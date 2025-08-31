@@ -58,9 +58,7 @@ static class DependencyInjectionClassEmitter
 			.AppendLine('{');
 
 		builder
-			.Append(1, Constants.System.EditorBrowsableConstant)
-			.Append(1, Constants.System.ExcludeFromCodeCoverageConstant)
-			.CodeGen(1)
+			.ClassAttributes(1)
 			.Append(1, $"{classAccessModifier} class ", withNewLine: false)
 			.Append(classNameToGenerate)
 			.AppendLine()
@@ -80,12 +78,12 @@ static class DependencyInjectionClassEmitter
 
 		builder.AppendLine('}');
 
-		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString());
+		EmbeddedResources.Instance.AddHeader(builder);
 		var hintName = $"{fullyQualifiedNamespace}{classNameToGenerate}.DependencyInjection.g.cs";
 
 		context.AddSource(
 			hintName,
-			Microsoft.CodeAnalysis.Text.SourceText.From(sourceText, Encoding.UTF8)
+			Microsoft.CodeAnalysis.Text.SourceText.From(builder.ToString(), Encoding.UTF8)
 		);
 	}
 

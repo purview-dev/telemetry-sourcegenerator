@@ -7,7 +7,7 @@
                               ^^^^^^^^^^^^^^^^^^^
 
 */
- Guid_1: (11,30)-(11,49),
+ Guid_1: (9,30)-(9,49),
       Message: Two or more methods named 'DuplicateMethodName' are defined. Keep method names unique as they're used to generate other members on the implementation class.,
       Severity: Error,
       Descriptor: {

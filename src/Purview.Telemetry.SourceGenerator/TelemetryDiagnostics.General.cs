@@ -20,10 +20,10 @@ partial class TelemetryDiagnostics
 				Id: "TSG1001",
 				Title: "Inferring generation targets is not supported when using multi-target generation",
 				Description: $"When using multiple generation targets - Activities, Logs or Metrics, each method must be either excluded or have an explicit generation target: "
-					+ $"{Constants.Activities.ActivityAttribute.Name}, {Constants.Activities.EventAttribute.Name}, {Constants.Activities.ContextAttribute.Name}, {Constants.Logging.LogAttribute.Name}, "
-					+ $"{Constants.Logging.WarningAttribute.Name}, "
-					+ $"{Constants.Metrics.CounterAttribute.Name}, {Constants.Metrics.HistogramAttribute.Name}, {Constants.Metrics.UpDownCounterAttribute.Name}, "
-					+ $"{Constants.Metrics.ObservableCounterAttribute.Name}, {Constants.Metrics.ObservableGaugeAttribute.Name} or {Constants.Metrics.ObservableUpDownCounterAttribute.Name}.",
+					+ $"{Constants.Activities.ActivityAttribute.TypeName}, {Constants.Activities.EventAttribute.TypeName}, {Constants.Activities.ContextAttribute.TypeName}, {Constants.Logging.LogAttribute.TypeName}, "
+					+ $"{Constants.Logging.WarningAttribute.TypeName}, "
+					+ $"{Constants.Metrics.CounterAttribute.TypeName}, {Constants.Metrics.HistogramAttribute.TypeName}, {Constants.Metrics.UpDownCounterAttribute.TypeName}, "
+					+ $"{Constants.Metrics.ObservableCounterAttribute.TypeName}, {Constants.Metrics.ObservableGaugeAttribute.TypeName} or {Constants.Metrics.ObservableUpDownCounterAttribute.TypeName}.",
 				Category: Constants.Diagnostics.Usage,
 				Severity: DiagnosticSeverity.Error
 			);
@@ -33,10 +33,10 @@ partial class TelemetryDiagnostics
 				Id: "TSG1002",
 				Title: "Multiple generation types are not supported",
 				Description: $"Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: "
-					+ $"{Constants.Activities.ActivityAttribute.Name}, {Constants.Activities.EventAttribute.Name}, {Constants.Activities.ContextAttribute.Name}, {Constants.Logging.LogAttribute.Name}, "
-					+ $"{Constants.Logging.WarningAttribute.Name}, "
-					+ $"{Constants.Metrics.CounterAttribute.Name}, {Constants.Metrics.HistogramAttribute.Name}, {Constants.Metrics.UpDownCounterAttribute.Name}, "
-					+ $"{Constants.Metrics.ObservableCounterAttribute.Name}, {Constants.Metrics.ObservableGaugeAttribute.Name} or {Constants.Metrics.ObservableUpDownCounterAttribute.Name}.",
+					+ $"{Constants.Activities.ActivityAttribute.TypeName}, {Constants.Activities.EventAttribute.TypeName}, {Constants.Activities.ContextAttribute.TypeName}, {Constants.Logging.LogAttribute.TypeName}, "
+					+ $"{Constants.Logging.WarningAttribute.TypeName}, "
+					+ $"{Constants.Metrics.CounterAttribute.TypeName}, {Constants.Metrics.HistogramAttribute.TypeName}, {Constants.Metrics.UpDownCounterAttribute.TypeName}, "
+					+ $"{Constants.Metrics.ObservableCounterAttribute.TypeName}, {Constants.Metrics.ObservableGaugeAttribute.TypeName} or {Constants.Metrics.ObservableUpDownCounterAttribute.TypeName}.",
 				Category: Constants.Diagnostics.Usage,
 				Severity: DiagnosticSeverity.Error
 			);

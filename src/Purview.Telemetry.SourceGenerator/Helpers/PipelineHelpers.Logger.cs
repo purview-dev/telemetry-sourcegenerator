@@ -215,7 +215,7 @@ partial class PipelineHelpers
 
 			var isKnownReturnType =
 				method.ReturnsVoid || Constants.System.IDisposable.Equals(method.ReturnType);
-			var loggerActionFieldName = $"_{Utilities.LowercaseFirstChar(method.Name)}Action";
+			var loggerActionFieldName = $"_{Utilities.LowerCaseFirstChar(method.Name)}Action";
 
 			var logName = GetLogName(
 				interfaceSymbol.Name,
@@ -512,7 +512,7 @@ partial class PipelineHelpers
 			parameters.Add(
 				new(
 					Name: parameter.Name,
-					UpperCasedName: Utilities.UppercaseFirstChar(parameter.Name),
+					UpperCasedName: Utilities.UpperCaseFirstChar(parameter.Name),
 					ParameterType: logParameterType,
 					IsException: isException,
 					IsFirstException: isException && isFirstException,

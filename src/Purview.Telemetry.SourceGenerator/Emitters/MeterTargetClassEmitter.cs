@@ -47,6 +47,7 @@ static partial class MeterTargetClassEmitter
 			builder,
 			context.CancellationToken
 		);
+
 		indent = EmitHelpers.EmitClassStart(
 			GenerationType.Metrics,
 			target.GenerationType,
@@ -81,12 +82,12 @@ static partial class MeterTargetClassEmitter
 			context.CancellationToken
 		);
 
-		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString());
+		EmbeddedResources.Instance.AddHeader(builder);
 		var hintName = $"{target.FullyQualifiedName}.Metric.g.cs";
 
 		context.AddSource(
 			hintName,
-			Microsoft.CodeAnalysis.Text.SourceText.From(sourceText, Encoding.UTF8)
+			Microsoft.CodeAnalysis.Text.SourceText.From(builder.ToString(), Encoding.UTF8)
 		);
 
 		DependencyInjectionClassEmitter.GenerateImplementation(

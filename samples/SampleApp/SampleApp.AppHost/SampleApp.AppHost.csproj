@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<Sdk Name="Aspire.AppHost.Sdk" Version="9.2.0" />
+	<Sdk Name="Aspire.AppHost.Sdk" Version="9.4.0" />
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<IsAspireHost>true</IsAspireHost>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Aspire.Hosting.AppHost" Version="9.2.0" />
+		<PackageReference Include="Aspire.Hosting.AppHost" Version="9.4.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\SampleApp.Host\SampleApp.Host.csproj" />

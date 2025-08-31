@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
+using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator;
 
@@ -13,16 +14,19 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator, IL
 		// Register all of the shared attributes we need.
 		context.RegisterPostInitializationOutput(ctx =>
 		{
-			_logger?.Debug("--- Adding templates.");
+			_logger?.Debug("--- Adding shared types.");
 
-			foreach (var template in Constants.GetAllTemplates())
+			foreach (var template in Constants.GetEmbeddedFileNames())
 			{
-				_logger?.Debug($"Adding {template.Name} as {template.GetGeneratedFilename()}.");
+				var generatedFilename = $"{template}.g.cs";
 
-				ctx.AddSource(template.GetGeneratedFilename(), template.TemplateData);
+				_logger?.Debug($"  Adding {template} as {generatedFilename}.");
+
+				var templateData = EmbeddedResources.Instance.LoadEmbeddedResource(template);
+				ctx.AddSource(generatedFilename, templateData);
 			}
 
-			_logger?.Debug("--- Finished adding templates.");
+			_logger?.Debug("--- Finished adding shared types.");
 		});
 
 		RegisterActivitiesGeneration(context, _logger);

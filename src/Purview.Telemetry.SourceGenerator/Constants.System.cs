@@ -47,13 +47,16 @@ partial class Constants
 			"[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
 
 		public const string ExcludeFromCodeCoverageConstant =
-			"[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]";
+			"[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]";
 
 		public const string EditorBrowsableConstant =
-			"[global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]";
+			"[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]";
+
+		public const string CompilerGeneratedConstant =
+			"[global::System.Runtime.CompilerServices.CompilerGenerated]";
 
 		const string GeneratedCodeConstant =
-			"[global::System.CodeDom.Compiler.GeneratedCodeAttribute(\"{0}\", \"{1}\")]";
+			"[global::System.CodeDom.Compiler.GeneratedCode(\"{0}\", \"{1}\")]";
 
 		public static readonly Lazy<string> GeneratedCode = new(() =>
 			string.Format(

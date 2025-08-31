@@ -7,7 +7,7 @@
       ^^^^^^^^^^^^^^^
 
 */
- Guid_1: (41,6)-(41,21),
+ Guid_1: (39,6)-(39,21),
       Message: It's best practice to accept an Activity parameter to ensure the Event, Tags and/ or Baggage are applied to the Activity you intended.,
       Severity: Warning,
       WarningLevel: 1,
@@ -27,7 +27,7 @@
       ^^^^^^^^^^^^^^^^^^^^^^
 
 */
- Guid_1: (47,6)-(47,28),
+ Guid_1: (45,6)-(45,28),
       Message: It's best practice to accept an Activity parameter to ensure the Event, Tags and/ or Baggage are applied to the Activity you intended.,
       Severity: Warning,
       WarningLevel: 1,
@@ -47,7 +47,7 @@
       ^^^^^^^^^^^^^^
 
 */
- Guid_1: (53,6)-(53,20),
+ Guid_1: (51,6)-(51,20),
       Message: It's best practice to accept an Activity parameter to ensure the Event, Tags and/ or Baggage are applied to the Activity you intended.,
       Severity: Warning,
       WarningLevel: 1,
@@ -67,7 +67,7 @@
       ^^^^^^^^^^^
 
 */
- Guid_1: (56,6)-(56,17),
+ Guid_1: (54,6)-(54,17),
       Message: It's best practice to accept an Activity parameter to ensure the Event, Tags and/ or Baggage are applied to the Activity you intended.,
       Severity: Warning,
       WarningLevel: 1,
@@ -87,7 +87,7 @@
       ^^^^^^^^^^^^^^^^^^^^^^^^
 
 */
- Guid_1: (59,6)-(59,30),
+ Guid_1: (57,6)-(57,30),
       Message: It's best practice to accept an Activity parameter to ensure the Event, Tags and/ or Baggage are applied to the Activity you intended.,
       Severity: Warning,
       WarningLevel: 1,
@@ -107,7 +107,7 @@
       ^^^^^^^^
 
 */
- Guid_1: (62,6)-(62,14),
+ Guid_1: (60,6)-(60,14),
       Message: It's best practice to accept an Activity parameter to ensure the Event, Tags and/ or Baggage are applied to the Activity you intended.,
       Severity: Warning,
       WarningLevel: 1,
@@ -127,7 +127,7 @@
       ^^^^^^^^^
 
 */
- Guid_1: (65,6)-(65,15),
+ Guid_1: (63,6)-(63,15),
       Message: It's best practice to accept an Activity parameter to ensure the Event, Tags and/ or Baggage are applied to the Activity you intended.,
       Severity: Warning,
       WarningLevel: 1,
@@ -147,7 +147,7 @@
       ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 */
- Guid_1: (17,6)-(17,32),
+ Guid_1: (15,6)-(15,32),
       Message: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
       Severity: Info,
       WarningLevel: 1,
@@ -167,7 +167,7 @@
       ^^^^^^^^^^^^^^^^^^^^
 
 */
- Guid_1: (20,6)-(20,26),
+ Guid_1: (18,6)-(18,26),
       Message: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
       Severity: Info,
       WarningLevel: 1,
@@ -187,7 +187,7 @@
       ^^^^^^^^^^^^^^^
 
 */
- Guid_1: (23,6)-(23,21),
+ Guid_1: (21,6)-(21,21),
       Message: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
       Severity: Info,
       WarningLevel: 1,
@@ -207,7 +207,7 @@
       ^^^^^^^^^^^^^^
 
 */
- Guid_1: (26,6)-(26,20),
+ Guid_1: (24,6)-(24,20),
       Message: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
       Severity: Info,
       WarningLevel: 1,
@@ -227,7 +227,7 @@
       ^^^^^^^^^^^^^^^^^^^^^^^^
 
 */
- Guid_1: (29,6)-(29,30),
+ Guid_1: (27,6)-(27,30),
       Message: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
       Severity: Info,
       WarningLevel: 1,
@@ -247,7 +247,7 @@
       ^^^^^^^^^^^^^^^^^^^^^^^
 
 */
- Guid_1: (32,6)-(32,29),
+ Guid_1: (30,6)-(30,29),
       Message: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
       Severity: Info,
       WarningLevel: 1,

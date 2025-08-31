@@ -148,7 +148,7 @@ partial class LoggerGenTargetClassEmitter
 			OutputState(
 				builder.WithIndent(indent),
 				stateVarName,
-				Utilities.UppercaseFirstChar(formattedMessageVarName).Wrap(),
+				Utilities.UpperCaseFirstChar(formattedMessageVarName).Wrap(),
 				formattedMessageVarName,
 				index: null
 			);

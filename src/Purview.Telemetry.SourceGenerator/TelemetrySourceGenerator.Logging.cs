@@ -28,7 +28,7 @@ partial class TelemetrySourceGenerator
 		// Register
 		var loggerTargetsPredicate = context
 			.SyntaxProvider.ForAttributeWithMetadataName(
-				Constants.Logging.LoggerAttribute.TypeInfo.FullyQualifiedName,
+				Constants.Logging.LoggerAttribute.FullyQualifiedName,
 				static (node, token) => PipelineHelpers.HasLoggerTargetAttribute(node, token),
 				loggerTargetTransform
 			)

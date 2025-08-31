@@ -79,20 +79,23 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 		}
 	}
 
-	protected static AdditionalText Text(string content, bool autoIncludeUsings = true) =>
+	protected static AdditionalText Text(string content, bool autoIncludeUsingStatements = true) =>
 		new InMemoryAdditionalText(
 			$"{Guid.NewGuid()}",
-			(autoIncludeUsings ? TestHelpers.DefaultUsingSet : "") + content
+			"#pragma warning disable 8019 // Unnecessary using directive"
+				+ Environment.NewLine
+				+ (autoIncludeUsingStatements ? TestHelpers.DefaultUsingSet : "")
+				+ content
 		);
 
 	protected static AdditionalText Text(
 		string path,
 		string content,
-		bool autoIncludeUsings = true
+		bool autoIncludeUsingStatements = true
 	) =>
 		new InMemoryAdditionalText(
 			path,
-			(autoIncludeUsings ? TestHelpers.DefaultUsingSet : "") + content
+			(autoIncludeUsingStatements ? TestHelpers.DefaultUsingSet : "") + content
 		);
 
 	protected static AdditionalText[] Texts(params (string path, string content)[] pairs) =>
@@ -157,13 +160,13 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 		ImmutableDictionary<string, string>? globalOptions = null,
 		Func<Project, Project>? projectModifier = null,
 		bool disableDependencyInjection = true,
-		bool autoIncludeUsings = true,
+		bool autoIncludeUsingStatements = true,
 		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
 		bool debugLog = true
 	)
 	{
 		return await GenerateAsync(
-			Text(csharpDocument, autoIncludeUsings: autoIncludeUsings),
+			Text(csharpDocument, autoIncludeUsingStatements: autoIncludeUsingStatements),
 			additionalTexts,
 			globalOptions,
 			projectModifier,
@@ -231,7 +234,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 				.. csharpDocuments,
 				Text(
 					"[assembly: Purview.Telemetry.TelemetryGeneration(GenerateDependencyExtension = false)]",
-					autoIncludeUsings: false
+					autoIncludeUsingStatements: false
 				),
 			];
 		}

@@ -48,9 +48,9 @@ partial class TelemetryDiagnostics
 			Severity: DiagnosticSeverity.Error
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor TimestampParameterNotAllowed = new(
+		public static readonly TelemetryDiagnosticDescriptor TimeStampParameterNotAllowed = new(
 			Id: "TSG3005",
-			Title: "Timestamp parameter is not valid",
+			Title: "TimeStamp parameter is not valid",
 			Description: "The {0} parameter is not allowed when defining an activity, only an event. You can specify this as a Tag or as Baggage to stop the inference.",
 			Category: Constants.Diagnostics.Activity.Usage,
 			Severity: DiagnosticSeverity.Error

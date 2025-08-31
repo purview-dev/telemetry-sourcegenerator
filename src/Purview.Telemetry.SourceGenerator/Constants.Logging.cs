@@ -16,43 +16,41 @@ partial class Constants
 
 		public const int DefaultLevel = 2;
 
-		public static readonly TemplateInfo LoggerGenerationAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Logging.LoggerGenerationAttribute"
-		);
-		public static readonly TemplateInfo LoggerAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo LoggerGenerationAttribute =
+			PurviewTypeFactory.Create("Purview.Telemetry.Logging.LoggerGenerationAttribute");
+		public static readonly PurviewTypeInfo LoggerAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Logging.LoggerAttribute"
 		);
-		public static readonly TemplateInfo LogAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo LogAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Logging.LogAttribute"
 		);
-		public static readonly TemplateInfo LogPrefixType = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo LogPrefixType = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Logging.LogPrefixType"
 		);
 
-		public static readonly TemplateInfo ExpandEnumerableAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Logging.ExpandEnumerableAttribute"
-		);
+		public static readonly PurviewTypeInfo ExpandEnumerableAttribute =
+			PurviewTypeFactory.Create("Purview.Telemetry.Logging.ExpandEnumerableAttribute");
 
-		public static readonly TemplateInfo TraceAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo TraceAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Logging.TraceAttribute"
 		);
-		public static readonly TemplateInfo DebugAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo DebugAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Logging.DebugAttribute"
 		);
-		public static readonly TemplateInfo InfoAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo InfoAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Logging.InfoAttribute"
 		);
-		public static readonly TemplateInfo WarningAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo WarningAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Logging.WarningAttribute"
 		);
-		public static readonly TemplateInfo ErrorAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo ErrorAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Logging.ErrorAttribute"
 		);
-		public static readonly TemplateInfo CriticalAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo CriticalAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Logging.CriticalAttribute"
 		);
 
-		public static readonly TemplateInfo[] SpecificLogAttributes =
+		public static readonly PurviewTypeInfo[] SpecificLogAttributes =
 		[
 			TraceAttribute,
 			DebugAttribute,
@@ -74,31 +72,18 @@ partial class Constants
 				{ 6, MicrosoftExtensions.LogLevel_None },
 			}.ToImmutableDictionary();
 
-		public static readonly ImmutableDictionary<TemplateInfo, int> SpecificLogAttributesToLevel =
-			new Dictionary<TemplateInfo, int>
-			{
-				{ TraceAttribute, 0 },
-				{ DebugAttribute, 1 },
-				{ InfoAttribute, 2 },
-				{ WarningAttribute, 3 },
-				{ ErrorAttribute, 4 },
-				{ CriticalAttribute, 5 },
-			}.ToImmutableDictionary();
-
-		public static TemplateInfo[] GetTemplates() =>
-			[
-				LoggerGenerationAttribute,
-				LoggerAttribute,
-				LogAttribute,
-				LogPrefixType,
-				ExpandEnumerableAttribute,
-				TraceAttribute,
-				DebugAttribute,
-				InfoAttribute,
-				WarningAttribute,
-				ErrorAttribute,
-				CriticalAttribute,
-			];
+		public static readonly ImmutableDictionary<
+			PurviewTypeInfo,
+			int
+		> SpecificLogAttributesToLevel = new Dictionary<PurviewTypeInfo, int>
+		{
+			{ TraceAttribute, 0 },
+			{ DebugAttribute, 1 },
+			{ InfoAttribute, 2 },
+			{ WarningAttribute, 3 },
+			{ ErrorAttribute, 4 },
+			{ CriticalAttribute, 5 },
+		}.ToImmutableDictionary();
 
 		public static class MicrosoftExtensions
 		{

@@ -28,7 +28,7 @@ partial class TelemetrySourceGenerator
 		// Register
 		var meterTargetsPredicate = context
 			.SyntaxProvider.ForAttributeWithMetadataName(
-				Constants.Metrics.MeterAttribute.TypeInfo.FullyQualifiedName,
+				Constants.Metrics.MeterAttribute.FullyQualifiedName,
 				static (node, token) => PipelineHelpers.HasMeterTargetAttribute(node, token),
 				meterTargetTransform
 			)

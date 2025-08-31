@@ -17,11 +17,8 @@ static partial class TestHelpers
 	static readonly string NamespaceRoot = typeof(TestHelpers).Namespace!;
 
 	public const string DefaultUsingSet =
-		@"
-using System;
-using Purview.Telemetry;
-
-";
+		@"using System;
+using Purview.Telemetry;";
 
 	public static string Wrap(this string value, char c = '"') => c + value + c;
 
@@ -161,18 +158,30 @@ using Purview.Telemetry;
 			.DisableRequireUniquePrefix()
 			.DisableDateCounting()
 			//.UniqueForTargetFrameworkAndVersion(typeof(TestHelpers).Assembly)
-			.ScrubInlineDateTimeOffsets("yyyy-MM-dd HH:mm:ss zzzz"); // 2024-22-02 14:43:22 +00:00
+			.ScrubInlineDateTimeOffsets("yyyy-MM-dd HH:mm:ss zzzz") // 2024-22-02 14:43:22 +00:00
+			.AutoVerify(file =>
+			{
+				if (autoVerifyTemplates)
+				{
+					foreach (var template in Constants.GetEmbeddedFileNames())
+					{
+						var potentialName = $"#{template}.g.cs";
+						if (file.IndexOf(potentialName, StringComparison.Ordinal) > -1)
+							return true;
+					}
+				}
+
+				return false;
+			});
 
 		if (parameters.Length > 0)
-		{
 			verifierTask = verifierTask.UseTextForParameters(
 				ComputeParameterFilenameHash(parameters)
 			);
-		}
 
 		config?.Invoke(verifierTask);
 
-		//verifierTask = verifierTask.AutoVerify();
+		// verifierTask = verifierTask.AutoVerify();
 
 		await verifierTask;
 
@@ -199,7 +208,7 @@ using Purview.Telemetry;
 					string.Join(
 						Environment.NewLine,
 						result.Diagnostics.Select(d =>
-							d
+							d.ToString()
 							+ Environment.NewLine
 							+ "-----------------------------------------------------"
 						)

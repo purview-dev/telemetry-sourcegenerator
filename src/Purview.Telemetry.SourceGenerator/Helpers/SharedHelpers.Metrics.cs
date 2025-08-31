@@ -99,8 +99,8 @@ partial class SharedHelpers
 			InstrumentPrefix: instrumentPrefix ?? new(),
 			IncludeAssemblyInstrumentPrefix: includeAssemblyInstrumentPrefix ?? new(true),
 			LowercaseInstrumentName: lowercaseInstrumentName
-				?? new(Constants.Metrics.LowercaseInstrumentNameDefault),
-			LowercaseTagKeys: lowercaseTagKeys ?? new(Constants.Metrics.LowercaseTagKeysDefault)
+				?? new(Constants.Metrics.LowerCaseInstrumentNameDefault),
+			LowercaseTagKeys: lowercaseTagKeys ?? new(Constants.Metrics.LowerCaseTagKeysDefault)
 		);
 	}
 
@@ -177,8 +177,8 @@ partial class SharedHelpers
 			InstrumentSeparator: instrumentSeparator
 				?? new(Constants.Metrics.InstrumentSeparatorDefault),
 			LowercaseInstrumentName: lowercaseInstrumentName
-				?? new(Constants.Metrics.LowercaseInstrumentNameDefault),
-			LowercaseTagKeys: lowercaseTagKeys ?? new(Constants.Metrics.LowercaseTagKeysDefault)
+				?? new(Constants.Metrics.LowerCaseInstrumentNameDefault),
+			LowercaseTagKeys: lowercaseTagKeys ?? new(Constants.Metrics.LowerCaseTagKeysDefault)
 		);
 	}
 

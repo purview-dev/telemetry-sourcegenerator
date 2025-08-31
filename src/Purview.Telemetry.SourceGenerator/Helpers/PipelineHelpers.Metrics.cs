@@ -188,7 +188,7 @@ partial class PipelineHelpers
 				.ToImmutableArray();
 			var measurementParameter = measurementParameters.FirstOrDefault();
 
-			var fieldName = $"_{Utilities.LowercaseFirstChar(method.Name)}Instrument";
+			var fieldName = $"_{Utilities.LowerCaseFirstChar(method.Name)}Instrument";
 			var instrumentName = instrumentAttribute?.Name?.Value;
 			if (string.IsNullOrWhiteSpace(instrumentName))
 				instrumentName = method.Name;

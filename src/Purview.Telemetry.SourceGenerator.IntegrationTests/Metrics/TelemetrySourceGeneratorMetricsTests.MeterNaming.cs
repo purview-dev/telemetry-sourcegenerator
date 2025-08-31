@@ -13,7 +13,7 @@ using Purview.Telemetry.Metrics;
 namespace Testing;
 
 [Meter(""testing-meter"", InstrumentPrefix = ""This.Is.A.Prefix"")]
-interface ITestMetrics 
+interface ITestMetrics
 {{
 	[AutoCounter]
 	void AutoCounterMetric();
@@ -40,7 +40,7 @@ using Purview.Telemetry.Metrics;
 namespace Testing;
 
 [Meter(""testing-meter"")]
-interface ITestMetrics 
+interface ITestMetrics
 {{
 	[AutoCounter]
 	void AutoCounterMetric();
@@ -67,7 +67,7 @@ using Purview.Telemetry.Metrics;
 namespace Testing;
 
 [Meter(""testing-meter"", InstrumentPrefix = ""This.Is.A.Prefix"")]
-interface ITestMetrics 
+interface ITestMetrics
 {{
 	[AutoCounter]
 	void AutoCounterMetric();
@@ -94,7 +94,7 @@ using Purview.Telemetry.Metrics;
 namespace Testing;
 
 [Meter(""testing-meter"", InstrumentPrefix = ""This.Is.A.Prefix"")]
-interface ITestMetrics 
+interface ITestMetrics
 {{
 	[AutoCounter(""auto-counter"")]
 	void AutoCounterMetric();
@@ -109,7 +109,7 @@ interface ITestMetrics
 	}
 
 	[Fact]
-	public async Task Generate_GivenNameShouldBeLowerCase_GeneratesMetricsWithLowercaseName()
+	public async Task Generate_GivenNameShouldBeLowerCase_GeneratesMetricsWithLowerCaseName()
 	{
 		// Arrange
 		var basicMetric =
@@ -119,7 +119,7 @@ using Purview.Telemetry.Metrics;
 namespace Testing;
 
 [Meter(""testing-meter"")]
-interface ITestMetrics 
+interface ITestMetrics
 {{
 	[AutoCounter]
 	void AutoCounterMetric();
@@ -134,7 +134,7 @@ interface ITestMetrics
 	}
 
 	[Fact]
-	public async Task Generate_GivenNameShouldBeDefaultLowerCase_GeneratesMetricsWithLowercaseName()
+	public async Task Generate_GivenNameShouldBeDefaultLowerCase_GeneratesMetricsWithLowerCaseName()
 	{
 		// Arrange
 		var basicMetric =
@@ -144,7 +144,7 @@ using Purview.Telemetry.Metrics;
 namespace Testing;
 
 [Meter(""testing-meter"")]
-interface ITestMetrics 
+interface ITestMetrics
 {{
 	[AutoCounter]
 	void AutoCounterMetric();
@@ -159,7 +159,7 @@ interface ITestMetrics
 	}
 
 	[Fact]
-	public async Task Generate_GivenNameShouldBeDefinedCase_GeneratesMetricsWithLowercaseName()
+	public async Task Generate_GivenNameShouldBeDefinedCase_GeneratesMetricsWithLowerCaseName()
 	{
 		// Arrange
 		var basicMetric =

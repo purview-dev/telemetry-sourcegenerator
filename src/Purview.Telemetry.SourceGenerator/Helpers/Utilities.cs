@@ -270,25 +270,19 @@ static partial class Utilities
 
 	public static bool ContainsAttribute(
 		ISymbol symbol,
-		PurviewTypeInfo type,
+		PurviewTypeInfo typeInfo,
 		CancellationToken token
-	) => TryContainsAttribute(symbol, type, token, out _);
+	) => TryContainsAttribute(symbol, typeInfo, token, out _);
 
 	public static bool ContainsAttribute(
 		ISymbol symbol,
-		TemplateInfo templateInfo,
+		PurviewTypeInfo[] typeInfo,
 		CancellationToken token
-	) => TryContainsAttribute(symbol, templateInfo, token, out _);
-
-	public static bool ContainsAttribute(
-		ISymbol symbol,
-		TemplateInfo[] templateInfo,
-		CancellationToken token
-	) => TryContainsAttribute(symbol, templateInfo, token, out _, out _);
+	) => TryContainsAttribute(symbol, typeInfo, token, out _, out _);
 
 	public static bool TryContainsAttribute(
 		ISymbol symbol,
-		PurviewTypeInfo type,
+		PurviewTypeInfo typeInfo,
 		CancellationToken token,
 		out AttributeData? attributeData
 	)
@@ -303,7 +297,7 @@ static partial class Utilities
 				continue;
 
 			var attributeType = PurviewTypeFactory.Create(attribute.AttributeClass);
-			if (attributeType == type)
+			if (attributeType == typeInfo)
 			{
 				attributeData = attribute;
 				return true;
@@ -315,37 +309,10 @@ static partial class Utilities
 
 	public static bool TryContainsAttribute(
 		ISymbol symbol,
-		TemplateInfo templateInfo,
-		CancellationToken token,
-		out AttributeData? attributeData
-	)
-	{
-		attributeData = null;
-
-		var attributes = symbol.GetAttributes();
-		foreach (var attribute in attributes)
-		{
-			token.ThrowIfCancellationRequested();
-			if (attribute.AttributeClass == null)
-				continue;
-
-			var attributeType = PurviewTypeFactory.Create(attribute.AttributeClass);
-			if (attributeType == templateInfo)
-			{
-				attributeData = attribute;
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public static bool TryContainsAttribute(
-		ISymbol symbol,
-		TemplateInfo[] templateInfo,
+		PurviewTypeInfo[] typeInfo,
 		CancellationToken token,
 		out AttributeData? attributeData,
-		out TemplateInfo? matchingTemplate
+		out PurviewTypeInfo? matchingTemplate
 	)
 	{
 		attributeData = null;
@@ -360,7 +327,7 @@ static partial class Utilities
 				continue;
 
 			var attributeType = PurviewTypeFactory.Create(attribute.AttributeClass);
-			foreach (var template in templateInfo)
+			foreach (var template in typeInfo)
 			{
 				if (template.Equals(attributeType))
 				{
@@ -375,7 +342,7 @@ static partial class Utilities
 		return false;
 	}
 
-	public static string LowercaseFirstChar(string value)
+	public static string LowerCaseFirstChar(string value)
 	{
 		if (value.Length > 0)
 		{
@@ -386,7 +353,7 @@ static partial class Utilities
 		return value;
 	}
 
-	public static string UppercaseFirstChar(string value)
+	public static string UpperCaseFirstChar(string value)
 	{
 		if (value.Length > 0)
 		{
@@ -395,5 +362,27 @@ static partial class Utilities
 		}
 
 		return value;
+	}
+
+	public static string GetClassAttributesString(bool includeEditorBrowsable, int indent = 0)
+	{
+		var indentString = new string('\t', indent);
+		return GetEnumAttributesString(includeEditorBrowsable, indent)
+			+ $"\n{indentString}{Constants.System.ExcludeFromCodeCoverageConstant}";
+	}
+
+	public static string GetEnumAttributesString(bool includeEditorBrowsable, int indent = 0)
+	{
+		var indentString = new string('\t', indent);
+		var result = string.Join(
+			"\n",
+			indentString + Constants.System.CompilerGeneratedConstant,
+			indentString + Constants.System.GeneratedCode.Value
+		);
+
+		if (includeEditorBrowsable)
+			result += $"\n{indentString}{Constants.System.EditorBrowsableConstant}";
+
+		return result;
 	}
 }

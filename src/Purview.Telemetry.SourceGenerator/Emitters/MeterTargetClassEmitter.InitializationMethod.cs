@@ -103,7 +103,7 @@ partial class MeterTargetClassEmitter
 			var description =
 				method.InstrumentAttribute?.Description?.Value?.Wrap()
 				?? Constants.System.NullKeyword;
-			var tagVariableName = Utilities.LowercaseFirstChar(method.MethodName) + "Tags";
+			var tagVariableName = Utilities.LowerCaseFirstChar(method.MethodName) + "Tags";
 
 			builder
 				.Append(indent, DictionaryStringObjectType, withNewLine: false)

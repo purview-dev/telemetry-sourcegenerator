@@ -17,7 +17,7 @@ static partial class PipelineHelpers
 
 	[System.Diagnostics.CodeAnalysis.SuppressMessage(
 		"Globalization",
-		"CA1308:Normalize strings to uppercase"
+		"CA1308:Normalize strings to upper-case"
 	)]
 	static string GenerateParameterName(string name, string? prefix, bool lowercase)
 	{

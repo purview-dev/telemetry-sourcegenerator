@@ -7,7 +7,7 @@ public interface ITestLogger {
       ^^^
 }
 */
- Guid_1: (11,6)-(11,9),
+ Guid_1: (9,6)-(9,9),
       Message: The maximum number of parameters (excluding optional Exception) is 6,
       Severity: Error,
       Descriptor: {

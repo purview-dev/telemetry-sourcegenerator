@@ -76,12 +76,7 @@ static class EmitHelpers
 		token.ThrowIfCancellationRequested();
 
 		if (SharedHelpers.ShouldEmit(requestingType, generationType))
-		{
-			builder
-				.Append(indent, Constants.System.EditorBrowsableConstant)
-				.Append(indent, Constants.System.ExcludeFromCodeCoverageConstant)
-				.CodeGen(indent);
-		}
+			builder.ClassAttributes(indent);
 
 		builder
 			.Append(indent, "sealed partial class ", withNewLine: false)

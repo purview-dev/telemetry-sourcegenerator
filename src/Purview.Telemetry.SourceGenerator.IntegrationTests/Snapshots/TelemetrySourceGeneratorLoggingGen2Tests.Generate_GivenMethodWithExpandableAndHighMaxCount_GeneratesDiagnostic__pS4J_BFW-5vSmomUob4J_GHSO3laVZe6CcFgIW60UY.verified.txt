@@ -7,7 +7,7 @@
                                                             ^^^^^^^^^^
 
 */
- Guid_1: (12,60)-(12,70),
+ Guid_1: (10,60)-(10,70),
       Message: The limit on unbounded enumeration is higher than the recommended default (5). This may cause performance issues, make sure you understand the consequences and test thoroughly.,
       Severity: Warning,
       WarningLevel: 1,
@@ -27,7 +27,7 @@
                                                               ^^^^^^^^^^^
 }
 */
- Guid_1: (14,62)-(14,73),
+ Guid_1: (12,62)-(12,73),
       Message: The limit on unbounded enumeration is higher than the recommended default (5). This may cause performance issues, make sure you understand the consequences and test thoroughly.,
       Severity: Warning,
       WarningLevel: 1,

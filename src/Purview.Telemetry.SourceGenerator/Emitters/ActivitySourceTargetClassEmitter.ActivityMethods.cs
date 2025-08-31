@@ -60,7 +60,7 @@ partial class ActivitySourceTargetClassEmitter
 
 			TelemetryDiagnostics.Report(
 				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.TimestampParameterNotAllowed,
+				TelemetryDiagnostics.Activities.TimeStampParameterNotAllowed,
 				timestampParam.Locations,
 				timestampParam.ParameterName
 			);

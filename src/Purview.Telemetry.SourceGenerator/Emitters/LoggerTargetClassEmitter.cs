@@ -38,6 +38,7 @@ static partial class LoggerTargetClassEmitter
 			builder,
 			context.CancellationToken
 		);
+
 		indent = EmitHelpers.EmitClassStart(
 			GenerationType.Logging,
 			target.GenerationType,
@@ -72,12 +73,12 @@ static partial class LoggerTargetClassEmitter
 			context.CancellationToken
 		);
 
-		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString());
+		EmbeddedResources.Instance.AddHeader(builder);
 		var hintName = $"{target.FullyQualifiedName}.Logging.g.cs";
 
 		context.AddSource(
 			hintName,
-			Microsoft.CodeAnalysis.Text.SourceText.From(sourceText, Encoding.UTF8)
+			Microsoft.CodeAnalysis.Text.SourceText.From(builder.ToString(), Encoding.UTF8)
 		);
 
 		DependencyInjectionClassEmitter.GenerateImplementation(

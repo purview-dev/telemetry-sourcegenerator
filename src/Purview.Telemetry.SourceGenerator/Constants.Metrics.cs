@@ -13,44 +13,41 @@ partial class Constants
 		public const string MeterFactoryParameterName = "meterFactory";
 
 		public const string InstrumentSeparatorDefault = ".";
-		public const bool LowercaseInstrumentNameDefault = true;
-		public const bool LowercaseTagKeysDefault = true;
+		public const bool LowerCaseInstrumentNameDefault = true;
+		public const bool LowerCaseTagKeysDefault = true;
 
-		public static readonly TemplateInfo MeterGenerationAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo MeterGenerationAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Metrics.MeterGenerationAttribute"
 		);
-		public static readonly TemplateInfo MeterAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo MeterAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Metrics.MeterAttribute"
 		);
 
-		public static readonly TemplateInfo InstrumentMeasurementAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Metrics.InstrumentMeasurementAttribute"
-		);
+		public static readonly PurviewTypeInfo InstrumentMeasurementAttribute =
+			PurviewTypeFactory.Create("Purview.Telemetry.Metrics.InstrumentMeasurementAttribute");
 
-		public static readonly TemplateInfo AutoCounterAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo AutoCounterAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Metrics.AutoCounterAttribute"
 		);
-		public static readonly TemplateInfo CounterAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo CounterAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Metrics.CounterAttribute"
 		);
-		public static readonly TemplateInfo UpDownCounterAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo UpDownCounterAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Metrics.UpDownCounterAttribute"
 		);
-		public static readonly TemplateInfo HistogramAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo HistogramAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Metrics.HistogramAttribute"
 		);
 
-		public static readonly TemplateInfo ObservableCounterAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Metrics.ObservableCounterAttribute"
-		);
-		public static readonly TemplateInfo ObservableUpDownCounterAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Metrics.ObservableUpDownCounterAttribute"
-		);
-		public static readonly TemplateInfo ObservableGaugeAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo ObservableCounterAttribute =
+			PurviewTypeFactory.Create("Purview.Telemetry.Metrics.ObservableCounterAttribute");
+		public static readonly PurviewTypeInfo ObservableUpDownCounterAttribute =
+			PurviewTypeFactory.Create("Purview.Telemetry.Metrics.ObservableUpDownCounterAttribute");
+		public static readonly PurviewTypeInfo ObservableGaugeAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Metrics.ObservableGaugeAttribute"
 		);
 
-		public static readonly TemplateInfo[] ValidInstrumentAttributes =
+		public static readonly PurviewTypeInfo[] ValidInstrumentAttributes =
 		[
 			AutoCounterAttribute,
 			CounterAttribute,
@@ -95,20 +92,6 @@ partial class Constants
 			{ InstrumentTypes.ObservableGauge, SystemDiagnostics.ObservableGauge },
 			{ InstrumentTypes.ObservableUpDownCounter, SystemDiagnostics.ObservableUpDownCounter },
 		}.ToImmutableDictionary();
-
-		public static TemplateInfo[] GetTemplates() =>
-			[
-				MeterGenerationAttribute,
-				MeterAttribute,
-				InstrumentMeasurementAttribute,
-				AutoCounterAttribute,
-				CounterAttribute,
-				UpDownCounterAttribute,
-				HistogramAttribute,
-				ObservableCounterAttribute,
-				ObservableGaugeAttribute,
-				ObservableUpDownCounterAttribute,
-			];
 
 		public static class SystemDiagnostics
 		{

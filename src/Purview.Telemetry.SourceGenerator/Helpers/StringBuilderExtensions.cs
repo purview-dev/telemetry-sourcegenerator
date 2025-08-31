@@ -11,28 +11,8 @@ static class StringBuilderExtensions
 	public static StringBuilder CodeGen(this StringBuilder builder, int indent) =>
 		builder.Append(indent, Constants.System.GeneratedCode.Value);
 
-	public static StringBuilder IfDefines(
-		this StringBuilder builder,
-		string condition,
-		params string[] values
-	) => builder.IfDefines(condition, 0, values);
-
-	public static StringBuilder IfDefines(
-		this StringBuilder builder,
-		string condition,
-		int indent,
-		params string[] values
-	)
-	{
-		builder.AppendLine().Append("#if ").AppendLine(condition).WithIndent(indent);
-
-		foreach (var value in values)
-			builder.Append(value);
-
-		builder.AppendLine().AppendLine("#endif");
-
-		return builder;
-	}
+	public static StringBuilder ClassAttributes(this StringBuilder builder, int indent) =>
+		builder.Append(Utilities.GetClassAttributesString(true, indent)).AppendLine();
 
 	public static StringBuilder WithIndent(this StringBuilder builder, int tabs)
 	{

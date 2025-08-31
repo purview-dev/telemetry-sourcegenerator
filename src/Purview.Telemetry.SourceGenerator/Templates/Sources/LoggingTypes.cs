@@ -1,0 +1,697 @@
+﻿#if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
+
+namespace Purview.Telemetry.Logging;
+
+/// <summary>
+/// Marker attribute used as an alternative to <see cref="global::Purview.Telemetry.Logging.LogAttribute"/>, where the <see cref="global::Purview.Telemetry.Logging.LogAttribute.Level"/>
+/// is set to <see cref="global::Microsoft.Extensions.Logging.LogLevel.Warning"/>.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+[global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
+sealed class WarningAttribute : global::System.Attribute
+{
+	/// <summary>
+	/// Creates a new instance of the <see cref="WarningAttribute"/>, specifying the <see cref="MessageTemplate"/>.
+	/// </summary>
+	/// <param name="messageTemplate">Specifies the <see cref="MessageTemplate"/>.</param>
+	public WarningAttribute(string messageTemplate)
+	{
+		MessageTemplate = messageTemplate;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="WarningAttribute"/>, specifying the <see cref="EventId"/>.
+	/// </summary>
+	/// <param name="eventId">Specifies the <see cref="EventId"/>.</param>
+	public WarningAttribute(int eventId)
+	{
+		EventId = eventId;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="WarningAttribute"/>,
+	/// optionally the <see cref="MessageTemplate"/> and <see cref="Name"/>.
+	/// </summary>
+	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
+	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
+	public WarningAttribute(string? messageTemplate = null, string? name = null)
+	{
+		MessageTemplate = messageTemplate;
+		Name = name;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="WarningAttribute"/>, specifying the <see cref="EventId"/>
+	/// and optionally the <see cref="MessageTemplate"/> and <see cref="Name"/>.
+	/// </summary>
+	/// <param name="eventId">Specifies the <see cref="EventId"/>.</param>
+	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
+	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
+	public WarningAttribute(int eventId, string? messageTemplate = null, string? name = null)
+	{
+		MessageTemplate = messageTemplate;
+		EventId = eventId;
+		Name = name;
+	}
+
+	/// <summary>
+	/// Optional. The message template used for the log entry, otherwise one is
+	/// generated based on the parameters.
+	/// </summary>
+	public string? MessageTemplate { get; set; }
+
+	/// <summary>
+	/// Optional. The event Id for this log entry. If one is not specified, one is automatically generated.
+	/// </summary>
+	public int? EventId { get; set; }
+
+	/// <summary>
+	/// Optional. Gets/ set the name of the log entry. If one is not specified, the method name is used.
+	/// </summary>
+	public string? Name { get; set; }
+}
+
+/// <summary>
+/// Marker attribute used as an alternative to <see cref="global::Purview.Telemetry.Logging.LogAttribute"/>, where the <see cref="global::Purview.Telemetry.Logging.LogAttribute.Level"/>
+/// is set to <see cref="global::Microsoft.Extensions.Logging.LogLevel.Trace"/>.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+[global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
+sealed class TraceAttribute : global::System.Attribute
+{
+	/// <summary>
+	/// Creates a new instance of the <see cref="TraceAttribute"/>, specifying the <see cref="MessageTemplate"/>.
+	/// </summary>
+	/// <param name="messageTemplate">Specifies the <see cref="MessageTemplate"/>.</param>
+	public TraceAttribute(string messageTemplate)
+	{
+		MessageTemplate = messageTemplate;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="TraceAttribute"/>, specifying the <see cref="EventId"/>.
+	/// </summary>
+	/// <param name="eventId">Specifies the <see cref="EventId"/>.</param>
+	public TraceAttribute(int eventId)
+	{
+		EventId = eventId;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="TraceAttribute"/>,
+	/// optionally the <see cref="MessageTemplate"/> and <see cref="Name"/>.
+	/// </summary>
+	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
+	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
+	public TraceAttribute(string? messageTemplate = null, string? name = null)
+	{
+		MessageTemplate = messageTemplate;
+		Name = name;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="TraceAttribute"/>, specifying the <see cref="EventId"/>
+	/// and optionally the <see cref="MessageTemplate"/> and <see cref="Name"/>.
+	/// </summary>
+	/// <param name="eventId">Specifies the <see cref="EventId"/>.</param>
+	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
+	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
+	public TraceAttribute(int eventId, string? messageTemplate = null, string? name = null)
+	{
+		MessageTemplate = messageTemplate;
+		EventId = eventId;
+		Name = name;
+	}
+
+	/// <summary>
+	/// Optional. The message template used for the log entry, otherwise one is
+	/// generated based on the parameters.
+	/// </summary>
+	public string? MessageTemplate { get; set; }
+
+	/// <summary>
+	/// Optional. The event Id for this log entry. If one is not specified, one is automatically generated.
+	/// </summary>
+	public int? EventId { get; set; }
+
+	/// <summary>
+	/// Optional. Gets/ set the name of the log entry. If one is not specified, the method name is used.
+	/// </summary>
+	public string? Name { get; set; }
+}
+
+/// <summary>
+/// Sets defaults for the generation of loggers and log entries.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Assembly, AllowMultiple = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+[global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
+sealed class LoggerGenerationAttribute : global::System.Attribute
+{
+	/// <summary>
+	/// Creates a new instance of <see cref="LoggerGenerationAttribute"/>.
+	/// </summary>
+	public LoggerGenerationAttribute()
+	{
+	}
+
+	/// <summary>
+	/// Creates a new instance of <see cref="LoggerGenerationAttribute"/> with the specified
+	/// <see cref="DefaultLevel"/>.
+	/// </summary>
+	/// <param name="defaultLevel"></param>
+	public LoggerGenerationAttribute(global::Microsoft.Extensions.Logging.LogLevel defaultLevel)
+	{
+		DefaultLevel = defaultLevel;
+	}
+
+	/// <summary>
+	/// Gets/ sets the default <see cref="global::Microsoft.Extensions.Logging.LogLevel">level</see> of the
+	/// logger. Defaults to <see cref="global::Microsoft.Extensions.Logging.LogLevel.Information"/>.
+	/// </summary>
+	public global::Microsoft.Extensions.Logging.LogLevel DefaultLevel { get; set; } = global::Microsoft.Extensions.Logging.LogLevel.Information;
+
+	/// <summary>
+	/// Disables the generation of the new style of telemetry generation for Microsoft.Extensions.Logging.
+	///
+	/// Defaults to false.
+	/// </summary>
+	public bool DisableMSLoggingTelemetryGeneration { get; set; }
+
+	/// <summary>
+	/// Specifies the default mode used to generate or override the prefix for the log entry.
+	///
+	/// Default when the <see cref="global::Purview.Telemetry.Logging.LoggerAttribute.PrefixType"/> is not set.
+	///
+	/// Defaults to <see cref="global::Purview.Telemetry.Logging.LogPrefixType.Default"/>.
+	/// </summary>
+	public global::Purview.Telemetry.Logging.LogPrefixType DefaultPrefixType { get; set; }
+}
+
+/// <summary>
+/// Marker attribute required for Log generation.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Interface, AllowMultiple = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+[global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
+sealed class LoggerAttribute : global::System.Attribute
+{
+	/// <summary>
+	/// Creates a new instance of the <see cref="LoggerAttribute"/> class.
+	/// </summary>
+	public LoggerAttribute()
+	{
+
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="LoggerAttribute"/>, specifying the <see cref="DefaultLevel"/>
+	/// and optionally the <see cref="CustomPrefix"/>.
+	/// </summary>
+	/// <param name="defaultLevel">The default <see cref="global::Microsoft.Extensions.Logging.LogLevel"/> to use
+	/// when one is not specified.</param>
+	/// <param name="customPrefix">If specified, also sets the <see cref="global::Purview.Telemetry.Logging.LogPrefixType"/> to <see cref="global::Purview.Telemetry.Logging.LogPrefixType.Custom"/>.</param>
+	/// <param name="disableMSLoggingTelemetryGeneration">Disables the generation of the new style of telemetry generation for Microsoft.Extensions.Logging.</param>
+	public LoggerAttribute(global::Microsoft.Extensions.Logging.LogLevel defaultLevel, string? customPrefix = null, bool disableMSLoggingTelemetryGeneration = false)
+	{
+		DefaultLevel = defaultLevel;
+		CustomPrefix = customPrefix;
+		DisableMSLoggingTelemetryGeneration = disableMSLoggingTelemetryGeneration;
+
+		if (!string.IsNullOrWhiteSpace(CustomPrefix))
+		{
+			PrefixType = global::Purview.Telemetry.Logging.LogPrefixType.Custom;
+		}
+	}
+
+	/// <summary>
+	/// Optional. Gets the <see cref="global::Microsoft.Extensions.Logging.LogLevel">level</see> of the
+	/// log entry. Defaults to <see cref="global::Microsoft.Extensions.Logging.LogLevel.Information"/>, unless there is
+	/// an <see cref="global::System.Exception"/> parameter and no-other override is defined.
+	/// </summary>
+	public global::Microsoft.Extensions.Logging.LogLevel DefaultLevel { get; set; } = global::Microsoft.Extensions.Logging.LogLevel.Information;
+
+	/// <summary>
+	/// Optional. The prefix used to when generating the log entry name.
+	/// </summary>
+	public string? CustomPrefix { get; set; }
+
+	/// <summary>
+	/// Specifies the mode used to generate or override the prefix for the log entry.
+	/// </summary>
+	public global::Purview.Telemetry.Logging.LogPrefixType PrefixType { get; set; }
+
+	/// <summary>
+	/// Disables the generation of the new style of telemetry generation for Microsoft.Extensions.Logging.
+	///
+	/// Defaults to false.
+	/// </summary>
+	public bool DisableMSLoggingTelemetryGeneration { get; set; }
+}
+
+/// <summary>
+/// Marker attribute required for log entry generation, based on
+/// high-performance <see cref="global::Microsoft.Extensions.Logging.LoggerMessage"/>.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+[global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
+sealed class LogAttribute : global::System.Attribute
+{
+	/// <summary>
+	/// Creates a new instance of the <see cref="LogAttribute"/> class.
+	/// </summary>
+	public LogAttribute()
+	{
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="LogAttribute"/>, specifying the <see cref="MessageTemplate"/>.
+	/// </summary>
+	/// <param name="messageTemplate">Specifies the <see cref="MessageTemplate"/>.</param>
+	public LogAttribute(string messageTemplate)
+	{
+		MessageTemplate = messageTemplate;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="LogAttribute"/>, specifying the <see cref="EventId"/>.
+	/// </summary>
+	/// <param name="eventId">Specifies the <see cref="EventId"/>.</param>
+	public LogAttribute(int eventId)
+	{
+		EventId = eventId;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="LogAttribute"/>, specifying the <see cref="Level"/>,
+	/// optionally the <see cref="MessageTemplate"/> and <see cref="Name"/>.
+	/// </summary>
+	/// <param name="level">Specifies the <see cref="Level"/>.</param>
+	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
+	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
+	public LogAttribute(global::Microsoft.Extensions.Logging.LogLevel level, string? messageTemplate = null, string? name = null)
+	{
+		Level = level;
+		MessageTemplate = messageTemplate;
+		Name = name;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="LogAttribute"/>, specifying the <see cref="EventId"/>
+	/// and the <see cref="Level"/>, optionally the <see cref="MessageTemplate"/> and <see cref="Name"/>.
+	/// </summary>
+	/// <param name="eventId">Specifies the <see cref="EventId"/>.</param>
+	/// <param name="level">Specifies the <see cref="Level"/>.</param>
+	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
+	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
+	public LogAttribute(int eventId, global::Microsoft.Extensions.Logging.LogLevel level, string? messageTemplate = null, string? name = null)
+	{
+		Level = level;
+		MessageTemplate = messageTemplate;
+		EventId = eventId;
+		Name = name;
+	}
+
+	/// <summary>
+	/// Optional. Gets/ sets the <see cref="global::Microsoft.Extensions.Logging.LogLevel">level</see> of the
+	/// log entry. Defaults to <see cref="global::Microsoft.Extensions.Logging.LogLevel.Information"/>, unless there is
+	/// an <see cref="Exception"/> parameter and no-other override is defined.
+	/// </summary>
+	public global::Microsoft.Extensions.Logging.LogLevel Level { get; set; } = global::Microsoft.Extensions.Logging.LogLevel.Information;
+
+	/// <summary>
+	/// Optional. The message template used for the log entry, otherwise one is
+	/// generated based on the parameters.
+	/// </summary>
+	public string? MessageTemplate { get; set; }
+
+	/// <summary>
+	/// Optional. The event Id for this log entry. If one is not specified, one is automatically generated.
+	/// </summary>
+	public int? EventId { get; set; }
+
+	/// <summary>
+	/// Optional. Gets/ set the name of the log entry. If one is not specified, the method name is used.
+	/// </summary>
+	public string? Name { get; set; }
+}
+
+/// <summary>
+/// Marker attribute used as an alternative to <see cref="global::Purview.Telemetry.Logging.LogAttribute"/>, where the <see cref="global::Purview.Telemetry.Logging.LogAttribute.Level"/>
+/// is set to <see cref="global::Microsoft.Extensions.Logging.LogLevel.Information"/>.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+[global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
+sealed class InfoAttribute : global::System.Attribute
+{
+	/// <summary>
+	/// Creates a new instance of the <see cref="InfoAttribute"/>, specifying the <see cref="MessageTemplate"/>.
+	/// </summary>
+	/// <param name="messageTemplate">Specifies the <see cref="MessageTemplate"/>.</param>
+	public InfoAttribute(string messageTemplate)
+	{
+		MessageTemplate = messageTemplate;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="InfoAttribute"/>, specifying the <see cref="EventId"/>.
+	/// </summary>
+	/// <param name="eventId">Specifies the <see cref="EventId"/>.</param>
+	public InfoAttribute(int eventId)
+	{
+		EventId = eventId;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="InfoAttribute"/>,
+	/// optionally the <see cref="MessageTemplate"/> and <see cref="Name"/>.
+	/// </summary>
+	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
+	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
+	public InfoAttribute(string? messageTemplate = null, string? name = null)
+	{
+		MessageTemplate = messageTemplate;
+		Name = name;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="InfoAttribute"/>, specifying the <see cref="EventId"/>
+	/// and optionally the <see cref="MessageTemplate"/> and <see cref="Name"/>.
+	/// </summary>
+	/// <param name="eventId">Specifies the <see cref="EventId"/>.</param>
+	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
+	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
+	public InfoAttribute(int eventId, string? messageTemplate = null, string? name = null)
+	{
+		MessageTemplate = messageTemplate;
+		EventId = eventId;
+		Name = name;
+	}
+
+	/// <summary>
+	/// Optional. The message template used for the log entry, otherwise one is
+	/// generated based on the parameters.
+	/// </summary>
+	public string? MessageTemplate { get; set; }
+
+	/// <summary>
+	/// Optional. The event Id for this log entry. If one is not specified, one is automatically generated.
+	/// </summary>
+	public int? EventId { get; set; }
+
+	/// <summary>
+	/// Optional. Gets/ set the name of the log entry. If one is not specified, the method name is used.
+	/// </summary>
+	public string? Name { get; set; }
+}
+
+/// <summary>
+/// Determines if an array/ enumerable property should be expanded into
+/// individual elements. This only works when the <code>Microsoft.Extensions.Telemetry.Abstractions</code>
+/// NuGet package is included.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Parameter, AllowMultiple = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+[global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
+sealed class ExpandEnumerableAttribute : global::System.Attribute
+{
+	/// <summary>
+	/// Creates a new instance of the <see cref="ExpandEnumerableAttribute"/>, optionally
+	/// specifying the <see cref="MaximumValueCount"/> property to determine the maximum
+	/// number of elements to include.
+	/// </summary>
+	/// <param name="maximumValueCount">Specifies the <see cref="MaximumValueCount"/>, defaults to 5.</param>
+	public ExpandEnumerableAttribute(int maximumValueCount = 5)
+	{
+		MaximumValueCount = maximumValueCount;
+	}
+
+	/// <summary>
+	/// Optional. Determines the number of the elements to render in the logging
+	/// properties. It is NOT recommended to use large numbers here, as it can
+	/// negatively impact performance.
+	/// </summary>
+	public int MaximumValueCount { get; set; }
+}
+
+/// <summary>
+/// Marker attribute used as an alternative to <see cref="global::Purview.Telemetry.Logging.LogAttribute"/>, where the <see cref="global::Purview.Telemetry.Logging.LogAttribute.Level"/>
+/// is set to <see cref="global::Microsoft.Extensions.Logging.LogLevel.Error"/>.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+[global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
+sealed class ErrorAttribute : global::System.Attribute
+{
+	/// <summary>
+	/// Creates a new instance of the <see cref="ErrorAttribute"/>, specifying the <see cref="MessageTemplate"/>.
+	/// </summary>
+	/// <param name="messageTemplate">Specifies the <see cref="MessageTemplate"/>.</param>
+	public ErrorAttribute(string messageTemplate)
+	{
+		MessageTemplate = messageTemplate;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="ErrorAttribute"/>, specifying the <see cref="EventId"/>.
+	/// </summary>
+	/// <param name="eventId">Specifies the <see cref="EventId"/>.</param>
+	public ErrorAttribute(int eventId)
+	{
+		EventId = eventId;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="ErrorAttribute"/>,
+	/// optionally the <see cref="MessageTemplate"/> and <see cref="Name"/>.
+	/// </summary>
+	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
+	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
+	public ErrorAttribute(string? messageTemplate = null, string? name = null)
+	{
+		MessageTemplate = messageTemplate;
+		Name = name;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="ErrorAttribute"/>, specifying the <see cref="EventId"/>
+	/// and optionally the <see cref="MessageTemplate"/> and <see cref="Name"/>.
+	/// </summary>
+	/// <param name="eventId">Specifies the <see cref="EventId"/>.</param>
+	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
+	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
+	public ErrorAttribute(int eventId, string? messageTemplate = null, string? name = null)
+	{
+		MessageTemplate = messageTemplate;
+		EventId = eventId;
+		Name = name;
+	}
+
+	/// <summary>
+	/// Optional. The message template used for the log entry, otherwise one is
+	/// generated based on the parameters.
+	/// </summary>
+	public string? MessageTemplate { get; set; }
+
+	/// <summary>
+	/// Optional. The event Id for this log entry. If one is not specified, one is automatically generated.
+	/// </summary>
+	public int? EventId { get; set; }
+
+	/// <summary>
+	/// Optional. Gets/ set the name of the log entry. If one is not specified, the method name is used.
+	/// </summary>
+	public string? Name { get; set; }
+}
+
+/// <summary>
+/// Marker attribute used as an alternative to <see cref="global::Purview.Telemetry.Logging.LogAttribute"/>, where the <see cref="global::Purview.Telemetry.Logging.LogAttribute.Level"/>
+/// is set to <see cref="global::Microsoft.Extensions.Logging.LogLevel.Debug"/>.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+[global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
+sealed class DebugAttribute : global::System.Attribute
+{
+	/// <summary>
+	/// Creates a new instance of the <see cref="DebugAttribute"/>, specifying the <see cref="MessageTemplate"/>.
+	/// </summary>
+	/// <param name="messageTemplate">Specifies the <see cref="MessageTemplate"/>.</param>
+	public DebugAttribute(string messageTemplate)
+	{
+		MessageTemplate = messageTemplate;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="DebugAttribute"/>, specifying the <see cref="EventId"/>.
+	/// </summary>
+	/// <param name="eventId">Specifies the <see cref="EventId"/>.</param>
+	public DebugAttribute(int eventId)
+	{
+		EventId = eventId;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="DebugAttribute"/>,
+	/// optionally the <see cref="MessageTemplate"/> and <see cref="Name"/>.
+	/// </summary>
+	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
+	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
+	public DebugAttribute(string? messageTemplate = null, string? name = null)
+	{
+		MessageTemplate = messageTemplate;
+		Name = name;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="DebugAttribute"/>, specifying the <see cref="EventId"/>
+	/// and optionally the <see cref="MessageTemplate"/> and <see cref="Name"/>.
+	/// </summary>
+	/// <param name="eventId">Specifies the <see cref="EventId"/>.</param>
+	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
+	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
+	public DebugAttribute(int eventId, string? messageTemplate = null, string? name = null)
+	{
+		MessageTemplate = messageTemplate;
+		EventId = eventId;
+		Name = name;
+	}
+
+	/// <summary>
+	/// Optional. The message template used for the log entry, otherwise one is
+	/// generated based on the parameters.
+	/// </summary>
+	public string? MessageTemplate { get; set; }
+
+	/// <summary>
+	/// Optional. The event Id for this log entry. If one is not specified, one is automatically generated.
+	/// </summary>
+	public int? EventId { get; set; }
+
+	/// <summary>
+	/// Optional. Gets/ set the name of the log entry. If one is not specified, the method name is used.
+	/// </summary>
+	public string? Name { get; set; }
+}
+
+/// <summary>
+/// Marker attribute used as an alternative to <see cref="global::Purview.Telemetry.Logging.LogAttribute"/>, where the <see cref="global::Purview.Telemetry.Logging.LogAttribute.Level"/>
+/// is set to <see cref="global::Microsoft.Extensions.Logging.LogLevel.Critical"/>.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+[global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
+sealed class CriticalAttribute : global::System.Attribute
+{
+	/// <summary>
+	/// Creates a new instance of the <see cref="CriticalAttribute"/>, specifying the <see cref="MessageTemplate"/>.
+	/// </summary>
+	/// <param name="messageTemplate">Specifies the <see cref="MessageTemplate"/>.</param>
+	public CriticalAttribute(string messageTemplate)
+	{
+		MessageTemplate = messageTemplate;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="CriticalAttribute"/>, specifying the <see cref="EventId"/>.
+	/// </summary>
+	/// <param name="eventId">Specifies the <see cref="EventId"/>.</param>
+	public CriticalAttribute(int eventId)
+	{
+		EventId = eventId;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="CriticalAttribute"/>,
+	/// optionally the <see cref="MessageTemplate"/> and <see cref="Name"/>.
+	/// </summary>
+	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
+	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
+	public CriticalAttribute(string? messageTemplate = null, string? name = null)
+	{
+		MessageTemplate = messageTemplate;
+		Name = name;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="CriticalAttribute"/>, specifying the <see cref="EventId"/>
+	/// and optionally the <see cref="MessageTemplate"/> and <see cref="Name"/>.
+	/// </summary>
+	/// <param name="eventId">Specifies the <see cref="EventId"/>.</param>
+	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
+	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
+	public CriticalAttribute(int eventId, string? messageTemplate = null, string? name = null)
+	{
+		MessageTemplate = messageTemplate;
+		EventId = eventId;
+		Name = name;
+	}
+
+	/// <summary>
+	/// Optional. The message template used for the log entry, otherwise one is
+	/// generated based on the parameters.
+	/// </summary>
+	public string? MessageTemplate { get; set; }
+
+	/// <summary>
+	/// Optional. The event Id for this log entry. If one is not specified, one is automatically generated.
+	/// </summary>
+	public int? EventId { get; set; }
+
+	/// <summary>
+	/// Optional. Gets/ set the name of the log entry. If one is not specified, the method name is used.
+	/// </summary>
+	public string? Name { get; set; }
+}
+
+/// <summary>
+/// The types of prefixes that can be used for the log entry name generation.
+/// </summary>
+{CodeGen,enum}
+enum LogPrefixType
+{
+	/// <summary>
+	/// No suffix is added to the name.
+	/// </summary>
+	Default = 0,
+
+	/// <summary>
+	/// The name of the interface used as the source for generation.
+	/// </summary>
+	Interface = 1,
+
+	/// <summary>
+	/// The name of the class, either specified or generated.
+	/// </summary>
+	Class = 2,
+
+	/// <summary>
+	/// Uses the custom name specified by <see cref="global::Purview.Telemetry.Logging.LoggerAttribute.CustomPrefix"/>. This is used when
+	/// the <see cref="global::Purview.Telemetry.Logging.LoggerAttribute.CustomPrefix"/> is set
+	/// regardless of <see cref="global::Purview.Telemetry.Logging.LoggerAttribute.PrefixType"/>.
+	/// </summary>
+	Custom = 3,
+
+	/// <summary>
+	/// The name of the interface without the "I" prefix or "Log", "Logger" or "Telemetry" suffixes if they exist.
+	///
+	/// For example, IRepositoryLog, IRepositoryLogger, or IRepositoryTelemetry would all be "Repository".
+	/// </summary>
+	TrimmedClassName = 4
+}
+
+#endif

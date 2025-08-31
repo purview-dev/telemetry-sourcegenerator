@@ -1,0 +1,498 @@
+﻿namespace Purview.Telemetry.Metrics;
+
+/// <summary>
+/// Specifies the meter type generated corresponds to a
+/// <see cref="global::System.Diagnostics.Metrics.Counter{T}"/> that auto-increments when called.
+///
+/// This is equivalent to applying the <see cref="CounterAttribute"/> with the
+/// <see cref="CounterAttribute.AutoIncrement"/> property set to true.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+[global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
+sealed class AutoCounterAttribute : global::System.Attribute
+{
+	/// <summary>
+	/// Creates a new instance of the <see cref="AutoCounterAttribute"/> class.
+	/// </summary>
+	public AutoCounterAttribute()
+	{
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="AutoCounterAttribute"/> class, and specifies the
+	/// <see cref="Name"/>, and optionally the <see cref="Unit"/> and <see cref="Description"/>.
+	/// </summary>
+	/// <param name="name">Specifies the <see cref="Name"/>.</param>
+	/// <param name="unit">Optionally specifies the <see cref="Unit"/>.</param>
+	/// <param name="description">Optionally specifies the <see cref="Description"/>.</param>
+	public AutoCounterAttribute(string name, string? unit = null, string? description = null)
+	{
+		Name = name;
+		Unit = unit;
+		Description = description;
+	}
+
+	/// <summary>
+	/// Optionally specifies the name of the meter. If one is not specified, the name
+	/// of the method is used.
+	/// </summary>
+
+	public string? Name { get; set; }
+
+	/// <summary>
+	/// Optionally specifies the unit of the meter.
+	/// </summary>
+	public string? Unit { get; set; }
+
+	/// <summary>
+	/// Optionally specifies the description of the meter.
+	/// </summary>
+	public string? Description { get; set; }
+}
+
+/// <summary>
+/// Specifies the meter type generated corresponds to a <see cref="global::System.Diagnostics.Metrics.Counter{T}"/>.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+[global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
+sealed class CounterAttribute : global::System.Attribute
+{
+	/// <summary>
+	/// Creates a new instance of the <see cref="CounterAttribute"/> class.
+	/// </summary>
+	public CounterAttribute()
+	{
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="CounterAttribute"/> class, and specifies the
+	/// <see cref="AutoIncrement"/>.
+	/// </summary>
+	/// <param name="autoIncrement">Specifies the <see cref="AutoIncrement"/>.</param>
+	public CounterAttribute(bool autoIncrement)
+	{
+		AutoIncrement = autoIncrement;
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="CounterAttribute"/> class, and specifies the
+	/// <see cref="Name"/>, and optionally the <see cref="Unit"/>, <see cref="Description"/>
+	/// and <see cref="AutoIncrement"/>.
+	/// </summary>
+	/// <param name="name">Specifies the <see cref="Name"/>.</param>
+	/// <param name="unit">Optionally specifies the <see cref="Unit"/>.</param>
+	/// <param name="description">Optionally specifies the <see cref="Description"/>.</param>
+	/// <param name="autoIncrement">Optionally specifies if the counter is <see cref="AutoIncrement">auto incremented</see>.</param>
+	public CounterAttribute(string name, string? unit = null, string? description = null, bool autoIncrement = false)
+	{
+		Name = name;
+		Unit = unit;
+		Description = description;
+		AutoIncrement = autoIncrement;
+	}
+
+	/// <summary>
+	/// If true, when the method is called the counter is automatically incremented (+1).
+	/// Otherwise a parameter value must be specified (either inferred or via using
+	/// the <see cref="InstrumentMeasurementAttribute" />).
+	/// </summary>
+	public bool AutoIncrement { get; set; }
+
+	/// <summary>
+	/// Optionally specifies the name of the meter. If one is not specified, the name
+	/// of the method is used.
+	/// </summary>
+
+	public string? Name { get; set; }
+
+	/// <summary>
+	/// Optionally specifies the unit of the meter.
+	/// </summary>
+	public string? Unit { get; set; }
+
+	/// <summary>
+	/// Optionally specifies the description of the meter.
+	/// </summary>
+	public string? Description { get; set; }
+}
+
+/// <summary>
+/// Specifies the meter type generated corresponds to a <see cref="global::System.Diagnostics.Metrics.UpDownCounter{T}"/>.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+[global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
+sealed class UpDownCounterAttribute : System.Attribute
+{
+	/// <summary>
+	/// Creates a new instance of the <see cref="UpDownCounterAttribute"/> class.
+	/// </summary>
+	public UpDownCounterAttribute()
+	{
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="UpDownCounterAttribute"/> class, and specifies the
+	/// <see cref="Name"/>, and optionally the <see cref="Unit"/> and <see cref="Description"/>.
+	/// </summary>
+	/// <param name="name">Specifies the <see cref="Name"/>.</param>
+	/// <param name="unit">Optionally specifies the <see cref="Unit"/>.</param>
+	/// <param name="description">Optionally specifies the <see cref="Description"/>.</param>
+	public UpDownCounterAttribute(string name, string? unit = null, string? description = null)
+	{
+		Name = name;
+		Unit = unit;
+		Description = description;
+	}
+
+	/// <summary>
+	/// Optionally specifies the name of the meter. If one is not specified, the name
+	/// of the method is used.
+	/// </summary>
+	public string? Name { get; set; }
+
+	/// <summary>
+	/// Optionally specifies the unit of the meter.
+	/// </summary>
+	public string? Unit { get; set; }
+
+	/// <summary>
+	/// Optionally specifies the description of the meter.
+	/// </summary>
+	public string? Description { get; set; }
+}
+
+/// <summary>
+/// Specifies the meter type generated corresponds to a <see cref="global::System.Diagnostics.Metrics.ObservableUpDownCounter{T}"/>.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+[global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
+sealed class ObservableUpDownCounterAttribute : global::System.Attribute
+{
+	/// <summary>
+	/// Creates a new instance of the <see cref="ObservableUpDownCounterAttribute"/> class.
+	/// </summary>
+	public ObservableUpDownCounterAttribute()
+	{
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="ObservableUpDownCounterAttribute"/> class, and specifies the
+	/// <see cref="Name"/>, and optionally the <see cref="Unit"/>, <see cref="Description"/>
+	/// and <see cref="ThrowOnAlreadyInitialized"/> properties.
+	/// </summary>
+	/// <param name="name">Specifies the <see cref="Name"/>.</param>
+	/// <param name="unit">Optionally specifies the <see cref="Unit"/>.</param>
+	/// <param name="description">Optionally specifies the <see cref="Description"/>.</param>
+	/// <param name="throwOnAlreadyInitialized">Optionally specifies if the observable counter throws an exception if it is already initialised. <see cref="ThrowOnAlreadyInitialized" />.</param>
+	public ObservableUpDownCounterAttribute(string name, string? unit = null, string? description = null, bool throwOnAlreadyInitialized = false)
+	{
+		Name = name;
+		Unit = unit;
+		Description = description;
+		ThrowOnAlreadyInitialized = throwOnAlreadyInitialized;
+	}
+
+	/// <summary>
+	/// Optionally specifies the name of the instrument. If
+	/// one is not specified, the method is used.
+	/// </summary>
+	public string? Name { get; set; }
+
+	/// <summary>
+	/// Optionally specifies the unit of the meter.
+	/// </summary>
+	public string? Unit { get; set; }
+
+	/// <summary>
+	/// Optionally specifies the description of the meter.
+	/// </summary>
+	public string? Description { get; set; }
+
+	/// <summary>
+	/// Optional, determines if the instrument method throws
+	/// if it's already initialised. Defaults to false.
+	/// </summary>
+	public bool ThrowOnAlreadyInitialized { get; set; }
+}
+
+/// <summary>
+/// Specifies the meter type generated corresponds to a <see cref="global::System.Diagnostics.Metrics.ObservableGauge{T}"/>.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+[global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
+sealed class ObservableGaugeAttribute : global::System.Attribute
+{
+	/// <summary>
+	/// Creates a new instance of the <see cref="ObservableGaugeAttribute"/> class.
+	/// </summary>
+	public ObservableGaugeAttribute()
+	{
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="ObservableGaugeAttribute"/> class, and specifies the
+	/// <see cref="Name"/>, and optionally the <see cref="Unit"/>, <see cref="Description"/>
+	/// and <see cref="ThrowOnAlreadyInitialized"/> properties.
+	/// </summary>
+	/// <param name="name">Specifies the <see cref="Name"/>.</param>
+	/// <param name="unit">Optionally specifies the <see cref="Unit"/>.</param>
+	/// <param name="description">Optionally specifies the <see cref="Description"/>.</param>
+	/// <param name="throwOnAlreadyInitialized">Optionally specifies if the observable counter throws an exception if it is already initialised. <see cref="ThrowOnAlreadyInitialized" />.</param>
+	public ObservableGaugeAttribute(string name, string? unit = null, string? description = null, bool throwOnAlreadyInitialized = false)
+	{
+		Name = name;
+		Unit = unit;
+		Description = description;
+		ThrowOnAlreadyInitialized = throwOnAlreadyInitialized;
+	}
+
+	/// <summary>
+	/// Optionally specifies the name of the instrument. If
+	/// one is not specified, the method is used.
+	/// </summary>
+	public string? Name { get; set; }
+
+	/// <summary>
+	/// Optionally specifies the unit of the meter.
+	/// </summary>
+	public string? Unit { get; set; }
+
+	/// <summary>
+	/// Optionally specifies the description of the meter.
+	/// </summary>
+	public string? Description { get; set; }
+
+	/// <summary>
+	/// Optional, determines if the instrument method throws
+	/// if it's already initialised. Defaults to false.
+	/// </summary>
+	public bool ThrowOnAlreadyInitialized { get; set; }
+}
+
+/// <summary>
+/// Specifies the meter type generated corresponds to a <see cref="global::System.Diagnostics.Metrics.ObservableCounter{T}"/>.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+[global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
+sealed class ObservableCounterAttribute : global::System.Attribute
+{
+	/// <summary>
+	/// Creates a new instance of the <see cref="ObservableCounterAttribute"/> class.
+	/// </summary>
+	public ObservableCounterAttribute()
+	{
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="ObservableCounterAttribute"/> class, and specifies the
+	/// <see cref="Name"/>, and optionally the <see cref="Unit"/>, <see cref="Description"/>
+	/// and <see cref="ThrowOnAlreadyInitialized"/> properties.
+	/// </summary>
+	/// <param name="name">Specifies the <see cref="Name"/>.</param>
+	/// <param name="unit">Optionally specifies the <see cref="Unit"/>.</param>
+	/// <param name="description">Optionally specifies the <see cref="Description"/>.</param>
+	/// <param name="throwOnAlreadyInitialized">Optionally specifies if the observable counter throws an exception if it is already initialised. <see cref="ThrowOnAlreadyInitialized" />.</param>
+	public ObservableCounterAttribute(string name, string? unit = null, string? description = null, bool throwOnAlreadyInitialized = false)
+	{
+		Name = name;
+		Unit = unit;
+		Description = description;
+		ThrowOnAlreadyInitialized = throwOnAlreadyInitialized;
+	}
+
+	/// <summary>
+	/// Optionally specifies the name of the instrument. If
+	/// one is not specified, the method is used.
+	/// </summary>
+	public string? Name { get; set; }
+
+	/// <summary>
+	/// Optionally specifies the unit of the meter.
+	/// </summary>
+	public string? Unit { get; set; }
+
+	/// <summary>
+	/// Optionally specifies the description of the meter.
+	/// </summary>
+	public string? Description { get; set; }
+
+	/// <summary>
+	/// Optional, determines if the instrument method throws
+	/// if it's already initialised. Defaults to false.
+	/// </summary>
+	public bool ThrowOnAlreadyInitialized { get; set; }
+}
+
+/// <summary>
+/// Marker attribute, used to indicate a meter (or group of instruments) and how they should be generated.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Assembly, AllowMultiple = false, Inherited = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+[global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
+sealed class MeterGenerationAttribute : global::System.Attribute
+{
+	/// <summary>
+	/// Creates a new <see cref="MeterGenerationAttribute" /> with optional
+	/// <paramref name="instrumentPrefix"/>, <paramref name="lowercaseInstrumentName"/>
+	/// and/ or <paramref name="lowercaseTagKeys"/>.
+	/// </summary>
+	/// <param name="instrumentPrefix">Optionally specifies the <see cref="InstrumentPrefix" />.</param>
+	/// <param name="lowercaseInstrumentName">Optionally specifies the <see cref="LowercaseInstrumentName" />.</param>
+	/// <param name="lowercaseTagKeys">Optionally specifies the <see cref="LowercaseTagKeys" />.</param>
+	public MeterGenerationAttribute(string? instrumentPrefix = null, bool lowercaseInstrumentName = true, bool lowercaseTagKeys = true)
+	{
+		InstrumentPrefix = instrumentPrefix;
+		LowercaseInstrumentName = lowercaseInstrumentName;
+		LowercaseTagKeys = lowercaseTagKeys;
+	}
+
+	/// <summary>
+	/// Optional, gets/ sets the prefix used when generating the instrument name.
+	/// </summary>
+	public string? InstrumentPrefix { get; set; }
+
+	/// <summary>
+	/// Optional, gets/ sets the separator used when
+	/// pre-pending any prefixes. Defaults to period.
+	/// </summary>
+	public string InstrumentSeparator { get; set; } = ".";
+
+	/// <summary>
+	/// Optional, gets/ sets a value indicating if the
+	/// instrument name is lower-cased. Defaults to true.
+	/// </summary>
+	public bool LowercaseInstrumentName { get; set; } = true;
+
+	/// <summary>
+	/// Optional, get/ sets a value indicating if any tag
+	/// keys/ names are lower-cased. Defaults to true.
+	/// </summary>
+	public bool LowercaseTagKeys { get; set; } = true;
+}
+
+/// <summary>
+/// Marker attribute, used to indicating a meter, or group of instruments.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Interface, AllowMultiple = false, Inherited = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+[global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
+sealed class MeterAttribute : global::System.Attribute
+{
+	/// <summary>
+	/// Creates a new <see cref="MeterAttribute" />.
+	/// </summary>
+	public MeterAttribute()
+	{
+	}
+
+	/// <summary>
+	/// Creates a new <see cref="MeterAttribute" />, specifying the <paramref name="name"/>.
+	/// </summary>
+	/// <param name="name">Specifies the <see cref="Name"/>.</param>
+	public MeterAttribute(string name)
+	{
+		Name = name;
+	}
+
+	/// <summary>
+	/// Optional. Gets/ sets the name of the meter, used for creating
+	/// a named grouped of instruments.
+	/// </summary>
+	public string? Name { get; set; }
+
+	/// <summary>
+	/// Optional, gets/ sets the prefix used when generating the instrument name.
+	/// </summary>
+	public string? InstrumentPrefix { get; set; }
+
+	/// <summary>
+	/// Optional, determines if <see cref="MeterGenerationAttribute.InstrumentPrefix" /> is
+	/// included in the generated name.
+	/// </summary>
+	public bool IncludeAssemblyInstrumentPrefix { get; set; } = true;
+
+	/// <summary>
+	/// Determines if the <see cref="CounterAttribute.Name"/>, <see cref="HistogramAttribute.Name"/>,
+	/// <see cref="UpDownCounterAttribute.Name"/>, <see cref="ObservableCounterAttribute.Name"/>,
+	/// <see cref="ObservableGaugeAttribute.Name"/> or <see cref="ObservableUpDownCounterAttribute.Name"/> (including
+	/// any prefixes) are lower-cased.
+	/// </summary>
+	public bool LowercaseInstrumentName { get; set; } = true;
+
+	/// <summary>
+	/// Determines if the <see cref="global::Purview.Telemetry.TagAttribute.Name"/> (including
+	/// any prefixes) are lower-cased.
+	/// </summary>
+	public bool LowercaseTagKeys { get; set; } = true;
+}
+
+/// <summary>
+/// Determines if the parameter is an instrument measurement.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+sealed class InstrumentMeasurementAttribute : global::System.Attribute
+{
+}
+
+/// <summary>
+/// Specifies the meter type generated corresponds to a <see cref="global::System.Diagnostics.Metrics.Histogram{T}"/>.
+/// </summary>
+{CodeGen}
+[global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+[global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
+sealed class HistogramAttribute : global::System.Attribute
+{
+	/// <summary>
+	/// Creates a new instance of the <see cref="HistogramAttribute"/> class.
+	/// </summary>
+	public HistogramAttribute()
+	{
+	}
+
+	/// <summary>
+	/// Creates a new instance of the <see cref="HistogramAttribute"/> class, and specifies the
+	/// <see cref="Name"/>, and optionally the <see cref="Unit"/> and <see cref="Description"/>.
+	/// </summary>
+	/// <param name="name">Specifies the <see cref="Name"/>.</param>
+	/// <param name="unit">Optionally specifies the <see cref="Unit"/>.</param>
+	/// <param name="description">Optionally specifies the <see cref="Description"/>.</param>
+	public HistogramAttribute(string name, string? unit = null, string? description = null)
+	{
+		Name = name;
+		Unit = unit;
+		Description = description;
+	}
+
+	/// <summary>
+	/// Optionally specifies the name of the meter. If one is not specified, the name
+	/// of the method is used.
+	/// </summary>
+
+	public string? Name { get; internal set; }
+
+	/// <summary>
+	/// Optionally specifies the unit of the meter.
+	/// </summary>
+	public string? Unit { get; internal set; }
+
+	/// <summary>
+	/// Optionally specifies the description of the meter.
+	/// </summary>
+	public string? Description { get; internal set; }
+}

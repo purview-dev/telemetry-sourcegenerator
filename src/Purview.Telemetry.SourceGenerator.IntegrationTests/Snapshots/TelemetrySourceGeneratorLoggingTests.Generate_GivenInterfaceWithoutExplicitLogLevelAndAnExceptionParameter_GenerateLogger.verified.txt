@@ -7,7 +7,7 @@ public interface ITestLogger {
       ^^^
 }
 */
- Guid_1: (11,6)-(11,9),
+ Guid_1: (9,6)-(9,9),
       Message: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
       Severity: Info,
       WarningLevel: 1,

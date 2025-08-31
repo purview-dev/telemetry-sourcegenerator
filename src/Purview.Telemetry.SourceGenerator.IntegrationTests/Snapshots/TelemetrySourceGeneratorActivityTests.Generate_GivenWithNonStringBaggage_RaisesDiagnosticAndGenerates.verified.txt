@@ -7,7 +7,7 @@
                                                                                          ^^^^^^^^
 
 */
- Guid_1: (12,89)-(12,97),
+ Guid_1: (10,89)-(10,97),
       Message: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
       Severity: Warning,
       WarningLevel: 1,
@@ -27,7 +27,7 @@
                                                                                                                  ^^^^^^^^^
 
 */
- Guid_1: (12,113)-(12,122),
+ Guid_1: (10,113)-(10,122),
       Message: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
       Severity: Warning,
       WarningLevel: 1,
@@ -47,7 +47,7 @@
                                                                                                        ^^^^^^^^
 
 */
- Guid_1: (15,103)-(15,111),
+ Guid_1: (13,103)-(13,111),
       Message: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
       Severity: Warning,
       WarningLevel: 1,
@@ -67,7 +67,7 @@
                                                                                                                                 ^^^^^^^^^
 
 */
- Guid_1: (15,128)-(15,137),
+ Guid_1: (13,128)-(13,137),
       Message: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
       Severity: Warning,
       WarningLevel: 1,
@@ -87,7 +87,7 @@
                                                                       ^^^^^^^^^^^
 }
 */
- Guid_1: (18,70)-(18,81),
+ Guid_1: (16,70)-(16,81),
       Message: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
       Severity: Warning,
       WarningLevel: 1,
@@ -107,7 +107,7 @@
                                                                                                                                        ^^^^^^^^^^
 }
 */
- Guid_1: (18,135)-(18,145),
+ Guid_1: (16,135)-(16,145),
       Message: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
       Severity: Warning,
       WarningLevel: 1,

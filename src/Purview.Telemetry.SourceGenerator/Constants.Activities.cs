@@ -32,30 +32,30 @@ partial class Constants
 
 		public const string RecordExceptionMethodName = "RecordExceptionInternal";
 
-		public static readonly TemplateInfo ActivitySourceGenerationAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Activities.ActivitySourceGenerationAttribute"
-		);
-		public static readonly TemplateInfo ActivitySourceAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo ActivitySourceGenerationAttribute =
+			PurviewTypeFactory.Create(
+				"Purview.Telemetry.Activities.ActivitySourceGenerationAttribute"
+			);
+		public static readonly PurviewTypeInfo ActivitySourceAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Activities.ActivitySourceAttribute"
 		);
-		public static readonly TemplateInfo ActivityAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo ActivityAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Activities.ActivityAttribute"
 		);
-		public static readonly TemplateInfo EventAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo EventAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Activities.EventAttribute"
 		);
-		public static readonly TemplateInfo ContextAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo ContextAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Activities.ContextAttribute"
 		);
-		public static readonly TemplateInfo BaggageAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo BaggageAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Activities.BaggageAttribute"
 		);
-		public static readonly TemplateInfo EscapeAttribute = TemplateInfo.Create(
+		public static readonly PurviewTypeInfo EscapeAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.Activities.EscapeAttribute"
 		);
-		public static readonly TemplateInfo StatusDescriptionAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Activities.StatusDescriptionAttribute"
-		);
+		public static readonly PurviewTypeInfo StatusDescriptionAttribute =
+			PurviewTypeFactory.Create("Purview.Telemetry.Activities.StatusDescriptionAttribute");
 
 		public static readonly ImmutableDictionary<int, string> ActivityKindTypeMap =
 			new Dictionary<int, string>
@@ -74,18 +74,6 @@ partial class Constants
 				{ 1, SystemDiagnostics.ActivityStatusCode_Ok },
 				{ 2, SystemDiagnostics.ActivityStatusCode_Error },
 			}.ToImmutableDictionary();
-
-		public static TemplateInfo[] GetTemplates() =>
-			[
-				ActivitySourceGenerationAttribute,
-				ActivitySourceAttribute,
-				ActivityAttribute,
-				EventAttribute,
-				ContextAttribute,
-				BaggageAttribute,
-				EscapeAttribute,
-				StatusDescriptionAttribute,
-			];
 
 		public static class SystemDiagnostics
 		{

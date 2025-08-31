@@ -38,6 +38,7 @@ static partial class ActivitySourceTargetClassEmitter
 			builder,
 			context.CancellationToken
 		);
+
 		indent = EmitHelpers.EmitClassStart(
 			GenerationType.Activities,
 			target.GenerationType,
@@ -60,12 +61,12 @@ static partial class ActivitySourceTargetClassEmitter
 			context.CancellationToken
 		);
 
-		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString());
+		EmbeddedResources.Instance.AddHeader(builder);
 		var hintName = $"{target.FullyQualifiedName}.Activity.g.cs";
 
 		context.AddSource(
 			hintName,
-			Microsoft.CodeAnalysis.Text.SourceText.From(sourceText, Encoding.UTF8)
+			Microsoft.CodeAnalysis.Text.SourceText.From(builder.ToString(), Encoding.UTF8)
 		);
 
 		DependencyInjectionClassEmitter.GenerateImplementation(

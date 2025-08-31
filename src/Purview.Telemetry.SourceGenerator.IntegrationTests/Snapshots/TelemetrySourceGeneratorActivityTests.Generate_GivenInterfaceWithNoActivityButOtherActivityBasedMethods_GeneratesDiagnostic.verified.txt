@@ -21,7 +21,7 @@ public interface ITestActivities {
 ^
 
 */
- Guid_1: (9,0)-(16,1),
+ Guid_1: (7,0)-(14,1),
       Message: As Event and/ or Context methods are defined, it's best practice to create a specific Activity otherwise the Activity will belong to another operation.,
       Severity: Info,
       WarningLevel: 1,
