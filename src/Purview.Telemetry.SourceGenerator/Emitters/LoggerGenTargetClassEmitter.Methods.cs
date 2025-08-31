@@ -81,7 +81,7 @@ partial class LoggerGenTargetClassEmitter
 			// ...but only if it's not been scoped.
 			builder
 				.Append(indent, "if (!", withNewLine: false)
-				.Append(Constants.Logging.LoggerFieldName)
+				.Append(Constants.VariableNames.LoggerFieldName)
 				.Append(".IsEnabled(")
 				.Append(methodTarget.MSLevel)
 				.AppendLine("))")
@@ -155,7 +155,7 @@ partial class LoggerGenTargetClassEmitter
 			builder
 				.AppendLine()
 				.Append(indent, "return ", withNewLine: false)
-				.Append(Constants.Logging.LoggerFieldName)
+				.Append(Constants.VariableNames.LoggerFieldName)
 				.Append(".BeginScope(")
 				.Append(stateVarName)
 				.AppendLine(");");
@@ -180,7 +180,7 @@ partial class LoggerGenTargetClassEmitter
 				methodTarget.EventId
 				?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
 			builder
-				.Append(indent, Constants.Logging.LoggerFieldName, withNewLine: false)
+				.Append(indent, Constants.VariableNames.LoggerFieldName, withNewLine: false)
 				.AppendLine(".Log(")
 				// Log level
 				.Append(indent + 1, methodTarget.MSLevel.WithComma(andSpace: false))

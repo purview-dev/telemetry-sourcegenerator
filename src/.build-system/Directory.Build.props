@@ -84,6 +84,11 @@
 		<IsPublishable>false</IsPublishable>
 		<EnableStaticNativeInstrumentation>False</EnableStaticNativeInstrumentation>
 		<EnableDynamicNativeInstrumentation>False</EnableDynamicNativeInstrumentation>
+		<!-- Xunit Defaults -->
+		<MaxParallelThreads>-1</MaxParallelThreads>
+		<ParallelAlgorithm>conservative</ParallelAlgorithm>
+		<ParallelizeAssemblies>true</ParallelizeAssemblies>
+		<ParallelizeTestCollections>true</ParallelizeTestCollections>
 	</PropertyGroup>
 	<!-- Exclude any ncrunch settings and xml comment files. -->
 	<ItemGroup Label="C# File Content Options" Condition="'$(IsCSharpProject)' == 'true'">
@@ -99,8 +104,13 @@
 		<Using Include="Xunit" />
 		<Using Include="NSubstitute" />
 		<Content
-			Include="$(MSBuildThisFileDirectory)xunit/xunit.runner.json"
+			Include="$(MSBuildThisFileDirectory)xunit.runner.json"
 			Link="xunit.runner.json"
+			CopyToOutputDirectory="PreserveNewest"
+		/>
+		<Content
+			Include="$(MSBuildThisFileDirectory)testconfig.json"
+			Link="testconfig.json"
 			CopyToOutputDirectory="PreserveNewest"
 		/>
 		<AssemblyAttribute Include="Xunit.Trait">

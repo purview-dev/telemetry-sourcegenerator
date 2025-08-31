@@ -82,7 +82,7 @@ static class ConstructorEmitter
 		if (generationType.HasFlag(GenerationType.Logging))
 		{
 			builder
-				.Append(indent + 1, Constants.Logging.LoggerFieldName, withNewLine: false)
+				.Append(indent + 1, Constants.VariableNames.LoggerFieldName, withNewLine: false)
 				.Append(" = ")
 				.Append(LoggerParameterName)
 				.AppendLine(';');

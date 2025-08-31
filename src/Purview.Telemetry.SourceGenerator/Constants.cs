@@ -43,7 +43,14 @@ static partial class Constants
 		"Fake.Fake.Fake.Fake.Empty"
 	);
 
-	public static partial class Shared
+	public static class VariableNames
+	{
+		public const string MeterFieldName = "_meter";
+		public const string LoggerFieldName = "_logger";
+		public const string ActivitySourceFieldName = "_activitySource";
+	}
+
+	public static class Shared
 	{
 		public static readonly PurviewTypeInfo TagAttribute = PurviewTypeFactory.Create(
 			"Purview.Telemetry.TagAttribute"
@@ -66,7 +73,7 @@ static partial class Constants
 			PurviewTypeFactory.Create("Purview.Telemetry.ExcludeFromMetricsAttribute");
 	}
 
-	public static partial class DependencyInjection
+	public static class DependencyInjection
 	{
 		public const string DependencyInjectionNamespace =
 			"Microsoft.Extensions.DependencyInjection";

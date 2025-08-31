@@ -80,13 +80,13 @@ partial class LoggerTargetClassEmitter
 				.Append(indent + 1, "return ", withNewLine: false)
 				.Append(methodTarget.LoggerActionFieldName)
 				.Append('(')
-				.Append(Constants.Logging.LoggerFieldName);
+				.Append(Constants.VariableNames.LoggerFieldName);
 		}
 		else
 		{
 			builder
 				.Append(indent + 1, "if (!", withNewLine: false)
-				.Append(Constants.Logging.LoggerFieldName)
+				.Append(Constants.VariableNames.LoggerFieldName)
 				.Append(".IsEnabled(")
 				.Append(methodTarget.MSLevel)
 				.AppendLine("))")
@@ -96,7 +96,7 @@ partial class LoggerTargetClassEmitter
 				.AppendLine()
 				.Append(indent + 1, methodTarget.LoggerActionFieldName, withNewLine: false)
 				.Append('(')
-				.Append(Constants.Logging.LoggerFieldName);
+				.Append(Constants.VariableNames.LoggerFieldName);
 		}
 
 		foreach (var parameter in methodTarget.ParametersSansException)

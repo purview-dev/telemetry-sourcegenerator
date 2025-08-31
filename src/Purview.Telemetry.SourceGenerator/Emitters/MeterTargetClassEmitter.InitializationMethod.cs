@@ -37,7 +37,7 @@ partial class MeterTargetClassEmitter
 
 		builder
 			.Append(indent, "if (", withNewLine: false)
-			.Append(MeterFieldName)
+			.Append(Constants.VariableNames.MeterFieldName)
 			.AppendLine(" != null)")
 			.Append(indent, '{')
 			.Append(indent + 1, "throw new ", withNewLine: false)
@@ -61,7 +61,7 @@ partial class MeterTargetClassEmitter
 			.AppendLine();
 
 		builder
-			.Append(indent, MeterFieldName, withNewLine: false)
+			.Append(indent, Constants.VariableNames.MeterFieldName, withNewLine: false)
 			.Append(" = ")
 			.Append(Constants.Metrics.MeterFactoryParameterName)
 			.Append(".Create(new ")
@@ -121,7 +121,7 @@ partial class MeterTargetClassEmitter
 			builder
 				.Append(indent, method.FieldName, withNewLine: false)
 				.Append(" = ")
-				.Append(MeterFieldName)
+				.Append(Constants.VariableNames.MeterFieldName)
 				.Append(".Create")
 				.Append(method.InstrumentAttribute!.InstrumentType)
 				.Append('<')

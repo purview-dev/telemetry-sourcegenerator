@@ -24,7 +24,7 @@ partial class MeterTargetClassEmitter
 		builder
 			.Append(indent, Constants.Metrics.SystemDiagnostics.Meter, withNewLine: false)
 			.Append(' ')
-			.Append(MeterFieldName)
+			.Append(Constants.VariableNames.MeterFieldName)
 			.AppendLine(" = default!;")
 			.AppendLine();
 

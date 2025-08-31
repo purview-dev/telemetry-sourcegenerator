@@ -26,7 +26,7 @@ partial class LoggerTargetClassEmitter
 			.Append(target.InterfaceType)
 			.Append('>')
 			.Append(' ')
-			.Append(Constants.Logging.LoggerFieldName)
+			.Append(Constants.VariableNames.LoggerFieldName)
 			.Append(';')
 			.AppendLine()
 			.AppendLine();

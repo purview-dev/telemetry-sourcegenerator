@@ -37,7 +37,7 @@ partial class ActivitySourceTargetClassEmitter
 			.Append(indent, "readonly static ", withNewLine: false)
 			.Append(Constants.Activities.SystemDiagnostics.ActivitySource)
 			.Append(' ')
-			.Append(Constants.Activities.ActivitySourceFieldName)
+			.Append(Constants.VariableNames.ActivitySourceFieldName)
 			.Append(" = new(")
 			.Append(activitySourceName!.Wrap())
 			.AppendLine(");")

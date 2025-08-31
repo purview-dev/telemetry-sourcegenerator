@@ -8,7 +8,7 @@
 	"maxParallelThreads": "unlimited",
 	"parallelizeAssembly": true,
 	"parallelizeTestCollections": true,
-	"parallelAlgorithm": "aggressive",
+	"parallelAlgorithm": "conservative",
 	"preEnumerateTheories": true,
 	"showLiveOutput": true
 }

@@ -226,7 +226,7 @@ partial class MeterTargetClassEmitter
 		builder
 			.Append(indent, method.FieldName, withNewLine: false)
 			.Append(" = ")
-			.Append(MeterFieldName)
+			.Append(Constants.VariableNames.MeterFieldName)
 			.Append(".Create")
 			.Append(method.InstrumentAttribute!.InstrumentType)
 			.Append('<')

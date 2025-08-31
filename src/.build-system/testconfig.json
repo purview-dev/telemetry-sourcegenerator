@@ -1,0 +1,17 @@
+﻿{
+	"xUnit": {
+		"culture": "en-GB",
+		"parallelizeTestCollections": true,
+		"maxParallelThreads": -1,
+		"failSkips": false,
+		"failWarns": true,
+		"internalDiagnosticMessages": false,
+		"longRunningTestSeconds": 15,
+		"methodDisplay": "method",
+		"methodDisplayOptions": "all",
+		"parallelAlgorithm": "conservative",
+		"diagnosticMessages": false,
+		"preEnumerateTheories": true,
+		"showLiveOutput": true
+	}
+}

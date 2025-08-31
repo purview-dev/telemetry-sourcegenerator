@@ -14,7 +14,6 @@ static partial class MeterTargetClassEmitter
 			Constants.System.BuiltInTypes.Object.WithNullable()
 		);
 
-	const string MeterFieldName = "_meter";
 	const string PartialMeterTagsMethod = "PopulateMeterTags";
 
 	public static void GenerateImplementation(

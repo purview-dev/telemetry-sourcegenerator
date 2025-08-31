@@ -77,7 +77,7 @@ partial class ActivitySourceTargetClassEmitter
 			.Append("? ")
 			.Append(activityVariableName)
 			.Append(" = ")
-			.Append(Constants.Activities.ActivitySourceFieldName)
+			.Append(Constants.VariableNames.ActivitySourceFieldName)
 			.Append('.');
 
 		var createOnly = methodTarget.ActivityAttribute?.CreateOnly.Value == true;
@@ -217,7 +217,7 @@ partial class ActivitySourceTargetClassEmitter
 		var returnsVoid = methodTarget.ReturnType.SpecialType == SpecialType.System_Void;
 		builder
 			.Append(indent, "if (!", withNewLine: false)
-			.Append(Constants.Activities.ActivitySourceFieldName)
+			.Append(Constants.VariableNames.ActivitySourceFieldName)
 			.AppendLine(".HasListeners())")
 			.Append(indent, '{')
 			.Append(

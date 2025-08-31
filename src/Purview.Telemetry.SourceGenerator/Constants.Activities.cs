@@ -13,7 +13,6 @@ partial class Constants
 		public const string DefaultActivitySourceName = "purview";
 		public const int DefaultActivityKind = 0;
 
-		public const string ActivitySourceFieldName = "_activitySource";
 		public const string ActivityVariableName = "activity";
 
 		public const string ParentIdParameterName = "parentId";

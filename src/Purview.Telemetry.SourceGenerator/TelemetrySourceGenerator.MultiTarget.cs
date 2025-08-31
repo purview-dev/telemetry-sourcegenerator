@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using System.Text;
 using Microsoft.CodeAnalysis;
-using Purview.Telemetry.SourceGenerator.Emitters;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
 using Purview.Telemetry.SourceGenerator.Templates;
@@ -96,7 +95,8 @@ partial class TelemetrySourceGenerator
 		GenerationLogger? logger
 	)
 	{
-		if (methods.Length == 0) return;
+		if (methods.Length == 0)
+			return;
 
 		var firstMethod = methods[0];
 		var containingTypeName = firstMethod.ContainingTypeName;
@@ -118,35 +118,55 @@ partial class TelemetrySourceGenerator
 		}
 
 		// Generate class declaration
-		builder.AppendLine($"partial class {implementationClassName} : {containingTypeName}")
+		builder
+			.AppendLine($"partial class {implementationClassName} : {containingTypeName}")
 			.AppendLine("{");
 
 		indent = 1;
 
 		// Generate fields for telemetry providers
-		var hasActivity = methods.Any(m => m.Configuration.TargetTypes.HasFlag(GenerationType.Activities));
-		var hasLogging = methods.Any(m => m.Configuration.TargetTypes.HasFlag(GenerationType.Logging));
-		var hasMetrics = methods.Any(m => m.Configuration.TargetTypes.HasFlag(GenerationType.Metrics));
+		var hasActivity = methods.Any(m =>
+			m.Configuration.TargetTypes.HasFlag(GenerationType.Activities)
+		);
+		var hasLogging = methods.Any(m =>
+			m.Configuration.TargetTypes.HasFlag(GenerationType.Logging)
+		);
+		var hasMetrics = methods.Any(m =>
+			m.Configuration.TargetTypes.HasFlag(GenerationType.Metrics)
+		);
 
 		if (hasActivity)
 		{
-			builder.AppendLine($"{new string('\t', indent)}private readonly {Constants.Activities.SystemDiagnostics.ActivitySource} _activitySource;");
+			builder.AppendLine(
+				$"{new string('\t', indent)}readonly {Constants.Activities.SystemDiagnostics.ActivitySource} {Constants.VariableNames.ActivitySourceFieldName};"
+			);
 		}
 
 		if (hasLogging)
 		{
-			builder.AppendLine($"{new string('\t', indent)}private readonly {Constants.Logging.MicrosoftExtensions.ILogger} _logger;");
+			builder.AppendLine(
+				$"{new string('\t', indent)}readonly {Constants.Logging.MicrosoftExtensions.ILogger} {Constants.VariableNames.LoggerFieldName};"
+			);
 		}
 
 		if (hasMetrics)
 		{
-			builder.AppendLine($"{new string('\t', indent)}private readonly {Constants.Metrics.SystemDiagnostics.Meter} _meter;");
+			builder.AppendLine(
+				$"{new string('\t', indent)}readonly {Constants.Metrics.SystemDiagnostics.Meter} {Constants.VariableNames.MeterFieldName};"
+			);
 		}
 
 		builder.AppendLine();
 
 		// Generate constructor
-		GenerateConstructor(builder, indent, implementationClassName, hasActivity, hasLogging, hasMetrics);
+		GenerateConstructor(
+			builder,
+			indent,
+			implementationClassName,
+			hasActivity,
+			hasLogging,
+			hasMetrics
+		);
 
 		// Generate methods
 		foreach (var method in methods)
@@ -178,7 +198,12 @@ partial class TelemetrySourceGenerator
 
 		var parameters = new List<string>();
 		if (hasActivity)
-			parameters.Add($"{Constants.Activities.SystemDiagnostics.ActivitySource} activitySource");
+		{
+			parameters.Add(
+				$"{Constants.Activities.SystemDiagnostics.ActivitySource} activitySource"
+			);
+		}
+
 		if (hasLogging)
 			parameters.Add($"{Constants.Logging.MicrosoftExtensions.ILogger} logger");
 		if (hasMetrics)
@@ -189,11 +214,25 @@ partial class TelemetrySourceGenerator
 
 		indent++;
 		if (hasActivity)
-			builder.AppendLine($"{new string('\t', indent)}_activitySource = activitySource;");
+		{
+			builder.AppendLine(
+				$"{new string('\t', indent)}{Constants.VariableNames.ActivitySourceFieldName} = activitySource;"
+			);
+		}
+
 		if (hasLogging)
-			builder.AppendLine($"{new string('\t', indent)}_logger = logger;");
+		{
+			builder.AppendLine(
+				$"{new string('\t', indent)}{Constants.VariableNames.LoggerFieldName} = logger;"
+			);
+		}
+
 		if (hasMetrics)
-			builder.AppendLine($"{new string('\t', indent)}_meter = meter;");
+		{
+			builder.AppendLine(
+				$"{new string('\t', indent)}{Constants.VariableNames.MeterFieldName} = meter;"
+			);
+		}
 
 		indent--;
 		builder.AppendLine($"{new string('\t', indent)}}}").AppendLine();
@@ -211,10 +250,11 @@ partial class TelemetrySourceGenerator
 
 		// Generate method signature
 		var returnType = method.MethodSymbol.ReturnType.ToDisplayString();
-		var parameters = string.Join(", ", method.Parameters.Select(p => 
-			$"{p.TypeName} {p.Name}"));
+		var parameters = string.Join(", ", method.Parameters.Select(p => $"{p.TypeName} {p.Name}"));
 
-		builder.AppendLine($"{new string('\t', indent)}public {returnType} {method.MethodName}({parameters})");
+		builder.AppendLine(
+			$"{new string('\t', indent)}public {returnType} {method.MethodName}({parameters})"
+		);
 		builder.AppendLine($"{new string('\t', indent)}{{");
 
 		indent++;
@@ -261,69 +301,99 @@ partial class TelemetrySourceGenerator
 		}
 	}
 
-	static void GenerateActivityMethodCall(StringBuilder builder, int indent, MultiTargetMethod method)
+	static void GenerateActivityMethodCall(
+		StringBuilder builder,
+		int indent,
+		MultiTargetMethod method
+	)
 	{
-		var activityParams = method.Parameters
-			.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Activities))
+		var activityParams = method
+			.Parameters.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Activities))
 			.Select(p => p.Name);
 
-		builder.AppendLine($"{new string('\t', indent)}{method.MethodName}_Activity({string.Join(", ", activityParams)});");
+		builder.AppendLine(
+			$"{new string('\t', indent)}{method.MethodName}_Activity({string.Join(", ", activityParams)});"
+		);
 	}
 
-	static void GenerateLoggingMethodCall(StringBuilder builder, int indent, MultiTargetMethod method)
+	static void GenerateLoggingMethodCall(
+		StringBuilder builder,
+		int indent,
+		MultiTargetMethod method
+	)
 	{
-		var loggingParams = method.Parameters
-			.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Logging))
+		var loggingParams = method
+			.Parameters.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Logging))
 			.Select(p => p.Name);
 
-		builder.AppendLine($"{new string('\t', indent)}{method.MethodName}_Logging({string.Join(", ", loggingParams)});");
+		builder.AppendLine(
+			$"{new string('\t', indent)}{method.MethodName}_Logging({string.Join(", ", loggingParams)});"
+		);
 	}
 
-	static void GenerateMetricsMethodCall(StringBuilder builder, int indent, MultiTargetMethod method)
+	static void GenerateMetricsMethodCall(
+		StringBuilder builder,
+		int indent,
+		MultiTargetMethod method
+	)
 	{
-		var metricsParams = method.Parameters
-			.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Metrics))
+		var metricsParams = method
+			.Parameters.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Metrics))
 			.Select(p => p.Name);
 
-		builder.AppendLine($"{new string('\t', indent)}{method.MethodName}_Metrics({string.Join(", ", metricsParams)});");
+		builder.AppendLine(
+			$"{new string('\t', indent)}{method.MethodName}_Metrics({string.Join(", ", metricsParams)});"
+		);
 	}
 
 	static void GenerateActivityMethod(StringBuilder builder, int indent, MultiTargetMethod method)
 	{
-		var activityParams = method.Parameters
-			.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Activities))
+		var activityParams = method
+			.Parameters.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Activities))
 			.Select(p => $"{p.TypeName} {p.Name}");
 
-		builder.AppendLine($"{new string('\t', indent)}private void {method.MethodName}_Activity({string.Join(", ", activityParams)})");
+		builder.AppendLine(
+			$"{new string('\t', indent)}private void {method.MethodName}_Activity({string.Join(", ", activityParams)})"
+		);
 		builder.AppendLine($"{new string('\t', indent)}{{");
 		builder.AppendLine($"{new string('\t', indent + 1)}// Activity telemetry generation");
-		builder.AppendLine($"{new string('\t', indent + 1)}// TODO: Implement activity generation logic");
+		builder.AppendLine(
+			$"{new string('\t', indent + 1)}// TODO: Implement activity generation logic"
+		);
 		builder.AppendLine($"{new string('\t', indent)}}}").AppendLine();
 	}
 
 	static void GenerateLoggingMethod(StringBuilder builder, int indent, MultiTargetMethod method)
 	{
-		var loggingParams = method.Parameters
-			.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Logging))
+		var loggingParams = method
+			.Parameters.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Logging))
 			.Select(p => $"{p.TypeName} {p.Name}");
 
-		builder.AppendLine($"{new string('\t', indent)}private void {method.MethodName}_Logging({string.Join(", ", loggingParams)})");
+		builder.AppendLine(
+			$"{new string('\t', indent)}private void {method.MethodName}_Logging({string.Join(", ", loggingParams)})"
+		);
 		builder.AppendLine($"{new string('\t', indent)}{{");
 		builder.AppendLine($"{new string('\t', indent + 1)}// Logging telemetry generation");
-		builder.AppendLine($"{new string('\t', indent + 1)}// TODO: Implement logging generation logic");
+		builder.AppendLine(
+			$"{new string('\t', indent + 1)}// TODO: Implement logging generation logic"
+		);
 		builder.AppendLine($"{new string('\t', indent)}}}").AppendLine();
 	}
 
 	static void GenerateMetricsMethod(StringBuilder builder, int indent, MultiTargetMethod method)
 	{
-		var metricsParams = method.Parameters
-			.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Metrics))
+		var metricsParams = method
+			.Parameters.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Metrics))
 			.Select(p => $"{p.TypeName} {p.Name}");
 
-		builder.AppendLine($"{new string('\t', indent)}private void {method.MethodName}_Metrics({string.Join(", ", metricsParams)})");
+		builder.AppendLine(
+			$"{new string('\t', indent)}private void {method.MethodName}_Metrics({string.Join(", ", metricsParams)})"
+		);
 		builder.AppendLine($"{new string('\t', indent)}{{");
 		builder.AppendLine($"{new string('\t', indent + 1)}// Metrics telemetry generation");
-		builder.AppendLine($"{new string('\t', indent + 1)}// TODO: Implement metrics generation logic");
+		builder.AppendLine(
+			$"{new string('\t', indent + 1)}// TODO: Implement metrics generation logic"
+		);
 		builder.AppendLine($"{new string('\t', indent)}}}").AppendLine();
 	}
 }

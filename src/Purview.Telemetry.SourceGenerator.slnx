@@ -11,6 +11,8 @@
     <File Path=".build-system/BuildVariables.props" />
     <File Path=".build-system/Directory.Build.props" />
     <File Path=".build-system/Directory.Build.targets" />
+    <File Path=".build-system/testconfig.json" />
+    <File Path=".build-system/xunit.runner.json" />
   </Folder>
   <Project Path="Purview.Telemetry.SourceGenerator.IntegrationTests/Purview.Telemetry.SourceGenerator.IntegrationTests.csproj" />
   <Project Path="Purview.Telemetry.SourceGenerator/Purview.Telemetry.SourceGenerator.csproj" />
