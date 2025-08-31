@@ -193,3 +193,6 @@ nCrunchTemp_*.csproj
 /.artifacts
 
 node_modules/
+
+/.nuget
+NuGet.config

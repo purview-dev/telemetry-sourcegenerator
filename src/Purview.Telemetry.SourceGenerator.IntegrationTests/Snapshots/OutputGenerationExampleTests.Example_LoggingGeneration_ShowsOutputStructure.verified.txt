@@ -1,0 +1,17 @@
+﻿{
+  Diagnostics: [
+    {
+      Message: Scoped log entries do not support having a log level set.,
+      Severity: Warning,
+      WarningLevel: 1,
+      Descriptor: {
+        Id: TSG2007,
+        Title: A scoped log shouldn't have a LogLevel, this will be ignored.,
+        MessageFormat: Scoped log entries do not support having a log level set.,
+        Category: Logging.Usage,
+        DefaultSeverity: Warning,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}

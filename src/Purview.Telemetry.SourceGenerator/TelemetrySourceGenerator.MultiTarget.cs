@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
-using System.Text;
 using Microsoft.CodeAnalysis;
+using Purview.Telemetry.SourceGenerator.Emitters;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
 using Purview.Telemetry.SourceGenerator.Templates;
@@ -14,11 +14,11 @@ partial class TelemetrySourceGenerator
 		GenerationLogger? logger
 	)
 	{
-		// Transform for multi-target methods
+		// Transform for multi-target interfaces
 		Func<
 			GeneratorAttributeSyntaxContext,
 			CancellationToken,
-			MultiTargetMethod?
+			MultiTargetInterface?
 		> multiTargetTransform =
 			logger == null
 				? static (context, cancellationToken) =>
@@ -26,10 +26,10 @@ partial class TelemetrySourceGenerator
 				: (context, cancellationToken) =>
 					PipelineHelpers.BuildMultiTargetTransform(context, logger, cancellationToken);
 
-		// Register for methods with TelemetryAttribute
-		var multiTargetMethodsPredicate = context
+		// Register for interfaces with TelemetryGenerationAttribute
+		var multiTargetInterfacesPredicate = context
 			.SyntaxProvider.ForAttributeWithMetadataName(
-				Constants.Shared.TelemetryAttribute.FullyQualifiedName,
+				Constants.Shared.TelemetryGenerationAttribute.FullyQualifiedName,
 				static (node, token) => PipelineHelpers.HasMultiTargetAttribute(node, token),
 				multiTargetTransform
 			)
@@ -39,46 +39,41 @@ partial class TelemetrySourceGenerator
 		// Build generation action
 		Action<
 			SourceProductionContext,
-			(Compilation Compilation, ImmutableArray<MultiTargetMethod?> Methods)
+			(Compilation Compilation, ImmutableArray<MultiTargetInterface?> Interfaces)
 		> generationMultiTargetAction =
 			logger == null
-				? static (spc, source) => GenerateMultiTargetMethods(source.Methods, spc, null)
-				: (spc, source) => GenerateMultiTargetMethods(source.Methods, spc, logger);
+				? static (spc, source) => GenerateMultiTargetInterfaces(source.Interfaces, spc, null)
+				: (spc, source) => GenerateMultiTargetInterfaces(source.Interfaces, spc, logger);
 
 		// Register with the source generator
-		var multiTargetMethods = context.CompilationProvider.Combine(
-			multiTargetMethodsPredicate.Collect()
+		var multiTargetInterfaces = context.CompilationProvider.Combine(
+			multiTargetInterfacesPredicate.Collect()
 		);
 
-		context.RegisterImplementationSourceOutput(multiTargetMethods, generationMultiTargetAction);
+		context.RegisterImplementationSourceOutput(multiTargetInterfaces, generationMultiTargetAction);
 	}
 
-	static void GenerateMultiTargetMethods(
-		ImmutableArray<MultiTargetMethod?> methods,
+	static void GenerateMultiTargetInterfaces(
+		ImmutableArray<MultiTargetInterface?> interfaces,
 		SourceProductionContext context,
 		GenerationLogger? logger
 	)
 	{
-		var filteredMethods = methods.Where(m => m != null).Cast<MultiTargetMethod>().ToArray();
+		var filteredInterfaces = interfaces.Where(i => i != null).Cast<MultiTargetInterface>().ToArray();
 
-		if (filteredMethods.Length == 0)
+		if (filteredInterfaces.Length == 0)
 			return;
 
-		// Group methods by containing type to generate one implementation class per interface
-		var methodsByType = filteredMethods
-			.GroupBy(m => new { m.ContainingTypeName, m.Namespace })
-			.ToArray();
-
-		foreach (var typeGroup in methodsByType)
+		foreach (var targetInterface in filteredInterfaces)
 		{
 			try
 			{
-				GenerateMultiTargetImplementation(typeGroup.ToArray(), context, logger);
+				MultiTargetClassEmitter.GenerateImplementation(targetInterface, context, logger);
 			}
 			catch (Exception ex)
 			{
 				logger?.Error(
-					$"Error generating multi-target implementation for {typeGroup.Key.ContainingTypeName}: {ex.Message}"
+					$"Error generating multi-target implementation for {targetInterface.InterfaceName}: {ex.Message}"
 				);
 				TelemetryDiagnostics.Report(
 					context.ReportDiagnostic,
@@ -87,313 +82,5 @@ partial class TelemetrySourceGenerator
 				);
 			}
 		}
-	}
-
-	static void GenerateMultiTargetImplementation(
-		MultiTargetMethod[] methods,
-		SourceProductionContext context,
-		GenerationLogger? logger
-	)
-	{
-		if (methods.Length == 0)
-			return;
-
-		var firstMethod = methods[0];
-		var containingTypeName = firstMethod.ContainingTypeName;
-		var namespaceName = firstMethod.Namespace;
-		var implementationClassName = containingTypeName.Replace("I", "") + "Implementation";
-
-		logger?.Debug($"Generating multi-target implementation for: {containingTypeName}");
-
-		StringBuilder builder = new();
-		var indent = 0;
-
-		// Generate file header
-		EmbeddedResources.Instance.AddHeader(builder);
-
-		// Generate namespace
-		if (!string.IsNullOrEmpty(namespaceName))
-		{
-			builder.AppendLine($"namespace {namespaceName};").AppendLine();
-		}
-
-		// Generate class declaration
-		builder
-			.AppendLine($"partial class {implementationClassName} : {containingTypeName}")
-			.AppendLine("{");
-
-		indent = 1;
-
-		// Generate fields for telemetry providers
-		var hasActivity = methods.Any(m =>
-			m.Configuration.TargetTypes.HasFlag(GenerationType.Activities)
-		);
-		var hasLogging = methods.Any(m =>
-			m.Configuration.TargetTypes.HasFlag(GenerationType.Logging)
-		);
-		var hasMetrics = methods.Any(m =>
-			m.Configuration.TargetTypes.HasFlag(GenerationType.Metrics)
-		);
-
-		if (hasActivity)
-		{
-			builder.AppendLine(
-				$"{new string('\t', indent)}readonly {Constants.Activities.SystemDiagnostics.ActivitySource} {Constants.VariableNames.ActivitySourceFieldName};"
-			);
-		}
-
-		if (hasLogging)
-		{
-			builder.AppendLine(
-				$"{new string('\t', indent)}readonly {Constants.Logging.MicrosoftExtensions.ILogger} {Constants.VariableNames.LoggerFieldName};"
-			);
-		}
-
-		if (hasMetrics)
-		{
-			builder.AppendLine(
-				$"{new string('\t', indent)}readonly {Constants.Metrics.SystemDiagnostics.Meter} {Constants.VariableNames.MeterFieldName};"
-			);
-		}
-
-		builder.AppendLine();
-
-		// Generate constructor
-		GenerateConstructor(
-			builder,
-			indent,
-			implementationClassName,
-			hasActivity,
-			hasLogging,
-			hasMetrics
-		);
-
-		// Generate methods
-		foreach (var method in methods)
-		{
-			GenerateMultiTargetMethod(builder, indent, method, context, logger);
-		}
-
-		// Close class
-		builder.AppendLine("}");
-
-		// Write source
-		var hintName = $"{namespaceName}.{implementationClassName}.MultiTarget.g.cs";
-		context.AddSource(
-			hintName,
-			Microsoft.CodeAnalysis.Text.SourceText.From(builder.ToString(), Encoding.UTF8)
-		);
-	}
-
-	static void GenerateConstructor(
-		StringBuilder builder,
-		int indent,
-		string className,
-		bool hasActivity,
-		bool hasLogging,
-		bool hasMetrics
-	)
-	{
-		builder.Append($"{new string('\t', indent)}public {className}(");
-
-		var parameters = new List<string>();
-		if (hasActivity)
-		{
-			parameters.Add(
-				$"{Constants.Activities.SystemDiagnostics.ActivitySource} activitySource"
-			);
-		}
-
-		if (hasLogging)
-			parameters.Add($"{Constants.Logging.MicrosoftExtensions.ILogger} logger");
-		if (hasMetrics)
-			parameters.Add($"{Constants.Metrics.SystemDiagnostics.Meter} meter");
-
-		builder.AppendLine(string.Join(", ", parameters) + ")");
-		builder.AppendLine($"{new string('\t', indent)}{{");
-
-		indent++;
-		if (hasActivity)
-		{
-			builder.AppendLine(
-				$"{new string('\t', indent)}{Constants.VariableNames.ActivitySourceFieldName} = activitySource;"
-			);
-		}
-
-		if (hasLogging)
-		{
-			builder.AppendLine(
-				$"{new string('\t', indent)}{Constants.VariableNames.LoggerFieldName} = logger;"
-			);
-		}
-
-		if (hasMetrics)
-		{
-			builder.AppendLine(
-				$"{new string('\t', indent)}{Constants.VariableNames.MeterFieldName} = meter;"
-			);
-		}
-
-		indent--;
-		builder.AppendLine($"{new string('\t', indent)}}}").AppendLine();
-	}
-
-	static void GenerateMultiTargetMethod(
-		StringBuilder builder,
-		int indent,
-		MultiTargetMethod method,
-		SourceProductionContext context,
-		GenerationLogger? logger
-	)
-	{
-		logger?.Debug($"Generating multi-target method: {method.MethodName}");
-
-		// Generate method signature
-		var returnType = method.MethodSymbol.ReturnType.ToDisplayString();
-		var parameters = string.Join(", ", method.Parameters.Select(p => $"{p.TypeName} {p.Name}"));
-
-		builder.AppendLine(
-			$"{new string('\t', indent)}public {returnType} {method.MethodName}({parameters})"
-		);
-		builder.AppendLine($"{new string('\t', indent)}{{");
-
-		indent++;
-
-		// Call target methods for each enabled telemetry type
-		if (method.Configuration.TargetTypes.HasFlag(GenerationType.Activities))
-		{
-			GenerateActivityMethodCall(builder, indent, method);
-		}
-
-		if (method.Configuration.TargetTypes.HasFlag(GenerationType.Logging))
-		{
-			GenerateLoggingMethodCall(builder, indent, method);
-		}
-
-		if (method.Configuration.TargetTypes.HasFlag(GenerationType.Metrics))
-		{
-			GenerateMetricsMethodCall(builder, indent, method);
-		}
-
-		// Return default if needed
-		if (returnType != "void")
-		{
-			builder.AppendLine($"{new string('\t', indent)}return default;");
-		}
-
-		indent--;
-		builder.AppendLine($"{new string('\t', indent)}}}").AppendLine();
-
-		// Generate private target methods
-		if (method.Configuration.TargetTypes.HasFlag(GenerationType.Activities))
-		{
-			GenerateActivityMethod(builder, indent, method);
-		}
-
-		if (method.Configuration.TargetTypes.HasFlag(GenerationType.Logging))
-		{
-			GenerateLoggingMethod(builder, indent, method);
-		}
-
-		if (method.Configuration.TargetTypes.HasFlag(GenerationType.Metrics))
-		{
-			GenerateMetricsMethod(builder, indent, method);
-		}
-	}
-
-	static void GenerateActivityMethodCall(
-		StringBuilder builder,
-		int indent,
-		MultiTargetMethod method
-	)
-	{
-		var activityParams = method
-			.Parameters.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Activities))
-			.Select(p => p.Name);
-
-		builder.AppendLine(
-			$"{new string('\t', indent)}{method.MethodName}_Activity({string.Join(", ", activityParams)});"
-		);
-	}
-
-	static void GenerateLoggingMethodCall(
-		StringBuilder builder,
-		int indent,
-		MultiTargetMethod method
-	)
-	{
-		var loggingParams = method
-			.Parameters.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Logging))
-			.Select(p => p.Name);
-
-		builder.AppendLine(
-			$"{new string('\t', indent)}{method.MethodName}_Logging({string.Join(", ", loggingParams)});"
-		);
-	}
-
-	static void GenerateMetricsMethodCall(
-		StringBuilder builder,
-		int indent,
-		MultiTargetMethod method
-	)
-	{
-		var metricsParams = method
-			.Parameters.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Metrics))
-			.Select(p => p.Name);
-
-		builder.AppendLine(
-			$"{new string('\t', indent)}{method.MethodName}_Metrics({string.Join(", ", metricsParams)});"
-		);
-	}
-
-	static void GenerateActivityMethod(StringBuilder builder, int indent, MultiTargetMethod method)
-	{
-		var activityParams = method
-			.Parameters.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Activities))
-			.Select(p => $"{p.TypeName} {p.Name}");
-
-		builder.AppendLine(
-			$"{new string('\t', indent)}private void {method.MethodName}_Activity({string.Join(", ", activityParams)})"
-		);
-		builder.AppendLine($"{new string('\t', indent)}{{");
-		builder.AppendLine($"{new string('\t', indent + 1)}// Activity telemetry generation");
-		builder.AppendLine(
-			$"{new string('\t', indent + 1)}// TODO: Implement activity generation logic"
-		);
-		builder.AppendLine($"{new string('\t', indent)}}}").AppendLine();
-	}
-
-	static void GenerateLoggingMethod(StringBuilder builder, int indent, MultiTargetMethod method)
-	{
-		var loggingParams = method
-			.Parameters.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Logging))
-			.Select(p => $"{p.TypeName} {p.Name}");
-
-		builder.AppendLine(
-			$"{new string('\t', indent)}private void {method.MethodName}_Logging({string.Join(", ", loggingParams)})"
-		);
-		builder.AppendLine($"{new string('\t', indent)}{{");
-		builder.AppendLine($"{new string('\t', indent + 1)}// Logging telemetry generation");
-		builder.AppendLine(
-			$"{new string('\t', indent + 1)}// TODO: Implement logging generation logic"
-		);
-		builder.AppendLine($"{new string('\t', indent)}}}").AppendLine();
-	}
-
-	static void GenerateMetricsMethod(StringBuilder builder, int indent, MultiTargetMethod method)
-	{
-		var metricsParams = method
-			.Parameters.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Metrics))
-			.Select(p => $"{p.TypeName} {p.Name}");
-
-		builder.AppendLine(
-			$"{new string('\t', indent)}private void {method.MethodName}_Metrics({string.Join(", ", metricsParams)})"
-		);
-		builder.AppendLine($"{new string('\t', indent)}{{");
-		builder.AppendLine($"{new string('\t', indent + 1)}// Metrics telemetry generation");
-		builder.AppendLine(
-			$"{new string('\t', indent + 1)}// TODO: Implement metrics generation logic"
-		);
-		builder.AppendLine($"{new string('\t', indent)}}}").AppendLine();
 	}
 }

@@ -26,7 +26,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+		<!-- Removed Microsoft.CodeAnalysis.Analyzers to avoid build issues in containerized environments -->
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="kjldev-logo.png" Pack="true" PackagePath="" />

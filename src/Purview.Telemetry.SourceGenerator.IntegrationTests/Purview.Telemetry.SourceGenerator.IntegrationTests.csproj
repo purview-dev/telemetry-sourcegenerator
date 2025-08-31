@@ -12,6 +12,7 @@
 	<ItemGroup>
 		<Using Include="Microsoft.CodeAnalysis" />
 		<Using Include="System.Collections.Immutable" />
+		<Using Include="Shouldly" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
@@ -21,5 +22,11 @@
 		<PackageReference Include="Verify.DiffPlex" />
 		<PackageReference Include="Verify.SourceGenerators" />
 		<PackageReference Include="Verify.Xunitv3" />
+		<PackageReference Include="System.Text.Json" />
+		<PackageReference Include="Shouldly" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="TEST-OUTPUT-GUIDE.md" />
+		<None Include=".gitignore-additions" />
 	</ItemGroup>
 </Project>

@@ -1,0 +1,8 @@
+# Generated test output (optional debugging files)
+# These files are generated when PURVIEW_TELEMETRY_OUTPUT_GENERATED_FILES=true
+generated-output/
+**/generated-output/
+
+# Custom output directory (if PURVIEW_TELEMETRY_OUTPUT_DIRECTORY is set)
+test-output/
+**/test-output/

@@ -3,6 +3,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Purview.Telemetry.SourceGenerator.BuildTools;
 using Purview.Telemetry.SourceGenerator.Helpers;
+using Purview.Telemetry.SourceGenerator.Configuration;
+using System.Runtime.CompilerServices;
 
 namespace Purview.Telemetry.SourceGenerator;
 
@@ -162,7 +164,8 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 		bool disableDependencyInjection = true,
 		bool autoIncludeUsingStatements = true,
 		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
-		bool debugLog = true
+		bool debugLog = true,
+		[CallerMemberName] string? testName = null
 	)
 	{
 		return await GenerateAsync(
@@ -172,7 +175,8 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 			projectModifier,
 			disableDependencyInjection,
 			includeLoggerTypes,
-			debugLog
+			debugLog,
+			testName
 		);
 	}
 
@@ -183,7 +187,8 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 		Func<Project, Project>? projectModifier = null,
 		bool disableDependencyInjection = true,
 		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
-		bool debugLog = true
+		bool debugLog = true,
+		[CallerMemberName] string? testName = null
 	)
 	{
 		return await GenerateAsync(
@@ -193,7 +198,8 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 			projectModifier,
 			disableDependencyInjection,
 			includeLoggerTypes,
-			debugLog
+			debugLog,
+			testName
 		);
 	}
 
@@ -204,7 +210,8 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 		Func<Project, Project>? projectModifier = null,
 		bool disableDependencyInjection = true,
 		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
-		bool debugLog = true
+		bool debugLog = true,
+		[CallerMemberName] string? testName = null
 	)
 	{
 		List<string> preprocessorSymbols = [];
@@ -278,7 +285,15 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 
 		runResult.Results.Where(m => m.Exception != null).Select(m => m.Exception).ShouldBeEmpty();
 
-		return new(runResult, diagnostics, outputCompilation);
+		var generationResult = new GenerationResult(runResult, diagnostics, outputCompilation);
+
+		// Write generated content to output directory if enabled
+		if (!string.IsNullOrEmpty(testName))
+		{
+			TestOutputWriter.WriteGeneratedContent(generationResult, testName);
+		}
+
+		return generationResult;
 	}
 
 	static void GuardGenerator(object generator)
