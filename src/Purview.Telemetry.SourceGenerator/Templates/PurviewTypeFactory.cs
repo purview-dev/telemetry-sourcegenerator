@@ -6,10 +6,10 @@ namespace Purview.Telemetry.SourceGenerator.Templates;
 
 static class PurviewTypeFactory
 {
-	internal static readonly Lazy<ImmutableDictionary<SpecialType, string>> AliasMap = new(
+	public static readonly Lazy<ImmutableDictionary<SpecialType, string>> AliasMap = new(
 		CreateAliasMap
 	);
-	internal static readonly Lazy<ImmutableDictionary<Type, SpecialType>> TypeMap = new(
+	public static readonly Lazy<ImmutableDictionary<Type, SpecialType>> TypeMap = new(
 		CreateTypeMap
 	);
 
