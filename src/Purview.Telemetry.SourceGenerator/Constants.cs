@@ -31,7 +31,13 @@ static partial class Constants
 	);
 
 	public static string[] GetEmbeddedFileNames() =>
-		["ActivityTypes", "LoggingTypes", "MetricTypes", "SharedTypes"];
+		[
+			"ActivityTypes",
+			"LoggingTypes",
+			"MetricTypes",
+			"SharedTypes",
+			"MultiTargetGenerationTypes",
+		];
 
 	public static readonly PurviewTypeInfo Empty = PurviewTypeFactory.Create(
 		"Fake.Fake.Fake.Fake.Empty"

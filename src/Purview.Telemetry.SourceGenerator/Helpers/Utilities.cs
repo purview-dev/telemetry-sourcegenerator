@@ -143,11 +143,8 @@ static partial class Utilities
 		if (potentialNamespaceParent is BaseNamespaceDeclarationSyntax namespaceParent)
 		{
 			var @namespace = namespaceParent.Name.ToString();
-			while (true)
+			while (namespaceParent.Parent is NamespaceDeclarationSyntax namespaceParentParent)
 			{
-				if (namespaceParent.Parent is not NamespaceDeclarationSyntax namespaceParentParent)
-					break;
-
 				namespaceParent = namespaceParentParent;
 				@namespace = $"{namespaceParent.Name}.{@namespace}";
 			}
@@ -181,7 +178,9 @@ static partial class Utilities
 				fullNamespace += ".";
 		}
 		else if (includeTrailingSeparator && fullNamespace != null)
+		{
 			fullNamespace += ".";
+		}
 
 		return fullNamespace;
 	}

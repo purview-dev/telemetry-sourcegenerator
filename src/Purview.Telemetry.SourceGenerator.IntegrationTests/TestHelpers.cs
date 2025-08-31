@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -13,32 +12,9 @@ static partial class TestHelpers
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
 	};
 
-	static readonly Assembly OwnerAssembly = typeof(TestHelpers).Assembly;
-	static readonly string NamespaceRoot = typeof(TestHelpers).Namespace!;
-
 	public const string DefaultUsingSet =
 		@"using System;
 using Purview.Telemetry;";
-
-	public static string Wrap(this string value, char c = '"') => c + value + c;
-
-	public static string LoadEmbeddedResource(string folder, string resourceName)
-	{
-		resourceName = $"{NamespaceRoot}.Resources.{folder}.{resourceName}";
-
-		var resourceStream = OwnerAssembly.GetManifestResourceStream(resourceName);
-		if (resourceStream is null)
-		{
-			var existingResources = OwnerAssembly.GetManifestResourceNames();
-			throw new ArgumentException(
-				$"Could not find embedded resource {resourceName}. Available resource names: {string.Join(", ", existingResources)}"
-			);
-		}
-
-		using StreamReader reader = new(resourceStream, Encoding.UTF8);
-
-		return reader.ReadToEnd();
-	}
 
 	public static List<string> GetCasePermutations(string input)
 	{
@@ -153,7 +129,7 @@ using Purview.Telemetry;";
 	)
 	{
 		var verifierTask = Verifier
-			.Verify(generationResult.Result)
+			.Verify(generationResult.DriverResult)
 			.UseDirectory("Snapshots")
 			.DisableRequireUniquePrefix()
 			.DisableDateCounting()
@@ -165,9 +141,14 @@ using Purview.Telemetry;";
 				{
 					foreach (var template in Constants.GetEmbeddedFileNames())
 					{
-						var potentialName = $"#{template}.g.cs";
-						if (file.IndexOf(potentialName, StringComparison.Ordinal) > -1)
+						var potentialName = $"#{template}.g";
+						if (
+							file.IndexOf(potentialName, StringComparison.Ordinal) > -1
+							&& file.EndsWith(".cs", StringComparison.Ordinal)
+						)
+						{
 							return true;
+						}
 					}
 				}
 
@@ -175,9 +156,11 @@ using Purview.Telemetry;";
 			});
 
 		if (parameters.Length > 0)
+		{
 			verifierTask = verifierTask.UseTextForParameters(
 				ComputeParameterFilenameHash(parameters)
 			);
+		}
 
 		config?.Invoke(verifierTask);
 
@@ -208,7 +191,7 @@ using Purview.Telemetry;";
 					string.Join(
 						Environment.NewLine,
 						result.Diagnostics.Select(d =>
-							d.ToString()
+							d
 							+ Environment.NewLine
 							+ "-----------------------------------------------------"
 						)

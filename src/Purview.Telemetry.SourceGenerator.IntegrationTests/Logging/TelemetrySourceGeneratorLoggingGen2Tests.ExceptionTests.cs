@@ -6,16 +6,16 @@ partial class TelemetrySourceGeneratorLoggingGen2Tests
 	public async Task Generate_GivenMethodWithNonSpecificException_UsesExceptionParameter()
 	{
 		// Arrange
-		var basicLogger =
-			@$"
+		const string basicLogger =
+			@"
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
 [Logger]
-public interface ITestLogger {{
+public interface ITestLogger {
 	void LogEntryWithCustomExceptionType(NullReferenceException nrf);
-}}
+}
 ";
 
 		// Act
@@ -32,18 +32,18 @@ public interface ITestLogger {{
 	public async Task Generate_GivenMethodWithCustomException_UsesExceptionParameter()
 	{
 		// Arrange
-		var basicLogger =
-			@$"
+		const string basicLogger =
+			@"
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
 [Logger]
-public interface ITestLogger {{
+public interface ITestLogger {
 	void LogEntryWithCustomExceptionType(BadLuckException custom);
-}}
+}
 
-public class BadLuckException : Exception {{ }}
+public class BadLuckException : Exception { }
 ";
 
 		// Act
@@ -60,18 +60,18 @@ public class BadLuckException : Exception {{ }}
 	public async Task Generate_GivenMethodWithMultipleExceptionParameters_GeneratesEntry()
 	{
 		// Arrange
-		var basicLogger =
-			@$"
+		const string basicLogger =
+			@"
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
 [Logger]
-public interface ITestLogger {{
+public interface ITestLogger {
 	void LogEntryWithMoreThanSixParams(int one, int two, int three, int four, int five, BadLuckException six, InvalidOperationException seven, ArgumentException eight, Exception nine, Exception? ten, Exception eleven);
-}}
+}
 
-public class BadLuckException : Exception {{ }}
+public class BadLuckException : Exception { }
 ";
 
 		// Act

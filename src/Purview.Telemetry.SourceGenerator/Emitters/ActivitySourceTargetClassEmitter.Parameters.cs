@@ -161,7 +161,9 @@ partial class ActivitySourceTargetClassEmitter
 			return false;
 		}
 		else
+		{
 			activityParam = activityParams.FirstOrDefault();
+		}
 
 		if (parentContextOrIdParams.Length > 1)
 		{
@@ -178,7 +180,9 @@ partial class ActivitySourceTargetClassEmitter
 			return false;
 		}
 		else
+		{
 			parentContextOrId = parentContextOrIdParams.FirstOrDefault();
+		}
 
 		if (tagsParams.Length > 1)
 		{
@@ -195,7 +199,9 @@ partial class ActivitySourceTargetClassEmitter
 			return false;
 		}
 		else
+		{
 			tagsParam = tagsParams.FirstOrDefault();
+		}
 
 		if (linksParams.Length > 1)
 		{
@@ -214,7 +220,9 @@ partial class ActivitySourceTargetClassEmitter
 			return false;
 		}
 		else
+		{
 			linksParam = linksParams.FirstOrDefault();
+		}
 
 		if (escapeParams.Length > 1)
 		{

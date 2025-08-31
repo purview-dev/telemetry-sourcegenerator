@@ -85,7 +85,9 @@ partial class PipelineHelpers
 			var assemblyName = context.SemanticModel.Compilation.AssemblyName?.ToLowerInvariant();
 #pragma warning restore CA1308 // Normalize strings to uppercase
 			if (!string.IsNullOrWhiteSpace(assemblyName))
+			{
 				activitySourceName = assemblyName;
+			}
 		}
 
 		var fullNamespace = Utilities.GetFullNamespace(interfaceDeclaration, true);
@@ -112,8 +114,8 @@ partial class PipelineHelpers
 			InterfaceType: PurviewTypeFactory.Create(interfaceSymbol),
 			ActivitySourceGenerationAttribute: activitySourceGenerationAttribute,
 			ActivitySourceName: activitySourceName,
-			ActivityTargetAttributeRecord: activitySourceAttribute,
 			ActivityMethods: activityMethods,
+			ActivityTargetAttributeRecord: activitySourceAttribute,
 			InterfaceLocation: interfaceDeclaration.GetLocation(),
 			DuplicateMethods: BuildDuplicateMethods(interfaceSymbol, semanticModel, token),
 			Failures: methodDiagnostics?.ToImmutableArray()
@@ -187,7 +189,9 @@ partial class PipelineHelpers
 					: eventAttribute?.Name.Value;
 
 			if (string.IsNullOrWhiteSpace(activityOrEventName))
+			{
 				activityOrEventName = method.Name;
+			}
 
 			logger?.Debug($"Found {methodType} method {interfaceSymbol.Name}.{method.Name}.");
 
@@ -298,7 +302,9 @@ partial class PipelineHelpers
 				destination = ActivityParameterDestination.StatusDescription;
 			}
 			else if (Constants.Activities.SystemDiagnostics.Activity.Equals(parameterType))
+			{
 				destination = ActivityParameterDestination.Activity;
+			}
 			else if (
 				Constants.Activities.SystemDiagnostics.ActivityTagsCollection.Equals(parameterType)
 				|| Constants.Activities.SystemDiagnostics.ActivityTagIEnumerable.Equals(
@@ -306,7 +312,9 @@ partial class PipelineHelpers
 				)
 				|| Constants.System.TagList.Equals(parameterType)
 			)
+			{
 				destination = ActivityParameterDestination.TagsEnumerable;
+			}
 			else if (
 				Constants.Activities.SystemDiagnostics.ActivityContext.Equals(parameterType)
 				|| (
@@ -314,29 +322,39 @@ partial class PipelineHelpers
 					&& parameterType.SpecialType == SpecialType.System_String
 				)
 			)
+			{
 				destination = ActivityParameterDestination.ParentContextOrId;
+			}
 			else if (
 				Constants.Activities.SystemDiagnostics.ActivityLinkArray.Equals(parameterType)
 				|| Constants.Activities.SystemDiagnostics.ActivityLinkIEnumerable.Equals(
 					parameterType
 				)
 			)
+			{
 				destination = ActivityParameterDestination.LinksEnumerable;
+			}
 			else if (
 				parameter.Name == Constants.Activities.StartTimeParameterName
 				&& Constants.System.DateTimeOffset.Equals(parameterType)
 			)
+			{
 				destination = ActivityParameterDestination.StartTime;
+			}
 			else if (
 				parameter.Name == Constants.Activities.TimeStampParameterName
 				&& Constants.System.DateTimeOffset.Equals(parameterType)
 			)
+			{
 				destination = ActivityParameterDestination.Timestamp;
+			}
 			else
+			{
 				// destination is already set to default.
 				logger?.Debug(
 					$"Inferring {(defaultToTags ? "tag" : "baggage")}: {parameter.Name}."
 				);
+			}
 
 			TagOrBaggageAttributeRecord? tagOrBaggageAttribute = null;
 			if (attribute != null)
@@ -360,10 +378,10 @@ partial class PipelineHelpers
 				new(
 					ParameterName: parameterName,
 					ParameterType: parameterType,
-					IsException: Utilities.IsExceptionType(parameter.Type),
 					GeneratedName: generatedName,
 					ParamDestination: destination,
 					SkipOnNullOrEmpty: GetSkipOnNullOrEmptyValue(tagOrBaggageAttribute),
+					IsException: parameter.Type.IsExceptionType(),
 					Locations: parameter.Locations
 				)
 			);
@@ -475,7 +493,9 @@ partial class PipelineHelpers
 		var includeActivitySource = activitySourceRecord.IncludeActivitySourcePrefix.Value ?? true;
 
 		if (!string.IsNullOrWhiteSpace(activitySourceGenPrefix))
+		{
 			prefix = activitySourceGenPrefix + separator;
+		}
 
 		if (!string.IsNullOrWhiteSpace(activitySourcePrefix))
 		{

@@ -127,7 +127,6 @@ partial class ActivitySourceTargetClassEmitter
 			AddActivityNameParameter(builder, methodTarget, false);
 			builder.Append(", ");
 		}
-		;
 
 		builder
 			// kind: (un-named)
@@ -219,8 +218,7 @@ partial class ActivitySourceTargetClassEmitter
 		builder
 			.Append(indent, "if (!", withNewLine: false)
 			.Append(Constants.Activities.ActivitySourceFieldName)
-			.Append(".HasListeners())")
-			.AppendLine()
+			.AppendLine(".HasListeners())")
 			.Append(indent, '{')
 			.Append(
 				indent + 1,

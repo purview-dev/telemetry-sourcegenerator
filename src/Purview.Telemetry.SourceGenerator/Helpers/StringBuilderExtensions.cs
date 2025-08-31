@@ -12,7 +12,7 @@ static class StringBuilderExtensions
 		builder.Append(indent, Constants.System.GeneratedCode.Value);
 
 	public static StringBuilder ClassAttributes(this StringBuilder builder, int indent) =>
-		builder.Append(Utilities.GetClassAttributesString(true, indent)).AppendLine();
+		builder.AppendLine(Utilities.GetClassAttributesString(true, indent));
 
 	public static StringBuilder WithIndent(this StringBuilder builder, int tabs)
 	{

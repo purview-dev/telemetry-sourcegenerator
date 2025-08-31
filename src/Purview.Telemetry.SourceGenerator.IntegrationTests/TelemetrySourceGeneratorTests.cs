@@ -3,7 +3,7 @@
 public partial class TelemetrySourceGeneratorTests(ITestOutputHelper testOutputHelper)
 	: IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>(testOutputHelper)
 {
-	[Fact]
+	[Fact(DisplayName = "Tests the generated attributes are included and compile")]
 	public async Task Generate_GivenGeneratedAttributes_GeneratesAsExpected()
 	{
 		// Arrange
@@ -33,7 +33,7 @@ namespace Testing;
 			);
 			parameter.Add(
 				TestHelpers.GetFriendlyTypeName(
-					typeof(IEnumerable<>).MakeGenericType(typeof(System.String)),
+					typeof(IEnumerable<>).MakeGenericType(typeof(string)),
 					useSystemType: false
 				)
 			);
@@ -44,10 +44,7 @@ namespace Testing;
 			);
 			parameter.Add(
 				TestHelpers.GetFriendlyTypeName(
-					typeof(IDictionary<,>).MakeGenericType(
-						typeof(System.String),
-						typeof(System.Int32)
-					),
+					typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(int)),
 					useSystemType: false
 				)
 			);

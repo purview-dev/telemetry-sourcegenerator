@@ -86,7 +86,6 @@ static class ConstructorEmitter
 				.Append(" = ")
 				.Append(LoggerParameterName)
 				.AppendLine(';');
-			;
 		}
 
 		if (generationType.HasFlag(GenerationType.Metrics))

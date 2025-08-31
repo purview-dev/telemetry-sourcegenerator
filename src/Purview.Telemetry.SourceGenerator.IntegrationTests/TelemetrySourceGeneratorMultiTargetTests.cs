@@ -29,7 +29,7 @@ public class TelemetrySourceGeneratorMultiTargetTests(ITestOutputHelper testOutp
 			""";
 
 		var generationResult = await GenerateAsync(source);
-		await TestHelpers.Verify(generationResult, autoVerifyTemplates: false);
+		await TestHelpers.Verify(generationResult);
 	}
 
 	[Fact]
@@ -62,7 +62,7 @@ public class TelemetrySourceGeneratorMultiTargetTests(ITestOutputHelper testOutp
 			""";
 
 		var generationResult = await GenerateAsync(source);
-		await TestHelpers.Verify(generationResult, autoVerifyTemplates: false);
+		await TestHelpers.Verify(generationResult);
 	}
 
 	[Fact]
@@ -93,6 +93,6 @@ public class TelemetrySourceGeneratorMultiTargetTests(ITestOutputHelper testOutp
 			""";
 
 		var generationResult = await GenerateAsync(source);
-		await TestHelpers.Verify(generationResult, autoVerifyTemplates: false);
+		await TestHelpers.Verify(generationResult);
 	}
 }

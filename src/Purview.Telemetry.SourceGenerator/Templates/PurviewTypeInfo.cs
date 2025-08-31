@@ -73,7 +73,7 @@ sealed record PurviewTypeInfo(
 	public string ToString(bool includeGlobal)
 	{
 		var isNullableSuffix = IsNullable ? "?" : null;
-		var result = (SystemAlias ?? (includeGlobal ? "global::" : null) + FullyQualifiedName);
+		var result = SystemAlias ?? (includeGlobal ? "global::" : null) + FullyQualifiedName;
 
 		if (GenericTypeArguments.Length > 0)
 		{

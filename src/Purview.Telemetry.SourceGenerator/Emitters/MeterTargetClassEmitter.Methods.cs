@@ -126,7 +126,9 @@ partial class MeterTargetClassEmitter
 				builder.Append(type);
 			}
 			else
+			{
 				builder.Append(parameter.ParameterType);
+			}
 
 			builder.Append(' ').Append(parameter.ParameterName);
 

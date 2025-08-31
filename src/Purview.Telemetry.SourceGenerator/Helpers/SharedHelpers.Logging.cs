@@ -44,28 +44,36 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						level = new((int)value);
+					}
 					else if (
 						name.Equals(
 							nameof(LogAttributeRecord.MessageTemplate),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						messageTemplate = new((string)value);
+					}
 					else if (
 						name.Equals(
 							nameof(LogAttributeRecord.EventId),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						eventId = new((int)value);
+					}
 					else if (
 						name.Equals(
 							nameof(LogAttributeRecord.Name),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						nameValue = new((string)value);
+					}
 				},
 				semanticModel,
 				logger,
@@ -120,28 +128,36 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						defaultLevel = new((int)value);
+					}
 					else if (
 						name.Equals(
 							nameof(LoggerAttributeRecord.CustomPrefix),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						customPrefix = new((string)value);
+					}
 					else if (
 						name.Equals(
 							nameof(LoggerAttributeRecord.PrefixType),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						prefixType = new((int)value);
+					}
 					else if (
 						name.Equals(
 							nameof(LoggerAttributeRecord.DisableMSLoggingTelemetryGeneration),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						disableMSLoggingTelemetryGeneration = new((bool)value);
+					}
 				},
 				semanticModel,
 				logger,
@@ -195,7 +211,9 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						defaultLevel = new((int)value);
+					}
 					else if (
 						name.Equals(
 							nameof(
@@ -204,14 +222,18 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						disableMSLoggingTelemetryGeneration = new((bool)value);
+					}
 					else if (
 						name.Equals(
 							nameof(LoggerGenerationAttributeRecord.DefaultPrefixType),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						prefixType = new((int)value);
+					}
 				},
 				semanticModel,
 				logger,
@@ -264,21 +286,27 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						omitReferenceName = new((bool)value);
+					}
 					else if (
 						name.Equals(
 							nameof(LogPropertiesAttributeRecord.SkipNullProperties),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						skipNullProperties = new((bool)value);
+					}
 					else if (
 						name.Equals(
 							nameof(LogPropertiesAttributeRecord.Transitive),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						transitive = new((bool)value);
+					}
 				},
 				semanticModel,
 				logger,

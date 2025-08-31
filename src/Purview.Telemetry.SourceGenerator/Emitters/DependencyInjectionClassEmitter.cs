@@ -60,8 +60,7 @@ static class DependencyInjectionClassEmitter
 		builder
 			.ClassAttributes(1)
 			.Append(1, $"{classAccessModifier} class ", withNewLine: false)
-			.Append(classNameToGenerate)
-			.AppendLine()
+			.AppendLine(classNameToGenerate)
 			.Append(1, '{');
 
 		EmitMethod(

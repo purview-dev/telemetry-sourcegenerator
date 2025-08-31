@@ -68,7 +68,7 @@ partial class LoggerTargetClassEmitter
 			if (methodTarget.HasMultipleExceptions)
 			{
 				logger?.Diagnostic(
-					$"Method has multiple exception parameters, only a single one is permitted."
+					"Method has multiple exception parameters, only a single one is permitted."
 				);
 				TelemetryDiagnostics.Report(
 					context.ReportDiagnostic,
@@ -84,7 +84,7 @@ partial class LoggerTargetClassEmitter
 				> Constants.Logging.MaxNonExceptionParameters
 			)
 			{
-				logger?.Diagnostic($"Method has more than 6 parameters.");
+				logger?.Diagnostic("Method has more than 6 parameters.");
 				TelemetryDiagnostics.Report(
 					context.ReportDiagnostic,
 					TelemetryDiagnostics.Logging.MaximumLogEntryParametersExceeded,
@@ -96,7 +96,7 @@ partial class LoggerTargetClassEmitter
 
 			if (methodTarget.InferredErrorLevel)
 			{
-				logger?.Diagnostic($"Inferring error log level.");
+				logger?.Diagnostic("Inferring error log level.");
 				TelemetryDiagnostics.Report(
 					context.ReportDiagnostic,
 					TelemetryDiagnostics.Logging.InferringErrorLogLevel,

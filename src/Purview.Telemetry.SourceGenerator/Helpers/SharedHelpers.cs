@@ -201,7 +201,7 @@ static partial class SharedHelpers
 
 			return diagnostics.Any(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
 		}
-		catch (ArgumentException ex)
+		catch (ArgumentException)
 		{
 			// For partial interfaces or other cases where the span might be invalid,
 			// fall back to getting diagnostics without a span
@@ -280,7 +280,9 @@ static partial class SharedHelpers
 					out assemblyAttribute
 				)
 			)
+			{
 				return CreateDefault();
+			}
 		}
 
 		var assemblyTelemetryGeneration =
@@ -340,28 +342,36 @@ static partial class SharedHelpers
 						StringComparison.OrdinalIgnoreCase
 					)
 				)
+				{
 					generateDependencyExtension = new((bool)value);
+				}
 				else if (
 					name.Equals(
 						nameof(TelemetryGenerationAttributeRecord.ClassName),
 						StringComparison.OrdinalIgnoreCase
 					)
 				)
+				{
 					className = new((string)value);
+				}
 				else if (
 					name.Equals(
 						nameof(TelemetryGenerationAttributeRecord.DependencyInjectionClassName),
 						StringComparison.OrdinalIgnoreCase
 					)
 				)
+				{
 					dependencyInjectionClassName = new((string)value);
+				}
 				else if (
 					name.Equals(
 						nameof(TelemetryGenerationAttributeRecord.DependencyInjectionClassIsPublic),
 						StringComparison.OrdinalIgnoreCase
 					)
 				)
+				{
 					dependencyInjectionClassIsPublic = new((bool)value);
+				}
 			},
 			semanticModel,
 			logger,

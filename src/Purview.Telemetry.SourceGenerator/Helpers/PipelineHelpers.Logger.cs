@@ -200,7 +200,9 @@ partial class PipelineHelpers
 				telemetryDiagnosticsList ??= [];
 				telemetryDiagnosticsList.Add(parameterDiagnostic.Value);
 				if (parameterDiagnostic.Value.Item1.Severity == DiagnosticSeverity.Error)
+				{
 					continue;
+				}
 			}
 
 			var logAttribute = SharedHelpers.GetLogAttribute(method, semanticModel, logger, token);
@@ -235,8 +237,10 @@ partial class PipelineHelpers
 				: methodParameters.FirstOrDefault(m => m.IsException);
 
 			var inferredErrorLevel = exceptionParam != null;
-			if ((logAttribute?.Level.IsSet ?? false) == true)
+			if (logAttribute?.Level.IsSet ?? false)
+			{
 				inferredErrorLevel = false;
+			}
 
 			var level = (
 				logAttribute?.Level.IsSet == true ? logAttribute.Level.Value!.Value
@@ -292,14 +296,16 @@ partial class PipelineHelpers
 						.Where(m =>
 							(m.IsPositional && m.Ordinal == i)
 							|| (
-								m.Name != null
-								&& m.Name.Equals(param.Name, StringComparison.OrdinalIgnoreCase)
+								m.Name?.Equals(param.Name, StringComparison.OrdinalIgnoreCase)
+								== true
 							)
 						)
 						.ToArray();
 
 					if (templates.Length > 0)
+					{
 						param.ReferencedHoles.AddRange(templates);
+					}
 				}
 			}
 
@@ -322,8 +328,8 @@ partial class PipelineHelpers
 						: [.. methodParameters.Where(m => !m.IsException)],
 					ExceptionParameter: exceptionParam,
 					HasMultipleExceptions: hasMultipleExceptions,
-					InferredErrorLevel: inferredErrorLevel,
 					MethodLocation: method.Locations.FirstOrDefault(),
+					InferredErrorLevel: inferredErrorLevel,
 					TargetGenerationState: Utilities.IsValidGenerationTarget(
 						method,
 						generationType,
@@ -348,29 +354,39 @@ partial class PipelineHelpers
 	)
 	{
 		if (logAttribute?.Name.IsSet == true)
+		{
 			methodName = logAttribute!.Name.Value!;
+		}
 
 		var prefixType = loggerAttribute.PrefixType.IsSet
 			? loggerAttribute.PrefixType.Value
 			: defaultPrefixType; // Default as LoggerGeneration level, or Default (0)
 
 		if (prefixType == 1)
+		{
 			// Interface
 			return $"{interfaceName}.{methodName}";
+		}
 		else if (prefixType == 2)
+		{
 			// Class
 			return $"{className}.{methodName}";
+		}
 		else if (prefixType == 3)
 		{
 			// Custom
 			if (!string.IsNullOrWhiteSpace(loggerAttribute.CustomPrefix.Value))
+			{
 				return $"{loggerAttribute.CustomPrefix.Value}.{methodName}";
+			}
 		}
 		else if (prefixType == 4)
 		{
 			// TrimmedClassName
 			if (interfaceName[0] == 'I')
+			{
 				interfaceName = interfaceName.Substring(1);
+			}
 
 			foreach (var suffix in SuffixesToRemove)
 			{
@@ -407,13 +423,17 @@ partial class PipelineHelpers
 
 		var count = methodParameters.Count(m => !m.IsException);
 		if (count > 0)
+		{
 			builder.Append(": ");
+		}
 
 		var index = 0;
 		foreach (var parameter in methodParameters)
 		{
 			if (!isScoped && parameter.IsException)
+			{
 				continue;
+			}
 
 			builder
 				.Append(parameter.UpperCasedName)
@@ -508,7 +528,7 @@ partial class PipelineHelpers
 			}
 
 			var logParameterType = PurviewTypeFactory.Create(parameter.Type);
-			var isException = Utilities.IsExceptionType(parameter.Type);
+			var isException = parameter.Type.IsExceptionType();
 			parameters.Add(
 				new(
 					Name: parameter.Name,
@@ -527,7 +547,9 @@ partial class PipelineHelpers
 			);
 
 			if (isException)
+			{
 				isFirstException = false;
+			}
 		}
 
 		logger?.Debug($"Found {parameters.Count} parameter(s) for {method.Name}.");

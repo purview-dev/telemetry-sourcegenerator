@@ -10,6 +10,6 @@ namespace System.Runtime.CompilerServices;
 #pragma warning restore IDE0130 // Namespace does not match folder structure
 
 [EditorBrowsable(EditorBrowsableState.Never)]
-static class IsExternalInit { }
+static class IsExternalInit;
 
 #endif

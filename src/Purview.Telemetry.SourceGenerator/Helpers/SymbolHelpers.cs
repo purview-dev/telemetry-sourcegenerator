@@ -11,9 +11,9 @@ static class SymbolHelpers
 	);
 
 	static readonly SymbolDisplayFormat NamespaceOnly = new(
+		globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,
 		typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-		genericsOptions: SymbolDisplayGenericsOptions.None,
-		globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted
+		genericsOptions: SymbolDisplayGenericsOptions.None
 	);
 
 	public static string GetTypeName(ITypeSymbol symbol) => StripNullableAndGenerics(symbol).Name; // "List"

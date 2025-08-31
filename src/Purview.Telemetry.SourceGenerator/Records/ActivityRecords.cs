@@ -33,7 +33,7 @@ record ActivitySourceTarget(
 			null,
 			null!,
 			null,
-			null!,
+			null,
 			Constants.Empty,
 			null,
 			null,

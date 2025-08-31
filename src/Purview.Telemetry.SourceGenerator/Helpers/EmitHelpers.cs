@@ -32,8 +32,7 @@ static class EmitHelpers
 			{
 				builder
 					.Append(indent, "partial class ", withNewLine: false)
-					.Append(parentClass)
-					.AppendLine()
+					.AppendLine(parentClass)
 					.Append(indent, "{");
 
 				indent++;
@@ -82,8 +81,7 @@ static class EmitHelpers
 			.Append(indent, "sealed partial class ", withNewLine: false)
 			.Append(className)
 			.Append(" : ")
-			.Append(fullyQualifiedInterface)
-			.AppendLine()
+			.AppendLine(fullyQualifiedInterface)
 			.Append(indent, '{');
 
 		return indent;

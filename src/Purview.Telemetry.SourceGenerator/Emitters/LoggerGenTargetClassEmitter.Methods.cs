@@ -84,8 +84,7 @@ partial class LoggerGenTargetClassEmitter
 				.Append(Constants.Logging.LoggerFieldName)
 				.Append(".IsEnabled(")
 				.Append(methodTarget.MSLevel)
-				.Append("))")
-				.AppendLine()
+				.AppendLine("))")
 				.Append(indent, '{')
 				.Append(indent + 1, "return;")
 				.Append(indent, '}')
@@ -328,6 +327,7 @@ partial class LoggerGenTargetClassEmitter
 				}
 			}
 			else if (parameter.LogProperties != null)
+			{
 				OutputLogPropertyDetails(
 					indent,
 					stateVarName,
@@ -336,6 +336,7 @@ partial class LoggerGenTargetClassEmitter
 					parameter,
 					existingParamNames
 				);
+			}
 		}
 
 		if (postSetProperties != null)
@@ -367,19 +368,14 @@ partial class LoggerGenTargetClassEmitter
 
 				var logPropertyValue = $"{parameter.Name}?.{logProperty.PropertyName}";
 				var logPropertyName = logProperty.PropertyName;
-				if (
-					!parameter.LogPropertiesAttribute!.OmitReferenceName.Value.GetValueOrDefault(
-						false
-					)
-				)
+				if (!(parameter.LogPropertiesAttribute!.OmitReferenceName.Value ?? false))
 				{
 					logPropertyName = $"{parameter.Name}.{logPropertyName}";
 				}
 
 				var shouldSkipNull =
-					parameter.LogPropertiesAttribute.SkipNullProperties.Value.GetValueOrDefault(
-						false
-					) && logProperty.IsNullable;
+					(parameter.LogPropertiesAttribute.SkipNullProperties.Value ?? false)
+					&& logProperty.IsNullable;
 				if (shouldSkipNull)
 				{
 					var tmpVarName = FindUniqueName("tmp", existingParamNames);
@@ -438,7 +434,9 @@ partial class LoggerGenTargetClassEmitter
 			builder.Append("TagArray[").Append(index.Value).Append("] = new(");
 		}
 		else
+		{
 			builder.Append("AddTag(");
+		}
 
 		builder.Append(propertyName.WithComma());
 
@@ -453,7 +451,9 @@ partial class LoggerGenTargetClassEmitter
 				.Append(')');
 		}
 		else
+		{
 			builder.Append(value);
+		}
 
 		builder.AppendLine(");");
 	}
@@ -601,9 +601,11 @@ partial class LoggerGenTargetClassEmitter
 			string varName;
 
 			var isUsingExpressionException =
-				exceptionParameter != null && exceptionParameter.ReferencedHoles.Contains(hole);
+				exceptionParameter?.ReferencedHoles.Contains(hole) == true;
 			if (isUsingExpressionException)
+			{
 				varName = expressionExceptionVarName!;
+			}
 			else
 			{
 				varName = FindUniqueName($"v{index}", existingParamNames);

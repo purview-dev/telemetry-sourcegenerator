@@ -325,7 +325,7 @@ partial class PipelineHelpers
 
 			var instrumentMeasurementType =
 				measurementParameter?.InstrumentType ?? Constants.System.BuiltInTypes.Int32;
-			if (measurementParameter != null && !measurementParameter.IsValidInstrumentType)
+			if (measurementParameter?.IsValidInstrumentType == false)
 			{
 				methodDiagnosticsList ??= [];
 				methodDiagnosticsList.Add(
@@ -344,9 +344,9 @@ partial class PipelineHelpers
 					IsNullableReturn: method.ReturnType.NullableAnnotation
 						== NullableAnnotation.Annotated,
 					FieldName: fieldName,
+					InstrumentMeasurementType: instrumentMeasurementType,
 					IsObservable: instrumentAttribute?.IsObservable == true,
 					MetricName: prefix + instrumentName!,
-					InstrumentMeasurementType: instrumentMeasurementType,
 					Locations: method.Locations,
 					InstrumentAttribute: instrumentAttribute,
 					Parameters: parameters,

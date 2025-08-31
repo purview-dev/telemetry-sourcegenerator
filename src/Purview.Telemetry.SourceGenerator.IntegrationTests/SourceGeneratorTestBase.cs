@@ -124,7 +124,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 		ArgumentNullException.ThrowIfNull(generationResult);
 
 		List<SyntaxTree> nodes = [];
-		foreach (var tree in generationResult.Result.GeneratedTrees)
+		foreach (var tree in generationResult.DriverResult.GeneratedTrees)
 			nodes.Add((await tree.GetRootAsync(cancellationToken)).SyntaxTree);
 
 		return generationResult.Compilation.AddSyntaxTrees(nodes);
@@ -212,8 +212,8 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 			preprocessorSymbols.Add("EXCLUDE_PURVIEW_TELEMETRY_LOGGING");
 
 		CSharpParseOptions parseOptions = new(
-			kind: SourceCodeKind.Regular,
 			documentationMode: DocumentationMode.Parse,
+			kind: SourceCodeKind.Regular,
 			preprocessorSymbols: preprocessorSymbols
 		);
 
@@ -251,7 +251,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 			optionsProvider = optionsProvider.WithAdditionalTreeOptions(map.ToImmutable());
 		}
 
-		GeneratorDriver driver = CSharpGeneratorDriver.Create(
+		var driver = CSharpGeneratorDriver.Create(
 			[Generator],
 			additionalTexts: additionalTexts,
 			parseOptions: parseOptions,
@@ -318,7 +318,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 				MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location)
 			);
 
-		if (csharpDocuments != null && csharpDocuments.Length > 0)
+		if (csharpDocuments?.Length > 0)
 		{
 			foreach (var csDoc in csharpDocuments)
 				project = project.AddDocument(csDoc.Path, csDoc.GetText()!).Project;
@@ -396,8 +396,8 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 	protected virtual Project SetupProject(Project project) => project;
 }
 
-public record GenerationResult(
-	GeneratorDriverRunResult Result,
+public sealed record GenerationResult(
+	GeneratorDriverRunResult DriverResult,
 	ImmutableArray<Diagnostic> Diagnostics,
 	Compilation Compilation
 );

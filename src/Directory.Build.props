@@ -2,6 +2,6 @@
 	<Import Project="./.build-system/Directory.Build.props" />
 	<PropertyGroup>
 		<DefineConstants Condition="'$(Configuration)' == 'DEBUG'">DEBUG_SG</DefineConstants>
-		<NoWarn>$(NoWarn);CA1031;</NoWarn>
+		<NoWarn>$(NoWarn);CA1031;RCS1266;</NoWarn>
 	</PropertyGroup>
 </Project>

@@ -22,7 +22,7 @@ partial class ActivitySourceTargetClassEmitter
 		var activitySourceName = target.ActivitySourceName;
 		if (string.IsNullOrWhiteSpace(activitySourceName))
 		{
-			logger?.Diagnostic($"No activity source specified.");
+			logger?.Diagnostic("No activity source specified.");
 
 			TelemetryDiagnostics.Report(
 				context.ReportDiagnostic,

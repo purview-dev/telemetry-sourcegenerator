@@ -101,7 +101,7 @@ public record struct MessageTemplateHole(
 
 	static MessageTemplateHole FromMatch(Match match)
 	{
-		if (match == null || !match.Success)
+		if (match?.Success != true)
 			throw new ArgumentException("Match must be successful.", nameof(match));
 
 		string? name = null;
