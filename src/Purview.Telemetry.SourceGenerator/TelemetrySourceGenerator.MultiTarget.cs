@@ -109,34 +109,4 @@ partial class TelemetrySourceGenerator
 			GenerateMetricsFromMultiTarget(method, context, logger);
 		}
 	}
-
-	static void GenerateActivityFromMultiTarget(
-		MultiTargetMethod method,
-		SourceProductionContext context,
-		GenerationLogger? logger
-	)
-	{
-		// TODO: Implement Activity generation from multi-target method
-		logger?.Debug($"Generating Activity for multi-target method: {method.MethodName}");
-	}
-
-	static void GenerateLoggingFromMultiTarget(
-		MultiTargetMethod method,
-		SourceProductionContext context,
-		GenerationLogger? logger
-	)
-	{
-		// TODO: Implement Logging generation from multi-target method
-		logger?.Debug($"Generating Logging for multi-target method: {method.MethodName}");
-	}
-
-	static void GenerateMetricsFromMultiTarget(
-		MultiTargetMethod method,
-		SourceProductionContext context,
-		GenerationLogger? logger
-	)
-	{
-		// TODO: Implement Metrics generation from multi-target method
-		logger?.Debug($"Generating Metrics for multi-target method: {method.MethodName}");
-	}
 }
