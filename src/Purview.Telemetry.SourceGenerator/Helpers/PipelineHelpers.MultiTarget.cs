@@ -1,6 +1,3 @@
-/*
-// TODO: Re-enable after implementing complete multi-target functionality
-
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -42,7 +39,9 @@ static partial class PipelineHelpers
 
 		if (!multiTargetConfig.IsMultiTargetEnabled)
 		{
-			logger?.Debug($"Method {methodSymbol.Name} has TelemetryAttribute but multi-target is not enabled");
+			logger?.Debug(
+				$"Method {methodSymbol.Name} has TelemetryAttribute but multi-target is not enabled"
+			);
 			return null;
 		}
 
@@ -96,7 +95,20 @@ static partial class PipelineHelpers
 			var (isTag, tagName) = GetTagInfo(parameter);
 			var (isBaggage, baggageName) = GetBaggageInfo(parameter);
 
-			var multiTargetParam = new MultiTargetParameter(
+			logger?.Debug(
+				$"Found parameter '{parameter.Name}': IsTag={isTag} (TagName={tagName}), IsBaggage={isBaggage} (BaggageName={baggageName}), Exclusions={exclusions}"
+			);
+
+			if (isTag && isBaggage)
+			{
+				logger?.Warning(
+					$"Parameter {parameter.Name} cannot be both a Tag and Baggage. It will be treated as a Tag."
+				);
+				isBaggage = false;
+				baggageName = null;
+			}
+
+			MultiTargetParameter multiTargetParam = new(
 				Name: parameter.Name,
 				TypeName: parameter.Type.ToDisplayString(),
 				ParameterSymbol: parameter,
@@ -115,9 +127,12 @@ static partial class PipelineHelpers
 
 	static (bool IsTag, string? TagName) GetTagInfo(IParameterSymbol parameter)
 	{
-		var tagAttribute = parameter.GetAttributes().FirstOrDefault(attr =>
-			attr.AttributeClass != null &&
-			PurviewTypeFactory.Create(attr.AttributeClass) == Constants.Shared.TagAttribute);
+		var tagAttribute = parameter
+			.GetAttributes()
+			.FirstOrDefault(attr =>
+				attr.AttributeClass != null
+				&& PurviewTypeFactory.Create(attr.AttributeClass) == Constants.Shared.TagAttribute
+			);
 
 		if (tagAttribute == null)
 			return (false, null);
@@ -140,9 +155,13 @@ static partial class PipelineHelpers
 	static (bool IsBaggage, string? BaggageName) GetBaggageInfo(IParameterSymbol parameter)
 	{
 		// Check for Activities.BaggageAttribute
-		var baggageAttribute = parameter.GetAttributes().FirstOrDefault(attr =>
-			attr.AttributeClass != null &&
-			PurviewTypeFactory.Create(attr.AttributeClass) == Constants.Activities.BaggageAttribute);
+		var baggageAttribute = parameter
+			.GetAttributes()
+			.FirstOrDefault(attr =>
+				attr.AttributeClass != null
+				&& PurviewTypeFactory.Create(attr.AttributeClass)
+					== Constants.Activities.BaggageAttribute
+			);
 
 		if (baggageAttribute == null)
 			return (false, null);
@@ -167,9 +186,8 @@ static partial class PipelineHelpers
 		return typeSymbol.DeclaringSyntaxReferences.Any(syntaxRef =>
 		{
 			var syntax = syntaxRef.GetSyntax();
-			return syntax is TypeDeclarationSyntax typeSyntax &&
-				   typeSyntax.Modifiers.Any(m => m.ValueText == "partial");
+			return syntax is TypeDeclarationSyntax typeSyntax
+				&& typeSyntax.Modifiers.Any(m => m.ValueText == "partial");
 		});
 	}
 }
-*/

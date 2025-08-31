@@ -13,13 +13,13 @@ enum GenerationType
 	Metrics = 4,
 }
 
-record TargetGeneration(
+sealed record TargetGeneration(
 	bool IsValid,
 	bool RaiseInferenceNotSupportedWithMultiTargeting,
 	bool RaiseMultiGenerationTargetsNotSupported
 );
 
-record AttributeValue<T>
+sealed record AttributeValue<T>
 	where T : struct
 {
 	public AttributeValue(T? value)
@@ -41,7 +41,7 @@ record AttributeValue<T>
 	public static implicit operator T?(AttributeValue<T> value) => value.Value;
 }
 
-record AttributeStringValue
+sealed record AttributeStringValue
 {
 	public AttributeStringValue(string? value)
 	{

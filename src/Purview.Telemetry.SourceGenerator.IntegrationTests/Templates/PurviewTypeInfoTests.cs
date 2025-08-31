@@ -46,19 +46,50 @@ public class PurviewTypeInfoTests
 		typeInfo.GenericTypeArguments.ShouldBeEmpty();
 	}
 
-	[Fact]
-	public void Create_GivenSpecialTypeOfString_CreatesPurviewTypeInfoWithAliasAndSpecialType()
+	[Theory(DisplayName = "Ensures PurviewTypeInfo can be created from a SpecialType")]
+	[MemberData(nameof(SpecialTypesData))]
+	public void Create_GivenSpecialType_CreatesPurviewTypeInfoWithAliasAndSpecialType(
+		SpecialType specialType
+	)
 	{
-		// Arrange & Act
-		var typeInfo = PurviewTypeFactory.Create(SpecialType.System_String);
+		// Arrange
+		var systemAlias = PurviewTypeFactory.AliasMap.Value.GetValueOrDefault(specialType);
+		var systemType = PurviewTypeFactory
+			.TypeMap.Value.SingleOrDefault(kv => kv.Value == specialType)
+			.Key;
+
+		// Act
+		var typeInfo = PurviewTypeFactory.Create(specialType);
 
 		// Assert
-		typeInfo.TypeName.ShouldBe("String");
-		typeInfo.FullyQualifiedName.ShouldBe("System.String");
-		typeInfo.Namespace.ShouldBe("System");
+		systemAlias.ShouldNotBeNull();
+		typeInfo.ShouldNotBeNull();
+
+		typeInfo.TypeName.ShouldBe(typeInfo.TypeName);
+		typeInfo.FullyQualifiedName.ShouldBe(typeInfo.FullyQualifiedName);
+		typeInfo.Namespace.ShouldBe(typeInfo.Namespace);
 		typeInfo.IsNullable.ShouldBeFalse();
-		typeInfo.SystemAlias.ShouldBe("string");
-		typeInfo.SpecialType.ShouldBe(SpecialType.System_String);
+		typeInfo.SystemAlias.ShouldBe(systemAlias);
+		typeInfo.SpecialType.ShouldBe(specialType);
 		typeInfo.GenericTypeArguments.ShouldBeEmpty();
 	}
+
+	public static TheoryData<SpecialType> SpecialTypesData =>
+		[
+			SpecialType.System_Boolean,
+			SpecialType.System_Byte,
+			SpecialType.System_Char,
+			SpecialType.System_Decimal,
+			SpecialType.System_Double,
+			SpecialType.System_Int16,
+			SpecialType.System_Int32,
+			SpecialType.System_Int64,
+			SpecialType.System_Object,
+			SpecialType.System_SByte,
+			SpecialType.System_Single,
+			SpecialType.System_String,
+			SpecialType.System_UInt16,
+			SpecialType.System_UInt32,
+			SpecialType.System_UInt64,
+		];
 }

@@ -4,7 +4,7 @@ using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator.Records;
 
-record MeterTarget(
+sealed record MeterTarget(
 	TelemetryGenerationAttributeRecord TelemetryGeneration,
 	GenerationType GenerationType,
 	string ClassNameToGenerate,
@@ -41,7 +41,7 @@ record MeterTarget(
 		);
 }
 
-record InstrumentTarget(
+sealed record InstrumentTarget(
 	string MethodName,
 	PurviewTypeInfo ReturnType,
 	bool ReturnsBool,
@@ -61,7 +61,7 @@ record InstrumentTarget(
 	public string TagPopulateMethodName { get; } = $"Populate{MethodName}Tags";
 }
 
-record InstrumentParameterTarget(
+sealed record InstrumentParameterTarget(
 	string ParameterName,
 	PurviewTypeInfo ParameterType,
 	bool IsFunc,

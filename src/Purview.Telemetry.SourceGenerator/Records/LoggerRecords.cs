@@ -4,7 +4,7 @@ using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator.Records;
 
-record LoggerTarget(
+sealed record LoggerTarget(
 	TelemetryGenerationAttributeRecord TelemetryGeneration,
 	GenerationType GenerationType,
 	string ClassNameToGenerate,
@@ -43,7 +43,7 @@ record LoggerTarget(
 		);
 }
 
-record LogMethodTarget(
+sealed record LogMethodTarget(
 	string MethodName,
 	bool IsScoped,
 	string LoggerActionFieldName,
@@ -69,7 +69,7 @@ record LogMethodTarget(
 	public int ParameterCountSansException => ParametersSansException.Length;
 }
 
-record LogParameterTarget(
+sealed record LogParameterTarget(
 	string Name,
 	string UpperCasedName,
 	PurviewTypeInfo ParameterType,
@@ -89,4 +89,4 @@ record LogParameterTarget(
 	public List<MessageTemplateHole> ReferencedHoles { get; } = [];
 }
 
-record LogPropertiesParameterDetails(string PropertyName, bool IsNullable);
+sealed record LogPropertiesParameterDetails(string PropertyName, bool IsNullable);

@@ -37,7 +37,7 @@ partial class MeterTargetClassEmitter
 			}
 
 			var type = Constants
-				.Metrics.InstrumentTypeMap[method.InstrumentAttribute.InstrumentType]
+				.Metrics.InstrumentTypeMap.Value[method.InstrumentAttribute.InstrumentType]
 				.MakeGeneric(method.InstrumentMeasurementType);
 
 			builder

@@ -4,7 +4,7 @@ using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator.Records;
 
-record ActivitySourceTarget(
+sealed record ActivitySourceTarget(
 	TelemetryGenerationAttributeRecord TelemetryGeneration,
 	GenerationType GenerationType,
 	string ClassNameToGenerate,
@@ -45,7 +45,7 @@ record ActivitySourceTarget(
 		);
 }
 
-record ActivityBasedGenerationTarget(
+sealed record ActivityBasedGenerationTarget(
 	string MethodName,
 	PurviewTypeInfo ReturnType,
 	string ActivityOrEventName,
@@ -60,7 +60,7 @@ record ActivityBasedGenerationTarget(
 	TargetGeneration TargetGenerationState
 );
 
-record ActivityBasedParameterTarget(
+sealed record ActivityBasedParameterTarget(
 	string ParameterName,
 	PurviewTypeInfo ParameterType,
 	string GeneratedName,

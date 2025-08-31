@@ -32,7 +32,7 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator, IL
 		RegisterActivitiesGeneration(context, _logger);
 		RegisterLoggerGeneration(context, _logger);
 		RegisterMetricsGeneration(context, _logger);
-		// TODO: Re-enable after debugging - RegisterMultiTargetGeneration(context, _logger);
+		RegisterMultiTargetGeneration(context, _logger);
 	}
 
 	void ILogSupport.SetLogOutput(Action<string, OutputType> action) =>

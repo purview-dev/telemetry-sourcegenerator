@@ -161,9 +161,12 @@ partial class PipelineHelpers
 	{
 		token.ThrowIfCancellationRequested();
 
-		List<(TelemetryDiagnosticDescriptor, ImmutableArray<Location>)>? telemetryDiagnosticsList =
-			null;
-		List<LogMethodTarget> methodTargets = [];
+		var telemetryDiagnosticsBuilder = ImmutableArray.CreateBuilder<(
+			TelemetryDiagnosticDescriptor,
+			ImmutableArray<Location>
+		)>();
+		var methodTargets = ImmutableArray.CreateBuilder<LogMethodTarget>();
+
 		foreach (
 			var method in GetAllInterfaceMethods(interfaceSymbol, semanticModel.Compilation, token)
 		)
@@ -178,8 +181,7 @@ partial class PipelineHelpers
 
 			if (method.Arity > 0)
 			{
-				telemetryDiagnosticsList ??= [];
-				telemetryDiagnosticsList.Add(
+				telemetryDiagnosticsBuilder.Add(
 					(TelemetryDiagnostics.General.GenericMethodsNotSupported, method.Locations)
 				);
 				continue;
@@ -197,8 +199,7 @@ partial class PipelineHelpers
 			);
 			if (parameterDiagnostic != null)
 			{
-				telemetryDiagnosticsList ??= [];
-				telemetryDiagnosticsList.Add(parameterDiagnostic.Value);
+				telemetryDiagnosticsBuilder.Add(parameterDiagnostic.Value);
 				if (parameterDiagnostic.Value.Item1.Severity == DiagnosticSeverity.Error)
 				{
 					continue;
@@ -209,8 +210,7 @@ partial class PipelineHelpers
 			if (isScoped && logAttribute?.Level.IsSet == true)
 			{
 				// This is a warning, so we can continue.
-				telemetryDiagnosticsList ??= [];
-				telemetryDiagnosticsList.Add(
+				telemetryDiagnosticsBuilder.Add(
 					(TelemetryDiagnostics.Logging.ScopedMethodShouldNotHaveLevel, method.Locations)
 				);
 			}
@@ -263,8 +263,7 @@ partial class PipelineHelpers
 				templateIsNamedBased = messageTemplateMatches.Any(m => m.Name != null);
 				if (templateIsOrdinalBased && templateIsNamedBased)
 				{
-					telemetryDiagnosticsList ??= [];
-					telemetryDiagnosticsList.Add(
+					telemetryDiagnosticsBuilder.Add(
 						(
 							TelemetryDiagnostics.Logging.MixedOrdinalAndNamedProperties,
 							method.Locations
@@ -278,8 +277,7 @@ partial class PipelineHelpers
 					: 0;
 				if (maxOrdinalValue > methodParameters.Length)
 				{
-					telemetryDiagnosticsList ??= [];
-					telemetryDiagnosticsList.Add(
+					telemetryDiagnosticsBuilder.Add(
 						(TelemetryDiagnostics.Logging.OrdinalsExceedParameters, method.Locations)
 					);
 					continue;
@@ -321,7 +319,7 @@ partial class PipelineHelpers
 					TemplateProperties: messageTemplateMatches,
 					TemplateIsOrdinalBased: templateIsOrdinalBased,
 					TemplateIsNamedBased: templateIsNamedBased,
-					MSLevel: Constants.Logging.LogLevelTypeMap[level],
+					MSLevel: Constants.Logging.LogLevelTypeMap.Value[level],
 					Parameters: methodParameters,
 					ParametersSansException: isScoped
 						? methodParameters
@@ -339,9 +337,10 @@ partial class PipelineHelpers
 			);
 		}
 
-		telemetryDiagnostics = telemetryDiagnosticsList?.ToArray();
+		telemetryDiagnostics =
+			telemetryDiagnosticsBuilder.Count > 0 ? telemetryDiagnosticsBuilder.ToArray() : null;
 
-		return [.. methodTargets];
+		return methodTargets.ToImmutable();
 	}
 
 	static string GetLogName(
@@ -464,7 +463,7 @@ partial class PipelineHelpers
 	{
 		parameterDiagnostic = null;
 
-		List<LogParameterTarget> parameters = [];
+		var parameters = ImmutableArray.CreateBuilder<LogParameterTarget>();
 		var isFirstException = true;
 		foreach (var parameter in method.Parameters)
 		{
@@ -492,11 +491,13 @@ partial class PipelineHelpers
 				break;
 			}
 
-			List<LogPropertiesParameterDetails>? logProperties = null;
+			ImmutableArray<LogPropertiesParameterDetails>? logProperties = null;
 			if (logPropertiesAttribute != null)
 			{
 				// At this point, we know the caller wants to expand the properties for the given type.
 				// So we can find the names of all the properties and their types.
+				var logPropertiesBuilder =
+					ImmutableArray.CreateBuilder<LogPropertiesParameterDetails>();
 
 				var type = parameter.Type;
 				foreach (var property in type.GetMembers().OfType<IPropertySymbol>())
@@ -521,10 +522,13 @@ partial class PipelineHelpers
 						|| property.Type.OriginalDefinition.SpecialType
 							== SpecialType.System_Nullable_T;
 
-					logProperties ??= [];
-
-					logProperties.Add(new(PropertyName: propertyName, IsNullable: isNullable));
+					logPropertiesBuilder.Add(
+						new(PropertyName: propertyName, IsNullable: isNullable)
+					);
 				}
+
+				logProperties =
+					logPropertiesBuilder.Count > 0 ? logPropertiesBuilder.ToImmutable() : null;
 			}
 
 			var logParameterType = PurviewTypeFactory.Create(parameter.Type);
@@ -541,7 +545,7 @@ partial class PipelineHelpers
 					IsComplexType: parameter.Type.IsComplexType(),
 					Locations: parameter.Locations,
 					LogPropertiesAttribute: logPropertiesAttribute,
-					LogProperties: logProperties?.ToImmutableArray(),
+					LogProperties: logProperties,
 					ExpandEnumerableAttribute: expandEnumerableAttribute
 				)
 			);
@@ -554,6 +558,6 @@ partial class PipelineHelpers
 
 		logger?.Debug($"Found {parameters.Count} parameter(s) for {method.Name}.");
 
-		return [.. parameters];
+		return parameters.ToImmutable();
 	}
 }

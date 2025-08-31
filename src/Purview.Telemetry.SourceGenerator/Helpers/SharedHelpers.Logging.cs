@@ -27,7 +27,7 @@ partial class SharedHelpers
 
 		AttributeValue<int>? level = null;
 		if (matchingTemplate != Constants.Logging.LogAttribute)
-			level = new(Constants.Logging.SpecificLogAttributesToLevel[matchingTemplate!]);
+			level = new(Constants.Logging.SpecificLogAttributesToLogLevel.Value[matchingTemplate!]);
 
 		AttributeStringValue? messageTemplate = null;
 		AttributeValue<int>? eventId = null;

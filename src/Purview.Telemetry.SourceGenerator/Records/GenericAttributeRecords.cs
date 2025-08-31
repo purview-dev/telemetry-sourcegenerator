@@ -1,11 +1,11 @@
 ﻿namespace Purview.Telemetry.SourceGenerator.Records;
 
-record TagOrBaggageAttributeRecord(
+sealed record TagOrBaggageAttributeRecord(
 	AttributeStringValue Name,
 	AttributeValue<bool> SkipOnNullOrEmpty
 );
 
-record TelemetryGenerationAttributeRecord(
+sealed record TelemetryGenerationAttributeRecord(
 	AttributeValue<bool> GenerateDependencyExtension,
 	AttributeStringValue ClassName,
 	AttributeStringValue DependencyInjectionClassName,

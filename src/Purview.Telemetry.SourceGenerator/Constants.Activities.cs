@@ -57,23 +57,33 @@ partial class Constants
 		public static readonly PurviewTypeInfo StatusDescriptionAttribute =
 			PurviewTypeFactory.Create("Purview.Telemetry.Activities.StatusDescriptionAttribute");
 
-		public static readonly ImmutableDictionary<int, string> ActivityKindTypeMap =
-			new Dictionary<int, string>
-			{
-				{ 0, SystemDiagnostics.ActivityKind_Internal },
-				{ 1, SystemDiagnostics.ActivityKind_Server },
-				{ 2, SystemDiagnostics.ActivityKind_Client },
-				{ 3, SystemDiagnostics.ActivityKind_Producer },
-				{ 4, SystemDiagnostics.ActivityKind_Consumer },
-			}.ToImmutableDictionary();
+		public static readonly Lazy<ImmutableDictionary<int, string>> ActivityKindTypeMap = new(
+			CreateActivityKindTypeMap
+		);
+		public static readonly Lazy<ImmutableDictionary<int, string>> ActivityStatusCodeMap = new(
+			CreateActivityStatusCodeMap
+		);
 
-		public static readonly ImmutableDictionary<int, string> ActivityStatusCodeMap =
-			new Dictionary<int, string>
-			{
-				{ 0, SystemDiagnostics.ActivityStatusCode_Unset },
-				{ 1, SystemDiagnostics.ActivityStatusCode_Ok },
-				{ 2, SystemDiagnostics.ActivityStatusCode_Error },
-			}.ToImmutableDictionary();
+		static ImmutableDictionary<int, string> CreateActivityKindTypeMap()
+		{
+			var activityKindBuilder = ImmutableDictionary.CreateBuilder<int, string>();
+			activityKindBuilder.Add(0, SystemDiagnostics.ActivityKind_Internal);
+			activityKindBuilder.Add(1, SystemDiagnostics.ActivityKind_Server);
+			activityKindBuilder.Add(2, SystemDiagnostics.ActivityKind_Client);
+			activityKindBuilder.Add(3, SystemDiagnostics.ActivityKind_Producer);
+			activityKindBuilder.Add(4, SystemDiagnostics.ActivityKind_Consumer);
+
+			return activityKindBuilder.ToImmutable();
+		}
+
+		static ImmutableDictionary<int, string> CreateActivityStatusCodeMap()
+		{
+			var activityStatusCodeBuilder = ImmutableDictionary.CreateBuilder<int, string>();
+			activityStatusCodeBuilder.Add(0, SystemDiagnostics.ActivityStatusCode_Unset);
+			activityStatusCodeBuilder.Add(1, SystemDiagnostics.ActivityStatusCode_Ok);
+			activityStatusCodeBuilder.Add(2, SystemDiagnostics.ActivityStatusCode_Error);
+			return activityStatusCodeBuilder.ToImmutable();
+		}
 
 		public static class SystemDiagnostics
 		{

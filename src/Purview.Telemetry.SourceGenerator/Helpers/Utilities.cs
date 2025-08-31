@@ -19,28 +19,28 @@ static partial class Utilities
 			.Where(m => m.AttributeClass != null)
 			.Select(m => PurviewTypeFactory.Create(m.AttributeClass!))
 			.ToArray();
-		var activityCount = attributes.Count(static m =>
-			Constants.Activities.ActivityAttribute == m
-			|| Constants.Activities.EventAttribute == m
-			|| Constants.Activities.ContextAttribute == m
+		var activityCount = attributes.Count(static p =>
+			Constants.Activities.ActivityAttribute == p
+			|| Constants.Activities.EventAttribute == p
+			|| Constants.Activities.ContextAttribute == p
 		);
-		var loggingCount = attributes.Count(static m =>
-			Constants.Logging.LogAttribute == m
-			|| Constants.Logging.TraceAttribute == m
-			|| Constants.Logging.DebugAttribute == m
-			|| Constants.Logging.InfoAttribute == m
-			|| Constants.Logging.WarningAttribute == m
-			|| Constants.Logging.ErrorAttribute == m
-			|| Constants.Logging.CriticalAttribute == m
+		var loggingCount = attributes.Count(static p =>
+			Constants.Logging.LogAttribute == p
+			|| Constants.Logging.TraceAttribute == p
+			|| Constants.Logging.DebugAttribute == p
+			|| Constants.Logging.InfoAttribute == p
+			|| Constants.Logging.WarningAttribute == p
+			|| Constants.Logging.ErrorAttribute == p
+			|| Constants.Logging.CriticalAttribute == p
 		);
-		var metricsCount = attributes.Count(static m =>
-			Constants.Metrics.CounterAttribute == m
-			|| Constants.Metrics.AutoCounterAttribute == m
-			|| Constants.Metrics.UpDownCounterAttribute == m
-			|| Constants.Metrics.HistogramAttribute == m
-			|| Constants.Metrics.ObservableCounterAttribute == m
-			|| Constants.Metrics.ObservableGaugeAttribute == m
-			|| Constants.Metrics.ObservableUpDownCounterAttribute == m
+		var metricsCount = attributes.Count(static p =>
+			Constants.Metrics.CounterAttribute == p
+			|| Constants.Metrics.AutoCounterAttribute == p
+			|| Constants.Metrics.UpDownCounterAttribute == p
+			|| Constants.Metrics.HistogramAttribute == p
+			|| Constants.Metrics.ObservableCounterAttribute == p
+			|| Constants.Metrics.ObservableGaugeAttribute == p
+			|| Constants.Metrics.ObservableUpDownCounterAttribute == p
 		);
 
 		var count = activityCount + loggingCount + metricsCount;
@@ -90,6 +90,114 @@ static partial class Utilities
 			RaiseInferenceNotSupportedWithMultiTargeting: inferenceNotSupportedWithMultiTargeting,
 			RaiseMultiGenerationTargetsNotSupported: multiGenerationTargetsNotSupported
 		);
+	}
+
+	/// <summary>
+	/// Gets the multi-target configuration for a method by checking for the TelemetryAttribute
+	/// and assembly-level EnableMultiTargetGenerationAttribute.
+	/// </summary>
+	public static MultiTargetConfiguration GetMultiTargetConfiguration(
+		IMethodSymbol method,
+		IAssemblySymbol assembly
+	)
+	{
+		// First check if multi-target generation is enabled at the assembly level
+		var enableMultiTargetAttr = assembly
+			.GetAttributes()
+			.FirstOrDefault(attr =>
+				attr.AttributeClass != null
+				&& PurviewTypeFactory.Create(attr.AttributeClass)
+					== Constants.Shared.EnableMultiTargetGenerationAttribute
+			);
+
+		if (enableMultiTargetAttr == null)
+		{
+			return new MultiTargetConfiguration(
+				IsMultiTargetEnabled: false,
+				TargetTypes: GenerationType.None
+			);
+		}
+
+		// Check for TelemetryAttribute on the method
+		var telemetryAttr = method
+			.GetAttributes()
+			.FirstOrDefault(attr =>
+				attr.AttributeClass != null
+				&& PurviewTypeFactory.Create(attr.AttributeClass)
+					== Constants.Shared.TelemetryAttribute
+			);
+
+		if (telemetryAttr == null)
+		{
+			return new MultiTargetConfiguration(
+				IsMultiTargetEnabled: false,
+				TargetTypes: GenerationType.None
+			);
+		}
+
+		// Extract configuration from TelemetryAttribute
+		var targetTypes = GenerationType.None;
+
+		// Check GenerateActivity property
+		var generateActivity = GetAttributeProperty<bool>(telemetryAttr, "GenerateActivity");
+		if (generateActivity)
+			targetTypes |= GenerationType.Activities;
+
+		// Check GenerateLogging property
+		var generateLogging = GetAttributeProperty<bool>(telemetryAttr, "GenerateLogging");
+		if (generateLogging)
+			targetTypes |= GenerationType.Logging;
+
+		// Check GenerateMetrics property
+		var generateMetrics = GetAttributeProperty<bool>(telemetryAttr, "GenerateMetrics");
+		if (generateMetrics)
+			targetTypes |= GenerationType.Metrics;
+
+		return new MultiTargetConfiguration(
+			IsMultiTargetEnabled: targetTypes != GenerationType.None,
+			TargetTypes: targetTypes
+		);
+	}
+
+	/// <summary>
+	/// Gets parameter exclusions by checking for exclusion attributes.
+	/// </summary>
+	public static ParameterExclusions GetParameterExclusions(IParameterSymbol parameter)
+	{
+		var exclusions = ParameterExclusions.None;
+		var attributes = parameter.GetAttributes();
+
+		foreach (var attr in attributes)
+		{
+			if (attr.AttributeClass == null)
+				continue;
+
+			var attributeType = PurviewTypeFactory.Create(attr.AttributeClass);
+
+			if (attributeType == Constants.Shared.ExcludeFromActivityAttribute)
+			{
+				exclusions |= ParameterExclusions.Activities;
+			}
+			else if (attributeType == Constants.Shared.ExcludeFromLoggingAttribute)
+			{
+				exclusions |= ParameterExclusions.Logging;
+			}
+			else if (attributeType == Constants.Shared.ExcludeFromMetricsAttribute)
+			{
+				exclusions |= ParameterExclusions.Metrics;
+			}
+		}
+
+		return exclusions;
+	}
+
+	/// <summary>
+	/// Helper method to extract property values from attributes.
+	/// </summary>
+	static T? GetAttributeProperty<T>(AttributeData attribute, string propertyName)
+	{
+		var namedArgument = attribute.NamedArguments.FirstOrDefault(arg => arg.Key == propertyName);
+		return namedArgument.Key != null && namedArgument.Value.Value is T value ? value : default;
 	}
 
 	public static string WithComma(this string value, bool andSpace = true) =>

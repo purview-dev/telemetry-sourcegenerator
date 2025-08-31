@@ -70,16 +70,23 @@ static partial class PipelineHelpers
 	)
 	{
 		var methods = GetAllInterfaceMethods(interfaceSymbol, compilation, token);
-		Dictionary<string, List<Location>> dict = [];
+		var duplicatesBuilder = ImmutableDictionary.CreateBuilder<string, Location[]>();
+		Dictionary<string, List<Location>> methodLocations = [];
+
 		foreach (var method in methods)
 		{
-			if (dict.TryGetValue(method.Name, out var list))
+			if (methodLocations.TryGetValue(method.Name, out var list))
 				list.AddRange(method.Locations);
 			else
-				dict[method.Name] = [.. method.Locations];
+				methodLocations[method.Name] = [.. method.Locations];
 		}
-		return dict.Where(m => m.Value.Count > 1)
-			.ToImmutableDictionary(m => m.Key, m => m.Value.ToArray());
+
+		foreach (var kvp in methodLocations.Where(m => m.Value.Count > 1))
+		{
+			duplicatesBuilder.Add(kvp.Key, [.. kvp.Value]);
+		}
+
+		return duplicatesBuilder.ToImmutable();
 	}
 
 	static ImmutableDictionary<string, Location[]> BuildDuplicateMethods(

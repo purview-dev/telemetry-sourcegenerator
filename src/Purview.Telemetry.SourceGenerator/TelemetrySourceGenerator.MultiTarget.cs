@@ -1,12 +1,7 @@
-/*
-// TODO: Re-enable after implementing complete multi-target functionality
-
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Purview.Telemetry.SourceGenerator.Emitters;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
-using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator;
 
@@ -32,7 +27,7 @@ partial class TelemetrySourceGenerator
 		// Register for methods with TelemetryAttribute
 		var multiTargetMethodsPredicate = context
 			.SyntaxProvider.ForAttributeWithMetadataName(
-				Constants.Shared.TelemetryAttribute.TypeInfo.FullyQualifiedName,
+				Constants.Shared.TelemetryAttribute.FullyQualifiedName,
 				static (node, token) => PipelineHelpers.HasMultiTargetAttribute(node, token),
 				multiTargetTransform
 			)
@@ -53,10 +48,7 @@ partial class TelemetrySourceGenerator
 			multiTargetMethodsPredicate.Collect()
 		);
 
-		context.RegisterImplementationSourceOutput(
-			multiTargetMethods,
-			generationMultiTargetAction
-		);
+		context.RegisterImplementationSourceOutput(multiTargetMethods, generationMultiTargetAction);
 	}
 
 	static void GenerateMultiTargetMethods(
@@ -78,7 +70,9 @@ partial class TelemetrySourceGenerator
 			}
 			catch (Exception ex)
 			{
-				logger?.Error($"Error generating multi-target method {method.MethodName}: {ex.Message}");
+				logger?.Error(
+					$"Error generating multi-target method {method.MethodName}: {ex.Message}"
+				);
 				TelemetryDiagnostics.Report(
 					context.ReportDiagnostic,
 					TelemetryDiagnostics.General.FatalExecutionDuringExecution,
@@ -146,4 +140,3 @@ partial class TelemetrySourceGenerator
 		logger?.Debug($"Generating Metrics for multi-target method: {method.MethodName}");
 	}
 }
-*/

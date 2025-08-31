@@ -53,5 +53,6 @@
 			PackagePath="analyzers/dotnet/cs"
 			Visible="false"
 		/>
+		<None Include="Records\MultiTargetRecords.cs" />
 	</ItemGroup>
 </Project>

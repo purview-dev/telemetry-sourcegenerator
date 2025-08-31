@@ -276,7 +276,7 @@ partial class ActivitySourceTargetClassEmitter
 				.AppendLine()
 				.Append(indent, activityVariableName, withNewLine: false)
 				.Append(".SetStatus(")
-				.Append(Constants.Activities.ActivityStatusCodeMap[statusCode]);
+				.Append(Constants.Activities.ActivityStatusCodeMap.Value[statusCode]);
 
 			// Error
 			if (statusCode == 2)

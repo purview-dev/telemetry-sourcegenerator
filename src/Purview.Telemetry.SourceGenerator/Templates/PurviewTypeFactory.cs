@@ -6,28 +6,59 @@ namespace Purview.Telemetry.SourceGenerator.Templates;
 
 static class PurviewTypeFactory
 {
-	static readonly ImmutableDictionary<SpecialType, string> AliasMap = new Dictionary<
-		SpecialType,
-		string
-	>
+	internal static readonly Lazy<ImmutableDictionary<SpecialType, string>> AliasMap = new(
+		CreateAliasMap
+	);
+	internal static readonly Lazy<ImmutableDictionary<Type, SpecialType>> TypeMap = new(
+		CreateTypeMap
+	);
+
+	static ImmutableDictionary<SpecialType, string> CreateAliasMap()
 	{
-		{ SpecialType.System_Void, Constants.System.VoidKeyword },
-		{ SpecialType.System_Object, "object" },
-		{ SpecialType.System_String, "string" },
-		{ SpecialType.System_Boolean, "bool" },
-		{ SpecialType.System_Char, "char" },
-		{ SpecialType.System_Byte, "byte" },
-		{ SpecialType.System_SByte, "sbyte" },
-		{ SpecialType.System_Int16, "short" },
-		{ SpecialType.System_UInt16, "ushort" },
-		{ SpecialType.System_Int32, "int" },
-		{ SpecialType.System_UInt32, "uint" },
-		{ SpecialType.System_Int64, "long" },
-		{ SpecialType.System_UInt64, "ulong" },
-		{ SpecialType.System_Decimal, "decimal" },
-		{ SpecialType.System_Single, "float" },
-		{ SpecialType.System_Double, "double" },
-	}.ToImmutableDictionary();
+		var aliasBuilder = ImmutableDictionary.CreateBuilder<SpecialType, string>();
+
+		aliasBuilder.Add(SpecialType.System_Void, Constants.System.VoidKeyword);
+		aliasBuilder.Add(SpecialType.System_Object, Constants.System.BuiltInTypes.ObjectKeyword);
+		aliasBuilder.Add(SpecialType.System_String, Constants.System.BuiltInTypes.StringKeyword);
+		aliasBuilder.Add(SpecialType.System_Boolean, Constants.System.BuiltInTypes.BoolKeyword);
+		aliasBuilder.Add(SpecialType.System_Char, Constants.System.BuiltInTypes.CharKeyword);
+		aliasBuilder.Add(SpecialType.System_Byte, Constants.System.BuiltInTypes.ByteKeyword);
+		aliasBuilder.Add(SpecialType.System_SByte, Constants.System.BuiltInTypes.SByteKeyword);
+		aliasBuilder.Add(SpecialType.System_Int16, Constants.System.BuiltInTypes.ShortKeyword);
+		aliasBuilder.Add(SpecialType.System_UInt16, Constants.System.BuiltInTypes.UShortKeyword);
+		aliasBuilder.Add(SpecialType.System_Int32, Constants.System.BuiltInTypes.IntKeyword);
+		aliasBuilder.Add(SpecialType.System_UInt32, Constants.System.BuiltInTypes.UIntKeyword);
+		aliasBuilder.Add(SpecialType.System_Int64, Constants.System.BuiltInTypes.LongKeyword);
+		aliasBuilder.Add(SpecialType.System_UInt64, Constants.System.BuiltInTypes.ULongKeyword);
+		aliasBuilder.Add(SpecialType.System_Decimal, Constants.System.BuiltInTypes.DecimalKeyword);
+		aliasBuilder.Add(SpecialType.System_Single, Constants.System.BuiltInTypes.FloatKeyword);
+		aliasBuilder.Add(SpecialType.System_Double, Constants.System.BuiltInTypes.DoubleKeyword);
+
+		return aliasBuilder.ToImmutable();
+	}
+
+	static ImmutableDictionary<Type, SpecialType> CreateTypeMap()
+	{
+		var typeBuilder = ImmutableDictionary.CreateBuilder<Type, SpecialType>();
+
+		typeBuilder.Add(typeof(object), SpecialType.System_Object);
+		typeBuilder.Add(typeof(string), SpecialType.System_String);
+		typeBuilder.Add(typeof(bool), SpecialType.System_Boolean);
+		typeBuilder.Add(typeof(char), SpecialType.System_Char);
+		typeBuilder.Add(typeof(byte), SpecialType.System_Byte);
+		typeBuilder.Add(typeof(sbyte), SpecialType.System_SByte);
+		typeBuilder.Add(typeof(short), SpecialType.System_Int16);
+		typeBuilder.Add(typeof(ushort), SpecialType.System_UInt16);
+		typeBuilder.Add(typeof(int), SpecialType.System_Int32);
+		typeBuilder.Add(typeof(uint), SpecialType.System_UInt32);
+		typeBuilder.Add(typeof(long), SpecialType.System_Int64);
+		typeBuilder.Add(typeof(ulong), SpecialType.System_UInt64);
+		typeBuilder.Add(typeof(decimal), SpecialType.System_Decimal);
+		typeBuilder.Add(typeof(float), SpecialType.System_Single);
+		typeBuilder.Add(typeof(double), SpecialType.System_Double);
+
+		return typeBuilder.ToImmutable();
+	}
 
 	public static PurviewTypeInfo Create(string fullName)
 	{
@@ -65,8 +96,7 @@ static class PurviewTypeFactory
 			typeArguments = [.. genericType.TypeArguments.Select(Create)];
 		}
 
-		var systemAlias = AliasMap.GetValueOrDefault(typeSymbol.SpecialType);
-
+		var systemAlias = AliasMap.Value.GetValueOrDefault(typeSymbol.SpecialType);
 		return new(
 			TypeName: SymbolHelpers.GetTypeName(typeSymbol),
 			FullyQualifiedName: SymbolHelpers.GetFullyQualifiedName(typeSymbol),
@@ -78,157 +108,53 @@ static class PurviewTypeFactory
 		);
 	}
 
-	public static PurviewTypeInfo Create<T>() => Create(typeof(T).FullName);
+	public static PurviewTypeInfo Create<T>() => Create(typeof(T));
 
-	public static PurviewTypeInfo Create(SpecialType special)
+	public static PurviewTypeInfo Create(Type type)
 	{
-		return special switch
+		if (type == null)
+			throw new ArgumentNullException(nameof(type));
+
+		var nullableType = Nullable.GetUnderlyingType(type);
+		var isNullable = nullableType != null;
+		if (isNullable)
+			type = nullableType!;
+
+		var fullName = type.FullName ?? throw new ArgumentException("Type must have a full name.");
+		var typeName = type.Name;
+		var @namespace = type.Namespace ?? "";
+
+		// Handle generic types
+		ImmutableArray<PurviewTypeInfo> typeArguments = [];
+		if (type.IsGenericType && !type.IsGenericTypeDefinition)
+			typeArguments = [.. type.GetGenericArguments().Select(Create)];
+
+		var specialType = TypeMap.Value.GetValueOrDefault(type, SpecialType.None);
+		var alias =
+			specialType == SpecialType.None ? null : AliasMap.Value.GetValueOrDefault(specialType);
+
+		return new(typeName, fullName, @namespace, alias, isNullable, specialType, typeArguments);
+	}
+
+	public static PurviewTypeInfo Create(SpecialType specialType)
+	{
+		if (!AliasMap.Value.TryGetValue(specialType, out var alias))
 		{
-			SpecialType.System_Void => new(
-				Constants.System.VoidKeyword,
-				Constants.System.VoidKeyword,
-				"System",
-				Constants.System.VoidKeyword,
-				false,
-				special,
-				[]
-			),
-			SpecialType.System_Object => new(
-				"Object",
-				"System.Object",
-				"System",
-				"object",
-				false,
-				special,
-				[]
-			),
-			SpecialType.System_String => new(
-				"String",
-				"System.String",
-				"System",
-				"string",
-				false,
-				special,
-				[]
-			),
-			SpecialType.System_Boolean => new(
-				"Boolean",
-				"System.Boolean",
-				"System",
-				"bool",
-				false,
-				special,
-				[]
-			),
-			SpecialType.System_Char => new(
-				"Char",
-				"System.Char",
-				"System",
-				"char",
-				false,
-				special,
-				[]
-			),
-			SpecialType.System_Byte => new(
-				"Byte",
-				"System.Byte",
-				"System",
-				"byte",
-				false,
-				special,
-				[]
-			),
-			SpecialType.System_SByte => new(
-				"SByte",
-				"System.SByte",
-				"System",
-				"sbyte",
-				false,
-				special,
-				[]
-			),
-			SpecialType.System_Int16 => new(
-				"Int16",
-				"System.Int16",
-				"System",
-				"short",
-				false,
-				special,
-				[]
-			),
-			SpecialType.System_UInt16 => new(
-				"UInt16",
-				"System.UInt16",
-				"System",
-				"ushort",
-				false,
-				special,
-				[]
-			),
-			SpecialType.System_Int32 => new(
-				"Int32",
-				"System.Int32",
-				"System",
-				"int",
-				false,
-				special,
-				[]
-			),
-			SpecialType.System_UInt32 => new(
-				"UInt32",
-				"System.UInt32",
-				"System",
-				"uint",
-				false,
-				special,
-				[]
-			),
-			SpecialType.System_Int64 => new(
-				"Int64",
-				"System.Int64",
-				"System",
-				"long",
-				false,
-				special,
-				[]
-			),
-			SpecialType.System_UInt64 => new(
-				"UInt64",
-				"System.UInt64",
-				"System",
-				"ulong",
-				false,
-				special,
-				[]
-			),
-			SpecialType.System_Decimal => new(
-				"Decimal",
-				"System.Decimal",
-				"System",
-				"decimal",
-				false,
-				special,
-				[]
-			),
-			SpecialType.System_Single => new(
-				"Single",
-				"System.Single",
-				"System",
-				"float",
-				false,
-				special,
-				[]
-			),
-			SpecialType.System_Double => new(
-				"Double",
-				"System.Double",
-				"System",
-				"double",
-				false,
-				special,
-				[]
-			),
-			_ => throw new ArgumentOutOfRangeException(nameof(special), special, null),
-		};
+			throw new ArgumentOutOfRangeException(
+				nameof(specialType),
+				$"SpecialType '{specialType}' does not have a known alias."
+			);
+		}
+
+		var fullName = specialType.ToString().Replace("System_", "System.");
+		return new(
+			TypeName: alias,
+			FullyQualifiedName: fullName,
+			Namespace: "System",
+			SystemAlias: alias,
+			IsNullable: false,
+			SpecialType: specialType,
+			GenericTypeArguments: []
+		);
 	}
 }

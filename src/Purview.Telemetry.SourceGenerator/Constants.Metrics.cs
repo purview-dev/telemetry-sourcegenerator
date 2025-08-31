@@ -80,18 +80,37 @@ partial class Constants
 			SpecialType.System_Decimal,
 		];
 
-		public static readonly ImmutableDictionary<
-			InstrumentTypes,
-			PurviewTypeInfo
-		> InstrumentTypeMap = new Dictionary<InstrumentTypes, PurviewTypeInfo>
+		public static readonly Lazy<
+			ImmutableDictionary<InstrumentTypes, PurviewTypeInfo>
+		> InstrumentTypeMap = new(CreateInstrumentTypeMap);
+
+		static ImmutableDictionary<InstrumentTypes, PurviewTypeInfo> CreateInstrumentTypeMap()
 		{
-			{ InstrumentTypes.Counter, SystemDiagnostics.Counter },
-			{ InstrumentTypes.UpDownCounter, SystemDiagnostics.UpDownCounter },
-			{ InstrumentTypes.Histogram, SystemDiagnostics.Histogram },
-			{ InstrumentTypes.ObservableCounter, SystemDiagnostics.ObservableCounter },
-			{ InstrumentTypes.ObservableGauge, SystemDiagnostics.ObservableGauge },
-			{ InstrumentTypes.ObservableUpDownCounter, SystemDiagnostics.ObservableUpDownCounter },
-		}.ToImmutableDictionary();
+			var instrumentTypeBuilder = ImmutableDictionary.CreateBuilder<
+				InstrumentTypes,
+				PurviewTypeInfo
+			>();
+			instrumentTypeBuilder.Add(InstrumentTypes.Counter, SystemDiagnostics.Counter);
+			instrumentTypeBuilder.Add(
+				InstrumentTypes.UpDownCounter,
+				SystemDiagnostics.UpDownCounter
+			);
+			instrumentTypeBuilder.Add(InstrumentTypes.Histogram, SystemDiagnostics.Histogram);
+			instrumentTypeBuilder.Add(
+				InstrumentTypes.ObservableCounter,
+				SystemDiagnostics.ObservableCounter
+			);
+			instrumentTypeBuilder.Add(
+				InstrumentTypes.ObservableGauge,
+				SystemDiagnostics.ObservableGauge
+			);
+			instrumentTypeBuilder.Add(
+				InstrumentTypes.ObservableUpDownCounter,
+				SystemDiagnostics.ObservableUpDownCounter
+			);
+
+			return instrumentTypeBuilder.ToImmutable();
+		}
 
 		public static class SystemDiagnostics
 		{

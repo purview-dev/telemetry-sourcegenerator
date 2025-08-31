@@ -60,30 +60,41 @@ partial class Constants
 			CriticalAttribute,
 		];
 
-		public static readonly ImmutableDictionary<int, PurviewTypeInfo> LogLevelTypeMap =
-			new Dictionary<int, PurviewTypeInfo>
-			{
-				{ 0, MicrosoftExtensions.LogLevel_Trace },
-				{ 1, MicrosoftExtensions.LogLevel_Debug },
-				{ 2, MicrosoftExtensions.LogLevel_Information },
-				{ 3, MicrosoftExtensions.LogLevel_Warning },
-				{ 4, MicrosoftExtensions.LogLevel_Error },
-				{ 5, MicrosoftExtensions.LogLevel_Critical },
-				{ 6, MicrosoftExtensions.LogLevel_None },
-			}.ToImmutableDictionary();
+		public static readonly Lazy<ImmutableDictionary<int, PurviewTypeInfo>> LogLevelTypeMap =
+			new(CreateLogLevelTypeMap);
+		public static readonly Lazy<
+			ImmutableDictionary<PurviewTypeInfo, int>
+		> SpecificLogAttributesToLogLevel = new(CreateSpecificLogAttributesToLogLevel);
 
-		public static readonly ImmutableDictionary<
-			PurviewTypeInfo,
-			int
-		> SpecificLogAttributesToLevel = new Dictionary<PurviewTypeInfo, int>
+		static ImmutableDictionary<int, PurviewTypeInfo> CreateLogLevelTypeMap()
 		{
-			{ TraceAttribute, 0 },
-			{ DebugAttribute, 1 },
-			{ InfoAttribute, 2 },
-			{ WarningAttribute, 3 },
-			{ ErrorAttribute, 4 },
-			{ CriticalAttribute, 5 },
-		}.ToImmutableDictionary();
+			var logLevelBuilder = ImmutableDictionary.CreateBuilder<int, PurviewTypeInfo>();
+			logLevelBuilder.Add(0, MicrosoftExtensions.LogLevel_Trace);
+			logLevelBuilder.Add(1, MicrosoftExtensions.LogLevel_Debug);
+			logLevelBuilder.Add(2, MicrosoftExtensions.LogLevel_Information);
+			logLevelBuilder.Add(3, MicrosoftExtensions.LogLevel_Warning);
+			logLevelBuilder.Add(4, MicrosoftExtensions.LogLevel_Error);
+			logLevelBuilder.Add(5, MicrosoftExtensions.LogLevel_Critical);
+			logLevelBuilder.Add(6, MicrosoftExtensions.LogLevel_None);
+
+			return logLevelBuilder.ToImmutable();
+		}
+
+		static ImmutableDictionary<PurviewTypeInfo, int> CreateSpecificLogAttributesToLogLevel()
+		{
+			var specificLogAttributesBuilder = ImmutableDictionary.CreateBuilder<
+				PurviewTypeInfo,
+				int
+			>();
+			specificLogAttributesBuilder.Add(TraceAttribute, 0);
+			specificLogAttributesBuilder.Add(DebugAttribute, 1);
+			specificLogAttributesBuilder.Add(InfoAttribute, 2);
+			specificLogAttributesBuilder.Add(WarningAttribute, 3);
+			specificLogAttributesBuilder.Add(ErrorAttribute, 4);
+			specificLogAttributesBuilder.Add(CriticalAttribute, 5);
+
+			return specificLogAttributesBuilder.ToImmutable();
+		}
 
 		public static class MicrosoftExtensions
 		{

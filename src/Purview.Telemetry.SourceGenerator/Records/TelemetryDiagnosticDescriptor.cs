@@ -2,7 +2,7 @@
 
 namespace Purview.Telemetry.SourceGenerator.Records;
 
-record TelemetryDiagnosticDescriptor(
+sealed record TelemetryDiagnosticDescriptor(
 	string Id,
 	string Title,
 	string Description,

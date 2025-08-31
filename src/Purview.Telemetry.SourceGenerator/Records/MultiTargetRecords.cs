@@ -6,7 +6,7 @@ namespace Purview.Telemetry.SourceGenerator.Records;
 /// <summary>
 /// Represents a method that uses multi-target telemetry generation.
 /// </summary>
-record MultiTargetMethod(
+sealed record MultiTargetMethod(
 	string MethodName,
 	string FullyQualifiedMethodName,
 	IMethodSymbol MethodSymbol,
@@ -21,7 +21,7 @@ record MultiTargetMethod(
 /// <summary>
 /// Represents a parameter in a multi-target method with exclusion information.
 /// </summary>
-record MultiTargetParameter(
+sealed record MultiTargetParameter(
 	string Name,
 	string TypeName,
 	IParameterSymbol ParameterSymbol,
@@ -31,3 +31,25 @@ record MultiTargetParameter(
 	string? TagName,
 	string? BaggageName
 );
+
+/// <summary>
+/// Configuration for multi-target telemetry generation.
+/// </summary>
+sealed record MultiTargetConfiguration(
+	bool IsMultiTargetEnabled,
+	GenerationType TargetTypes,
+	string? ConfigurationName = null
+);
+
+/// <summary>
+/// Represents exclusion settings for parameters in multi-target scenarios.
+/// </summary>
+[Flags]
+enum ParameterExclusions
+{
+	None = 0,
+	Activities = 1 << 0,
+	Logging = 1 << 1,
+	Metrics = 1 << 2,
+	All = Activities | Logging | Metrics,
+}

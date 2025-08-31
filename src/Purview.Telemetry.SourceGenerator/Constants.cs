@@ -53,6 +53,17 @@ static partial class Constants
 		);
 		public static readonly PurviewTypeInfo TelemetryGenerationAttribute =
 			PurviewTypeFactory.Create("Purview.Telemetry.TelemetryGenerationAttribute");
+		public static readonly PurviewTypeInfo TelemetryAttribute = PurviewTypeFactory.Create(
+			"Purview.Telemetry.TelemetryAttribute"
+		);
+		public static readonly PurviewTypeInfo EnableMultiTargetGenerationAttribute =
+			PurviewTypeFactory.Create("Purview.Telemetry.EnableMultiTargetGenerationAttribute");
+		public static readonly PurviewTypeInfo ExcludeFromActivityAttribute =
+			PurviewTypeFactory.Create("Purview.Telemetry.ExcludeFromActivityAttribute");
+		public static readonly PurviewTypeInfo ExcludeFromLoggingAttribute =
+			PurviewTypeFactory.Create("Purview.Telemetry.ExcludeFromLoggingAttribute");
+		public static readonly PurviewTypeInfo ExcludeFromMetricsAttribute =
+			PurviewTypeFactory.Create("Purview.Telemetry.ExcludeFromMetricsAttribute");
 	}
 
 	public static partial class DependencyInjection

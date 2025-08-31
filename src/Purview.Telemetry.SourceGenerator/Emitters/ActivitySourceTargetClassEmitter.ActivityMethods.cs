@@ -130,7 +130,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		builder
 			// kind: (un-named)
-			.Append(Constants.Activities.ActivityKindTypeMap[kind])
+			.Append(Constants.Activities.ActivityKindTypeMap.Value[kind])
 			// parentContext/ parentId:
 			.Append(", ")
 			.Append(parentContextParameterName)
