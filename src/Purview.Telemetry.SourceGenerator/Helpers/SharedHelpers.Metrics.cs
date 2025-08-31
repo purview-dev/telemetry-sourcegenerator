@@ -33,7 +33,9 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeStringValue? nameValue = null;
 		AttributeStringValue? instrumentPrefix = null;
@@ -117,7 +119,9 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeStringValue? instrumentPrefix = null;
 		AttributeStringValue? instrumentSeparator = null;
@@ -196,7 +200,9 @@ partial class SharedHelpers
 					out attributeData
 				)
 			)
+			{
 				break;
+			}
 		}
 
 		if (attributeData?.AttributeClass == null)

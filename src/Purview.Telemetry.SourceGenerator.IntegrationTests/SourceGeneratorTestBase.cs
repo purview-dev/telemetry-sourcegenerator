@@ -283,9 +283,11 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 		var generatorType = generator.GetType();
 
 		if (!generatorType.IsDefined(typeof(GeneratorAttribute)))
+		{
 			throw new InvalidOperationException(
 				$"Type is not marked [Generator]: {generatorType}."
 			);
+		}
 	}
 
 	protected virtual bool ReferenceCore => true;
@@ -370,6 +372,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 					)
 				);
 				if (includeLoggerTypes == IncludeLoggerTypes.Telemetry)
+				{
 					project = project.AddMetadataReference(
 						MetadataReference.CreateFromFile(
 							typeof(Microsoft.Extensions.Logging.LogPropertiesAttribute)
@@ -377,6 +380,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 								.Location
 						)
 					);
+				}
 			}
 		}
 

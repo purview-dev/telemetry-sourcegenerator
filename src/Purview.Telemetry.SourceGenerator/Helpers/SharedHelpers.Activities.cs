@@ -32,7 +32,9 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeStringValue? nameValue = null;
 		AttributeValue<bool>? defaultToTags = null;
@@ -115,7 +117,9 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeStringValue? nameValue = null;
 		AttributeValue<bool>? defaultToTags = null;
@@ -212,7 +216,9 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeStringValue? nameValue = null;
 		AttributeValue<int>? kind = null;
@@ -277,7 +283,9 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeStringValue? nameValue = null;
 		AttributeValue<bool>? useRecordExceptionRules = null;

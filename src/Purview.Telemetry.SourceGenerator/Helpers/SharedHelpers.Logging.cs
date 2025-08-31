@@ -21,7 +21,9 @@ partial class SharedHelpers
 				out var matchingTemplate
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeValue<int>? level = null;
 		if (matchingTemplate != Constants.Logging.LogAttribute)
@@ -98,7 +100,9 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeValue<int>? defaultLevel = null;
 		AttributeStringValue? customPrefix = null;
@@ -172,7 +176,9 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeValue<int>? defaultLevel = null;
 		AttributeValue<bool>? disableMSLoggingTelemetryGeneration = null;
@@ -239,7 +245,9 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeValue<bool>? omitReferenceName = null;
 		AttributeValue<bool>? skipNullProperties = null;
@@ -304,7 +312,9 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeValue<int>? maximumValueCount = null;
 
@@ -319,7 +329,9 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						maximumValueCount = new((int)value);
+					}
 				},
 				semanticModel,
 				logger,

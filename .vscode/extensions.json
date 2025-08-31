@@ -4,9 +4,10 @@
 		"github.vscode-github-actions",
 		"github.vscode-pull-request-github",
 		"streetsidesoftware.code-spell-checker",
-		"bierner.github-markdown-preview",
 		"davidanson.vscode-markdownlint",
 		"esbenp.prettier-vscode",
-		"hnw.vscode-auto-open-markdown-preview"
+		"yahyabatulu.vscode-markdown-alert",
+		"yzhang.markdown-all-in-one",
+		"csharpier.csharpier-vscode"
 	]
 }

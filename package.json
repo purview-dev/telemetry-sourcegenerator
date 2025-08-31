@@ -5,7 +5,8 @@
 	"readme": "README.md",
 	"main": "index.js",
 	"scripts": {
-		"release": "commit-and-tag-version --commit-all"
+		"release": "commit-and-tag-version --commit-all",
+		"prepare": "husky"
 	},
 	"repository": {
 		"type": "git",

@@ -90,7 +90,9 @@ partial class MeterTargetClassEmitter
 			!methodTarget.InstrumentAttribute!.IsAutoIncrement
 			&& methodTarget.MeasurementParameter == null
 		)
+		{
 			return;
+		}
 
 		logger?.Debug($"Emitting instrument method: {methodTarget.MethodName}.");
 

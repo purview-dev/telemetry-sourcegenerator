@@ -76,10 +76,12 @@ sealed record PurviewTypeInfo(
 		var result = (SystemAlias ?? (includeGlobal ? "global::" : null) + FullyQualifiedName);
 
 		if (GenericTypeArguments.Length > 0)
+		{
 			result +=
 				"<"
 				+ string.Join(", ", GenericTypeArguments.Select(m => m.ToString(includeGlobal)))
 				+ ">";
+		}
 
 		return result + isNullableSuffix;
 	}

@@ -293,9 +293,11 @@ partial class LoggerGenTargetClassEmitter
 			context.CancellationToken.ThrowIfCancellationRequested();
 
 			if (parameter.Name == methodTarget.ExceptionParameter?.Name)
+			{
 				// We need to skip over the exception parameter as
 				// its passed directly to the .Log method.
 				continue;
+			}
 
 			var isEnumerable = parameter.IsArray || parameter.IsIEnumerable;
 			// Need to match the name against the value.
@@ -370,7 +372,9 @@ partial class LoggerGenTargetClassEmitter
 						false
 					)
 				)
+				{
 					logPropertyName = $"{parameter.Name}.{logPropertyName}";
+				}
 
 				var shouldSkipNull =
 					parameter.LogPropertiesAttribute.SkipNullProperties.Value.GetValueOrDefault(

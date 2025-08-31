@@ -426,8 +426,10 @@ partial class PipelineHelpers
 		}
 
 		if (index > 0)
+		{
 			// Trim the last ", "
 			builder.Remove(builder.Length - 2, 2);
+		}
 
 		return builder.ToString();
 	}

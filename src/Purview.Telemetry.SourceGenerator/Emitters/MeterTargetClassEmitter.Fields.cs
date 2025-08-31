@@ -22,11 +22,7 @@ partial class MeterTargetClassEmitter
 		indent++;
 
 		builder
-			.Append(
-				indent,
-				Constants.Metrics.SystemDiagnostics.Meter,
-				withNewLine: false
-			)
+			.Append(indent, Constants.Metrics.SystemDiagnostics.Meter, withNewLine: false)
 			.Append(' ')
 			.Append(MeterFieldName)
 			.AppendLine(" = default!;")
@@ -35,13 +31,14 @@ partial class MeterTargetClassEmitter
 		foreach (var method in target.InstrumentationMethods)
 		{
 			if (method.InstrumentAttribute == null)
+			{
 				// We've already 'reported' this error, so we can skip it.
 				continue;
+			}
 
 			var type = Constants
 				.Metrics.InstrumentTypeMap[method.InstrumentAttribute.InstrumentType]
-				.MakeGeneric(method.InstrumentMeasurementType)
-				;
+				.MakeGeneric(method.InstrumentMeasurementType);
 
 			builder
 				.Append(indent, type, withNewLine: false)

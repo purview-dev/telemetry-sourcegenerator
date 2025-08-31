@@ -590,7 +590,9 @@ partial class PipelineHelpers
 				meterGenerationAttribute?.InstrumentPrefix.IsSet == true
 				&& !string.IsNullOrWhiteSpace(meterGenerationAttribute?.InstrumentPrefix.Value)
 			)
+			{
 				prefix = meterGenerationAttribute!.InstrumentPrefix.Value! + separator;
+			}
 		}
 
 		if (!string.IsNullOrWhiteSpace(meterAttribute.InstrumentPrefix.Value))

@@ -164,9 +164,11 @@ using Purview.Telemetry;
 			.ScrubInlineDateTimeOffsets("yyyy-MM-dd HH:mm:ss zzzz"); // 2024-22-02 14:43:22 +00:00
 
 		if (parameters.Length > 0)
+		{
 			verifierTask = verifierTask.UseTextForParameters(
 				ComputeParameterFilenameHash(parameters)
 			);
+		}
 
 		config?.Invoke(verifierTask);
 
@@ -197,7 +199,7 @@ using Purview.Telemetry;
 					string.Join(
 						Environment.NewLine,
 						result.Diagnostics.Select(d =>
-							d.ToString()
+							d
 							+ Environment.NewLine
 							+ "-----------------------------------------------------"
 						)

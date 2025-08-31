@@ -64,19 +64,25 @@ static partial class Utilities
 				generationType.HasFlag(GenerationType.Activities)
 				&& requestedType == GenerationType.Activities
 			)
+			{
 				isValid = loggingCount == 0 && metricsCount == 0;
+			}
 
 			if (
 				generationType.HasFlag(GenerationType.Logging)
 				&& requestedType == GenerationType.Logging
 			)
+			{
 				isValid = activityCount == 0 && metricsCount == 0;
+			}
 
 			if (
 				generationType.HasFlag(GenerationType.Metrics)
 				&& requestedType == GenerationType.Metrics
 			)
+			{
 				isValid = activityCount == 0 && loggingCount == 0;
+			}
 		}
 
 		return new(

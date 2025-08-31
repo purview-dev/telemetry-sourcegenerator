@@ -28,7 +28,7 @@ sealed class EmbeddedResources
 		{
 			var existingResources = _ownerAssembly.GetManifestResourceNames();
 			throw new ArgumentException(
-				$"Could not find embedded resource {resourceName}. Available resource names: {string.Join(", ", existingResources)}"
+				$"Could not find embedded resource {resourceName}.\n\nAvailable resource names:\n{string.Join("\n", existingResources.Select(r => $"   - {r}"))}"
 			);
 		}
 

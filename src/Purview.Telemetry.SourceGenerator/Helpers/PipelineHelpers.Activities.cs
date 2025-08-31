@@ -340,12 +340,14 @@ partial class PipelineHelpers
 
 			TagOrBaggageAttributeRecord? tagOrBaggageAttribute = null;
 			if (attribute != null)
+			{
 				tagOrBaggageAttribute = SharedHelpers.GetTagOrBaggageAttribute(
 					attribute,
 					semanticModel,
 					logger,
 					token
 				);
+			}
 
 			var parameterName = parameter.Name;
 			var generatedName = GenerateParameterName(

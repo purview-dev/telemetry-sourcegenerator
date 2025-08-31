@@ -91,6 +91,7 @@ static partial class SharedHelpers
 		// supports: [AttributeType(namedParam: 10)]
 		var items = attributeData.ConstructorArguments;
 		if (items.Length > 0)
+		{
 			for (var i = 0; i < items.Length; i++)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
@@ -107,9 +108,11 @@ static partial class SharedHelpers
 				}
 				namedArguments(name, value);
 			}
+		}
 
 		// supports: e.g. [AttributeType(PropertyName = 10)]
 		if (attributeData.NamedArguments.Any())
+		{
 			foreach (var namedArgument in attributeData.NamedArguments)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
@@ -131,6 +134,7 @@ static partial class SharedHelpers
 
 				namedArguments(namedArgument.Key, value!);
 			}
+		}
 
 		return true;
 	}
@@ -146,6 +150,7 @@ static partial class SharedHelpers
 
 		var arguments = attributeSyntax.ArgumentList?.Arguments;
 		if (arguments != null)
+		{
 			foreach (var argument in arguments)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
@@ -156,12 +161,14 @@ static partial class SharedHelpers
 						.OfType<IdentifierNameSyntax>()
 						.FirstOrDefault()
 						?.ToString();
+
 				var value = argument.Expression.ToString();
 				if (name == null || value == null)
 					continue;
 
 				namedArguments(name!, value);
 			}
+		}
 
 		return true;
 	}
@@ -177,7 +184,9 @@ static partial class SharedHelpers
 			attributeData.ApplicationSyntaxReference?.GetSyntax(cancellationToken)
 			is not AttributeSyntax attributeSyntax
 		)
+		{
 			return false;
+		}
 
 		try
 		{
@@ -260,6 +269,7 @@ static partial class SharedHelpers
 				out var typeAttribute
 			)
 		)
+		{
 			if (
 				!Utilities.TryContainsAttribute(
 					semanticModel.Compilation.Assembly,
@@ -269,6 +279,7 @@ static partial class SharedHelpers
 				)
 			)
 				return CreateDefault();
+		}
 
 		var assemblyTelemetryGeneration =
 			assemblyAttribute == null

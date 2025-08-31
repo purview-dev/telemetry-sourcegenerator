@@ -36,10 +36,12 @@ static class PurviewTypeFactory
 
 		var lastDotIndex = fullName.LastIndexOf('.');
 		if (lastDotIndex < 0)
+		{
 			throw new ArgumentException(
 				"Type name must contain a namespace and a type name.",
 				nameof(fullName)
 			);
+		}
 
 		var typeName = fullName.Substring(lastDotIndex + 1);
 		var @namespace = fullName.Substring(0, lastDotIndex);

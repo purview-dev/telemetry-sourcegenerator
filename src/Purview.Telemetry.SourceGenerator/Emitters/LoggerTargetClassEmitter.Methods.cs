@@ -31,7 +31,9 @@ partial class LoggerTargetClassEmitter
 				methodTarget.ParameterCountSansException
 				> Constants.Logging.MaxNonExceptionParameters
 			)
+			{
 				continue;
+			}
 
 			EmitLogActionMethod(builder, indent, methodTarget, context, logger);
 		}

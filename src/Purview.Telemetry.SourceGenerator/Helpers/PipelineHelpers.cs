@@ -57,7 +57,9 @@ static partial class PipelineHelpers
 					semanticModel.GetDeclaredSymbol(member, token) is IMethodSymbol symbol
 					&& seen.Add(symbol.ToDisplayString())
 				)
+				{
 					yield return symbol;
+				}
 			}
 		}
 	}

@@ -23,10 +23,13 @@ sealed class TelemetryAttribute : global::System.Attribute
 	/// </summary>
 	public bool GenerateActivity { get; set; }
 
+#if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
+
 	/// <summary>
 	/// Determines if Logging telemetry should be generated for this method.
 	/// </summary>
 	public bool GenerateLogging { get; set; }
+#endif
 
 	/// <summary>
 	/// Determines if Metrics telemetry should be generated for this method.
@@ -45,11 +48,14 @@ sealed class TelemetryAttribute : global::System.Attribute
 	/// </summary>
 	public global::System.Diagnostics.ActivityKind ActivityKind { get; set; }
 
+#if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
+
 	/// <summary>
 	/// Optional log level for the Logging telemetry. Use Microsoft.Extensions.Logging.LogLevel values.
 	/// Only used when <see cref="GenerateLogging"/> is true.
 	/// </summary>
-	public int LogLevel { get; set; }
+	public global::Microsoft.Extensions.Logging.LogLevel LogLevel { get; set; } =
+		global::Microsoft.Extensions.Logging.LogLevel.Information;
 
 	/// <summary>
 	/// Optional log message template for the Logging telemetry.
@@ -62,4 +68,5 @@ sealed class TelemetryAttribute : global::System.Attribute
 	/// Only used when <see cref="GenerateLogging"/> is true.
 	/// </summary>
 	public int? LogEventId { get; set; }
+#endif
 }
