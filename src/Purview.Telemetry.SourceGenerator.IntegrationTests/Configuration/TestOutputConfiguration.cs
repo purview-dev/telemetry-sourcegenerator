@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Purview.Telemetry.SourceGenerator.Configuration;
 
 /// <summary>
@@ -11,7 +9,8 @@ public static class TestOutputConfiguration
 	/// Environment variable name to enable test output generation.
 	/// Set to "true" to enable writing generated content to the output folder.
 	/// </summary>
-	public const string EnableOutputEnvironmentVariable = "PURVIEW_TELEMETRY_OUTPUT_GENERATED_FILES";
+	public const string EnableOutputEnvironmentVariable =
+		"PURVIEW_TELEMETRY_OUTPUT_GENERATED_FILES";
 
 	/// <summary>
 	/// Environment variable name to specify the output directory.
@@ -28,7 +27,9 @@ public static class TestOutputConfiguration
 	/// Gets whether output generation is enabled based on environment variables.
 	/// </summary>
 	public static bool IsOutputEnabled =>
-		Environment.GetEnvironmentVariable(EnableOutputEnvironmentVariable)?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
+		Environment
+			.GetEnvironmentVariable(EnableOutputEnvironmentVariable)
+			?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
 
 	/// <summary>
 	/// Gets the configured output directory path.
@@ -113,12 +114,12 @@ public static class TestOutputConfiguration
 	{
 		var outputDir = EnsureOutputDirectory();
 		var testDir = Path.Combine(outputDir, SanitizeFileName(testName));
-		
+
 		if (Directory.Exists(testDir))
 		{
 			Directory.Delete(testDir, recursive: true);
 		}
-		
+
 		Directory.CreateDirectory(testDir);
 		return testDir;
 	}
@@ -129,7 +130,10 @@ public static class TestOutputConfiguration
 	private static string SanitizeFileName(string fileName)
 	{
 		var invalidChars = Path.GetInvalidFileNameChars();
-		var sanitized = string.Join("_", fileName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries));
+		var sanitized = string.Join(
+			"_",
+			fileName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries)
+		);
 		return sanitized.Length > 100 ? sanitized.Substring(0, 100) : sanitized;
 	}
 }

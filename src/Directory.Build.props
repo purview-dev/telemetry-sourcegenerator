@@ -4,10 +4,4 @@
 		<DefineConstants Condition="'$(Configuration)' == 'DEBUG'">DEBUG_SG</DefineConstants>
 		<NoWarn>$(NoWarn);CA1031;RCS1266;</NoWarn>
 	</PropertyGroup>
-	<!-- Avoid NuGet fallback folders on non-Windows (e.g., Linux CI/containers).
-	     This prevents ResolvePackageAssets from probing Visual Studio fallback paths. -->
-	<PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
-		<RestoreAdditionalProjectFallbackFolders></RestoreAdditionalProjectFallbackFolders>
-		<RestoreFallbackFolders></RestoreFallbackFolders>
-	</PropertyGroup>
 </Project>

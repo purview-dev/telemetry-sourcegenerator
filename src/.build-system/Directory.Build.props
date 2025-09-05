@@ -127,7 +127,6 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="NCrunch.Framework" />
 		<PackageReference Include="xunit.v3" />
 		<PackageReference Include="xunit.analyzers">
 			<PrivateAssets>all</PrivateAssets>

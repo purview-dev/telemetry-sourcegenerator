@@ -43,6 +43,29 @@ partial class PipelineHelpers
 			);
 		}
 
+		// If multi-target generation is enabled and this interface contains [Telemetry] methods,
+		// skip single-target metrics generation to avoid mixed outputs.
+		{
+			var assembly = context.SemanticModel.Compilation.Assembly;
+			foreach (
+				var m in GetAllInterfaceMethods(
+					interfaceSymbol,
+					context.SemanticModel.Compilation,
+					token
+				)
+			)
+			{
+				var mt = Utilities.GetMultiTargetConfiguration(m, assembly);
+				if (mt.IsMultiTargetEnabled)
+				{
+					logger?.Debug(
+						$"Skipping Meter generation for {interfaceSymbol.Name} due to multi-target usage."
+					);
+					return null;
+				}
+			}
+		}
+
 		var semanticModel = context.SemanticModel;
 		var meterAttribute = SharedHelpers.GetMeterAttribute(
 			context.TargetSymbol,

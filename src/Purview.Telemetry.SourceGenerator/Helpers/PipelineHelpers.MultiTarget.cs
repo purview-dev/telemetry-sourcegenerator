@@ -35,7 +35,7 @@ static partial class PipelineHelpers
 		}
 
 		var assembly = context.SemanticModel.Compilation.Assembly;
-		
+
 		// Check if multi-target generation is enabled at the assembly level
 		var enableMultiTargetAttr = assembly
 			.GetAttributes()
@@ -47,7 +47,7 @@ static partial class PipelineHelpers
 
 		if (enableMultiTargetAttr == null)
 		{
-			logger?.Debug($"Multi-target generation not enabled at assembly level");
+			logger?.Debug("Multi-target generation not enabled at assembly level");
 			return null;
 		}
 
@@ -96,6 +96,82 @@ static partial class PipelineHelpers
 		);
 	}
 
+	public static MultiTargetInterface? BuildMultiTargetTransformFromInterface(
+		GeneratorSyntaxContext context,
+		GenerationLogger? logger,
+		CancellationToken cancellationToken
+	)
+	{
+		cancellationToken.ThrowIfCancellationRequested();
+
+		if (context.Node is not InterfaceDeclarationSyntax interfaceSyntax)
+			return null;
+
+		var semanticModel = context.SemanticModel;
+		if (
+			context.SemanticModel.GetDeclaredSymbol(interfaceSyntax, cancellationToken)
+			is not INamedTypeSymbol interfaceSymbol
+		)
+		{
+			logger?.Warning("MultiTarget transform called on non-interface symbol");
+			return null;
+		}
+
+		var assembly = context.SemanticModel.Compilation.Assembly;
+
+		// Require assembly-level opt-in
+		var enableMultiTargetAttr = assembly
+			.GetAttributes()
+			.FirstOrDefault(attr =>
+				attr.AttributeClass != null
+				&& PurviewTypeFactory.Create(attr.AttributeClass)
+					== Constants.Shared.EnableMultiTargetGenerationAttribute
+			);
+
+		if (enableMultiTargetAttr == null)
+		{
+			logger?.Debug("Multi-target generation not enabled at assembly level");
+			return null;
+		}
+
+		// Build methods driven by [Telemetry] usage
+		var methods = ProcessMultiTargetMethods(
+			interfaceSymbol,
+			context.SemanticModel.Compilation,
+			logger,
+			cancellationToken
+		);
+
+		if (methods.IsEmpty)
+		{
+			logger?.Debug($"No multi-target methods found in interface {interfaceSymbol.Name}");
+			return null;
+		}
+
+		var telemetryGeneration = SharedHelpers.GetTelemetryGenerationAttribute(
+			interfaceSymbol,
+			semanticModel,
+			logger,
+			cancellationToken
+		);
+
+		var generationType = GetGenerationTypeFromMethods(methods);
+		var namespaceName = interfaceSymbol.ContainingNamespace?.ToDisplayString() ?? "";
+		var parentClasses = Utilities.GetParentClasses(interfaceSyntax);
+
+		return new MultiTargetInterface(
+			InterfaceName: interfaceSymbol.Name,
+			FullyQualifiedInterfaceName: interfaceSymbol.ToDisplayString(),
+			InterfaceSymbol: interfaceSymbol,
+			Namespace: namespaceName,
+			ParentClasses: parentClasses,
+			TelemetryGeneration: telemetryGeneration,
+			Methods: methods,
+			GenerationType: generationType,
+			Location: interfaceSyntax.GetLocation()
+		);
+	}
+
 	static ImmutableArray<MultiTargetMethod> ProcessMultiTargetMethods(
 		INamedTypeSymbol interfaceSymbol,
 		Compilation compilation,
@@ -105,7 +181,9 @@ static partial class PipelineHelpers
 	{
 		var result = ImmutableArray.CreateBuilder<MultiTargetMethod>();
 
-		foreach (var method in GetAllInterfaceMethods(interfaceSymbol, compilation, cancellationToken))
+		foreach (
+			var method in GetAllInterfaceMethods(interfaceSymbol, compilation, cancellationToken)
+		)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 
@@ -129,7 +207,9 @@ static partial class PipelineHelpers
 
 			if (!config.IsMultiTargetEnabled)
 			{
-				logger?.Debug($"Method {method.Name} has Telemetry attribute but no targets enabled");
+				logger?.Debug(
+					$"Method {method.Name} has Telemetry attribute but no targets enabled"
+				);
 				continue;
 			}
 
@@ -165,7 +245,7 @@ static partial class PipelineHelpers
 
 		// Check GenerateActivity property
 		var generateActivity = GetAttributeProperty<bool>(telemetryAttribute, "GenerateActivity");
-		if (generateActivity == true)
+		if (generateActivity)
 		{
 			targetTypes |= GenerationType.Activities;
 			activityName = GetAttributeProperty<string>(telemetryAttribute, "ActivityName");
@@ -173,24 +253,24 @@ static partial class PipelineHelpers
 
 		// Check GenerateLogging property
 		var generateLogging = GetAttributeProperty<bool>(telemetryAttribute, "GenerateLogging");
-		if (generateLogging == true)
+		if (generateLogging)
 		{
 			targetTypes |= GenerationType.Logging;
 			logMessage = GetAttributeProperty<string>(telemetryAttribute, "LogMessage");
-			
+
 			// Handle LogLevel enum property
 			var logLevelValue = GetAttributeProperty<object>(telemetryAttribute, "LogLevel");
 			if (logLevelValue != null)
 			{
 				logLevel = logLevelValue.ToString();
 			}
-			
+
 			logEventId = GetAttributeProperty<int?>(telemetryAttribute, "LogEventId");
 		}
 
 		// Check GenerateMetrics property
 		var generateMetrics = GetAttributeProperty<bool>(telemetryAttribute, "GenerateMetrics");
-		if (generateMetrics == true)
+		if (generateMetrics)
 		{
 			targetTypes |= GenerationType.Metrics;
 		}
@@ -325,11 +405,6 @@ static partial class PipelineHelpers
 	static T? GetAttributeProperty<T>(AttributeData attribute, string propertyName)
 	{
 		var namedArgument = attribute.NamedArguments.FirstOrDefault(arg => arg.Key == propertyName);
-		if (namedArgument.Key != null && namedArgument.Value.Value is T value)
-		{
-			return value;
-		}
-
-		return default(T);
+		return namedArgument.Key != null && namedArgument.Value.Value is T value ? value : default;
 	}
 }

@@ -1,7 +1,5 @@
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
-using Purview.Telemetry.SourceGenerator.Configuration;
 using System.Text;
+using Purview.Telemetry.SourceGenerator.Configuration;
 
 namespace Purview.Telemetry.SourceGenerator.Helpers;
 
@@ -82,7 +80,7 @@ public static class TestOutputWriter
 
 		var filePath = Path.Combine(sourcesDir, fileName);
 		var sourceText = source.SourceText.ToString();
-		
+
 		File.WriteAllText(filePath, sourceText, Encoding.UTF8);
 	}
 
@@ -93,20 +91,22 @@ public static class TestOutputWriter
 	{
 		var exceptionFile = Path.Combine(sourcesDir, "EXCEPTION.txt");
 		var content = new StringBuilder();
-		content.AppendLine($"Exception occurred during generation:");
-		content.AppendLine($"Type: {exception.GetType().FullName}");
-		content.AppendLine($"Message: {exception.Message}");
-		content.AppendLine($"Stack Trace:");
-		content.AppendLine(exception.StackTrace);
-		
+		content
+			.AppendLine($"Exception occurred during generation:")
+			.AppendLine($"Type: {exception.GetType().FullName}")
+			.AppendLine($"Message: {exception.Message}")
+			.AppendLine($"Stack Trace:")
+			.AppendLine(exception.StackTrace);
+
 		if (exception.InnerException != null)
 		{
-			content.AppendLine();
-			content.AppendLine("Inner Exception:");
-			content.AppendLine($"Type: {exception.InnerException.GetType().FullName}");
-			content.AppendLine($"Message: {exception.InnerException.Message}");
-			content.AppendLine($"Stack Trace:");
-			content.AppendLine(exception.InnerException.StackTrace);
+			content
+				.AppendLine()
+				.AppendLine("Inner Exception:")
+				.AppendLine($"Type: {exception.InnerException.GetType().FullName}")
+				.AppendLine($"Message: {exception.InnerException.Message}")
+				.AppendLine($"Stack Trace:")
+				.AppendLine(exception.InnerException.StackTrace);
 		}
 
 		File.WriteAllText(exceptionFile, content.ToString(), Encoding.UTF8);
@@ -119,14 +119,17 @@ public static class TestOutputWriter
 	{
 		var diagnosticsFile = Path.Combine(outputDir, "diagnostics.txt");
 		var content = new StringBuilder();
-		
-		content.AppendLine("Compilation Diagnostics:");
-		content.AppendLine("========================");
-		content.AppendLine();
+
+		content
+			.AppendLine("Compilation Diagnostics:")
+			.AppendLine("========================")
+			.AppendLine();
 
 		foreach (var diagnostic in diagnostics)
 		{
-			content.AppendLine($"[{diagnostic.Severity}] {diagnostic.Id}: {diagnostic.GetMessage()}");
+			content.AppendLine(
+				$"[{diagnostic.Severity}] {diagnostic.Id}: {diagnostic.GetMessage()}"
+			);
 			if (diagnostic.Location != Location.None)
 			{
 				content.AppendLine($"  Location: {diagnostic.Location}");
@@ -149,14 +152,18 @@ public static class TestOutputWriter
 		foreach (var syntaxTree in compilation.SyntaxTrees)
 		{
 			var fileName = Path.GetFileName(syntaxTree.FilePath);
-			if (string.IsNullOrEmpty(fileName) || fileName.Contains("System.") || fileName.Contains("Microsoft."))
+			if (
+				string.IsNullOrEmpty(fileName)
+				|| fileName.Contains("System.")
+				|| fileName.Contains("Microsoft.")
+			)
 			{
 				fileName = $"Input_{index:D3}.cs";
 			}
 
 			var filePath = Path.Combine(inputDir, fileName);
 			var sourceText = syntaxTree.GetText().ToString();
-			
+
 			File.WriteAllText(filePath, sourceText, Encoding.UTF8);
 			index++;
 		}
@@ -165,17 +172,27 @@ public static class TestOutputWriter
 	/// <summary>
 	/// Writes metadata about the test run.
 	/// </summary>
-	private static void WriteMetadata(GenerationResult generationResult, string outputDir, string testName)
+	private static void WriteMetadata(
+		GenerationResult generationResult,
+		string outputDir,
+		string testName
+	)
 	{
 		var metadataFile = Path.Combine(outputDir, "metadata.json");
 		var metadata = new
 		{
 			TestName = testName,
 			Timestamp = DateTime.UtcNow.ToString("O"),
-			GeneratedSourcesCount = generationResult.DriverResult.Results.SelectMany(r => r.GeneratedSources).Count(),
+			GeneratedSourcesCount = generationResult
+				.DriverResult.Results.SelectMany(r => r.GeneratedSources)
+				.Count(),
 			DiagnosticsCount = generationResult.Diagnostics.Length,
-			HasErrors = generationResult.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error),
-			HasWarnings = generationResult.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Warning),
+			HasErrors = generationResult.Diagnostics.Any(d =>
+				d.Severity == DiagnosticSeverity.Error
+			),
+			HasWarnings = generationResult.Diagnostics.Any(d =>
+				d.Severity == DiagnosticSeverity.Warning
+			),
 			CompilationAssemblyName = generationResult.Compilation.AssemblyName,
 			InputSourcesCount = generationResult.Compilation.SyntaxTrees.Count(),
 			Environment = new
@@ -184,15 +201,15 @@ public static class TestOutputWriter
 				UserName = Environment.UserName,
 				OSVersion = Environment.OSVersion.ToString(),
 				CLRVersion = Environment.Version.ToString(),
-				WorkingDirectory = Environment.CurrentDirectory
-			}
+				WorkingDirectory = Environment.CurrentDirectory,
+			},
 		};
 
-		var json = System.Text.Json.JsonSerializer.Serialize(metadata, new System.Text.Json.JsonSerializerOptions 
-		{ 
-			WriteIndented = true 
-		});
-		
+		var json = System.Text.Json.JsonSerializer.Serialize(
+			metadata,
+			new System.Text.Json.JsonSerializerOptions { WriteIndented = true }
+		);
+
 		File.WriteAllText(metadataFile, json, Encoding.UTF8);
 	}
 
@@ -210,26 +227,39 @@ public static class TestOutputWriter
 		{
 			var readmeFile = Path.Combine(outputDir, "README.md");
 			var content = new StringBuilder();
-			
-			content.AppendLine($"# Generated Content for Test: {testName}");
-			content.AppendLine();
-			content.AppendLine($"Generated on: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
-			content.AppendLine();
-			content.AppendLine("## Structure");
-			content.AppendLine();
-			content.AppendLine("- `Generated/` - Contains all source files generated by the source generator");
-			content.AppendLine("- `Input/` - Contains the input source files that were fed to the generator");
-			content.AppendLine("- `diagnostics.txt` - Any compilation diagnostics (warnings, errors, etc.)");
-			content.AppendLine("- `metadata.json` - Metadata about the test run and generation process");
-			content.AppendLine("- `README.md` - This file");
-			content.AppendLine();
-			content.AppendLine("## Usage");
-			content.AppendLine();
-			content.AppendLine("This content is automatically generated when the `PURVIEW_TELEMETRY_OUTPUT_GENERATED_FILES=true` environment variable is set.");
-			content.AppendLine("The output directory can be customized using the `PURVIEW_TELEMETRY_OUTPUT_DIRECTORY` environment variable.");
-			content.AppendLine();
-			content.AppendLine("## Generated Files");
-			content.AppendLine();
+
+			content
+				.AppendLine($"# Generated Content for Test: {testName}")
+				.AppendLine()
+				.AppendLine($"Generated on: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC")
+				.AppendLine()
+				.AppendLine("## Structure")
+				.AppendLine()
+				.AppendLine(
+					"- `Generated/` - Contains all source files generated by the source generator"
+				)
+				.AppendLine(
+					"- `Input/` - Contains the input source files that were fed to the generator"
+				)
+				.AppendLine(
+					"- `diagnostics.txt` - Any compilation diagnostics (warnings, errors, etc.)"
+				)
+				.AppendLine(
+					"- `metadata.json` - Metadata about the test run and generation process"
+				)
+				.AppendLine("- `README.md` - This file")
+				.AppendLine()
+				.AppendLine("## Usage")
+				.AppendLine()
+				.AppendLine(
+					"This content is automatically generated when the `PURVIEW_TELEMETRY_OUTPUT_GENERATED_FILES=true` environment variable is set."
+				)
+				.AppendLine(
+					"The output directory can be customized using the `PURVIEW_TELEMETRY_OUTPUT_DIRECTORY` environment variable."
+				)
+				.AppendLine()
+				.AppendLine("## Generated Files")
+				.AppendLine();
 
 			var generatedDir = Path.Combine(outputDir, "Generated");
 			if (Directory.Exists(generatedDir))

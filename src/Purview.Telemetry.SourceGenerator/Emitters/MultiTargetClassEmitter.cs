@@ -18,8 +18,10 @@ static partial class MultiTargetClassEmitter
 		var interfaceName = targetInterface.InterfaceName;
 		var classNamespace = targetInterface.Namespace;
 
-		var classNameToGenerate = targetInterface.TelemetryGeneration.ClassName.Or(GenerateClassName(interfaceName));
-		
+		var classNameToGenerate = targetInterface.TelemetryGeneration.ClassName.Or(
+			GenerateClassName(interfaceName)
+		);
+
 		// Create a target record that follows the same pattern as other targets
 		var target = new MultiTargetGenerationTarget(
 			TelemetryGeneration: targetInterface.TelemetryGeneration,
@@ -28,7 +30,8 @@ static partial class MultiTargetClassEmitter
 			ClassNamespace: classNamespace,
 			ParentClasses: targetInterface.ParentClasses,
 			FullNamespace: string.IsNullOrEmpty(classNamespace) ? null : classNamespace + ".",
-			FullyQualifiedName: (string.IsNullOrEmpty(classNamespace) ? "" : classNamespace + ".") + classNameToGenerate,
+			FullyQualifiedName: (string.IsNullOrEmpty(classNamespace) ? "" : classNamespace + ".")
+				+ classNameToGenerate,
 			InterfaceType: PurviewTypeFactory.Create(targetInterface.InterfaceSymbol),
 			Methods: targetInterface.Methods,
 			DuplicateMethods: ImmutableDictionary<string, Location[]>.Empty,
@@ -38,15 +41,6 @@ static partial class MultiTargetClassEmitter
 		logger?.Debug($"Generating multi-target implementation for: {interfaceName}");
 
 		StringBuilder builder = new();
-
-		// If any method is non-void (i.e., scoped logging or async return),
-		// align with existing snapshots by emitting an empty file.
-        if (target.Methods.Any(m => !m.MethodSymbol.ReturnsVoid))
-        {
-            var hintNameEmpty = $"{target.FullyQualifiedName}.MultiTarget.g.cs";
-            context.AddSource(hintNameEmpty, Microsoft.CodeAnalysis.Text.SourceText.From(string.Empty, Encoding.UTF8));
-            return;
-        }
 
 		// Add header
 		EmbeddedResources.Instance.AddHeader(builder);
@@ -83,7 +77,22 @@ static partial class MultiTargetClassEmitter
 		);
 
 		var hintName = $"{target.FullyQualifiedName}.MultiTarget.g.cs";
-		context.AddSource(hintName, Microsoft.CodeAnalysis.Text.SourceText.From(builder.ToString(), Encoding.UTF8));
+		context.AddSource(
+			hintName,
+			Microsoft.CodeAnalysis.Text.SourceText.From(builder.ToString(), Encoding.UTF8)
+		);
+
+		// Emit DI helper for multi-target implementations as well
+		DependencyInjectionClassEmitter.GenerateImplementation(
+			/* requestingType */target.GenerationType,
+			/* attribute */target.TelemetryGeneration,
+			/* generationType */target.GenerationType,
+			/* implementationClassName */target.ClassNameToGenerate,
+			/* sourceInterfaceName */target.InterfaceType.TypeName,
+			/* fullyQualifiedNamespace */target.FullNamespace,
+			context,
+			logger
+		);
 	}
 
 	static string GenerateClassName(string name)

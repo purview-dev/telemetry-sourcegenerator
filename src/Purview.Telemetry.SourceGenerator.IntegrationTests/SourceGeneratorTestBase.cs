@@ -1,10 +1,8 @@
-﻿using System.Reflection;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Diagnostics;
+﻿using System.Collections.Immutable;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using Purview.Telemetry.SourceGenerator.BuildTools;
 using Purview.Telemetry.SourceGenerator.Helpers;
-using Purview.Telemetry.SourceGenerator.Configuration;
-using System.Runtime.CompilerServices;
 
 namespace Purview.Telemetry.SourceGenerator;
 

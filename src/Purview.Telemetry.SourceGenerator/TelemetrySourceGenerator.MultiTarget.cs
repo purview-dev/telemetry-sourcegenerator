@@ -14,24 +14,23 @@ partial class TelemetrySourceGenerator
 		GenerationLogger? logger
 	)
 	{
-		// Transform for multi-target interfaces
+		// Transform for multi-target interfaces – do NOT require [TelemetryGeneration] on the interface
+		// Scan all interface declarations and decide in the transform whether to emit
 		Func<
-			GeneratorAttributeSyntaxContext,
+			GeneratorSyntaxContext,
 			CancellationToken,
 			MultiTargetInterface?
-		> multiTargetTransform =
+		> multiTargetTransformFromInterface =
 			logger == null
-				? static (context, cancellationToken) =>
-					PipelineHelpers.BuildMultiTargetTransform(context, null, cancellationToken)
-				: (context, cancellationToken) =>
-					PipelineHelpers.BuildMultiTargetTransform(context, logger, cancellationToken);
+				? static (gctx, cancellationToken) =>
+					PipelineHelpers.BuildMultiTargetTransformFromInterface(gctx, null, cancellationToken)
+				: (gctx, cancellationToken) =>
+					PipelineHelpers.BuildMultiTargetTransformFromInterface(gctx, logger, cancellationToken);
 
-		// Register for interfaces with TelemetryGenerationAttribute
 		var multiTargetInterfacesPredicate = context
-			.SyntaxProvider.ForAttributeWithMetadataName(
-				Constants.Shared.TelemetryGenerationAttribute.FullyQualifiedName,
-				static (node, token) => PipelineHelpers.HasMultiTargetAttribute(node, token),
-				multiTargetTransform
+			.SyntaxProvider.CreateSyntaxProvider(
+				static (node, _) => node is Microsoft.CodeAnalysis.CSharp.Syntax.InterfaceDeclarationSyntax,
+				multiTargetTransformFromInterface
 			)
 			.WhereNotNull()
 			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_MultiTarget");

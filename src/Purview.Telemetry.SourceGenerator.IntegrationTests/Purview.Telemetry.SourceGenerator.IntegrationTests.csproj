@@ -1,32 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<ItemGroup>
-		<Compile Remove="Resources/**/*" />
-		<EmbeddedResource Include="Resources/**/*" />
-		<None Update="Snapshots/**/*" Visible="false" />
-		<Compile Update="Snapshots/**/*" Visible="false" />
-		<Content Update="Snapshots/**/*" Visible="false" />
+		<Compile None="Snapshots/**/*" Visible="false" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-		<Using Include="Microsoft.CodeAnalysis" />
-		<Using Include="System.Collections.Immutable" />
-		<Using Include="Shouldly" />
-	</ItemGroup>
-	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
-		<PackageReference Include="Microsoft.Extensions.Logging" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" />
-		<PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" />
-		<PackageReference Include="Verify.DiffPlex" />
-		<PackageReference Include="Verify.SourceGenerators" />
-		<PackageReference Include="Verify.Xunitv3" />
-		<PackageReference Include="System.Text.Json" />
-		<PackageReference Include="Shouldly" />
-	</ItemGroup>
-	<ItemGroup>
-		<None Include="TEST-OUTPUT-GUIDE.md" />
-		<None Include=".gitignore-additions" />
 	</ItemGroup>
 </Project>
