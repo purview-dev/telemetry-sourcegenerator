@@ -134,26 +134,27 @@ using Purview.Telemetry;";
 			.DisableRequireUniquePrefix()
 			.DisableDateCounting()
 			//.UniqueForTargetFrameworkAndVersion(typeof(TestHelpers).Assembly)
-			.ScrubInlineDateTimeOffsets("yyyy-MM-dd HH:mm:ss zzzz") // 2024-22-02 14:43:22 +00:00
-			.AutoVerify(file =>
+			.ScrubInlineDateTimeOffsets("yyyy-MM-dd HH:mm:ss zzzz"); // 2024-22-02 14:43:22 +00:00
+
+		if (autoVerifyTemplates)
+		{
+			verifierTask = verifierTask.AutoVerify(file =>
 			{
-				if (autoVerifyTemplates)
+				foreach (var template in Constants.GetEmbeddedFileNames())
 				{
-					foreach (var template in Constants.GetEmbeddedFileNames())
+					var potentialName = $"#{template}.g";
+					if (
+						file.IndexOf(potentialName, StringComparison.Ordinal) > -1
+						&& file.EndsWith(".cs", StringComparison.Ordinal)
+					)
 					{
-						var potentialName = $"#{template}.g";
-						if (
-							file.IndexOf(potentialName, StringComparison.Ordinal) > -1
-							&& file.EndsWith(".cs", StringComparison.Ordinal)
-						)
-						{
-							return true;
-						}
+						return true;
 					}
 				}
 
 				return false;
 			});
+		}
 
 		if (parameters.Length > 0)
 		{

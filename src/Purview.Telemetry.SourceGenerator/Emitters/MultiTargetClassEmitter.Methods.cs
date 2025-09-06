@@ -22,7 +22,7 @@ partial class MultiTargetClassEmitter
 		foreach (var method in target.Methods)
 		{
 			context.CancellationToken.ThrowIfCancellationRequested();
-			EmitMethod(method, builder, indent, context, logger);
+			EmitMethod(method, target, builder, indent, context, logger);
 		}
 
 		return --indent;
@@ -30,6 +30,7 @@ partial class MultiTargetClassEmitter
 
 	static void EmitMethod(
 		MultiTargetMethod method,
+		MultiTargetGenerationTarget target,
 		StringBuilder builder,
 		int indent,
 		SourceProductionContext context,
@@ -40,11 +41,39 @@ partial class MultiTargetClassEmitter
 
 		logger?.Debug($"Emitting multi-target method: {method.MethodName}");
 
-		// Method signature
+		// Emit the public interface method that calls private target methods
+		EmitPublicInterfaceMethod(method, builder, indent, context, logger);
+
+		// Emit private methods for each enabled telemetry type
+		if (method.Configuration.TargetTypes.HasFlag(GenerationType.Activities))
+		{
+			EmitActivityTargetMethod(method, target, builder, indent, context, logger);
+		}
+
+		if (method.Configuration.TargetTypes.HasFlag(GenerationType.Logging))
+		{
+			EmitLoggingTargetMethod(method, target, builder, indent, context, logger);
+		}
+
+		if (method.Configuration.TargetTypes.HasFlag(GenerationType.Metrics))
+		{
+			EmitMetricsTargetMethod(method, target, builder, indent, context, logger);
+		}
+	}
+
+	static void EmitPublicInterfaceMethod(
+		MultiTargetMethod method,
+		StringBuilder builder,
+		int indent,
+		SourceProductionContext context,
+		GenerationLogger? logger
+	)
+	{
 		var returnType = method.MethodSymbol.ReturnType.ToDisplayString();
 		var parameters = string.Join(", ", method.Parameters.Select(p => $"{p.TypeName} {p.Name}"));
 
 		builder
+			.AppendLine()
 			.CodeGen(indent)
 			.AggressiveInlining(indent)
 			.Append(indent, "public ", withNewLine: false)
@@ -58,21 +87,20 @@ partial class MultiTargetClassEmitter
 
 		indent++;
 
-		// Method body - call appropriate telemetry methods based on configuration
-		// Order is important: Activity first, then Logging, then Metrics
+		// Call the appropriate private target methods
 		if (method.Configuration.TargetTypes.HasFlag(GenerationType.Activities))
 		{
-			EmitActivityCall(method, builder, indent, logger);
+			EmitCallToTargetMethod(method, "Activity", builder, indent);
 		}
 
 		if (method.Configuration.TargetTypes.HasFlag(GenerationType.Logging))
 		{
-			EmitLoggingCall(method, builder, indent, logger);
+			EmitCallToTargetMethod(method, "Logging", builder, indent);
 		}
 
 		if (method.Configuration.TargetTypes.HasFlag(GenerationType.Metrics))
 		{
-			EmitMetricsCall(method, builder, indent, logger);
+			EmitCallToTargetMethod(method, "Metrics", builder, indent);
 		}
 
 		// Return default if needed
@@ -82,21 +110,46 @@ partial class MultiTargetClassEmitter
 		}
 
 		indent--;
-
 		builder.Append(indent, "}").AppendLine();
 	}
 
-	static void EmitActivityCall(
+	static void EmitCallToTargetMethod(
 		MultiTargetMethod method,
+		string targetType,
+		StringBuilder builder,
+		int indent
+	)
+	{
+		var filteredParams = GetFilteredParametersForTarget(method, targetType);
+		var paramNames = string.Join(", ", filteredParams.Select(p => p.Name));
+
+		builder
+			.Append(indent, method.MethodName, withNewLine: false)
+			.Append('_')
+			.Append(targetType)
+			.Append('(')
+			.Append(paramNames)
+			.AppendLine(");");
+	}
+
+	static void EmitActivityTargetMethod(
+		MultiTargetMethod method,
+		MultiTargetGenerationTarget target,
 		StringBuilder builder,
 		int indent,
+		SourceProductionContext context,
 		GenerationLogger? logger
 	)
 	{
-		logger?.Debug($"Generating activity code for {method.MethodName}");
+		var filteredParams = GetFilteredParametersForTarget(method, "Activity");
+		var methodName = $"{method.MethodName}_Activity";
 
-		// Determine activity name - match snapshots: use method name only
-		var activityName = method.MethodName;
+		EmitPrivateMethodSignature(methodName, filteredParams, builder, indent);
+
+		indent++;
+
+		// Generate activity using similar logic to existing activity emitter
+		var activityName = method.Configuration.ActivityName ?? method.MethodName;
 
 		builder
 			.Append(indent, "using var activity = ", withNewLine: false)
@@ -105,15 +158,10 @@ partial class MultiTargetClassEmitter
 			.Append(activityName)
 			.AppendLine("\");");
 
-		// Generate basic activity creation following established patterns
-		var activityParams = method
-			.Parameters.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Activities))
-			.ToArray();
-
-		// Add tags for non-excluded parameters
-		foreach (var param in activityParams.Where(p => p.IsTag))
+		// Add tags for parameters marked as tags
+		foreach (var param in filteredParams.Where(p => p.IsTag))
 		{
-			var tagName = param.TagName ?? param.Name;
+			var tagName = param.TagName ?? param.Name.ToLowerInvariant();
 			builder
 				.Append(indent, "activity?.SetTag(\"", withNewLine: false)
 				.Append(tagName)
@@ -122,10 +170,10 @@ partial class MultiTargetClassEmitter
 				.AppendLine(");");
 		}
 
-		// Add baggage for non-excluded parameters
-		foreach (var param in activityParams.Where(p => p.IsBaggage))
+		// Add baggage for parameters marked as baggage  
+		foreach (var param in filteredParams.Where(p => p.IsBaggage))
 		{
-			var baggageName = param.BaggageName ?? param.Name;
+			var baggageName = param.BaggageName ?? param.Name.ToLowerInvariant();
 			builder
 				.Append(indent, "activity?.SetBaggage(\"", withNewLine: false)
 				.Append(baggageName)
@@ -134,26 +182,41 @@ partial class MultiTargetClassEmitter
 				.AppendLine("?.ToString());");
 		}
 
-		builder.AppendLine();
+		indent--;
+		builder.Append(indent, "}").AppendLine();
 	}
 
-	static void EmitLoggingCall(
+	static void EmitLoggingTargetMethod(
 		MultiTargetMethod method,
+		MultiTargetGenerationTarget target,
 		StringBuilder builder,
 		int indent,
+		SourceProductionContext context,
 		GenerationLogger? logger
 	)
 	{
-		logger?.Debug($"Generating logging code for {method.MethodName}");
+		var filteredParams = GetFilteredParametersForTarget(method, "Logging");
+		var methodName = $"{method.MethodName}_Logging";
 
-		// Generate logging call following established patterns
-		var loggingParams = method.Parameters.Where(p =>
-			!p.Exclusions.HasFlag(ParameterExclusions.Logging)
-		);
-		var logLevel = GetLogLevel(method);
-		var logMessage = GetDefaultLogMessage(method, loggingParams);
+		EmitPrivateMethodSignature(methodName, filteredParams, builder, indent);
+
+		indent++;
+
+		// Generate logging using similar logic to existing logging emitter
+		var logLevel = method.Configuration.LogLevel ?? "Information";
+		var logMessage = method.Configuration.LogMessage ?? BuildDefaultLogMessage(method.MethodName, filteredParams);
 
 		builder
+			.Append(indent, "if (!", withNewLine: false)
+			.Append(Constants.VariableNames.LoggerFieldName)
+			.Append(".IsEnabled(")
+			.Append("global::Microsoft.Extensions.Logging.LogLevel.")
+			.Append(logLevel)
+			.AppendLine("))")
+			.Append(indent, '{')
+			.Append(indent + 1, "return;")
+			.Append(indent, '}')
+			.AppendLine()
 			.Append(indent, Constants.VariableNames.LoggerFieldName, withNewLine: false)
 			.Append('.')
 			.Append(GetLogMethodName(logLevel))
@@ -162,47 +225,123 @@ partial class MultiTargetClassEmitter
 			.Append('"');
 
 		// Add parameters for template
-		foreach (var param in loggingParams)
+		foreach (var param in filteredParams)
 		{
 			builder.Append(", ").Append(param.Name);
 		}
 
-		builder.AppendLine(");").AppendLine();
+		builder.AppendLine(");");
+
+		indent--;
+		builder.Append(indent, "}").AppendLine();
 	}
 
-	static void EmitMetricsCall(
+	static void EmitMetricsTargetMethod(
 		MultiTargetMethod method,
+		MultiTargetGenerationTarget target,
 		StringBuilder builder,
 		int indent,
+		SourceProductionContext context,
 		GenerationLogger? logger
 	)
 	{
-		logger?.Debug($"Generating metrics code for {method.MethodName}");
+		var filteredParams = GetFilteredParametersForTarget(method, "Metrics");
+		var methodName = $"{method.MethodName}_Metrics";
 
-		// Match current snapshots: do not generate actual instruments here,
-		// only emit an empty tags array and guidance comments.
-		builder
-			.Append(indent, "// Metrics instrumentation for ", withNewLine: false)
-			.AppendLine(method.MethodName)
-			.Append(
+		EmitPrivateMethodSignature(methodName, filteredParams, builder, indent);
+
+		indent++;
+
+		// Generate metrics using similar logic to existing metrics emitter
+		var tagParams = filteredParams.Where(p => p.IsTag).ToArray();
+
+		if (tagParams.Any())
+		{
+			EmitTagsCollection(tagParams, builder, indent);
+		}
+		else
+		{
+			builder.Append(
 				indent,
 				"var tags = global::System.Array.Empty<global::System.Collections.Generic.KeyValuePair<string, object?>>();"
-			)
-			.Append(
-				indent,
-				"// TODO: Replace with appropriate metric instrument call based on method configuration"
-			)
+			);
+		}
+
+		builder
+			.Append(indent, "// TODO: Implement actual metrics instrumentation for ", withNewLine: false)
+			.AppendLine(method.MethodName)
+			.Append(indent, "// Example: _someCounter.Add(1, tags);");
+
+		indent--;
+		builder.Append(indent, "}").AppendLine();
+	}
+
+	static void EmitPrivateMethodSignature(
+		string methodName,
+		IEnumerable<MultiTargetParameter> parameters,
+		StringBuilder builder,
+		int indent
+	)
+	{
+		var paramList = string.Join(", ", parameters.Select(p => $"{p.TypeName} {p.Name}"));
+
+		builder
 			.AppendLine()
-			.Append(indent, "// Example: _someCounter.Add(1, tags);")
-			.AppendLine()
-			.AppendLine();
+			.CodeGen(indent)
+			.AggressiveInlining(indent)
+			.Append(indent, "private void ", withNewLine: false)
+			.Append(methodName)
+			.Append('(')
+			.Append(paramList)
+			.AppendLine(')')
+			.Append(indent, '{');
+	}
+
+	static IEnumerable<MultiTargetParameter> GetFilteredParametersForTarget(
+		MultiTargetMethod method,
+		string targetType
+	)
+	{
+		var exclusionFlag = targetType switch
+		{
+			"Activity" => ParameterExclusions.Activities,
+			"Logging" => ParameterExclusions.Logging,
+			"Metrics" => ParameterExclusions.Metrics,
+			_ => ParameterExclusions.None
+		};
+
+		return method.Parameters.Where(p =>
+		{
+			// Apply explicit exclusions
+			if (p.Exclusions.HasFlag(exclusionFlag))
+				return false;
+
+			// Apply automatic exclusions based on parameter type
+			return !ShouldAutoExcludeFromTarget(p.TypeName, targetType);
+		});
+	}
+
+	static bool ShouldAutoExcludeFromTarget(string typeName, string targetType)
+	{
+		// Automatically exclude Activity parameters from Logging and Metrics
+		if (typeName == "System.Diagnostics.Activity" || typeName == "global::System.Diagnostics.Activity")
+		{
+			return targetType is "Logging" or "Metrics";
+		}
+
+		// Automatically exclude CancellationToken from all targets
+		if (typeName == "System.Threading.CancellationToken" || typeName == "global::System.Threading.CancellationToken")
+		{
+			return true;
+		}
+
+		return false;
 	}
 
 	static void EmitTagsCollection(
 		MultiTargetParameter[] tagParams,
 		StringBuilder builder,
-		int indent,
-		GenerationLogger? logger
+		int indent
 	)
 	{
 		builder.Append(
@@ -213,13 +352,7 @@ partial class MultiTargetClassEmitter
 		for (int i = 0; i < tagParams.Length; i++)
 		{
 			var param = tagParams[i];
-			var tagName = param.TagName ?? param.Name;
-
-			// Apply tag key casing rule
-			if (Constants.Metrics.LowerCaseTagKeysDefault)
-			{
-				tagName = tagName.ToLowerInvariant();
-			}
+			var tagName = param.TagName ?? param.Name.ToLowerInvariant();
 
 			if (i > 0)
 				builder.Append(", ");
@@ -230,31 +363,22 @@ partial class MultiTargetClassEmitter
 		builder.AppendLine("};");
 	}
 
-	static string GetActivityName(MultiTargetMethod method) => method.MethodName;
-
-	static string GetLogLevel(MultiTargetMethod method)
+	static string BuildDefaultLogMessage(string methodName, IEnumerable<MultiTargetParameter> parameters)
 	{
-		// Use configured log level or default to Information
-		return method.Configuration.LogLevel ?? "Information";
-	}
-
-	static string GetDefaultLogMessage(
-		MultiTargetMethod method,
-		IEnumerable<MultiTargetParameter> loggingParams
-	)
-	{
-		var logParams = loggingParams.ToArray();
-		var message = $"{method.MethodName} called";
-		if (logParams.Length > 0)
+		var paramList = parameters.ToArray();
+		var message = $"{methodName} called";
+		
+		if (paramList.Length > 0)
 		{
-			message += ", ";
-			for (int i = 0; i < logParams.Length; i++)
+			message += " with";
+			for (int i = 0; i < paramList.Length; i++)
 			{
 				if (i > 0)
-					message += ", ";
-				message += $"{{{logParams[i].Name}}}";
+					message += ",";
+				message += $" {{{paramList[i].Name}}}";
 			}
 		}
+		
 		return message;
 	}
 
@@ -263,75 +387,12 @@ partial class MultiTargetClassEmitter
 		return logLevel switch
 		{
 			"Trace" => "LogTrace",
-			"Debug" => "LogDebug",
+			"Debug" => "LogDebug", 
 			"Information" => "LogInformation",
 			"Warning" => "LogWarning",
 			"Error" => "LogError",
 			"Critical" => "LogCritical",
 			_ => "LogInformation",
 		};
-	}
-
-	static MultiTargetParameter? GetMeasurementParameter(
-		MultiTargetMethod method,
-		IEnumerable<MultiTargetParameter> metricsParams
-	)
-	{
-		// Find the first parameter that could be used as a measurement value
-		return metricsParams.FirstOrDefault(p => !p.IsTag && IsValidMeasurementType(p.TypeName));
-	}
-
-	/// <summary>
-	/// Generates an instrument name following the established naming conventions from Constants.Metrics.
-	/// </summary>
-	static string GenerateInstrumentName(string methodName)
-	{
-		// Convert PascalCase to snake_case if lowercase is enabled
-		if (Constants.Metrics.LowerCaseInstrumentNameDefault)
-		{
-			var instrumentName = string.Join(
-				"_",
-				System
-					.Text.RegularExpressions.Regex.Split(methodName, "(?<!^)(?=[A-Z])")
-					.Select(s => s.ToLowerInvariant())
-			);
-
-			// Ensure it follows metrics naming conventions
-			if (
-				!instrumentName.EndsWith("_total")
-				&& !instrumentName.EndsWith("_count")
-				&& !instrumentName.EndsWith("_counter")
-			)
-			{
-				instrumentName += "_total";
-			}
-
-			return instrumentName;
-		}
-
-		return methodName;
-	}
-
-	/// <summary>
-	/// Determines if a type name represents a valid measurement type for metrics using Constants.Metrics.
-	/// </summary>
-	static bool IsValidMeasurementType(string typeName)
-	{
-		return Constants.Metrics.ValidMeasurementKeywordTypes.Contains(typeName)
-			|| typeName
-				is "byte"
-					or "short"
-					or "int"
-					or "long"
-					or "float"
-					or "double"
-					or "decimal"
-					or "System.Byte"
-					or "System.Int16"
-					or "System.Int32"
-					or "System.Int64"
-					or "System.Single"
-					or "System.Double"
-					or "System.Decimal";
 	}
 }
