@@ -86,21 +86,29 @@ partial class MultiTargetClassEmitter
 		builder.Append(indent, "}").AppendLine();
 	}
 
-	static void EmitActivityCall(MultiTargetMethod method, StringBuilder builder, int indent, GenerationLogger? logger)
+	static void EmitActivityCall(
+		MultiTargetMethod method,
+		StringBuilder builder,
+		int indent,
+		GenerationLogger? logger
+	)
 	{
 		logger?.Debug($"Generating activity code for {method.MethodName}");
-		
-		// Generate basic activity creation following established patterns
-		var activityParams = method.Parameters.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Activities));
-		
+
 		// Determine activity name - match snapshots: use method name only
 		var activityName = method.MethodName;
 
-		builder.Append(indent, "using var activity = ", withNewLine: false)
+		builder
+			.Append(indent, "using var activity = ", withNewLine: false)
 			.Append(Constants.VariableNames.ActivitySourceFieldName)
 			.Append(".StartActivity(\"")
 			.Append(activityName)
 			.AppendLine("\");");
+
+		// Generate basic activity creation following established patterns
+		var activityParams = method
+			.Parameters.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Activities))
+			.ToArray();
 
 		// Add tags for non-excluded parameters
 		foreach (var param in activityParams.Where(p => p.IsTag))
@@ -129,22 +137,30 @@ partial class MultiTargetClassEmitter
 		builder.AppendLine();
 	}
 
-	static void EmitLoggingCall(MultiTargetMethod method, StringBuilder builder, int indent, GenerationLogger? logger)
+	static void EmitLoggingCall(
+		MultiTargetMethod method,
+		StringBuilder builder,
+		int indent,
+		GenerationLogger? logger
+	)
 	{
 		logger?.Debug($"Generating logging code for {method.MethodName}");
-		
+
 		// Generate logging call following established patterns
-		var loggingParams = method.Parameters.Where(p => !p.Exclusions.HasFlag(ParameterExclusions.Logging));
+		var loggingParams = method.Parameters.Where(p =>
+			!p.Exclusions.HasFlag(ParameterExclusions.Logging)
+		);
 		var logLevel = GetLogLevel(method);
 		var logMessage = GetDefaultLogMessage(method, loggingParams);
-		
-		builder.Append(indent, Constants.VariableNames.LoggerFieldName, withNewLine: false)
-			.Append(".")
+
+		builder
+			.Append(indent, Constants.VariableNames.LoggerFieldName, withNewLine: false)
+			.Append('.')
 			.Append(GetLogMethodName(logLevel))
 			.Append("(\"")
 			.Append(logMessage)
 			.Append('"');
-		
+
 		// Add parameters for template
 		foreach (var param in loggingParams)
 		{
@@ -154,43 +170,63 @@ partial class MultiTargetClassEmitter
 		builder.AppendLine(");").AppendLine();
 	}
 
-	static void EmitMetricsCall(MultiTargetMethod method, StringBuilder builder, int indent, GenerationLogger? logger)
+	static void EmitMetricsCall(
+		MultiTargetMethod method,
+		StringBuilder builder,
+		int indent,
+		GenerationLogger? logger
+	)
 	{
 		logger?.Debug($"Generating metrics code for {method.MethodName}");
-		
+
 		// Match current snapshots: do not generate actual instruments here,
 		// only emit an empty tags array and guidance comments.
-		builder.Append(indent, "// Metrics instrumentation for ", withNewLine: false)
-			.Append(method.MethodName)
+		builder
+			.Append(indent, "// Metrics instrumentation for ", withNewLine: false)
+			.AppendLine(method.MethodName)
+			.Append(
+				indent,
+				"var tags = global::System.Array.Empty<global::System.Collections.Generic.KeyValuePair<string, object?>>();"
+			)
+			.Append(
+				indent,
+				"// TODO: Replace with appropriate metric instrument call based on method configuration"
+			)
+			.AppendLine()
+			.Append(indent, "// Example: _someCounter.Add(1, tags);")
+			.AppendLine()
 			.AppendLine();
-		builder.Append(indent, "var tags = global::System.Array.Empty<global::System.Collections.Generic.KeyValuePair<string, object?>>();");
-		builder.Append(indent, "// TODO: Replace with appropriate metric instrument call based on method configuration");
-		builder.AppendLine();
-		builder.Append(indent, "// Example: _someCounter.Add(1, tags);");
-		builder.AppendLine().AppendLine();
 	}
 
-	static void EmitTagsCollection(MultiTargetParameter[] tagParams, StringBuilder builder, int indent, GenerationLogger? logger)
+	static void EmitTagsCollection(
+		MultiTargetParameter[] tagParams,
+		StringBuilder builder,
+		int indent,
+		GenerationLogger? logger
+	)
 	{
-		builder.Append(indent, "var tags = new global::System.Collections.Generic.KeyValuePair<string, object?>[] {");
-		
+		builder.Append(
+			indent,
+			"var tags = new global::System.Collections.Generic.KeyValuePair<string, object?>[] {"
+		);
+
 		for (int i = 0; i < tagParams.Length; i++)
 		{
 			var param = tagParams[i];
 			var tagName = param.TagName ?? param.Name;
-			
+
 			// Apply tag key casing rule
 			if (Constants.Metrics.LowerCaseTagKeysDefault)
 			{
 				tagName = tagName.ToLowerInvariant();
 			}
-			
+
 			if (i > 0)
 				builder.Append(", ");
-				
+
 			builder.Append($"new(\"{tagName}\", {param.Name})");
 		}
-		
+
 		builder.AppendLine("};");
 	}
 
@@ -202,7 +238,10 @@ partial class MultiTargetClassEmitter
 		return method.Configuration.LogLevel ?? "Information";
 	}
 
-	static string GetDefaultLogMessage(MultiTargetMethod method, IEnumerable<MultiTargetParameter> loggingParams)
+	static string GetDefaultLogMessage(
+		MultiTargetMethod method,
+		IEnumerable<MultiTargetParameter> loggingParams
+	)
 	{
 		var logParams = loggingParams.ToArray();
 		var message = $"{method.MethodName} called";
@@ -211,7 +250,8 @@ partial class MultiTargetClassEmitter
 			message += ", ";
 			for (int i = 0; i < logParams.Length; i++)
 			{
-				if (i > 0) message += ", ";
+				if (i > 0)
+					message += ", ";
 				message += $"{{{logParams[i].Name}}}";
 			}
 		}
@@ -228,16 +268,17 @@ partial class MultiTargetClassEmitter
 			"Warning" => "LogWarning",
 			"Error" => "LogError",
 			"Critical" => "LogCritical",
-			_ => "LogInformation"
+			_ => "LogInformation",
 		};
 	}
 
-	static MultiTargetParameter? GetMeasurementParameter(MultiTargetMethod method, IEnumerable<MultiTargetParameter> metricsParams)
+	static MultiTargetParameter? GetMeasurementParameter(
+		MultiTargetMethod method,
+		IEnumerable<MultiTargetParameter> metricsParams
+	)
 	{
 		// Find the first parameter that could be used as a measurement value
-		return metricsParams
-			.Where(p => !p.IsTag && IsValidMeasurementType(p.TypeName))
-			.FirstOrDefault();
+		return metricsParams.FirstOrDefault(p => !p.IsTag && IsValidMeasurementType(p.TypeName));
 	}
 
 	/// <summary>
@@ -248,15 +289,19 @@ partial class MultiTargetClassEmitter
 		// Convert PascalCase to snake_case if lowercase is enabled
 		if (Constants.Metrics.LowerCaseInstrumentNameDefault)
 		{
-			var instrumentName = string.Join("_", 
-				System.Text.RegularExpressions.Regex.Split(methodName, @"(?<!^)(?=[A-Z])")
-				.Select(s => s.ToLowerInvariant())
+			var instrumentName = string.Join(
+				"_",
+				System
+					.Text.RegularExpressions.Regex.Split(methodName, "(?<!^)(?=[A-Z])")
+					.Select(s => s.ToLowerInvariant())
 			);
 
 			// Ensure it follows metrics naming conventions
-			if (!instrumentName.EndsWith("_total") && 
-				!instrumentName.EndsWith("_count") && 
-				!instrumentName.EndsWith("_counter"))
+			if (
+				!instrumentName.EndsWith("_total")
+				&& !instrumentName.EndsWith("_count")
+				&& !instrumentName.EndsWith("_counter")
+			)
 			{
 				instrumentName += "_total";
 			}
@@ -272,9 +317,21 @@ partial class MultiTargetClassEmitter
 	/// </summary>
 	static bool IsValidMeasurementType(string typeName)
 	{
-		return Constants.Metrics.ValidMeasurementKeywordTypes.Contains(typeName) ||
-			   typeName is "byte" or "short" or "int" or "long" or "float" or "double" or "decimal" or
-			   "System.Byte" or "System.Int16" or "System.Int32" or "System.Int64" or 
-			   "System.Single" or "System.Double" or "System.Decimal";
+		return Constants.Metrics.ValidMeasurementKeywordTypes.Contains(typeName)
+			|| typeName
+				is "byte"
+					or "short"
+					or "int"
+					or "long"
+					or "float"
+					or "double"
+					or "decimal"
+					or "System.Byte"
+					or "System.Int16"
+					or "System.Int32"
+					or "System.Int64"
+					or "System.Single"
+					or "System.Double"
+					or "System.Decimal";
 	}
 }
