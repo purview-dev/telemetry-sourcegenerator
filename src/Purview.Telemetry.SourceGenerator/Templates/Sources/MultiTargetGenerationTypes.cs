@@ -130,7 +130,34 @@ sealed class TelemetryAttribute : global::System.Attribute
 	/// Optional activity kind for the Activity. Defaults to Internal.
 	/// Only used when <see cref="GenerateActivity"/> is true.
 	/// </summary>
-	public global::System.Diagnostics.ActivityKind ActivityKind { get; set; }
+	public global::System.Diagnostics.ActivityKind ActivityKind { get; set; } = 
+		global::System.Diagnostics.ActivityKind.Internal;
+
+	/// <summary>
+	/// If true, the Activity is created using CreateActivity (not started by default).
+	/// Otherwise StartActivity is used. Only used when <see cref="GenerateActivity"/> is true.
+	/// </summary>
+	public bool CreateActivityOnly { get; set; }
+
+	/// <summary>
+	/// The activity method type. Determines if this is an Activity start/create, Event, or Context method.
+	/// Only used when <see cref="GenerateActivity"/> is true.
+	/// </summary>
+	public ActivityMethodType ActivityMethodType { get; set; } = ActivityMethodType.Activity;
+
+	/// <summary>
+	/// Optional activity status code for Event methods. 
+	/// Only used when <see cref="GenerateActivity"/> is true and <see cref="ActivityMethodType"/> is Event.
+	/// </summary>
+	public global::System.Diagnostics.ActivityStatusCode ActivityStatusCode { get; set; } = 
+		global::System.Diagnostics.ActivityStatusCode.Unset;
+
+	/// <summary>
+	/// Optional status description for Error status events.
+	/// Only used when <see cref="GenerateActivity"/> is true, <see cref="ActivityMethodType"/> is Event,
+	/// and <see cref="ActivityStatusCode"/> is Error.
+	/// </summary>
+	public string? ActivityStatusDescription { get; set; }
 
 #if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
 
@@ -158,5 +185,140 @@ sealed class TelemetryAttribute : global::System.Attribute
 	/// </summary>
 	public int? LogEventId { get; set; }
 
+	/// <summary>
+	/// Optional log name for the Logging telemetry.
+	/// Only used when <see cref="GenerateLogging"/> is true.
+	/// </summary>
+	public string? LogName { get; set; }
+
+	/// <summary>
+	/// Determines if scoped logging should be used (returns IDisposable).
+	/// Only used when <see cref="GenerateLogging"/> is true.
+	/// </summary>
+	public bool UsesScopedLogging { get; set; }
+
 #endif
+
+	/// <summary>
+	/// The metric type to generate when <see cref="GenerateMetrics"/> is true.
+	/// </summary>
+	public MetricType MetricType { get; set; } = MetricType.Counter;
+
+	/// <summary>
+	/// Optional metric name. If not specified, uses the method name.
+	/// Only used when <see cref="GenerateMetrics"/> is true.
+	/// </summary>
+	public string? MetricName { get; set; }
+
+	/// <summary>
+	/// Optional metric unit for histogram and other metrics.
+	/// Only used when <see cref="GenerateMetrics"/> is true.
+	/// </summary>
+	public string? MetricUnit { get; set; }
+
+	/// <summary>
+	/// Optional metric description.
+	/// Only used when <see cref="GenerateMetrics"/> is true.
+	/// </summary>
+	public string? MetricDescription { get; set; }
+}
+
+/// <summary>
+/// Defines the type of activity method for multi-target generation.
+/// </summary>
+public enum ActivityMethodType
+{
+	/// <summary>
+	/// Activity start or create method that returns an Activity.
+	/// </summary>
+	Activity,
+	
+	/// <summary>
+	/// Event method that adds an event to an existing Activity.
+	/// </summary>
+	Event,
+	
+	/// <summary>
+	/// Context method that adds context (tags/baggage) to an existing Activity.
+	/// </summary>
+	Context
+}
+
+/// <summary>
+/// Defines the type of metric to generate for multi-target generation.
+/// </summary>
+public enum MetricType
+{
+	/// <summary>
+	/// Counter metric that tracks cumulative values.
+	/// </summary>
+	Counter,
+	
+	/// <summary>
+	/// UpDownCounter metric that can increase and decrease.
+	/// </summary>
+	UpDownCounter,
+	
+	/// <summary>
+	/// Histogram metric that tracks distribution of values.
+	/// </summary>
+	Histogram,
+	
+	/// <summary>
+	/// Gauge metric that tracks current values.
+	/// </summary>
+	Gauge
+}
+
+/// <summary>
+/// Combined result type for multi-target telemetry generation when both Activity and Scoped Logging are enabled.
+/// This type is internal to the assembly and provides implicit conversions to Activity and IDisposable.
+/// </summary>
+{CodeGen}
+internal readonly struct MultiTargetTelemetryResult : global::System.IDisposable
+{
+	private readonly global::System.Diagnostics.Activity? _activity;
+	private readonly global::System.IDisposable? _scope;
+
+	/// <summary>
+	/// Initializes a new instance of the <see cref="MultiTargetTelemetryResult"/> struct.
+	/// </summary>
+	/// <param name="activity">The activity instance, if any.</param>
+	/// <param name="scope">The logging scope instance, if any.</param>
+	public MultiTargetTelemetryResult(global::System.Diagnostics.Activity? activity, global::System.IDisposable? scope)
+	{
+		_activity = activity;
+		_scope = scope;
+	}
+
+	/// <summary>
+	/// Gets the Activity instance, if any.
+	/// </summary>
+	public global::System.Diagnostics.Activity? Activity => _activity;
+
+	/// <summary>
+	/// Gets the logging scope instance, if any.
+	/// </summary>
+	public global::System.IDisposable? Scope => _scope;
+
+	/// <summary>
+	/// Implicit conversion to Activity.
+	/// </summary>
+	/// <param name="result">The multi-target result.</param>
+	public static implicit operator global::System.Diagnostics.Activity?(MultiTargetTelemetryResult result) => result._activity;
+
+	/// <summary>
+	/// Implicit conversion to IDisposable.
+	/// </summary>
+	/// <param name="result">The multi-target result.</param>
+	public static implicit operator global::System.IDisposable?(MultiTargetTelemetryResult result) => result._scope;
+
+	/// <summary>
+	/// Disposes both the activity and the logging scope.
+	/// </summary>
+	public void Dispose()
+	{
+		_scope?.Dispose();
+		_activity?.Dispose();
+	}
 }
