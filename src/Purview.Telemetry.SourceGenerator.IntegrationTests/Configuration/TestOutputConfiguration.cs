@@ -3,7 +3,7 @@ namespace Purview.Telemetry.SourceGenerator.Configuration;
 /// <summary>
 /// Configuration for test output generation.
 /// </summary>
-public static class TestOutputConfiguration
+static class TestOutputConfiguration
 {
 	/// <summary>
 	/// Environment variable name to enable test output generation.
@@ -54,7 +54,7 @@ public static class TestOutputConfiguration
 	/// Gets the test project directory by walking up from the current directory
 	/// to find the directory containing a .csproj file.
 	/// </summary>
-	private static string GetTestProjectDirectory()
+	static string GetTestProjectDirectory()
 	{
 		var currentDir = AppContext.BaseDirectory;
 		while (currentDir != null)
@@ -127,7 +127,7 @@ public static class TestOutputConfiguration
 	/// <summary>
 	/// Sanitizes a test name to be safe for use as a directory name.
 	/// </summary>
-	private static string SanitizeFileName(string fileName)
+	static string SanitizeFileName(string fileName)
 	{
 		var invalidChars = Path.GetInvalidFileNameChars();
 		var sanitized = string.Join(

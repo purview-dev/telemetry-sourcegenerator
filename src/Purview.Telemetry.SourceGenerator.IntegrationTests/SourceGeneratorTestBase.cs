@@ -284,12 +284,25 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 
 		runResult.Results.Where(m => m.Exception != null).Select(m => m.Exception).ShouldBeEmpty();
 
-		var generationResult = new GenerationResult(runResult, diagnostics, outputCompilation);
+		GenerationResult generationResult = new(runResult, diagnostics, outputCompilation);
 
 		// Write generated content to output directory if enabled
 		if (!string.IsNullOrEmpty(testName))
 		{
 			TestOutputWriter.WriteGeneratedContent(generationResult, testName);
+		}
+
+		if (testOutputHelper is object)
+		{
+			testOutputHelper.WriteLine(
+				$"--- Generated {runResult.Results.Sum(r => r.GeneratedSources.Length)} source files for test {testName ?? "<no-test-found>"} ---"
+			);
+
+			foreach (var src in runResult.Results.SelectMany(r => r.GeneratedSources))
+			{
+				testOutputHelper.WriteLine($"--- Source: {src.HintName} ---");
+				//testOutputHelper.WriteLine(src.SourceText.ToString());
+			}
 		}
 
 		return generationResult;

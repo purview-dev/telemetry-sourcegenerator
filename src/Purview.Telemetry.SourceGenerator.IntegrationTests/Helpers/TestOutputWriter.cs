@@ -1,12 +1,12 @@
 using System.Text;
 using Purview.Telemetry.SourceGenerator.Configuration;
 
-namespace Purview.Telemetry.SourceGenerator.Helpers;
+namespace Purview.Telemetry.SourceGenerator;
 
 /// <summary>
 /// Helper class for writing generated source content to files for debugging and inspection.
 /// </summary>
-public static class TestOutputWriter
+static class TestOutputWriter
 {
 	/// <summary>
 	/// Writes all generated sources from a GenerationResult to the configured output directory.
@@ -37,7 +37,7 @@ public static class TestOutputWriter
 	/// <summary>
 	/// Writes the generation result to the specified directory.
 	/// </summary>
-	private static void WriteGenerationResult(GenerationResult generationResult, string outputDir)
+	static void WriteGenerationResult(GenerationResult generationResult, string outputDir)
 	{
 		// Write generated sources
 		var sourcesDir = Path.Combine(outputDir, "Generated");
@@ -70,7 +70,7 @@ public static class TestOutputWriter
 	/// <summary>
 	/// Writes a single generated source to a file.
 	/// </summary>
-	private static void WriteSingleSource(GeneratedSourceResult source, string sourcesDir)
+	static void WriteSingleSource(GeneratedSourceResult source, string sourcesDir)
 	{
 		var fileName = source.HintName;
 		if (!fileName.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
@@ -87,15 +87,15 @@ public static class TestOutputWriter
 	/// <summary>
 	/// Writes exception information to a file.
 	/// </summary>
-	private static void WriteExceptionInfo(Exception exception, string sourcesDir)
+	static void WriteExceptionInfo(Exception exception, string sourcesDir)
 	{
 		var exceptionFile = Path.Combine(sourcesDir, "EXCEPTION.txt");
 		var content = new StringBuilder();
 		content
-			.AppendLine($"Exception occurred during generation:")
+			.AppendLine("Exception occurred during generation:")
 			.AppendLine($"Type: {exception.GetType().FullName}")
 			.AppendLine($"Message: {exception.Message}")
-			.AppendLine($"Stack Trace:")
+			.AppendLine("Stack Trace:")
 			.AppendLine(exception.StackTrace);
 
 		if (exception.InnerException != null)
@@ -105,7 +105,7 @@ public static class TestOutputWriter
 				.AppendLine("Inner Exception:")
 				.AppendLine($"Type: {exception.InnerException.GetType().FullName}")
 				.AppendLine($"Message: {exception.InnerException.Message}")
-				.AppendLine($"Stack Trace:")
+				.AppendLine("Stack Trace:")
 				.AppendLine(exception.InnerException.StackTrace);
 		}
 
@@ -115,7 +115,7 @@ public static class TestOutputWriter
 	/// <summary>
 	/// Writes compilation diagnostics to a file.
 	/// </summary>
-	private static void WriteDiagnostics(ImmutableArray<Diagnostic> diagnostics, string outputDir)
+	static void WriteDiagnostics(ImmutableArray<Diagnostic> diagnostics, string outputDir)
 	{
 		var diagnosticsFile = Path.Combine(outputDir, "diagnostics.txt");
 		var content = new StringBuilder();
@@ -143,7 +143,7 @@ public static class TestOutputWriter
 	/// <summary>
 	/// Writes input source files (what was fed to the generator) to a directory.
 	/// </summary>
-	private static void WriteInputSources(Compilation compilation, string outputDir)
+	static void WriteInputSources(Compilation compilation, string outputDir)
 	{
 		var inputDir = Path.Combine(outputDir, "Input");
 		Directory.CreateDirectory(inputDir);
@@ -172,20 +172,16 @@ public static class TestOutputWriter
 	/// <summary>
 	/// Writes metadata about the test run.
 	/// </summary>
-	private static void WriteMetadata(
-		GenerationResult generationResult,
-		string outputDir,
-		string testName
-	)
+	static void WriteMetadata(GenerationResult generationResult, string outputDir, string testName)
 	{
 		var metadataFile = Path.Combine(outputDir, "metadata.json");
 		var metadata = new
 		{
 			TestName = testName,
 			Timestamp = DateTime.UtcNow.ToString("O"),
-			GeneratedSourcesCount = generationResult
-				.DriverResult.Results.SelectMany(r => r.GeneratedSources)
-				.Count(),
+			GeneratedSourcesCount = generationResult.DriverResult.Results.Sum(r =>
+				r.GeneratedSources.Length
+			),
 			DiagnosticsCount = generationResult.Diagnostics.Length,
 			HasErrors = generationResult.Diagnostics.Any(d =>
 				d.Severity == DiagnosticSeverity.Error
@@ -197,8 +193,8 @@ public static class TestOutputWriter
 			InputSourcesCount = generationResult.Compilation.SyntaxTrees.Count(),
 			Environment = new
 			{
-				MachineName = Environment.MachineName,
-				UserName = Environment.UserName,
+				Environment.MachineName,
+				Environment.UserName,
 				OSVersion = Environment.OSVersion.ToString(),
 				CLRVersion = Environment.Version.ToString(),
 				WorkingDirectory = Environment.CurrentDirectory,
@@ -265,7 +261,7 @@ public static class TestOutputWriter
 			if (Directory.Exists(generatedDir))
 			{
 				var files = Directory.GetFiles(generatedDir, "*.cs", SearchOption.AllDirectories);
-				foreach (var file in files.OrderBy(f => f))
+				foreach (var file in files.Order())
 				{
 					var relativePath = Path.GetRelativePath(outputDir, file);
 					var fileName = Path.GetFileName(file);

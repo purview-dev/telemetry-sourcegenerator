@@ -1,220 +1,266 @@
 namespace Purview.Telemetry.SourceGenerator;
 
 public class LoggingMessageTemplateTests(ITestOutputHelper output)
-    : IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>(output)
+	: IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>(output)
 {
-    [Fact]
-    public async Task SpecificLevelAttributes_EmitExpectedLevelsAndTemplates()
-    {
-        const string src = """
-            using Microsoft.Extensions.Logging;
-            using Purview.Telemetry.Logging;
+	[Fact]
+	public async Task SpecificLevelAttributes_EmitExpectedLevelsAndTemplates()
+	{
+		// Arrange
+		const string src = """
+			using Microsoft.Extensions.Logging;
+			using Purview.Telemetry.Logging;
 
-            namespace Tests;
+			namespace Tests;
 
-            [Logger]
-            public partial interface ILevels
-            {
-                [Trace("Trace {val}")] void TraceLog(string val);
-                [Debug("Debug {val}")] void DebugLog(string val);
-                [Info("Info {val}")] void InfoLog(string val);
-                [Warning("Warn {val}")] void WarnLog(string val);
-                [Error("Error {val}")] void ErrorLog(string val, System.Exception? ex = null);
-                [Critical("Critical {val}")] void CriticalLog(string val);
-            }
-            """;
+			[Logger]
+			public partial interface ILevels
+			{
+			    [Trace("Trace {val}")] void TraceLog(string val);
+			    [Debug("Debug {val}")] void DebugLog(string val);
+			    [Info("Info {val}")] void InfoLog(string val);
+			    [Warning("Warn {val}")] void WarnLog(string val);
+			    [Error("Error {val}")] void ErrorLog(string val, System.Exception? ex = null);
+			    [Critical("Critical {val}")] void CriticalLog(string val);
+			}
+			""";
 
-        var result = await GenerateAsync(src);
-        var content = string.Join("\n", result.DriverResult.Results.SelectMany(r => r.GeneratedSources).Select(s => s.SourceText.ToString()));
+		// Act
+		var result = await GenerateAsync(src);
 
-        content.ShouldContain("LogLevel.Trace");
-        content.ShouldContain("\"Trace {val}\"");
+		// Assert
+		var content = result.GetGeneratedSourceText("Tests.LevelsCore.Logging.g.cs");
 
-        content.ShouldContain("LogLevel.Debug");
-        content.ShouldContain("\"Debug {val}\"");
+		content.ShouldContain("LogLevel.Trace");
+		content.ShouldContain("\"Trace {val}\"");
 
-        content.ShouldContain("LogLevel.Information");
-        content.ShouldContain("\"Info {val}\"");
+		content.ShouldContain("LogLevel.Debug");
+		content.ShouldContain("\"Debug {val}\"");
 
-        content.ShouldContain("LogLevel.Warning");
-        content.ShouldContain("\"Warn {val}\"");
+		content.ShouldContain("LogLevel.Information");
+		content.ShouldContain("\"Info {val}\"");
 
-        content.ShouldContain("LogLevel.Error");
-        content.ShouldContain("\"Error {val}\"");
+		content.ShouldContain("LogLevel.Warning");
+		content.ShouldContain("\"Warn {val}\"");
 
-        content.ShouldContain("LogLevel.Critical");
-        content.ShouldContain("\"Critical {val}\"");
-    }
+		content.ShouldContain("LogLevel.Error");
+		content.ShouldContain("\"Error {val}\"");
 
-    [Fact]
-    public async Task NamedPlaceholders_ArePreservedInTemplate()
-    {
-        const string src = """
-            using Microsoft.Extensions.Logging;
-            using Purview.Telemetry.Logging;
+		content.ShouldContain("LogLevel.Critical");
+		content.ShouldContain("\"Critical {val}\"");
+	}
 
-            namespace Tests;
+	[Fact]
+	public async Task NamedPlaceholders_ArePreservedInTemplate()
+	{
+		// Arrange
+		const string src = """
+			using Microsoft.Extensions.Logging;
+			using Purview.Telemetry.Logging;
 
-            [Logger]
-            public partial interface INamed
-            {
-                [Log("Hello {user} did {count}")]
-                void Hello(string user, int count);
-            }
-            """;
+			namespace Tests;
 
-        var result = await GenerateAsync(src);
-        var text = result.DriverResult.Results.SelectMany(r => r.GeneratedSources).First(s => s.HintName.EndsWith("INamedCore.Logging.g.cs")).SourceText.ToString();
-        text.ShouldContain("\"Hello {user} did {count}\"");
-    }
+			[Logger]
+			public partial interface INamed
+			{
+			    [Log("Hello {user} did {count}")]
+			    void Hello(string user, int count);
+			}
+			""";
 
-    [Fact]
-    public async Task OrdinalPlaceholders_WithinParameterCount_Succeeds()
-    {
-        const string src = """
-            using Microsoft.Extensions.Logging;
-            using Purview.Telemetry.Logging;
+		// Act
+		var result = await GenerateAsync(src);
 
-            namespace Tests;
+		// Assert
+		var content = result.GetGeneratedSourceText("Tests.NamedCore.Logging.g.cs");
 
-            [Logger]
-            public partial interface IOrd
-            {
-                [Log("A={0}, B={1}")] void M(string a, int b);
-            }
-            """;
+		content.ShouldContain("\"Hello {user} did {count}\"");
+	}
 
-        var result = await GenerateAsync(src);
-        // No diagnostics expected
-        result.Diagnostics.ShouldBeEmpty();
-        var text = result.DriverResult.Results.SelectMany(r => r.GeneratedSources).First(s => s.HintName.EndsWith("IOrdCore.Logging.g.cs")).SourceText.ToString();
-        text.ShouldContain("\"A={0}, B={1}\"");
-    }
+	[Fact]
+	public async Task OrdinalPlaceholders_WithinParameterCount_Succeeds()
+	{
+		// Arrange
+		const string src = """
+			using Microsoft.Extensions.Logging;
+			using Purview.Telemetry.Logging;
 
-    [Fact]
-    public async Task MixedNamedAndOrdinal_RaisesDiagnostic_TSG2004()
-    {
-        const string src = """
-            using Microsoft.Extensions.Logging;
-            using Purview.Telemetry.Logging;
+			namespace Tests;
 
-            namespace Tests;
+			[Logger]
+			public partial interface IOrd
+			{
+			    [Log("A={0}, B={1}")] void M(string a, int b);
+			}
+			""";
 
-            [Logger]
-            public partial interface IMixed
-            {
-                [Log("A={0}, B={name}")] void M(string name, int b);
-            }
-            """;
+		// Act
+		var result = await GenerateAsync(src);
 
-        var result = await GenerateAsync(src);
-        result.Diagnostics.Any(d => d.Id == "TSG2004" && d.Severity == DiagnosticSeverity.Error).ShouldBeTrue();
-    }
+		// Assert
+		var content = result.GetGeneratedSourceText("Tests.OrdCore.Logging.g.cs");
 
-    [Fact]
-    public async Task OrdinalExceedsParameterCount_RaisesDiagnostic_TSG2005()
-    {
-        const string src = """
-            using Microsoft.Extensions.Logging;
-            using Purview.Telemetry.Logging;
+		content.ShouldContain("\"A={0}, B={1}\"");
+	}
 
-            namespace Tests;
+	[Fact]
+	public async Task MixedNamedAndOrdinal_RaisesDiagnostic_TSG2004()
+	{
+		// Arrange
+		const string src = """
+			using Microsoft.Extensions.Logging;
+			using Purview.Telemetry.Logging;
 
-            [Logger]
-            public partial interface ITooMany
-            {
-                [Log("X={2}")] void M(string a, int b);
-            }
-            """;
+			namespace Tests;
 
-        var result = await GenerateAsync(src);
-        result.Diagnostics.Any(d => d.Id == "TSG2005" && d.Severity == DiagnosticSeverity.Error).ShouldBeTrue();
-    }
+			[Logger]
+			public partial interface IMixed
+			{
+			    [Log("A={0}, B={name}")] void M(string name, int b);
+			}
+			""";
 
-    [Fact]
-    public async Task ScopedLoggingWithLevel_RaisesWarning_TSG2007()
-    {
-        const string src = """
-            using Microsoft.Extensions.Logging;
-            using Purview.Telemetry.Logging;
+		// Act
+		var result = await GenerateAsync(src);
 
-            namespace Tests;
+		// Assert
+		result
+			.Diagnostics.Any(d => d.Id == "TSG2004" && d.Severity == DiagnosticSeverity.Error)
+			.ShouldBeTrue();
+	}
 
-            [Logger]
-            public partial interface IScoped
-            {
-                [Debug] System.IDisposable BeginScope(string op);
-            }
-            """;
+	[Fact]
+	public async Task OrdinalExceedsParameterCount_RaisesDiagnostic_TSG2005()
+	{
+		// Arrange
+		const string src = """
+			using Microsoft.Extensions.Logging;
+			using Purview.Telemetry.Logging;
 
-        var result = await GenerateAsync(src);
-        result.Diagnostics.Any(d => d.Id == "TSG2007" && d.Severity == DiagnosticSeverity.Warning).ShouldBeTrue();
-    }
+			namespace Tests;
 
-    [Fact]
-    public async Task LogProperties_ExpandsProperties()
-    {
-        const string src = """
-            using Microsoft.Extensions.Logging;
-            using Purview.Telemetry.Logging;
+			[Logger]
+			public partial interface ITooMany
+			{
+			    [Log("X={2}")] void M(string a, int b);
+			}
+			""";
 
-            namespace Tests;
+		// Act
+		var result = await GenerateAsync(src);
 
-            public class Person { public string Name { get; set; } = ""; public int Age { get; set; } }
+		// Assert
+		result
+			.Diagnostics.Any(d => d.Id == "TSG2005" && d.Severity == DiagnosticSeverity.Error)
+			.ShouldBeTrue();
+	}
 
-            [Logger]
-            public partial interface IProps
-            {
-                [Log] void Write([LogProperties] Person person);
-            }
-            """;
+	[Fact]
+	public async Task ScopedLoggingWithLevel_RaisesWarning_TSG2007()
+	{
+		// Arrange
+		const string src = """
+			using Microsoft.Extensions.Logging;
+			using Purview.Telemetry.Logging;
 
-        var result = await GenerateAsync(src);
-        var text = result.DriverResult.Results.SelectMany(r => r.GeneratedSources).First(s => s.HintName.EndsWith("IPropsCore.Logging.g.cs")).SourceText.ToString();
-        text.ShouldContain("Name = {Name}");
-        text.ShouldContain("Age = {Age}");
-    }
+			namespace Tests;
 
-    [Fact]
-    public async Task ExpandEnumerable_And_LogProperties_Together_RaisesError_TSG2006()
-    {
-        const string src = """
-            using Microsoft.Extensions.Logging;
-            using Purview.Telemetry.Logging;
+			[Logger]
+			public partial interface IScoped
+			{
+			    [Debug] System.IDisposable BeginScope(string op);
+			}
+			""";
 
-            namespace Tests;
+		// Act
+		var result = await GenerateAsync(src);
 
-            public class Item { public string Id { get; set; } = ""; }
+		// Assert
+		result
+			.Diagnostics.Any(d => d.Id == "TSG2007" && d.Severity == DiagnosticSeverity.Warning)
+			.ShouldBeTrue();
+	}
 
-            [Logger]
-            public partial interface IInvalid
-            {
-                [Log] void Write([LogProperties][ExpandEnumerable] Item[] items);
-            }
-            """;
+	[Fact]
+	public async Task LogProperties_ExpandsProperties()
+	{
+		// Arrange
+		const string src = """
+			using Microsoft.Extensions.Logging;
+			using Purview.Telemetry.Logging;
 
-        var result = await GenerateAsync(src);
-        result.Diagnostics.Any(d => d.Id == "TSG2006" && d.Severity == DiagnosticSeverity.Error).ShouldBeTrue();
-    }
+			namespace Tests;
 
-    [Fact]
-    public async Task ExpandEnumerable_UnboundedHighMax_RaisesWarning_TSG2008()
-    {
-        const string src = """
-            using Microsoft.Extensions.Logging;
-            using Purview.Telemetry.Logging;
+			public class Person { public string Name { get; set; } = ""; public int Age { get; set; } }
 
-            namespace Tests;
+			[Logger]
+			public partial interface IProps
+			{
+			    [Log] void Write([LogProperties] Person person);
+			}
+			""";
 
-            [Logger]
-            public partial interface IEnum
-            {
-                [Log] void Write([ExpandEnumerable(MaximumValueCount = 10)] string[] values);
-            }
-            """;
+		// Act
+		var result = await GenerateAsync(src);
 
-        var result = await GenerateAsync(src);
-        result.Diagnostics.Any(d => d.Id == "TSG2008" && d.Severity == DiagnosticSeverity.Warning).ShouldBeTrue();
-    }
+		// Assert
+		var content = result.GetGeneratedSourceText("Tests.PropsCore.Logging.g.cs");
+
+		content.ShouldContain("Name = {Name}");
+		content.ShouldContain("Age = {Age}");
+	}
+
+	[Fact]
+	public async Task ExpandEnumerable_And_LogProperties_Together_RaisesError_TSG2006()
+	{
+		// Arrange
+		const string src = """
+			using Microsoft.Extensions.Logging;
+			using Purview.Telemetry.Logging;
+
+			namespace Tests;
+
+			public class Item { public string Id { get; set; } = ""; }
+
+			[Logger]
+			public partial interface IInvalid
+			{
+			    [Log] void Write([LogProperties][ExpandEnumerable] Item[] items);
+			}
+			""";
+
+		// Act
+		var result = await GenerateAsync(src);
+
+		// Assert
+		result
+			.Diagnostics.Any(d => d.Id == "TSG2006" && d.Severity == DiagnosticSeverity.Error)
+			.ShouldBeTrue();
+	}
+
+	[Fact]
+	public async Task ExpandEnumerable_UnboundedHighMax_RaisesWarning_TSG2008()
+	{
+		// Arrange
+		const string src = """
+			using Microsoft.Extensions.Logging;
+			using Purview.Telemetry.Logging;
+
+			namespace Tests;
+
+			[Logger]
+			public partial interface IEnum
+			{
+			    [Log] void Write([ExpandEnumerable(MaximumValueCount = 10)] string[] values);
+			}
+			""";
+
+		// Act
+		var result = await GenerateAsync(src);
+
+		// Assert
+		result
+			.Diagnostics.Any(d => d.Id == "TSG2008" && d.Severity == DiagnosticSeverity.Warning)
+			.ShouldBeTrue();
+	}
 }
-

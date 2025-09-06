@@ -1,149 +1,161 @@
 namespace Purview.Telemetry.SourceGenerator;
 
 public class LoggingV2StateObjectTests(ITestOutputHelper output)
-    : IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>(output)
+	: IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>(output)
 {
-    [Fact]
-    public async Task StateObject_IsBuilt_WithOriginalFormat_And_Properties()
-    {
-        const string src = """
-            using Microsoft.Extensions.Logging;
-            using Purview.Telemetry.Logging;
+	[Fact]
+	public async Task StateObject_IsBuilt_WithOriginalFormat_And_Properties()
+	{
+		// Arrange
+		const string src = """
+			using Microsoft.Extensions.Logging;
+			using Purview.Telemetry.Logging;
 
-            namespace Tests;
+			namespace Tests;
 
-            public class Person { public string Name { get; set; } = string.Empty; public int Age { get; set; } }
+			public class Person { public string Name { get; set; } = string.Empty; public int Age { get; set; } }
 
-            [Logger]
-            public partial interface ILogProps
-            {
-                [Log("Hello {name}")]
-                void Write([LogProperties] Person person, string name);
-            }
-            """;
+			[Logger]
+			public partial interface ILogProps
+			{
+			    [Log("Hello {name}")]
+			    void Write([LogProperties] Person person, string name);
+			}
+			""";
 
-        var result = await GenerateAsync(src);
-        var text = result.DriverResult.Results.SelectMany(r => r.GeneratedSources)
-            .First(s => s.HintName.EndsWith("LogPropsCore.Logging.g.cs", StringComparison.Ordinal))
-            .SourceText.ToString();
+		// Act
+		var result = await GenerateAsync(src, includeLoggerTypes: IncludeLoggerTypes.Telemetry);
 
-        text.ShouldContain("LoggerMessageHelper.ThreadLocalState");
-        text.ShouldContain("ReserveTagSpace(");
-        text.ShouldContain("\"{OriginalFormat}\"");
-        text.ShouldContain("TagArray[0] = new(\"{OriginalFormat}\"");
-        text.ShouldContain("TagArray");
-        text.ShouldContain("person?.Name");
-        text.ShouldContain("person?.Age");
-        text.ShouldContain(".Log(");
-    }
+		// Assert
+		var content = result.GetGeneratedSourceText("Tests.LogPropsCore.Logging.g.cs");
 
-    [Fact]
-    public async Task LogProperties_SkipNull_And_OmitReferenceName()
-    {
-        const string src = """
-            using Microsoft.Extensions.Logging;
-            using Purview.Telemetry.Logging;
+		content.ShouldContain("LoggerMessageHelper.ThreadLocalState");
+		content.ShouldContain("ReserveTagSpace(");
+		content.ShouldContain("\"{OriginalFormat}\"");
+		content.ShouldContain("TagArray[0] = new(\"{OriginalFormat}\"");
+		content.ShouldContain("TagArray");
+		content.ShouldContain("person?.Name");
+		content.ShouldContain("person?.Age");
+		content.ShouldContain(".Log(");
+	}
 
-            namespace Tests;
+	[Fact]
+	public async Task LogProperties_SkipNull_And_OmitReferenceName()
+	{
+		// Arrange
+		const string src = """
+			using Microsoft.Extensions.Logging;
+			using Purview.Telemetry.Logging;
 
-            public class Data { public string? Value { get; set; } }
+			namespace Tests;
 
-            [Logger]
-            public partial interface IProps
-            {
-                [Log]
-                void M([LogProperties(SkipNullProperties = true, OmitReferenceName = true)] Data data);
-            }
-            """;
+			public class Data { public string? Value { get; set; } }
 
-        var result = await GenerateAsync(src);
-        var text = result.DriverResult.Results.SelectMany(r => r.GeneratedSources)
-            .First(s => s.HintName.EndsWith("IPropsCore.Logging.g.cs", StringComparison.Ordinal))
-            .SourceText.ToString();
+			[Logger]
+			public partial interface IProps
+			{
+			    [Log]
+			    void M([LogProperties(SkipNullProperties = true, OmitReferenceName = true)] Data data);
+			}
+			""";
 
-        // Temporary var used when skipping nulls
-        text.ShouldContain("var tmp");
-        // OmitReferenceName => property key is just property name, not prefixed with parameter name
-        text.ShouldContain("\"Value\"");
-        text.ShouldNotContain("data.Value\"");
-    }
+		// Act
+		var result = await GenerateAsync(src, includeLoggerTypes: IncludeLoggerTypes.Telemetry);
 
-    [Fact]
-    public async Task Enumerable_Stringify_IsUsed()
-    {
-        const string src = """
-            using Microsoft.Extensions.Logging;
-            using Purview.Telemetry.Logging;
+		// Assert
+		var content = result.GetGeneratedSourceText("Tests.PropsCore.Logging.g.cs");
 
-            namespace Tests;
+		// Temporary var used when skipping nulls
+		content.ShouldContain("var tmp");
+		// OmitReferenceName => property key is just property name, not prefixed with parameter name
+		content.ShouldContain("\"Value\"");
+		content.ShouldNotContain("data.Value\"");
+	}
 
-            [Logger]
-            public partial interface IEnum
-            {
-                [Log]
-                void M(string[] values);
-            }
-            """;
+	[Fact]
+	public async Task Enumerable_Stringify_IsUsed()
+	{
+		// Arrange
+		const string src = """
+			using Microsoft.Extensions.Logging;
+			using Purview.Telemetry.Logging;
 
-        var result = await GenerateAsync(src);
-        var text = result.DriverResult.Results.SelectMany(r => r.GeneratedSources)
-            .First(s => s.HintName.EndsWith("IEnumCore.Logging.g.cs", StringComparison.Ordinal))
-            .SourceText.ToString();
+			namespace Tests;
 
-        text.ShouldContain("LoggerMessageHelper.Stringify(values)");
-    }
+			[Logger]
+			public partial interface IEnum
+			{
+			    [Log]
+			    void M(string[] values);
+			}
+			""";
 
-    [Fact]
-    public async Task ExplicitEventId_And_NameOverride()
-    {
-        const string src = """
-            using Microsoft.Extensions.Logging;
-            using Purview.Telemetry.Logging;
+		// Act
+		var result = await GenerateAsync(src, includeLoggerTypes: IncludeLoggerTypes.Telemetry);
 
-            namespace Tests;
+		// Assert
+		var content = result.GetGeneratedSourceText("Tests.EnumCore.Logging.g.cs");
 
-            [Logger]
-            public partial interface IEvents
-            {
-                [Log(42, LogLevel.Information, name: "CustomName", messageTemplate: "X {x}")]
-                void A(int x);
+		content.ShouldContain("LoggerMessageHelper.Stringify(values)");
+	}
 
-                [Log]
-                void B(int y);
-            }
-            """;
+	[Fact]
+	public async Task ExplicitEventId_And_NameOverride()
+	{
+		const string src = """
+			using Microsoft.Extensions.Logging;
+			using Purview.Telemetry.Logging;
 
-        var result = await GenerateAsync(src);
-        var content = string.Join("\n", result.DriverResult.Results.SelectMany(r => r.GeneratedSources).Select(s => s.SourceText.ToString()));
+			namespace Tests;
 
-        content.ShouldContain("new (42, nameof(CustomName))");
-        content.ShouldContain("nameof(B)");
-    }
+			[Logger]
+			public partial interface IEvents
+			{
+			    [Log(42, LogLevel.Information, name: "CustomName", messageTemplate: "X {x}")]
+			    void A(int x);
 
-    [Fact]
-    public async Task Scoped_Returns_BeginScope_With_FormattedMessage()
-    {
-        const string src = """
-            using Microsoft.Extensions.Logging;
-            using Purview.Telemetry.Logging;
+			    [Log]
+			    void B(int y);
+			}
+			""";
 
-            namespace Tests;
+		var result = await GenerateAsync(src, includeLoggerTypes: IncludeLoggerTypes.Telemetry);
+		var content = string.Join(
+			"\n",
+			result
+				.DriverResult.Results.SelectMany(r => r.GeneratedSources)
+				.Select(s => s.SourceText.ToString())
+		);
 
-            [Logger]
-            public partial interface IScopes
-            {
-                [Log("Scope {id}")]
-                System.IDisposable Begin(string id);
-            }
-            """;
+		content.ShouldContain("new (42, nameof(CustomName))");
+		content.ShouldContain("nameof(B)");
+	}
 
-        var result = await GenerateAsync(src);
-        var text = result.DriverResult.Results.SelectMany(r => r.GeneratedSources)
-            .First(s => s.HintName.EndsWith("IScopesCore.Logging.g.cs", StringComparison.Ordinal))
-            .SourceText.ToString();
+	[Fact]
+	public async Task Scoped_Returns_BeginScope_With_FormattedMessage()
+	{
+		// Arrange
+		const string src = """
+			using Microsoft.Extensions.Logging;
+			using Purview.Telemetry.Logging;
 
-        text.ShouldContain("formattedMessage");
-        text.ShouldContain("BeginScope(");
-    }
+			namespace Tests;
+
+			[Logger]
+			public partial interface IScopes
+			{
+			    [Log("Scope {id}")]
+			    System.IDisposable Begin(string id);
+			}
+			""";
+
+		// Act
+		var result = await GenerateAsync(src, includeLoggerTypes: IncludeLoggerTypes.Telemetry);
+
+		// Assert
+		var content = result.GetGeneratedSourceText("Tests.ScopesCore.Logging.g.cs");
+
+		content.ShouldContain("formattedMessage");
+		content.ShouldContain("BeginScope(");
+	}
 }
-

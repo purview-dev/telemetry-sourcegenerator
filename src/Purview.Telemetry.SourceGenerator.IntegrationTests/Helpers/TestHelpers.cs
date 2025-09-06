@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -11,6 +12,72 @@ static partial class TestHelpers
 		WriteIndented = false,
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
 	};
+
+	public static bool TryGetGeneratedSourceResult(
+		this GenerationResult generationResult,
+		string hintName,
+		out GeneratedSourceResult generatedSourceResult
+	) =>
+		TryGetGeneratedSourceResult(
+			generationResult,
+			r => r.HintName == hintName,
+			out generatedSourceResult
+		);
+
+	public static bool TryGetGeneratedSourceResult(
+		this GenerationResult generationResult,
+		Func<GeneratedSourceResult, bool> predicate,
+		out GeneratedSourceResult generatedSourceResult
+	)
+	{
+		generatedSourceResult = default;
+		foreach (var result in generationResult.DriverResult.Results)
+		{
+			// We only return one match here...
+			foreach (var source in result.GeneratedSources.Where(predicate))
+			{
+				generatedSourceResult = source;
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public static string? GetGeneratedSourceText(
+		this GenerationResult generationResult,
+		string hintName,
+		[DoesNotReturnIf(true)] bool failOnNotFound = true
+	) => GetGeneratedSourceText(generationResult, r => r.HintName == hintName, failOnNotFound);
+
+	public static string? GetGeneratedSourceText(
+		this GenerationResult generationResult,
+		Func<GeneratedSourceResult, bool> predicate,
+		[DoesNotReturnIf(true)] bool failOnNotFound = true
+	)
+	{
+		var found = generationResult.TryGetGeneratedSourceResult(predicate, out var sourceResult);
+		if (failOnNotFound && !found)
+			found.ShouldBeTrue();
+
+		return found ? sourceResult.SourceText.ToString() : null;
+	}
+
+	public static IEnumerable<GeneratedSourceResult> GetGeneratedSourceResults(
+		this GenerationResult generationResult,
+		Func<GeneratedSourceResult, bool>? predicate = null
+	)
+	{
+		predicate ??= _ => true;
+
+		foreach (var result in generationResult.DriverResult.Results)
+		{
+			foreach (var source in result.GeneratedSources.Where(predicate))
+			{
+				yield return source;
+			}
+		}
+	}
 
 	public const string DefaultUsingSet =
 		@"using System;
