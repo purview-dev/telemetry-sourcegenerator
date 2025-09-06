@@ -31,12 +31,16 @@ public class TelemetrySourceGeneratorMultiTargetTests(ITestOutputHelper testOutp
 			""";
 
 		var generationResult = await GenerateAsync(source);
-		
+
 		// Write detailed output information if enabled
 		if (TestOutputConfiguration.IsOutputEnabled)
 		{
-			testOutputHelper.WriteLine($"Generated content written to: {TestOutputConfiguration.OutputDirectory}");
-			testOutputHelper.WriteLine($"Total generated sources: {generationResult.DriverResult.Results.SelectMany(r => r.GeneratedSources).Count()}");
+			testOutputHelper.WriteLine(
+				$"Generated content written to: {TestOutputConfiguration.OutputDirectory}"
+			);
+			testOutputHelper.WriteLine(
+				$"Total generated sources: {generationResult.DriverResult.Results.SelectMany(r => r.GeneratedSources).Count()}"
+			);
 		}
 
 		await TestHelpers.Verify(generationResult, validationCompilation: false);
@@ -72,12 +76,16 @@ public class TelemetrySourceGeneratorMultiTargetTests(ITestOutputHelper testOutp
 			""";
 
 		var generationResult = await GenerateAsync(source);
-		
+
 		// Write detailed output information if enabled
 		if (TestOutputConfiguration.IsOutputEnabled)
 		{
-			testOutputHelper.WriteLine($"Generated content written to: {TestOutputConfiguration.OutputDirectory}");
-			testOutputHelper.WriteLine($"Total generated sources: {generationResult.DriverResult.Results.SelectMany(r => r.GeneratedSources).Count()}");
+			testOutputHelper.WriteLine(
+				$"Generated content written to: {TestOutputConfiguration.OutputDirectory}"
+			);
+			testOutputHelper.WriteLine(
+				$"Total generated sources: {generationResult.DriverResult.Results.SelectMany(r => r.GeneratedSources).Count()}"
+			);
 		}
 
 		await TestHelpers.Verify(generationResult, validationCompilation: false);
@@ -111,12 +119,16 @@ public class TelemetrySourceGeneratorMultiTargetTests(ITestOutputHelper testOutp
 			""";
 
 		var generationResult = await GenerateAsync(source);
-		
+
 		// Write detailed output information if enabled
 		if (TestOutputConfiguration.IsOutputEnabled)
 		{
-			testOutputHelper.WriteLine($"Generated content written to: {TestOutputConfiguration.OutputDirectory}");
-			testOutputHelper.WriteLine($"Total generated sources: {generationResult.DriverResult.Results.SelectMany(r => r.GeneratedSources).Count()}");
+			testOutputHelper.WriteLine(
+				$"Generated content written to: {TestOutputConfiguration.OutputDirectory}"
+			);
+			testOutputHelper.WriteLine(
+				$"Total generated sources: {generationResult.DriverResult.Results.SelectMany(r => r.GeneratedSources).Count()}"
+			);
 		}
 
 		await TestHelpers.Verify(generationResult, validationCompilation: false);
@@ -180,10 +192,16 @@ public class TelemetrySourceGeneratorMultiTargetTests(ITestOutputHelper testOutp
 			var outputDir = TestOutputConfiguration.OutputDirectory;
 			testOutputHelper.WriteLine($"=== DETAILED GENERATION OUTPUT ===");
 			testOutputHelper.WriteLine($"Output Directory: {outputDir}");
-			testOutputHelper.WriteLine($"Total Generated Sources: {generationResult.DriverResult.Results.SelectMany(r => r.GeneratedSources).Count()}");
+			testOutputHelper.WriteLine(
+				$"Total Generated Sources: {generationResult.DriverResult.Results.SelectMany(r => r.GeneratedSources).Count()}"
+			);
 			testOutputHelper.WriteLine($"Diagnostics Count: {generationResult.Diagnostics.Length}");
-			testOutputHelper.WriteLine($"Has Errors: {generationResult.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error)}");
-			testOutputHelper.WriteLine($"Has Warnings: {generationResult.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Warning)}");
+			testOutputHelper.WriteLine(
+				$"Has Errors: {generationResult.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error)}"
+			);
+			testOutputHelper.WriteLine(
+				$"Has Warnings: {generationResult.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Warning)}"
+			);
 
 			// List generated files
 			testOutputHelper.WriteLine("Generated Files:");
@@ -197,7 +215,9 @@ public class TelemetrySourceGeneratorMultiTargetTests(ITestOutputHelper testOutp
 		}
 		else
 		{
-			testOutputHelper.WriteLine("Set PURVIEW_TELEMETRY_OUTPUT_GENERATED_FILES=true to see detailed output");
+			testOutputHelper.WriteLine(
+				"Set PURVIEW_TELEMETRY_OUTPUT_GENERATED_FILES=true to see detailed output"
+			);
 		}
 
 		await TestHelpers.Verify(generationResult, validationCompilation: false);

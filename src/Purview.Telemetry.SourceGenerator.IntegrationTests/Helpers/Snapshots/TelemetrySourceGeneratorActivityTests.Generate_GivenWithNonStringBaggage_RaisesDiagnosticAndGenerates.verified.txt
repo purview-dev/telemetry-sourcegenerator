@@ -1,0 +1,124 @@
+﻿{
+  Diagnostics: [
+    {
+      Location: /*
+	[Activity]
+	System.Diagnostics.Activity?  Activity([Baggage]string stringNonNullParam, [Baggage]int intParam, [Baggage]bool boolParam);
+                                                                                         ^^^^^^^^
+
+*/
+ Guid_1: (10,89)-(10,97),
+      Message: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
+      Severity: Warning,
+      WarningLevel: 1,
+      Descriptor: {
+        Id: TSG3000,
+        Title: Baggage parameter types only accept strings,
+        MessageFormat: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
+        Category: Activity.Usage,
+        DefaultSeverity: Warning,
+        IsEnabledByDefault: true
+      }
+    },
+    {
+      Location: /*
+	[Activity]
+	System.Diagnostics.Activity?  Activity([Baggage]string stringNonNullParam, [Baggage]int intParam, [Baggage]bool boolParam);
+                                                                                                                 ^^^^^^^^^
+
+*/
+ Guid_1: (10,113)-(10,122),
+      Message: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
+      Severity: Warning,
+      WarningLevel: 1,
+      Descriptor: {
+        Id: TSG3000,
+        Title: Baggage parameter types only accept strings,
+        MessageFormat: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
+        Category: Activity.Usage,
+        DefaultSeverity: Warning,
+        IsEnabledByDefault: true
+      }
+    },
+    {
+      Location: /*
+	[Event]
+	void Event(System.Diagnostics.Activity? activity, [Baggage]string? stringNullableParam, [Baggage]int? intParam, [Baggage]bool? boolParam);
+                                                                                                       ^^^^^^^^
+
+*/
+ Guid_1: (13,103)-(13,111),
+      Message: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
+      Severity: Warning,
+      WarningLevel: 1,
+      Descriptor: {
+        Id: TSG3000,
+        Title: Baggage parameter types only accept strings,
+        MessageFormat: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
+        Category: Activity.Usage,
+        DefaultSeverity: Warning,
+        IsEnabledByDefault: true
+      }
+    },
+    {
+      Location: /*
+	[Event]
+	void Event(System.Diagnostics.Activity? activity, [Baggage]string? stringNullableParam, [Baggage]int? intParam, [Baggage]bool? boolParam);
+                                                                                                                                ^^^^^^^^^
+
+*/
+ Guid_1: (13,128)-(13,137),
+      Message: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
+      Severity: Warning,
+      WarningLevel: 1,
+      Descriptor: {
+        Id: TSG3000,
+        Title: Baggage parameter types only accept strings,
+        MessageFormat: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
+        Category: Activity.Usage,
+        DefaultSeverity: Warning,
+        IsEnabledByDefault: true
+      }
+    },
+    {
+      Location: /*
+	[Context]
+	void Context(System.Diagnostics.Activity? activity, [Baggage]object? objectParam, [Baggage]string stringNonNullParam, [Baggage]float? floatParam);
+                                                                      ^^^^^^^^^^^
+}
+*/
+ Guid_1: (16,70)-(16,81),
+      Message: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
+      Severity: Warning,
+      WarningLevel: 1,
+      Descriptor: {
+        Id: TSG3000,
+        Title: Baggage parameter types only accept strings,
+        MessageFormat: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
+        Category: Activity.Usage,
+        DefaultSeverity: Warning,
+        IsEnabledByDefault: true
+      }
+    },
+    {
+      Location: /*
+	[Context]
+	void Context(System.Diagnostics.Activity? activity, [Baggage]object? objectParam, [Baggage]string stringNonNullParam, [Baggage]float? floatParam);
+                                                                                                                                       ^^^^^^^^^^
+}
+*/
+ Guid_1: (16,135)-(16,145),
+      Message: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
+      Severity: Warning,
+      WarningLevel: 1,
+      Descriptor: {
+        Id: TSG3000,
+        Title: Baggage parameter types only accept strings,
+        MessageFormat: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
+        Category: Activity.Usage,
+        DefaultSeverity: Warning,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}

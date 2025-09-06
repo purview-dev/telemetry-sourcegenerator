@@ -1,0 +1,16 @@
+﻿{
+  Diagnostics: [
+    {
+      Message: Remove the generic type(s) from the interface, this type of generation is not supported.,
+      Severity: Error,
+      Descriptor: {
+        Id: TSG1004,
+        Title: Generic interfaces are not supported,
+        MessageFormat: Remove the generic type(s) from the interface, this type of generation is not supported.,
+        Category: Usage,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}

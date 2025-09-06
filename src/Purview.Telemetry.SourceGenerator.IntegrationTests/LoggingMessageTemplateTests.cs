@@ -234,8 +234,8 @@ public class LoggingMessageTemplateTests(ITestOutputHelper output)
 
 		// Assert
 		result
-			.Diagnostics.Any(d => d.Id == "TSG2006" && d.Severity == DiagnosticSeverity.Error)
-			.ShouldBeTrue();
+			.Diagnostics.Where(d => d.Id == "TSG2006" && d.Severity == DiagnosticSeverity.Error)
+			.ShouldNotBeEmpty();
 	}
 
 	[Fact]

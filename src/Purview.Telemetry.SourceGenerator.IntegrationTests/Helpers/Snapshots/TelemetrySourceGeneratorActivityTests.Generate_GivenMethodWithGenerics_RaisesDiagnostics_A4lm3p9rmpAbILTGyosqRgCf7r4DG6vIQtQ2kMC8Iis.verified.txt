@@ -1,0 +1,16 @@
+﻿{
+  Diagnostics: [
+    {
+      Message: Remove the generic type(s) from the method, this type of generation is not supported.,
+      Severity: Error,
+      Descriptor: {
+        Id: TSG1005,
+        Title: Generic methods are not supported,
+        MessageFormat: Remove the generic type(s) from the method, this type of generation is not supported.,
+        Category: Usage,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}

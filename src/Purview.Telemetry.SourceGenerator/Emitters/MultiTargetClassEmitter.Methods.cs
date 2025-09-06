@@ -170,7 +170,7 @@ partial class MultiTargetClassEmitter
 				.AppendLine(");");
 		}
 
-		// Add baggage for parameters marked as baggage  
+		// Add baggage for parameters marked as baggage
 		foreach (var param in filteredParams.Where(p => p.IsBaggage))
 		{
 			var baggageName = param.BaggageName ?? param.Name.ToLowerInvariant();
@@ -204,7 +204,9 @@ partial class MultiTargetClassEmitter
 
 		// Generate logging using similar logic to existing logging emitter
 		var logLevel = method.Configuration.LogLevel ?? "Information";
-		var logMessage = method.Configuration.LogMessage ?? BuildDefaultLogMessage(method.MethodName, filteredParams);
+		var logMessage =
+			method.Configuration.LogMessage
+			?? BuildDefaultLogMessage(method.MethodName, filteredParams);
 
 		builder
 			.Append(indent, "if (!", withNewLine: false)
@@ -255,7 +257,7 @@ partial class MultiTargetClassEmitter
 		// Generate metrics using similar logic to existing metrics emitter
 		var tagParams = filteredParams.Where(p => p.IsTag).ToArray();
 
-		if (tagParams.Any())
+		if (tagParams.Length != 0)
 		{
 			EmitTagsCollection(tagParams, builder, indent);
 		}
@@ -268,7 +270,11 @@ partial class MultiTargetClassEmitter
 		}
 
 		builder
-			.Append(indent, "// TODO: Implement actual metrics instrumentation for ", withNewLine: false)
+			.Append(
+				indent,
+				"// TODO: Implement actual metrics instrumentation for ",
+				withNewLine: false
+			)
 			.AppendLine(method.MethodName)
 			.Append(indent, "// Example: _someCounter.Add(1, tags);");
 
@@ -297,7 +303,7 @@ partial class MultiTargetClassEmitter
 			.Append(indent, '{');
 	}
 
-	static IEnumerable<MultiTargetParameter> GetFilteredParametersForTarget(
+	static MultiTargetParameter[] GetFilteredParametersForTarget(
 		MultiTargetMethod method,
 		string targetType
 	)
@@ -307,30 +313,38 @@ partial class MultiTargetClassEmitter
 			"Activity" => ParameterExclusions.Activities,
 			"Logging" => ParameterExclusions.Logging,
 			"Metrics" => ParameterExclusions.Metrics,
-			_ => ParameterExclusions.None
+			_ => ParameterExclusions.None,
 		};
 
-		return method.Parameters.Where(p =>
-		{
-			// Apply explicit exclusions
-			if (p.Exclusions.HasFlag(exclusionFlag))
-				return false;
+		return method
+			.Parameters.Where(p =>
+			{
+				// Apply explicit exclusions
+				if (p.Exclusions.HasFlag(exclusionFlag))
+					return false;
 
-			// Apply automatic exclusions based on parameter type
-			return !ShouldAutoExcludeFromTarget(p.TypeName, targetType);
-		});
+				// Apply automatic exclusions based on parameter type
+				return !ShouldAutoExcludeFromTarget(p.TypeName, targetType);
+			})
+			.ToArray();
 	}
 
 	static bool ShouldAutoExcludeFromTarget(string typeName, string targetType)
 	{
 		// Automatically exclude Activity parameters from Logging and Metrics
-		if (typeName == "System.Diagnostics.Activity" || typeName == "global::System.Diagnostics.Activity")
+		if (
+			typeName == "System.Diagnostics.Activity"
+			|| typeName == "global::System.Diagnostics.Activity"
+		)
 		{
 			return targetType is "Logging" or "Metrics";
 		}
 
 		// Automatically exclude CancellationToken from all targets
-		if (typeName == "System.Threading.CancellationToken" || typeName == "global::System.Threading.CancellationToken")
+		if (
+			typeName == "System.Threading.CancellationToken"
+			|| typeName == "global::System.Threading.CancellationToken"
+		)
 		{
 			return true;
 		}
@@ -363,11 +377,14 @@ partial class MultiTargetClassEmitter
 		builder.AppendLine("};");
 	}
 
-	static string BuildDefaultLogMessage(string methodName, IEnumerable<MultiTargetParameter> parameters)
+	static string BuildDefaultLogMessage(
+		string methodName,
+		IEnumerable<MultiTargetParameter> parameters
+	)
 	{
 		var paramList = parameters.ToArray();
 		var message = $"{methodName} called";
-		
+
 		if (paramList.Length > 0)
 		{
 			message += " with";
@@ -378,7 +395,7 @@ partial class MultiTargetClassEmitter
 				message += $" {{{paramList[i].Name}}}";
 			}
 		}
-		
+
 		return message;
 	}
 
@@ -387,7 +404,7 @@ partial class MultiTargetClassEmitter
 		return logLevel switch
 		{
 			"Trace" => "LogTrace",
-			"Debug" => "LogDebug", 
+			"Debug" => "LogDebug",
 			"Information" => "LogInformation",
 			"Warning" => "LogWarning",
 			"Error" => "LogError",

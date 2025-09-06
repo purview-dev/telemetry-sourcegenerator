@@ -30,27 +30,37 @@ public class OutputGenerationExampleTests(ITestOutputHelper testOutputHelper)
 			""";
 
 		testOutputHelper.WriteLine("=== EXAMPLE: Basic Activity Generation ===");
-		testOutputHelper.WriteLine("This example demonstrates how to inspect generated Activity code.");
-		
+		testOutputHelper.WriteLine(
+			"This example demonstrates how to inspect generated Activity code."
+		);
+
 		if (TestOutputConfiguration.IsOutputEnabled)
 		{
 			testOutputHelper.WriteLine($"? Output generation is ENABLED");
-			testOutputHelper.WriteLine($"  Output directory: {TestOutputConfiguration.OutputDirectory}");
-			testOutputHelper.WriteLine($"  Look for: Example_BasicActivityGeneration_ShowsOutputStructure/");
+			testOutputHelper.WriteLine(
+				$"  Output directory: {TestOutputConfiguration.OutputDirectory}"
+			);
+			testOutputHelper.WriteLine(
+				$"  Look for: Example_BasicActivityGeneration_ShowsOutputStructure/"
+			);
 		}
 		else
 		{
 			testOutputHelper.WriteLine("? Output generation is DISABLED");
-			testOutputHelper.WriteLine("  Set PURVIEW_TELEMETRY_OUTPUT_GENERATED_FILES=true to enable");
+			testOutputHelper.WriteLine(
+				"  Set PURVIEW_TELEMETRY_OUTPUT_GENERATED_FILES=true to enable"
+			);
 		}
 
 		var result = await GenerateAsync(inputSource);
 
 		if (TestOutputConfiguration.IsOutputEnabled)
 		{
-			var generatedCount = result.DriverResult.Results.SelectMany(r => r.GeneratedSources).Count();
+			var generatedCount = result
+				.DriverResult.Results.SelectMany(r => r.GeneratedSources)
+				.Count();
 			testOutputHelper.WriteLine($"? Generated {generatedCount} source files");
-			
+
 			testOutputHelper.WriteLine("Generated files:");
 			foreach (var generatorResult in result.DriverResult.Results)
 			{
@@ -88,7 +98,9 @@ public class OutputGenerationExampleTests(ITestOutputHelper testOutputHelper)
 			""";
 
 		testOutputHelper.WriteLine("=== EXAMPLE: Logging Generation ===");
-		testOutputHelper.WriteLine("This example demonstrates how to inspect generated Logging code.");
+		testOutputHelper.WriteLine(
+			"This example demonstrates how to inspect generated Logging code."
+		);
 
 		var result = await GenerateAsync(inputSource);
 
@@ -123,10 +135,16 @@ public class OutputGenerationExampleTests(ITestOutputHelper testOutputHelper)
 			""";
 
 		testOutputHelper.WriteLine("=== EXAMPLE: Metrics Generation ===");
-		testOutputHelper.WriteLine("This example demonstrates how to inspect generated Metrics code.");
+		testOutputHelper.WriteLine(
+			"This example demonstrates how to inspect generated Metrics code."
+		);
 
 		var result = await GenerateAsync(inputSource);
-		await TestHelpers.Verify(result, expectsDiagnostics: true, whenValidatingDiagnosticsIgnoreNonErrors: true);
+		await TestHelpers.Verify(
+			result,
+			expectsDiagnostics: true,
+			whenValidatingDiagnosticsIgnoreNonErrors: true
+		);
 	}
 
 	[Fact]
@@ -148,7 +166,9 @@ public class OutputGenerationExampleTests(ITestOutputHelper testOutputHelper)
 			""";
 
 		testOutputHelper.WriteLine("=== EXAMPLE: Error Scenario ===");
-		testOutputHelper.WriteLine("This example demonstrates how diagnostics are captured in output.");
+		testOutputHelper.WriteLine(
+			"This example demonstrates how diagnostics are captured in output."
+		);
 
 		var result = await GenerateAsync(inputSource);
 
@@ -157,12 +177,15 @@ public class OutputGenerationExampleTests(ITestOutputHelper testOutputHelper)
 			if (result.Diagnostics.Length > 0)
 			{
 				testOutputHelper.WriteLine($"? Captured {result.Diagnostics.Length} diagnostics");
-				testOutputHelper.WriteLine("  Check diagnostics.txt in the output folder for details");
+				testOutputHelper.WriteLine(
+					"  Check diagnostics.txt in the output folder for details"
+				);
 			}
 		}
 
 		// Validate the presence of expected diagnostics without snapshot comparison
-		result.Diagnostics.Any(d => d.Id == "TSG1005" && d.Severity == DiagnosticSeverity.Error).ShouldBeTrue();
+		result
+			.Diagnostics.Any(d => d.Id == "TSG1005" && d.Severity == DiagnosticSeverity.Error)
+			.ShouldBeTrue();
 	}
 }
-
