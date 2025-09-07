@@ -334,7 +334,16 @@ static partial class PipelineHelpers
 				IsTag: isTag,
 				IsBaggage: isBaggage,
 				TagName: tagName,
-				BaggageName: baggageName
+				BaggageName: baggageName,
+				IsActivity: false,
+				IsParentContext: false,
+				IsStartTime: false,
+				IsTimestamp: false,
+				IsEscape: false,
+				IsStatusDescription: false,
+				IsException: false,
+				IsTagsEnumerable: false,
+				IsLinksEnumerable: false
 			);
 
 			result.Add(multiTargetParam);

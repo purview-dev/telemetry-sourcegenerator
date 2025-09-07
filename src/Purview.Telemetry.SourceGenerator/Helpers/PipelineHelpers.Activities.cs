@@ -8,7 +8,11 @@ namespace Purview.Telemetry.SourceGenerator.Helpers;
 
 partial class PipelineHelpers
 {
-	public static bool HasActivityTargetAttribute(SyntaxNode _, CancellationToken __) => true;
+	public static bool HasActivityTargetAttribute(SyntaxNode node, CancellationToken token)
+	{
+		token.ThrowIfCancellationRequested();
+		return node is InterfaceDeclarationSyntax;
+	}
 
 	public static ActivitySourceTarget? BuildActivityTransform(
 		GeneratorAttributeSyntaxContext context,

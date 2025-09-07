@@ -60,49 +60,25 @@ sealed record MultiTargetParameter(
 sealed record MultiTargetConfiguration(
 	bool IsMultiTargetEnabled,
 	GenerationType TargetTypes,
-	
 	// Activity configuration
 	string? ActivityName = null,
-	global::System.Diagnostics.ActivityKind ActivityKind = global::System.Diagnostics.ActivityKind.Internal,
+	int ActivityKind = Constants.Activities.DefaultActivityKind,
 	bool CreateActivityOnly = false,
 	ActivityMethodType ActivityMethodType = ActivityMethodType.Activity,
-	global::System.Diagnostics.ActivityStatusCode ActivityStatusCode = global::System.Diagnostics.ActivityStatusCode.Unset,
+	int ActivityStatusCode = 0, // 0 == Unset in System.Diagnostics.ActivityStatusCode
 	string? ActivityStatusDescription = null,
-	
-	// Logging configuration  
+	// Logging configuration
 	string? LogMessage = null,
 	string? LogLevel = null,
 	int? LogEventId = null,
 	string? LogName = null,
 	bool UsesScopedLogging = false,
-	
 	// Metrics configuration
 	MetricType MetricType = MetricType.Counter,
 	string? MetricName = null,
 	string? MetricUnit = null,
 	string? MetricDescription = null
 );
-
-/// <summary>
-/// Defines the type of activity method for multi-target generation.
-/// </summary>
-enum ActivityMethodType
-{
-	/// <summary>
-	/// Activity start or create method that returns an Activity.
-	/// </summary>
-	Activity,
-	
-	/// <summary>
-	/// Event method that adds an event to an existing Activity.
-	/// </summary>
-	Event,
-	
-	/// <summary>
-	/// Context method that adds context (tags/baggage) to an existing Activity.
-	/// </summary>
-	Context
-}
 
 /// <summary>
 /// Defines the type of metric to generate for multi-target generation.
@@ -113,21 +89,21 @@ enum MetricType
 	/// Counter metric that tracks cumulative values.
 	/// </summary>
 	Counter,
-	
+
 	/// <summary>
 	/// UpDownCounter metric that can increase and decrease.
 	/// </summary>
 	UpDownCounter,
-	
+
 	/// <summary>
 	/// Histogram metric that tracks distribution of values.
 	/// </summary>
 	Histogram,
-	
+
 	/// <summary>
 	/// Gauge metric that tracks current values.
 	/// </summary>
-	Gauge
+	Gauge,
 }
 
 /// <summary>
@@ -140,7 +116,7 @@ enum ParameterExclusions
 	Activities = 1 << 0,
 	Logging = 1 << 1,
 	Metrics = 1 << 2,
-	All = Activities | Logging | Metrics
+	All = Activities | Logging | Metrics,
 }
 
 /// <summary>
@@ -184,31 +160,36 @@ sealed record MultiTargetGenerationTarget(
 	/// <param name="configuration">The multi-target configuration.</param>
 	/// <param name="originalReturnType">The original method return type.</param>
 	/// <returns>The return type to use for the generated method.</returns>
-	public static string DetermineReturnType(MultiTargetConfiguration configuration, ITypeSymbol originalReturnType)
+	public static string DetermineReturnType(
+		MultiTargetConfiguration configuration,
+		ITypeSymbol originalReturnType
+	)
 	{
-		var hasActivity = configuration.TargetTypes.HasFlag(GenerationType.Activities) &&
-		                  configuration.ActivityMethodType == ActivityMethodType.Activity;
-		var hasScopedLogging = configuration.TargetTypes.HasFlag(GenerationType.Logging) &&
-		                      configuration.UsesScopedLogging;
-		
+		var hasActivity =
+			configuration.TargetTypes.HasFlag(GenerationType.Activities)
+			&& configuration.ActivityMethodType == ActivityMethodType.Activity;
+		var hasScopedLogging =
+			configuration.TargetTypes.HasFlag(GenerationType.Logging)
+			&& configuration.UsesScopedLogging;
+
 		// If both Activity and Scoped Logging are enabled, use the combined return type
 		if (hasActivity && hasScopedLogging)
 		{
 			return "MultiTargetTelemetryResult";
 		}
-		
+
 		// If only Activity is enabled and it's an Activity method type, return Activity?
 		if (hasActivity)
 		{
 			return "global::System.Diagnostics.Activity?";
 		}
-		
+
 		// If only Scoped Logging is enabled, return IDisposable?
 		if (hasScopedLogging)
 		{
 			return "global::System.IDisposable?";
 		}
-		
+
 		// Otherwise, return void (for Metrics-only, Event methods, Context methods, etc.)
 		return "void";
 	}

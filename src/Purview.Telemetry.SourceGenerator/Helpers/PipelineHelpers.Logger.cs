@@ -11,7 +11,11 @@ partial class PipelineHelpers
 {
 	static readonly string[] SuffixesToRemove = ["Logs", "Logger", "Telemetry"];
 
-	public static bool HasLoggerTargetAttribute(SyntaxNode _, CancellationToken __) => true;
+	public static bool HasLoggerTargetAttribute(SyntaxNode node, CancellationToken token)
+	{
+		token.ThrowIfCancellationRequested();
+		return node is InterfaceDeclarationSyntax;
+	}
 
 	public static LoggerTarget? BuildLoggerTransform(
 		GeneratorAttributeSyntaxContext context,

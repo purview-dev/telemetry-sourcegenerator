@@ -8,7 +8,11 @@ namespace Purview.Telemetry.SourceGenerator.Helpers;
 
 partial class PipelineHelpers
 {
-	public static bool HasMeterTargetAttribute(SyntaxNode _, CancellationToken __) => true;
+	public static bool HasMeterTargetAttribute(SyntaxNode node, CancellationToken token)
+	{
+		token.ThrowIfCancellationRequested();
+		return node is InterfaceDeclarationSyntax;
+	}
 
 	public static MeterTarget? BuildMeterTransform(
 		GeneratorAttributeSyntaxContext context,

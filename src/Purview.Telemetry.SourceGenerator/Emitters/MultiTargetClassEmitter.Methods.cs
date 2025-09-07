@@ -1,7 +1,10 @@
+using System.Collections.Immutable;
+using System.Reflection;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
+using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator.Emitters;
 
@@ -43,7 +46,7 @@ partial class MultiTargetClassEmitter
 
 		// Determine the return type based on enabled telemetry types
 		var returnType = MultiTargetGenerationTarget.DetermineReturnType(
-			method.Configuration, 
+			method.Configuration,
 			method.MethodSymbol.ReturnType
 		);
 
@@ -53,17 +56,38 @@ partial class MultiTargetClassEmitter
 		// Emit private methods for each enabled telemetry type, reusing existing infrastructure
 		if (method.Configuration.TargetTypes.HasFlag(GenerationType.Activities))
 		{
-			EmitActivityTargetMethodUsingExistingInfrastructure(method, target, builder, indent, context, logger);
+			EmitActivityTargetMethodUsingExistingInfrastructure(
+				method,
+				target,
+				builder,
+				indent,
+				context,
+				logger
+			);
 		}
 
 		if (method.Configuration.TargetTypes.HasFlag(GenerationType.Logging))
 		{
-			EmitLoggingTargetMethodUsingExistingInfrastructure(method, target, builder, indent, context, logger);
+			EmitLoggingTargetMethodUsingExistingInfrastructure(
+				method,
+				target,
+				builder,
+				indent,
+				context,
+				logger
+			);
 		}
 
 		if (method.Configuration.TargetTypes.HasFlag(GenerationType.Metrics))
 		{
-			EmitMetricsTargetMethodUsingExistingInfrastructure(method, target, builder, indent, context, logger);
+			EmitMetricsTargetMethodUsingExistingInfrastructure(
+				method,
+				target,
+				builder,
+				indent,
+				context,
+				logger
+			);
 		}
 	}
 
@@ -223,11 +247,7 @@ partial class MultiTargetClassEmitter
 		}
 	}
 
-	static void EmitVoidReturnLogic(
-		MultiTargetMethod method,
-		StringBuilder builder,
-		int indent
-	)
+	static void EmitVoidReturnLogic(MultiTargetMethod method, StringBuilder builder, int indent)
 	{
 		// For void returns, call all enabled targets
 		if (method.Configuration.TargetTypes.HasFlag(GenerationType.Activities))
@@ -264,7 +284,6 @@ partial class MultiTargetClassEmitter
 			.Append(paramNames)
 			.AppendLine(");");
 	}
-}
 
 	static void EmitActivityTargetMethodUsingExistingInfrastructure(
 		MultiTargetMethod method,
@@ -277,31 +296,53 @@ partial class MultiTargetClassEmitter
 	{
 		var filteredParams = GetFilteredParametersForTarget(method, "Activity");
 		var methodName = $"{method.MethodName}_Activity";
-		var returnType = method.Configuration.ActivityMethodType == ActivityMethodType.Activity 
-			? "global::System.Diagnostics.Activity?" 
-			: "void";
+		var returnType =
+			method.Configuration.ActivityMethodType == ActivityMethodType.Activity
+				? "global::System.Diagnostics.Activity?"
+				: "void";
 
 		EmitPrivateMethodSignature(methodName, filteredParams, returnType, builder, indent);
 		indent++;
 
 		// Convert multi-target configuration to ActivityBasedGenerationTarget format
 		var activityTarget = CreateActivityTargetFromMultiTarget(method, filteredParams);
-		
+
 		// Use existing activity generation logic
 		if (method.Configuration.ActivityMethodType == ActivityMethodType.Activity)
 		{
 			// Use existing ActivitySourceTargetClassEmitter.EmitActivityMethodBody logic
-			EmitActivityMethodBodyFromExistingInfrastructure(builder, indent, activityTarget, context, logger);
+			InvokeActivityEmitter(
+				"EmitActivityMethodBody",
+				builder,
+				indent,
+				activityTarget,
+				context,
+				logger
+			);
 		}
 		else if (method.Configuration.ActivityMethodType == ActivityMethodType.Event)
 		{
 			// Use existing event generation logic
-			EmitEventMethodBodyFromExistingInfrastructure(builder, indent, activityTarget, context, logger);
+			InvokeActivityEmitter(
+				"EmitEventMethodBody",
+				builder,
+				indent,
+				activityTarget,
+				context,
+				logger
+			);
 		}
 		else if (method.Configuration.ActivityMethodType == ActivityMethodType.Context)
 		{
 			// Use existing context generation logic
-			EmitContextMethodBodyFromExistingInfrastructure(builder, indent, activityTarget, context, logger);
+			InvokeActivityEmitter(
+				"EmitContextMethodBody",
+				builder,
+				indent,
+				activityTarget,
+				context,
+				logger
+			);
 		}
 
 		indent--;
@@ -319,8 +360,8 @@ partial class MultiTargetClassEmitter
 	{
 		var filteredParams = GetFilteredParametersForTarget(method, "Logging");
 		var methodName = $"{method.MethodName}_Logging";
-		var returnType = method.Configuration.UsesScopedLogging 
-			? "global::System.IDisposable?" 
+		var returnType = method.Configuration.UsesScopedLogging
+			? "global::System.IDisposable?"
 			: "void";
 
 		EmitPrivateMethodSignature(methodName, filteredParams, returnType, builder, indent);
@@ -328,7 +369,7 @@ partial class MultiTargetClassEmitter
 
 		// Convert multi-target configuration to LogMethodTarget format
 		var logTarget = CreateLogTargetFromMultiTarget(method, filteredParams);
-		
+
 		// Use existing LoggerTargetClassEmitter.EmitLogActionMethod logic
 		EmitLogActionMethodFromExistingInfrastructure(builder, indent, logTarget, context, logger);
 
@@ -353,9 +394,15 @@ partial class MultiTargetClassEmitter
 
 		// Convert multi-target configuration to metrics target format
 		var metricsTarget = CreateMetricsTargetFromMultiTarget(method, filteredParams);
-		
+
 		// Use existing MeterTargetClassEmitter logic
-		EmitMetricsMethodFromExistingInfrastructure(builder, indent, metricsTarget, context, logger);
+		EmitMetricsMethodFromExistingInfrastructure(
+			builder,
+			indent,
+			metricsTarget,
+			context,
+			logger
+		);
 
 		indent--;
 		builder.Append(indent, "}").AppendLine();
@@ -396,24 +443,30 @@ partial class MultiTargetClassEmitter
 	{
 		// Convert MultiTargetMethod + filtered parameters to ActivityBasedGenerationTarget
 		// This allows us to reuse existing activity generation logic
-		
+
 		// For now, return a simplified version - this will be expanded to fully map all properties
 		return new ActivityBasedGenerationTarget(
 			MethodName: method.MethodName,
-			ReturnType: method.Configuration.ActivityMethodType == ActivityMethodType.Activity 
-				? Constants.Activities.SystemDiagnostics.Activity 
-				: PurviewTypeFactory.Void,
+			ReturnType: method.Configuration.ActivityMethodType == ActivityMethodType.Activity
+				? PurviewTypeFactory.Create(Constants.Activities.SystemDiagnostics.Activity)
+				: PurviewTypeFactory.Create(typeof(void)),
 			ActivityOrEventName: method.Configuration.ActivityName ?? method.MethodName,
 			HasActivityParameter: filteredParams.Any(p => p.IsActivity),
 			Locations: [method.Location],
 			ActivityAttribute: CreateActivityAttributeRecord(method.Configuration),
-			EventAttribute: method.Configuration.ActivityMethodType == ActivityMethodType.Event 
-				? CreateEventAttributeRecord(method.Configuration) 
+			EventAttribute: method.Configuration.ActivityMethodType == ActivityMethodType.Event
+				? CreateEventAttributeRecord(method.Configuration)
 				: null,
 			MethodType: method.Configuration.ActivityMethodType,
 			Parameters: ConvertToActivityParameters(filteredParams),
-			Baggage: filteredParams.Where(p => p.IsBaggage).Select(ConvertToActivityParameter).ToImmutableArray(),
-			Tags: filteredParams.Where(p => p.IsTag).Select(ConvertToActivityParameter).ToImmutableArray(),
+			Baggage: filteredParams
+				.Where(p => p.IsBaggage)
+				.Select(ConvertToActivityParameter)
+				.ToImmutableArray(),
+			Tags: filteredParams
+				.Where(p => p.IsTag)
+				.Select(ConvertToActivityParameter)
+				.ToImmutableArray(),
 			TargetGenerationState: new TargetGeneration(IsValid: true, false, false)
 		);
 	}
@@ -425,7 +478,7 @@ partial class MultiTargetClassEmitter
 	{
 		// Convert MultiTargetMethod + filtered parameters to LogMethodTarget
 		// This allows us to reuse existing logging generation logic
-		
+
 		return new LogMethodTarget(
 			MethodName: method.MethodName,
 			IsScoped: method.Configuration.UsesScopedLogging,
@@ -433,14 +486,20 @@ partial class MultiTargetClassEmitter
 			UnknownReturnType: false,
 			LogName: method.Configuration.LogName ?? method.MethodName,
 			EventId: method.Configuration.LogEventId,
-			MessageTemplate: method.Configuration.LogMessage ?? BuildDefaultLogMessage(method.MethodName, filteredParams),
+			MessageTemplate: method.Configuration.LogMessage
+				?? BuildDefaultLogMessage(method.MethodName, filteredParams),
 			TemplateProperties: [], // Will be calculated from message template
 			TemplateIsOrdinalBased: false,
 			TemplateIsNamedBased: true,
 			MSLevel: $"global::Microsoft.Extensions.Logging.LogLevel.{method.Configuration.LogLevel ?? "Information"}",
 			Parameters: ConvertToLogParameters(filteredParams),
-			ParametersSansException: ConvertToLogParameters(filteredParams.Where(p => !p.IsException).ToArray()),
-			ExceptionParameter: filteredParams.Where(p => p.IsException).Select(ConvertToLogParameter).FirstOrDefault(),
+			ParametersSansException: ConvertToLogParameters(
+				filteredParams.Where(p => !p.IsException).ToArray()
+			),
+			ExceptionParameter: filteredParams
+				.Where(p => p.IsException)
+				.Select(ConvertToLogParameter)
+				.FirstOrDefault(),
 			HasMultipleExceptions: filteredParams.Count(p => p.IsException) > 1,
 			MethodLocation: method.Location,
 			InferredErrorLevel: false,
@@ -449,9 +508,9 @@ partial class MultiTargetClassEmitter
 	}
 
 	// Placeholder methods for the existing infrastructure calls
-	// These will be implemented to call the actual existing emitter methods
-
-	static void EmitActivityMethodBodyFromExistingInfrastructure(
+	// These were previously placeholders; now we provide a single reflection-based helper.
+	static void InvokeActivityEmitter(
+		string methodName,
 		StringBuilder builder,
 		int indent,
 		ActivityBasedGenerationTarget methodTarget,
@@ -459,33 +518,25 @@ partial class MultiTargetClassEmitter
 		GenerationLogger? logger
 	)
 	{
-		// TODO: Call existing ActivitySourceTargetClassEmitter.EmitActivityMethodBody
-		// For now, emit a placeholder that will be replaced
-		builder.Append(indent, "// TODO: Implement activity generation using existing infrastructure");
-	}
-
-	static void EmitEventMethodBodyFromExistingInfrastructure(
-		StringBuilder builder,
-		int indent,
-		ActivityBasedGenerationTarget methodTarget,
-		SourceProductionContext context,
-		GenerationLogger? logger
-	)
-	{
-		// TODO: Call existing ActivitySourceTargetClassEmitter.EmitEventMethodBody
-		builder.Append(indent, "// TODO: Implement event generation using existing infrastructure");
-	}
-
-	static void EmitContextMethodBodyFromExistingInfrastructure(
-		StringBuilder builder,
-		int indent,
-		ActivityBasedGenerationTarget methodTarget,
-		SourceProductionContext context,
-		GenerationLogger? logger
-	)
-	{
-		// TODO: Call existing ActivitySourceTargetClassEmitter.EmitContextMethodBody
-		builder.Append(indent, "// TODO: Implement context generation using existing infrastructure");
+		const BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic;
+		var mi = typeof(ActivitySourceTargetClassEmitter).GetMethod(methodName, flags);
+		if (mi is null)
+		{
+			logger?.Diagnostic(
+				$"Multi-target: could not locate activity emitter method '{methodName}'."
+			);
+			return;
+		}
+		try
+		{
+			mi.Invoke(null, new object?[] { builder, indent, methodTarget, context, logger });
+		}
+		catch (TargetInvocationException tie)
+		{
+			logger?.Diagnostic(
+				$"Multi-target reflection invoke failed for '{methodName}': {tie.InnerException?.Message ?? tie.Message}"
+			);
+		}
 	}
 
 	static void EmitLogActionMethodFromExistingInfrastructure(
@@ -496,20 +547,74 @@ partial class MultiTargetClassEmitter
 		GenerationLogger? logger
 	)
 	{
-		// TODO: Call existing LoggerTargetClassEmitter.EmitLogActionMethod
-		builder.Append(indent, "// TODO: Implement logging generation using existing infrastructure");
-	}
+		// Adapt existing LoggerTargetClassEmitter.EmitLogActionMethod logic for multi-target
+		logger?.Debug($"Emitting multi-target logging body for {logTarget.MethodName}");
 
-	static void EmitMetricsMethodFromExistingInfrastructure(
-		StringBuilder builder,
-		int indent,
-		object metricsTarget,
-		SourceProductionContext context,
-		GenerationLogger? logger
-	)
-	{
-		// TODO: Call existing MeterTargetClassEmitter logic
-		builder.Append(indent, "// TODO: Implement metrics generation using existing infrastructure");
+		builder
+			.AppendLine()
+			.CodeGen(indent)
+			.AggressiveInlining(indent)
+			.Append(indent, "private ", withNewLine: false);
+
+		if (logTarget.IsScoped)
+			builder.Append(Constants.System.IDisposable).Append('?');
+		else
+			builder.Append(Constants.System.VoidKeyword);
+
+		builder.Append(' ').Append(logTarget.MethodName).Append("_Logging(");
+
+		// Parameters
+		for (var i = 0; i < logTarget.Parameters.Length; i++)
+		{
+			var p = logTarget.Parameters[i];
+			builder.Append(p.ParameterType).Append(' ').Append(p.Name);
+			if (i < logTarget.Parameters.Length - 1)
+				builder.Append(", ");
+		}
+
+		builder.AppendLine(")").Append(indent, '{');
+
+		if (logTarget.IsScoped)
+		{
+			builder
+				.Append(indent + 1, "return ", withNewLine: false)
+				.Append($"_log{logTarget.MethodName}Action")
+				.Append('(')
+				.Append(Constants.VariableNames.LoggerFieldName);
+			foreach (var p in logTarget.ParametersSansException)
+				builder.Append(", ").Append(p.Name);
+			builder.AppendLine(");");
+		}
+		else
+		{
+			builder
+				.Append(indent + 1, "if (!", withNewLine: false)
+				.Append(Constants.VariableNames.LoggerFieldName)
+				.Append(".IsEnabled(")
+				.Append(logTarget.MSLevel)
+				.AppendLine("))")
+				.Append(indent + 1, '{')
+				.Append(indent + 2, "return;")
+				.Append(indent + 1, '}')
+				.AppendLine();
+
+			builder
+				.Append(indent + 1, $"_log{logTarget.MethodName}Action", withNewLine: false)
+				.Append('(')
+				.Append(Constants.VariableNames.LoggerFieldName);
+			foreach (var p in logTarget.ParametersSansException)
+				builder.Append(", ").Append(p.Name);
+			if (logTarget.ExceptionParameter != null)
+				builder.Append(", ").Append(logTarget.ExceptionParameter.Name);
+			else
+				builder.Append(", null");
+			builder.AppendLine(");");
+		}
+
+		if (!logTarget.IsScoped)
+			builder.Append(indent, '}').AppendLine();
+		else
+			builder.Append(indent, '}').AppendLine();
 	}
 
 	// Helper conversion methods
@@ -517,19 +622,30 @@ partial class MultiTargetClassEmitter
 	{
 		if (!config.TargetTypes.HasFlag(GenerationType.Activities))
 			return null;
-			
-		// Convert multi-target config to ActivityAttributeRecord format
-		// This is a simplified version - expand as needed
-		return null; // Placeholder
+
+		return new ActivityAttributeRecord(
+			Name: config.ActivityName ?? new AttributeStringValue(),
+			Kind: new AttributeValue<int>(config.ActivityKind),
+			CreateOnly: new AttributeValue<bool>(config.CreateActivityOnly)
+		);
 	}
 
 	static EventAttributeRecord? CreateEventAttributeRecord(MultiTargetConfiguration config)
 	{
 		if (config.ActivityMethodType != ActivityMethodType.Event)
 			return null;
-			
-		// Convert multi-target config to EventAttributeRecord format  
-		return null; // Placeholder
+
+		var statusCode = config.ActivityStatusCode;
+		var statusCodeValue =
+			statusCode == 0 ? new AttributeValue<int>() : new AttributeValue<int>(statusCode);
+
+		return new EventAttributeRecord(
+			Name: config.ActivityName ?? new AttributeStringValue(),
+			UseRecordExceptionRules: new AttributeValue<bool>(),
+			RecordExceptionEscape: new AttributeValue<bool>(),
+			StatusCode: statusCodeValue,
+			StatusDescription: config.ActivityStatusDescription ?? new AttributeStringValue()
+		);
 	}
 
 	static ImmutableArray<ActivityBasedParameterTarget> ConvertToActivityParameters(
@@ -546,10 +662,10 @@ partial class MultiTargetClassEmitter
 			ParameterName: param.Name,
 			ParameterType: PurviewTypeFactory.Create(param.ParameterSymbol.Type),
 			GeneratedName: param.TagName ?? param.BaggageName ?? param.Name,
-			ParamDestination: param.IsTag ? ActivityParameterDestination.Tag : 
-			                 param.IsBaggage ? ActivityParameterDestination.Baggage :
-			                 param.IsActivity ? ActivityParameterDestination.Activity :
-			                 ActivityParameterDestination.Tag, // Default
+			ParamDestination: param.IsTag ? ActivityParameterDestination.Tag
+				: param.IsBaggage ? ActivityParameterDestination.Baggage
+				: param.IsActivity ? ActivityParameterDestination.Activity
+				: ActivityParameterDestination.Tag, // Default
 			SkipOnNullOrEmpty: false, // Could be enhanced to read from attributes
 			IsException: param.IsException,
 			Locations: [param.ParameterSymbol.Locations.FirstOrDefault() ?? Location.None]
@@ -582,15 +698,143 @@ partial class MultiTargetClassEmitter
 		);
 	}
 
-	static object CreateMetricsTargetFromMultiTarget(
+	static MetricsMethodInfo CreateMetricsTargetFromMultiTarget(
 		MultiTargetMethod method,
 		MultiTargetParameter[] filteredParams
 	)
 	{
-		// TODO: Create appropriate metrics target record
-		// The exact type will depend on the metric type (Counter, Histogram, etc.)
-		return new { }; // Placeholder
+		return new MetricsMethodInfo(method, filteredParams);
 	}
+
+	record MetricsMethodInfo(MultiTargetMethod Method, MultiTargetParameter[] Params);
+
+	static void EmitMetricsMethodFromExistingInfrastructure(
+		StringBuilder builder,
+		int indent,
+		MetricsMethodInfo metricsTarget,
+		SourceProductionContext context,
+		GenerationLogger? logger
+	)
+	{
+		context.CancellationToken.ThrowIfCancellationRequested();
+
+		var method = metricsTarget.Method;
+		var paramsArray = metricsTarget.Params;
+		var fieldName = $"_metric{method.MethodName}";
+		var metricName = method.Configuration.MetricName ?? method.MethodName;
+		var measurementParam = paramsArray.FirstOrDefault(p => IsNumericType(p.TypeName));
+		var measurementValue = measurementParam != null ? measurementParam.Name : "1";
+
+		// Lazy instrument init
+		builder
+			.Append(indent, "if (", withNewLine: false)
+			.Append(fieldName)
+			.AppendLine(" == null)")
+			.Append(indent, '{')
+			.Append(indent + 1, fieldName, withNewLine: false)
+			.Append(" = ")
+			.Append(Constants.VariableNames.MeterFieldName)
+			.Append('.')
+			.Append(
+				method.Configuration.MetricType switch
+				{
+					MetricType.Counter => "CreateCounter<long>",
+					MetricType.UpDownCounter => "CreateUpDownCounter<long>",
+					MetricType.Histogram => "CreateHistogram<long>",
+					MetricType.Gauge => "CreateObservableGauge<long>",
+					_ => "CreateCounter<long>",
+				}
+			)
+			.Append('(')
+			.Append('"')
+			.Append(metricName)
+			.Append('"');
+
+		if (!string.IsNullOrWhiteSpace(method.Configuration.MetricUnit))
+			builder.Append(", unit: \"").Append(method.Configuration.MetricUnit).Append('\"');
+		if (!string.IsNullOrWhiteSpace(method.Configuration.MetricDescription))
+			builder
+				.Append(", description: \"")
+				.Append(method.Configuration.MetricDescription)
+				.Append('\"');
+
+		builder.AppendLine(");").Append(indent, '}');
+
+		// Emit record/ add measurement
+		if (method.Configuration.MetricType == MetricType.Gauge)
+		{
+			// For observable gauge we'd normally register callback; simplified immediate measurement emission omitted
+			return;
+		}
+
+		// Build tag list
+		var tagParams = paramsArray.Where(p => p.IsTag).ToArray();
+		if (tagParams.Length > 0)
+		{
+			builder
+				.AppendLine()
+				.Append(
+					indent,
+					"global::System.Collections.Generic.KeyValuePair<string, object?>[] tagsArr = [",
+					withNewLine: false
+				);
+			for (var i = 0; i < tagParams.Length; i++)
+			{
+				var tp = tagParams[i];
+				var tagKey = tp.TagName ?? tp.Name;
+				builder.Append("new(\"").Append(tagKey).Append("\", ").Append(tp.Name).Append(')');
+				if (i < tagParams.Length - 1)
+					builder.Append(", ");
+			}
+			builder.AppendLine("]; ");
+		}
+
+		builder
+			.Append(indent, fieldName, withNewLine: false)
+			.Append(
+				method.Configuration.MetricType switch
+				{
+					MetricType.Counter => ".Add(",
+					MetricType.UpDownCounter => ".Add(",
+					MetricType.Histogram => ".Record(",
+					_ => ".Add(",
+				}
+			)
+			.Append(measurementValue);
+
+		if (tagParams.Length > 0)
+			builder.Append(", tags: tagsArr");
+
+		builder.AppendLine(");");
+	}
+
+	static bool IsNumericType(string typeName) =>
+		typeName switch
+		{
+			"int"
+			or "long"
+			or "short"
+			or "byte"
+			or "uint"
+			or "ulong"
+			or "ushort"
+			or "sbyte"
+			or "double"
+			or "float"
+			or "decimal"
+			or "global::System.Int32"
+			or "global::System.Int64"
+			or "global::System.Int16"
+			or "global::System.Byte"
+			or "global::System.UInt32"
+			or "global::System.UInt64"
+			or "global::System.UInt16"
+			or "global::System.SByte"
+			or "global::System.Double"
+			or "global::System.Single"
+			or "global::System.Decimal" => true,
+			_ => false,
+		};
 
 	static MultiTargetParameter[] GetFilteredParametersForTarget(
 		MultiTargetMethod method,
@@ -663,4 +907,3 @@ partial class MultiTargetClassEmitter
 		return message;
 	}
 }
-
