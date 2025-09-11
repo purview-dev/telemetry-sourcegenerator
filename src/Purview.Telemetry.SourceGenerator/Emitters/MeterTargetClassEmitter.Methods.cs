@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
 
@@ -9,7 +8,7 @@ partial class MeterTargetClassEmitter
 {
 	static int EmitMethods(
 		MeterTarget target,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		SourceProductionContext context,
 		GenerationLogger? logger
@@ -33,7 +32,7 @@ partial class MeterTargetClassEmitter
 	}
 
 	static void EmitPartialMethods(
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		MeterTarget target,
 		SourceProductionContext context,
@@ -74,7 +73,7 @@ partial class MeterTargetClassEmitter
 	}
 
 	static void EmitMethod(
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		InstrumentTarget methodTarget,
 		SourceProductionContext context,
@@ -156,7 +155,7 @@ partial class MeterTargetClassEmitter
 	}
 
 	static void EmitObservableInstrumentBodyTest(
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		InstrumentTarget method
 	)
@@ -191,7 +190,7 @@ partial class MeterTargetClassEmitter
 		builder.Append(indent, '}').AppendLine();
 	}
 
-	static void EmitInstrumentBodyTest(StringBuilder builder, int indent, InstrumentTarget method)
+	static void EmitInstrumentBodyTest(CodeWriter builder, int indent, InstrumentTarget method)
 	{
 		indent++;
 
@@ -212,7 +211,7 @@ partial class MeterTargetClassEmitter
 	}
 
 	static void EmitObservableInstrumentBody(
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		InstrumentTarget method,
 		string? tagVariableName
@@ -228,7 +227,7 @@ partial class MeterTargetClassEmitter
 			.Append(" = ")
 			.Append(Constants.VariableNames.MeterFieldName)
 			.Append(".Create")
-			.Append(method.InstrumentAttribute!.InstrumentType)
+			.Append(method.InstrumentAttribute!.InstrumentType.ToString())
 			.Append('<')
 			.Append(method.InstrumentMeasurementType)
 			.Append(">(")
@@ -258,7 +257,7 @@ partial class MeterTargetClassEmitter
 	}
 
 	static void EmitInstrumentBody(
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		InstrumentTarget methodTarget,
 		string? tagVariableName
@@ -292,7 +291,7 @@ partial class MeterTargetClassEmitter
 		}
 	}
 
-	static string? EmitTags(StringBuilder builder, int indent, InstrumentTarget methodTarget)
+	static string? EmitTags(CodeWriter builder, int indent, InstrumentTarget methodTarget)
 	{
 		if (methodTarget.Tags.Length == 0)
 			return null;

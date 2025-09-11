@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Reflection;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -12,7 +11,7 @@ partial class MultiTargetClassEmitter
 {
 	static int EmitMethods(
 		MultiTargetGenerationTarget target,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		SourceProductionContext context,
 		GenerationLogger? logger
@@ -34,7 +33,7 @@ partial class MultiTargetClassEmitter
 	static void EmitMethod(
 		MultiTargetMethod method,
 		MultiTargetGenerationTarget target,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		SourceProductionContext context,
 		GenerationLogger? logger
@@ -95,26 +94,25 @@ partial class MultiTargetClassEmitter
 		MultiTargetMethod method,
 		MultiTargetGenerationTarget target,
 		string returnType,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		SourceProductionContext context,
 		GenerationLogger? logger
 	)
 	{
 		var parameters = string.Join(", ", method.Parameters.Select(p => $"{p.TypeName} {p.Name}"));
-
+		// Inline emission to avoid per-method temporary CodeWriter allocation.
 		builder
-			.AppendLine()
-			.CodeGen(indent)
-			.AggressiveInlining(indent)
+			.Append(indent, Constants.System.GeneratedCode.Value)
+			.Append(indent, Constants.System.AggressiveInlining)
 			.Append(indent, "public ", withNewLine: false)
 			.Append(returnType)
-			.Append(' ')
+			.Space()
 			.Append(method.MethodName)
-			.Append('(')
+			.Append("(")
 			.Append(parameters)
-			.AppendLine(')')
-			.Append(indent, '{');
+			.AppendLine(")")
+			.Append(indent, "{");
 
 		indent++;
 
@@ -142,7 +140,7 @@ partial class MultiTargetClassEmitter
 
 	static void EmitCombinedReturnTypeLogic(
 		MultiTargetMethod method,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent
 	)
 	{
@@ -169,7 +167,7 @@ partial class MultiTargetClassEmitter
 
 	static void EmitActivityOnlyReturnLogic(
 		MultiTargetMethod method,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent
 	)
 	{
@@ -209,7 +207,7 @@ partial class MultiTargetClassEmitter
 
 	static void EmitScopedLoggingOnlyReturnLogic(
 		MultiTargetMethod method,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent
 	)
 	{
@@ -247,7 +245,7 @@ partial class MultiTargetClassEmitter
 		}
 	}
 
-	static void EmitVoidReturnLogic(MultiTargetMethod method, StringBuilder builder, int indent)
+	static void EmitVoidReturnLogic(MultiTargetMethod method, CodeWriter builder, int indent)
 	{
 		// For void returns, call all enabled targets
 		if (method.Configuration.TargetTypes.HasFlag(GenerationType.Activities))
@@ -269,7 +267,7 @@ partial class MultiTargetClassEmitter
 	static void EmitCallToTargetMethod(
 		MultiTargetMethod method,
 		string targetType,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent
 	)
 	{
@@ -288,7 +286,7 @@ partial class MultiTargetClassEmitter
 	static void EmitActivityTargetMethodUsingExistingInfrastructure(
 		MultiTargetMethod method,
 		MultiTargetGenerationTarget target,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		SourceProductionContext context,
 		GenerationLogger? logger
@@ -352,7 +350,7 @@ partial class MultiTargetClassEmitter
 	static void EmitLoggingTargetMethodUsingExistingInfrastructure(
 		MultiTargetMethod method,
 		MultiTargetGenerationTarget target,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		SourceProductionContext context,
 		GenerationLogger? logger
@@ -380,7 +378,7 @@ partial class MultiTargetClassEmitter
 	static void EmitMetricsTargetMethodUsingExistingInfrastructure(
 		MultiTargetMethod method,
 		MultiTargetGenerationTarget target,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		SourceProductionContext context,
 		GenerationLogger? logger
@@ -412,7 +410,7 @@ partial class MultiTargetClassEmitter
 		string methodName,
 		IEnumerable<MultiTargetParameter> parameters,
 		string returnType,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent
 	)
 	{
@@ -511,7 +509,7 @@ partial class MultiTargetClassEmitter
 	// These were previously placeholders; now we provide a single reflection-based helper.
 	static void InvokeActivityEmitter(
 		string methodName,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		ActivityBasedGenerationTarget methodTarget,
 		SourceProductionContext context,
@@ -540,7 +538,7 @@ partial class MultiTargetClassEmitter
 	}
 
 	static void EmitLogActionMethodFromExistingInfrastructure(
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		LogMethodTarget logTarget,
 		SourceProductionContext context,
@@ -709,7 +707,7 @@ partial class MultiTargetClassEmitter
 	record MetricsMethodInfo(MultiTargetMethod Method, MultiTargetParameter[] Params);
 
 	static void EmitMetricsMethodFromExistingInfrastructure(
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		MetricsMethodInfo metricsTarget,
 		SourceProductionContext context,

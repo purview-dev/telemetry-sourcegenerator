@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Records;
 
@@ -10,7 +9,7 @@ static class EmitHelpers
 	public static int EmitNamespaceStart(
 		string? classNamespace,
 		string[] parentClasses,
-		StringBuilder builder,
+		CodeWriter builder,
 		CancellationToken token
 	)
 	{
@@ -46,7 +45,7 @@ static class EmitHelpers
 		string? classNamespace,
 		string[] parentClasses,
 		int indent,
-		StringBuilder builder,
+		CodeWriter builder,
 		CancellationToken token
 	)
 	{
@@ -67,7 +66,7 @@ static class EmitHelpers
 		GenerationType generationType,
 		string className,
 		string fullyQualifiedInterface,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		CancellationToken token
 	)
@@ -87,8 +86,7 @@ static class EmitHelpers
 		return indent;
 	}
 
-	public static void EmitClassEnd(StringBuilder builder, int indent) =>
-		builder.Append(indent, '}');
+	public static void EmitClassEnd(CodeWriter builder, int indent) => builder.Append(indent, '}');
 
 	public static bool GenerateDuplicateMethodDiagnostics(
 		GenerationType requestedType,

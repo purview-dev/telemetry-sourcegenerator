@@ -1,4 +1,3 @@
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -9,7 +8,7 @@ partial class MultiTargetClassEmitter
 {
 	static int EmitConstructor(
 		MultiTargetGenerationTarget target,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		SourceProductionContext context,
 		GenerationLogger? logger
@@ -33,7 +32,9 @@ partial class MultiTargetClassEmitter
 
 		if (target.GenerationType.HasFlag(GenerationType.Activities))
 		{
-			parameters.Add($"{Constants.Activities.SystemDiagnostics.ActivitySource} activitySource");
+			parameters.Add(
+				$"{Constants.Activities.SystemDiagnostics.ActivitySource} activitySource"
+			);
 		}
 
 		if (target.GenerationType.HasFlag(GenerationType.Logging))
@@ -46,8 +47,7 @@ partial class MultiTargetClassEmitter
 			parameters.Add($"{Constants.Metrics.SystemDiagnostics.Meter} meter");
 		}
 
-		builder.AppendLine(string.Join(", ", parameters) + ")")
-			.Append(indent, "{");
+		builder.AppendLine(string.Join(", ", parameters) + ")").Append(indent, "{");
 
 		// Constructor body
 		indent++;

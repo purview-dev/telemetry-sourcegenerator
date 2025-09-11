@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
 
@@ -9,7 +8,7 @@ partial class MeterTargetClassEmitter
 {
 	static int EmitInitializationMethod(
 		MeterTarget target,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		SourceProductionContext context
 	)
@@ -89,7 +88,7 @@ partial class MeterTargetClassEmitter
 
 	static void EmitInitialiseInstrumentVariable(
 		InstrumentTarget method,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent
 	)
 	{
@@ -123,7 +122,7 @@ partial class MeterTargetClassEmitter
 				.Append(" = ")
 				.Append(Constants.VariableNames.MeterFieldName)
 				.Append(".Create")
-				.Append(method.InstrumentAttribute!.InstrumentType)
+				.Append(method.InstrumentAttribute!.InstrumentType.ToString())
 				.Append('<')
 				.Append(method.InstrumentMeasurementType)
 				.Append(">(name: ")

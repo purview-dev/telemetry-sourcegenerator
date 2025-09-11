@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
 
@@ -9,7 +8,7 @@ partial class LoggerGenTargetClassEmitter
 {
 	static int EmitMethods(
 		LoggerTarget target,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		SourceProductionContext context,
 		GenerationLogger? logger
@@ -31,7 +30,7 @@ partial class LoggerGenTargetClassEmitter
 	}
 
 	static void EmitMethod(
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		LogMethodTarget methodTarget,
 		SourceProductionContext context,
@@ -245,7 +244,7 @@ partial class LoggerGenTargetClassEmitter
 	}
 
 	static void EmitStateContent(
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		LogMethodTarget methodTarget,
 		string stateVarName,
@@ -361,7 +360,7 @@ partial class LoggerGenTargetClassEmitter
 			List<string> existingParamNames
 		)
 		{
-			StringBuilder logPropertiesBuilder = new();
+			CodeWriter logPropertiesBuilder = new();
 			foreach (var logProperty in parameter.LogProperties!.Value)
 			{
 				context.CancellationToken.ThrowIfCancellationRequested();
@@ -413,13 +412,14 @@ partial class LoggerGenTargetClassEmitter
 				postPropertyDefinitions ??= [];
 				postPropertyDefinitions.Add(logPropertiesBuilder.ToString());
 
-				logPropertiesBuilder.Clear();
+				// Recreate writer instead of Clear() since CodeWriter lacks Clear API.
+				logPropertiesBuilder = new CodeWriter();
 			}
 		}
 	}
 
 	static void OutputState(
-		StringBuilder builder,
+		CodeWriter builder,
 		string stateVarName,
 		string propertyName,
 		string value,
@@ -469,7 +469,7 @@ partial class LoggerGenTargetClassEmitter
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		StringBuilder builder = new();
+		CodeWriter builder = new();
 		var iteratorVarName = FindUniqueName("tmp_i", existingParamNames);
 		var iteratorItemVarName = FindUniqueName("item", existingParamNames);
 		builder
@@ -536,7 +536,7 @@ partial class LoggerGenTargetClassEmitter
 
 	static void EmitParametersAsMethodArgumentList(
 		LogMethodTarget methodTarget,
-		StringBuilder builder,
+		CodeWriter builder,
 		SourceProductionContext context
 	)
 	{

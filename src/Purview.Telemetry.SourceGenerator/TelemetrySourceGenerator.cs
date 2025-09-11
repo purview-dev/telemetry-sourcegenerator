@@ -23,6 +23,11 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator, IL
 				_logger?.Debug($"  Adding {template} as {generatedFilename}.");
 
 				var templateData = EmbeddedResources.Instance.LoadEmbeddedResource(template);
+				// Align with snapshot format: first line contains HintName then header.
+				if (!templateData.StartsWith("//HintName:", System.StringComparison.Ordinal))
+				{
+					templateData = $"//HintName: {generatedFilename}\n" + templateData;
+				}
 				ctx.AddSource(generatedFilename, templateData);
 			}
 

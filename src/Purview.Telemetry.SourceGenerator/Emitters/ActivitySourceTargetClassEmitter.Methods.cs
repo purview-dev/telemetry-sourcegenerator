@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
 
@@ -9,7 +8,7 @@ partial class ActivitySourceTargetClassEmitter
 {
 	static int EmitMethods(
 		ActivitySourceTarget target,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		SourceProductionContext context,
 		GenerationLogger? logger
@@ -46,7 +45,7 @@ partial class ActivitySourceTargetClassEmitter
 	}
 
 	static void EmitRecordExceptionEvent(
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		SourceProductionContext context,
 		GenerationLogger? logger
@@ -124,7 +123,7 @@ partial class ActivitySourceTargetClassEmitter
 	}
 
 	static void EmitExceptionParam(
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		string tagsListVariableName,
 		string escapeParam,
@@ -165,7 +164,7 @@ partial class ActivitySourceTargetClassEmitter
 	}
 
 	static void EmitMethod(
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		ActivityBasedGenerationTarget methodTarget,
 		ActivitySourceTarget target,

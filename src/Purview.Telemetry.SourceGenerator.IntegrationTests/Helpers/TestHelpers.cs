@@ -195,6 +195,34 @@ using Purview.Telemetry;";
 		params object[] parameters
 	)
 	{
+		// Temporary debug dump to inspect generated source headers during refactor.
+		try
+		{
+			var dumped = 0;
+			foreach (var driver in generationResult.DriverResult.Results)
+			{
+				foreach (var src in driver.GeneratedSources)
+				{
+					if (dumped++ >= 5)
+						break;
+					Console.WriteLine("========== GENERATED DEBUG DUMP ==========");
+					Console.WriteLine(src.HintName);
+					Console.WriteLine(
+						src.SourceText.ToString()
+							.Split('\n')
+							.Take(20)
+							.Aggregate(new StringBuilder(), (sb, line) => sb.AppendLine(line))
+							.ToString()
+					);
+				}
+				if (dumped >= 5)
+					break;
+			}
+		}
+		catch
+		{ /* ignore debug dump failures */
+		}
+
 		var verifierTask = Verifier
 			.Verify(generationResult.DriverResult)
 			.UseDirectory("Snapshots")

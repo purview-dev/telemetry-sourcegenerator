@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
 
@@ -9,7 +8,7 @@ partial class LoggerTargetClassEmitter
 {
 	static int EmitFields(
 		LoggerTarget target,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		SourceProductionContext context,
 		GenerationLogger? logger
@@ -110,7 +109,7 @@ partial class LoggerTargetClassEmitter
 		return --indent;
 	}
 
-	static void EmitLogActionField(StringBuilder builder, int indent, LogMethodTarget methodTarget)
+	static void EmitLogActionField(CodeWriter builder, int indent, LogMethodTarget methodTarget)
 	{
 		builder
 			.Append(indent, "static readonly ", withNewLine: false)

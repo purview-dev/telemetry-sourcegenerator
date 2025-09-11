@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -9,7 +8,7 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 partial class ActivitySourceTargetClassEmitter
 {
 	static void EmitTagsOrBaggageParameters(
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		string activityVariableName,
 		bool populateTags,

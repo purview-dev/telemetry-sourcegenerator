@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
 
@@ -8,7 +7,7 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 partial class ActivitySourceTargetClassEmitter
 {
 	static void EmitActivityMethodBody(
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		ActivityBasedGenerationTarget methodTarget,
 		SourceProductionContext context,
@@ -196,7 +195,7 @@ partial class ActivitySourceTargetClassEmitter
 		}
 
 		static void AddActivityNameParameter(
-			StringBuilder builder,
+			CodeWriter builder,
 			ActivityBasedGenerationTarget methodTarget,
 			bool useName
 		)
@@ -209,7 +208,7 @@ partial class ActivitySourceTargetClassEmitter
 	}
 
 	static void EmitHasListenersTest(
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		ActivityBasedGenerationTarget methodTarget
 	)

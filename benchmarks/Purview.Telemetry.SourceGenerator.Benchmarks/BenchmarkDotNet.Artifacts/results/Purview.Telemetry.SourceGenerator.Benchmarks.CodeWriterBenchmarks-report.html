@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>Purview.Telemetry.SourceGenerator.Benchmarks.CodeWriterBenchmarks-20250908-182616</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.13.12, Windows 11 (10.0.26220.5770)
+13th Gen Intel Core i9-13900KF, 1 CPU, 32 logical and 24 physical cores
+.NET SDK 10.0.100-preview.7.25380.108
+  [Host]     : .NET 9.0.8 (9.0.825.36511), X64 RyuJIT AVX2
+  DefaultJob : .NET 9.0.8 (9.0.825.36511), X64 RyuJIT AVX2
+  ShortRun   : .NET 9.0.8 (9.0.825.36511), X64 RyuJIT AVX2
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>Method             </th><th>Job </th><th>IterationCount</th><th>LaunchCount</th><th>WarmupCount</th><th>Methods</th><th>Mean  </th><th>Error  </th><th>StdDev</th><th>Median</th><th>Ratio</th><th>RatioSD</th><th>Gen0</th><th>Gen1</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>Legacy_StringBuilder</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>10</td><td>295.3 ns</td><td>3.63 ns</td><td>3.39 ns</td><td>294.4 ns</td><td>1.00</td><td>0.00</td><td>0.8998</td><td>0.0558</td><td>16944 B</td><td>1.00</td>
+</tr><tr><td>New_CodeWriter</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>10</td><td>191.5 ns</td><td>2.88 ns</td><td>2.70 ns</td><td>192.5 ns</td><td>0.65</td><td>0.01</td><td>0.0262</td><td>-</td><td>496 B</td><td>0.03</td>
+</tr><tr><td>New_CodeWriter_HighLevel</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>10</td><td>362.6 ns</td><td>3.64 ns</td><td>3.41 ns</td><td>363.9 ns</td><td>1.23</td><td>0.02</td><td>0.0429</td><td>-</td><td>816 B</td><td>0.05</td>
+</tr><tr><td>StringWriter_TextWriter</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>10</td><td>180.9 ns</td><td>3.44 ns</td><td>3.38 ns</td><td>181.7 ns</td><td>0.61</td><td>0.01</td><td>0.0751</td><td>0.0002</td><td>1416 B</td><td>0.08</td>
+</tr><tr><td>PlainString_Concat</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>10</td><td>309.5 ns</td><td>3.90 ns</td><td>3.65 ns</td><td>309.0 ns</td><td>1.05</td><td>0.01</td><td>0.1664</td><td>-</td><td>3136 B</td><td>0.19</td>
+</tr><tr><td>PlainString_Interpolation</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>10</td><td>301.0 ns</td><td>5.56 ns</td><td>12.09 ns</td><td>306.6 ns</td><td>1.02</td><td>0.04</td><td>0.8984</td><td>0.0558</td><td>16920 B</td><td>1.00</td>
+</tr><tr><td>PlainString_Join</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>10</td><td>177.4 ns</td><td>2.93 ns</td><td>4.82 ns</td><td>176.9 ns</td><td>0.61</td><td>0.02</td><td>0.0627</td><td>-</td><td>1184 B</td><td>0.07</td>
+</tr><tr><td>PlainString_Accumulator</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>10</td><td>178.1 ns</td><td>3.52 ns</td><td>3.61 ns</td><td>177.6 ns</td><td>0.60</td><td>0.02</td><td>0.0646</td><td>-</td><td>1216 B</td><td>0.07</td>
+</tr><tr><td>Legacy_StringBuilder</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>10</td><td>278.2 ns</td><td>133.06 ns</td><td>7.29 ns</td><td>277.3 ns</td><td>1.00</td><td>0.00</td><td>0.8998</td><td>0.0558</td><td>16944 B</td><td>1.00</td>
+</tr><tr><td>New_CodeWriter</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>10</td><td>214.7 ns</td><td>70.27 ns</td><td>3.85 ns</td><td>216.5 ns</td><td>0.77</td><td>0.02</td><td>0.0262</td><td>-</td><td>496 B</td><td>0.03</td>
+</tr><tr><td>New_CodeWriter_HighLevel</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>10</td><td>344.0 ns</td><td>57.83 ns</td><td>3.17 ns</td><td>345.7 ns</td><td>1.24</td><td>0.03</td><td>0.0429</td><td>-</td><td>816 B</td><td>0.05</td>
+</tr><tr><td>StringWriter_TextWriter</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>10</td><td>146.6 ns</td><td>64.77 ns</td><td>3.55 ns</td><td>145.7 ns</td><td>0.53</td><td>0.03</td><td>0.0751</td><td>0.0002</td><td>1416 B</td><td>0.08</td>
+</tr><tr><td>PlainString_Concat</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>10</td><td>287.5 ns</td><td>152.72 ns</td><td>8.37 ns</td><td>291.6 ns</td><td>1.03</td><td>0.06</td><td>0.1664</td><td>-</td><td>3136 B</td><td>0.19</td>
+</tr><tr><td>PlainString_Interpolation</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>10</td><td>264.1 ns</td><td>53.21 ns</td><td>2.92 ns</td><td>264.2 ns</td><td>0.95</td><td>0.02</td><td>0.8984</td><td>0.0558</td><td>16920 B</td><td>1.00</td>
+</tr><tr><td>PlainString_Join</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>10</td><td>174.0 ns</td><td>18.07 ns</td><td>0.99 ns</td><td>173.7 ns</td><td>0.63</td><td>0.02</td><td>0.0627</td><td>-</td><td>1184 B</td><td>0.07</td>
+</tr><tr><td>PlainString_Accumulator</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>10</td><td>176.7 ns</td><td>57.75 ns</td><td>3.17 ns</td><td>177.3 ns</td><td>0.64</td><td>0.02</td><td>0.0646</td><td>-</td><td>1216 B</td><td>0.07</td>
+</tr><tr><td>Legacy_StringBuilder</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>50</td><td>514.5 ns</td><td>5.64 ns</td><td>5.27 ns</td><td>512.0 ns</td><td>1.00</td><td>0.00</td><td>1.0014</td><td>0.0305</td><td>18864 B</td><td>1.00</td>
+</tr><tr><td>New_CodeWriter</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>50</td><td>1,017.9 ns</td><td>19.33 ns</td><td>17.14 ns</td><td>1,015.8 ns</td><td>1.98</td><td>0.03</td><td>0.1240</td><td>-</td><td>2336 B</td><td>0.12</td>
+</tr><tr><td>New_CodeWriter_HighLevel</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>50</td><td>1,686.6 ns</td><td>14.81 ns</td><td>13.85 ns</td><td>1,689.3 ns</td><td>3.28</td><td>0.04</td><td>0.2079</td><td>-</td><td>3936 B</td><td>0.21</td>
+</tr><tr><td>StringWriter_TextWriter</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>50</td><td>534.3 ns</td><td>9.65 ns</td><td>13.21 ns</td><td>531.1 ns</td><td>1.04</td><td>0.03</td><td>0.3786</td><td>0.0067</td><td>7136 B</td><td>0.38</td>
+</tr><tr><td>PlainString_Concat</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>50</td><td>3,219.9 ns</td><td>41.32 ns</td><td>38.65 ns</td><td>3,207.0 ns</td><td>6.26</td><td>0.11</td><td>3.1815</td><td>0.0153</td><td>59936 B</td><td>3.18</td>
+</tr><tr><td>PlainString_Interpolation</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>50</td><td>416.3 ns</td><td>2.94 ns</td><td>2.61 ns</td><td>416.9 ns</td><td>0.81</td><td>0.01</td><td>0.9956</td><td>0.0620</td><td>18760 B</td><td>0.99</td>
+</tr><tr><td>PlainString_Join</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>50</td><td>885.7 ns</td><td>17.68 ns</td><td>21.71 ns</td><td>883.5 ns</td><td>1.72</td><td>0.05</td><td>0.3090</td><td>0.0019</td><td>5824 B</td><td>0.31</td>
+</tr><tr><td>PlainString_Accumulator</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>50</td><td>923.0 ns</td><td>17.94 ns</td><td>28.46 ns</td><td>921.6 ns</td><td>1.80</td><td>0.05</td><td>0.3109</td><td>0.0038</td><td>5856 B</td><td>0.31</td>
+</tr><tr><td>Legacy_StringBuilder</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>50</td><td>530.8 ns</td><td>91.87 ns</td><td>5.04 ns</td><td>533.0 ns</td><td>1.00</td><td>0.00</td><td>1.0014</td><td>0.0305</td><td>18864 B</td><td>1.00</td>
+</tr><tr><td>New_CodeWriter</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>50</td><td>1,040.7 ns</td><td>181.10 ns</td><td>9.93 ns</td><td>1,038.5 ns</td><td>1.96</td><td>0.02</td><td>0.1240</td><td>-</td><td>2336 B</td><td>0.12</td>
+</tr><tr><td>New_CodeWriter_HighLevel</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>50</td><td>1,929.6 ns</td><td>893.79 ns</td><td>48.99 ns</td><td>1,932.3 ns</td><td>3.63</td><td>0.06</td><td>0.2060</td><td>-</td><td>3936 B</td><td>0.21</td>
+</tr><tr><td>StringWriter_TextWriter</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>50</td><td>563.1 ns</td><td>171.37 ns</td><td>9.39 ns</td><td>559.4 ns</td><td>1.06</td><td>0.01</td><td>0.3786</td><td>0.0067</td><td>7136 B</td><td>0.38</td>
+</tr><tr><td>PlainString_Concat</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>50</td><td>3,528.8 ns</td><td>5,179.90 ns</td><td>283.93 ns</td><td>3,544.5 ns</td><td>6.65</td><td>0.59</td><td>3.1815</td><td>0.0153</td><td>59936 B</td><td>3.18</td>
+</tr><tr><td>PlainString_Interpolation</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>50</td><td>423.4 ns</td><td>29.94 ns</td><td>1.64 ns</td><td>423.6 ns</td><td>0.80</td><td>0.01</td><td>0.9956</td><td>0.0620</td><td>18760 B</td><td>0.99</td>
+</tr><tr><td>PlainString_Join</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>50</td><td>940.6 ns</td><td>589.54 ns</td><td>32.31 ns</td><td>932.2 ns</td><td>1.77</td><td>0.06</td><td>0.3090</td><td>0.0019</td><td>5824 B</td><td>0.31</td>
+</tr><tr><td>PlainString_Accumulator</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>50</td><td>886.2 ns</td><td>265.10 ns</td><td>14.53 ns</td><td>889.3 ns</td><td>1.67</td><td>0.04</td><td>0.3109</td><td>0.0038</td><td>5856 B</td><td>0.31</td>
+</tr><tr><td>Legacy_StringBuilder</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>200</td><td>1,689.0 ns</td><td>16.68 ns</td><td>13.02 ns</td><td>1,692.9 ns</td><td>1.00</td><td>0.00</td><td>1.3943</td><td>0.0420</td><td>26264 B</td><td>1.00</td>
+</tr><tr><td>New_CodeWriter</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>200</td><td>4,280.7 ns</td><td>43.64 ns</td><td>40.82 ns</td><td>4,270.7 ns</td><td>2.54</td><td>0.04</td><td>0.4959</td><td>-</td><td>9440 B</td><td>0.36</td>
+</tr><tr><td>New_CodeWriter_HighLevel</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>200</td><td>7,274.9 ns</td><td>44.20 ns</td><td>41.35 ns</td><td>7,290.2 ns</td><td>4.31</td><td>0.04</td><td>0.8392</td><td>-</td><td>15840 B</td><td>0.60</td>
+</tr><tr><td>StringWriter_TextWriter</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>200</td><td>1,717.7 ns</td><td>20.96 ns</td><td>19.61 ns</td><td>1,709.9 ns</td><td>1.02</td><td>0.01</td><td>1.4343</td><td>0.0839</td><td>26968 B</td><td>1.03</td>
+</tr><tr><td>PlainString_Concat</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>200</td><td>40,199.9 ns</td><td>654.09 ns</td><td>611.84 ns</td><td>40,123.2 ns</td><td>23.76</td><td>0.39</td><td>48.3398</td><td>0.8545</td><td>909936 B</td><td>34.65</td>
+</tr><tr><td>PlainString_Interpolation</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>200</td><td>1,226.6 ns</td><td>13.68 ns</td><td>12.80 ns</td><td>1,228.1 ns</td><td>0.73</td><td>0.01</td><td>1.3733</td><td>0.0420</td><td>25864 B</td><td>0.98</td>
+</tr><tr><td>PlainString_Join</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>200</td><td>3,524.1 ns</td><td>51.54 ns</td><td>48.21 ns</td><td>3,526.2 ns</td><td>2.09</td><td>0.04</td><td>1.2856</td><td>0.0648</td><td>24224 B</td><td>0.92</td>
+</tr><tr><td>PlainString_Accumulator</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>200</td><td>3,612.8 ns</td><td>40.18 ns</td><td>37.58 ns</td><td>3,615.9 ns</td><td>2.14</td><td>0.03</td><td>1.2894</td><td>0.0687</td><td>24256 B</td><td>0.92</td>
+</tr><tr><td>Legacy_StringBuilder</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>200</td><td>1,628.6 ns</td><td>219.66 ns</td><td>12.04 ns</td><td>1,628.9 ns</td><td>1.00</td><td>0.00</td><td>1.3943</td><td>0.0420</td><td>26264 B</td><td>1.00</td>
+</tr><tr><td>New_CodeWriter</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>200</td><td>4,544.2 ns</td><td>897.27 ns</td><td>49.18 ns</td><td>4,565.6 ns</td><td>2.79</td><td>0.05</td><td>0.4959</td><td>-</td><td>9440 B</td><td>0.36</td>
+</tr><tr><td>New_CodeWriter_HighLevel</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>200</td><td>7,140.5 ns</td><td>1,628.43 ns</td><td>89.26 ns</td><td>7,110.4 ns</td><td>4.38</td><td>0.03</td><td>0.8392</td><td>-</td><td>15840 B</td><td>0.60</td>
+</tr><tr><td>StringWriter_TextWriter</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>200</td><td>1,814.8 ns</td><td>666.71 ns</td><td>36.54 ns</td><td>1,803.7 ns</td><td>1.11</td><td>0.03</td><td>1.4343</td><td>0.0839</td><td>26968 B</td><td>1.03</td>
+</tr><tr><td>PlainString_Concat</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>200</td><td>39,891.2 ns</td><td>9,568.07 ns</td><td>524.46 ns</td><td>39,942.6 ns</td><td>24.49</td><td>0.26</td><td>48.3398</td><td>0.8545</td><td>909936 B</td><td>34.65</td>
+</tr><tr><td>PlainString_Interpolation</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>200</td><td>1,231.5 ns</td><td>164.34 ns</td><td>9.01 ns</td><td>1,228.8 ns</td><td>0.76</td><td>0.00</td><td>1.3733</td><td>0.0420</td><td>25864 B</td><td>0.98</td>
+</tr><tr><td>PlainString_Join</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>200</td><td>3,707.3 ns</td><td>378.15 ns</td><td>20.73 ns</td><td>3,700.0 ns</td><td>2.28</td><td>0.03</td><td>1.2856</td><td>0.0648</td><td>24224 B</td><td>0.92</td>
+</tr><tr><td>PlainString_Accumulator</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>200</td><td>4,177.5 ns</td><td>549.94 ns</td><td>30.14 ns</td><td>4,172.9 ns</td><td>2.57</td><td>0.02</td><td>1.2894</td><td>0.0687</td><td>24256 B</td><td>0.92</td>
+</tr><tr><td>Legacy_StringBuilder</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>1000</td><td>9,741.4 ns</td><td>192.51 ns</td><td>189.07 ns</td><td>9,763.4 ns</td><td>1.00</td><td>0.00</td><td>6.0730</td><td>1.0071</td><td>114480 B</td><td>1.00</td>
+</tr><tr><td>New_CodeWriter</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>1000</td><td>18,781.7 ns</td><td>324.85 ns</td><td>287.97 ns</td><td>18,814.3 ns</td><td>1.93</td><td>0.05</td><td>2.5330</td><td>-</td><td>47840 B</td><td>0.42</td>
+</tr><tr><td>New_CodeWriter_HighLevel</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>1000</td><td>37,650.5 ns</td><td>664.45 ns</td><td>589.01 ns</td><td>37,743.9 ns</td><td>3.87</td><td>0.10</td><td>4.2114</td><td>-</td><td>79840 B</td><td>0.70</td>
+</tr><tr><td>StringWriter_TextWriter</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>1000</td><td>12,677.7 ns</td><td>241.53 ns</td><td>268.46 ns</td><td>12,722.7 ns</td><td>1.30</td><td>0.04</td><td>7.2937</td><td>1.4496</td><td>137584 B</td><td>1.20</td>
+</tr><tr><td>PlainString_Concat</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>1000</td><td>962,815.9 ns</td><td>11,461.81 ns</td><td>10,160.60 ns</td><td>964,452.2 ns</td><td>98.91</td><td>2.63</td><td>1214.8438</td><td>132.8125</td><td>22909936 B</td><td>200.12</td>
+</tr><tr><td>PlainString_Interpolation</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>1000</td><td>6,343.2 ns</td><td>90.79 ns</td><td>84.92 ns</td><td>6,332.3 ns</td><td>0.65</td><td>0.02</td><td>5.1117</td><td>0.8469</td><td>96408 B</td><td>0.84</td>
+</tr><tr><td>PlainString_Join</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>1000</td><td>17,997.3 ns</td><td>349.24 ns</td><td>388.18 ns</td><td>17,988.1 ns</td><td>1.85</td><td>0.06</td><td>6.6223</td><td>1.0986</td><td>125024 B</td><td>1.09</td>
+</tr><tr><td>PlainString_Accumulator</td><td>DefaultJob</td><td>Default</td><td>Default</td><td>Default</td><td>1000</td><td>18,586.9 ns</td><td>349.72 ns</td><td>343.47 ns</td><td>18,610.3 ns</td><td>1.91</td><td>0.06</td><td>6.6223</td><td>1.4648</td><td>125056 B</td><td>1.09</td>
+</tr><tr><td>Legacy_StringBuilder</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>1000</td><td>8,533.9 ns</td><td>3,967.66 ns</td><td>217.48 ns</td><td>8,457.4 ns</td><td>1.00</td><td>0.00</td><td>6.0730</td><td>1.0071</td><td>114480 B</td><td>1.00</td>
+</tr><tr><td>New_CodeWriter</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>1000</td><td>17,942.7 ns</td><td>1,798.69 ns</td><td>98.59 ns</td><td>17,993.6 ns</td><td>2.10</td><td>0.06</td><td>2.5330</td><td>-</td><td>47840 B</td><td>0.42</td>
+</tr><tr><td>New_CodeWriter_HighLevel</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>1000</td><td>36,064.1 ns</td><td>4,795.56 ns</td><td>262.86 ns</td><td>36,186.5 ns</td><td>4.23</td><td>0.14</td><td>4.2114</td><td>-</td><td>79840 B</td><td>0.70</td>
+</tr><tr><td>StringWriter_TextWriter</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>1000</td><td>11,961.2 ns</td><td>5,432.51 ns</td><td>297.77 ns</td><td>11,925.6 ns</td><td>1.40</td><td>0.07</td><td>7.2937</td><td>1.4496</td><td>137584 B</td><td>1.20</td>
+</tr><tr><td>PlainString_Concat</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>1000</td><td>926,661.9 ns</td><td>122,871.86 ns</td><td>6,735.02 ns</td><td>928,414.1 ns</td><td>108.63</td><td>2.50</td><td>1214.8438</td><td>132.8125</td><td>22909936 B</td><td>200.12</td>
+</tr><tr><td>PlainString_Interpolation</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>1000</td><td>5,996.4 ns</td><td>2,090.63 ns</td><td>114.59 ns</td><td>5,966.3 ns</td><td>0.70</td><td>0.00</td><td>5.1117</td><td>0.8469</td><td>96408 B</td><td>0.84</td>
+</tr><tr><td>PlainString_Join</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>1000</td><td>17,819.5 ns</td><td>11,054.03 ns</td><td>605.91 ns</td><td>17,814.4 ns</td><td>2.09</td><td>0.03</td><td>6.6223</td><td>1.0986</td><td>125024 B</td><td>1.09</td>
+</tr><tr><td>PlainString_Accumulator</td><td>ShortRun</td><td>3</td><td>1</td><td>3</td><td>1000</td><td>19,327.0 ns</td><td>13,991.09 ns</td><td>766.90 ns</td><td>19,386.2 ns</td><td>2.27</td><td>0.12</td><td>6.6223</td><td>1.4648</td><td>125056 B</td><td>1.09</td>
+</tr></tbody></table>
+</body>
+</html>

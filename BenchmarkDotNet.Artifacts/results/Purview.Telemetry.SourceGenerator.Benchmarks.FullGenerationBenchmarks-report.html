@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>Purview.Telemetry.SourceGenerator.Benchmarks.FullGenerationBenchmarks-20250908-010627</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.13.12, Windows 11 (10.0.26220.5770)
+13th Gen Intel Core i9-13900KF, 1 CPU, 32 logical and 24 physical cores
+.NET SDK 10.0.100-preview.7.25380.108
+  [Host]     : .NET 9.0.8 (9.0.825.36511), X64 RyuJIT AVX2
+  Job-SZTKAZ : .NET 9.0.8 (9.0.825.36511), X64 RyuJIT AVX2
+</code></pre>
+<pre><code>IterationCount=5  WarmupCount=1  
+</code></pre>
+
+<table>
+<thead><tr><th>Method     </th><th>Methods</th><th>Mean</th><th>Error</th><th>StdDev</th><th>Gen0</th><th>Gen1</th><th>Allocated</th>
+</tr>
+</thead><tbody><tr><td>LegacyBuilder</td><td>5</td><td>280.9 ns</td><td>28.93 ns</td><td>7.51 ns</td><td>0.2689</td><td>0.0033</td><td>4.95 KB</td>
+</tr><tr><td>CodeWriterAdapter</td><td>5</td><td>2,072.6 ns</td><td>77.43 ns</td><td>11.98 ns</td><td>1.8158</td><td>0.0458</td><td>33.42 KB</td>
+</tr><tr><td>LegacyBuilder</td><td>25</td><td>388.1 ns</td><td>46.61 ns</td><td>12.11 ns</td><td>0.3047</td><td>0.0033</td><td>5.6 KB</td>
+</tr><tr><td>CodeWriterAdapter</td><td>25</td><td>2,271.8 ns</td><td>41.28 ns</td><td>6.39 ns</td><td>1.8692</td><td>0.0458</td><td>34.39 KB</td>
+</tr><tr><td>LegacyBuilder</td><td>75</td><td>614.4 ns</td><td>25.67 ns</td><td>6.67 ns</td><td>0.5474</td><td>0.0124</td><td>10.08 KB</td>
+</tr><tr><td>CodeWriterAdapter</td><td>75</td><td>2,861.0 ns</td><td>202.31 ns</td><td>52.54 ns</td><td>2.2240</td><td>0.0763</td><td>40.91 KB</td>
+</tr></tbody></table>
+</body>
+</html>

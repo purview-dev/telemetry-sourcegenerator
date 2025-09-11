@@ -14,7 +14,7 @@ static class ConstructorEmitter
 		GenerationType generationType,
 		string classNameToGenerate,
 		string fullyQualifiedInterfaceName,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		SourceProductionContext context,
 		GenerationLogger? logger
@@ -52,7 +52,7 @@ static class ConstructorEmitter
 	static void EmitParameters(
 		GenerationType generationType,
 		string? loggerFullyQualifiedInterfaceName,
-		StringBuilder builder
+		CodeWriter builder
 	)
 	{
 		if (generationType.HasFlag(GenerationType.Logging))
@@ -77,7 +77,7 @@ static class ConstructorEmitter
 		}
 	}
 
-	static void EmitBody(GenerationType generationType, int indent, StringBuilder builder)
+	static void EmitBody(GenerationType generationType, int indent, CodeWriter builder)
 	{
 		if (generationType.HasFlag(GenerationType.Logging))
 		{

@@ -461,14 +461,48 @@ partial class PipelineHelpers
 				continue;
 			}
 
-			builder
-				.Append(parameter.UpperCasedName)
-				.Append(" = ")
-				.Append('{')
-				.Append(parameter.UpperCasedName)
-				.Append("}, ");
+			// Handle LogProperties expansion
+			if (parameter.LogProperties?.Length > 0)
+			{
+				var omitReferenceName =
+					parameter.LogPropertiesAttribute?.OmitReferenceName.Value ?? false;
 
-			index++;
+				foreach (var property in parameter.LogProperties.Value)
+				{
+					if (omitReferenceName)
+					{
+						builder
+							.Append(property.PropertyName)
+							.Append(" = {")
+							.Append(property.PropertyName)
+							.Append("}, ");
+					}
+					else
+					{
+						builder
+							.Append(parameter.Name)
+							.Append('.')
+							.Append(property.PropertyName)
+							.Append(" = {")
+							.Append(parameter.Name)
+							.Append('.')
+							.Append(property.PropertyName)
+							.Append("}, ");
+					}
+					index++;
+				}
+			}
+			else
+			{
+				builder
+					.Append(parameter.UpperCasedName)
+					.Append(" = ")
+					.Append('{')
+					.Append(parameter.UpperCasedName)
+					.Append("}, ");
+
+				index++;
+			}
 		}
 
 		if (index > 0)

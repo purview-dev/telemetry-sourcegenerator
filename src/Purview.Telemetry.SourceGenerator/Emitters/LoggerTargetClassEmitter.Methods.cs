@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
 
@@ -9,7 +8,7 @@ partial class LoggerTargetClassEmitter
 {
 	static int EmitMethods(
 		LoggerTarget target,
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		SourceProductionContext context,
 		GenerationLogger? logger
@@ -42,7 +41,7 @@ partial class LoggerTargetClassEmitter
 	}
 
 	static void EmitLogActionMethod(
-		StringBuilder builder,
+		CodeWriter builder,
 		int indent,
 		LogMethodTarget methodTarget,
 		SourceProductionContext context,
@@ -120,7 +119,7 @@ partial class LoggerTargetClassEmitter
 
 	static void EmitParametersAsMethodArgumentList(
 		LogMethodTarget methodTarget,
-		StringBuilder builder,
+		CodeWriter builder,
 		SourceProductionContext context
 	)
 	{

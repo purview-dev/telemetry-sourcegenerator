@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFrameworks>net9.0</TargetFrameworks>
+        <OutputType>Exe</OutputType>
+        <IsPackable>false</IsPackable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <NoWarn>CA1305;CA1707;CA1822</NoWarn>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
+        <PackageReference Include="Microsoft.CodeAnalysis" Version="4.14.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+        <ProjectReference Include="..\..\src\Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.csproj" />
+    </ItemGroup>
+</Project>
