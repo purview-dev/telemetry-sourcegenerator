@@ -1,0 +1,16 @@
+﻿{
+  Diagnostics: [
+    {
+      Message: Either define a measurement parameter, or provide a supported type parameter that is not a tag to enable inferring.,
+      Severity: Error,
+      Descriptor: {
+        Id: TSG4004,
+        Title: No measurement value defined,
+        MessageFormat: Either define a measurement parameter, or provide a supported type parameter that is not a tag to enable inferring.,
+        Category: Metrics.Usage,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}
