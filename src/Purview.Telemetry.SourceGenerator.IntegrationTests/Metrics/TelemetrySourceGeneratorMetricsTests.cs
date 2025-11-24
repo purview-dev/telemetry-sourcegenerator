@@ -92,6 +92,7 @@ public interface ITestMetrics<{genericTypeDef}>  {{
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG1004"],
 			parameters: genericTypeCount
 		);
 	}
@@ -129,6 +130,7 @@ public interface ITestMetrics<{genericTypeDef}>  {{
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG1004"],
 			parameters: genericTypeCount
 		);
 	}

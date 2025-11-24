@@ -53,6 +53,7 @@ public interface ITestMetrics
 			generationResult,
 			config: c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG4002"],
 			validationCompilation: false
 		);
 	}
@@ -108,6 +109,7 @@ public interface ITestMetrics
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG4002"],
 			validationCompilation: false
 		);
 	}
