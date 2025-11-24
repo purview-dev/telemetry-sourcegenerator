@@ -65,6 +65,7 @@ public interface ITestLogger
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG2008"],
 			parameters: maxCount
 		);
 	}
