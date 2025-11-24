@@ -159,7 +159,8 @@ public interface IMultiTelemetry
 		await TestHelpers.Verify(
 			generationResult,
 			config: s => s.ScrubInlineGuids(),
-			expectsDiagnostics: true
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG1002"]
 		);
 	}
 
@@ -191,7 +192,8 @@ public interface IMultiTelemetry
 		await TestHelpers.Verify(
 			generationResult,
 			config: s => s.ScrubInlineGuids(),
-			expectsDiagnostics: true
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG1002"]
 		);
 	}
 
@@ -223,7 +225,8 @@ public interface IMultiTelemetry
 		await TestHelpers.Verify(
 			generationResult,
 			config: s => s.ScrubInlineGuids(),
-			expectsDiagnostics: true
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG1002"]
 		);
 	}
 
@@ -258,7 +261,8 @@ public interface IMultiTelemetry
 		await TestHelpers.Verify(
 			generationResult,
 			config: s => s.ScrubInlineGuids(),
-			expectsDiagnostics: true
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG1002"]
 		);
 	}
 
@@ -292,7 +296,8 @@ public interface IMultiTelemetry
 		await TestHelpers.Verify(
 			generationResult,
 			config: s => s.ScrubInlineGuids(),
-			expectsDiagnostics: true
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG1001"]
 		);
 	}
 
@@ -578,7 +583,8 @@ public interface IMultiTelemetry
 		await TestHelpers.Verify(
 			generationResult,
 			config: s => s.ScrubInlineGuids(),
-			expectsDiagnostics: true
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG1003"]
 		);
 	}
 
@@ -685,7 +691,8 @@ public interface IMultiTelemetry
 		await TestHelpers.Verify(
 			generationResult,
 			config: s => s.ScrubInlineGuids(),
-			expectsDiagnostics: true
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG3012"]
 		);
 	}
 
@@ -723,7 +730,8 @@ public interface IMultiTelemetry
 		await TestHelpers.Verify(
 			generationResult,
 			config: s => s.ScrubInlineGuids(),
-			expectsDiagnostics: true
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG3012"]
 		);
 	}
 }

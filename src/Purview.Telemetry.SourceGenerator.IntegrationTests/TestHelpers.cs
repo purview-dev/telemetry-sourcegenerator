@@ -152,6 +152,7 @@ using Purview.Telemetry;
 		bool whenValidatingDiagnosticsIgnoreNonErrors = false,
 		bool validationCompilation = true,
 		bool autoVerifyTemplates = true,
+		string[]? expectedDiagnosticCodes = null,
 		params object[] parameters
 	)
 	{
@@ -193,7 +194,22 @@ using Purview.Telemetry;
 			diag = diag.Where(m => m.Severity == DiagnosticSeverity.Error);
 
 		if (expectsDiagnostics)
+		{
 			diag.ShouldNotBeEmpty();
+
+			// Assert on expected diagnostic codes if provided
+			if (expectedDiagnosticCodes is not null && expectedDiagnosticCodes.Length > 0)
+			{
+				var actualDiagnosticCodes = diag.Select(d => d.Id).Distinct().OrderBy(id => id).ToArray();
+				var expectedCodes = expectedDiagnosticCodes.OrderBy(id => id).ToArray();
+
+				actualDiagnosticCodes.ShouldBe(
+					expectedCodes,
+					$"Expected diagnostic codes: [{string.Join(", ", expectedCodes)}], " +
+					$"but found: [{string.Join(", ", actualDiagnosticCodes)}]"
+				);
+			}
+		}
 		else
 			diag.ShouldBeEmpty();
 
