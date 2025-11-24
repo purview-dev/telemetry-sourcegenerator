@@ -28,7 +28,8 @@ public interface ITestTelemetry
 		await TestHelpers.Verify(
 			generationResult,
 			c => c.ScrubInlineGuids(),
-			expectsDiagnostics: true
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG1003"]
 		);
 	}
 
@@ -61,7 +62,8 @@ public interface ITestTelemetry
 		await TestHelpers.Verify(
 			generationResult,
 			c => c.ScrubInlineGuids(),
-			expectsDiagnostics: true
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG1003"]
 		);
 	}
 
@@ -99,6 +101,7 @@ public interface ITestTelemetry
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG1003"],
 			parameters: [includeLoggerTypes]
 		);
 	}
@@ -129,7 +132,8 @@ public interface ITestTelemetry
 		await TestHelpers.Verify(
 			generationResult,
 			c => c.ScrubInlineGuids(),
-			expectsDiagnostics: true
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG1003"]
 		);
 	}
 
@@ -186,6 +190,7 @@ public interface ITestTelemetry
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG1003"],
 			parameters: [includeLoggerType]
 		);
 	}

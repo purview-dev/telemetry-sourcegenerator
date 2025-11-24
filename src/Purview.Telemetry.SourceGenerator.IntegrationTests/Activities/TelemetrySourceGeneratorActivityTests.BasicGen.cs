@@ -56,7 +56,8 @@ public interface ITestActivities {
 		await TestHelpers.Verify(
 			generationResult,
 			config: s => s.ScrubInlineGuids(),
-			expectsDiagnostics: true
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG3012"]
 		);
 	}
 
@@ -118,7 +119,8 @@ public interface ITestActivities {
 		await TestHelpers.Verify(
 			generationResult,
 			s => s.ScrubInlineGuids(),
-			expectsDiagnostics: true
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG3000"]
 		);
 	}
 
