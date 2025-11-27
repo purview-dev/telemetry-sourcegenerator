@@ -23,18 +23,6 @@
         DefaultSeverity: Error,
         IsEnabledByDefault: true
       }
-    },
-    {
-      Message: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
-      Severity: Error,
-      Descriptor: {
-        Id: TSG2021,
-        Title: Log method must return void or IDisposable,
-        MessageFormat: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
-        Category: Logging.Usage,
-        DefaultSeverity: Error,
-        IsEnabledByDefault: true
-      }
     }
   ]
 }

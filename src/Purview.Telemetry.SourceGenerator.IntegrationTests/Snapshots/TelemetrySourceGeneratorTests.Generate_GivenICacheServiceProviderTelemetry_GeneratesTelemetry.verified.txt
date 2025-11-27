@@ -141,74 +141,122 @@
       }
     },
     {
-      Message: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
-      Severity: Error,
+      Location: /*
+	[Log]
+	void FailedToDeserializePayload(int dataLength, Exception ex);
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+*/
+ Guid_1: (17,6)-(17,32),
+      Message: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
+      Severity: Info,
+      WarningLevel: 1,
       Descriptor: {
-        Id: TSG2021,
-        Title: Log method must return void or IDisposable,
-        MessageFormat: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
+        Id: TSG2002,
+        Title: Inferring error log level,
+        MessageFormat: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
         Category: Logging.Usage,
-        DefaultSeverity: Error,
+        DefaultSeverity: Info,
         IsEnabledByDefault: true
       }
     },
     {
-      Message: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
-      Severity: Error,
+      Location: /*
+	[Log]
+	void FailedToGetFromCache(string key, Exception ex);
+      ^^^^^^^^^^^^^^^^^^^^
+
+*/
+ Guid_1: (20,6)-(20,26),
+      Message: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
+      Severity: Info,
+      WarningLevel: 1,
       Descriptor: {
-        Id: TSG2021,
-        Title: Log method must return void or IDisposable,
-        MessageFormat: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
+        Id: TSG2002,
+        Title: Inferring error log level,
+        MessageFormat: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
         Category: Logging.Usage,
-        DefaultSeverity: Error,
+        DefaultSeverity: Info,
         IsEnabledByDefault: true
       }
     },
     {
-      Message: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
-      Severity: Error,
+      Location: /*
+	[Log]
+	void FailedToRefresh(string cacheKey, Exception ex);
+      ^^^^^^^^^^^^^^^
+
+*/
+ Guid_1: (23,6)-(23,21),
+      Message: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
+      Severity: Info,
+      WarningLevel: 1,
       Descriptor: {
-        Id: TSG2021,
-        Title: Log method must return void or IDisposable,
-        MessageFormat: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
+        Id: TSG2002,
+        Title: Inferring error log level,
+        MessageFormat: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
         Category: Logging.Usage,
-        DefaultSeverity: Error,
+        DefaultSeverity: Info,
         IsEnabledByDefault: true
       }
     },
     {
-      Message: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
-      Severity: Error,
+      Location: /*
+	[Log]
+	void FailedToRemove(string key, Exception ex);
+      ^^^^^^^^^^^^^^
+
+*/
+ Guid_1: (26,6)-(26,20),
+      Message: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
+      Severity: Info,
+      WarningLevel: 1,
       Descriptor: {
-        Id: TSG2021,
-        Title: Log method must return void or IDisposable,
-        MessageFormat: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
+        Id: TSG2002,
+        Title: Inferring error log level,
+        MessageFormat: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
         Category: Logging.Usage,
-        DefaultSeverity: Error,
+        DefaultSeverity: Info,
         IsEnabledByDefault: true
       }
     },
     {
-      Message: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
-      Severity: Error,
+      Location: /*
+	[Log]
+	void FailedToSerializePayload(string? fullName, Exception ex);
+      ^^^^^^^^^^^^^^^^^^^^^^^^
+
+*/
+ Guid_1: (29,6)-(29,30),
+      Message: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
+      Severity: Info,
+      WarningLevel: 1,
       Descriptor: {
-        Id: TSG2021,
-        Title: Log method must return void or IDisposable,
-        MessageFormat: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
+        Id: TSG2002,
+        Title: Inferring error log level,
+        MessageFormat: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
         Category: Logging.Usage,
-        DefaultSeverity: Error,
+        DefaultSeverity: Info,
         IsEnabledByDefault: true
       }
     },
     {
-      Message: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
-      Severity: Error,
+      Location: /*
+	[Log]
+	void FailedToSetValueInCache(string key, Exception ex);
+      ^^^^^^^^^^^^^^^^^^^^^^^
+
+*/
+ Guid_1: (32,6)-(32,29),
+      Message: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
+      Severity: Info,
+      WarningLevel: 1,
       Descriptor: {
-        Id: TSG2021,
-        Title: Log method must return void or IDisposable,
-        MessageFormat: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
+        Id: TSG2002,
+        Title: Inferring error log level,
+        MessageFormat: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
         Category: Logging.Usage,
-        DefaultSeverity: Error,
+        DefaultSeverity: Info,
         IsEnabledByDefault: true
       }
     }

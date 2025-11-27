@@ -1,25 +1,6 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-	[Counter]
-	void InvalidMethod(string message);
-      ^^^^^^^^^^^^^
-}
-*/
- Guid_1: (16,6)-(16,19),
-      Message: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-      Severity: Error,
-      Descriptor: {
-        Id: TSG1002,
-        Title: Multiple generation types are not supported,
-        MessageFormat: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-        Category: Usage,
-        DefaultSeverity: Error,
-        IsEnabledByDefault: true
-      }
-    },
-    {
       Message: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
       Severity: Error,
       Descriptor: {
