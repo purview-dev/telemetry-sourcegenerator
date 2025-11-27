@@ -81,5 +81,29 @@ partial class TelemetryDiagnostics
 			Category: Constants.Diagnostics.Logging.Performance,
 			Severity: DiagnosticSeverity.Warning
 		);
+
+		public static readonly TelemetryDiagnosticDescriptor ScopedLogMustReturnIDisposable = new(
+			Id: "TSG2020",
+			Title: "Scoped logger must return IDisposable",
+			Description: "Scoped logging methods must return IDisposable to properly manage the log scope lifetime.",
+			Category: Constants.Diagnostics.Logging.Usage,
+			Severity: DiagnosticSeverity.Error
+		);
+
+		public static readonly TelemetryDiagnosticDescriptor LogMustReturnVoidOrAsync = new(
+			Id: "TSG2021",
+			Title: "Log method must return void or IDisposable",
+			Description: "Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.",
+			Category: Constants.Diagnostics.Logging.Usage,
+			Severity: DiagnosticSeverity.Error
+		);
+
+		public static readonly TelemetryDiagnosticDescriptor InvalidAsyncReturnType = new(
+			Id: "TSG2022",
+			Title: "Async return types are not supported",
+			Description: "Logging methods cannot return Task or ValueTask. Only void (non-scoped) or IDisposable (scoped) are supported.",
+			Category: Constants.Diagnostics.Logging.Usage,
+			Severity: DiagnosticSeverity.Error
+		);
 	}
 }

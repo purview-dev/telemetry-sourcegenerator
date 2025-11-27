@@ -20,20 +20,13 @@
       }
     },
     {
-      Location: /*
-	// This method has no attribute, so inference is not supported in multi-target
-	void MethodWithoutAttribute(string message);
-      ^^^^^^^^^^^^^^^^^^^^^^
-}
-*/
- Guid_1: (18,6)-(18,28),
-      Message: When using multiple generation targets - Activities, Logs or Metrics, each method must be either excluded or have an explicit generation target: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
+      Message: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
       Severity: Error,
       Descriptor: {
-        Id: TSG1001,
-        Title: Inferring generation targets is not supported when using multi-target generation,
-        MessageFormat: When using multiple generation targets - Activities, Logs or Metrics, each method must be either excluded or have an explicit generation target: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-        Category: Usage,
+        Id: TSG2021,
+        Title: Log method must return void or IDisposable,
+        MessageFormat: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
+        Category: Logging.Usage,
         DefaultSeverity: Error,
         IsEnabledByDefault: true
       }

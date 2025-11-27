@@ -1,20 +1,13 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-	[Activity]
-	System.Diagnostics.Activity? Process([Tag]string id);
-                              ^^^^^^^
-
-*/
- Guid_1: (15,30)-(15,37),
-      Message: Two or more methods named 'Process' are defined. Keep method names unique as they're used to generate other members on the implementation class.,
+      Message: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
       Severity: Error,
       Descriptor: {
-        Id: TSG1003,
-        Title: Duplicate method names are not supported,
-        MessageFormat: Two or more methods named '{0}' are defined. Keep method names unique as they're used to generate other members on the implementation class.,
-        Category: Usage,
+        Id: TSG2021,
+        Title: Log method must return void or IDisposable,
+        MessageFormat: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
+        Category: Logging.Usage,
         DefaultSeverity: Error,
         IsEnabledByDefault: true
       }

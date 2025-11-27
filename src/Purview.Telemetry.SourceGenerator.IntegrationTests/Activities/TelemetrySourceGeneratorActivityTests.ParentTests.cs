@@ -2,7 +2,7 @@
 
 partial class TelemetrySourceGeneratorActivityTests
 {
-	[Fact]
+	[Test]
 	public async Task Generate_GivenActivityContext_GeneratesActivityAndSetsActivityContext()
 	{
 		// Arrange
@@ -23,10 +23,10 @@ public interface ITestActivities {
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenNullableActivityContext_GeneratesActivityAndSetsActivityContextOrDefault()
 	{
 		// Arrange
@@ -47,10 +47,10 @@ public interface ITestActivities {
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenParentId_GeneratesActivityAndSetsParentId()
 	{
 		// Arrange
@@ -71,10 +71,10 @@ public interface ITestActivities {
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenNullableParentId_GeneratesActivityAndSetsParentId()
 	{
 		// Arrange
@@ -95,6 +95,6 @@ public interface ITestActivities {
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 }

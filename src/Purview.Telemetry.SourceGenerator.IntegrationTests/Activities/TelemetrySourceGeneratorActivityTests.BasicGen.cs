@@ -2,7 +2,7 @@
 
 partial class TelemetrySourceGeneratorActivityTests
 {
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicGen_GeneratesActivity()
 	{
 		// Arrange
@@ -26,10 +26,10 @@ public interface ITestActivities {
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenInterfaceWithNoActivityButOtherActivityBasedMethods_GeneratesDiagnostic()
 	{
 		// Arrange
@@ -53,7 +53,7 @@ public interface ITestActivities {
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
@@ -61,7 +61,7 @@ public interface ITestActivities {
 		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicGenAndNoActivityName_GeneratesActivity()
 	{
 		// Arrange
@@ -86,10 +86,10 @@ public interface ITestActivities
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenWithNonStringBaggage_RaisesDiagnosticAndGenerates()
 	{
 		// Arrange
@@ -116,7 +116,7 @@ public interface ITestActivities {
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
@@ -124,7 +124,7 @@ public interface ITestActivities {
 		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicGenWithReturningActivity_GeneratesActivity()
 	{
 		// Arrange
@@ -149,10 +149,10 @@ public interface ITestActivities {
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicGenWithReturningNullableActivity_GeneratesActivity()
 	{
 		// Arrange
@@ -177,10 +177,10 @@ public interface ITestActivities {
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicGenWithNullableParams_GeneratesActivity()
 	{
 		// Arrange
@@ -205,6 +205,6 @@ public interface ITestActivities {
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 }

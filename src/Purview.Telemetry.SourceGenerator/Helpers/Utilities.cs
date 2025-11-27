@@ -126,9 +126,9 @@ static partial class Utilities
 		// Determine the namespace the type is declared in, if any
 		var potentialNamespaceParent = typeSymbol.Parent;
 		while (
-			potentialNamespaceParent != null
-			&& potentialNamespaceParent is not NamespaceDeclarationSyntax
-			&& potentialNamespaceParent is not FileScopedNamespaceDeclarationSyntax
+			potentialNamespaceParent is not null
+			and not NamespaceDeclarationSyntax
+			and not FileScopedNamespaceDeclarationSyntax
 		)
 		{
 			potentialNamespaceParent = potentialNamespaceParent.Parent;
@@ -194,7 +194,7 @@ static partial class Utilities
 	public static bool IsComplexType(this ITypeSymbol typeSymbol)
 	{
 		// Check for class, struct, or record types
-		if (typeSymbol.TypeKind == TypeKind.Class || typeSymbol.TypeKind == TypeKind.Struct)
+		if (typeSymbol.TypeKind is TypeKind.Class or TypeKind.Struct)
 		{
 			// Exclude primitive types and special types like string
 			if (typeSymbol.SpecialType is SpecialType.None)
@@ -244,7 +244,7 @@ static partial class Utilities
 
 	public static bool IsExceptionType(this ITypeSymbol typeSymbol)
 	{
-		ITypeSymbol? localTypeSymbol = typeSymbol;
+		var localTypeSymbol = typeSymbol;
 		while (localTypeSymbol != null)
 		{
 			if (Constants.System.Exception.Equals(localTypeSymbol))

@@ -145,7 +145,7 @@ using Purview.Telemetry;
 		return builder.ToString();
 	}
 
-	public static async Task Verify(
+	public static async Task VerifyAsync(
 		GenerationResult generationResult,
 		Action<SettingsTask>? config = null,
 		bool expectsDiagnostics = false,
@@ -179,9 +179,11 @@ using Purview.Telemetry;
 			});
 
 		if (parameters.Length > 0)
+		{
 			verifierTask = verifierTask.UseTextForParameters(
 				ComputeParameterFilenameHash(parameters)
 			);
+		}
 
 		config?.Invoke(verifierTask);
 
@@ -189,9 +191,9 @@ using Purview.Telemetry;
 
 		await verifierTask;
 
-		var diag = generationResult.Diagnostics.AsEnumerable();
+		var diag = generationResult.Diagnostics.ToArray();
 		if (whenValidatingDiagnosticsIgnoreNonErrors)
-			diag = diag.Where(m => m.Severity == DiagnosticSeverity.Error);
+			diag = [.. diag.Where(m => m.Severity == DiagnosticSeverity.Error)];
 
 		if (expectsDiagnostics)
 		{

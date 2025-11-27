@@ -2,8 +2,8 @@
 
 partial class TelemetrySourceGeneratorLoggingTests
 {
-	[Theory]
-	[MemberData(nameof(SpecificLogAttributeTypes))]
+	[Test]
+	[MethodDataSource(nameof(SpecificLogAttributeTypes))]
 	public async Task Generate_GivenInterfaceWithSpecificLogAttribute_GenerateLoggerWithThatLevel(
 		string attribute
 	)
@@ -27,11 +27,11 @@ public interface ITestLogger
 		var generationResult = await GenerateAsync(basicLogger);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, parameters: attribute);
+		await TestHelpers.VerifyAsync(generationResult, parameters: attribute);
 	}
 
-	[Theory]
-	[MemberData(nameof(SpecificLogAttributeTypes))]
+	[Test]
+	[MethodDataSource(nameof(SpecificLogAttributeTypes))]
 	public async Task Generate_GivenInterfaceWithSpecificTypesAndSpecificParameters_GenerateLoggerWithThatLevelAndParameter(
 		string attribute
 	)
@@ -70,14 +70,14 @@ public interface ITestLogger
 		var generationResult = await GenerateAsync(basicLogger);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, parameters: attribute);
+		await TestHelpers.VerifyAsync(generationResult, parameters: attribute);
 	}
 
-	public static TheoryData<string> SpecificLogAttributeTypes
+	public static IEnumerable<string> SpecificLogAttributeTypes
 	{
 		get
 		{
-			TheoryData<string> data = [];
+			List<string> data = [];
 
 			data.Add("Trace");
 			data.Add("Debug");

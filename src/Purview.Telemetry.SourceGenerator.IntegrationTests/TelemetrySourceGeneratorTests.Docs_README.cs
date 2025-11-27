@@ -2,9 +2,9 @@
 
 partial class TelemetrySourceGeneratorTests
 {
-	[Theory]
-	[InlineData(IncludeLoggerTypes.LoggerOnly)]
-	[InlineData(IncludeLoggerTypes.Telemetry)]
+	[Test]
+	[Arguments(IncludeLoggerTypes.LoggerOnly)]
+	[Arguments(IncludeLoggerTypes.Telemetry)]
 	public async Task Generate_FromREADMESection_GeneratesTelemetry(IncludeLoggerTypes loggerTypes)
 	{
 		// Arrange
@@ -78,10 +78,10 @@ interface IEntityStoreTelemetry
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, parameters: loggerTypes);
+		await TestHelpers.VerifyAsync(generationResult, parameters: loggerTypes);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_FromWikiActivitiesSection_GeneratesTelemetry()
 	{
 		// Arrange
@@ -117,10 +117,10 @@ interface IActivityTelemetry
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_FromWikiLoggingSection_GeneratesTelemetry()
 	{
 		// Arrange
@@ -161,10 +161,10 @@ enum ItemTypes
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_FromWikiMetricsSection_GeneratesTelemetry()
 	{
 		// Arrange
@@ -210,10 +210,10 @@ interface IMeterTelemetry
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_FromWikiMultiTargetingSection_GeneratesTelemetry()
 	{
 		// Arrange
@@ -253,6 +253,6 @@ interface IServiceTelemetry
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 }

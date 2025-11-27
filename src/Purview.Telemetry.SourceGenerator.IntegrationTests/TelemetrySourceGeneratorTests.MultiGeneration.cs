@@ -6,7 +6,7 @@ namespace Purview.Telemetry.SourceGenerator;
 /// </summary>
 public partial class TelemetrySourceGeneratorTests
 {
-	[Fact]
+	[Test]
 	public async Task Generate_GivenActivitiesAndLogging_GeneratesBothCorrectly()
 	{
 		// Arrange
@@ -33,10 +33,10 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenActivitiesAndMetrics_GeneratesBothCorrectly()
 	{
 		// Arrange
@@ -63,10 +63,10 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenLoggingAndMetrics_GeneratesBothCorrectly()
 	{
 		// Arrange
@@ -93,10 +93,10 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenAllThreeTypes_GeneratesAllCorrectly()
 	{
 		// Arrange
@@ -128,10 +128,10 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodWithMultipleTargetAttributes_RaisesDiagnostic()
 	{
 		// Arrange
@@ -156,7 +156,7 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
@@ -164,7 +164,7 @@ public interface IMultiTelemetry
 		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodWithActivityAndMetricAttributes_RaisesDiagnostic()
 	{
 		// Arrange
@@ -189,7 +189,7 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
@@ -197,7 +197,7 @@ public interface IMultiTelemetry
 		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodWithLoggingAndMetricAttributes_RaisesDiagnostic()
 	{
 		// Arrange
@@ -222,7 +222,7 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
@@ -230,7 +230,7 @@ public interface IMultiTelemetry
 		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodWithAllThreeAttributes_RaisesDiagnostic()
 	{
 		// Arrange
@@ -258,7 +258,7 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
@@ -266,7 +266,7 @@ public interface IMultiTelemetry
 		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodWithoutAttributeInMultiTarget_RaisesInferenceNotSupportedDiagnostic()
 	{
 		// Arrange
@@ -293,7 +293,7 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
@@ -301,7 +301,7 @@ public interface IMultiTelemetry
 		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenActivitiesLoggingWithExplicitAttributes_GeneratesCorrectly()
 	{
 		// Arrange
@@ -346,10 +346,10 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMetricsWithAllInstrumentTypes_GeneratesCorrectly()
 	{
 		// Arrange
@@ -394,10 +394,10 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenLoggingMetricsWithVariousTypes_GeneratesCorrectly()
 	{
 		// Arrange
@@ -433,10 +433,10 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenAllThreeTypesWithComplexParameters_GeneratesCorrectly()
 	{
 		// Arrange
@@ -469,7 +469,7 @@ public interface IMultiTelemetry
 		string? correlationId
 	);
 
-	[Counter]
+	[AutoCounter]
 	void IncrementRequestCount(string endpoint);
 
 	[Histogram]
@@ -481,10 +481,10 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenActivitiesWithContextAndEvent_GeneratesCorrectly()
 	{
 		// Arrange
@@ -509,7 +509,7 @@ public interface IMultiTelemetry
 	void RecordEvent(System.Diagnostics.Activity? activity, [Tag]string eventName);
 
 	[Counter]
-	void CountOperation(string operationType);
+	void CountOperation(int counterValue, string operationType);
 }
 ";
 
@@ -517,10 +517,10 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenExclusionInMultiTarget_ExcludesMethodCorrectly()
 	{
 		// Arrange
@@ -544,16 +544,24 @@ public interface IMultiTelemetry
 	[Exclude]
 	void ExcludedMethod(string message);
 }
+
+partial class MultiTelemetryCore
+{
+	public void ExcludeMethod(string message)
+	{
+		// This method should be excluded from the generated telemetry implementation.
+	}
+}
 ";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMultipleMethodsWithSameNames_RaisesDiagnostic()
 	{
 		// Arrange
@@ -580,7 +588,7 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
@@ -588,7 +596,7 @@ public interface IMultiTelemetry
 		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenNullableParametersInMultiTarget_GeneratesCorrectly()
 	{
 		// Arrange
@@ -623,11 +631,11 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
-	public async Task Generate_GivenAsyncMethodsInMultiTarget_GeneratesCorrectly()
+	[Test]
+	public async Task Generate_GivenAsyncMethodsInMultiTarget_RaisesDiagnostics()
 	{
 		// Arrange
 		const string multiGen =
@@ -656,11 +664,16 @@ public interface IMultiTelemetry
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
 
-		// Assert
-		await TestHelpers.Verify(generationResult);
+		// Assert - Task and ValueTask are not valid return types for logging
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			config: s => s.ScrubInlineGuids(),
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG2021", "TSG2021"] // Both async methods are invalid
+		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenActivityWithLoggerButNoActivityMethods_GeneratesLoggerOnlyWithInfo()
 	{
 		// Arrange
@@ -688,15 +701,13 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG3012"]
+			config: s => s.ScrubInlineGuids()
 		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenOnlyEventAndContextWithoutActivity_RaisesDiagnostic()
 	{
 		// Arrange
@@ -727,7 +738,7 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,

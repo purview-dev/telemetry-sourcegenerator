@@ -2,7 +2,7 @@
 
 partial class TelemetrySourceGeneratorTests
 {
-	[Fact]
+	[Test]
 	public async Task Generate_GivenICacheServiceProviderTelemetry_GeneratesTelemetry()
 	{
 		// Arrange
@@ -88,7 +88,7 @@ public interface ICacheServiceProviderTelemetry
 		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			s => s.ScrubInlineGuids(),
 			whenValidatingDiagnosticsIgnoreNonErrors: true

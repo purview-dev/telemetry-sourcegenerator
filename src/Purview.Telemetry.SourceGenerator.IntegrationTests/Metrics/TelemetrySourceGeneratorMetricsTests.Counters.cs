@@ -2,7 +2,7 @@
 
 partial class TelemetrySourceGeneratorMetricsTests
 {
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicAutoCounterWithInferredTagsOfInstrumentType_GeneratesMetrics()
 	{
 		// Arrange
@@ -24,10 +24,10 @@ public interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicAutoCounterWithSpecifiedInstrumentMeasurement_GeneratesDiagnostic()
 	{
 		// Arrange
@@ -49,7 +49,7 @@ public interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			config: c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
@@ -58,7 +58,7 @@ public interface ITestMetrics
 		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicAutoCounter_GeneratesMetrics()
 	{
 		// Arrange
@@ -80,10 +80,10 @@ public interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenAutoCounterWithInstrumentationValue_GeneratesDiagnostic()
 	{
 		// Arrange
@@ -105,7 +105,7 @@ public interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
@@ -114,7 +114,7 @@ public interface ITestMetrics
 		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicCounters_GeneratesMetrics()
 	{
 		// Arrange
@@ -153,10 +153,10 @@ public interface ITestMetrics {
 		var generationResult = await GenerateAsync(basicMetric);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicCountersWithAutoIncrement_GeneratesMetrics()
 	{
 		// Arrange
@@ -183,10 +183,10 @@ public interface ITestMetrics {
 		var generationResult = await GenerateAsync(basicMetric);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicObservableCounters_GeneratesMetrics()
 	{
 		// Arrange
@@ -215,6 +215,6 @@ public interface ITestMetrics {
 		var generationResult = await GenerateAsync(basicMetric);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 }

@@ -87,10 +87,7 @@ partial class PipelineHelpers
 			logger,
 			token
 		);
-		var defaultLogLevel =
-			loggerGenerationAttribute?.DefaultLevel.IsSet == true
-				? loggerGenerationAttribute.DefaultLevel.Value!.Value
-				: Constants.Logging.DefaultLevel;
+		var defaultLogLevel = loggerGenerationAttribute?.DefaultLevel?.Value ?? Constants.Logging.DefaultLevel;
 		var disableMSLoggingTelemetryGeneration =
 			loggerAttribute.DisableMSLoggingTelemetryGeneration.Value
 			?? loggerGenerationAttribute?.DisableMSLoggingTelemetryGeneration.Value
@@ -186,6 +183,17 @@ partial class PipelineHelpers
 			}
 
 			logger?.Debug($"Found method {interfaceSymbol.Name}.{method.Name}.");
+
+			// Validate return type
+			var returnTypeValidation = ValidateLogReturnType(method, semanticModel, logger, token);
+			if (returnTypeValidation.HasValue)
+			{
+				telemetryDiagnosticsList ??= [];
+				telemetryDiagnosticsList.Add(returnTypeValidation.Value);
+				// Skip this method if there's an error
+				if (returnTypeValidation.Value.Item1.Severity == DiagnosticSeverity.Error)
+					continue;
+			}
 
 			var isScoped = !method.ReturnsVoid;
 			var methodParameters = GetLogMethodParameters(
@@ -531,5 +539,53 @@ partial class PipelineHelpers
 		logger?.Debug($"Found {parameters.Count} parameter(s) for {method.Name}.");
 
 		return [.. parameters];
+	}
+
+	static (TelemetryDiagnosticDescriptor, ImmutableArray<Location>)? ValidateLogReturnType(
+		IMethodSymbol method,
+		SemanticModel semanticModel,
+		GenerationLogger? logger,
+		CancellationToken token
+	)
+	{
+		token.ThrowIfCancellationRequested();
+
+		// Valid return types for logging:
+		// - void (non-scoped)
+		// - IDisposable or IDisposable? (scoped)
+		// Everything else is invalid
+
+		var isVoid = method.ReturnsVoid;
+		
+		// Check if return type is IDisposable (handle both nullable and non-nullable)
+		var returnType = method.ReturnType;
+		var isIDisposable = Constants.System.IDisposable.Equals(returnType);
+		
+		// Also check if it's nullable IDisposable (IDisposable?)
+		if (!isIDisposable && returnType.NullableAnnotation == NullableAnnotation.Annotated)
+		{
+			// Get the underlying type without the nullable annotation
+			if (returnType is INamedTypeSymbol namedType && !namedType.IsValueType)
+			{
+				isIDisposable = Constants.System.IDisposable.Equals(namedType.OriginalDefinition) ||
+				                Constants.System.IDisposable.FullyQualifiedName == namedType.ConstructedFrom.ToString();
+			}
+		}
+
+		// If it's one of the valid types, allow it
+		if (isVoid || isIDisposable)
+		{
+			return null;
+		}
+
+		// Everything else is invalid
+		logger?.Diagnostic(
+			$"Log method {method.Name} must return void or IDisposable (for scoped logs), but returns {method.ReturnType}."
+		);
+		
+		return (
+			TelemetryDiagnostics.Logging.LogMustReturnVoidOrAsync,
+			method.ReturnType.Locations
+		);
 	}
 }

@@ -2,7 +2,7 @@
 
 partial class TelemetrySourceGeneratorTests
 {
-	[Fact]
+	[Test]
 	public async Task Generate_GivenDuplicateActivityMethodNames_GeneratesDiagnostic()
 	{
 		// Arrange
@@ -25,7 +25,7 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
@@ -33,7 +33,7 @@ public interface ITestTelemetry
 		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenDuplicateActivityEventContextMethodNames_GeneratesDiagnostic()
 	{
 		// Arrange
@@ -59,7 +59,7 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
@@ -67,9 +67,9 @@ public interface ITestTelemetry
 		);
 	}
 
-	[Theory]
-	[InlineData(IncludeLoggerTypes.LoggerOnly)]
-	[InlineData(IncludeLoggerTypes.Telemetry)]
+	[Test]
+	[Arguments(IncludeLoggerTypes.LoggerOnly)]
+	[Arguments(IncludeLoggerTypes.Telemetry)]
 	public async Task Generate_GivenDuplicateLoggingMethodNames_GeneratesDiagnostic(
 		IncludeLoggerTypes includeLoggerTypes
 	)
@@ -97,7 +97,7 @@ public interface ITestTelemetry
 		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
@@ -106,7 +106,7 @@ public interface ITestTelemetry
 		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenDuplicateMetricsMethodNames_GeneratesDiagnostic()
 	{
 		// Arrange
@@ -129,7 +129,7 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
@@ -137,9 +137,9 @@ public interface ITestTelemetry
 		);
 	}
 
-	[Theory]
-	[InlineData(IncludeLoggerTypes.LoggerOnly)]
-	[InlineData(IncludeLoggerTypes.Telemetry)]
+	[Test]
+	[Arguments(IncludeLoggerTypes.LoggerOnly)]
+	[Arguments(IncludeLoggerTypes.Telemetry)]
 	public async Task Generate_GivenDuplicateMultiTargetMethodNames_GeneratesDiagnostic(
 		IncludeLoggerTypes includeLoggerType
 	)
@@ -186,7 +186,7 @@ public interface ITestTelemetry
 		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,

@@ -7,19 +7,20 @@ namespace Purview.Telemetry.SourceGenerator.Records;
 [Flags]
 enum GenerationType
 {
-	None,
+	None = 0,
 	Activities = 1,
 	Logging = 2,
 	Metrics = 4,
+	All = Activities | Logging | Metrics
 }
 
-record TargetGeneration(
+sealed record TargetGeneration(
 	bool IsValid,
 	bool RaiseInferenceNotSupportedWithMultiTargeting,
 	bool RaiseMultiGenerationTargetsNotSupported
 );
 
-record AttributeValue<T>
+sealed record AttributeValue<T>
 	where T : struct
 {
 	public AttributeValue(T? value)
@@ -30,7 +31,8 @@ record AttributeValue<T>
 
 	public AttributeValue() => IsSet = false;
 
-	public T? Or(T value) => IsSet ? Value : value;
+	public T? Or(T value)
+		=> IsSet ? Value : value;
 
 	public T? Value { get; }
 

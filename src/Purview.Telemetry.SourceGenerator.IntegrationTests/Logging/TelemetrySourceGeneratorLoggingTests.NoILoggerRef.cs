@@ -2,7 +2,7 @@
 
 partial class TelemetrySourceGeneratorLoggingTests
 {
-	[Fact]
+	[Test]
 	public async Task Generate_GivenNoReferenceToILoggerAndNoLoggerRequested_DoesNotGenerateDiagnostic()
 	{
 		// Arrange
@@ -29,10 +29,10 @@ public interface ITestActivities {
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenNoReferenceToILoggerAndNoLoggerRequested_CompilesWithoutILoggerRef()
 	{
 		// Arrange
@@ -59,7 +59,7 @@ public interface ITestActivities {
 		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			expectsDiagnostics: false,
 			whenValidatingDiagnosticsIgnoreNonErrors: true

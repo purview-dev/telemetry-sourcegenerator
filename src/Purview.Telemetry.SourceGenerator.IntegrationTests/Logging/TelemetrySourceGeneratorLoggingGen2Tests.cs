@@ -1,13 +1,9 @@
 ﻿namespace Purview.Telemetry.SourceGenerator.Logging;
 
-public partial class TelemetrySourceGeneratorLoggingGen2Tests(ITestOutputHelper testOutputHelper)
-	: IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>(testOutputHelper)
+public partial class TelemetrySourceGeneratorLoggingGen2Tests : IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>
 {
-	[Theory]
-	[MemberData(
-		nameof(TelemetrySourceGeneratorTests.BasicGenericParameters),
-		MemberType = typeof(TelemetrySourceGeneratorTests)
-	)]
+	[Test]
+	[MethodDataSource<TelemetrySourceGeneratorTests>(nameof(TelemetrySourceGeneratorTests.BasicGenericParameters))]
 	public async Task Generate_GivenMethodWithBasicGenericParams_GeneratesEntryCorrectly(
 		string parameterType
 	)
@@ -33,18 +29,15 @@ public interface ITestLogger
 		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			parameters: parameterType
 		);
 	}
 
-	[Theory]
-	[MemberData(
-		nameof(TelemetrySourceGeneratorTests.GetGenericTypeDefCount),
-		MemberType = typeof(TelemetrySourceGeneratorTests)
-	)]
+	[Test]
+	[MethodDataSource<TelemetrySourceGeneratorTests>(nameof(TelemetrySourceGeneratorTests.GetGenericTypeDefCount))]
 	public async Task Generate_GivenInterfaceWithGenerics_RaisesDiagnostics(int genericTypeCount)
 	{
 		// Arrange
@@ -71,7 +64,7 @@ public interface ITestLogger<{genericTypeDef}> {{
 		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
@@ -79,11 +72,8 @@ public interface ITestLogger<{genericTypeDef}> {{
 		);
 	}
 
-	[Theory]
-	[MemberData(
-		nameof(TelemetrySourceGeneratorTests.GetGenericTypeDefCount),
-		MemberType = typeof(TelemetrySourceGeneratorTests)
-	)]
+	[Test]
+	[MethodDataSource<TelemetrySourceGeneratorTests>(nameof(TelemetrySourceGeneratorTests.GetGenericTypeDefCount))]
 	public async Task Generate_GivenMethodWithGenerics_RaisesDiagnostics(int genericTypeCount)
 	{
 		// Arrange
@@ -110,7 +100,7 @@ public interface ITestLogger<{genericTypeDef}> {{
 		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
@@ -118,7 +108,7 @@ public interface ITestLogger<{genericTypeDef}> {{
 		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodWithMoreThanSixParameters_GeneratesEntry()
 	{
 		// Arrange
@@ -141,6 +131,6 @@ public interface ITestLogger {{
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 }

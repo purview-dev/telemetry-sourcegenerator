@@ -28,7 +28,7 @@ static class EmitHelpers
 
 		if (parentClasses.Length > 0)
 		{
-			foreach (var parentClass in parentClasses.Reverse())
+			foreach (var parentClass in ((IEnumerable<string>)parentClasses).Reverse())
 			{
 				builder
 					.Append(indent, "partial class ", withNewLine: false)

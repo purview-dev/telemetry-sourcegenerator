@@ -2,9 +2,9 @@
 
 partial class TelemetrySourceGeneratorLoggingGen2Tests
 {
-	[Theory]
-	[InlineData(true)]
-	[InlineData(false)]
+	[Test]
+	[Arguments(true)]
+	[Arguments(false)]
 	public async Task Generate_GivenBasicScopedMethod_GeneratesLogMethodCorrectly(
 		bool nullableDisposable
 	)
@@ -31,14 +31,14 @@ public interface ITestLogger
 		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			parameters: nullableDisposable
 		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicScopedMethodWithOtherParameters_GeneratesLogMethodCorrectly()
 	{
 		// Arrange
@@ -62,10 +62,10 @@ public interface ITestLogger
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, c => c.ScrubInlineGuids());
+		await TestHelpers.VerifyAsync(generationResult, c => c.ScrubInlineGuids());
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicScopedMethodWithOtherParametersAndUsedInMessageTemplate_GeneratesLogMethodCorrectly()
 	{
 		// Arrange
@@ -90,10 +90,10 @@ public interface ITestLogger
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, c => c.ScrubInlineGuids());
+		await TestHelpers.VerifyAsync(generationResult, c => c.ScrubInlineGuids());
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicScopedMethodWithOtherParametersPartiallyUsedInMessageTemplate_GeneratesLogMethodCorrectly()
 	{
 		// Arrange
@@ -118,10 +118,10 @@ public interface ITestLogger
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, c => c.ScrubInlineGuids());
+		await TestHelpers.VerifyAsync(generationResult, c => c.ScrubInlineGuids());
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicScopedAndLogHasLevelSet_GeneratesDiagnostic()
 	{
 		// Arrange
@@ -147,10 +147,10 @@ public interface ITestLogger
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, expectsDiagnostics: true);
+		await TestHelpers.VerifyAsync(generationResult, expectsDiagnostics: true);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicScopedAndLevelSetBySpecificAttribute_GeneratesDiagnostic()
 	{
 		// Arrange
@@ -176,6 +176,6 @@ public interface ITestLogger
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, expectsDiagnostics: true);
+		await TestHelpers.VerifyAsync(generationResult, expectsDiagnostics: true);
 	}
 }

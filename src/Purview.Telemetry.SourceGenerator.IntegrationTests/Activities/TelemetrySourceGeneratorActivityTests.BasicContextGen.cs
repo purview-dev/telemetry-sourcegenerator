@@ -2,7 +2,7 @@
 
 partial class TelemetrySourceGeneratorActivityTests
 {
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicContextGen_GeneratesActivity()
 	{
 		// Arrange
@@ -27,10 +27,10 @@ public interface ITestActivities
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicContextGenWithReturningActivity_GeneratesActivity()
 	{
 		// Arrange
@@ -56,10 +56,10 @@ public interface ITestActivities
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicContextGenWithReturningNullableActivity_GeneratesActivity()
 	{
 		// Arrange
@@ -87,10 +87,10 @@ public interface ITestActivities {
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicContextGenWithNullableParams_GeneratesActivity()
 	{
 		// Arrange
@@ -119,10 +119,10 @@ public interface ITestActivities
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicContextGenWithActivity_GeneratesActivity()
 	{
 		// Arrange
@@ -151,10 +151,10 @@ public interface ITestActivities
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicContextGenWithActivityAndNoReturn_GeneratesActivity()
 	{
 		// Arrange
@@ -183,6 +183,6 @@ public interface ITestActivities
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 }

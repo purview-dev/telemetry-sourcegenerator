@@ -2,7 +2,7 @@
 
 partial class TelemetrySourceGeneratorLoggingTests
 {
-	[Fact]
+	[Test]
 	public async Task Generate_GivenInterfaceWithSingleBasicExplicitLogEntry_GenerateLogger()
 	{
 		// Arrange
@@ -23,10 +23,10 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLogger);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenInterfaceWithSingleBasicImplicitLogEntry_GenerateLogger()
 	{
 		// Arrange
@@ -46,13 +46,13 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLogger);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Theory]
-	[InlineData("Level = Microsoft.Extensions.Logging.LogLevel.Trace")]
-	[InlineData("level: Microsoft.Extensions.Logging.LogLevel.Trace")]
-	[InlineData("Microsoft.Extensions.Logging.LogLevel.Trace")]
+	[Test]
+	[Arguments("Level = Microsoft.Extensions.Logging.LogLevel.Trace")]
+	[Arguments("level: Microsoft.Extensions.Logging.LogLevel.Trace")]
+	[Arguments("Microsoft.Extensions.Logging.LogLevel.Trace")]
 	public async Task Generate_GivenInterfaceWithExplicitLogLevelAndAnExceptionParameter_GenerateLogger(
 		string level
 	)
@@ -75,10 +75,10 @@ public interface ITestLogger {{
 		var generationResult = await GenerateAsync(basicLogger);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, c => c.ScrubInlineGuids(), parameters: level);
+		await TestHelpers.VerifyAsync(generationResult, c => c.ScrubInlineGuids(), parameters: level);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenInterfaceWithoutExplicitLogLevelAndAnExceptionParameter_GenerateLogger()
 	{
 		// Arrange
@@ -98,14 +98,14 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLogger);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true
 		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenInterfaceMoreThanSixParameters_RaisesDiagnostic()
 	{
 		// Arrange
@@ -125,7 +125,7 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLogger);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
@@ -133,7 +133,7 @@ public interface ITestLogger {
 		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenInterfaceMoreThanOneExceptionParameter_RaisesDiagnostic()
 	{
 		// Arrange
@@ -153,7 +153,7 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLogger);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
@@ -161,7 +161,7 @@ public interface ITestLogger {
 		);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodReturnsIDisposable_GeneratesScopedLogEntry()
 	{
 		// Arrange
@@ -181,10 +181,10 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLogger);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, c => c.ScrubInlineGuids());
+		await TestHelpers.VerifyAsync(generationResult, c => c.ScrubInlineGuids());
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodWithParamsAndExceptionReturnsIDisposable_GeneratesScopedLogEntry()
 	{
 		// Arrange
@@ -204,10 +204,10 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLogger);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, c => c.ScrubInlineGuids());
+		await TestHelpers.VerifyAsync(generationResult, c => c.ScrubInlineGuids());
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodWithParamsReturnsIDisposable_GeneratesScopedLogEntry()
 	{
 		// Arrange
@@ -227,6 +227,6 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLogger);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, c => c.ScrubInlineGuids());
+		await TestHelpers.VerifyAsync(generationResult, c => c.ScrubInlineGuids());
 	}
 }

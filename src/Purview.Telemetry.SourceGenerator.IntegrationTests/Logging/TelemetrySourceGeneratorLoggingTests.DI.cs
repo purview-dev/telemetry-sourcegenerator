@@ -2,7 +2,7 @@
 
 partial class TelemetrySourceGeneratorLoggingTests
 {
-	[Fact]
+	[Test]
 	public async Task Generate_GivenAssemblyEnableDI_GeneratesLog()
 	{
 		// Arrange
@@ -26,10 +26,10 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLog, disableDependencyInjection: false);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenInterfaceEnableDI_GeneratesLog()
 	{
 		// Arrange
@@ -52,10 +52,10 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLog, disableDependencyInjection: false);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenDIDisabledAtAssemblyAndInterfaceEnableDI_GeneratesLog()
 	{
 		// Arrange
@@ -80,10 +80,10 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLog, disableDependencyInjection: false);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenDIEnabledAtAssemblyAndInterfaceDisabledDI_GeneratesLog()
 	{
 		// Arrange
@@ -108,6 +108,6 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLog, disableDependencyInjection: false);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 }

@@ -2,7 +2,7 @@
 
 public class PurviewTypeInfoTests
 {
-	[Fact]
+	[Test]
 	public void Create_GivenBasicTypeNameAsString_CreatesPurviewTypeInfo()
 	{
 		// Arrange
@@ -24,7 +24,7 @@ public class PurviewTypeInfoTests
 		typeInfo.GenericTypeArguments.ShouldBeEmpty();
 	}
 
-	[Fact]
+	[Test]
 	public void Create_GivenNestedTypeAsAString_CreatesPurviewTypeInfo()
 	{
 		// Arrange
@@ -46,7 +46,7 @@ public class PurviewTypeInfoTests
 		typeInfo.GenericTypeArguments.ShouldBeEmpty();
 	}
 
-	[Fact]
+	[Test]
 	public void Create_GivenSpecialTypeOfString_CreatesPurviewTypeInfoWithAliasAndSpecialType()
 	{
 		// Arrange & Act

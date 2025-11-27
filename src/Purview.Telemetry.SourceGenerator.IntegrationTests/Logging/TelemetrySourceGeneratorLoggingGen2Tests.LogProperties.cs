@@ -2,7 +2,7 @@
 
 partial class TelemetrySourceGeneratorLoggingGen2Tests
 {
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodWithLogProperty_GeneratesIndividualProperties()
 	{
 		// Arrange
@@ -34,10 +34,10 @@ public class WeatherForecast
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodWithLogPropertyAndExpandEnumerable_GeneratesDiagnostic()
 	{
 		// Arrange
@@ -69,10 +69,10 @@ public class WeatherForecast
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, expectsDiagnostics: true);
+		await TestHelpers.VerifyAsync(generationResult, expectsDiagnostics: true);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodWithExceptionUsedInTemplate_UsesPassInException()
 	{
 		// Arrange
@@ -98,10 +98,10 @@ public interface ITestLogger
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodWithLogPropertyOmit_GeneratesIndividualProperties()
 	{
 		// Arrange
@@ -133,10 +133,10 @@ public class WeatherForecast
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodWithLogPropertySkipNull_GeneratesIndividualProperties()
 	{
 		// Arrange
@@ -168,10 +168,10 @@ public class WeatherForecast
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodWithLogPropertySkipNullAndOmit_GeneratesIndividualProperties()
 	{
 		// Arrange
@@ -203,10 +203,10 @@ public class WeatherForecast
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodWithLogPropertyIgnore_GeneratesIndividualProperties()
 	{
 		// Arrange
@@ -241,6 +241,6 @@ public class WeatherForecast
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 }

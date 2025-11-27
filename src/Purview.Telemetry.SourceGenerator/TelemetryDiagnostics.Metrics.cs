@@ -65,5 +65,21 @@ partial class TelemetryDiagnostics
 			Category: Constants.Diagnostics.Metrics.Usage,
 			Severity: DiagnosticSeverity.Error
 		);
+
+		public static readonly TelemetryDiagnosticDescriptor ObservableCannotReturnBool = new(
+			Id: "TSG4007",
+			Title: "Observable metrics cannot return bool",
+			Description: "Observable metrics can only return void or Activity? (when combined with Activity attribute). Boolean returns are not supported for observables.",
+			Category: Constants.Diagnostics.Metrics.Usage,
+			Severity: DiagnosticSeverity.Error
+		);
+
+		public static readonly TelemetryDiagnosticDescriptor AutoCounterMustReturnVoid = new(
+			Id: "TSG4008",
+			Title: "AutoCounter must return void",
+			Description: "AutoCounter methods must return void. Boolean or other return types are not supported.",
+			Category: Constants.Diagnostics.Metrics.Usage,
+			Severity: DiagnosticSeverity.Error
+		);
 	}
 }

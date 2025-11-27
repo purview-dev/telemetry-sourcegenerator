@@ -2,8 +2,8 @@
 
 partial class TelemetrySourceGeneratorLoggingTests
 {
-	[Theory]
-	[MemberData(nameof(GetEntryNames))]
+	[Test]
+	[MethodDataSource(nameof(GetEntryNames))]
 	public async Task Generate_GivenLogTargetWithEntryName_GenerateLogger(string logTargetName)
 	{
 		// Arrange
@@ -24,11 +24,11 @@ public interface ITestLogger {{
 		var generationResult = await GenerateAsync(basicLogger);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, parameters: logTargetName);
+		await TestHelpers.VerifyAsync(generationResult, parameters: logTargetName);
 	}
 
-	[Theory]
-	[MemberData(nameof(GetPrefixAndEntryNames))]
+	[Test]
+	[MethodDataSource(nameof(GetPrefixAndEntryNames))]
 	public async Task Generate_GivenLogTargetWithPrefixAndEntryName_GenerateLogger(
 		string type,
 		string logTargetName
@@ -58,12 +58,12 @@ public interface ITestLogger {{
 		var generationResult = await GenerateAsync(basicLogger);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, parameters: [prefixType, logTargetName]);
+		await TestHelpers.VerifyAsync(generationResult, parameters: [prefixType, logTargetName]);
 	}
 
-	public static TheoryData<string, string> GetPrefixAndEntryNames()
+	public static IEnumerable<(string, string)> GetPrefixAndEntryNames()
 	{
-		TheoryData<string, string> data = [];
+		List<(string, string)> data = [];
 
 		string[] prefixes = ["Default", "Custom", "Interface", "Class", "TrimmedClassName"];
 
@@ -71,16 +71,16 @@ public interface ITestLogger {{
 		{
 			foreach (var entryName in TestEntryNames)
 			{
-				data.Add(type, entryName);
+				data.Add((type, entryName));
 			}
 		}
 
 		return data;
 	}
 
-	public static TheoryData<string> GetEntryNames()
+	public static IEnumerable<string> GetEntryNames()
 	{
-		TheoryData<string> data = [];
+		List<string> data = [];
 
 		foreach (var entryName in TestEntryNames)
 		{

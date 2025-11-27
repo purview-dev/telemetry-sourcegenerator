@@ -3,18 +3,17 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Purview.Telemetry.SourceGenerator.BuildTools;
 using Purview.Telemetry.SourceGenerator.Helpers;
+using Assembly = System.Reflection.Assembly;
 
 namespace Purview.Telemetry.SourceGenerator;
 
-public abstract class IncrementalSourceGeneratorTestBase<TGenerator>
-	: SourceGeneratorTestBase<ISourceGenerator>
+public abstract class IncrementalSourceGeneratorTestBase<TGenerator> : SourceGeneratorTestBase<ISourceGenerator>
 	where TGenerator : class, IIncrementalGenerator
 {
 	protected IncrementalSourceGeneratorTestBase(
-		ITestOutputHelper? testOutputHelper = null,
 		bool throwOnLoggedOnError = true
 	)
-		: base(testOutputHelper, throwOnLoggedOnError)
+		: base(throwOnLoggedOnError)
 	{
 		ThrowOnLoggedOnError = throwOnLoggedOnError;
 	}
@@ -31,10 +30,7 @@ public abstract class IncrementalSourceGeneratorTestBase<TGenerator>
 	}
 }
 
-public abstract class SourceGeneratorTestBase<TGenerator>(
-	ITestOutputHelper? testOutputHelper = null,
-	bool throwOnLoggedOnError = true
-)
+public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnError = true)
 	where TGenerator : ISourceGenerator
 {
 	protected virtual bool ThrowOnLoggedOnError { get; set; } = throwOnLoggedOnError;
@@ -56,7 +52,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 
 		GuardGenerator(generator);
 
-		if (generator is ILogSupport logging && testOutputHelper is not null)
+		if (generator is ILogSupport logging && TestContext.Current is not null)
 		{
 			logging.SetLogOutput(
 				(message, outputType) =>
@@ -70,7 +66,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 						_ => "???",
 					};
 
-					testOutputHelper.WriteLine($"{prefix}: {message}");
+					TestContext.Current.OutputWriter.WriteLine($"{prefix}: {message}");
 
 					if (ThrowOnLoggedOnError)
 						outputType.ShouldNotBe(OutputType.Error, message);
@@ -265,10 +261,16 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 			out var outputCompilation,
 			out var diagnostics
 		);
-		if (testOutputHelper is object)
+		if (TestContext.Current is not null)
 		{
 			foreach (var d in diagnostics)
-				testOutputHelper.WriteLine(d.ToString());
+			{
+				if (d.Severity is DiagnosticSeverity.Error)
+					await TestContext.Current.ErrorOutputWriter.WriteLineAsync(d.ToString());
+				else
+					await TestContext.Current.OutputWriter.WriteLineAsync(d.ToString());
+
+			}
 		}
 
 		var runResult = result.GetRunResult();

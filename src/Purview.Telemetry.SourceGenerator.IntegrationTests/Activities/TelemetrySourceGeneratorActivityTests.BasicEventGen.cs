@@ -2,11 +2,11 @@
 
 partial class TelemetrySourceGeneratorActivityTests
 {
-	[Theory]
-	[InlineData("Activity")]
-	[InlineData("Activity?")]
-	[InlineData("System.Diagnostics.Activity")]
-	[InlineData("System.Diagnostics.Activity?")]
+	[Test]
+	[Arguments("Activity")]
+	[Arguments("Activity?")]
+	[Arguments("System.Diagnostics.Activity")]
+	[Arguments("System.Diagnostics.Activity?")]
 	public async Task Generate_GivenEventWithFirstParameterAsActivityAndNoEventAttribute_GeneratesEventByInference(
 		string activityType
 	)
@@ -33,10 +33,10 @@ public interface ITestActivities
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, parameters: activityType);
+		await TestHelpers.VerifyAsync(generationResult, parameters: activityType);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicEventWithActivityParameter_GeneratesEvent()
 	{
 		// Arrange
@@ -62,10 +62,10 @@ public interface ITestActivities
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicEventWithNullableActivityParameter_GeneratesEvent()
 	{
 		// Arrange
@@ -91,10 +91,10 @@ public interface ITestActivities
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicEventStatusCodeParameterSetToOk_GeneratesEvent()
 	{
 		// Arrange
@@ -120,10 +120,10 @@ public interface ITestActivities
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicEventStatusCodeParameterSetToError_GeneratesEvent()
 	{
 		// Arrange
@@ -149,10 +149,10 @@ public interface ITestActivities
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicEventStatusCodeParameterSetToErrorWithException_GeneratesEvent()
 	{
 		// Arrange
@@ -178,10 +178,10 @@ public interface ITestActivities
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicEventStatusCodeParameterSetToErrorWithStatusDescriptionOnEventAttribute_GeneratesEvent()
 	{
 		// Arrange
@@ -207,10 +207,10 @@ public interface ITestActivities
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicEventStatusCodeParameterSetToErrorWithStatusDescriptionOnParameter_GeneratesEvent()
 	{
 		// Arrange
@@ -239,6 +239,6 @@ public interface ITestActivities
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 }

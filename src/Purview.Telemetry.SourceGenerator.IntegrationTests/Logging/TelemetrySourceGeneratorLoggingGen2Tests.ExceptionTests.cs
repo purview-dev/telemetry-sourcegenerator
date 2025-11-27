@@ -2,7 +2,7 @@
 
 partial class TelemetrySourceGeneratorLoggingGen2Tests
 {
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodWithNonSpecificException_UsesExceptionParameter()
 	{
 		// Arrange
@@ -25,10 +25,10 @@ public interface ITestLogger {{
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodWithCustomException_UsesExceptionParameter()
 	{
 		// Arrange
@@ -53,10 +53,10 @@ public class BadLuckException : Exception {{ }}
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenMethodWithMultipleExceptionParameters_GeneratesEntry()
 	{
 		// Arrange
@@ -81,6 +81,6 @@ public class BadLuckException : Exception {{ }}
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 }

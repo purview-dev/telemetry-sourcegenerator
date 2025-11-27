@@ -2,7 +2,7 @@
 
 partial class TelemetrySourceGeneratorTests
 {
-	[Fact]
+	[Test]
 	public async Task Generate_GivenPartialInterface_GeneratesTelemetry()
 	{
 		// Arrange
@@ -75,10 +75,10 @@ partial interface ITestTelemetry
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenNoNamespace_GeneratesTelemetry()
 	{
 		// Arrange
@@ -117,10 +117,10 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicTelemetryGen_GeneratesTelemetry()
 	{
 		// Arrange
@@ -161,10 +161,10 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicEventWithException_GeneratesTelemetry()
 	{
 		// Arrange
@@ -189,10 +189,10 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicEventWithExceptionAndEscape_GeneratesTelemetry()
 	{
 		// Arrange
@@ -217,10 +217,10 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicEventWithExceptionAndDisabledOTelExceptionRulesAndEscape_GeneratesTelemetry()
 	{
 		// Arrange
@@ -245,10 +245,10 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicEventWithExplicitExceptionAndNamedExceptionAndRulesAreFalse_GeneratesTelemetry()
 	{
 		// Arrange
@@ -273,10 +273,10 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicEventWithExplicitExceptionAndEventIsNamedExceptionAndRulesAreTrue_GeneratesTelemetry()
 	{
 		// Arrange
@@ -301,10 +301,10 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenDuplicateTelemetryGen_GeneratesDiagnostics()
 	{
 		// Arrange
@@ -352,7 +352,7 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,

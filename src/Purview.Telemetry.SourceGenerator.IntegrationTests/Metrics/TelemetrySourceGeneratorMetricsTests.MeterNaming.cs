@@ -2,7 +2,7 @@
 
 partial class TelemetrySourceGeneratorMetricsTests
 {
-	[Fact]
+	[Test]
 	public async Task Generate_GivenNameWithInterfacePrefix_GeneratesMetricsWithPrefix()
 	{
 		// Arrange
@@ -24,10 +24,10 @@ interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenNameWithAssemblyPrefix_GeneratesMetricsWithPrefix()
 	{
 		// Arrange
@@ -51,10 +51,10 @@ interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenNameWithAssemblyAndInterfacePrefix_GeneratesMetricsWithPrefix()
 	{
 		// Arrange
@@ -78,10 +78,10 @@ interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenNameWithAssemblyAndInterfacePrefixAndName_GeneratesMetricsWithPrefix()
 	{
 		// Arrange
@@ -105,10 +105,10 @@ interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenNameShouldBeLowerCase_GeneratesMetricsWithLowercaseName()
 	{
 		// Arrange
@@ -130,10 +130,10 @@ interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenNameShouldBeDefaultLowerCase_GeneratesMetricsWithLowercaseName()
 	{
 		// Arrange
@@ -155,10 +155,10 @@ interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenNameShouldBeDefinedCase_GeneratesMetricsWithLowercaseName()
 	{
 		// Arrange
@@ -180,6 +180,6 @@ interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 }

@@ -2,7 +2,7 @@
 
 partial class TelemetrySourceGeneratorActivityTests
 {
-	[Fact]
+	[Test]
 	public async Task Generate_GivenAssemblyEnableDI_GeneratesActivity()
 	{
 		// Arrange
@@ -32,10 +32,10 @@ public interface ITestActivities {
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenInterfaceEnableDI_GeneratesActivity()
 	{
 		// Arrange
@@ -64,10 +64,10 @@ public interface ITestActivities {
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenDIDisabledAtAssemblyAndInterfaceEnableDI_GeneratesActivity()
 	{
 		// Arrange
@@ -98,10 +98,10 @@ public interface ITestActivities {
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenDIEnabledAtAssemblyAndInterfaceDisableDI_GeneratesActivity()
 	{
 		// Arrange
@@ -132,10 +132,10 @@ public interface ITestActivities {
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenAssemblyEnableDIAndClassIsPublic_GeneratesActivity()
 	{
 		// Arrange
@@ -165,6 +165,6 @@ public interface ITestActivities {
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 }

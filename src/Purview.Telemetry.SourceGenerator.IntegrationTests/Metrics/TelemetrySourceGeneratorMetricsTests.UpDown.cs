@@ -2,7 +2,7 @@
 
 partial class TelemetrySourceGeneratorMetricsTests
 {
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicUpDown_GeneratesMetrics()
 	{
 		// Arrange
@@ -26,10 +26,10 @@ public interface ITestMetrics {
 		var generationResult = await GenerateAsync(basicMetric);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 
-	[Fact]
+	[Test]
 	public async Task Generate_GivenBasicObservableUpDown_GeneratesMetrics()
 	{
 		// Arrange
@@ -58,6 +58,6 @@ public interface ITestMetrics {
 		var generationResult = await GenerateAsync(basicMetric);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult);
 	}
 }

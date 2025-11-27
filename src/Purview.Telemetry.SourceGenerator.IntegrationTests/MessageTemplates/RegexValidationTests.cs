@@ -1,63 +1,62 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using Xunit.Sdk;
 
 namespace Purview.Telemetry.SourceGenerator.MessageTemplates;
 
 public partial class RegexValidationTests
 {
-	[Theory]
-	[MemberData(nameof(OrdinalTests))]
+	[Test]
+	[MethodDataSource(nameof(OrdinalTests))]
 	public void Match_GivenOrdinals_Matches(
 		string template,
 		[NotNull] TestMessageTemplateHole[] holes
 	) => Match(template, holes);
 
-	[Theory]
-	[MemberData(nameof(NamedTests))]
+	[Test]
+	[MethodDataSource(nameof(NamedTests))]
 	public void Match_GivenNames_Matches(
 		string template,
 		[NotNull] TestMessageTemplateHole[] holes
 	) => Match(template, holes);
 
-	[Theory]
-	[MemberData(nameof(DestructureTests))]
+	[Test]
+	[MethodDataSource(nameof(DestructureTests))]
 	public void Match_GivenDestructure_Matches(
 		string template,
 		[NotNull] TestMessageTemplateHole[] holes
 	) => Match(template, holes);
 
-	[Theory]
-	[MemberData(nameof(StringifyTests))]
+	[Test]
+	[MethodDataSource(nameof(StringifyTests))]
 	public void Match_GivenStringify_Matches(
 		string template,
 		[NotNull] TestMessageTemplateHole[] holes
 	) => Match(template, holes);
 
-	[Theory]
-	[MemberData(nameof(AlignmentTests))]
+	[Test]
+	[MethodDataSource(nameof(AlignmentTests))]
 	public void Match_GivenAlignment_Matches(
 		string template,
 		[NotNull] TestMessageTemplateHole[] holes
 	) => Match(template, holes);
 
-	[Theory]
-	[MemberData(nameof(FormattingTests))]
+	[Test]
+	[MethodDataSource(nameof(FormattingTests))]
 	public void Match_GivenFormatting_Matches(
 		string template,
 		[NotNull] TestMessageTemplateHole[] holes
 	) => Match(template, holes);
 
-	[Theory]
-	[MemberData(nameof(AMixedBag))]
+	[Test]
+	[MethodDataSource(nameof(AMixedBag))]
 	public void Match_GivenAMixOfParameters_Matches(
 		string template,
 		[NotNull] TestMessageTemplateHole[] holes
 	) => Match(template, holes);
 
-	[Theory]
-	[MemberData(nameof(DoubleCurlyBraces))]
+	[Test]
+	[MethodDataSource(nameof(DoubleCurlyBraces))]
 	public void Match_GivenDoubleCurlyBraces_Matches(
 		string template,
 		[NotNull] TestMessageTemplateHole[] holes
@@ -82,18 +81,18 @@ public partial class RegexValidationTests
 		}
 	}
 
-	public static TheoryData<string, TestMessageTemplateHole[]> OrdinalTests
+	public static IEnumerable<(string, TestMessageTemplateHole[])> OrdinalTests
 	{
 		get
 		{
-			TheoryData<string, TestMessageTemplateHole[]> data = new()
-			{
-				{ "Customer with ID {0}", [TestMessageTemplateHole.Create(0)] },
-				{
+			List<(string, TestMessageTemplateHole[])> data =
+			[
+				( "Customer with ID {0}", [TestMessageTemplateHole.Create(0)] ),
+				(
 					"Customer with ID {0} is named {1}",
 					[TestMessageTemplateHole.Create(0), TestMessageTemplateHole.Create(1)]
-				},
-				{
+				),
+				(
 					"Customer with ID {0} is named {1}, and {2}. and {3}",
 					[
 						TestMessageTemplateHole.Create(0),
@@ -101,28 +100,28 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create(2),
 						TestMessageTemplateHole.Create(3),
 					]
-				},
-			};
+				),
+			];
 
 			return data;
 		}
 	}
 
-	public static TheoryData<string, TestMessageTemplateHole[]> NamedTests
+	public static IEnumerable<(string, TestMessageTemplateHole[])> NamedTests
 	{
 		get
 		{
-			TheoryData<string, TestMessageTemplateHole[]> data = new()
-			{
-				{ "Customer with ID {CustomerId}", [TestMessageTemplateHole.Create("CustomerId")] },
-				{
+			List<(string, TestMessageTemplateHole[])> data =
+			[
+				( "Customer with ID {CustomerId}", [TestMessageTemplateHole.Create("CustomerId")] ),
+				(
 					"Customer with ID {CustomerId} is named {CustomerName}",
 					[
 						TestMessageTemplateHole.Create("CustomerId"),
 						TestMessageTemplateHole.Create("CustomerName"),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {CustomerId} is named {CustomerName}, and {Banana}. and {Apple}",
 					[
 						TestMessageTemplateHole.Create("CustomerId"),
@@ -130,31 +129,31 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create("Banana"),
 						TestMessageTemplateHole.Create("Apple"),
 					]
-				},
-			};
+				),
+			];
 
 			return data;
 		}
 	}
 
-	public static TheoryData<string, TestMessageTemplateHole[]> DestructureTests
+	public static IEnumerable<(string, TestMessageTemplateHole[])> DestructureTests
 	{
 		get
 		{
-			TheoryData<string, TestMessageTemplateHole[]> data = new()
-			{
-				{
+			List<(string, TestMessageTemplateHole[])> data =
+			[
+				(
 					"Customer with ID {@CustomerId}",
 					[TestMessageTemplateHole.Create("CustomerId", destructure: true)]
-				},
-				{
+				),
+				(
 					"Customer with ID {@CustomerId} is named {@CustomerName}",
 					[
 						TestMessageTemplateHole.Create("CustomerId", destructure: true),
 						TestMessageTemplateHole.Create("CustomerName", destructure: true),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {CustomerId} is named {@CustomerName}, and {Banana}. and {@Apple}",
 					[
 						TestMessageTemplateHole.Create("CustomerId"),
@@ -162,8 +161,8 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create("Banana"),
 						TestMessageTemplateHole.Create("Apple", destructure: true),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {CustomerId} is named {@CustomerName}, and {@Banana}. and {Apple}",
 					[
 						TestMessageTemplateHole.Create("CustomerId"),
@@ -171,16 +170,16 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create("Banana", destructure: true),
 						TestMessageTemplateHole.Create("Apple"),
 					]
-				},
-				{ "Customer with ID {@0}", [TestMessageTemplateHole.Create(0, destructure: true)] },
-				{
+				),
+				( "Customer with ID {@0}", [TestMessageTemplateHole.Create(0, destructure: true)] ),
+				(
 					"Customer with ID {@0} is named {@1}",
 					[
 						TestMessageTemplateHole.Create(0, destructure: true),
 						TestMessageTemplateHole.Create(1, destructure: true),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {0} is named {@1}, and {2}. and {@3}",
 					[
 						TestMessageTemplateHole.Create(0),
@@ -188,8 +187,8 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create(2),
 						TestMessageTemplateHole.Create(3, destructure: true),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {0} is named {@1}, and {@2}. and {3}",
 					[
 						TestMessageTemplateHole.Create(0),
@@ -197,31 +196,31 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create(2, destructure: true),
 						TestMessageTemplateHole.Create(3),
 					]
-				},
-			};
+				),
+			];
 
 			return data;
 		}
 	}
 
-	public static TheoryData<string, TestMessageTemplateHole[]> StringifyTests
+	public static IEnumerable<(string, TestMessageTemplateHole[])> StringifyTests
 	{
 		get
 		{
-			TheoryData<string, TestMessageTemplateHole[]> data = new()
-			{
-				{
+			List<(string, TestMessageTemplateHole[])> data =
+			[
+				(
 					"Customer with ID {$CustomerId}",
 					[TestMessageTemplateHole.Create("CustomerId", stringify: true)]
-				},
-				{
+				),
+				(
 					"Customer with ID {$CustomerId} is named {$CustomerName}",
 					[
 						TestMessageTemplateHole.Create("CustomerId", stringify: true),
 						TestMessageTemplateHole.Create("CustomerName", stringify: true),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {CustomerId} is named {$CustomerName}, and {Banana}. and {$Apple}",
 					[
 						TestMessageTemplateHole.Create("CustomerId"),
@@ -229,8 +228,8 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create("Banana"),
 						TestMessageTemplateHole.Create("Apple", stringify: true),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {CustomerId} is named {$CustomerName}, and {$Banana}. and {Apple}",
 					[
 						TestMessageTemplateHole.Create("CustomerId"),
@@ -238,16 +237,16 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create("Banana", stringify: true),
 						TestMessageTemplateHole.Create("Apple"),
 					]
-				},
-				{ "Customer with ID {$0}", [TestMessageTemplateHole.Create(0, stringify: true)] },
-				{
+				),
+				( "Customer with ID {$0}", [TestMessageTemplateHole.Create(0, stringify: true)] ),
+				(
 					"Customer with ID {$0} is named {$1}",
 					[
 						TestMessageTemplateHole.Create(0, stringify: true),
 						TestMessageTemplateHole.Create(1, stringify: true),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {0} is named {$1}, and {2}. and {$3}",
 					[
 						TestMessageTemplateHole.Create(0),
@@ -255,8 +254,8 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create(2),
 						TestMessageTemplateHole.Create(3, stringify: true),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {0} is named {$1}, and {$2}. and {3}",
 					[
 						TestMessageTemplateHole.Create(0),
@@ -264,31 +263,31 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create(2, stringify: true),
 						TestMessageTemplateHole.Create(3),
 					]
-				},
-			};
+				),
+			];
 
 			return data;
 		}
 	}
 
-	public static TheoryData<string, TestMessageTemplateHole[]> AlignmentTests
+	public static IEnumerable<(string, TestMessageTemplateHole[])> AlignmentTests
 	{
 		get
 		{
-			TheoryData<string, TestMessageTemplateHole[]> data = new()
-			{
-				{
+			List<(string, TestMessageTemplateHole[])> data =
+			[
+				(
 					"Customer with ID {CustomerId,10}",
 					[TestMessageTemplateHole.Create("CustomerId", alignment: 10)]
-				},
-				{
+				),
+				(
 					"Customer with ID {CustomerId,-10} is named {CustomerName,10}",
 					[
 						TestMessageTemplateHole.Create("CustomerId", alignment: -10),
 						TestMessageTemplateHole.Create("CustomerName", alignment: 10),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {CustomerId} is named {CustomerName,99}, and {Banana}. and {Apple,000}",
 					[
 						TestMessageTemplateHole.Create("CustomerId"),
@@ -296,8 +295,8 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create("Banana"),
 						TestMessageTemplateHole.Create("Apple", alignment: 000),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {CustomerId} is named {CustomerName,100}, and {Banana,-111}. and {Apple}",
 					[
 						TestMessageTemplateHole.Create("CustomerId"),
@@ -305,16 +304,16 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create("Banana", alignment: -111),
 						TestMessageTemplateHole.Create("Apple"),
 					]
-				},
-				{ "Customer with ID {0,-99}", [TestMessageTemplateHole.Create(0, alignment: -99)] },
-				{
+				),
+				( "Customer with ID {0,-99}", [TestMessageTemplateHole.Create(0, alignment: -99)] ),
+				(
 					"Customer with ID {0,101} is named {1,-1}",
 					[
 						TestMessageTemplateHole.Create(0, alignment: 101),
 						TestMessageTemplateHole.Create(1, alignment: -1),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {0} is named {1,1}, and {2}. and {3,-3}",
 					[
 						TestMessageTemplateHole.Create(0),
@@ -322,8 +321,8 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create(2),
 						TestMessageTemplateHole.Create(3, alignment: -3),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {0} is named {1,1111}, and {2,222}. and {3}",
 					[
 						TestMessageTemplateHole.Create(0),
@@ -331,31 +330,31 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create(2, alignment: 222),
 						TestMessageTemplateHole.Create(3),
 					]
-				},
-			};
+				),
+			];
 
 			return data;
 		}
 	}
 
-	public static TheoryData<string, TestMessageTemplateHole[]> FormattingTests
+	public static IEnumerable<(string, TestMessageTemplateHole[])> FormattingTests
 	{
 		get
 		{
-			TheoryData<string, TestMessageTemplateHole[]> data = new()
-			{
-				{
+			List<(string, TestMessageTemplateHole[])> data =
+			[
+				(
 					"Customer with ID {CustomerId:ff}",
 					[TestMessageTemplateHole.Create("CustomerId", format: "ff")]
-				},
-				{
+				),
+				(
 					"Customer with ID {CustomerId:-10} is named {CustomerName:pies}",
 					[
 						TestMessageTemplateHole.Create("CustomerId", format: "-10"),
 						TestMessageTemplateHole.Create("CustomerName", format: "pies"),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {CustomerId} is named {CustomerName:ice-cream}, and {Banana}. and {Apple:p000p}",
 					[
 						TestMessageTemplateHole.Create("CustomerId"),
@@ -363,8 +362,8 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create("Banana"),
 						TestMessageTemplateHole.Create("Apple", format: "p000p"),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {CustomerId} is named {CustomerName:100}, and {Banana:-111}. and {Apple}",
 					[
 						TestMessageTemplateHole.Create("CustomerId"),
@@ -372,16 +371,16 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create("Banana", format: "-111"),
 						TestMessageTemplateHole.Create("Apple"),
 					]
-				},
-				{ "Customer with ID {0:-99}", [TestMessageTemplateHole.Create(0, format: "-99")] },
-				{
+				),
+				( "Customer with ID {0:-99}", [TestMessageTemplateHole.Create(0, format: "-99")] ),
+				(
 					"Customer with ID {0:101} is named {1:hello-1}",
 					[
 						TestMessageTemplateHole.Create(0, format: "101"),
 						TestMessageTemplateHole.Create(1, format: "hello-1"),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {0} is named {1:1}, and {2}. and {3:-3}",
 					[
 						TestMessageTemplateHole.Create(0),
@@ -389,8 +388,8 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create(2),
 						TestMessageTemplateHole.Create(3, format: "-3"),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {0} is named {1:1111}, and {2:222}. and {3}",
 					[
 						TestMessageTemplateHole.Create(0),
@@ -398,24 +397,24 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create(2, format: "222"),
 						TestMessageTemplateHole.Create(3),
 					]
-				},
-			};
+				),
+			];
 
 			return data;
 		}
 	}
 
-	public static TheoryData<string, TestMessageTemplateHole[]> AMixedBag
+	public static IEnumerable<(string, TestMessageTemplateHole[])> AMixedBag
 	{
 		get
 		{
-			TheoryData<string, TestMessageTemplateHole[]> data = new()
-			{
-				{
+			List<(string, TestMessageTemplateHole[])> data =
+			[
+				(
 					"Customer with ID {CustomerId:ff}",
 					[TestMessageTemplateHole.Create("CustomerId", format: "ff")]
-				},
-				{
+				),
+				(
 					"Customer with ID {CustomerId,0101:-10} is named {$CustomerName:pies}",
 					[
 						TestMessageTemplateHole.Create(
@@ -429,8 +428,8 @@ public partial class RegexValidationTests
 							stringify: true
 						),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {@CustomerId} is named {$CustomerName:ice-cream}, and {$Banana,100:110}. and {@Apple:p000p}",
 					[
 						TestMessageTemplateHole.Create("CustomerId", destructure: true),
@@ -447,8 +446,8 @@ public partial class RegexValidationTests
 						),
 						TestMessageTemplateHole.Create("Apple", format: "p000p", destructure: true),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {$CustomerId} is named {@CustomerName,100:pies}, and {@Banana,1010101:-111}. and {Apple}",
 					[
 						TestMessageTemplateHole.Create("CustomerId", stringify: true),
@@ -466,16 +465,16 @@ public partial class RegexValidationTests
 						),
 						TestMessageTemplateHole.Create("Apple"),
 					]
-				},
-				{ "Customer with ID {0:ff}", [TestMessageTemplateHole.Create(0, format: "ff")] },
-				{
+				),
+				( "Customer with ID {0:ff}", [TestMessageTemplateHole.Create(0, format: "ff")] ),
+				(
 					"Customer with ID {0,0101:-10} is named {$1:pies}",
 					[
 						TestMessageTemplateHole.Create(0, alignment: 0101, format: "-10"),
 						TestMessageTemplateHole.Create(1, format: "pies", stringify: true),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {@0} is named {$1:ice-cream}, and {$2,100:110}. and {@3:p000p}",
 					[
 						TestMessageTemplateHole.Create(0, destructure: true),
@@ -488,8 +487,8 @@ public partial class RegexValidationTests
 						),
 						TestMessageTemplateHole.Create(3, format: "p000p", destructure: true),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {$0} is named {@1,100:pies}, and {@2,1010101:-111}. and {3}",
 					[
 						TestMessageTemplateHole.Create(0, stringify: true),
@@ -507,24 +506,24 @@ public partial class RegexValidationTests
 						),
 						TestMessageTemplateHole.Create(3),
 					]
-				},
-			};
+				),
+			];
 
 			return data;
 		}
 	}
 
-	public static TheoryData<string, TestMessageTemplateHole[]> DoubleCurlyBraces
+	public static IEnumerable<(string, TestMessageTemplateHole[])> DoubleCurlyBraces
 	{
 		get
 		{
-			TheoryData<string, TestMessageTemplateHole[]> data = new()
-			{
-				{
+			List<(string, TestMessageTemplateHole[])> data =
+			[
+				(
 					"Customer with ID {{CustomerId:ff}}",
 					[TestMessageTemplateHole.Create("CustomerId", format: "ff")]
-				},
-				{
+				),
+				(
 					"Customer with ID {{CustomerId,0101:-10}} is named {{$CustomerName:pies}}",
 					[
 						TestMessageTemplateHole.Create(
@@ -538,8 +537,8 @@ public partial class RegexValidationTests
 							stringify: true
 						),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {{@CustomerId}} is named {{$CustomerName:ice-cream}}, and {{$Banana,100:110}}. and {{@Apple:p000p}}",
 					[
 						TestMessageTemplateHole.Create("CustomerId", destructure: true),
@@ -556,8 +555,8 @@ public partial class RegexValidationTests
 						),
 						TestMessageTemplateHole.Create("Apple", format: "p000p", destructure: true),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {{$CustomerId}} is named {{@CustomerName,100:pies}}, and {{@Banana,1010101:-111}}. and {{Apple}}",
 					[
 						TestMessageTemplateHole.Create("CustomerId", stringify: true),
@@ -575,16 +574,16 @@ public partial class RegexValidationTests
 						),
 						TestMessageTemplateHole.Create("Apple"),
 					]
-				},
-				{ "Customer with ID {{0:ff}", [TestMessageTemplateHole.Create(0, format: "ff")] },
-				{
+				),
+				( "Customer with ID {{0:ff}", [TestMessageTemplateHole.Create(0, format: "ff")] ),
+				(
 					"Customer with ID {{0,0101:-10}} is named {{$1:pies}}",
 					[
 						TestMessageTemplateHole.Create(0, alignment: 0101, format: "-10"),
 						TestMessageTemplateHole.Create(1, format: "pies", stringify: true),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {{@0}} is named {{$1:ice-cream}}, and {{$2,100:110}}. and {{@3:p000p}}",
 					[
 						TestMessageTemplateHole.Create(0, destructure: true),
@@ -597,8 +596,8 @@ public partial class RegexValidationTests
 						),
 						TestMessageTemplateHole.Create(3, format: "p000p", destructure: true),
 					]
-				},
-				{
+				),
+				(
 					"Customer with ID {{$0}} is named {{@1,100:pies}}, and {{@2,1010101:-111}}. and {{3}}",
 					[
 						TestMessageTemplateHole.Create(0, stringify: true),
@@ -616,15 +615,15 @@ public partial class RegexValidationTests
 						),
 						TestMessageTemplateHole.Create(3),
 					]
-				},
-			};
+				),
+			];
 
 			return data;
 		}
 	}
 
 	[SuppressMessage("Design", "CA1034:Nested types should not be visible")]
-	public record struct TestMessageTemplateHole : IXunitSerializable
+	public record struct TestMessageTemplateHole
 	{
 		public TestMessageTemplateHole(
 			string? name,
@@ -649,8 +648,6 @@ public partial class RegexValidationTests
 			if (Destructure && Stringify)
 				throw new Exception("Destructure and Stringify cannot both be true.");
 		}
-
-		public TestMessageTemplateHole() { }
 
 		public readonly bool IsPositional => Name is null;
 
@@ -711,26 +708,6 @@ public partial class RegexValidationTests
 				destructure,
 				stringify
 			);
-		}
-
-		public void Deserialize(IXunitSerializationInfo info)
-		{
-			Name = info.GetValue<string?>("Name");
-			Ordinal = info.GetValue<int?>("Ordinal");
-			Alignment = info.GetValue<int?>("Alignment");
-			Format = info.GetValue<string?>("Format");
-			Destructure = info.GetValue<bool>("Destructure");
-			Stringify = info.GetValue<bool>("Stringify");
-		}
-
-		public readonly void Serialize(IXunitSerializationInfo info)
-		{
-			info.AddValue("Name", Name);
-			info.AddValue("Ordinal", Ordinal);
-			info.AddValue("Alignment", Alignment);
-			info.AddValue("Format", Format);
-			info.AddValue("Destructure", Destructure);
-			info.AddValue("Stringify", Stringify);
 		}
 	}
 }
