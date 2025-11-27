@@ -390,4 +390,18 @@ static partial class Utilities
 
 		return value;
 	}
+
+	/// <summary>
+	/// Checks if a method has any metrics-related attribute (Counter, AutoCounter, UpDownCounter, Histogram, etc.)
+	/// </summary>
+	public static bool HasMetricsAttribute(IMethodSymbol method, CancellationToken token)
+	{
+		return ContainsAttribute(method, Constants.Metrics.CounterAttribute, token)
+			|| ContainsAttribute(method, Constants.Metrics.AutoCounterAttribute, token)
+			|| ContainsAttribute(method, Constants.Metrics.UpDownCounterAttribute, token)
+			|| ContainsAttribute(method, Constants.Metrics.HistogramAttribute, token)
+			|| ContainsAttribute(method, Constants.Metrics.ObservableCounterAttribute, token)
+			|| ContainsAttribute(method, Constants.Metrics.ObservableGaugeAttribute, token)
+			|| ContainsAttribute(method, Constants.Metrics.ObservableUpDownCounterAttribute, token);
+	}
 }

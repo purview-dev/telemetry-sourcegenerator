@@ -173,6 +173,26 @@ partial class PipelineHelpers
 				continue;
 			}
 
+			// In multi-target scenarios, skip methods with explicit Activity or Metrics attributes
+			if (generationType != GenerationType.Logging)
+			{
+				if (SharedHelpers.IsActivityMethod(method, token))
+				{
+					logger?.Debug(
+						$"Skipping {interfaceSymbol.Name}.{method.Name} from logging - has Activity attribute."
+					);
+					continue;
+				}
+
+				if (Utilities.HasMetricsAttribute(method, token))
+				{
+					logger?.Debug(
+						$"Skipping {interfaceSymbol.Name}.{method.Name} from logging - has Metrics attribute."
+					);
+					continue;
+				}
+			}
+
 			if (method.Arity > 0)
 			{
 				telemetryDiagnosticsList ??= [];
