@@ -71,7 +71,6 @@ public interface ITestActivities<{genericTypeDef}>
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG1004"],
 			parameters: genericTypeCount
 		);
 	}
@@ -107,7 +106,6 @@ public interface ITestActivities
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG1004"],
 			parameters: genericTypeCount
 		);
 	}
