@@ -123,19 +123,17 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		}
 
 		// Check for measurement value parameters in metrics
-		if (currentTarget == GenerationType.Metrics)
+		// If we're generating for Logging and there's also Metrics target,
+		// exclude parameters that look like metric measurement values
+		if (currentTarget == GenerationType.Logging && allTargets.HasFlag(GenerationType.Metrics))
 		{
-			// Counter/histogram value parameters should be excluded from logging
 			if (IsMetricsMeasurementParameter(parameter, allTargets))
 			{
-				if (allTargets.HasFlag(GenerationType.Logging))
-				{
-					exclusions.Add(new ParameterExclusion(
-						GenerationType.Logging,
-						ParameterExclusionReason.MetricsMeasurementParameterNotAllowedInLogging,
-						$"Parameter '{parameter.Name}' is a metrics measurement value and is automatically excluded from logging generation."
-					));
-				}
+				exclusions.Add(new ParameterExclusion(
+					GenerationType.Logging,
+					ParameterExclusionReason.MetricsMeasurementParameterNotAllowedInLogging,
+					$"Parameter '{parameter.Name}' is a metrics measurement value and is automatically excluded from logging generation."
+				));
 			}
 		}
 
@@ -284,10 +282,21 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 					return true;
 			}
 
-			// Check for IEnumerable<Measurement<T>>
+			// Check if the type itself is IEnumerable<Measurement<T>>
+			if (namedType.Name == "IEnumerable" &&
+				namedType.ContainingNamespace?.ToDisplayString() == "System.Collections.Generic" &&
+				namedType.TypeArguments.Length == 1 &&
+				IsMeasurementType(namedType.TypeArguments[0]))
+			{
+				return true;
+			}
+
+			// Check for types implementing IEnumerable<Measurement<T>>
 			if (namedType.AllInterfaces.Any(i =>
 				i.Name == "IEnumerable" &&
-				i.TypeArguments.Any(IsMeasurementType)))
+				i.ContainingNamespace?.ToDisplayString() == "System.Collections.Generic" &&
+				i.TypeArguments.Length == 1 &&
+				IsMeasurementType(i.TypeArguments[0])))
 			{
 				return true;
 			}
