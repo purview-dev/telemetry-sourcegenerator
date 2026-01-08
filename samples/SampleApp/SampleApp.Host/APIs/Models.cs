@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SampleApp.Host.Services;
 
+namespace SampleApp.Host.APIs;
+
 record DefaultWeatherRequest(
 	[FromServices] IWeatherService WeatherService,
 	CancellationToken Token

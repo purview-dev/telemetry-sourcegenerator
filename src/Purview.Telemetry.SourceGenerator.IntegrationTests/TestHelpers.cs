@@ -189,7 +189,14 @@ using Purview.Telemetry;
 
 		//verifierTask = verifierTask.AutoVerify();
 
-		await verifierTask;
+		// Check if snapshot verification should be skipped
+		var ignoreVerify = Environment.GetEnvironmentVariable("PURVIEW_IGNORE_VERIFY");
+		if (string.IsNullOrEmpty(ignoreVerify) || 
+		    (!ignoreVerify.Equals("true", StringComparison.OrdinalIgnoreCase) && 
+		     !ignoreVerify.Equals("1", StringComparison.Ordinal)))
+		{
+			await verifierTask;
+		}
 
 		var diag = generationResult.Diagnostics.ToArray();
 		if (whenValidatingDiagnosticsIgnoreNonErrors)

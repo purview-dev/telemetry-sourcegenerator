@@ -1,26 +1,21 @@
 using SampleApp.Host.APIs;
 using SampleApp.Host.Services;
 
-var builder = WebApplication.CreateSlimBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 builder
 	.AddServiceDefaults()
-	.AddDefaultOpenAPI(
-	//builder.Services.AddApiVersioning()
-	);
+	.AddDefaultOpenAPI();
 
 builder.Services.AddScoped<IWeatherService, WeatherService>().AddWeatherServiceTelemetry();
 
 var app = builder.Build();
 
-app.MapDefaultEndpoints();
+app.UseHttpsRedirection();
 
-//app
-//.NewVersionedApi("Weather API")
-//.MapToApiVersion(1.0)
-//;
-
-app.MapWeatherAPIv1();
+app
+	.MapDefaultEndpoints()
+	.MapWeatherAPIv1();
 
 app.UseDefaultOpenAPI();
 

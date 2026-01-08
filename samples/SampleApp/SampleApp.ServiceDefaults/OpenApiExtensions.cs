@@ -13,7 +13,7 @@ namespace Microsoft.AspNetCore.Builder;
 #pragma warning restore IDE0130 // Namespace does not match folder structure
 
 [EditorBrowsable(EditorBrowsableState.Never)]
-public static partial class OpenApiExtensions
+public static class OpenApiExtensions
 {
 	public static IApplicationBuilder UseDefaultOpenAPI(
 		[NotNull] this WebApplication app,
@@ -34,11 +34,7 @@ public static partial class OpenApiExtensions
 
 		if (app.Environment.IsDevelopment())
 		{
-			app.MapScalarApiReference(options =>
-			{
-				// Disable default fonts to avoid download unnecessary fonts
-				//options.DefaultFonts = false;
-			});
+			app.MapScalarApiReference();
 			app.MapGet("/", () => Results.Redirect("/scalar/v1")).ExcludeFromDescription();
 		}
 
@@ -52,15 +48,6 @@ public static partial class OpenApiExtensions
 	)
 	{
 		var openApiSection = builder.Configuration.GetSection("OpenAPI");
-		var identitySection = builder.Configuration.GetSection("Identity");
-
-		var scopes = identitySection.Exists()
-			? identitySection
-				.GetRequiredSection("Scopes")
-				.GetChildren()
-				.ToDictionary(p => p.Key, p => p.Value)
-			: [];
-
 		if (!openApiSection.Exists())
 		{
 			return throwOnMissing
@@ -84,15 +71,12 @@ public static partial class OpenApiExtensions
 						.ApplyAPIVersionInfo(
 							openApiSection.GetRequiredValue("Document:Title"),
 							openApiSection.GetRequiredValue("Document:Description")
-						)
-						.ApplyAuthorizationChecks([.. scopes.Keys])
-						.ApplySecuritySchemeDefinitions()
-						.ApplyOperationDeprecatedStatus();
+						);
 
 					// Clear out the default servers so we can fallback to
 					// whatever ports have been allocated for the service by Aspire
 					options.AddDocumentTransformer(
-						(document, context, cancellationToken) =>
+						(document, _, _) =>
 						{
 							document.Servers = [];
 							return Task.CompletedTask;
