@@ -7,18 +7,20 @@ partial class TelemetrySourceGeneratorMetricsTests
 	{
 		// Arrange
 		const string basicMetric =
-			@"
+			"""
+
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface ITestMetrics 
 {
 	[AutoCounter]
 	void AutoCounter(int intParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric);
@@ -32,18 +34,20 @@ public interface ITestMetrics
 	{
 		// Arrange
 		const string basicMetric =
-			@"
+			"""
+
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface ITestMetrics 
 {
 	[AutoCounter]
 	void AutoCounter([InstrumentMeasurement]int intParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric);
@@ -53,9 +57,9 @@ public interface ITestMetrics
 			generationResult,
 			config: c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG4002"],
 			validationCompilation: false
-		);
+,
+			expectedDiagnosticCodes: ["TSG4002"]);
 	}
 
 	[Test]
@@ -63,18 +67,20 @@ public interface ITestMetrics
 	{
 		// Arrange
 		const string basicMetric =
-			@"
+			"""
+
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface ITestMetrics 
 {
 	[AutoCounter]
 	void AutoCounter([Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric);
@@ -88,18 +94,20 @@ public interface ITestMetrics
 	{
 		// Arrange
 		const string basicMetric =
-			@"
+			"""
+
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface ITestMetrics 
 {
 	[AutoCounter]
 	void AutoCounter([InstrumentMeasurement]int value, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric);
@@ -109,9 +117,9 @@ public interface ITestMetrics
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG4002"],
 			validationCompilation: false
-		);
+,
+			expectedDiagnosticCodes: ["TSG4002"]);
 	}
 
 	[Test]
@@ -119,12 +127,13 @@ public interface ITestMetrics
 	{
 		// Arrange
 		const string basicMetric =
-			@"
+			"""
+
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface ITestMetrics {
 	[Counter]
 	void Counter(int counterValue, [Tag]int intParam, [Tag]bool boolParam);
@@ -147,7 +156,8 @@ public interface ITestMetrics {
 	[Counter]
 	void Counter7([InstrumentMeasurement]decimal counterValue, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric);
@@ -161,12 +171,13 @@ public interface ITestMetrics {
 	{
 		// Arrange
 		const string basicMetric =
-			@"
+			"""
+
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface ITestMetrics {
 	[Counter(autoIncrement: true)]
 	void Counter1([Tag]int intParam, [Tag]bool boolParam);
@@ -177,7 +188,8 @@ public interface ITestMetrics {
 	[Counter(true)]
 	void Counter3([Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric);
@@ -191,14 +203,15 @@ public interface ITestMetrics {
 	{
 		// Arrange
 		const string basicMetric =
-			@"
+			"""
+
 using Purview.Telemetry.Metrics;
 using System.Diagnostics.Metrics;
 using System.Collections.Generic;
 
 namespace Testing;
 
-[Meter(""testing-observable-meter"")]
+[Meter("testing-observable-meter")]
 public interface ITestMetrics {
 	[ObservableCounter]
 	void ObservableCounter(Func<int> f, [Tag]int intParam, [Tag]bool boolParam);
@@ -209,7 +222,8 @@ public interface ITestMetrics {
 	[ObservableCounter]
 	void ObservableCounter3(Func<IEnumerable<Measurement<int>>> f, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric);

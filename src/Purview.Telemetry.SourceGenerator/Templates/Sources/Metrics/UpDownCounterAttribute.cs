@@ -1,4 +1,4 @@
-﻿namespace Purview.Telemetry.Metrics;
+﻿namespace Purview.Telemetry;
 
 /// <summary>
 /// Specifies the meter type generated corresponds to a <see cref="global::System.Diagnostics.Metrics.UpDownCounter{T}"/>.

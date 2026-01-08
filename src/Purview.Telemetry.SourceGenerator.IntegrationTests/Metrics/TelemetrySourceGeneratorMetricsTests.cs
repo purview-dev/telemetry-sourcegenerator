@@ -10,39 +10,41 @@ public partial class TelemetrySourceGeneratorMetricsTests : IncrementalSourceGen
 	{
 		// Arrange
 		var basicActivity =
-			@$"
+			$$"""
+
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface ITestMetrics
-{{
+{
 	[AutoCounter]
-	void AutoCounter({parameterType} genericParameter);
+	void AutoCounter({{parameterType}} genericParameter);
 
 	[Counter(AutoIncrement = true)]
-	void Counter_AutoIncrement({parameterType} genericParameter);
+	void Counter_AutoIncrement({{parameterType}} genericParameter);
 
 	[Counter]
-	void Counter([InstrumentMeasurement]int value, {parameterType} genericParameter);
+	void Counter([InstrumentMeasurement]int value, {{parameterType}} genericParameter);
 
 	[Histogram]
-	void Histogram([InstrumentMeasurement]int value, {parameterType} genericParameter);
+	void Histogram([InstrumentMeasurement]int value, {{parameterType}} genericParameter);
 
 	[UpDownCounter]
-	void UpDownCounter([InstrumentMeasurement]int value, {parameterType} genericParameter);
+	void UpDownCounter([InstrumentMeasurement]int value, {{parameterType}} genericParameter);
 
 	[ObservableCounter]
-	void ObservableCounter(Func<int> valueFunc, {parameterType} genericParameter);
+	void ObservableCounter(Func<int> valueFunc, {{parameterType}} genericParameter);
 
 	[ObservableGauge]
-	void ObservableGauge(Func<int> valueFunc, {parameterType} genericParameter);
+	void ObservableGauge(Func<int> valueFunc, {{parameterType}} genericParameter);
 
 	[ObservableUpDownCounter]
-	void ObservableUpDownCounter(Func<int> valueFunc, {parameterType} genericParameter);
-}}
-";
+	void ObservableUpDownCounter(Func<int> valueFunc, {{parameterType}} genericParameter);
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -65,17 +67,19 @@ public interface ITestMetrics
 			Enumerable.Range(0, genericTypeCount).Select(i => $"T{i}")
 		);
 		var basicMeter =
-			@$"
+			$$"""
+
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
-public interface ITestMetrics<{genericTypeDef}>  {{
+[Meter("testing-meter")]
+public interface ITestMetrics<{{genericTypeDef}}>  {
 	[AutoCounter]
 	void AutoCounter();
-}}
-";
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMeter);
@@ -100,17 +104,19 @@ public interface ITestMetrics<{genericTypeDef}>  {{
 			Enumerable.Range(0, genericTypeCount).Select(i => $"T{i}")
 		);
 		var basicMeter =
-			@$"
+			$$"""
+
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
-public interface ITestMetrics<{genericTypeDef}>  {{
+[Meter("testing-meter")]
+public interface ITestMetrics<{{genericTypeDef}}>  {
 	[AutoCounter]
 	void AutoCounter();
-}}
-";
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMeter);

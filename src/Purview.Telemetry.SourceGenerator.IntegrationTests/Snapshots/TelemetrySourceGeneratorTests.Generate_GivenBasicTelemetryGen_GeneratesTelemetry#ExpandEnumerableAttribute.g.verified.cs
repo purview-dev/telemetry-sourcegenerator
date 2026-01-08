@@ -13,7 +13,7 @@
 
 #if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
 
-namespace Purview.Telemetry.Logging;
+namespace Purview.Telemetry;
 
 /// <summary>
 /// Determines if an array/ enumerable property should be expanded into

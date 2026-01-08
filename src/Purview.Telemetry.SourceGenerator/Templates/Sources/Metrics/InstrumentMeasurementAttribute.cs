@@ -1,4 +1,4 @@
-﻿namespace Purview.Telemetry.Metrics;
+﻿namespace Purview.Telemetry;
 
 /// <summary>
 /// Determines if the parameter is an instrument measurement.

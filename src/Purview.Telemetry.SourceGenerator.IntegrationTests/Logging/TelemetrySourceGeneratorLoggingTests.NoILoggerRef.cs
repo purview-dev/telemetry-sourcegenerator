@@ -7,12 +7,13 @@ partial class TelemetrySourceGeneratorLoggingTests
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Activity]
 	System.Diagnostics.Activity? Activity([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
@@ -20,7 +21,8 @@ public interface ITestActivities {
 	[Event]
 	void Event(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
@@ -37,12 +39,13 @@ public interface ITestActivities {
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Activity]
 	System.Diagnostics.Activity? Activity([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
@@ -50,7 +53,8 @@ public interface ITestActivities {
 	[Event]
 	void Event(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(

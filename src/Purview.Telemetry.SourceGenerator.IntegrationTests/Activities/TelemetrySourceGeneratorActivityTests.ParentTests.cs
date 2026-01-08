@@ -7,17 +7,19 @@ partial class TelemetrySourceGeneratorActivityTests
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Activity]
 	System.Diagnostics.Activity? Activity(System.Diagnostics.ActivityContext parentContext);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -31,17 +33,19 @@ public interface ITestActivities {
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Activity]
 	System.Diagnostics.Activity? Activity(System.Diagnostics.ActivityContext? parentContext);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -55,17 +59,19 @@ public interface ITestActivities {
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Activity]
 	System.Diagnostics.Activity? Activity(string parentId);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -79,17 +85,19 @@ public interface ITestActivities {
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Activity]
 	System.Diagnostics.Activity? Activity(string? parentId);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);

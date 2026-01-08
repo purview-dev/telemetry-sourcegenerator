@@ -8,17 +8,19 @@ partial class TelemetrySourceGeneratorLoggingTests
 	{
 		// Arrange
 		var basicLogger =
-			@$"
+			$$"""
+
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
 [Logger]
-public interface ITestLogger {{
-	[Log(Name = ""{logTargetName}"")]
+public interface ITestLogger {
+	[Log(Name = "{{logTargetName}}")]
 	void Log(string stringParam, int intParam, bool boolParam);
-}}
-";
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicLogger);
@@ -42,17 +44,19 @@ public interface ITestLogger {{
 		};
 
 		var basicLogger =
-			@$"
+			$$"""
+
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
-[Logger(PrefixType = LogPrefixType.{prefixType})]
-public interface ITestLogger {{
-	[Log(Name = ""{logTargetName}"")]
+[Logger(PrefixType = LogPrefixType.{{prefixType}})]
+public interface ITestLogger {
+	[Log(Name = "{{logTargetName}}")]
 	void Log(string stringParam, int intParam, bool boolParam);
-}}
-";
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicLogger);

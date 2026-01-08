@@ -113,15 +113,15 @@ public interface ITestLogger<{genericTypeDef}> {{
 	{
 		// Arrange
 		var basicLogger =
-			@$"
+			@"
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
 [Logger]
-public interface ITestLogger {{
+public interface ITestLogger {
 	void LogEntryWithMoreThanSixParams(int one, int two, int three, int four, int five, int six, int seven, int eight, int nine, int ten, int eleven);
-}}
+}
 ";
 
 		// Act

@@ -7,18 +7,20 @@ partial class TelemetrySourceGeneratorMetricsTests
 	{
 		// Arrange
 		var basicMetric =
-			@$"
+			"""
+
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"", InstrumentPrefix = ""This.Is.A.Prefix"")]
+[Meter("testing-meter", InstrumentPrefix = "This.Is.A.Prefix")]
 interface ITestMetrics 
-{{
+{
 	[AutoCounter]
 	void AutoCounterMetric();
-}}
-";
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric);
@@ -32,20 +34,22 @@ interface ITestMetrics
 	{
 		// Arrange
 		var basicMetric =
-			@$"
+			"""
+
 using Purview.Telemetry.Metrics;
 
-[assembly: MeterGeneration(InstrumentPrefix = ""This.Is.An.Assembly.Prefix"")]
+[assembly: MeterGeneration(InstrumentPrefix = "This.Is.An.Assembly.Prefix")]
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 interface ITestMetrics 
-{{
+{
 	[AutoCounter]
 	void AutoCounterMetric();
-}}
-";
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric);
@@ -59,20 +63,22 @@ interface ITestMetrics
 	{
 		// Arrange
 		var basicMetric =
-			@$"
+			"""
+
 using Purview.Telemetry.Metrics;
 
-[assembly: MeterGeneration(InstrumentPrefix = ""This.Is.An.Assembly.Prefix"")]
+[assembly: MeterGeneration(InstrumentPrefix = "This.Is.An.Assembly.Prefix")]
 
 namespace Testing;
 
-[Meter(""testing-meter"", InstrumentPrefix = ""This.Is.A.Prefix"")]
+[Meter("testing-meter", InstrumentPrefix = "This.Is.A.Prefix")]
 interface ITestMetrics 
-{{
+{
 	[AutoCounter]
 	void AutoCounterMetric();
-}}
-";
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric);
@@ -86,20 +92,22 @@ interface ITestMetrics
 	{
 		// Arrange
 		var basicMetric =
-			@$"
+			"""
+
 using Purview.Telemetry.Metrics;
 
-[assembly: MeterGeneration(InstrumentPrefix = ""This.Is.An.Assembly.Prefix"")]
+[assembly: MeterGeneration(InstrumentPrefix = "This.Is.An.Assembly.Prefix")]
 
 namespace Testing;
 
-[Meter(""testing-meter"", InstrumentPrefix = ""This.Is.A.Prefix"")]
+[Meter("testing-meter", InstrumentPrefix = "This.Is.A.Prefix")]
 interface ITestMetrics 
-{{
-	[AutoCounter(""auto-counter"")]
+{
+	[AutoCounter("auto-counter")]
 	void AutoCounterMetric();
-}}
-";
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric);
@@ -113,18 +121,20 @@ interface ITestMetrics
 	{
 		// Arrange
 		var basicMetric =
-			@$"
+			"""
+
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 interface ITestMetrics 
-{{
+{
 	[AutoCounter]
 	void AutoCounterMetric();
-}}
-";
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric);
@@ -138,18 +148,20 @@ interface ITestMetrics
 	{
 		// Arrange
 		var basicMetric =
-			@$"
+			"""
+
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 interface ITestMetrics 
-{{
+{
 	[AutoCounter]
 	void AutoCounterMetric();
-}}
-";
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric);
@@ -163,18 +175,20 @@ interface ITestMetrics
 	{
 		// Arrange
 		var basicMetric =
-			@$"
+			"""
+
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"", LowercaseInstrumentName = false)]
+[Meter("testing-meter", LowercaseInstrumentName = false)]
 interface ITestMetrics
-{{
+{
 	[AutoCounter]
 	void AutoCounterMetric();
-}}
-";
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric);

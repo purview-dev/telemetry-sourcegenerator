@@ -31,7 +31,9 @@ partial class LoggerTargetClassEmitter
 				methodTarget.ParameterCountSansException
 				> Constants.Logging.MaxNonExceptionParameters
 			)
+			{
 				continue;
+			}
 
 			EmitLogActionMethod(builder, indent, methodTarget, context, logger);
 		}
@@ -62,7 +64,9 @@ partial class LoggerTargetClassEmitter
 			builder.Append(Constants.System.IDisposable).Append('?');
 		}
 		else
+		{
 			builder.Append(Constants.System.VoidKeyword);
+		}
 
 		builder.Append(' ').Append(methodTarget.MethodName).Append('(');
 
@@ -85,8 +89,7 @@ partial class LoggerTargetClassEmitter
 				.Append(Constants.Logging.LoggerFieldName)
 				.Append(".IsEnabled(")
 				.Append(methodTarget.MSLevel)
-				.Append("))")
-				.AppendLine()
+				.AppendLine("))")
 				.Append(indent + 1, '{')
 				.Append(indent + 2, "return;")
 				.Append(indent + 1, '}')

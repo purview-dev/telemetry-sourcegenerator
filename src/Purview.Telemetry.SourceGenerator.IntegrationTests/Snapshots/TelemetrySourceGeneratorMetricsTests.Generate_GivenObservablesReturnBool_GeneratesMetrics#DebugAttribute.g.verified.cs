@@ -13,10 +13,10 @@
 
 #if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
 
-namespace Purview.Telemetry.Logging;
+namespace Purview.Telemetry;
 
 /// <summary>
-/// Marker attribute used as an alternative to <see cref="global::Purview.Telemetry.Logging.LogAttribute"/>, where the <see cref="global::Purview.Telemetry.Logging.LogAttribute.Level"/>
+/// Marker attribute used as an alternative to <see cref="global::Purview.Telemetry.LogAttribute"/>, where the <see cref="global::Purview.Telemetry.LogAttribute.Level"/>
 /// is set to <see cref="global::Microsoft.Extensions.Logging.LogLevel.Debug"/>.
 /// </summary>
 [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

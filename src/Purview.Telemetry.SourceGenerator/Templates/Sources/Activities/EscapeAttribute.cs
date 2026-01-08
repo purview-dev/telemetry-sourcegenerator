@@ -1,4 +1,4 @@
-﻿namespace Purview.Telemetry.Activities;
+﻿namespace Purview.Telemetry;
 
 /// <summary>
 /// Used during <see cref="global::System.Diagnostics.ActivityEvent"/> generation

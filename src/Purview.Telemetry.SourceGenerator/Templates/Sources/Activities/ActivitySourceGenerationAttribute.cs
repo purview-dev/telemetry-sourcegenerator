@@ -1,4 +1,4 @@
-﻿namespace Purview.Telemetry.Activities;
+﻿namespace Purview.Telemetry;
 
 /// <summary>
 /// Determines the default <see cref="global::System.Diagnostics.ActivitySource.Name" /> for generated
@@ -35,16 +35,16 @@ sealed class ActivitySourceGenerationAttribute : global::System.Attribute
 	/// <summary>
 	/// Specifies the default used when inferring between
 	/// <see cref="global::Purview.Telemetry.TagAttribute"/>
-	/// or <see cref="global::Purview.Telemetry.Activities.BaggageAttribute"/>, unless
-	/// explicitly marked. Overridden when specifying <see cref="global::Purview.Telemetry.Activities.ActivitySourceAttribute.DefaultToTags"/>.
+	/// or <see cref="global::Purview.Telemetry.BaggageAttribute"/>, unless
+	/// explicitly marked. Overridden when specifying <see cref="global::Purview.Telemetry.ActivitySourceAttribute.DefaultToTags"/>.
 	/// </summary>
 	public bool DefaultToTags { get; set; } = true;
 
 	/// <summary>
 	/// Prefix used to when generating the tag or baggage name. Prepended
 	/// before the <see cref="global::Purview.Telemetry.TagAttribute.Name"/> or
-	/// <see cref="global::Purview.Telemetry.Activities.BaggageAttribute.Name"/>, unless
-	/// explicitly marked. Overridden when specifying <see cref="global::Purview.Telemetry.Activities.ActivitySourceAttribute.BaggageAndTagPrefix"/>.
+	/// <see cref="global::Purview.Telemetry.BaggageAttribute.Name"/>, unless
+	/// explicitly marked. Overridden when specifying <see cref="global::Purview.Telemetry.ActivitySourceAttribute.BaggageAndTagPrefix"/>.
 	/// </summary>
 	public string? BaggageAndTagPrefix { get; set; }
 
@@ -56,14 +56,14 @@ sealed class ActivitySourceGenerationAttribute : global::System.Attribute
 
 	/// <summary>
 	/// Determines if the <see cref="global::Purview.Telemetry.TagAttribute.Name"/> or
-	/// <see cref="global::Purview.Telemetry.Activities.BaggageAttribute.Name"/> (including
+	/// <see cref="global::Purview.Telemetry.BaggageAttribute.Name"/> (including
 	/// any prefixes) are lowercased, unless
-	/// explicitly marked. Overridden when specifying <see cref="global::Purview.Telemetry.Activities.ActivitySourceAttribute.LowercaseBaggageAndTagKeys"/>.
+	/// explicitly marked. Overridden when specifying <see cref="global::Purview.Telemetry.ActivitySourceAttribute.LowercaseBaggageAndTagKeys"/>.
 	/// </summary>
 	public bool LowercaseBaggageAndTagKeys { get; set; } = true;
 
 	/// <summary>
-	/// Determines if diagnostics are generated for when an Activity method does not return an activity, or 
+	/// Determines if diagnostics are generated for when an Activity method does not return an activity, or
 	/// when an Event or Context method does not include and Activity as a parameter.
 	/// </summary>
 	public bool GenerateDiagnosticsForMissingActivity { get; set; } = true;

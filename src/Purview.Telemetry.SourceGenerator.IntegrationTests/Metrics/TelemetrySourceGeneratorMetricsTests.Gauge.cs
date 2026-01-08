@@ -7,14 +7,15 @@ partial class TelemetrySourceGeneratorMetricsTests
 	{
 		// Arrange
 		const string basicMetric =
-			@"
+			"""
+
 using Purview.Telemetry.Metrics;
 using System.Diagnostics.Metrics;
 using System.Collections.Generic;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface ITestMetrics {
 	[ObservableGauge]
 	void ObservableGauge(Func<int> f, [Tag]int intParam, [Tag]bool boolParam);
@@ -25,7 +26,8 @@ public interface ITestMetrics {
 	[ObservableGauge]
 	void ObservableGauge3(Func<IEnumerable<Measurement<int>>> f, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric);

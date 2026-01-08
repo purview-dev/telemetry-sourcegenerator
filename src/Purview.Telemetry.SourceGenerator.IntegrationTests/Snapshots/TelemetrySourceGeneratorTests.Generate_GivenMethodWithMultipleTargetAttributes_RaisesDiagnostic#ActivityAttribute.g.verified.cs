@@ -11,7 +11,7 @@
 
 #nullable enable
 
-namespace Purview.Telemetry.Activities;
+namespace Purview.Telemetry;
 
 /// <summary>
 /// Marker attribute used to control the generation

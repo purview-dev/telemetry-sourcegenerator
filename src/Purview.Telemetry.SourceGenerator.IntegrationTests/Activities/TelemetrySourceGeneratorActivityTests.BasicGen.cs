@@ -7,12 +7,13 @@ partial class TelemetrySourceGeneratorActivityTests
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Activity]
 	System.Diagnostics.Activity? Activity([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
@@ -20,7 +21,8 @@ public interface ITestActivities {
 	[Event]
 	void Event(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -34,12 +36,13 @@ public interface ITestActivities {
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Context]
 	void Context(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
@@ -47,7 +50,8 @@ public interface ITestActivities {
 	[Event]
 	void Event(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -94,12 +98,13 @@ public interface ITestActivities
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Activity]
 	System.Diagnostics.Activity?  Activity([Baggage]string stringNonNullParam, [Baggage]int intParam, [Baggage]bool boolParam);
@@ -110,7 +115,8 @@ public interface ITestActivities {
 	[Context]
 	void Context(System.Diagnostics.Activity? activity, [Baggage]object? objectParam, [Baggage]string stringNonNullParam, [Baggage]float? floatParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -129,13 +135,14 @@ public interface ITestActivities {
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Activity]
 	Activity Activity([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
@@ -143,7 +150,8 @@ public interface ITestActivities {
 	[Event]
 	Activity Event(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -157,13 +165,14 @@ public interface ITestActivities {
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Activity]
 	Activity Activity([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
@@ -171,7 +180,8 @@ public interface ITestActivities {
 	[Activity]
 	Activity? ActivityWithNullableReturnActivity([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -185,13 +195,14 @@ public interface ITestActivities {
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Activity]
 	Activity? Activity([Baggage]string? stringParam, [Tag]int? intParam, bool? boolParam);
@@ -199,7 +210,8 @@ public interface ITestActivities {
 	[Activity]
 	Activity? ActivityWithNullableParams([Baggage]string? stringParam, [Tag]int? intParam, bool? boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);

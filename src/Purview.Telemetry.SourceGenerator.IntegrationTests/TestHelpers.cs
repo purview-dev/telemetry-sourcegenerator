@@ -191,8 +191,8 @@ using Purview.Telemetry;
 
 		// Check if snapshot verification should be skipped
 		var ignoreVerify = Environment.GetEnvironmentVariable("PURVIEW_IGNORE_VERIFY");
-		if (string.IsNullOrEmpty(ignoreVerify) || 
-		    (!ignoreVerify.Equals("true", StringComparison.OrdinalIgnoreCase) && 
+		if (string.IsNullOrEmpty(ignoreVerify) ||
+		    (!ignoreVerify.Equals("true", StringComparison.OrdinalIgnoreCase) &&
 		     !ignoreVerify.Equals("1", StringComparison.Ordinal)))
 		{
 			await verifierTask;
@@ -220,7 +220,9 @@ using Purview.Telemetry;
 			}
 		}
 		else
+		{
 			diag.ShouldBeEmpty();
+		}
 
 		if (!validationCompilation)
 			return;

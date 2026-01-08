@@ -7,7 +7,8 @@ partial class TelemetrySourceGeneratorTests
 	{
 		// Arrange
 		const string basicTelemetry =
-			@"
+			"""
+
 using System.Diagnostics;
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
@@ -16,7 +17,7 @@ namespace Purview.Interfaces.ApplicationServices.Caching;
 
 [ActivitySource]
 [Logger]
-[System.Diagnostics.CodeAnalysis.SuppressMessage(""Design"", ""CA1024:Use properties where appropriate"")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1024:Use properties where appropriate")]
 public interface ICacheServiceProviderTelemetry 
 {
 	[Log]
@@ -79,7 +80,8 @@ public interface ICacheServiceProviderTelemetry
 	[Activity(ActivityKind.Client)]
 	Activity? Remove();
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(

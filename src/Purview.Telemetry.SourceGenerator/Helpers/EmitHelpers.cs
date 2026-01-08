@@ -32,8 +32,7 @@ static class EmitHelpers
 			{
 				builder
 					.Append(indent, "partial class ", withNewLine: false)
-					.Append(parentClass)
-					.AppendLine()
+					.AppendLine(parentClass)
 					.Append(indent, "{");
 
 				indent++;
@@ -87,8 +86,7 @@ static class EmitHelpers
 			.Append(indent, "sealed partial class ", withNewLine: false)
 			.Append(className)
 			.Append(" : ")
-			.Append(fullyQualifiedInterface)
-			.AppendLine()
+			.AppendLine(fullyQualifiedInterface)
 			.Append(indent, '{');
 
 		return indent;
@@ -106,13 +104,17 @@ static class EmitHelpers
 	)
 	{
 		if (duplicateMethods.IsEmpty)
+		{
 			// No duplicate methods found.
 			return false;
+		}
 
 		if (!SharedHelpers.ShouldEmit(requestedType, generationType))
+		{
 			// We're not generating this type of method, so we don't need to emit diagnostics for it
 			// but we do need to stop processing.
 			return true;
+		}
 
 		logger?.Debug($"Found {duplicateMethods.Count} duplicate method(s).");
 

@@ -40,18 +40,20 @@ public interface IInvalidTelemetry
 	{
 		// Arrange
 		const string code =
-			@"
+			"""
+
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface IInvalidTelemetry
 {
 	[Counter]
 	int InvalidReturnType(int value);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(code);
@@ -70,18 +72,20 @@ public interface IInvalidTelemetry
 	{
 		// Arrange
 		const string code =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface IInvalidTelemetry
 {
 	[Activity]
 	object InvalidReturnType(string operationId);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(code);
@@ -193,19 +197,21 @@ public interface IInvalidTelemetry
 	{
 		// Arrange
 		const string code =
-			@"
+			"""
+
 using Purview.Telemetry.Metrics;
 using System.Threading.Tasks;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface IInvalidTelemetry
 {
 	[Counter]
 	Task InvalidAsyncCounter(int value);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(code);
@@ -224,19 +230,21 @@ public interface IInvalidTelemetry
 	{
 		// Arrange
 		const string code =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using System.Threading.Tasks;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface IInvalidTelemetry
 {
 	[Activity]
 	Task<System.Diagnostics.Activity?> InvalidAsyncActivity(string operationId);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(code);
@@ -285,18 +293,20 @@ public interface IInvalidTelemetry
 	{
 		// Arrange
 		const string code =
-			@"
+			"""
+
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface IInvalidTelemetry
 {
 	[ObservableCounter]
 	bool InvalidObservableReturn(System.Func<int> callback);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(code);
@@ -315,18 +325,20 @@ public interface IInvalidTelemetry
 	{
 		// Arrange
 		const string code =
-			@"
+			"""
+
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface IInvalidTelemetry
 {
 	[AutoCounter]
 	bool InvalidAutoCounterReturn(string operation);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(code);
@@ -345,12 +357,13 @@ public interface IInvalidTelemetry
 	{
 		// Arrange
 		const string code =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface IInvalidTelemetry
 {
 	[Event]
@@ -359,7 +372,8 @@ public interface IInvalidTelemetry
 		string eventName
 	);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(code);
@@ -378,12 +392,13 @@ public interface IInvalidTelemetry
 	{
 		// Arrange
 		const string code =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface IInvalidTelemetry
 {
 	[Context]
@@ -393,7 +408,8 @@ public interface IInvalidTelemetry
 		string value
 	);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(code);
@@ -534,18 +550,20 @@ public interface IInvalidTelemetry
 	{
 		// Arrange
 		const string code =
-			@"
+			"""
+
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface IInvalidTelemetry
 {
 	[Counter]
 	System.IDisposable InvalidDisposableReturn(int value);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(code);

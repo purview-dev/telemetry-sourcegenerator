@@ -7,10 +7,11 @@ partial class TelemetrySourceGeneratorTests
 	{
 		// Arrange
 		const string basicTelemetry =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
-[ActivitySource(""activity-source"")]
+[ActivitySource("activity-source")]
 public interface ITestTelemetry
 {
 	[Activity]
@@ -19,7 +20,8 @@ public interface ITestTelemetry
 	[Activity]
 	System.Diagnostics.Activity? DuplicateMethodName();
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicTelemetry);
@@ -38,10 +40,11 @@ public interface ITestTelemetry
 	{
 		// Arrange
 		const string basicTelemetry =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
-[ActivitySource(""activity-source"")]
+[ActivitySource("activity-source")]
 public interface ITestTelemetry
 {
 	[Activity]
@@ -53,7 +56,8 @@ public interface ITestTelemetry
 	[Context]
 	void DuplicateMethodName(System.Diagnostics.Activity? activity, int intParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicTelemetry);
@@ -146,12 +150,13 @@ public interface ITestTelemetry
 	{
 		// Arrange
 		const string basicTelemetry =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 using Purview.Telemetry.Metrics;
 
-[ActivitySource(""activity-source"")]
+[ActivitySource("activity-source")]
 [Logger]
 [Meter]
 public interface ITestTelemetry
@@ -177,7 +182,8 @@ public interface ITestTelemetry
 	[Counter]
 	void DuplicateMethodName(int measurementValue);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(

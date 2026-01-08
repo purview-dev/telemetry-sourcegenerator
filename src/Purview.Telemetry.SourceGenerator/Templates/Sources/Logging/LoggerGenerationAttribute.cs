@@ -1,6 +1,6 @@
 ﻿#if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
 
-namespace Purview.Telemetry.Logging;
+namespace Purview.Telemetry;
 
 /// <summary>
 /// Sets defaults for the generation of loggers and log entries.
@@ -44,11 +44,11 @@ sealed class LoggerGenerationAttribute : global::System.Attribute
 	/// <summary>
 	/// Specifies the default mode used to generate or override the prefix for the log entry.
 	/// 
-	/// Default when the <see cref="global::Purview.Telemetry.Logging.LoggerAttribute.PrefixType"/> is not set.
+	/// Default when the <see cref="global::Purview.Telemetry.LoggerAttribute.PrefixType"/> is not set.
 	/// 
-	/// Defaults to <see cref="global::Purview.Telemetry.Logging.LogPrefixType.Default"/>.
+	/// Defaults to <see cref="global::Purview.Telemetry.LogPrefixType.Default"/>.
 	/// </summary>
-	public global::Purview.Telemetry.Logging.LogPrefixType DefaultPrefixType { get; set; }
+	public global::Purview.Telemetry.LogPrefixType DefaultPrefixType { get; set; }
 }
 
 #endif

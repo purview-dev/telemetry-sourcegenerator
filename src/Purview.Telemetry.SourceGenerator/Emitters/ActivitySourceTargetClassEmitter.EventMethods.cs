@@ -119,18 +119,22 @@ partial class ActivitySourceTargetClassEmitter
 			var emitExceptionEscape =
 				escapeParam != null || Constants.Activities.RecordExceptionEscapedDefault;
 			if (methodTarget.EventAttribute?.UseRecordExceptionRules.IsSet == true)
+			{
 				useRecordedExceptionRules = methodTarget
 					.EventAttribute
 					.UseRecordExceptionRules
 					.Value!
 					.Value;
+			}
 
 			if (methodTarget.EventAttribute?.RecordExceptionEscape.IsSet == true)
+			{
 				emitExceptionEscape = methodTarget
 					.EventAttribute
 					.RecordExceptionEscape!
 					.Value!
 					.Value;
+			}
 
 			var escapeValue = escapeParam?.ParameterName ?? "true";
 			foreach (var tagParam in methodTarget.Tags)

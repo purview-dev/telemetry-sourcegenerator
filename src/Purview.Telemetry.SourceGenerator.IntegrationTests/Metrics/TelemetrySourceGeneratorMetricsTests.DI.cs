@@ -7,7 +7,8 @@ partial class TelemetrySourceGeneratorMetricsTests
 	{
 		// Arrange
 		const string basicMetric =
-			@"
+			"""
+
 using Purview.Telemetry;
 using Purview.Telemetry.Metrics;
 
@@ -15,12 +16,13 @@ using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface ITestMetrics {
 	[Counter]
 	void Counter(int counterValue, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric, disableDependencyInjection: false);
@@ -34,19 +36,21 @@ public interface ITestMetrics {
 	{
 		// Arrange
 		const string basicMetric =
-			@"
+			"""
+
 using Purview.Telemetry;
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 [TelemetryGeneration(GenerateDependencyExtension = true)]
 public interface ITestMetrics {
 	[Counter]
 	void Counter(int counterValue, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric, disableDependencyInjection: false);
@@ -60,7 +64,8 @@ public interface ITestMetrics {
 	{
 		// Arrange
 		const string basicMetric =
-			@"
+			"""
+
 using Purview.Telemetry;
 using Purview.Telemetry.Metrics;
 
@@ -68,13 +73,14 @@ using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 [TelemetryGeneration(GenerateDependencyExtension = true)]
 public interface ITestMetrics {
 	[Counter]
 	void Counter(int counterValue, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric, disableDependencyInjection: false);
@@ -88,7 +94,8 @@ public interface ITestMetrics {
 	{
 		// Arrange
 		const string basicMetric =
-			@"
+			"""
+
 using Purview.Telemetry;
 using Purview.Telemetry.Metrics;
 
@@ -96,13 +103,14 @@ using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 [TelemetryGeneration(GenerateDependencyExtension = false)]
 public interface ITestMetrics {
 	[Counter]
 	void Counter(int counterValue, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric, disableDependencyInjection: false);

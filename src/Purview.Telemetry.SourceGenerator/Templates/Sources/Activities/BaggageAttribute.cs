@@ -1,4 +1,4 @@
-﻿namespace Purview.Telemetry.Activities;
+﻿namespace Purview.Telemetry;
 
 /// <summary>
 /// Marker attribute required for explicitly setting a

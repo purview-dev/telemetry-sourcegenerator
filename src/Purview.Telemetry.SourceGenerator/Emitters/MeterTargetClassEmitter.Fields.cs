@@ -35,8 +35,10 @@ partial class MeterTargetClassEmitter
 		foreach (var method in target.InstrumentationMethods)
 		{
 			if (method.InstrumentAttribute == null)
+			{
 				// We've already 'reported' this error, so we can skip it.
 				continue;
+			}
 
 			var type = Constants
 				.Metrics.InstrumentTypeMap[method.InstrumentAttribute.InstrumentType]

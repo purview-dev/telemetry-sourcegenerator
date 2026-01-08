@@ -1,4 +1,4 @@
-﻿namespace Purview.Telemetry.Metrics;
+﻿namespace Purview.Telemetry;
 
 /// <summary>
 /// Marker attribute, used to indicating a meter, or group of instruments.

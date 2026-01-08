@@ -7,12 +7,13 @@ partial class TelemetrySourceGeneratorMetricsTests
 	{
 		// Arrange
 		const string basicMetric =
-			@"
+			"""
+
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface ITestMetrics {
 	[UpDownCounter]
 	void UpDown(int counterValue, [Tag]int intParam, [Tag]bool boolParam);
@@ -20,7 +21,8 @@ public interface ITestMetrics {
 	[UpDownCounter]
 	void UpDown2([InstrumentMeasurement]int counterValue, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric);
@@ -34,14 +36,15 @@ public interface ITestMetrics {
 	{
 		// Arrange
 		const string basicMetric =
-			@"
+			"""
+
 using Purview.Telemetry.Metrics;
 using System.Diagnostics.Metrics;
 using System.Collections.Generic;
 
 namespace Testing;
 
-[Meter(""testing-observable-meter"")]
+[Meter("testing-observable-meter")]
 public interface ITestMetrics {
 	[ObservableUpDownCounter]
 	void ObservableUpDown(Func<int> f, [Tag]int intParam, [Tag]bool boolParam);
@@ -52,7 +55,8 @@ public interface ITestMetrics {
 	[ObservableUpDownCounter]
 	void ObservableUpDown3(Func<IEnumerable<Measurement<int>>> f, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric);

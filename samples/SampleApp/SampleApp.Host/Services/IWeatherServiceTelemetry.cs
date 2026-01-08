@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics;
-using Purview.Telemetry.Activities;
-using Purview.Telemetry.Logging;
-using Purview.Telemetry.Metrics;
+using Purview.Telemetry;
 
 namespace SampleApp.Host.Services;
 

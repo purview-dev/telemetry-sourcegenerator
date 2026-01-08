@@ -7,12 +7,12 @@ partial class TelemetrySourceGeneratorActivityTests
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
 using Purview.Telemetry.Activities;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities
 {
 	[Activity]
@@ -21,7 +21,8 @@ public interface ITestActivities
 	[Context]
 	void Context(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -35,13 +36,14 @@ public interface ITestActivities
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities
 {
 	[Activity]
@@ -50,7 +52,8 @@ public interface ITestActivities
 	[Context]
 	Activity Context(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -64,13 +67,14 @@ public interface ITestActivities
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Activity]
 	System.Diagnostics.Activity? Activity();
@@ -81,7 +85,8 @@ public interface ITestActivities {
 	[Context]
 	Activity? ContextWithNullableReturnActivity(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -95,13 +100,14 @@ public interface ITestActivities {
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities
 {
 	[Activity]
@@ -113,7 +119,8 @@ public interface ITestActivities
 	[Context]
 	Activity? ContextWithNullableParams(System.Diagnostics.Activity? activity, [Baggage]string? stringParam, [Tag]int? intParam, bool? boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -127,13 +134,14 @@ public interface ITestActivities
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities
 {
 	[Activity]
@@ -145,7 +153,8 @@ public interface ITestActivities
 	[Context]
 	Activity? ContextWithNullableParams(Activity? activityParameter, [Baggage]string? stringParam, [Tag]int? intParam, bool? boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -159,13 +168,14 @@ public interface ITestActivities
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities
 {
 	[Activity]
@@ -177,7 +187,8 @@ public interface ITestActivities
 	[Context]
 	void ContextWithNullableParams(Activity? activityParameter, [Baggage]string? stringParam, [Tag]int? intParam, bool? boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);

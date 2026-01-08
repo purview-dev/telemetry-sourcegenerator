@@ -350,8 +350,8 @@ partial class PipelineHelpers
 						: [.. methodParameters.Where(m => !m.IsException)],
 					ExceptionParameter: exceptionParam,
 					HasMultipleExceptions: hasMultipleExceptions,
-					InferredErrorLevel: inferredErrorLevel,
 					MethodLocation: method.Locations.FirstOrDefault(),
+					InferredErrorLevel: inferredErrorLevel,
 					TargetGenerationState: Utilities.IsValidGenerationTarget(
 						method,
 						generationType,
@@ -383,11 +383,15 @@ partial class PipelineHelpers
 			: defaultPrefixType; // Default as LoggerGeneration level, or Default (0)
 
 		if (prefixType == 1)
+		{
 			// Interface
 			return $"{interfaceName}.{methodName}";
+		}
 		else if (prefixType == 2)
+		{
 			// Class
 			return $"{className}.{methodName}";
+		}
 		else if (prefixType == 3)
 		{
 			// Custom
@@ -454,8 +458,10 @@ partial class PipelineHelpers
 		}
 
 		if (index > 0)
+		{
 			// Trim the last ", "
 			builder.Remove(builder.Length - 2, 2);
+		}
 
 		return builder.ToString();
 	}
@@ -534,7 +540,7 @@ partial class PipelineHelpers
 			}
 
 			var logParameterType = PurviewTypeFactory.Create(parameter.Type);
-			var isException = Utilities.IsExceptionType(parameter.Type);
+			var isException = parameter.Type.IsExceptionType();
 			parameters.Add(
 				new(
 					Name: parameter.Name,
@@ -576,11 +582,11 @@ partial class PipelineHelpers
 		// Everything else is invalid
 
 		var isVoid = method.ReturnsVoid;
-		
+
 		// Check if return type is IDisposable (handle both nullable and non-nullable)
 		var returnType = method.ReturnType;
 		var isIDisposable = Constants.System.IDisposable.Equals(returnType);
-		
+
 		// Also check if it's nullable IDisposable (IDisposable?)
 		if (!isIDisposable && returnType.NullableAnnotation == NullableAnnotation.Annotated)
 		{
@@ -588,7 +594,7 @@ partial class PipelineHelpers
 			if (returnType is INamedTypeSymbol namedType && !namedType.IsValueType)
 			{
 				isIDisposable = Constants.System.IDisposable.Equals(namedType.OriginalDefinition) ||
-				                Constants.System.IDisposable.FullyQualifiedName == namedType.ConstructedFrom.ToString();
+								Constants.System.IDisposable.FullyQualifiedName == namedType.ConstructedFrom.ToString();
 			}
 		}
 
@@ -602,7 +608,7 @@ partial class PipelineHelpers
 		logger?.Diagnostic(
 			$"Log method {method.Name} must return void or IDisposable (for scoped logs), but returns {method.ReturnType}."
 		);
-		
+
 		return (
 			TelemetryDiagnostics.Logging.LogMustReturnVoidOrAsync,
 			method.ReturnType.Locations

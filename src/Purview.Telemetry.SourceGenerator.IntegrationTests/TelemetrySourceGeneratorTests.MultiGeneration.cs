@@ -11,13 +11,14 @@ public partial class TelemetrySourceGeneratorTests
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 [Logger]
 public interface IMultiTelemetry
 {
@@ -27,7 +28,8 @@ public interface IMultiTelemetry
 	[Log]
 	void LogOperation(string operationId, string message);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -41,14 +43,15 @@ public interface IMultiTelemetry
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
-[Meter(""testing-meter"")]
+[ActivitySource("testing-activity-source")]
+[Meter("testing-meter")]
 public interface IMultiTelemetry
 {
 	[Activity]
@@ -57,7 +60,8 @@ public interface IMultiTelemetry
 	[Counter]
 	void IncrementCounter(int value);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -71,14 +75,15 @@ public interface IMultiTelemetry
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Logging;
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
 [Logger]
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface IMultiTelemetry
 {
 	[Log]
@@ -87,7 +92,8 @@ public interface IMultiTelemetry
 	[Counter]
 	void IncrementCounter(int value);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -101,16 +107,17 @@ public interface IMultiTelemetry
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 [Logger]
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface IMultiTelemetry
 {
 	[Activity]
@@ -122,7 +129,8 @@ public interface IMultiTelemetry
 	[Counter]
 	void IncrementCounter(int value);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -136,13 +144,14 @@ public interface IMultiTelemetry
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 [Logger]
 public interface IMultiTelemetry
 {
@@ -150,7 +159,8 @@ public interface IMultiTelemetry
 	[Log]
 	void InvalidMethod(string message);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -169,21 +179,23 @@ public interface IMultiTelemetry
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
-[Meter(""testing-meter"")]
+[ActivitySource("testing-activity-source")]
+[Meter("testing-meter")]
 public interface IMultiTelemetry
 {
 	[Activity]
 	[Counter]
 	void InvalidMethod(string message);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -202,21 +214,23 @@ public interface IMultiTelemetry
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Logging;
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
 [Logger]
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface IMultiTelemetry
 {
 	[Log]
 	[Counter]
 	void InvalidMethod(string message);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -235,16 +249,17 @@ public interface IMultiTelemetry
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 [Logger]
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface IMultiTelemetry
 {
 	[Activity]
@@ -252,7 +267,8 @@ public interface IMultiTelemetry
 	[Counter]
 	void InvalidMethod(string message);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -271,13 +287,14 @@ public interface IMultiTelemetry
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 [Logger]
 public interface IMultiTelemetry
 {
@@ -287,7 +304,8 @@ public interface IMultiTelemetry
 	// This method has no attribute, so inference is not supported in multi-target
 	void MethodWithoutAttribute(string message);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -306,13 +324,14 @@ public interface IMultiTelemetry
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 [Logger]
 public interface IMultiTelemetry
 {
@@ -340,7 +359,8 @@ public interface IMultiTelemetry
 	[Critical]
 	void CriticalMessage(string message);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -354,14 +374,15 @@ public interface IMultiTelemetry
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
-[Meter(""testing-meter"")]
+[ActivitySource("testing-activity-source")]
+[Meter("testing-meter")]
 public interface IMultiTelemetry
 {
 	[Activity]
@@ -388,7 +409,8 @@ public interface IMultiTelemetry
 	[ObservableUpDownCounter]
 	int GetObservableUpDownCounter();
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -402,14 +424,15 @@ public interface IMultiTelemetry
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Logging;
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
 [Logger]
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface IMultiTelemetry
 {
 	[Log]
@@ -427,7 +450,8 @@ public interface IMultiTelemetry
 	[UpDownCounter]
 	void UpdateActiveConnections(int delta);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -441,7 +465,8 @@ public interface IMultiTelemetry
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 using Purview.Telemetry.Metrics;
@@ -449,9 +474,9 @@ using System;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 [Logger]
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface IMultiTelemetry
 {
 	[Activity]
@@ -475,7 +500,8 @@ public interface IMultiTelemetry
 	[Histogram]
 	void RecordRequestDuration(double milliseconds, string endpoint);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -489,14 +515,15 @@ public interface IMultiTelemetry
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
-[Meter(""testing-meter"")]
+[ActivitySource("testing-activity-source")]
+[Meter("testing-meter")]
 public interface IMultiTelemetry
 {
 	[Activity]
@@ -511,7 +538,8 @@ public interface IMultiTelemetry
 	[Counter]
 	void CountOperation(int counterValue, string operationType);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -525,13 +553,14 @@ public interface IMultiTelemetry
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 [Logger]
 public interface IMultiTelemetry
 {
@@ -552,7 +581,8 @@ partial class MultiTelemetryCore
 		// This method should be excluded from the generated telemetry implementation.
 	}
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -566,13 +596,14 @@ partial class MultiTelemetryCore
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 [Logger]
 public interface IMultiTelemetry
 {
@@ -582,7 +613,8 @@ public interface IMultiTelemetry
 	[Log]
 	void Process(string id, string message);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -601,16 +633,17 @@ public interface IMultiTelemetry
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 [Logger]
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface IMultiTelemetry
 {
 	[Activity]
@@ -625,7 +658,8 @@ public interface IMultiTelemetry
 	[Counter]
 	void IncrementCounter(int? value);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -639,14 +673,15 @@ public interface IMultiTelemetry
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 using System.Threading.Tasks;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 [Logger]
 public interface IMultiTelemetry
 {
@@ -659,7 +694,8 @@ public interface IMultiTelemetry
 	[Info]
 	ValueTask InfoAsync(string message);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -678,13 +714,14 @@ public interface IMultiTelemetry
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 [Logger]
 public interface IMultiTelemetry
 {
@@ -695,7 +732,8 @@ public interface IMultiTelemetry
 	[Info]
 	void InfoMessage(string message);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);
@@ -712,14 +750,15 @@ public interface IMultiTelemetry
 	{
 		// Arrange
 		const string multiGen =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
-[Meter(""testing-meter"")]
+[ActivitySource("testing-activity-source")]
+[Meter("testing-meter")]
 public interface IMultiTelemetry
 {
 	// No [Activity] method, only Event and Context
@@ -732,7 +771,8 @@ public interface IMultiTelemetry
 	[Counter]
 	void IncrementCounter();
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(multiGen);

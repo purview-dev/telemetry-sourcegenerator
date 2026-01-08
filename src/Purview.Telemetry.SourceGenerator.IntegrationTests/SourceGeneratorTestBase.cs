@@ -205,8 +205,8 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 			preprocessorSymbols.Add("EXCLUDE_PURVIEW_TELEMETRY_LOGGING");
 
 		CSharpParseOptions parseOptions = new(
-			kind: SourceCodeKind.Regular,
 			documentationMode: DocumentationMode.Parse,
+			kind: SourceCodeKind.Regular,
 			preprocessorSymbols: preprocessorSymbols
 		);
 
@@ -285,9 +285,11 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 		var generatorType = generator.GetType();
 
 		if (!generatorType.IsDefined(typeof(GeneratorAttribute)))
+		{
 			throw new InvalidOperationException(
 				$"Type is not marked [Generator]: {generatorType}."
 			);
+		}
 	}
 
 	protected virtual bool ReferenceCore => true;
@@ -372,6 +374,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 					)
 				);
 				if (includeLoggerTypes == IncludeLoggerTypes.Telemetry)
+				{
 					project = project.AddMetadataReference(
 						MetadataReference.CreateFromFile(
 							typeof(Microsoft.Extensions.Logging.LogPropertiesAttribute)
@@ -379,6 +382,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 								.Location
 						)
 					);
+				}
 			}
 		}
 

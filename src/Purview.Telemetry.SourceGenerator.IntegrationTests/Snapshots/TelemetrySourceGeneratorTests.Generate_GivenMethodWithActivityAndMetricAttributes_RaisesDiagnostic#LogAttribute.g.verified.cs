@@ -13,7 +13,7 @@
 
 #if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
 
-namespace Purview.Telemetry.Logging;
+namespace Purview.Telemetry;
 
 /// <summary>
 /// Marker attribute required for log entry generation, based on

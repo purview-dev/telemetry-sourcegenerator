@@ -13,21 +13,23 @@ partial class TelemetrySourceGeneratorActivityTests
 	{
 		// Arrange
 		var basicActivity =
-			@$"
+			$$"""
+
 using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities
-{{
+{
 	[Activity]
 	System.Diagnostics.Activity? Activity();
 
-	void ThisIsAMethod({activityType} activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
-}}
-";
+	void ThisIsAMethod({{activityType}} activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -41,13 +43,14 @@ public interface ITestActivities
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities
 {
 	[Activity]
@@ -56,7 +59,8 @@ public interface ITestActivities
 	[Event]
 	void Event(Activity activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -70,13 +74,14 @@ public interface ITestActivities
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities
 {
 	[Activity]
@@ -85,7 +90,8 @@ public interface ITestActivities
 	[Event]
 	void Event(Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -99,13 +105,14 @@ public interface ITestActivities
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities
 {
 	[Activity]
@@ -114,7 +121,8 @@ public interface ITestActivities
 	[Event(ActivityStatusCode.Ok)]
 	void Event(Activity? activity);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -128,13 +136,14 @@ public interface ITestActivities
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities
 {
 	[Activity]
@@ -143,7 +152,8 @@ public interface ITestActivities
 	[Event(ActivityStatusCode.Error)]
 	void Event(Activity? activity);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -157,13 +167,14 @@ public interface ITestActivities
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities
 {
 	[Activity]
@@ -172,7 +183,8 @@ public interface ITestActivities
 	[Event(ActivityStatusCode.Error)]
 	void Event(Activity? activity, Exception exception);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -186,22 +198,24 @@ public interface ITestActivities
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities
 {
 	[Activity]
 	System.Diagnostics.Activity? Activity();
 
-	[Event(ActivityStatusCode.Error, StatusDescription = ""This is a Test"")]
+	[Event(ActivityStatusCode.Error, StatusDescription = "This is a Test")]
 	void Event(Activity? activity, Exception exception);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);
@@ -215,13 +229,14 @@ public interface ITestActivities
 	{
 		// Arrange
 		const string basicActivity =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities
 {
 	[Activity]
@@ -233,7 +248,8 @@ public interface ITestActivities
 	[Event(ActivityStatusCode.Error)]
 	void Event2(Activity? activity, [StatusDescription]string statusDescription_another);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicActivity);

@@ -62,8 +62,7 @@ static class DependencyInjectionClassEmitter
 			.Append(1, Constants.System.ExcludeFromCodeCoverageConstant)
 			.CodeGen(1)
 			.Append(1, $"{classAccessModifier} class ", withNewLine: false)
-			.Append(classNameToGenerate)
-			.AppendLine()
+			.AppendLine(classNameToGenerate)
 			.Append(1, '{');
 
 		EmitMethod(

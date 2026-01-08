@@ -7,15 +7,15 @@ partial class TelemetrySourceGeneratorLoggingGen2Tests
 	{
 		// Arrange
 		var basicLogger =
-			@$"
+			@"
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
 [Logger]
-public interface ITestLogger {{
+public interface ITestLogger {
 	void LogEntryWithCustomExceptionType(NullReferenceException nrf);
-}}
+}
 ";
 
 		// Act
@@ -33,17 +33,17 @@ public interface ITestLogger {{
 	{
 		// Arrange
 		var basicLogger =
-			@$"
+			@"
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
 [Logger]
-public interface ITestLogger {{
+public interface ITestLogger {
 	void LogEntryWithCustomExceptionType(BadLuckException custom);
-}}
+}
 
-public class BadLuckException : Exception {{ }}
+public class BadLuckException : Exception { }
 ";
 
 		// Act
@@ -61,17 +61,17 @@ public class BadLuckException : Exception {{ }}
 	{
 		// Arrange
 		var basicLogger =
-			@$"
+			@"
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
 [Logger]
-public interface ITestLogger {{
+public interface ITestLogger {
 	void LogEntryWithMoreThanSixParams(int one, int two, int three, int four, int five, BadLuckException six, InvalidOperationException seven, ArgumentException eight, Exception nine, Exception? ten, Exception eleven);
-}}
+}
 
-public class BadLuckException : Exception {{ }}
+public class BadLuckException : Exception { }
 ";
 
 		// Act

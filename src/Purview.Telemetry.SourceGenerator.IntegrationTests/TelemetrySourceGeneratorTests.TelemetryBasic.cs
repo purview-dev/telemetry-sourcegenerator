@@ -7,18 +7,20 @@ partial class TelemetrySourceGeneratorTests
 	{
 		// Arrange
 		const string partialInterfaceDef =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 using Purview.Telemetry.Metrics;
 
-[ActivitySource(""activity-source"")]
+[ActivitySource("activity-source")]
 [Logger]
 [Meter]
 partial interface ITestTelemetry
 {
 }
-";
+
+""";
 
 		const string partialInterfaceActivities =
 			@"
@@ -83,12 +85,13 @@ partial interface ITestTelemetry
 	{
 		// Arrange
 		const string basicTelemetry =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 using Purview.Telemetry.Metrics;
 
-[ActivitySource(""activity-source"")]
+[ActivitySource("activity-source")]
 [Logger]
 [Meter]
 public interface ITestTelemetry
@@ -111,7 +114,8 @@ public interface ITestTelemetry
 	[Counter]
 	bool Counter(int counterValue, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicTelemetry);
@@ -125,14 +129,15 @@ public interface ITestTelemetry
 	{
 		// Arrange
 		const string basicTelemetry =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[ActivitySource(""activity-source"")]
+[ActivitySource("activity-source")]
 [Logger]
 [Meter]
 public interface ITestTelemetry
@@ -155,7 +160,8 @@ public interface ITestTelemetry
 	[Counter]
 	bool Counter(int counterValue, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicTelemetry);
@@ -169,12 +175,13 @@ public interface ITestTelemetry
 	{
 		// Arrange
 		const string basicTelemetry =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
 namespace Testing;
 
-[ActivitySource(""activity-source"")]
+[ActivitySource("activity-source")]
 public interface ITestTelemetry
 {
 	[Activity]
@@ -183,7 +190,8 @@ public interface ITestTelemetry
 	[Event]
 	void Event(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam, Exception anException);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicTelemetry);
@@ -197,12 +205,13 @@ public interface ITestTelemetry
 	{
 		// Arrange
 		const string basicTelemetry =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
 namespace Testing;
 
-[ActivitySource(""activity-source"")]
+[ActivitySource("activity-source")]
 public interface ITestTelemetry
 {
 	[Activity]
@@ -211,7 +220,8 @@ public interface ITestTelemetry
 	[Event]
 	void Event(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam, Exception anException, [Escape]bool escape);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicTelemetry);
@@ -225,12 +235,13 @@ public interface ITestTelemetry
 	{
 		// Arrange
 		const string basicTelemetry =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
 namespace Testing;
 
-[ActivitySource(""activity-source"")]
+[ActivitySource("activity-source")]
 public interface ITestTelemetry
 {
 	[Activity]
@@ -239,7 +250,8 @@ public interface ITestTelemetry
 	[Event(UseRecordExceptionRules = false)]
 	void EventMethod(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam, Exception anException, [Escape]bool escape);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicTelemetry);
@@ -253,21 +265,23 @@ public interface ITestTelemetry
 	{
 		// Arrange
 		const string basicTelemetry =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
 namespace Testing;
 
-[ActivitySource(""activity-source"")]
+[ActivitySource("activity-source")]
 public interface ITestTelemetry
 {
 	[Activity]
 	System.Diagnostics.Activity? Activity();
 
-	[Event(name: ""exception"", UseRecordExceptionRules = false)]
+	[Event(name: "exception", UseRecordExceptionRules = false)]
 	void EventMethod(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam, Exception anException, [Escape]bool escape);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicTelemetry);
@@ -281,21 +295,23 @@ public interface ITestTelemetry
 	{
 		// Arrange
 		const string basicTelemetry =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 
 namespace Testing;
 	
-[ActivitySource(""activity-source"")]
+[ActivitySource("activity-source")]
 public interface ITestTelemetry
 {
 	[Activity]
 	System.Diagnostics.Activity? Activity();
 
-	[Event(name: ""exception"", UseRecordExceptionRules = true)]
+	[Event(name: "exception", UseRecordExceptionRules = true)]
 	void EventMethod(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam, Exception anException, [Escape]bool escape);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicTelemetry);
@@ -309,14 +325,15 @@ public interface ITestTelemetry
 	{
 		// Arrange
 		const string basicTelemetry =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
-[ActivitySource(""activity-source"")]
+[ActivitySource("activity-source")]
 [Logger]
 [Meter]
 public interface ITestTelemetry
@@ -346,7 +363,8 @@ public interface ITestTelemetry
 	[Log]
 	void Counter(int counterValue, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicTelemetry);

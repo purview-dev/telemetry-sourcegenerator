@@ -340,9 +340,9 @@ partial class PipelineHelpers
 					IsNullableReturn: method.ReturnType.NullableAnnotation
 						== NullableAnnotation.Annotated,
 					FieldName: fieldName,
+					InstrumentMeasurementType: instrumentMeasurementType,
 					IsObservable: instrumentAttribute?.IsObservable == true,
 					MetricName: prefix + instrumentName!,
-					InstrumentMeasurementType: instrumentMeasurementType,
 					Locations: method.Locations,
 					InstrumentAttribute: instrumentAttribute,
 					Parameters: parameters,
@@ -586,7 +586,9 @@ partial class PipelineHelpers
 				meterGenerationAttribute?.InstrumentPrefix.IsSet == true
 				&& !string.IsNullOrWhiteSpace(meterGenerationAttribute?.InstrumentPrefix.Value)
 			)
+			{
 				prefix = meterGenerationAttribute!.InstrumentPrefix.Value! + separator;
+			}
 		}
 
 		if (!string.IsNullOrWhiteSpace(meterAttribute.InstrumentPrefix.Value))

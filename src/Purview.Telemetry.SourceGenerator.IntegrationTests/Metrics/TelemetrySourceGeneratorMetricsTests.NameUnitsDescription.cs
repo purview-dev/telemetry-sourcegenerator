@@ -11,19 +11,21 @@ partial class TelemetrySourceGeneratorMetricsTests
 	{
 		// Arrange
 		var basicMetric =
-			@$"
+			$$"""
+
 using Purview.Telemetry.Metrics;
 using System.Diagnostics.Metrics;
 using System.Collections.Generic;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
-public interface ITestMetrics {{
-	[{attribute}]
-	void Metric({measurementParameter}[Tag]int intParam, [Tag]bool boolParam);
-}}
-";
+[Meter("testing-meter")]
+public interface ITestMetrics {
+	[{{attribute}}]
+	void Metric({{measurementParameter}}[Tag]int intParam, [Tag]bool boolParam);
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicMetric);

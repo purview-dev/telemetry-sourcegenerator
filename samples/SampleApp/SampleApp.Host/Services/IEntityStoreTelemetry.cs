@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics;
-using Purview.Telemetry.Activities;
-using Purview.Telemetry.Logging;
-using Purview.Telemetry.Metrics;
+using Purview.Telemetry;
 
 // ************************************************
 // This is the sample from the README.md file.

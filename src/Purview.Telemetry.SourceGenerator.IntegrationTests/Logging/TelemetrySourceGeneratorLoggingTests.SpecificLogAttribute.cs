@@ -38,33 +38,35 @@ public interface ITestLogger
 	{
 		// Arrange
 		string basicLogger =
-			@$"
+			$$"""
+
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
 [Logger]
 public interface ITestLogger
-{{
-	[{attribute}]
+{
+	[{{attribute}}]
 	void Log(string stringParam, int intParam, bool boolParam);
 
-	[{attribute}(eventId: 100)]
+	[{{attribute}}(eventId: 100)]
 	void Log_EventId_1(string stringParam, int intParam, bool boolParam);
 
-	[{attribute}(100)]
+	[{{attribute}}(100)]
 	void Log_EventId_3(string stringParam, int intParam, bool boolParam);
 
-	[{attribute}(messageTemplate: ""template"")]
+	[{{attribute}}(messageTemplate: "template")]
 	void Log_MessageTemplate_1(string stringParam, int intParam, bool boolParam);
 
-	[{attribute}(MessageTemplate = ""template"")]
+	[{{attribute}}(MessageTemplate = "template")]
 	void Log_MessageTemplate_2(string stringParam, int intParam, bool boolParam);
 
-	[{attribute}(""template"")]
+	[{{attribute}}("template")]
 	void Log_MessageTemplate_3(string stringParam, int intParam, bool boolParam);
-}}
-";
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(basicLogger);

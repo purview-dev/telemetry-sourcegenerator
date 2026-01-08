@@ -43,16 +43,16 @@ public interface ITestLogger
 	{
 		// Arrange
 		var basicLogger =
-			@$"
+			@"
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
 [Logger]
 public interface ITestLogger
-{{
+{
 	IDisposable BasicScoped(int intValue, string? nullableStringValue, uint uintValue);
-}}
+}
 ";
 
 		// Act
@@ -70,18 +70,20 @@ public interface ITestLogger
 	{
 		// Arrange
 		var basicLogger =
-			@$"
+			"""
+
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
 [Logger]
 public interface ITestLogger
-{{
-	[Log(MessageTemplate = ""intValue: {{intValue}} nullableStringValue: {{nullableStringValue}} uintValue: {{uintValue}}"")]
+{
+	[Log(MessageTemplate = "intValue: {intValue} nullableStringValue: {nullableStringValue} uintValue: {uintValue}")]
 	IDisposable BasicScoped(int intValue, string? nullableStringValue, uint uintValue);
-}}
-";
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
@@ -98,18 +100,20 @@ public interface ITestLogger
 	{
 		// Arrange
 		var basicLogger =
-			@$"
+			"""
+
 using Purview.Telemetry.Logging;
 
 namespace Testing;
 
 [Logger]
 public interface ITestLogger
-{{
-	[Log(MessageTemplate = ""intValue: {{intValue}} uintValue: {{uintValue}}"")]
+{
+	[Log(MessageTemplate = "intValue: {intValue} uintValue: {uintValue}")]
 	IDisposable BasicScoped(int intValue, string? UNUSEDnullableStringValue, uint uintValue);
-}}
-";
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
@@ -126,7 +130,7 @@ public interface ITestLogger
 	{
 		// Arrange
 		var basicLogger =
-			@$"
+			@"
 using Purview.Telemetry.Logging;
 using Microsoft.Extensions.Logging;
 
@@ -134,10 +138,10 @@ namespace Testing;
 
 [Logger]
 public interface ITestLogger
-{{
+{
 	[Log(Level = LogLevel.Information)]
 	IDisposable BasicScoped();
-}}
+}
 ";
 
 		// Act
@@ -155,7 +159,7 @@ public interface ITestLogger
 	{
 		// Arrange
 		var basicLogger =
-			@$"
+			@"
 using Purview.Telemetry.Logging;
 using Microsoft.Extensions.Logging;
 
@@ -163,10 +167,10 @@ namespace Testing;
 
 [Logger]
 public interface ITestLogger
-{{
+{
 	[Info]
 	IDisposable BasicScoped();
-}}
+}
 ";
 
 		// Act

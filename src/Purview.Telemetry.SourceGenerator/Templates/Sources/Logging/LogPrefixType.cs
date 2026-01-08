@@ -1,6 +1,6 @@
 ﻿#if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
 
-namespace Purview.Telemetry.Logging;
+namespace Purview.Telemetry;
 
 /// <summary>
 /// The types of prefixes that can be used for the log entry name generation.
@@ -24,9 +24,9 @@ enum LogPrefixType
 	Class = 2,
 
 	/// <summary>
-	/// Uses the custom name specified by <see cref="global::Purview.Telemetry.Logging.LoggerAttribute.CustomPrefix"/>. This is used when
-	/// the <see cref="global::Purview.Telemetry.Logging.LoggerAttribute.CustomPrefix"/> is set
-	/// regardless of <see cref="global::Purview.Telemetry.Logging.LoggerAttribute.PrefixType"/>.
+	/// Uses the custom name specified by <see cref="global::Purview.Telemetry.LoggerAttribute.CustomPrefix"/>. This is used when
+	/// the <see cref="global::Purview.Telemetry.LoggerAttribute.CustomPrefix"/> is set
+	/// regardless of <see cref="global::Purview.Telemetry.LoggerAttribute.PrefixType"/>.
 	/// </summary>
 	Custom = 3,
 

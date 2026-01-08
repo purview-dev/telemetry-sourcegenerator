@@ -199,7 +199,7 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		);
 	}
 
-	ReturnTypeValidation ValidateMetricsReturnType(ITypeSymbol returnType)
+	static ReturnTypeValidation ValidateMetricsReturnType(ITypeSymbol returnType)
 	{
 		// Metrics methods should return void or observable types
 		if (returnType.SpecialType == SpecialType.System_Void)
@@ -265,7 +265,7 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		return genericValueTaskType != null && SymbolEqualityComparer.Default.Equals(namedType.ConstructedFrom, genericValueTaskType);
 	}
 
-	bool IsObservableMetricsReturnType(ITypeSymbol type)
+	static bool IsObservableMetricsReturnType(ITypeSymbol type)
 	{
 		// Observable metrics can return numeric types or Func<T> where T is numeric
 		if (IsNumericType(type))
@@ -305,7 +305,7 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		return false;
 	}
 
-	bool IsMeasurementType(ITypeSymbol type)
+	static bool IsMeasurementType(ITypeSymbol type)
 	{
 		return type is INamedTypeSymbol namedType && namedType.Name == "Measurement" &&
 			   namedType.ContainingNamespace?.ToDisplayString() == "System.Diagnostics.Metrics" &&

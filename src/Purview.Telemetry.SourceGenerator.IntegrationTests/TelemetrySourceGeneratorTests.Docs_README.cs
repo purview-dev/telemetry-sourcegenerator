@@ -9,7 +9,8 @@ partial class TelemetrySourceGeneratorTests
 	{
 		// Arrange
 		const string basicTelemetry =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 using Purview.Telemetry.Metrics;
@@ -59,7 +60,7 @@ interface IEntityStoreTelemetry
     /// <summary>
     /// Generates a structured log message using an ILogger, specifically defined as Error.
     /// </summary>
-    [Error(""An explicit error message. The entity Id is {EntityId}, and the error is {Exception}."")]
+    [Error("An explicit error message. The entity Id is {EntityId}, and the error is {Exception}.")]
     void ExplicitErrorMessage(int entityId, Exception exception);
 
     /// <summary>
@@ -68,7 +69,8 @@ interface IEntityStoreTelemetry
     [AutoCounter]
     void RetrievingEntity(int entityId);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
@@ -86,20 +88,21 @@ interface IEntityStoreTelemetry
 	{
 		// Arrange
 		const string basicTelemetry =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
-[ActivitySource(""some-activity"")]
+[ActivitySource("some-activity")]
 interface IActivityTelemetry
 {
     [Activity]
     Activity? GettingItemFromCache([Baggage]string key, [Tag]string itemType);
 
-    [Event(""cachemiss"")]
+    [Event("cachemiss")]
     void Miss(Activity? activity);
 
-    [Event(""cachehit"")]
+    [Event("cachehit")]
     void Hit(Activity? activity);
 
     [Event]
@@ -108,7 +111,8 @@ interface IActivityTelemetry
     [Event]
     void Finished(Activity? activity, [Tag]TimeSpan duration);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
@@ -218,13 +222,14 @@ interface IMeterTelemetry
 	{
 		// Arrange
 		const string basicTelemetry =
-			@"
+			"""
+
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
 using Purview.Telemetry.Metrics;
 using System.Diagnostics;
 
-[ActivitySource(""multi-targeting"")]
+[ActivitySource("multi-targeting")]
 [Logger]
 [Meter]
 interface IServiceTelemetry
@@ -244,7 +249,8 @@ interface IServiceTelemetry
     [Counter(AutoIncrement = true)]
     void AnAutoIncrement([Tag]int value);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
