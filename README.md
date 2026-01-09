@@ -4,18 +4,21 @@ Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system
 
 [![CI](https://github.com/kjldev/purview-telemetry-sourcegenerator/actions/workflows/ci.yml/badge.svg)](https://github.com/kjldev/purview-telemetry-sourcegenerator/actions/workflows/ci.yml)
 
-This approach allows for:
+## Features
 
-- Faster iteration cycles - simply create the method on your interface and the implementation will be automatically generated
-- Easy mocking/ substitution for testing - a full sample project, including tests can be found [here](https://github.com/kjldev/purview-telemetry-sourcegenerator/tree/main/samples/SampleApp)
-- Built-in dependency injection helper generation
+- **Zero boilerplate** - define methods on an interface, get full telemetry implementation generated
+- **Multi-target generation** - generate Activities, Logging, and Metrics from a single interface
+- **Testable** - easy mocking/substitution for unit testing
+- **DI-ready** - automatic dependency injection registration helpers
 
-Use the latest version available on [NuGet](https://www.nuget.org/packages/Purview.Telemetry.SourceGenerator/), which supports the following frameworks:
+## Supported Frameworks
 
-- .NET Framework 4.7.2, or higher
+- .NET Framework 4.8
 - .NET 8 or higher
 
-Reference in your `Directory.Build.props` or `.csproj` file:
+## Installation
+
+Add to your `Directory.Build.props` or `.csproj` file:
 
 ```xml
 <PackageReference Include="Purview.Telemetry.SourceGenerator" Version="4.0.0-alpha.1">
@@ -24,83 +27,135 @@ Reference in your `Directory.Build.props` or `.csproj` file:
 </PackageReference>
 ```
 
-For more information see the [wiki](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki).
+## Quick Start
 
-## Example Interface
-
-This is called a **multi-target interface** because it generates more than one output type: **Activities, Logging, and Metrics**.
-
-> [!TIP]
-> When generating a single target, the generator will automatically infer the necessary attributes. More information about multi-targeting can be found in [here](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Multi-Targeting).
+Define an interface with telemetry methods and the generator creates the implementation:
 
 ```csharp
-using Purview.Telemetry.Activities;
-using Purview.Telemetry.Logging;
-using Purview.Telemetry.Metrics;
+using Purview.Telemetry;
 
-/// <summary>
-/// Generates an implementation of the methods for each generation type (Activity, Logging, or Metrics)
-/// and an extension method to enable easy registration with the IServiceCollection.
-/// </summary>
+// Multi-target interface: generates Activities, Logging, AND Metrics from combined methods
 [ActivitySource]
 [Logger]
 [Meter]
 interface IEntityStoreTelemetry
 {
-    /// <summary>
-    /// Creates and starts an Activity and adds the parameters as Tags and Baggage.
-    /// </summary>
+    // MULTI-TARGET: Creates Activity + Logs Info + Increments Counter - all from one method!
     [Activity]
+    [Info]
+    [AutoCounter]
     Activity? GettingEntityFromStore(int entityId, [Baggage]string serviceUrl);
 
-    /// <summary>
-    /// Adds an ActivityEvent to the Activity with the parameters as Tags.
-    /// </summary>
+    // MULTI-TARGET: Adds ActivityEvent + Logs the duration
     [Event]
+    [Log]
     void GetDuration(Activity? activity, int durationInMS);
 
-    /// <summary>
-    /// Adds the parameters as Baggage to the Activity.
-    /// </summary>
+    // Single-target examples (when you only need one telemetry type):
+    
+    // Activity-only: Adds Baggage to the Activity
     [Context]
     void RetrievedEntity(Activity? activity, float totalValue, int lastUpdatedByUserId);
 
-    /// <summary>
-    /// Generates a structured log message using an ILogger - defaults to Informational.
-    /// </summary>
-    [Log]
-    void ProcessingEntity(int entityId, string updateState);
+    // Log-only: Structured log message
+    [Warning]
+    void EntityNotFound(int entityId);
 
-    /// <summary>
-    /// Generates a structured log message using an ILogger, specifically defined as Informational.
-    /// </summary>
-    [Info]
-    void ProcessingAnotherEntity(int entityId, string updateState);
-
-    /// <summary>
-    /// Adds 1 to a Counter<T> with the entityId as a Tag.
-    /// </summary>
-    [AutoCounter]
-    void RetrievingEntity(int entityId);
+    // Metric-only: Histogram for tracking values
+    [Histogram]
+    void RecordEntitySize(int sizeInBytes);
 }
 ```
 
-To see the code generated for the `IEntityStoreTelemetry` interface, see the [`Generated Output`](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Generated-Output) page in the wiki.
+Register with dependency injection:
 
-## Example Project
+```csharp
+// Generated extension method
+services.AddEntityStoreTelemetry();
+```
 
-The [.NET Aspire Sample](https://github.com/kjldev/purview-telemetry-sourcegenerator/tree/main/samples/SampleApp) demos the Activities, Logs, and Metrics generation working together with the Aspire Dashboard.
+Then inject and use - a single method call emits an Activity, Log, and Metric simultaneously:
 
-Check the page in the the [wiki](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Sample-Application) for information.
+```csharp
+public class EntityService(IEntityStoreTelemetry telemetry)
+{
+    public async Task<Entity> GetEntityAsync(int id, string serviceUrl, CancellationToken cancellationToken)
+    {
+        // Single call creates Activity AND logs AND increments counter
+        using var activity = telemetry.GettingEntityFromStore(id, serviceUrl);
+        
+        var entity = await _repository.GetAsync(id, cancellationToken);
+                        
+        // Adds event to activity AND logs duration
+        telemetry.GetDuration(activity, stopwatch.ElapsedMilliseconds);
+
+        if (entity == null)
+        {
+            // Logs warning if entity not found
+            telemetry.EntityNotFound(id);
+            return null;
+        })
+
+        // Activity context addition
+        telemetry.RetrievedEntity(activity, entity.TotalValue, entity.LastUpdatedByUserId);
+        
+        // Histogram only records size
+        telemetry.RecordEntitySize(entity.SizeInBytes);
+
+        return entity;
+    }
+}
+```
+
+## Telemetry Types
+
+| Attribute | Generation Type | Description |
+|-----------|----------------|-------------|
+| `[ActivitySource]` | Class-level | Marks interface for Activity generation |
+| `[Activity]` | Method | Creates and starts a new Activity |
+| `[Event]` | Method | Adds an ActivityEvent to an Activity |
+| `[Context]` | Method | Adds Baggage to an Activity |
+| `[Logger]` | Class-level | Marks interface for ILogger generation |
+| `[Log]` | Method | Generates structured log message |
+| `[Debug]`, `[Info]`, `[Warning]`, `[Error]`, `[Critical]` | Method | Log with specific level |
+| `[Meter]` | Class-level | Marks interface for Metrics generation |
+| `[Counter]`, `[AutoCounter]` | Method | Counter instrument |
+| `[Histogram]` | Method | Histogram instrument |
+| `[ObservableCounter]`, `[ObservableGauge]`, `[ObservableUpDownCounter]` | Method | Observable instruments |
 
 > [!TIP]
-> This sample project has [`EmitCompilerGeneratedFiles`](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration-generator#enable-the-configuration-source-generator) set to `true`, so you can easily see the generated output.
+> For single-target interfaces (only Activities, only Logging, or only Metrics), the generator automatically infers the necessary attributes. See the [wiki](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Multi-Targeting) for details.
 
-## Notes on Logging Generation
+## Documentation
 
-There are two types of logging generation based on:
+- [Full Wiki](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki)
+- [Generated Output Examples](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Generated-Output)
+- [Multi-Targeting Guide](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Multi-Targeting)
+- [Logging Configuration](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Logging)
 
-1. **Microsoft Logging Extension Packages** – Determined by the NuGet packages referenced in your project.
-2. **Attribute-based Configuration** – Controlled using attributes in your code.
+## Sample Project
 
-For more details, see the [Logging](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Logging) page in the wiki.  
+The [.NET Aspire Sample](https://github.com/kjldev/purview-telemetry-sourcegenerator/tree/main/samples/SampleApp) demonstrates Activities, Logs, and Metrics generation working together with the Aspire Dashboard.
+
+> [!TIP]
+> The sample project has [`EmitCompilerGeneratedFiles`](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration-generator#enable-the-configuration-source-generator) enabled so you can inspect the generated output.
+
+## v4 Breaking Changes
+
+### Namespace Consolidation
+
+v4 consolidates all attributes into a single namespace. Update your using statements:
+
+**Before (v3):**
+```csharp
+using Purview.Telemetry.Activities;
+using Purview.Telemetry.Logging;
+using Purview.Telemetry.Metrics;
+```
+
+**After (v4):**
+```csharp
+using Purview.Telemetry;
+```
+
+All attributes (`[ActivitySource]`, `[Logger]`, `[Meter]`, `[Activity]`, `[Event]`, `[Log]`, `[Counter]`, etc.) are now in the unified `Purview.Telemetry` namespace.
