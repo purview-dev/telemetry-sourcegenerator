@@ -20,6 +20,13 @@ namespace Testing
 		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, string, string, global::System.Exception?> _logOperationAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<string, string>(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(1933755022, "LogOperation"), "LogOperation: OperationId = {OperationId}, Message = {Message}");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+		public MultiTelemetryCore(global::Microsoft.Extensions.Logging.ILogger<global::Testing.IMultiTelemetry> logger, global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
+		{
+			_logger = logger;
+			InitializeMeters(meterFactory);
+		}
+
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public void LogOperation(string operationId, string message)
 		{

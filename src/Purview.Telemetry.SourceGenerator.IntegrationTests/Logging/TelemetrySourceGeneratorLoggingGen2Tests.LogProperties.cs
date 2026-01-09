@@ -1,14 +1,15 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Logging;
+namespace Purview.Telemetry.SourceGenerator.Logging;
 
 partial class TelemetrySourceGeneratorLoggingGen2Tests
 {
 	[Test]
-	public async Task Generate_GivenMethodWithLogProperty_GeneratesIndividualProperties()
+	public async Task Generate_GivenMethodWithLogProperty_GeneratesIndividualProperties(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
+		const string basicLogger =
 			@"
-using Purview.Telemetry.Logging;
 using Microsoft.Extensions.Logging;
 
 namespace Testing;
@@ -30,20 +31,22 @@ public class WeatherForecast
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenMethodWithLogPropertyAndExpandEnumerable_GeneratesDiagnostic()
+	public async Task Generate_GivenMethodWithLogPropertyAndExpandEnumerable_GeneratesDiagnostic(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
+		const string basicLogger =
 			@"
-using Purview.Telemetry.Logging;
 using Microsoft.Extensions.Logging;
 
 namespace Testing;
@@ -65,21 +68,26 @@ public class WeatherForecast
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, expectsDiagnostics: true);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			expectsDiagnostics: true,
+			cancellationToken: cancellationToken
+		);
 	}
 
 	[Test]
-	public async Task Generate_GivenMethodWithExceptionUsedInTemplate_UsesPassInException()
+	public async Task Generate_GivenMethodWithExceptionUsedInTemplate_UsesPassInException(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
-			"""
+		const string basicLogger = """
 
-using Purview.Telemetry.Logging;
 using Microsoft.Extensions.Logging;
 
 namespace Testing;
@@ -96,20 +104,22 @@ public interface ITestLogger
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenMethodWithLogPropertyOmit_GeneratesIndividualProperties()
+	public async Task Generate_GivenMethodWithLogPropertyOmit_GeneratesIndividualProperties(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
+		const string basicLogger =
 			@"
-using Purview.Telemetry.Logging;
 using Microsoft.Extensions.Logging;
 
 namespace Testing;
@@ -131,20 +141,22 @@ public class WeatherForecast
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenMethodWithLogPropertySkipNull_GeneratesIndividualProperties()
+	public async Task Generate_GivenMethodWithLogPropertySkipNull_GeneratesIndividualProperties(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
+		const string basicLogger =
 			@"
-using Purview.Telemetry.Logging;
 using Microsoft.Extensions.Logging;
 
 namespace Testing;
@@ -166,20 +178,22 @@ public class WeatherForecast
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenMethodWithLogPropertySkipNullAndOmit_GeneratesIndividualProperties()
+	public async Task Generate_GivenMethodWithLogPropertySkipNullAndOmit_GeneratesIndividualProperties(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
+		const string basicLogger =
 			@"
-using Purview.Telemetry.Logging;
 using Microsoft.Extensions.Logging;
 
 namespace Testing;
@@ -201,20 +215,22 @@ public class WeatherForecast
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenMethodWithLogPropertyIgnore_GeneratesIndividualProperties()
+	public async Task Generate_GivenMethodWithLogPropertyIgnore_GeneratesIndividualProperties(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
+		const string basicLogger =
 			@"
-using Purview.Telemetry.Logging;
 using Microsoft.Extensions.Logging;
 
 namespace Testing;
@@ -239,10 +255,11 @@ public class WeatherForecast
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

@@ -58,38 +58,38 @@ partial class SharedHelpers
 						nameValue = new((string)value);
 					}
 					else if (
-											name.Equals(
-												nameof(MeterAttributeRecord.InstrumentPrefix),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(MeterAttributeRecord.InstrumentPrefix),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						instrumentPrefix = new((string)value);
 					}
 					else if (
-											name.Equals(
-												nameof(MeterAttributeRecord.IncludeAssemblyInstrumentPrefix),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(MeterAttributeRecord.IncludeAssemblyInstrumentPrefix),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						includeAssemblyInstrumentPrefix = new((bool)value);
 					}
 					else if (
-											name.Equals(
-												nameof(MeterAttributeRecord.LowercaseInstrumentName),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(MeterAttributeRecord.LowercaseInstrumentName),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						lowercaseInstrumentName = new((bool)value);
 					}
 					else if (
-											name.Equals(
-												nameof(MeterAttributeRecord.LowercaseTagKeys),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(MeterAttributeRecord.LowercaseTagKeys),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						lowercaseTagKeys = new((bool)value);
 					}
@@ -153,29 +153,29 @@ partial class SharedHelpers
 						instrumentPrefix = new((string)value);
 					}
 					else if (
-											name.Equals(
-												nameof(MeterGenerationAttributeRecord.InstrumentSeparator),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(MeterGenerationAttributeRecord.InstrumentSeparator),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						instrumentSeparator = new((string)value);
 					}
 					else if (
-											name.Equals(
-												nameof(MeterGenerationAttributeRecord.LowercaseInstrumentName),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(MeterGenerationAttributeRecord.LowercaseInstrumentName),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						lowercaseInstrumentName = new((bool)value);
 					}
 					else if (
-											name.Equals(
-												nameof(MeterGenerationAttributeRecord.LowercaseTagKeys),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(MeterGenerationAttributeRecord.LowercaseTagKeys),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						lowercaseTagKeys = new((bool)value);
 					}
@@ -247,38 +247,38 @@ partial class SharedHelpers
 						nameValue = new((string)value);
 					}
 					else if (
-											name.Equals(
-												nameof(InstrumentAttributeRecord.Unit),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(InstrumentAttributeRecord.Unit),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						unit = new((string)value);
 					}
 					else if (
-											name.Equals(
-												nameof(InstrumentAttributeRecord.Description),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(InstrumentAttributeRecord.Description),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						description = new((string)value);
 					}
 					else if (
-											name.Equals(
-												nameof(InstrumentAttributeRecord.AutoIncrement),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(InstrumentAttributeRecord.AutoIncrement),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						autoIncrement = new((bool)value);
 					}
 					else if (
-											name.Equals(
-												nameof(InstrumentAttributeRecord.ThrowOnAlreadyInitialized),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(InstrumentAttributeRecord.ThrowOnAlreadyInitialized),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						throwOnAlreadyInitialized = new((bool)value);
 					}

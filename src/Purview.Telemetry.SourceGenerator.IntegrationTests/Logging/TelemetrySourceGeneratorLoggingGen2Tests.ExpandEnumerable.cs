@@ -1,17 +1,17 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Logging;
+namespace Purview.Telemetry.SourceGenerator.Logging;
 
 partial class TelemetrySourceGeneratorLoggingGen2Tests
 {
 	[Test]
 	[MethodDataSource(nameof(ExpandableArrays))]
 	public async Task Generate_GivenMethodWithExpandableArrayOrEnumerable_GeneratesCorrectElements(
-		string parameter
+		string parameter,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
 		var basicLogger =
 			@$"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -25,23 +25,28 @@ public interface ITestLogger
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, parameters: parameter);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			cancellationToken: cancellationToken,
+			parameters: parameter
+		);
 	}
 
 	[Test]
 	[MethodDataSource(nameof(ExpandableMaxCount))]
 	public async Task Generate_GivenMethodWithExpandableAndHighMaxCount_GeneratesDiagnostic(
-		int maxCount
+		int maxCount,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
 		var basicLogger =
 			@$"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -57,7 +62,8 @@ public interface ITestLogger
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
@@ -66,6 +72,7 @@ public interface ITestLogger
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			expectedDiagnosticCodes: ["TSG2008"],
+			cancellationToken: cancellationToken,
 			parameters: maxCount
 		);
 	}

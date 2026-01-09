@@ -13,9 +13,6 @@
 
 namespace Purview.Interfaces.ApplicationServices.Caching
 {
-	[global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
-	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class CacheServiceProviderTelemetryCore : global::Purview.Interfaces.ApplicationServices.Caching.ICacheServiceProviderTelemetry
 	{
 		readonly global::Microsoft.Extensions.Logging.ILogger<global::Purview.Interfaces.ApplicationServices.Caching.ICacheServiceProviderTelemetry> _logger;

@@ -29,24 +29,66 @@ static partial class SharedHelpers
 
 	public static bool ShouldEmit(GenerationType requestingType, GenerationType generationType)
 	{
-		if (requestingType == generationType)
-			return true;
+		// For multi-targeting: emit if the interface has the requesting target type
+		// This allows ActivitySource+Logger+Meter interfaces to generate all three targets
+		return generationType.HasFlag(requestingType);
+	}
 
-		var hasActivities = generationType.HasFlag(GenerationType.Activities);
-		var hasLogging = generationType.HasFlag(GenerationType.Logging);
-		var hasMetrics = generationType.HasFlag(GenerationType.Metrics);
+	/// <summary>
+	/// Determines if the DI extension should be generated for this requesting type.
+	/// Only one target should generate the DI extension to avoid duplicate files.
+	/// </summary>
+	public static bool ShouldEmitDIExtension(
+		GenerationType requestingType,
+		GenerationType generationType
+	)
+	{
+		// Only emit DI extension from one target to avoid duplicates
+		// Priority: Activities > Logging > Metrics
+		return generationType.HasFlag(GenerationType.Activities)
+				? requestingType == GenerationType.Activities
+			: generationType.HasFlag(GenerationType.Logging)
+				? requestingType == GenerationType.Logging
+			: generationType.HasFlag(GenerationType.Metrics)
+				&& requestingType == GenerationType.Metrics;
+	}
 
-		if (hasMetrics)
-			return requestingType == GenerationType.Metrics;
+	/// <summary>
+	/// Determines if class-level attributes should be emitted for this requesting type.
+	/// Only one target should emit class attributes to avoid duplicate attributes on partial classes.
+	/// </summary>
+	public static bool ShouldEmitClassAttributes(
+		GenerationType requestingType,
+		GenerationType generationType
+	)
+	{
+		// Only emit class attributes from one target to avoid duplicates
+		// Priority: Activities > Logging > Metrics
+		return generationType.HasFlag(GenerationType.Activities)
+				? requestingType == GenerationType.Activities
+			: generationType.HasFlag(GenerationType.Logging)
+				? requestingType == GenerationType.Logging
+			: generationType.HasFlag(GenerationType.Metrics)
+				&& requestingType == GenerationType.Metrics;
+	}
 
-		if (hasLogging && (!hasActivities || !hasMetrics))
-			return requestingType == GenerationType.Logging;
-
-		if (hasActivities && (!hasLogging || !hasMetrics))
-			return requestingType == GenerationType.Activities;
-
-		// Should really get here unless the generation type is None.
-		return false;
+	/// <summary>
+	/// Determines if the constructor should be emitted for this requesting type.
+	/// Only one target should emit the constructor to avoid duplicate definitions.
+	/// Constructor is emitted by the first target that needs one (Logging or Metrics).
+	/// </summary>
+	public static bool ShouldEmitConstructor(
+		GenerationType requestingType,
+		GenerationType generationType
+	)
+	{
+		// Activities don't use the constructor (no injected dependencies)
+		// Only Logging and Metrics need constructor
+		// Priority: Logging > Metrics
+		return generationType.HasFlag(GenerationType.Logging)
+			? requestingType == GenerationType.Logging
+			: generationType.HasFlag(GenerationType.Metrics)
+				&& requestingType == GenerationType.Metrics;
 	}
 
 	public static bool AttributeParser(
@@ -277,7 +319,9 @@ static partial class SharedHelpers
 					out assemblyAttribute
 				)
 			)
+			{
 				return CreateDefault();
+			}
 		}
 
 		var assemblyTelemetryGeneration =
@@ -341,29 +385,29 @@ static partial class SharedHelpers
 					generateDependencyExtension = new((bool)value);
 				}
 				else if (
-									name.Equals(
-										nameof(TelemetryGenerationAttributeRecord.ClassName),
-										StringComparison.OrdinalIgnoreCase
-									)
-								)
+					name.Equals(
+						nameof(TelemetryGenerationAttributeRecord.ClassName),
+						StringComparison.OrdinalIgnoreCase
+					)
+				)
 				{
 					className = new((string)value);
 				}
 				else if (
-									name.Equals(
-										nameof(TelemetryGenerationAttributeRecord.DependencyInjectionClassName),
-										StringComparison.OrdinalIgnoreCase
-									)
-								)
+					name.Equals(
+						nameof(TelemetryGenerationAttributeRecord.DependencyInjectionClassName),
+						StringComparison.OrdinalIgnoreCase
+					)
+				)
 				{
 					dependencyInjectionClassName = new((string)value);
 				}
 				else if (
-									name.Equals(
-										nameof(TelemetryGenerationAttributeRecord.DependencyInjectionClassIsPublic),
-										StringComparison.OrdinalIgnoreCase
-									)
-								)
+					name.Equals(
+						nameof(TelemetryGenerationAttributeRecord.DependencyInjectionClassIsPublic),
+						StringComparison.OrdinalIgnoreCase
+					)
+				)
 				{
 					dependencyInjectionClassIsPublic = new((bool)value);
 				}
@@ -379,5 +423,65 @@ static partial class SharedHelpers
 				DependencyInjectionClassIsPublic: dependencyInjectionClassIsPublic ?? new(false)
 			)
 			: null;
+	}
+
+	/// <summary>
+	/// Gets the ExcludeTargetsAttribute from a parameter, if present.
+	/// </summary>
+	public static ExcludeTargetsAttributeRecord? GetExcludeTargetsAttribute(
+		IParameterSymbol parameter,
+		SemanticModel semanticModel,
+		GenerationLogger? logger,
+		CancellationToken token
+	)
+	{
+		if (
+			!Utilities.TryContainsAttribute(
+				parameter,
+				Constants.Shared.ExcludeTargetsAttribute,
+				token,
+				out var attributeData
+			)
+		)
+		{
+			return null;
+		}
+
+		GenerationType excludedTargets = GenerationType.None;
+
+		return !AttributeParser(
+			attributeData!,
+			(name, value) =>
+			{
+				if (
+					name.Equals("targets", StringComparison.OrdinalIgnoreCase)
+					|| name.Equals("excludedTargets", StringComparison.OrdinalIgnoreCase)
+				)
+				{
+					// The value comes as an int from the enum
+					excludedTargets = (GenerationType)(int)value;
+				}
+			},
+			semanticModel,
+			logger,
+			token
+		)
+			? null
+			: new ExcludeTargetsAttributeRecord(excludedTargets);
+	}
+
+	/// <summary>
+	/// Checks if a parameter should be excluded from a specific target based on ExcludeTargetsAttribute.
+	/// </summary>
+	public static bool IsParameterExcludedFromTarget(
+		IParameterSymbol parameter,
+		GenerationType target,
+		SemanticModel semanticModel,
+		GenerationLogger? logger,
+		CancellationToken token
+	)
+	{
+		var excludeTargets = GetExcludeTargetsAttribute(parameter, semanticModel, logger, token);
+		return excludeTargets?.ExcludedTargets.HasFlag(target) == true;
 	}
 }

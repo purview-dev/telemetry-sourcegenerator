@@ -1,17 +1,15 @@
-﻿namespace Purview.Telemetry.SourceGenerator;
+namespace Purview.Telemetry.SourceGenerator;
 
 partial class TelemetrySourceGeneratorTests
 {
 	[Test]
-	public async Task Generate_GivenPartialInterface_GeneratesTelemetry()
+	public async Task Generate_GivenPartialInterface_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string partialInterfaceDef =
-			"""
+		const string partialInterfaceDef = """
 
-using Purview.Telemetry.Activities;
-using Purview.Telemetry.Logging;
-using Purview.Telemetry.Metrics;
 
 [ActivitySource("activity-source")]
 [Logger]
@@ -24,7 +22,6 @@ partial interface ITestTelemetry
 
 		const string partialInterfaceActivities =
 			@"
-using Purview.Telemetry.Activities;
 
 partial interface ITestTelemetry
 {
@@ -41,7 +38,6 @@ partial interface ITestTelemetry
 
 		const string partialInterfaceLogging =
 			@"
-using Purview.Telemetry.Logging;
 
 partial interface ITestTelemetry
 {
@@ -55,7 +51,6 @@ partial interface ITestTelemetry
 
 		const string partialInterfaceMetric =
 			@"
-using Purview.Telemetry.Metrics;
 
 
 partial interface ITestTelemetry
@@ -73,23 +68,22 @@ partial interface ITestTelemetry
 				Text(partialInterfaceActivities),
 				Text(partialInterfaceLogging),
 				Text(partialInterfaceMetric),
-			]
+			],
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenNoNamespace_GeneratesTelemetry()
+	public async Task Generate_GivenNoNamespace_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			"""
+		const string basicTelemetry = """
 
-using Purview.Telemetry.Activities;
-using Purview.Telemetry.Logging;
-using Purview.Telemetry.Metrics;
 
 [ActivitySource("activity-source")]
 [Logger]
@@ -118,22 +112,23 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicTelemetryGen_GeneratesTelemetry()
+	public async Task Generate_GivenBasicTelemetryGen_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			"""
+		const string basicTelemetry = """
 
-using Purview.Telemetry.Activities;
-using Purview.Telemetry.Logging;
-using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
@@ -164,20 +159,23 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicEventWithException_GeneratesTelemetry()
+	public async Task Generate_GivenBasicEventWithException_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			"""
+		const string basicTelemetry = """
 
-using Purview.Telemetry.Activities;
 
 namespace Testing;
 
@@ -194,20 +192,23 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicEventWithExceptionAndEscape_GeneratesTelemetry()
+	public async Task Generate_GivenBasicEventWithExceptionAndEscape_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			"""
+		const string basicTelemetry = """
 
-using Purview.Telemetry.Activities;
 
 namespace Testing;
 
@@ -224,20 +225,23 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicEventWithExceptionAndDisabledOTelExceptionRulesAndEscape_GeneratesTelemetry()
+	public async Task Generate_GivenBasicEventWithExceptionAndDisabledOTelExceptionRulesAndEscape_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			"""
+		const string basicTelemetry = """
 
-using Purview.Telemetry.Activities;
 
 namespace Testing;
 
@@ -254,20 +258,23 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicEventWithExplicitExceptionAndNamedExceptionAndRulesAreFalse_GeneratesTelemetry()
+	public async Task Generate_GivenBasicEventWithExplicitExceptionAndNamedExceptionAndRulesAreFalse_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			"""
+		const string basicTelemetry = """
 
-using Purview.Telemetry.Activities;
 
 namespace Testing;
 
@@ -284,23 +291,26 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicEventWithExplicitExceptionAndEventIsNamedExceptionAndRulesAreTrue_GeneratesTelemetry()
+	public async Task Generate_GivenBasicEventWithExplicitExceptionAndEventIsNamedExceptionAndRulesAreTrue_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			"""
+		const string basicTelemetry = """
 
-using Purview.Telemetry.Activities;
 
 namespace Testing;
-	
+
 [ActivitySource("activity-source")]
 public interface ITestTelemetry
 {
@@ -314,22 +324,23 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenDuplicateTelemetryGen_GeneratesDiagnostics()
+	public async Task Generate_GivenDuplicateTelemetryGen_GeneratesDiagnostics(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			"""
+		const string basicTelemetry = """
 
-using Purview.Telemetry.Activities;
-using Purview.Telemetry.Logging;
-using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
@@ -367,14 +378,18 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
 			s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
-			validationCompilation: false
+			validationCompilation: false,
+			cancellationToken: cancellationToken
 		);
 	}
 }

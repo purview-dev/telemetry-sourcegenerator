@@ -1,15 +1,13 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Activities;
+namespace Purview.Telemetry.SourceGenerator.Activities;
 
 partial class TelemetrySourceGeneratorActivityTests
 {
 	[Test]
-	public async Task Generate_GivenBasicGen_GeneratesActivity()
+	public async Task Generate_GivenBasicGen_GeneratesActivity(CancellationToken cancellationToken)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 
 namespace Testing;
 
@@ -25,20 +23,23 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenInterfaceWithNoActivityButOtherActivityBasedMethods_GeneratesDiagnostic()
+	public async Task Generate_GivenInterfaceWithNoActivityButOtherActivityBasedMethods_GeneratesDiagnostic(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 
 namespace Testing;
 
@@ -54,29 +55,33 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
 			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG3012"]
+			expectedDiagnosticCodes: ["TSG3012"],
+			cancellationToken: cancellationToken
 		);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicGenAndNoActivityName_GeneratesActivity()
+	public async Task Generate_GivenBasicGenAndNoActivityName_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string basicActivity =
 			@"
-using Purview.Telemetry.Activities;
-
 namespace Testing;
 
 [ActivitySource]
-public interface ITestActivities 
+public interface ITestActivities
 {
 	[Activity]
 	System.Diagnostics.Activity? Activity([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
@@ -87,20 +92,23 @@ public interface ITestActivities
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenWithNonStringBaggage_RaisesDiagnosticAndGenerates()
+	public async Task Generate_GivenWithNonStringBaggage_RaisesDiagnosticAndGenerates(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 
 namespace Testing;
 
@@ -119,25 +127,28 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
 			s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG3000"]
+			expectedDiagnosticCodes: ["TSG3000"],
+			cancellationToken: cancellationToken
 		);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicGenWithReturningActivity_GeneratesActivity()
+	public async Task Generate_GivenBasicGenWithReturningActivity_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
-
-using Purview.Telemetry.Activities;
+		const string basicActivity = """
 using System.Diagnostics;
 
 namespace Testing;
@@ -154,20 +165,23 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicGenWithReturningNullableActivity_GeneratesActivity()
+	public async Task Generate_GivenBasicGenWithReturningNullableActivity_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
@@ -184,20 +198,23 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicGenWithNullableParams_GeneratesActivity()
+	public async Task Generate_GivenBasicGenWithNullableParams_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
@@ -214,9 +231,12 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

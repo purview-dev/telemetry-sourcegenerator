@@ -33,7 +33,7 @@ record ActivitySourceTarget(
 			null,
 			null!,
 			null,
-			null!,
+			null,
 			Constants.Empty,
 			null,
 			null,
@@ -67,7 +67,8 @@ record ActivityBasedParameterTarget(
 	ActivityParameterDestination ParamDestination,
 	bool SkipOnNullOrEmpty,
 	bool IsException,
-	ImmutableArray<Location> Locations
+	ImmutableArray<Location> Locations,
+	GenerationType ExcludedTargets
 );
 
 enum ActivityParameterDestination

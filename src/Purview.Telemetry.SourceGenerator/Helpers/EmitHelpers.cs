@@ -74,7 +74,8 @@ static class EmitHelpers
 	{
 		token.ThrowIfCancellationRequested();
 
-		if (SharedHelpers.ShouldEmit(requestingType, generationType))
+		// Only emit class attributes from one target to avoid duplicates on partial classes
+		if (SharedHelpers.ShouldEmitClassAttributes(requestingType, generationType))
 		{
 			builder
 				.Append(indent, Constants.System.EditorBrowsableConstant)

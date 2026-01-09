@@ -1,15 +1,15 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Logging;
+namespace Purview.Telemetry.SourceGenerator.Logging;
 
 partial class TelemetrySourceGeneratorLoggingTests
 {
 	[Test]
-	public async Task Generate_GivenAssemblyEnableDI_GeneratesLog()
+	public async Task Generate_GivenAssemblyEnableDI_GeneratesLog(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string basicLog =
 			@"
-using Purview.Telemetry;
-using Purview.Telemetry.Logging;
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = true)]
 
@@ -23,20 +23,24 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLog, disableDependencyInjection: false);
+		var generationResult = await GenerateAsync(
+			basicLog,
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenInterfaceEnableDI_GeneratesLog()
+	public async Task Generate_GivenInterfaceEnableDI_GeneratesLog(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string basicLog =
 			@"
-using Purview.Telemetry;
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -49,20 +53,24 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLog, disableDependencyInjection: false);
+		var generationResult = await GenerateAsync(
+			basicLog,
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenDIDisabledAtAssemblyAndInterfaceEnableDI_GeneratesLog()
+	public async Task Generate_GivenDIDisabledAtAssemblyAndInterfaceEnableDI_GeneratesLog(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string basicLog =
 			@"
-using Purview.Telemetry;
-using Purview.Telemetry.Logging;
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = false)]
 
@@ -77,20 +85,24 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLog, disableDependencyInjection: false);
+		var generationResult = await GenerateAsync(
+			basicLog,
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenDIEnabledAtAssemblyAndInterfaceDisabledDI_GeneratesLog()
+	public async Task Generate_GivenDIEnabledAtAssemblyAndInterfaceDisabledDI_GeneratesLog(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string basicLog =
 			@"
-using Purview.Telemetry;
-using Purview.Telemetry.Logging;
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = true)]
 
@@ -105,9 +117,13 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLog, disableDependencyInjection: false);
+		var generationResult = await GenerateAsync(
+			basicLog,
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

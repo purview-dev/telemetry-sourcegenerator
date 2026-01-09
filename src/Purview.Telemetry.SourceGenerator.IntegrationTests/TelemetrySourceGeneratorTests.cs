@@ -1,24 +1,30 @@
-﻿namespace Purview.Telemetry.SourceGenerator;
+namespace Purview.Telemetry.SourceGenerator;
 
-public partial class TelemetrySourceGeneratorTests : IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>
+public partial class TelemetrySourceGeneratorTests
+	: IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>
 {
 	[Test]
-	public async Task Generate_GivenGeneratedAttributes_GeneratesAsExpected()
+	public async Task Generate_GivenGeneratedAttributes_GeneratesAsExpected(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string empty =
 			@"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(empty);
+		var generationResult = await GenerateAsync(empty, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, autoVerifyTemplates: false);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			autoVerifyTemplates: false,
+			cancellationToken: cancellationToken
+		);
 	}
 
 	public static IEnumerable<string> BasicGenericParameters

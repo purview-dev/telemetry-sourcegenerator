@@ -103,7 +103,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		var kind =
 			methodTarget.ActivityAttribute?.Kind.IsSet == true
-				? methodTarget.ActivityAttribute.Value.Kind.Value!.Value
+				? methodTarget.ActivityAttribute.Value.Kind.Value.GetValueOrDefault()
 				: Constants.Activities.DefaultActivityKind;
 
 		var parentContextOrIdParameterValue = parentContextOrId?.ParameterName ?? "default";

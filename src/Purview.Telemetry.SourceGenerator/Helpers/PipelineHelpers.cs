@@ -34,8 +34,7 @@ static partial class PipelineHelpers
 	)]
 	static bool GetSkipOnNullOrEmptyValue(TagOrBaggageAttributeRecord? tagOrBaggageAttribute) =>
 		tagOrBaggageAttribute?.SkipOnNullOrEmpty.IsSet == true
-			? tagOrBaggageAttribute.SkipOnNullOrEmpty.Value!.Value
-			: false;
+		&& tagOrBaggageAttribute.SkipOnNullOrEmpty.Value!.Value;
 
 	static IEnumerable<IMethodSymbol> GetAllInterfaceMethods(
 		INamedTypeSymbol interfaceSymbol,

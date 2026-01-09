@@ -178,6 +178,198 @@ partial class ActivitySourceTargetClassEmitter
 		if (!GuardMethod(methodTarget, target, context, logger))
 			return;
 
+		var isMultiTarget = methodTarget.TargetGenerationState.IsMultiTarget;
+		var methodTargets = methodTarget.TargetGenerationState.MethodTargets;
+
+		// For multi-target, Activity emitter generates the public method that delegates
+		// to private implementation methods for each target
+		if (isMultiTarget)
+		{
+			// Generate private activity implementation method
+			EmitPrivateActivityMethod(builder, indent, methodTarget, target, context, logger);
+
+			// Generate public delegating method (Activity emitter owns this for multi-target)
+			EmitPublicDelegatingMethod(
+				builder,
+				indent,
+				methodTarget,
+				methodTargets,
+				context,
+				logger
+			);
+		}
+		else
+		{
+			// Single-target: generate public method as before
+			EmitPublicActivityMethod(builder, indent, methodTarget, context, logger);
+		}
+	}
+
+	static void EmitPrivateActivityMethod(
+		StringBuilder builder,
+		int indent,
+		ActivityBasedGenerationTarget methodTarget,
+		ActivitySourceTarget _, // target
+		SourceProductionContext context,
+		GenerationLogger? logger
+	)
+	{
+		var privateMethodName = methodTarget.MethodName + "_Activity";
+
+		builder
+			.CodeGen(indent)
+			.AggressiveInlining(indent)
+			.Append(indent, "private ", withNewLine: false)
+			.Append(methodTarget.ReturnType);
+
+		builder.Append(' ').Append(privateMethodName).Append('(');
+
+		var index = 0;
+		foreach (var parameter in methodTarget.Parameters)
+		{
+			context.CancellationToken.ThrowIfCancellationRequested();
+
+			builder.Append(parameter.ParameterType).Append(' ').Append(parameter.ParameterName);
+
+			if (index < methodTarget.Parameters.Length - 1)
+				builder.Append(", ");
+
+			index++;
+		}
+
+		builder.AppendLine(')').Append(indent, '{');
+
+		indent++;
+
+		if (methodTarget.MethodType == ActivityMethodType.Activity)
+			EmitActivityMethodBody(builder, indent, methodTarget, context, logger);
+		else if (methodTarget.MethodType == ActivityMethodType.Event)
+			EmitEventMethodBody(builder, indent, methodTarget, context, logger);
+		else if (methodTarget.MethodType == ActivityMethodType.Context)
+			EmitContextMethodBody(builder, indent, methodTarget, context, logger);
+
+		builder.Append(--indent, '}').AppendLine();
+	}
+
+	static void EmitPublicDelegatingMethod(
+		StringBuilder builder,
+		int indent,
+		ActivityBasedGenerationTarget methodTarget,
+		GenerationType methodTargets,
+		SourceProductionContext context,
+		GenerationLogger? logger
+	)
+	{
+		logger?.Debug($"Building public delegating method for {methodTarget.MethodName}.");
+
+		builder
+			.AppendLine()
+			.CodeGen(indent)
+			.AggressiveInlining(indent)
+			.Append(indent, "public ", withNewLine: false)
+			.Append(methodTarget.ReturnType);
+
+		builder.Append(' ').Append(methodTarget.MethodName).Append('(');
+
+		var index = 0;
+		foreach (var parameter in methodTarget.Parameters)
+		{
+			context.CancellationToken.ThrowIfCancellationRequested();
+
+			builder.Append(parameter.ParameterType).Append(' ').Append(parameter.ParameterName);
+
+			if (index < methodTarget.Parameters.Length - 1)
+				builder.Append(", ");
+
+			index++;
+		}
+
+		builder.AppendLine(')').Append(indent, '{');
+
+		indent++;
+
+		var returnsActivity = Constants.Activities.SystemDiagnostics.Activity.Equals(
+			methodTarget.ReturnType
+		);
+		var paramList = string.Join(", ", methodTarget.Parameters.Select(p => p.ParameterName));
+
+		// Create filtered parameter list for Logging/Metrics (excludes Activity-related types)
+		var loggingMetricsParamList = string.Join(
+			", ",
+			methodTarget
+				.Parameters.Where(p =>
+					!Constants.Activities.SystemDiagnostics.Activity.Equals(p.ParameterType)
+					&& !Constants.Activities.SystemDiagnostics.ActivityContext.Equals(
+						p.ParameterType
+					)
+					&& !Constants.Activities.SystemDiagnostics.ActivityLink.Equals(p.ParameterType)
+					&& !Constants.Activities.SystemDiagnostics.ActivityLinkArray.Equals(
+						p.ParameterType
+					)
+					&& !Constants.System.TagList.Equals(p.ParameterType)
+				)
+				.Select(p => p.ParameterName)
+		);
+
+		// Call Activity private method first (returns Activity? if applicable)
+		if (methodTargets.HasFlag(GenerationType.Activities))
+		{
+			if (returnsActivity)
+			{
+				builder
+					.Append(indent, "var activityResult = ", withNewLine: false)
+					.Append(methodTarget.MethodName)
+					.Append("_Activity(")
+					.Append(paramList)
+					.AppendLine(");");
+			}
+			else
+			{
+				builder
+					.Append(indent, methodTarget.MethodName, withNewLine: false)
+					.Append("_Activity(")
+					.Append(paramList)
+					.AppendLine(");");
+			}
+		}
+
+		// Call Logging private method
+		if (methodTargets.HasFlag(GenerationType.Logging))
+		{
+			builder
+				.Append(indent, methodTarget.MethodName, withNewLine: false)
+				.Append("_Logging(")
+				.Append(loggingMetricsParamList)
+				.AppendLine(");");
+		}
+
+		// Call Metrics private method
+		if (methodTargets.HasFlag(GenerationType.Metrics))
+		{
+			builder
+				.Append(indent, methodTarget.MethodName, withNewLine: false)
+				.Append("_Metrics(")
+				.Append(loggingMetricsParamList)
+				.AppendLine(");");
+		}
+
+		// Return result if applicable
+		if (returnsActivity)
+		{
+			builder.AppendLine().Append(indent, "return activityResult;");
+		}
+
+		builder.Append(--indent, '}').AppendLine();
+	}
+
+	static void EmitPublicActivityMethod(
+		StringBuilder builder,
+		int indent,
+		ActivityBasedGenerationTarget methodTarget,
+		SourceProductionContext context,
+		GenerationLogger? logger
+	)
+	{
 		builder
 			.CodeGen(indent)
 			.AggressiveInlining(indent)

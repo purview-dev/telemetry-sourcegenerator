@@ -13,6 +13,9 @@
 
 namespace Testing
 {
+	[global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class MultiTelemetryCore : global::Testing.IMultiTelemetry
 	{
 		readonly static global::System.Diagnostics.ActivitySource _activitySource = new("testing-activity-source");
@@ -35,6 +38,23 @@ namespace Testing
 			global::System.Diagnostics.ActivityEvent recordExceptionEvent = new(name: "exception", timestamp: default, tags: tagsCollection);
 
 			activity.AddEvent(recordExceptionEvent);
+		}
+
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		public void InvalidMethod(string message)
+		{
+			if (!_activitySource.HasListeners())
+			{
+				return;
+			}
+
+			global::System.Diagnostics.Activity? activityInvalidMethod = _activitySource.StartActivity("InvalidMethod", global::System.Diagnostics.ActivityKind.Internal, parentId: default, tags: default, links: default, startTime: default);
+
+			if (activityInvalidMethod != null)
+			{
+				activityInvalidMethod.SetTag("message", message);
+			}
 		}
 
 	}

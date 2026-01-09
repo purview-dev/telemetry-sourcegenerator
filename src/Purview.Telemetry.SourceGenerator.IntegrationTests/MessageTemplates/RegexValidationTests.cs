@@ -4,80 +4,80 @@ using System.Text.RegularExpressions;
 
 namespace Purview.Telemetry.SourceGenerator.MessageTemplates;
 
-public partial class RegexValidationTests
+public class RegexValidationTests
 {
 	[Test]
 	[MethodDataSource(nameof(OrdinalTests))]
-	public void Match_GivenOrdinals_Matches(
+	public async Task Match_GivenOrdinals_Matches(
 		string template,
 		[NotNull] TestMessageTemplateHole[] holes
-	) => Match(template, holes);
+	) => await MatchAsync(template, holes);
 
 	[Test]
 	[MethodDataSource(nameof(NamedTests))]
-	public void Match_GivenNames_Matches(
+	public async Task Match_GivenNames_Matches(
 		string template,
 		[NotNull] TestMessageTemplateHole[] holes
-	) => Match(template, holes);
+	) => await MatchAsync(template, holes);
 
 	[Test]
 	[MethodDataSource(nameof(DestructureTests))]
-	public void Match_GivenDestructure_Matches(
+	public async Task Match_GivenDestructure_Matches(
 		string template,
 		[NotNull] TestMessageTemplateHole[] holes
-	) => Match(template, holes);
+	) => await MatchAsync(template, holes);
 
 	[Test]
 	[MethodDataSource(nameof(StringifyTests))]
-	public void Match_GivenStringify_Matches(
+	public async Task Match_GivenStringify_Matches(
 		string template,
 		[NotNull] TestMessageTemplateHole[] holes
-	) => Match(template, holes);
+	) => await MatchAsync(template, holes);
 
 	[Test]
 	[MethodDataSource(nameof(AlignmentTests))]
-	public void Match_GivenAlignment_Matches(
+	public async Task Match_GivenAlignment_Matches(
 		string template,
 		[NotNull] TestMessageTemplateHole[] holes
-	) => Match(template, holes);
+	) => await MatchAsync(template, holes);
 
 	[Test]
 	[MethodDataSource(nameof(FormattingTests))]
-	public void Match_GivenFormatting_Matches(
+	public async Task Match_GivenFormatting_Matches(
 		string template,
 		[NotNull] TestMessageTemplateHole[] holes
-	) => Match(template, holes);
+	) => await MatchAsync(template, holes);
 
 	[Test]
 	[MethodDataSource(nameof(AMixedBag))]
-	public void Match_GivenAMixOfParameters_Matches(
+	public async Task Match_GivenAMixOfParameters_Matches(
 		string template,
 		[NotNull] TestMessageTemplateHole[] holes
-	) => Match(template, holes);
+	) => await MatchAsync(template, holes);
 
 	[Test]
 	[MethodDataSource(nameof(DoubleCurlyBraces))]
-	public void Match_GivenDoubleCurlyBraces_Matches(
+	public async Task Match_GivenDoubleCurlyBraces_Matches(
 		string template,
 		[NotNull] TestMessageTemplateHole[] holes
-	) => Match(template, holes);
+	) => await MatchAsync(template, holes);
 
-	static void Match(string template, TestMessageTemplateHole[] holes)
+	static async Task MatchAsync(string template, TestMessageTemplateHole[] holes)
 	{
 		// Arrange/ Act
 		var matches = Constants.MessageTemplateMatcher.Matches(template);
 
 		// Assert
-		matches.Count.ShouldBe(holes.Length);
+		await Assert.That(matches.Count).IsEqualTo(holes.Length);
 		for (var i = 0; i < matches.Count; i++)
 		{
 			Match match = matches[i];
-			match.Success.ShouldBeTrue();
+			await Assert.That(match.Success).IsTrue();
 
 			var hole = holes[i];
 			var result = TestMessageTemplateHole.FromMatch(match);
 
-			hole.ShouldBe(result);
+			await Assert.That(hole).IsEqualTo(result);
 		}
 	}
 
@@ -87,7 +87,7 @@ public partial class RegexValidationTests
 		{
 			List<(string, TestMessageTemplateHole[])> data =
 			[
-				( "Customer with ID {0}", [TestMessageTemplateHole.Create(0)] ),
+				("Customer with ID {0}", [TestMessageTemplateHole.Create(0)]),
 				(
 					"Customer with ID {0} is named {1}",
 					[TestMessageTemplateHole.Create(0), TestMessageTemplateHole.Create(1)]
@@ -113,7 +113,7 @@ public partial class RegexValidationTests
 		{
 			List<(string, TestMessageTemplateHole[])> data =
 			[
-				( "Customer with ID {CustomerId}", [TestMessageTemplateHole.Create("CustomerId")] ),
+				("Customer with ID {CustomerId}", [TestMessageTemplateHole.Create("CustomerId")]),
 				(
 					"Customer with ID {CustomerId} is named {CustomerName}",
 					[
@@ -171,7 +171,7 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create("Apple"),
 					]
 				),
-				( "Customer with ID {@0}", [TestMessageTemplateHole.Create(0, destructure: true)] ),
+				("Customer with ID {@0}", [TestMessageTemplateHole.Create(0, destructure: true)]),
 				(
 					"Customer with ID {@0} is named {@1}",
 					[
@@ -238,7 +238,7 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create("Apple"),
 					]
 				),
-				( "Customer with ID {$0}", [TestMessageTemplateHole.Create(0, stringify: true)] ),
+				("Customer with ID {$0}", [TestMessageTemplateHole.Create(0, stringify: true)]),
 				(
 					"Customer with ID {$0} is named {$1}",
 					[
@@ -305,7 +305,7 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create("Apple"),
 					]
 				),
-				( "Customer with ID {0,-99}", [TestMessageTemplateHole.Create(0, alignment: -99)] ),
+				("Customer with ID {0,-99}", [TestMessageTemplateHole.Create(0, alignment: -99)]),
 				(
 					"Customer with ID {0,101} is named {1,-1}",
 					[
@@ -372,7 +372,7 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create("Apple"),
 					]
 				),
-				( "Customer with ID {0:-99}", [TestMessageTemplateHole.Create(0, format: "-99")] ),
+				("Customer with ID {0:-99}", [TestMessageTemplateHole.Create(0, format: "-99")]),
 				(
 					"Customer with ID {0:101} is named {1:hello-1}",
 					[
@@ -466,7 +466,7 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create("Apple"),
 					]
 				),
-				( "Customer with ID {0:ff}", [TestMessageTemplateHole.Create(0, format: "ff")] ),
+				("Customer with ID {0:ff}", [TestMessageTemplateHole.Create(0, format: "ff")]),
 				(
 					"Customer with ID {0,0101:-10} is named {$1:pies}",
 					[
@@ -575,7 +575,7 @@ public partial class RegexValidationTests
 						TestMessageTemplateHole.Create("Apple"),
 					]
 				),
-				( "Customer with ID {{0:ff}", [TestMessageTemplateHole.Create(0, format: "ff")] ),
+				("Customer with ID {{0:ff}", [TestMessageTemplateHole.Create(0, format: "ff")]),
 				(
 					"Customer with ID {{0,0101:-10}} is named {{$1:pies}}",
 					[
@@ -651,17 +651,17 @@ public partial class RegexValidationTests
 
 		public readonly bool IsPositional => Name is null;
 
-		public string? Name { get; private set; }
+		public string? Name { get; }
 
 		public int? Ordinal { get; private set; }
 
 		public int? Alignment { get; private set; }
 
-		public string? Format { get; private set; }
+		public string? Format { get; }
 
-		public bool Destructure { get; private set; }
+		public bool Destructure { get; }
 
-		public bool Stringify { get; private set; }
+		public bool Stringify { get; }
 
 		public static TestMessageTemplateHole Create(
 			int ordinal,

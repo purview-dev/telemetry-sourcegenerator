@@ -56,9 +56,21 @@ static partial class Constants
 		public static readonly TemplateInfo TelemetryGenerationAttribute = TemplateInfo.Create(
 			"Purview.Telemetry.TelemetryGenerationAttribute"
 		);
+		public static readonly TemplateInfo TargetsEnum = TemplateInfo.Create(
+			"Purview.Telemetry.Targets"
+		);
+		public static readonly TemplateInfo ExcludeTargetsAttribute = TemplateInfo.Create(
+			"Purview.Telemetry.ExcludeTargetsAttribute"
+		);
 
 		public static TemplateInfo[] GetTemplates() =>
-			[TagAttribute, ExcludeAttribute, TelemetryGenerationAttribute];
+			[
+				TagAttribute,
+				ExcludeAttribute,
+				TelemetryGenerationAttribute,
+				TargetsEnum,
+				ExcludeTargetsAttribute,
+			];
 	}
 
 	public static partial class DependencyInjection

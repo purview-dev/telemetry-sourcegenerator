@@ -141,11 +141,12 @@ partial class PipelineHelpers
 		var defaultToTags =
 			activitySourceGenerationAttribute?.DefaultToTags.IsSet == true
 				? activitySourceGenerationAttribute.DefaultToTags.Value!.Value
-				: activitySourceAttribute.DefaultToTags.Value!.Value;
-		var lowercaseBaggageAndTagKeys = activitySourceAttribute
-			.LowercaseBaggageAndTagKeys!
-			.Value!
-			.Value;
+				: activitySourceAttribute.DefaultToTags?.IsSet != true
+					|| activitySourceAttribute.DefaultToTags.Value!.Value; // Default value
+
+		var lowercaseBaggageAndTagKeys =
+			activitySourceAttribute.LowercaseBaggageAndTagKeys?.IsSet != true
+			|| activitySourceAttribute.LowercaseBaggageAndTagKeys.Value!.Value; // Default value
 
 		List<(TelemetryDiagnosticDescriptor, ImmutableArray<Location>)>? methodDiagnosticsList =
 			null;
@@ -302,45 +303,45 @@ partial class PipelineHelpers
 				destination = ActivityParameterDestination.Activity;
 			}
 			else if (
-							Constants.Activities.SystemDiagnostics.ActivityTagsCollection.Equals(parameterType)
-							|| Constants.Activities.SystemDiagnostics.ActivityTagIEnumerable.Equals(
-								parameterType
-							)
-							|| Constants.System.TagList.Equals(parameterType)
-						)
+				Constants.Activities.SystemDiagnostics.ActivityTagsCollection.Equals(parameterType)
+				|| Constants.Activities.SystemDiagnostics.ActivityTagIEnumerable.Equals(
+					parameterType
+				)
+				|| Constants.System.TagList.Equals(parameterType)
+			)
 			{
 				destination = ActivityParameterDestination.TagsEnumerable;
 			}
 			else if (
-							Constants.Activities.SystemDiagnostics.ActivityContext.Equals(parameterType)
-							|| (
-								parameter.Name == Constants.Activities.ParentIdParameterName
-								&& parameterType.SpecialType == SpecialType.System_String
-							)
-						)
+				Constants.Activities.SystemDiagnostics.ActivityContext.Equals(parameterType)
+				|| (
+					parameter.Name == Constants.Activities.ParentIdParameterName
+					&& parameterType.SpecialType == SpecialType.System_String
+				)
+			)
 			{
 				destination = ActivityParameterDestination.ParentContextOrId;
 			}
 			else if (
-							Constants.Activities.SystemDiagnostics.ActivityLinkArray.Equals(parameterType)
-							|| Constants.Activities.SystemDiagnostics.ActivityLinkIEnumerable.Equals(
-								parameterType
-							)
-						)
+				Constants.Activities.SystemDiagnostics.ActivityLinkArray.Equals(parameterType)
+				|| Constants.Activities.SystemDiagnostics.ActivityLinkIEnumerable.Equals(
+					parameterType
+				)
+			)
 			{
 				destination = ActivityParameterDestination.LinksEnumerable;
 			}
 			else if (
-							parameter.Name == Constants.Activities.StartTimeParameterName
-							&& Constants.System.DateTimeOffset.Equals(parameterType)
-						)
+				parameter.Name == Constants.Activities.StartTimeParameterName
+				&& Constants.System.DateTimeOffset.Equals(parameterType)
+			)
 			{
 				destination = ActivityParameterDestination.StartTime;
 			}
 			else if (
-							parameter.Name == Constants.Activities.TimeStampParameterName
-							&& Constants.System.DateTimeOffset.Equals(parameterType)
-						)
+				parameter.Name == Constants.Activities.TimeStampParameterName
+				&& Constants.System.DateTimeOffset.Equals(parameterType)
+			)
 			{
 				destination = ActivityParameterDestination.Timestamp;
 			}
@@ -363,6 +364,14 @@ partial class PipelineHelpers
 				);
 			}
 
+			// Check for ExcludeTargetsAttribute
+			var excludeTargets = SharedHelpers.GetExcludeTargetsAttribute(
+				parameter,
+				semanticModel,
+				logger,
+				token
+			);
+
 			var parameterName = parameter.Name;
 			var generatedName = GenerateParameterName(
 				tagOrBaggageAttribute?.Name.Value ?? parameterName,
@@ -377,8 +386,9 @@ partial class PipelineHelpers
 					GeneratedName: generatedName,
 					ParamDestination: destination,
 					SkipOnNullOrEmpty: GetSkipOnNullOrEmptyValue(tagOrBaggageAttribute),
-					IsException: Utilities.IsExceptionType(parameter.Type),
-					Locations: parameter.Locations
+					IsException: parameter.Type.IsExceptionType(),
+					Locations: parameter.Locations,
+					ExcludedTargets: excludeTargets?.ExcludedTargets ?? GenerationType.None
 				)
 			);
 		}

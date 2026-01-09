@@ -1,15 +1,15 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Activities;
+namespace Purview.Telemetry.SourceGenerator.Activities;
 
 partial class TelemetrySourceGeneratorActivityTests
 {
 	[Test]
-	public async Task Generate_GivenAssemblyEnableDI_GeneratesActivity()
+	public async Task Generate_GivenAssemblyEnableDI_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = true)]
@@ -30,21 +30,22 @@ public interface ITestActivities {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicActivity,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenInterfaceEnableDI_GeneratesActivity()
+	public async Task Generate_GivenInterfaceEnableDI_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
@@ -64,21 +65,22 @@ public interface ITestActivities {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicActivity,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenDIDisabledAtAssemblyAndInterfaceEnableDI_GeneratesActivity()
+	public async Task Generate_GivenDIDisabledAtAssemblyAndInterfaceEnableDI_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = false)]
@@ -100,21 +102,22 @@ public interface ITestActivities {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicActivity,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenDIEnabledAtAssemblyAndInterfaceDisableDI_GeneratesActivity()
+	public async Task Generate_GivenDIEnabledAtAssemblyAndInterfaceDisableDI_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = true)]
@@ -136,21 +139,22 @@ public interface ITestActivities {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicActivity,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenAssemblyEnableDIAndClassIsPublic_GeneratesActivity()
+	public async Task Generate_GivenAssemblyEnableDIAndClassIsPublic_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = true, DependencyInjectionClassIsPublic = true)]
@@ -171,10 +175,11 @@ public interface ITestActivities {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicActivity,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

@@ -7,7 +7,26 @@
                               ^^^^^^^
 
 */
- Guid_1: (15,30)-(15,37),
+ Guid_1: (13,30)-(13,37),
+      Message: Two or more methods named 'Process' are defined. Keep method names unique as they're used to generate other members on the implementation class.,
+      Severity: Error,
+      Descriptor: {
+        Id: TSG1003,
+        Title: Duplicate method names are not supported,
+        MessageFormat: Two or more methods named '{0}' are defined. Keep method names unique as they're used to generate other members on the implementation class.,
+        Category: Usage,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    },
+    {
+      Location: /*
+	[Activity]
+	System.Diagnostics.Activity? Process([Tag]string id);
+                              ^^^^^^^
+
+*/
+ Guid_1: (13,30)-(13,37),
       Message: Two or more methods named 'Process' are defined. Keep method names unique as they're used to generate other members on the implementation class.,
       Severity: Error,
       Descriptor: {

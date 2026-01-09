@@ -72,12 +72,11 @@
 	<!-- Test Projects. -->
 	<PropertyGroup Label="Testing Project Properties" Condition="'$(IsTestProject)' == 'true'">
 		<OutputType>Exe</OutputType>
-		<UseAppHost>true</UseAppHost>
 		<UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
 		<TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
 		<NoWarn>$(NoWarn);CA1515;CA1707;CA1822</NoWarn>
 		<CollectCoverage>true</CollectCoverage>
-		<Exclude>[NSubstitute*]*,[Shouldly*]*,[TUnit.*]*,[Microsoft.Testing.*]*,[Microsoft.NET.Test*]*[NCrunch*]*</Exclude>
+		<Exclude>[NSubstitute*]*,[TUnit.*]*,[Microsoft.Testing.*]*,[Microsoft.NET.Test*]</Exclude>
 		<ExcludeByAttribute>System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute</ExcludeByAttribute>
 		<Packable>false</Packable>
 		<IsPackable>false</IsPackable>
@@ -95,15 +94,11 @@
 		<None Remove="TestResults/**" />
 	</ItemGroup>
 	<ItemGroup Label="Testing NuGet Packages" Condition="'$(IsTestProject)' == 'true'">
-		<Using Include="Shouldly" />
 		<Using Include="NSubstitute" />
 		<AssemblyAttribute Include="TUnit.Core.Category">
 			<_Parameter1>$(TestingType)</_Parameter1>
 		</AssemblyAttribute>
 		<AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute" />
-		<PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
-		<PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
-		<PackageReference Include="Shouldly" />
 		<PackageReference Include="NSubstitute" />
 		<PackageReference Include="NSubstitute.Analyzers.CSharp">
 			<PrivateAssets>all</PrivateAssets>

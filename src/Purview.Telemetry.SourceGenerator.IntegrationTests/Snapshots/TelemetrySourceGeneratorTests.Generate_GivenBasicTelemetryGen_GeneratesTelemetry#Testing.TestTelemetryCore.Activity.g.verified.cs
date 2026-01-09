@@ -13,6 +13,9 @@
 
 namespace Testing
 {
+	[global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class TestTelemetryCore : global::Testing.ITestTelemetry
 	{
 		readonly static global::System.Diagnostics.ActivitySource _activitySource = new("activity-source");

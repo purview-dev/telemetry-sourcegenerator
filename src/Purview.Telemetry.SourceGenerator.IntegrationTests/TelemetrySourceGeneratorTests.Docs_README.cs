@@ -1,19 +1,18 @@
-﻿namespace Purview.Telemetry.SourceGenerator;
+namespace Purview.Telemetry.SourceGenerator;
 
 partial class TelemetrySourceGeneratorTests
 {
 	[Test]
 	[Arguments(IncludeLoggerTypes.LoggerOnly)]
 	[Arguments(IncludeLoggerTypes.Telemetry)]
-	public async Task Generate_FromREADMESection_GeneratesTelemetry(IncludeLoggerTypes loggerTypes)
+	public async Task Generate_FromREADMESection_GeneratesTelemetry(
+		IncludeLoggerTypes loggerTypes,
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			"""
+		const string basicTelemetry = """
 
-using Purview.Telemetry.Activities;
-using Purview.Telemetry.Logging;
-using Purview.Telemetry.Metrics;
 using System.Diagnostics;
 
 [ActivitySource]
@@ -76,21 +75,26 @@ interface IEntityStoreTelemetry
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
 			disableDependencyInjection: false,
-			includeLoggerTypes: loggerTypes
+			includeLoggerTypes: loggerTypes,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, parameters: loggerTypes);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			cancellationToken: cancellationToken,
+			parameters: loggerTypes
+		);
 	}
 
 	[Test]
-	public async Task Generate_FromWikiActivitiesSection_GeneratesTelemetry()
+	public async Task Generate_FromWikiActivitiesSection_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			"""
+		const string basicTelemetry = """
 
-using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 [ActivitySource("some-activity")]
@@ -117,20 +121,22 @@ interface IActivityTelemetry
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_FromWikiLoggingSection_GeneratesTelemetry()
+	public async Task Generate_FromWikiLoggingSection_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string basicTelemetry =
 			@"
-using Purview.Telemetry.Logging;
 using Microsoft.Extensions.Logging;
 
 [Logger]
@@ -161,20 +167,22 @@ enum ItemTypes
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_FromWikiMetricsSection_GeneratesTelemetry()
+	public async Task Generate_FromWikiMetricsSection_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string basicTelemetry =
 			@"
-using Purview.Telemetry.Metrics;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 
@@ -210,23 +218,22 @@ interface IMeterTelemetry
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_FromWikiMultiTargetingSection_GeneratesTelemetry()
+	public async Task Generate_FromWikiMultiTargetingSection_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			"""
+		const string basicTelemetry = """
 
-using Purview.Telemetry.Activities;
-using Purview.Telemetry.Logging;
-using Purview.Telemetry.Metrics;
 using System.Diagnostics;
 
 [ActivitySource("multi-targeting")]
@@ -255,10 +262,11 @@ interface IServiceTelemetry
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

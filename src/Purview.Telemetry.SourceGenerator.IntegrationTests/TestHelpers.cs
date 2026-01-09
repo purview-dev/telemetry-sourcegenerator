@@ -1,11 +1,11 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
 namespace Purview.Telemetry.SourceGenerator;
 
-static partial class TestHelpers
+static class TestHelpers
 {
 	static readonly JsonSerializerOptions JsonOptions = new()
 	{
@@ -153,6 +153,7 @@ using Purview.Telemetry;
 		bool validationCompilation = true,
 		bool autoVerifyTemplates = true,
 		string[]? expectedDiagnosticCodes = null,
+		CancellationToken cancellationToken = default,
 		params object[] parameters
 	)
 	{
@@ -191,9 +192,13 @@ using Purview.Telemetry;
 
 		// Check if snapshot verification should be skipped
 		var ignoreVerify = Environment.GetEnvironmentVariable("PURVIEW_IGNORE_VERIFY");
-		if (string.IsNullOrEmpty(ignoreVerify) ||
-		    (!ignoreVerify.Equals("true", StringComparison.OrdinalIgnoreCase) &&
-		     !ignoreVerify.Equals("1", StringComparison.Ordinal)))
+		if (
+			string.IsNullOrEmpty(ignoreVerify)
+			|| (
+				!ignoreVerify.Equals("true", StringComparison.OrdinalIgnoreCase)
+				&& !ignoreVerify.Equals("1", StringComparison.Ordinal)
+			)
+		)
 		{
 			await verifierTask;
 		}
@@ -203,25 +208,27 @@ using Purview.Telemetry;
 			diag = [.. diag.Where(m => m.Severity == DiagnosticSeverity.Error)];
 
 		if (expectsDiagnostics)
-		{
-			diag.ShouldNotBeEmpty();
-
-			// Assert on expected diagnostic codes if provided
-			if (expectedDiagnosticCodes is not null && expectedDiagnosticCodes.Length > 0)
 			{
-				var actualDiagnosticCodes = diag.Select(d => d.Id).Distinct().OrderBy(id => id).ToArray();
-				var expectedCodes = expectedDiagnosticCodes.OrderBy(id => id).ToArray();
+				await Assert.That(diag).IsNotEmpty();
 
-				actualDiagnosticCodes.ShouldBe(
-					expectedCodes,
-					$"Expected diagnostic codes: [{string.Join(", ", expectedCodes)}], " +
-					$"but found: [{string.Join(", ", actualDiagnosticCodes)}]"
-				);
+				// Assert on expected diagnostic codes if provided
+				if (expectedDiagnosticCodes?.Length > 0)
+				{
+				var actualDiagnosticCodes = diag.Select(d => d.Id).Distinct().ToArray();
+				var expectedCodes = expectedDiagnosticCodes.ToArray();
+
+				await Assert
+					.That(actualDiagnosticCodes)
+					.IsEquivalentTo(expectedCodes)
+					.Because(
+						$"Expected diagnostic codes: [{string.Join(", ", expectedCodes)}], "
+							+ $"but found: [{string.Join(", ", actualDiagnosticCodes)}]"
+					);
 			}
 		}
 		else
 		{
-			diag.ShouldBeEmpty();
+			await Assert.That(diag).IsEmpty();
 		}
 
 		if (!validationCompilation)
@@ -229,18 +236,19 @@ using Purview.Telemetry;
 
 		await using MemoryStream ms = new();
 
-		var result = generationResult.Compilation.Emit(ms);
+		var result = generationResult.Compilation.Emit(ms, cancellationToken: cancellationToken);
 		if (!result.Success)
 		{
-			result
-				.Diagnostics.Where(m => !m.Id.StartsWith("TSG", StringComparison.Ordinal))
-				.ShouldBeEmpty(
+			await Assert
+				.That(
+					result.Diagnostics.Where(m => !m.Id.StartsWith("TSG", StringComparison.Ordinal))
+				)
+				.IsEmpty()
+				.Because(
 					string.Join(
 						Environment.NewLine,
 						result.Diagnostics.Select(d =>
-							d.ToString()
-							+ Environment.NewLine
-							+ "-----------------------------------------------------"
+							$"{d}{Environment.NewLine}-----------------------------------------------------"
 						)
 					)
 				);

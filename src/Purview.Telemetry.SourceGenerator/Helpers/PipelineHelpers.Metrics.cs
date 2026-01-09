@@ -129,28 +129,38 @@ partial class PipelineHelpers
 				|| meterGenerationAttribute.LowercaseInstrumentName.Value!.Value;
 
 		var prefix = GeneratePrefix(meterGenerationAttribute, meterAttribute, token);
-		var lowercaseTagKeys = meterAttribute.LowercaseTagKeys!.Value!.Value;
+		var lowercaseTagKeys =
+			meterAttribute.LowercaseTagKeys?.IsSet == true
+			&& meterAttribute.LowercaseTagKeys.Value!.Value;
 
 		List<InstrumentTarget> methodTargets = [];
-		foreach (var method in GetAllInterfaceMethods(interfaceSymbol, semanticModel.Compilation, token))
+		foreach (
+			var method in GetAllInterfaceMethods(interfaceSymbol, semanticModel.Compilation, token)
+		)
 		{
 			token.ThrowIfCancellationRequested();
 
 			if (Utilities.ContainsAttribute(method, Constants.Shared.ExcludeAttribute, token))
 			{
-				logger?.Debug($"Skipping {interfaceSymbol.Name}.{method.Name}, explicitly excluded.");
+				logger?.Debug(
+					$"Skipping {interfaceSymbol.Name}.{method.Name}, explicitly excluded."
+				);
 				continue;
 			}
 
 			if (method.Arity > 0)
 			{
 				methodDiagnosticsList ??= [];
-				methodDiagnosticsList.Add((TelemetryDiagnostics.General.GenericMethodsNotSupported, method.Locations));
+				methodDiagnosticsList.Add(
+					(TelemetryDiagnostics.General.GenericMethodsNotSupported, method.Locations)
+				);
 
 				continue;
 			}
 
-			logger?.Debug($"Found possible instrument method {interfaceSymbol.Name}.{method.Name}.");
+			logger?.Debug(
+				$"Found possible instrument method {interfaceSymbol.Name}.{method.Name}."
+			);
 
 			var instrumentAttribute = SharedHelpers.GetInstrumentAttribute(
 				method,
@@ -201,17 +211,31 @@ partial class PipelineHelpers
 			{
 				if (targetGenerationState.RaiseMultiGenerationTargetsNotSupported)
 				{
-					logger?.Debug($"Identified {interfaceSymbol.Name}.{method.Name} as problematic as it has another target types.");
+					logger?.Debug(
+						$"Identified {interfaceSymbol.Name}.{method.Name} as problematic as it has another target types."
+					);
 
 					methodDiagnosticsList ??= [];
-					methodDiagnosticsList.Add((TelemetryDiagnostics.General.MultiGenerationTargetsNotSupported, method.Locations));
+					methodDiagnosticsList.Add(
+						(
+							TelemetryDiagnostics.General.MultiGenerationTargetsNotSupported,
+							method.Locations
+						)
+					);
 				}
 				else if (targetGenerationState.RaiseInferenceNotSupportedWithMultiTargeting)
 				{
-					logger?.Debug($"Identified {interfaceSymbol.Name}.{method.Name} as problematic as it is inferred.");
+					logger?.Debug(
+						$"Identified {interfaceSymbol.Name}.{method.Name} as problematic as it is inferred."
+					);
 
 					methodDiagnosticsList ??= [];
-					methodDiagnosticsList.Add((TelemetryDiagnostics.General.InferenceNotSupportedWithMultiTargeting, method.Locations));
+					methodDiagnosticsList.Add(
+						(
+							TelemetryDiagnostics.General.InferenceNotSupportedWithMultiTargeting,
+							method.Locations
+						)
+					);
 				}
 			}
 			else
@@ -221,12 +245,16 @@ partial class PipelineHelpers
 					logger?.Warning("Missing instrument attribute.");
 
 					methodDiagnosticsList ??= [];
-					methodDiagnosticsList.Add((TelemetryDiagnostics.Metrics.NoInstrumentDefined, method.Locations));
+					methodDiagnosticsList.Add(
+						(TelemetryDiagnostics.Metrics.NoInstrumentDefined, method.Locations)
+					);
 				}
 				else if (!validAutoCounter && measurementParameter == null)
 				{
 					methodDiagnosticsList ??= [];
-					methodDiagnosticsList.Add((TelemetryDiagnostics.Metrics.NoMeasurementValueDefined, method.Locations));
+					methodDiagnosticsList.Add(
+						(TelemetryDiagnostics.Metrics.NoMeasurementValueDefined, method.Locations)
+					);
 				}
 				else
 				{
@@ -285,6 +313,14 @@ partial class PipelineHelpers
 
 				if (instrumentAttribute != null)
 				{
+					// Check if this is multi-target with Activity (Activity return type is allowed)
+					var isMultiTargetWithActivity =
+						targetGenerationState.IsMultiTarget
+						&& targetGenerationState.MethodTargets.HasFlag(GenerationType.Activities);
+					var returnsActivity = Constants.Activities.SystemDiagnostics.Activity.Equals(
+						method.ReturnType
+					);
+
 					// Validate return types for observable and auto-counter
 					if (instrumentAttribute.IsObservable && returnsBool)
 					{
@@ -298,30 +334,38 @@ partial class PipelineHelpers
 					}
 					else if (validAutoCounter && !method.ReturnsVoid)
 					{
-						methodDiagnosticsList ??= [];
-						methodDiagnosticsList.Add(
-							(
-								TelemetryDiagnostics.Metrics.AutoCounterMustReturnVoid,
-								method.ReturnType.Locations
-							)
-						);
+						// For multi-target with Activity, Activity? return is valid
+						if (!(isMultiTargetWithActivity && returnsActivity))
+						{
+							methodDiagnosticsList ??= [];
+							methodDiagnosticsList.Add(
+								(
+									TelemetryDiagnostics.Metrics.AutoCounterMustReturnVoid,
+									method.ReturnType.Locations
+								)
+							);
+						}
 					}
 					else if (!method.ReturnsVoid && !returnsBool)
 					{
-						methodDiagnosticsList ??= [];
-						methodDiagnosticsList.Add(
-							(
-								TelemetryDiagnostics.Metrics.DoesNotReturnVoid,
-								method.ReturnType.Locations
-							)
-						);
+						// For multi-target with Activity, Activity? return is valid
+						if (!(isMultiTargetWithActivity && returnsActivity))
+						{
+							methodDiagnosticsList ??= [];
+							methodDiagnosticsList.Add(
+								(
+									TelemetryDiagnostics.Metrics.DoesNotReturnVoid,
+									method.ReturnType.Locations
+								)
+							);
+						}
 					}
 				}
 			}
 
 			var instrumentMeasurementType =
 				measurementParameter?.InstrumentType ?? Constants.System.BuiltInTypes.Int32;
-			if (measurementParameter != null && !measurementParameter.IsValidInstrumentType)
+			if (measurementParameter?.IsValidInstrumentType == false)
 			{
 				methodDiagnosticsList ??= [];
 				methodDiagnosticsList.Add(
@@ -371,6 +415,21 @@ partial class PipelineHelpers
 		foreach (var parameter in method.Parameters)
 		{
 			token.ThrowIfCancellationRequested();
+
+			// Skip Activity-related parameters - they are not valid for metrics
+			var paramType = PurviewTypeFactory.Create(parameter.Type);
+			if (
+				Constants.Activities.SystemDiagnostics.Activity.Equals(paramType)
+				|| Constants.Activities.SystemDiagnostics.ActivityContext.Equals(paramType)
+				|| Constants.Activities.SystemDiagnostics.ActivityLink.Equals(paramType)
+				|| Constants.Activities.SystemDiagnostics.ActivityLinkArray.Equals(paramType)
+			)
+			{
+				logger?.Debug(
+					$"Skipping Activity-related parameter '{parameter.Name}' from metrics."
+				);
+				continue;
+			}
 
 			TagOrBaggageAttributeRecord? tagAttribute = null;
 			var destination = InstrumentParameterDestination.Unknown;
@@ -547,6 +606,14 @@ partial class PipelineHelpers
 				lowercaseTagKeys
 			);
 
+			// Check for ExcludeTargetsAttribute
+			var excludeTargets = SharedHelpers.GetExcludeTargetsAttribute(
+				parameter,
+				semanticModel,
+				logger,
+				token
+			);
+
 			parameterTargets.Add(
 				new(
 					ParameterName: parameterName,
@@ -559,7 +626,8 @@ partial class PipelineHelpers
 					GeneratedName: generatedName,
 					ParamDestination: destination,
 					SkipOnNullOrEmpty: GetSkipOnNullOrEmptyValue(tagAttribute),
-					Locations: parameter.Locations
+					Locations: parameter.Locations,
+					ExcludedTargets: excludeTargets?.ExcludedTargets ?? GenerationType.None
 				)
 			);
 		}

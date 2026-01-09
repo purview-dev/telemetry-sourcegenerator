@@ -72,7 +72,8 @@ record InstrumentParameterTarget(
 	string GeneratedName,
 	InstrumentParameterDestination ParamDestination,
 	bool SkipOnNullOrEmpty,
-	ImmutableArray<Location> Locations
+	ImmutableArray<Location> Locations,
+	GenerationType ExcludedTargets
 );
 
 enum InstrumentTypes

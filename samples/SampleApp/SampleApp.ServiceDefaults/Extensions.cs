@@ -58,9 +58,9 @@ public static class Extensions
 					.AddProcessInstrumentation()
 					.AddRuntimeInstrumentation()
 					.AddMeter([
-						 // These are the names of the meters...
+						// These are the names of the meters...
 						"WeatherServiceTelemetry",
-						"WeatherAPIClientTelemetry"
+						"WeatherAPIClientTelemetry",
 					])
 			)
 			.WithTracing(tracing =>

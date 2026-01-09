@@ -1,0 +1,4 @@
+# Ignore template source files - these are embedded resources and should not be formatted
+
+src/Purview.Telemetry.SourceGenerator/Templates/Sources/
+src/Purview.Telemetry.SourceGenerator.IntegrationTests/Snapshots/

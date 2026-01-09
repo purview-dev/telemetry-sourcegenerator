@@ -1,15 +1,15 @@
-﻿namespace Purview.Telemetry.SourceGenerator;
+namespace Purview.Telemetry.SourceGenerator;
 
 partial class TelemetrySourceGeneratorTests
 {
 	[Test]
-	public async Task Generate_GivenDuplicateActivityMethodNames_GeneratesDiagnostic()
+	public async Task Generate_GivenDuplicateActivityMethodNames_GeneratesDiagnostic(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			"""
+		const string basicTelemetry = """
 
-using Purview.Telemetry.Activities;
 
 [ActivitySource("activity-source")]
 public interface ITestTelemetry
@@ -24,25 +24,29 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG1003"]
+			expectedDiagnosticCodes: ["TSG1003"],
+			cancellationToken: cancellationToken
 		);
 	}
 
 	[Test]
-	public async Task Generate_GivenDuplicateActivityEventContextMethodNames_GeneratesDiagnostic()
+	public async Task Generate_GivenDuplicateActivityEventContextMethodNames_GeneratesDiagnostic(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			"""
+		const string basicTelemetry = """
 
-using Purview.Telemetry.Activities;
 
 [ActivitySource("activity-source")]
 public interface ITestTelemetry
@@ -60,14 +64,18 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG1003"]
+			expectedDiagnosticCodes: ["TSG1003"],
+			cancellationToken: cancellationToken
 		);
 	}
 
@@ -75,13 +83,13 @@ public interface ITestTelemetry
 	[Arguments(IncludeLoggerTypes.LoggerOnly)]
 	[Arguments(IncludeLoggerTypes.Telemetry)]
 	public async Task Generate_GivenDuplicateLoggingMethodNames_GeneratesDiagnostic(
-		IncludeLoggerTypes includeLoggerTypes
+		IncludeLoggerTypes includeLoggerTypes,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
 		const string basicTelemetry =
 			@"
-using Purview.Telemetry.Logging;
 
 [Logger]
 public interface ITestTelemetry
@@ -97,7 +105,8 @@ public interface ITestTelemetry
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
-			includeLoggerTypes: includeLoggerTypes
+			includeLoggerTypes: includeLoggerTypes,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
@@ -106,17 +115,19 @@ public interface ITestTelemetry
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			expectedDiagnosticCodes: ["TSG1003"],
+			cancellationToken: cancellationToken,
 			parameters: [includeLoggerTypes]
 		);
 	}
 
 	[Test]
-	public async Task Generate_GivenDuplicateMetricsMethodNames_GeneratesDiagnostic()
+	public async Task Generate_GivenDuplicateMetricsMethodNames_GeneratesDiagnostic(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string basicTelemetry =
 			@"
-using Purview.Telemetry.Metrics;
 
 [Meter]
 public interface ITestTelemetry
@@ -130,14 +141,18 @@ public interface ITestTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG1003"]
+			expectedDiagnosticCodes: ["TSG1003"],
+			cancellationToken: cancellationToken
 		);
 	}
 
@@ -145,16 +160,13 @@ public interface ITestTelemetry
 	[Arguments(IncludeLoggerTypes.LoggerOnly)]
 	[Arguments(IncludeLoggerTypes.Telemetry)]
 	public async Task Generate_GivenDuplicateMultiTargetMethodNames_GeneratesDiagnostic(
-		IncludeLoggerTypes includeLoggerType
+		IncludeLoggerTypes includeLoggerType,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			"""
+		const string basicTelemetry = """
 
-using Purview.Telemetry.Activities;
-using Purview.Telemetry.Logging;
-using Purview.Telemetry.Metrics;
 
 [ActivitySource("activity-source")]
 [Logger]
@@ -188,7 +200,8 @@ public interface ITestTelemetry
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
-			includeLoggerTypes: includeLoggerType
+			includeLoggerTypes: includeLoggerType,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
@@ -197,6 +210,7 @@ public interface ITestTelemetry
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			expectedDiagnosticCodes: ["TSG1003"],
+			cancellationToken: cancellationToken,
 			parameters: [includeLoggerType]
 		);
 	}

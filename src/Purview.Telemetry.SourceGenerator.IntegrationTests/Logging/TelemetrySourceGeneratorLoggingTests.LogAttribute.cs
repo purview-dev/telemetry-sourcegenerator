@@ -1,16 +1,17 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Logging;
+namespace Purview.Telemetry.SourceGenerator.Logging;
 
 partial class TelemetrySourceGeneratorLoggingTests
 {
 	[Test]
 	[MethodDataSource(nameof(GetEntryNames))]
-	public async Task Generate_GivenLogTargetWithEntryName_GenerateLogger(string logTargetName)
+	public async Task Generate_GivenLogTargetWithEntryName_GenerateLogger(
+		string logTargetName,
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
-			$$"""
+		var basicLogger = $$"""
 
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -23,17 +24,25 @@ public interface ITestLogger {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, parameters: logTargetName);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			cancellationToken: cancellationToken,
+			parameters: logTargetName
+		);
 	}
 
 	[Test]
 	[MethodDataSource(nameof(GetPrefixAndEntryNames))]
 	public async Task Generate_GivenLogTargetWithPrefixAndEntryName_GenerateLogger(
 		string type,
-		string logTargetName
+		string logTargetName,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
@@ -43,10 +52,8 @@ public interface ITestLogger {
 			_ => type,
 		};
 
-		var basicLogger =
-			$$"""
+		var basicLogger = $$"""
 
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -59,10 +66,17 @@ public interface ITestLogger {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, parameters: [prefixType, logTargetName]);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			cancellationToken: cancellationToken,
+			parameters: [prefixType, logTargetName]
+		);
 	}
 
 	public static IEnumerable<(string, string)> GetPrefixAndEntryNames()
@@ -86,10 +100,7 @@ public interface ITestLogger {
 	{
 		List<string> data = [];
 
-		foreach (var entryName in TestEntryNames)
-		{
-			data.Add(entryName);
-		}
+		data.AddRange(TestEntryNames);
 
 		return data;
 	}

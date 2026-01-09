@@ -1,17 +1,20 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Activities;
+namespace Purview.Telemetry.SourceGenerator.Activities;
 
-public partial class TelemetrySourceGeneratorActivityTests : IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>
+public partial class TelemetrySourceGeneratorActivityTests
+	: IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>
 {
 	[Test]
-	[MethodDataSource<TelemetrySourceGeneratorTests>(nameof(TelemetrySourceGeneratorTests.BasicGenericParameters))]
+	[MethodDataSource<TelemetrySourceGeneratorTests>(
+		nameof(TelemetrySourceGeneratorTests.BasicGenericParameters)
+	)]
 	public async Task Generate_GivenMethodWithBasicGenericParams_GeneratesEntryCorrectly(
-		string parameterType
+		string parameterType,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
 		var basicActivity =
 			@$"
-using Purview.Telemetry.Activities;
 
 namespace Testing;
 
@@ -30,19 +33,28 @@ public interface ITestActivities
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
+			cancellationToken: cancellationToken,
 			parameters: parameterType
 		);
 	}
 
 	[Test]
-	[MethodDataSource<TelemetrySourceGeneratorTests>(nameof(TelemetrySourceGeneratorTests.GetGenericTypeDefCount))]
-	public async Task Generate_GivenInterfaceWithGenerics_RaisesDiagnostics(int genericTypeCount)
+	[MethodDataSource<TelemetrySourceGeneratorTests>(
+		nameof(TelemetrySourceGeneratorTests.GetGenericTypeDefCount)
+	)]
+	public async Task Generate_GivenInterfaceWithGenerics_RaisesDiagnostics(
+		int genericTypeCount,
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		var genericTypeDef = string.Join(
@@ -51,7 +63,6 @@ public interface ITestActivities
 		);
 		var basicActivity =
 			@$"
-using Purview.Telemetry.Activities;
 
 namespace Testing;
 
@@ -64,20 +75,29 @@ public interface ITestActivities<{genericTypeDef}>
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
+			cancellationToken: cancellationToken,
 			parameters: genericTypeCount
 		);
 	}
 
 	[Test]
-	[MethodDataSource<TelemetrySourceGeneratorTests>(nameof(TelemetrySourceGeneratorTests.GetGenericTypeDefCount))]
-	public async Task Generate_GivenMethodWithGenerics_RaisesDiagnostics(int genericTypeCount)
+	[MethodDataSource<TelemetrySourceGeneratorTests>(
+		nameof(TelemetrySourceGeneratorTests.GetGenericTypeDefCount)
+	)]
+	public async Task Generate_GivenMethodWithGenerics_RaisesDiagnostics(
+		int genericTypeCount,
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		var genericTypeDef = string.Join(
@@ -86,7 +106,6 @@ public interface ITestActivities<{genericTypeDef}>
 		);
 		var basicActivity =
 			@$"
-using Purview.Telemetry.Activities;
 
 namespace Testing;
 
@@ -99,13 +118,17 @@ public interface ITestActivities
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
+			cancellationToken: cancellationToken,
 			parameters: genericTypeCount
 		);
 	}

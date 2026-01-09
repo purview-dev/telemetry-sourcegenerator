@@ -2,50 +2,12 @@
   Diagnostics: [
     {
       Location: /*
-
-[ActivitySource("testing-activity-source")]
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-public interface IInvalidTelemetry
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-{
-^
-	[Context]
-^^^^^^^^^^
-	bool InvalidContextReturn(
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-		System.Diagnostics.Activity? activity,
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-		string key,
-^^^^^^^^^^^^^
-		string value
-^^^^^^^^^^^^^^
-	);
-^^^
-}
-^
-
-*/
- Guid_1: (9,0)-(18,1),
-      Message: As Event and/ or Context methods are defined, it's best practice to create a specific Activity otherwise the Activity will belong to another operation.,
-      Severity: Info,
-      WarningLevel: 1,
-      Descriptor: {
-        Id: TSG3012,
-        Title: There are no Activity methods defined, assumed use of Activity.Current,
-        MessageFormat: As Event and/ or Context methods are defined, it's best practice to create a specific Activity otherwise the Activity will belong to another operation.,
-        Category: Activity.Usage,
-        DefaultSeverity: Info,
-        IsEnabledByDefault: true
-      }
-    },
-    {
-      Location: /*
 	[Context]
 	bool InvalidContextReturn(
       ^^^^^^^^^^^^^^^^^^^^
 		System.Diagnostics.Activity? activity,
 */
- Guid_1: (13,6)-(13,26),
+ Guid_1: (15,6)-(15,26),
       Message: An activity or event must return either void or an System.Diagnostics.Activity.,
       Severity: Error,
       Descriptor: {

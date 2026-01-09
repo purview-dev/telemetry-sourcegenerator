@@ -1,17 +1,17 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Logging;
+namespace Purview.Telemetry.SourceGenerator.Logging;
 
 partial class TelemetrySourceGeneratorLoggingTests
 {
 	[Test]
 	[MethodDataSource(nameof(SpecificLogAttributeTypes))]
 	public async Task Generate_GivenInterfaceWithSpecificLogAttribute_GenerateLoggerWithThatLevel(
-		string attribute
+		string attribute,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
 		string basicLogger =
 			@$"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -24,23 +24,29 @@ public interface ITestLogger
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, parameters: attribute);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			cancellationToken: cancellationToken,
+			parameters: attribute
+		);
 	}
 
 	[Test]
 	[MethodDataSource(nameof(SpecificLogAttributeTypes))]
 	public async Task Generate_GivenInterfaceWithSpecificTypesAndSpecificParameters_GenerateLoggerWithThatLevelAndParameter(
-		string attribute
+		string attribute,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
-		string basicLogger =
-			$$"""
+		string basicLogger = $$"""
 
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -69,10 +75,17 @@ public interface ITestLogger
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, parameters: attribute);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			cancellationToken: cancellationToken,
+			parameters: attribute
+		);
 	}
 
 	public static IEnumerable<string> SpecificLogAttributeTypes

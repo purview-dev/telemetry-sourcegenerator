@@ -1,17 +1,17 @@
 <Solution>
-  <Folder Name="/Solution Items/">
-    <File Path=".editorconfig" />
-    <File Path="Directory.Build.props" />
-    <File Path="Directory.Build.targets" />
-    <File Path="Directory.Packages.props" />
-    <File Path="exclusion.dic" />
-    <File Path="global.json" />
-  </Folder>
-  <Folder Name="/Solution Items/.build-system/">
-    <File Path=".build-system/BuildVariables.props" />
-    <File Path=".build-system/Directory.Build.props" />
-    <File Path=".build-system/Directory.Build.targets" />
-  </Folder>
-  <Project Path="Purview.Telemetry.SourceGenerator.IntegrationTests/Purview.Telemetry.SourceGenerator.IntegrationTests.csproj" />
-  <Project Path="Purview.Telemetry.SourceGenerator/Purview.Telemetry.SourceGenerator.csproj" />
+	<Folder Name="/Solution Items/">
+		<File Path=".editorconfig" />
+		<File Path="Directory.Build.props" />
+		<File Path="Directory.Build.targets" />
+		<File Path="Directory.Packages.props" />
+		<File Path="exclusion.dic" />
+		<File Path="global.json" />
+	</Folder>
+	<Folder Name="/Solution Items/.build-system/">
+		<File Path=".build-system/BuildVariables.props" />
+		<File Path=".build-system/Directory.Build.props" />
+		<File Path=".build-system/Directory.Build.targets" />
+	</Folder>
+	<Project Path="Purview.Telemetry.SourceGenerator.IntegrationTests/Purview.Telemetry.SourceGenerator.IntegrationTests.csproj" />
+	<Project Path="Purview.Telemetry.SourceGenerator/Purview.Telemetry.SourceGenerator.csproj" />
 </Solution>

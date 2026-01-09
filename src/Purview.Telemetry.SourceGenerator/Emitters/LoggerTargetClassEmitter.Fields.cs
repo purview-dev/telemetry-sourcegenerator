@@ -65,6 +65,20 @@ partial class LoggerTargetClassEmitter
 				continue;
 			}
 
+			// Report warning for Activity parameter without Activity target
+			if (methodTarget.TargetGenerationState.ActivityParameterWithoutTarget != null)
+			{
+				logger?.Debug(
+					$"Activity parameter '{methodTarget.TargetGenerationState.ActivityParameterWithoutTarget}' on {methodTarget.MethodName} has no Activity target."
+				);
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.General.ActivityParameterWithoutActivityTarget,
+					methodTarget.MethodLocation,
+					methodTarget.TargetGenerationState.ActivityParameterWithoutTarget
+				);
+			}
+
 			if (methodTarget.HasMultipleExceptions)
 			{
 				logger?.Diagnostic(

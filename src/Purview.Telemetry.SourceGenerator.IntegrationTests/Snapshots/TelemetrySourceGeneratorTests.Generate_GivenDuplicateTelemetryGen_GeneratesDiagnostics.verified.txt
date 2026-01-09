@@ -7,15 +7,16 @@
       ^^^^^^^^
 
 */
- Guid_1: (18,6)-(18,14),
-      Message: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-      Severity: Error,
+ Guid_1: (15,6)-(15,14),
+      Message: It's best practice to return the created Activity so you can dispose of it, and use it for Event or Context methods.,
+      Severity: Warning,
+      WarningLevel: 1,
       Descriptor: {
-        Id: TSG1002,
-        Title: Multiple generation types are not supported,
-        MessageFormat: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-        Category: Usage,
-        DefaultSeverity: Error,
+        Id: TSG3013,
+        Title: Should return the created Activity,
+        MessageFormat: It's best practice to return the created Activity so you can dispose of it, and use it for Event or Context methods.,
+        Category: Activity.Usage,
+        DefaultSeverity: Warning,
         IsEnabledByDefault: true
       }
     },
@@ -26,15 +27,16 @@
       ^^^^^
 
 */
- Guid_1: (22,6)-(22,11),
-      Message: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-      Severity: Error,
+ Guid_1: (19,6)-(19,11),
+      Message: It's best practice to accept an Activity parameter to ensure the Event, Tags and/ or Baggage are applied to the Activity you intended.,
+      Severity: Warning,
+      WarningLevel: 1,
       Descriptor: {
-        Id: TSG1002,
-        Title: Multiple generation types are not supported,
-        MessageFormat: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-        Category: Usage,
-        DefaultSeverity: Error,
+        Id: TSG3014,
+        Title: Should accept an Activity to apply the Event/ Tags/ Baggage too,
+        MessageFormat: It's best practice to accept an Activity parameter to ensure the Event, Tags and/ or Baggage are applied to the Activity you intended.,
+        Category: Activity.Usage,
+        DefaultSeverity: Warning,
         IsEnabledByDefault: true
       }
     },
@@ -45,32 +47,13 @@
       ^^^^^^^
 
 */
- Guid_1: (26,6)-(26,13),
-      Message: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
+ Guid_1: (23,6)-(23,13),
+      Message: Only a single attribute per target family (Activities, Logs, or Metrics) is allowed on each method. For Activities: use one of ActivityAttribute, EventAttribute, or ContextAttribute. For Logging: use one of LogAttribute or a semantic level attribute (TraceAttribute, DebugAttribute, etc.). For Metrics: use one instrument attribute (CounterAttribute, HistogramAttribute, etc.).,
       Severity: Error,
       Descriptor: {
         Id: TSG1002,
-        Title: Multiple generation types are not supported,
-        MessageFormat: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-        Category: Usage,
-        DefaultSeverity: Error,
-        IsEnabledByDefault: true
-      }
-    },
-    {
-      Location: /*
-	[Counter]
-	void Log([Tag]int intParam, bool boolParam);
-      ^^^
-
-*/
- Guid_1: (30,6)-(30,9),
-      Message: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-      Severity: Error,
-      Descriptor: {
-        Id: TSG1002,
-        Title: Multiple generation types are not supported,
-        MessageFormat: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
+        Title: Multiple attributes from the same target family are not supported,
+        MessageFormat: Only a single attribute per target family (Activities, Logs, or Metrics) is allowed on each method. For Activities: use one of ActivityAttribute, EventAttribute, or ContextAttribute. For Logging: use one of LogAttribute or a semantic level attribute (TraceAttribute, DebugAttribute, etc.). For Metrics: use one instrument attribute (CounterAttribute, HistogramAttribute, etc.).,
         Category: Usage,
         DefaultSeverity: Error,
         IsEnabledByDefault: true
@@ -83,14 +66,14 @@
               ^^^^^^^^
 
 */
- Guid_1: (34,14)-(34,22),
-      Message: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
+ Guid_1: (31,14)-(31,22),
+      Message: An activity or event must return either void or an System.Diagnostics.Activity.,
       Severity: Error,
       Descriptor: {
-        Id: TSG1002,
-        Title: Multiple generation types are not supported,
-        MessageFormat: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-        Category: Usage,
+        Id: TSG3002,
+        Title: Invalid return type,
+        MessageFormat: An activity or event must return either void or an System.Diagnostics.Activity.,
+        Category: Activity.Usage,
         DefaultSeverity: Error,
         IsEnabledByDefault: true
       }
@@ -102,86 +85,51 @@
       ^^^^^^^
 }
 */
- Guid_1: (39,6)-(39,13),
-      Message: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
+ Guid_1: (36,6)-(36,13),
+      Message: It's best practice to accept an Activity parameter to ensure the Event, Tags and/ or Baggage are applied to the Activity you intended.,
+      Severity: Warning,
+      WarningLevel: 1,
+      Descriptor: {
+        Id: TSG3014,
+        Title: Should accept an Activity to apply the Event/ Tags/ Baggage too,
+        MessageFormat: It's best practice to accept an Activity parameter to ensure the Event, Tags and/ or Baggage are applied to the Activity you intended.,
+        Category: Activity.Usage,
+        DefaultSeverity: Warning,
+        IsEnabledByDefault: true
+      }
+    },
+    {
+      Message: Either define a measurement parameter, or provide a supported type parameter that is not a tag to enable inferring.,
+      Severity: Error,
+      Descriptor: {
+        Id: TSG4004,
+        Title: No measurement value defined,
+        MessageFormat: Either define a measurement parameter, or provide a supported type parameter that is not a tag to enable inferring.,
+        Category: Metrics.Usage,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    },
+    {
+      Message: Only a single attribute per target family (Activities, Logs, or Metrics) is allowed on each method. For Activities: use one of ActivityAttribute, EventAttribute, or ContextAttribute. For Logging: use one of LogAttribute or a semantic level attribute (TraceAttribute, DebugAttribute, etc.). For Metrics: use one instrument attribute (CounterAttribute, HistogramAttribute, etc.).,
       Severity: Error,
       Descriptor: {
         Id: TSG1002,
-        Title: Multiple generation types are not supported,
-        MessageFormat: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
+        Title: Multiple attributes from the same target family are not supported,
+        MessageFormat: Only a single attribute per target family (Activities, Logs, or Metrics) is allowed on each method. For Activities: use one of ActivityAttribute, EventAttribute, or ContextAttribute. For Logging: use one of LogAttribute or a semantic level attribute (TraceAttribute, DebugAttribute, etc.). For Metrics: use one instrument attribute (CounterAttribute, HistogramAttribute, etc.).,
         Category: Usage,
         DefaultSeverity: Error,
         IsEnabledByDefault: true
       }
     },
     {
-      Message: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
+      Message: Either define a measurement parameter, or provide a supported type parameter that is not a tag to enable inferring.,
       Severity: Error,
       Descriptor: {
-        Id: TSG1002,
-        Title: Multiple generation types are not supported,
-        MessageFormat: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-        Category: Usage,
-        DefaultSeverity: Error,
-        IsEnabledByDefault: true
-      }
-    },
-    {
-      Message: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-      Severity: Error,
-      Descriptor: {
-        Id: TSG1002,
-        Title: Multiple generation types are not supported,
-        MessageFormat: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-        Category: Usage,
-        DefaultSeverity: Error,
-        IsEnabledByDefault: true
-      }
-    },
-    {
-      Message: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-      Severity: Error,
-      Descriptor: {
-        Id: TSG1002,
-        Title: Multiple generation types are not supported,
-        MessageFormat: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-        Category: Usage,
-        DefaultSeverity: Error,
-        IsEnabledByDefault: true
-      }
-    },
-    {
-      Message: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-      Severity: Error,
-      Descriptor: {
-        Id: TSG1002,
-        Title: Multiple generation types are not supported,
-        MessageFormat: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-        Category: Usage,
-        DefaultSeverity: Error,
-        IsEnabledByDefault: true
-      }
-    },
-    {
-      Message: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-      Severity: Error,
-      Descriptor: {
-        Id: TSG1002,
-        Title: Multiple generation types are not supported,
-        MessageFormat: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-        Category: Usage,
-        DefaultSeverity: Error,
-        IsEnabledByDefault: true
-      }
-    },
-    {
-      Message: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-      Severity: Error,
-      Descriptor: {
-        Id: TSG1002,
-        Title: Multiple generation types are not supported,
-        MessageFormat: Only a single generation target types (Activities, Logs or Metrics) are supported. Use one of the following: ActivityAttribute, EventAttribute, ContextAttribute, LogAttribute, WarningAttribute, CounterAttribute, HistogramAttribute, UpDownCounterAttribute, ObservableCounterAttribute, ObservableGaugeAttribute or ObservableUpDownCounterAttribute.,
-        Category: Usage,
+        Id: TSG4004,
+        Title: No measurement value defined,
+        MessageFormat: Either define a measurement parameter, or provide a supported type parameter that is not a tag to enable inferring.,
+        Category: Metrics.Usage,
         DefaultSeverity: Error,
         IsEnabledByDefault: true
       }

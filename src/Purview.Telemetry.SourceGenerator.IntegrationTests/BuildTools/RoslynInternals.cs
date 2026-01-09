@@ -34,8 +34,7 @@ sealed class InMemoryAdditionalText(
 	private class InMemoryConfigOptions(ImmutableDictionary<string, string> values)
 		: AnalyzerConfigOptions
 	{
-		public static AnalyzerConfigOptions Empty { get; } =
-			new InMemoryConfigOptions(ImmutableDictionary<string, string>.Empty);
+		public static AnalyzerConfigOptions Empty { get; } = new InMemoryConfigOptions([]);
 
 		public override bool TryGetValue(
 			string key,
@@ -49,10 +48,7 @@ internal sealed class TestAnalyzerConfigOptionsProvider : AnalyzerConfigOptionsP
 	readonly ImmutableDictionary<object, AnalyzerConfigOptions> _treeDict;
 
 	public static TestAnalyzerConfigOptionsProvider Empty { get; } =
-		new(
-			ImmutableDictionary<object, AnalyzerConfigOptions>.Empty,
-			TestAnalyzerConfigOptions.Empty
-		);
+		new([], TestAnalyzerConfigOptions.Empty);
 
 	internal TestAnalyzerConfigOptionsProvider(
 		ImmutableDictionary<object, AnalyzerConfigOptions> treeDict,

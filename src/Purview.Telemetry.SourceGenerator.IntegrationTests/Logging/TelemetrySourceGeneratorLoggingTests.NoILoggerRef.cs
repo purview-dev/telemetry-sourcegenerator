@@ -1,15 +1,15 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Logging;
+namespace Purview.Telemetry.SourceGenerator.Logging;
 
 partial class TelemetrySourceGeneratorLoggingTests
 {
 	[Test]
-	public async Task Generate_GivenNoReferenceToILoggerAndNoLoggerRequested_DoesNotGenerateDiagnostic()
+	public async Task Generate_GivenNoReferenceToILoggerAndNoLoggerRequested_DoesNotGenerateDiagnostic(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 
 namespace Testing;
 
@@ -27,21 +27,22 @@ public interface ITestActivities {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicActivity,
-			includeLoggerTypes: IncludeLoggerTypes.None
+			includeLoggerTypes: IncludeLoggerTypes.None,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenNoReferenceToILoggerAndNoLoggerRequested_CompilesWithoutILoggerRef()
+	public async Task Generate_GivenNoReferenceToILoggerAndNoLoggerRequested_CompilesWithoutILoggerRef(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 
 namespace Testing;
 
@@ -59,14 +60,16 @@ public interface ITestActivities {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicActivity,
-			includeLoggerTypes: IncludeLoggerTypes.None
+			includeLoggerTypes: IncludeLoggerTypes.None,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
 			expectsDiagnostics: false,
-			whenValidatingDiagnosticsIgnoreNonErrors: true
+			whenValidatingDiagnosticsIgnoreNonErrors: true,
+			cancellationToken: cancellationToken
 		);
 	}
 }

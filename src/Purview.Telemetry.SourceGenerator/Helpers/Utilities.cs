@@ -43,52 +43,96 @@ static partial class Utilities
 			|| Constants.Metrics.ObservableUpDownCounterAttribute == m
 		);
 
-		var count = activityCount + loggingCount + metricsCount;
 		var inferenceNotSupportedWithMultiTargeting = false;
 		var multiGenerationTargetsNotSupported = false;
-		if (generationType != requestedType)
+
+		// Check for intra-family conflicts (multiple attributes within same family)
+		// This is always an error - can only have one activity/event/context, one log level, one instrument
+		if (activityCount > 1 || loggingCount > 1 || metricsCount > 1)
+			multiGenerationTargetsNotSupported = true;
+
+		// Count how many families are present on the interface
+		var interfaceTargetCount = 0;
+		if (generationType.HasFlag(GenerationType.Activities))
+			interfaceTargetCount++;
+		if (generationType.HasFlag(GenerationType.Logging))
+			interfaceTargetCount++;
+		if (generationType.HasFlag(GenerationType.Metrics))
+			interfaceTargetCount++;
+
+		// Determine which target families this method has explicit attributes for
+		var methodTargets = GenerationType.None;
+		if (activityCount > 0)
+			methodTargets |= GenerationType.Activities;
+		if (loggingCount > 0)
+			methodTargets |= GenerationType.Logging;
+		if (metricsCount > 0)
+			methodTargets |= GenerationType.Metrics;
+
+		// Count how many target families this method targets
+		var methodTargetFamilyCount = 0;
+		if (methodTargets.HasFlag(GenerationType.Activities))
+			methodTargetFamilyCount++;
+		if (methodTargets.HasFlag(GenerationType.Logging))
+			methodTargetFamilyCount++;
+		if (methodTargets.HasFlag(GenerationType.Metrics))
+			methodTargetFamilyCount++;
+
+		// This method is multi-target if it has attributes from more than one family
+		var isMultiTarget = methodTargetFamilyCount > 1;
+
+		// If interface has multiple target families, methods need explicit attributes (no inference)
+		if (interfaceTargetCount > 1)
 		{
-			// This means it's multi-target generation so we need everything to be explicit.
-			if (count == 0)
+			// If no explicit attribute for any target, that's the inference error
+			if (methodTargetFamilyCount == 0)
 				inferenceNotSupportedWithMultiTargeting = true;
 		}
 
-		if (count > 1)
-			multiGenerationTargetsNotSupported = true;
-
+		// Determine if this method is valid for the requested target type
 		var isValid =
 			!multiGenerationTargetsNotSupported && !inferenceNotSupportedWithMultiTargeting;
 		if (isValid)
 		{
-			if (
-				generationType.HasFlag(GenerationType.Activities)
-				&& requestedType == GenerationType.Activities
-			)
+			// Method is valid for this target if it has an explicit attribute for this target,
+			// OR if it's single-target generation and can use inference
+			if (interfaceTargetCount > 1)
 			{
-				isValid = loggingCount == 0 && metricsCount == 0;
+				// Multi-target interface: must have explicit attribute for this target
+				isValid = requestedType switch
+				{
+					GenerationType.Activities => activityCount > 0,
+					GenerationType.Logging => loggingCount > 0,
+					GenerationType.Metrics => metricsCount > 0,
+					_ => false,
+				};
 			}
+			// Single-target interface: original inference logic applies
+		}
 
-			if (
-				generationType.HasFlag(GenerationType.Logging)
-				&& requestedType == GenerationType.Logging
-			)
+		// Check for Activity parameter without Activity target
+		string? activityParameterWithoutTarget = null;
+		if (activityCount == 0)
+		{
+			// No Activity attribute, check if there are Activity parameters
+			foreach (var param in method.Parameters)
 			{
-				isValid = activityCount == 0 && metricsCount == 0;
-			}
-
-			if (
-				generationType.HasFlag(GenerationType.Metrics)
-				&& requestedType == GenerationType.Metrics
-			)
-			{
-				isValid = activityCount == 0 && loggingCount == 0;
+				var paramType = PurviewTypeFactory.Create(param.Type);
+				if (Constants.Activities.SystemDiagnostics.Activity.Equals(paramType))
+				{
+					activityParameterWithoutTarget = param.Name;
+					break;
+				}
 			}
 		}
 
 		return new(
 			IsValid: isValid,
 			RaiseInferenceNotSupportedWithMultiTargeting: inferenceNotSupportedWithMultiTargeting,
-			RaiseMultiGenerationTargetsNotSupported: multiGenerationTargetsNotSupported
+			RaiseMultiGenerationTargetsNotSupported: multiGenerationTargetsNotSupported,
+			IsMultiTarget: isMultiTarget,
+			MethodTargets: methodTargets,
+			ActivityParameterWithoutTarget: activityParameterWithoutTarget
 		);
 	}
 
@@ -132,9 +176,10 @@ static partial class Utilities
 		// Determine the namespace the type is declared in, if any
 		var potentialNamespaceParent = typeSymbol.Parent;
 		while (
-			potentialNamespaceParent is not null
-			and not NamespaceDeclarationSyntax
-			and not FileScopedNamespaceDeclarationSyntax
+			potentialNamespaceParent
+				is not null
+					and not NamespaceDeclarationSyntax
+					and not FileScopedNamespaceDeclarationSyntax
 		)
 		{
 			potentialNamespaceParent = potentialNamespaceParent.Parent;
@@ -143,11 +188,8 @@ static partial class Utilities
 		if (potentialNamespaceParent is BaseNamespaceDeclarationSyntax namespaceParent)
 		{
 			var @namespace = namespaceParent.Name.ToString();
-			while (true)
+			while (namespaceParent.Parent is NamespaceDeclarationSyntax namespaceParentParent)
 			{
-				if (namespaceParent.Parent is not NamespaceDeclarationSyntax namespaceParentParent)
-					break;
-
 				namespaceParent = namespaceParentParent;
 				@namespace = $"{namespaceParent.Name}.{@namespace}";
 			}

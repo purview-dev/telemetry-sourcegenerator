@@ -1,15 +1,15 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Purview.Telemetry.SourceGenerator.Records;
-using Purview.Telemetry.SourceGenerator.Validators;
 
-namespace Purview.Telemetry.SourceGenerator.IntegrationTests.Validators;
+namespace Purview.Telemetry.SourceGenerator.Validators;
 
 public class TelemetryMethodValidatorTests
 {
 	static CSharpCompilation CreateCompilation(string source)
 	{
 		var syntaxTree = CSharpSyntaxTree.ParseText(source);
-		var references = AppDomain.CurrentDomain.GetAssemblies()
+		var references = AppDomain
+			.CurrentDomain.GetAssemblies()
 			.Where(a => !a.IsDynamic && !string.IsNullOrWhiteSpace(a.Location))
 			.Select(a => MetadataReference.CreateFromFile(a.Location))
 			.ToList();
@@ -34,10 +34,11 @@ public class TelemetryMethodValidatorTests
 	}
 
 	[Test]
-	public void ValidateReturnType_GivenVoidForLogging_ReturnsValid()
+	public async Task ValidateReturnType_GivenVoidForLogging_ReturnsValid()
 	{
 		// Arrange
-		const string source = @"
+		const string source =
+			@"
 using System;
 namespace Test {
 	public interface ITest {
@@ -56,15 +57,16 @@ namespace Test {
 		);
 
 		// Assert
-		result.IsValid.ShouldBeTrue();
-		result.IsValidFor(GenerationType.Logging).ShouldBeTrue();
+		await Assert.That(result.IsValid).IsTrue();
+		await Assert.That(result.IsValidFor(GenerationType.Logging)).IsTrue();
 	}
 
 	[Test]
-	public void ValidateReturnType_GivenIDisposableForScopedLogging_ReturnsValid()
+	public async Task ValidateReturnType_GivenIDisposableForScopedLogging_ReturnsValid()
 	{
 		// Arrange
-		const string source = @"
+		const string source =
+			@"
 using System;
 namespace Test {
 	public interface ITest {
@@ -83,15 +85,16 @@ namespace Test {
 		);
 
 		// Assert
-		result.IsValid.ShouldBeTrue();
-		result.IsValidFor(GenerationType.Logging).ShouldBeTrue();
+		await Assert.That(result.IsValid).IsTrue();
+		await Assert.That(result.IsValidFor(GenerationType.Logging)).IsTrue();
 	}
 
 	[Test]
-	public void ValidateReturnType_GivenVoidForScopedLogging_ReturnsInvalid()
+	public async Task ValidateReturnType_GivenVoidForScopedLogging_ReturnsInvalid()
 	{
 		// Arrange
-		const string source = @"
+		const string source =
+			@"
 using System;
 namespace Test {
 	public interface ITest {
@@ -110,18 +113,17 @@ namespace Test {
 		);
 
 		// Assert
-		result.IsValid.ShouldBeFalse();
-		result.Errors.Count().ShouldBe(1);
-		result.Errors.First().Error.ShouldBe(
-			ReturnTypeValidationError.ScopedLoggerMustReturnIDisposable
-		);
+		await Assert.That(result.IsValid).IsFalse();
+		await Assert.That(result.Errors.Count()).IsEqualTo(1);
+		await Assert.That(result.Errors.First().Error).IsEqualTo(ReturnTypeValidationError.ScopedLoggerMustReturnIDisposable);
 	}
 
 	[Test]
-	public void ValidateReturnType_GivenActivityForActivities_ReturnsValid()
+	public async Task ValidateReturnType_GivenActivityForActivities_ReturnsValid()
 	{
 		// Arrange
-		const string source = @"
+		const string source =
+			@"
 using System.Diagnostics;
 namespace Test {
 	public interface ITest {
@@ -140,15 +142,16 @@ namespace Test {
 		);
 
 		// Assert
-		result.IsValid.ShouldBeTrue();
-		result.IsValidFor(GenerationType.Activities).ShouldBeTrue();
+		await Assert.That(result.IsValid).IsTrue();
+		await Assert.That(result.IsValidFor(GenerationType.Activities)).IsTrue();
 	}
 
 	[Test]
-	public void ValidateReturnType_GivenVoidForActivities_ReturnsValid()
+	public async Task ValidateReturnType_GivenVoidForActivities_ReturnsValid()
 	{
 		// Arrange
-		const string source = @"
+		const string source =
+			@"
 using System.Diagnostics;
 namespace Test {
 	public interface ITest {
@@ -167,14 +170,15 @@ namespace Test {
 		);
 
 		// Assert
-		result.IsValid.ShouldBeTrue();
+		await Assert.That(result.IsValid).IsTrue();
 	}
 
 	[Test]
-	public void ValidateReturnType_GivenStringForActivities_ReturnsInvalid()
+	public async Task ValidateReturnType_GivenStringForActivities_ReturnsInvalid()
 	{
 		// Arrange
-		const string source = @"
+		const string source =
+			@"
 namespace Test {
 	public interface ITest {
 		string InvalidActivity();
@@ -192,17 +196,16 @@ namespace Test {
 		);
 
 		// Assert
-		result.IsValid.ShouldBeFalse();
-		result.Errors.First().Error.ShouldBe(
-			ReturnTypeValidationError.InvalidActivityReturnType
-		);
+		await Assert.That(result.IsValid).IsFalse();
+		await Assert.That(result.Errors.First().Error).IsEqualTo(ReturnTypeValidationError.InvalidActivityReturnType);
 	}
 
 	[Test]
-	public void ValidateReturnType_GivenVoidForMetrics_ReturnsValid()
+	public async Task ValidateReturnType_GivenVoidForMetrics_ReturnsValid()
 	{
 		// Arrange
-		const string source = @"
+		const string source =
+			@"
 namespace Test {
 	public interface ITest {
 		void IncrementCounter(int value);
@@ -220,15 +223,16 @@ namespace Test {
 		);
 
 		// Assert
-		result.IsValid.ShouldBeTrue();
-		result.IsValidFor(GenerationType.Metrics).ShouldBeTrue();
+		await Assert.That(result.IsValid).IsTrue();
+		await Assert.That(result.IsValidFor(GenerationType.Metrics)).IsTrue();
 	}
 
 	[Test]
-	public void ValidateReturnType_GivenTaskForLogging_ReturnsValid()
+	public async Task ValidateReturnType_GivenTaskForLogging_ReturnsValid()
 	{
 		// Arrange
-		const string source = @"
+		const string source =
+			@"
 using System.Threading.Tasks;
 namespace Test {
 	public interface ITest {
@@ -247,14 +251,15 @@ namespace Test {
 		);
 
 		// Assert
-		result.IsValid.ShouldBeTrue();
+		await Assert.That(result.IsValid).IsTrue();
 	}
 
 	[Test]
-	public void ValidateReturnType_GivenValueTaskForLogging_ReturnsValid()
+	public async Task ValidateReturnType_GivenValueTaskForLogging_ReturnsValid()
 	{
 		// Arrange
-		const string source = @"
+		const string source =
+			@"
 using System.Threading.Tasks;
 namespace Test {
 	public interface ITest {
@@ -273,14 +278,15 @@ namespace Test {
 		);
 
 		// Assert
-		result.IsValid.ShouldBeTrue();
+		await Assert.That(result.IsValid).IsTrue();
 	}
 
 	[Test]
-	public void ValidateReturnType_GivenMultiTarget_ValidatesAllTargets()
+	public async Task ValidateReturnType_GivenMultiTarget_ValidatesAllTargets()
 	{
 		// Arrange
-		const string source = @"
+		const string source =
+			@"
 using System;
 using System.Diagnostics;
 namespace Test {
@@ -300,18 +306,19 @@ namespace Test {
 		);
 
 		// Assert
-		result.Validations.Count.ShouldBe(3);
-		result.IsValid.ShouldBeTrue();
-		result.IsValidFor(GenerationType.Logging).ShouldBeTrue();
-		result.IsValidFor(GenerationType.Activities).ShouldBeTrue();
-		result.IsValidFor(GenerationType.Metrics).ShouldBeTrue();
+		await Assert.That(result.Validations.Count).IsEqualTo(3);
+		await Assert.That(result.IsValid).IsTrue();
+		await Assert.That(result.IsValidFor(GenerationType.Logging)).IsTrue();
+		await Assert.That(result.IsValidFor(GenerationType.Activities)).IsTrue();
+		await Assert.That(result.IsValidFor(GenerationType.Metrics)).IsTrue();
 	}
 
 	[Test]
-	public void ShouldExcludeParameter_GivenActivityParameterForLogging_ReturnsExcluded()
+	public async Task ShouldExcludeParameter_GivenActivityParameterForLogging_ReturnsExcluded()
 	{
 		// Arrange
-		const string source = @"
+		const string source =
+			@"
 using System.Diagnostics;
 namespace Test {
 	public interface ITest {
@@ -331,17 +338,16 @@ namespace Test {
 		);
 
 		// Assert
-		result.IsExcludedFrom(GenerationType.Logging).ShouldBeTrue();
-		result.GetExclusionFor(GenerationType.Logging)?.Reason.ShouldBe(
-			ParameterExclusionReason.ActivityParameterNotAllowedInLogging
-		);
+		await Assert.That(result.IsExcludedFrom(GenerationType.Logging)).IsTrue();
+		await Assert.That(result.GetExclusionFor(GenerationType.Logging)?.Reason).IsEqualTo(ParameterExclusionReason.ActivityParameterNotAllowedInLogging);
 	}
 
 	[Test]
-	public void ShouldExcludeParameter_GivenActivityParameterForMetrics_ReturnsExcluded()
+	public async Task ShouldExcludeParameter_GivenActivityParameterForMetrics_ReturnsExcluded()
 	{
 		// Arrange
-		const string source = @"
+		const string source =
+			@"
 using System.Diagnostics;
 namespace Test {
 	public interface ITest {
@@ -361,17 +367,16 @@ namespace Test {
 		);
 
 		// Assert
-		result.IsExcludedFrom(GenerationType.Metrics).ShouldBeTrue();
-		result.GetExclusionFor(GenerationType.Metrics)?.Reason.ShouldBe(
-			ParameterExclusionReason.ActivityParameterNotAllowedInMetrics
-		);
+		await Assert.That(result.IsExcludedFrom(GenerationType.Metrics)).IsTrue();
+		await Assert.That(result.GetExclusionFor(GenerationType.Metrics)?.Reason).IsEqualTo(ParameterExclusionReason.ActivityParameterNotAllowedInMetrics);
 	}
 
 	[Test]
-	public void ShouldExcludeParameter_GivenActivityParameterForActivities_ReturnsNotExcluded()
+	public async Task ShouldExcludeParameter_GivenActivityParameterForActivities_ReturnsNotExcluded()
 	{
 		// Arrange
-		const string source = @"
+		const string source =
+			@"
 using System.Diagnostics;
 namespace Test {
 	public interface ITest {
@@ -391,14 +396,15 @@ namespace Test {
 		);
 
 		// Assert
-		result.IsExcludedFrom(GenerationType.Activities).ShouldBeFalse();
+		await Assert.That(result.IsExcludedFrom(GenerationType.Activities)).IsFalse();
 	}
 
 	[Test]
-	public void ShouldExcludeParameter_GivenActivityContextForLogging_ReturnsExcluded()
+	public async Task ShouldExcludeParameter_GivenActivityContextForLogging_ReturnsExcluded()
 	{
 		// Arrange
-		const string source = @"
+		const string source =
+			@"
 using System.Diagnostics;
 namespace Test {
 	public interface ITest {
@@ -418,17 +424,16 @@ namespace Test {
 		);
 
 		// Assert
-		result.IsExcludedFrom(GenerationType.Logging).ShouldBeTrue();
-		result.GetExclusionFor(GenerationType.Logging)?.Reason.ShouldBe(
-			ParameterExclusionReason.ActivityContextParameterNotAllowedInLogging
-		);
+		await Assert.That(result.IsExcludedFrom(GenerationType.Logging)).IsTrue();
+		await Assert.That(result.GetExclusionFor(GenerationType.Logging)?.Reason).IsEqualTo(ParameterExclusionReason.ActivityContextParameterNotAllowedInLogging);
 	}
 
 	[Test]
-	public void ShouldExcludeParameter_GivenTagListForLogging_ReturnsExcluded()
+	public async Task ShouldExcludeParameter_GivenTagListForLogging_ReturnsExcluded()
 	{
 		// Arrange
-		const string source = @"
+		const string source =
+			@"
 using System.Diagnostics;
 namespace Test {
 	public interface ITest {
@@ -448,17 +453,16 @@ namespace Test {
 		);
 
 		// Assert
-		result.IsExcludedFrom(GenerationType.Logging).ShouldBeTrue();
-		result.GetExclusionFor(GenerationType.Logging)?.Reason.ShouldBe(
-			ParameterExclusionReason.TagListParameterNotAllowedInLogging
-		);
+		await Assert.That(result.IsExcludedFrom(GenerationType.Logging)).IsTrue();
+		await Assert.That(result.GetExclusionFor(GenerationType.Logging)?.Reason).IsEqualTo(ParameterExclusionReason.TagListParameterNotAllowedInLogging);
 	}
 
 	[Test]
-	public void ShouldExcludeParameter_GivenRegularStringParameter_ReturnsNotExcluded()
+	public async Task ShouldExcludeParameter_GivenRegularStringParameter_ReturnsNotExcluded()
 	{
 		// Arrange
-		const string source = @"
+		const string source =
+			@"
 namespace Test {
 	public interface ITest {
 		void Method(string message);
@@ -477,14 +481,15 @@ namespace Test {
 		);
 
 		// Assert
-		result.IsExcludedFrom(GenerationType.Logging).ShouldBeFalse();
+		await Assert.That(result.IsExcludedFrom(GenerationType.Logging)).IsFalse();
 	}
 
 	[Test]
-	public void ShouldExcludeParameter_GivenCounterValueForLogging_ReturnsExcluded()
+	public async Task ShouldExcludeParameter_GivenCounterValueForLogging_ReturnsExcluded()
 	{
 		// Arrange
-		const string source = @"
+		const string source =
+			@"
 namespace Test {
 	public interface ITest {
 		void IncrementCounter(int counterValue, string endpoint);
@@ -503,17 +508,18 @@ namespace Test {
 		);
 
 		// Assert
-		result.Exclusions.Any(e =>
-			e.Target == GenerationType.Logging &&
-			e.Reason == ParameterExclusionReason.MetricsMeasurementParameterNotAllowedInLogging
-		).ShouldBeTrue();
+		await Assert.That(result.Exclusions.Any(e =>
+			e.Target == GenerationType.Logging
+			&& e.Reason == ParameterExclusionReason.MetricsMeasurementParameterNotAllowedInLogging
+		)).IsTrue();
 	}
 
 	[Test]
-	public void ShouldExcludeParameter_GivenMultipleExclusions_ReturnsAllExclusions()
+	public async Task ShouldExcludeParameter_GivenMultipleExclusions_ReturnsAllExclusions()
 	{
 		// Arrange
-		const string source = @"
+		const string source =
+			@"
 using System.Diagnostics;
 namespace Test {
 	public interface ITest {
@@ -538,16 +544,17 @@ namespace Test {
 		);
 
 		// Assert
-		loggingResult.IsExcludedFrom(GenerationType.Logging).ShouldBeTrue();
-		metricsResult.IsExcludedFrom(GenerationType.Metrics).ShouldBeTrue();
+		await Assert.That(loggingResult.IsExcludedFrom(GenerationType.Logging)).IsTrue();
+		await Assert.That(metricsResult.IsExcludedFrom(GenerationType.Metrics)).IsTrue();
 	}
 
 	[Test]
 	[MethodDataSource(nameof(GetObservableMetricsReturnTypes))]
-	public void ValidateReturnType_GivenObservableMetricsTypes_ReturnsValid(string returnType)
+	public async Task ValidateReturnType_GivenObservableMetricsTypes_ReturnsValid(string returnType)
 	{
 		// Arrange
-		var source = $@"
+		var source =
+			$@"
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
@@ -568,8 +575,8 @@ namespace Test {{
 		);
 
 		// Assert
-		result.IsValid.ShouldBeTrue();
-		result.IsValidFor(GenerationType.Metrics).ShouldBeTrue();
+		await Assert.That(result.IsValid).IsTrue();
+		await Assert.That(result.IsValidFor(GenerationType.Metrics)).IsTrue();
 	}
 
 	public static IEnumerable<string> GetObservableMetricsReturnTypes

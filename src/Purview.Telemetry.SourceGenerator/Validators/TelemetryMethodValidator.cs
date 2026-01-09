@@ -9,7 +9,6 @@ namespace Purview.Telemetry.SourceGenerator.Validators;
 /// </summary>
 sealed class TelemetryMethodValidator(Compilation compilation)
 {
-
 	/// <summary>
 	/// Validates the return type for a given method and target generation type.
 	/// </summary>
@@ -35,6 +34,10 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 	/// <summary>
 	/// Determines if a parameter should be excluded from a specific target generation.
 	/// </summary>
+	[System.Diagnostics.CodeAnalysis.SuppressMessage(
+		"Performance",
+		"CA1822:Mark members as static"
+	)]
 	public ParameterExclusionResult ShouldExcludeParameter(
 		IParameterSymbol parameter,
 		GenerationType currentTarget,
@@ -48,20 +51,24 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		{
 			if (currentTarget == GenerationType.Logging)
 			{
-				exclusions.Add(new ParameterExclusion(
-					currentTarget,
-					ParameterExclusionReason.ActivityParameterNotAllowedInLogging,
-					$"Parameter '{parameter.Name}' of type Activity is automatically excluded from logging generation."
-				));
+				exclusions.Add(
+					new ParameterExclusion(
+						currentTarget,
+						ParameterExclusionReason.ActivityParameterNotAllowedInLogging,
+						$"Parameter '{parameter.Name}' of type Activity is automatically excluded from logging generation."
+					)
+				);
 			}
 
 			if (currentTarget == GenerationType.Metrics)
 			{
-				exclusions.Add(new ParameterExclusion(
-					currentTarget,
-					ParameterExclusionReason.ActivityParameterNotAllowedInMetrics,
-					$"Parameter '{parameter.Name}' of type Activity is automatically excluded from metrics generation."
-				));
+				exclusions.Add(
+					new ParameterExclusion(
+						currentTarget,
+						ParameterExclusionReason.ActivityParameterNotAllowedInMetrics,
+						$"Parameter '{parameter.Name}' of type Activity is automatically excluded from metrics generation."
+					)
+				);
 			}
 		}
 
@@ -70,20 +77,24 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		{
 			if (currentTarget == GenerationType.Logging)
 			{
-				exclusions.Add(new ParameterExclusion(
-					currentTarget,
-					ParameterExclusionReason.ActivityContextParameterNotAllowedInLogging,
-					$"Parameter '{parameter.Name}' of type ActivityContext is automatically excluded from logging generation."
-				));
+				exclusions.Add(
+					new ParameterExclusion(
+						currentTarget,
+						ParameterExclusionReason.ActivityContextParameterNotAllowedInLogging,
+						$"Parameter '{parameter.Name}' of type ActivityContext is automatically excluded from logging generation."
+					)
+				);
 			}
 
 			if (currentTarget == GenerationType.Metrics)
 			{
-				exclusions.Add(new ParameterExclusion(
-					currentTarget,
-					ParameterExclusionReason.ActivityContextParameterNotAllowedInMetrics,
-					$"Parameter '{parameter.Name}' of type ActivityContext is automatically excluded from metrics generation."
-				));
+				exclusions.Add(
+					new ParameterExclusion(
+						currentTarget,
+						ParameterExclusionReason.ActivityContextParameterNotAllowedInMetrics,
+						$"Parameter '{parameter.Name}' of type ActivityContext is automatically excluded from metrics generation."
+					)
+				);
 			}
 		}
 
@@ -92,20 +103,24 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		{
 			if (currentTarget == GenerationType.Logging)
 			{
-				exclusions.Add(new ParameterExclusion(
-					currentTarget,
-					ParameterExclusionReason.ActivityLinkParameterNotAllowedInLogging,
-					$"Parameter '{parameter.Name}' of type ActivityLink is automatically excluded from logging generation."
-				));
+				exclusions.Add(
+					new ParameterExclusion(
+						currentTarget,
+						ParameterExclusionReason.ActivityLinkParameterNotAllowedInLogging,
+						$"Parameter '{parameter.Name}' of type ActivityLink is automatically excluded from logging generation."
+					)
+				);
 			}
 
 			if (currentTarget == GenerationType.Metrics)
 			{
-				exclusions.Add(new ParameterExclusion(
-					currentTarget,
-					ParameterExclusionReason.ActivityLinkParameterNotAllowedInMetrics,
-					$"Parameter '{parameter.Name}' of type ActivityLink is automatically excluded from metrics generation."
-				));
+				exclusions.Add(
+					new ParameterExclusion(
+						currentTarget,
+						ParameterExclusionReason.ActivityLinkParameterNotAllowedInMetrics,
+						$"Parameter '{parameter.Name}' of type ActivityLink is automatically excluded from metrics generation."
+					)
+				);
 			}
 		}
 
@@ -114,11 +129,13 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		{
 			if (currentTarget == GenerationType.Logging)
 			{
-				exclusions.Add(new ParameterExclusion(
-					currentTarget,
-					ParameterExclusionReason.TagListParameterNotAllowedInLogging,
-					$"Parameter '{parameter.Name}' of type TagList is automatically excluded from logging generation."
-				));
+				exclusions.Add(
+					new ParameterExclusion(
+						currentTarget,
+						ParameterExclusionReason.TagListParameterNotAllowedInLogging,
+						$"Parameter '{parameter.Name}' of type TagList is automatically excluded from logging generation."
+					)
+				);
 			}
 		}
 
@@ -129,11 +146,13 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		{
 			if (IsMetricsMeasurementParameter(parameter, allTargets))
 			{
-				exclusions.Add(new ParameterExclusion(
-					GenerationType.Logging,
-					ParameterExclusionReason.MetricsMeasurementParameterNotAllowedInLogging,
-					$"Parameter '{parameter.Name}' is a metrics measurement value and is automatically excluded from logging generation."
-				));
+				exclusions.Add(
+					new ParameterExclusion(
+						GenerationType.Logging,
+						ParameterExclusionReason.MetricsMeasurementParameterNotAllowedInLogging,
+						$"Parameter '{parameter.Name}' is a metrics measurement value and is automatically excluded from logging generation."
+					)
+				);
 			}
 		}
 
@@ -151,10 +170,10 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 					"Scoped logger correctly returns IDisposable."
 				)
 				: ReturnTypeValidation.Invalid(
-				GenerationType.Logging,
-				ReturnTypeValidationError.ScopedLoggerMustReturnIDisposable,
-				$"Scoped logger methods must return IDisposable, but found '{returnType.ToDisplayString()}'."
-			);
+					GenerationType.Logging,
+					ReturnTypeValidationError.ScopedLoggerMustReturnIDisposable,
+					$"Scoped logger methods must return IDisposable, but found '{returnType.ToDisplayString()}'."
+				);
 		}
 
 		// Non-scoped logger should return void or Task/ValueTask
@@ -173,30 +192,30 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 				$"Logger method correctly returns async type '{returnType.ToDisplayString()}'."
 			)
 			: ReturnTypeValidation.Invalid(
-			GenerationType.Logging,
-			ReturnTypeValidationError.InvalidLoggingReturnType,
-			$"Logger methods must return void, Task, ValueTask, or IDisposable (for scoped), but found '{returnType.ToDisplayString()}'."
-		);
+				GenerationType.Logging,
+				ReturnTypeValidationError.InvalidLoggingReturnType,
+				$"Logger methods must return void, Task, ValueTask, or IDisposable (for scoped), but found '{returnType.ToDisplayString()}'."
+			);
 	}
 
 	static ReturnTypeValidation ValidateActivityReturnType(ITypeSymbol returnType)
 	{
 		// Activity methods can return Activity or void
 		return Constants.Activities.SystemDiagnostics.Activity.Equals(returnType)
-			? ReturnTypeValidation.Valid(
-				GenerationType.Activities,
-				"Activity method correctly returns Activity."
-			)
+				? ReturnTypeValidation.Valid(
+					GenerationType.Activities,
+					"Activity method correctly returns Activity."
+				)
 			: returnType.SpecialType == SpecialType.System_Void
-			? ReturnTypeValidation.Valid(
-				GenerationType.Activities,
-				"Activity method correctly returns void."
-			)
+				? ReturnTypeValidation.Valid(
+					GenerationType.Activities,
+					"Activity method correctly returns void."
+				)
 			: ReturnTypeValidation.Invalid(
-			GenerationType.Activities,
-			ReturnTypeValidationError.InvalidActivityReturnType,
-			$"Activity methods must return Activity or void, but found '{returnType.ToDisplayString()}'."
-		);
+				GenerationType.Activities,
+				ReturnTypeValidationError.InvalidActivityReturnType,
+				$"Activity methods must return Activity or void, but found '{returnType.ToDisplayString()}'."
+			);
 	}
 
 	static ReturnTypeValidation ValidateMetricsReturnType(ITypeSymbol returnType)
@@ -217,10 +236,10 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 				$"Observable metrics method correctly returns '{returnType.ToDisplayString()}'."
 			)
 			: ReturnTypeValidation.Invalid(
-			GenerationType.Metrics,
-			ReturnTypeValidationError.InvalidMetricsReturnType,
-			$"Metrics methods must return void or observable types, but found '{returnType.ToDisplayString()}'."
-		);
+				GenerationType.Metrics,
+				ReturnTypeValidationError.InvalidMetricsReturnType,
+				$"Metrics methods must return void or observable types, but found '{returnType.ToDisplayString()}'."
+			);
 	}
 
 	static bool IsActivityLinkType(ITypeSymbol type)
@@ -232,8 +251,13 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
 		{
 			var typeArg = namedType.TypeArguments.FirstOrDefault();
-			if (typeArg != null && Constants.Activities.SystemDiagnostics.ActivityLink.Equals(typeArg))
+			if (
+				typeArg != null
+				&& Constants.Activities.SystemDiagnostics.ActivityLink.Equals(typeArg)
+			)
+			{
 				return true;
+			}
 		}
 
 		return false;
@@ -245,11 +269,17 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 			return false;
 
 		var taskType = compilation.GetTypeByMetadataName("System.Threading.Tasks.Task");
-		if (taskType != null && SymbolEqualityComparer.Default.Equals(namedType.ConstructedFrom, taskType))
+		if (
+			taskType != null
+			&& SymbolEqualityComparer.Default.Equals(namedType.ConstructedFrom, taskType)
+		)
+		{
 			return true;
+		}
 
 		var genericTaskType = compilation.GetTypeByMetadataName("System.Threading.Tasks.Task`1");
-		return genericTaskType != null && SymbolEqualityComparer.Default.Equals(namedType.ConstructedFrom, genericTaskType);
+		return genericTaskType != null
+			&& SymbolEqualityComparer.Default.Equals(namedType.ConstructedFrom, genericTaskType);
 	}
 
 	bool IsValueTaskType(ITypeSymbol type)
@@ -258,11 +288,22 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 			return false;
 
 		var valueTaskType = compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask");
-		if (valueTaskType != null && SymbolEqualityComparer.Default.Equals(namedType, valueTaskType))
+		if (
+			valueTaskType != null
+			&& SymbolEqualityComparer.Default.Equals(namedType, valueTaskType)
+		)
+		{
 			return true;
+		}
 
-		var genericValueTaskType = compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask`1");
-		return genericValueTaskType != null && SymbolEqualityComparer.Default.Equals(namedType.ConstructedFrom, genericValueTaskType);
+		var genericValueTaskType = compilation.GetTypeByMetadataName(
+			"System.Threading.Tasks.ValueTask`1"
+		);
+		return genericValueTaskType != null
+			&& SymbolEqualityComparer.Default.Equals(
+				namedType.ConstructedFrom,
+				genericValueTaskType
+			);
 	}
 
 	static bool IsObservableMetricsReturnType(ITypeSymbol type)
@@ -274,29 +315,40 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		// Check for Func<T> where T is numeric or Measurement<T>
 		if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
 		{
-			var funcFullName = $"{namedType.ContainingNamespace?.ToDisplayString()}.{namedType.Name}";
+			var funcFullName =
+				$"{namedType.ContainingNamespace?.ToDisplayString()}.{namedType.Name}";
 			if (funcFullName == "System.Func")
 			{
 				var returnType = namedType.TypeArguments.LastOrDefault();
-				if (returnType != null && (IsNumericType(returnType) || IsMeasurementType(returnType)))
+				if (
+					returnType != null
+					&& (IsNumericType(returnType) || IsMeasurementType(returnType))
+				)
+				{
 					return true;
+				}
 			}
 
 			// Check if the type itself is IEnumerable<Measurement<T>>
-			if (namedType.Name == "IEnumerable" &&
-				namedType.ContainingNamespace?.ToDisplayString() == "System.Collections.Generic" &&
-				namedType.TypeArguments.Length == 1 &&
-				IsMeasurementType(namedType.TypeArguments[0]))
+			if (
+				namedType.Name == "IEnumerable"
+				&& namedType.ContainingNamespace?.ToDisplayString() == "System.Collections.Generic"
+				&& namedType.TypeArguments.Length == 1
+				&& IsMeasurementType(namedType.TypeArguments[0])
+			)
 			{
 				return true;
 			}
 
 			// Check for types implementing IEnumerable<Measurement<T>>
-			if (namedType.AllInterfaces.Any(i =>
-				i.Name == "IEnumerable" &&
-				i.ContainingNamespace?.ToDisplayString() == "System.Collections.Generic" &&
-				i.TypeArguments.Length == 1 &&
-				IsMeasurementType(i.TypeArguments[0])))
+			if (
+				namedType.AllInterfaces.Any(i =>
+					i.Name == "IEnumerable"
+					&& i.ContainingNamespace?.ToDisplayString() == "System.Collections.Generic"
+					&& i.TypeArguments.Length == 1
+					&& IsMeasurementType(i.TypeArguments[0])
+				)
+			)
 			{
 				return true;
 			}
@@ -307,26 +359,27 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 
 	static bool IsMeasurementType(ITypeSymbol type)
 	{
-		return type is INamedTypeSymbol namedType && namedType.Name == "Measurement" &&
-			   namedType.ContainingNamespace?.ToDisplayString() == "System.Diagnostics.Metrics" &&
-			   namedType.TypeArguments.Length == 1 &&
-			   IsNumericType(namedType.TypeArguments[0]);
+		return type is INamedTypeSymbol namedType
+			&& namedType.Name == "Measurement"
+			&& namedType.ContainingNamespace?.ToDisplayString() == "System.Diagnostics.Metrics"
+			&& namedType.TypeArguments.Length == 1
+			&& IsNumericType(namedType.TypeArguments[0]);
 	}
 
 	static bool IsNumericType(ITypeSymbol type)
 	{
-		return type.SpecialType is
-			SpecialType.System_Byte or
-			SpecialType.System_SByte or
-			SpecialType.System_Int16 or
-			SpecialType.System_UInt16 or
-			SpecialType.System_Int32 or
-			SpecialType.System_UInt32 or
-			SpecialType.System_Int64 or
-			SpecialType.System_UInt64 or
-			SpecialType.System_Single or
-			SpecialType.System_Double or
-			SpecialType.System_Decimal;
+		return type.SpecialType
+			is SpecialType.System_Byte
+				or SpecialType.System_SByte
+				or SpecialType.System_Int16
+				or SpecialType.System_UInt16
+				or SpecialType.System_Int32
+				or SpecialType.System_UInt32
+				or SpecialType.System_Int64
+				or SpecialType.System_UInt64
+				or SpecialType.System_Single
+				or SpecialType.System_Double
+				or SpecialType.System_Decimal;
 	}
 
 	static bool IsMetricsMeasurementParameter(IParameterSymbol parameter, GenerationType allTargets)
@@ -342,8 +395,14 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		if (IsNumericType(parameter.Type) && allTargets.HasFlag(GenerationType.Metrics))
 		{
 			// Check if it's the first parameter (common pattern for metrics)
-			if (parameter.ContainingSymbol is IMethodSymbol method && method.Parameters.Length > 0 && SymbolEqualityComparer.Default.Equals(method.Parameters[0], parameter))
+			if (
+				parameter.ContainingSymbol is IMethodSymbol method
+				&& method.Parameters.Length > 0
+				&& SymbolEqualityComparer.Default.Equals(method.Parameters[0], parameter)
+			)
+			{
 				return true;
+			}
 		}
 
 		return false;
@@ -353,17 +412,14 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 /// <summary>
 /// Result of return type validation containing results for all applicable targets.
 /// </summary>
-sealed record ReturnTypeValidationResult(
-	IReadOnlyList<ReturnTypeValidation> Validations
-)
+sealed record ReturnTypeValidationResult(IReadOnlyList<ReturnTypeValidation> Validations)
 {
 	public bool IsValid => Validations.All(v => v.IsValid);
 
 	public bool IsValidFor(GenerationType target) =>
 		Validations.FirstOrDefault(v => v.Target == target)?.IsValid ?? false;
 
-	public IEnumerable<ReturnTypeValidation> Errors =>
-		Validations.Where(v => !v.IsValid);
+	public IEnumerable<ReturnTypeValidation> Errors => Validations.Where(v => !v.IsValid);
 }
 
 /// <summary>
@@ -394,24 +450,20 @@ enum ReturnTypeValidationError
 	ScopedLoggerMustReturnIDisposable,
 	InvalidLoggingReturnType,
 	InvalidActivityReturnType,
-	InvalidMetricsReturnType
+	InvalidMetricsReturnType,
 }
 
 /// <summary>
 /// Result indicating if and why a parameter should be excluded from target generation.
 /// </summary>
-sealed record ParameterExclusionResult(
-	IReadOnlyList<ParameterExclusion> Exclusions
-)
+sealed record ParameterExclusionResult(IReadOnlyList<ParameterExclusion> Exclusions)
 {
-	public bool IsExcludedFrom(GenerationType target) =>
-		Exclusions.Any(e => e.Target == target);
+	public bool IsExcludedFrom(GenerationType target) => Exclusions.Any(e => e.Target == target);
 
 	public ParameterExclusion? GetExclusionFor(GenerationType target) =>
 		Exclusions.FirstOrDefault(e => e.Target == target);
 
-	public bool IsIncludedIn(GenerationType target) =>
-		!IsExcludedFrom(target);
+	public bool IsIncludedIn(GenerationType target) => !IsExcludedFrom(target);
 }
 
 /// <summary>
@@ -435,5 +487,5 @@ enum ParameterExclusionReason
 	ActivityLinkParameterNotAllowedInLogging,
 	ActivityLinkParameterNotAllowedInMetrics,
 	TagListParameterNotAllowedInLogging,
-	MetricsMeasurementParameterNotAllowedInLogging
+	MetricsMeasurementParameterNotAllowedInLogging,
 }

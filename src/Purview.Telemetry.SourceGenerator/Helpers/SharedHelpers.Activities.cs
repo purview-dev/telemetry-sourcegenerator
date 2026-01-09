@@ -57,38 +57,38 @@ partial class SharedHelpers
 						nameValue = new((string)value);
 					}
 					else if (
-											name.Equals(
-												nameof(ActivitySourceAttributeRecord.DefaultToTags),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(ActivitySourceAttributeRecord.DefaultToTags),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						defaultToTags = new((bool)value);
 					}
 					else if (
-											name.Equals(
-												nameof(ActivitySourceAttributeRecord.BaggageAndTagPrefix),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(ActivitySourceAttributeRecord.BaggageAndTagPrefix),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						baggageAndTagPrefix = new((string)value);
 					}
 					else if (
-											name.Equals(
-												nameof(ActivitySourceAttributeRecord.IncludeActivitySourcePrefix),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(ActivitySourceAttributeRecord.IncludeActivitySourcePrefix),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						includeActivitySourcePrefix = new((bool)value);
 					}
 					else if (
-											name.Equals(
-												nameof(ActivitySourceAttributeRecord.LowercaseBaggageAndTagKeys),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(ActivitySourceAttributeRecord.LowercaseBaggageAndTagKeys),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						lowercaseBaggageAndTagKeys = new((bool)value);
 					}
@@ -153,51 +153,51 @@ partial class SharedHelpers
 						nameValue = new((string)value);
 					}
 					else if (
-											name.Equals(
-												nameof(ActivitySourceGenerationAttributeRecord.DefaultToTags),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(ActivitySourceGenerationAttributeRecord.DefaultToTags),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						defaultToTags = new((bool)value);
 					}
 					else if (
-											name.Equals(
-												nameof(ActivitySourceGenerationAttributeRecord.BaggageAndTagPrefix),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(ActivitySourceGenerationAttributeRecord.BaggageAndTagPrefix),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						baggageAndTagPrefix = new((string)value);
 					}
 					else if (
-											name.Equals(
-												nameof(ActivitySourceGenerationAttributeRecord.BaggageAndTagSeparator),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(ActivitySourceGenerationAttributeRecord.BaggageAndTagSeparator),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						baggageAndTagSeparator = new((string)value);
 					}
 					else if (
-											name.Equals(
-												nameof(
-													ActivitySourceGenerationAttributeRecord.LowercaseBaggageAndTagKeys
-												),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(
+								ActivitySourceGenerationAttributeRecord.LowercaseBaggageAndTagKeys
+							),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						lowercaseBaggageAndTagKeys = new((bool)value);
 					}
 					else if (
-											name.Equals(
-												nameof(
-													ActivitySourceGenerationAttributeRecord.GenerateDiagnosticsForMissingActivity
-												),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(
+								ActivitySourceGenerationAttributeRecord.GenerateDiagnosticsForMissingActivity
+							),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						generateDiagnosticsForMissingActivity = new((bool)value);
 					}
@@ -261,20 +261,20 @@ partial class SharedHelpers
 						nameValue = new((string)value);
 					}
 					else if (
-											name.Equals(
-												nameof(ActivityAttributeRecord.Kind),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(ActivityAttributeRecord.Kind),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						kind = new((int)value);
 					}
 					else if (
-											name.Equals(
-												nameof(ActivityAttributeRecord.CreateOnly),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(ActivityAttributeRecord.CreateOnly),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						createOnly = new((bool)value);
 					}
@@ -336,38 +336,38 @@ partial class SharedHelpers
 						nameValue = new((string)value);
 					}
 					else if (
-											name.Equals(
-												nameof(EventAttributeRecord.UseRecordExceptionRules),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(EventAttributeRecord.UseRecordExceptionRules),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						useRecordExceptionRules = new((bool)value);
 					}
 					else if (
-											name.Equals(
-												nameof(EventAttributeRecord.RecordExceptionEscape),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(EventAttributeRecord.RecordExceptionEscape),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						recordExceptionEscape = new((bool)value);
 					}
 					else if (
-											name.Equals(
-												nameof(EventAttributeRecord.StatusCode),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(EventAttributeRecord.StatusCode),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						statusCode = new((int)value);
 					}
 					else if (
-											name.Equals(
-												nameof(EventAttributeRecord.StatusDescription),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(EventAttributeRecord.StatusDescription),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						statusDescription = new((string)value);
 					}

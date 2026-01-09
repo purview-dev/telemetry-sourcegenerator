@@ -81,7 +81,8 @@ record LogParameterTarget(
 	ImmutableArray<Location> Locations,
 	LogPropertiesAttributeRecord? LogPropertiesAttribute,
 	ImmutableArray<LogPropertiesParameterDetails>? LogProperties,
-	ExpandEnumerableAttributeRecord? ExpandEnumerableAttribute
+	ExpandEnumerableAttributeRecord? ExpandEnumerableAttribute,
+	GenerationType ExcludedTargets
 )
 {
 	public bool UsedInTemplate => ReferencedHoles.Count > 0;

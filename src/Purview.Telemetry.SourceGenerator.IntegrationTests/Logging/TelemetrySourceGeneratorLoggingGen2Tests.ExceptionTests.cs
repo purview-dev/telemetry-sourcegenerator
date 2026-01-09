@@ -1,14 +1,15 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Logging;
+namespace Purview.Telemetry.SourceGenerator.Logging;
 
 partial class TelemetrySourceGeneratorLoggingGen2Tests
 {
 	[Test]
-	public async Task Generate_GivenMethodWithNonSpecificException_UsesExceptionParameter()
+	public async Task Generate_GivenMethodWithNonSpecificException_UsesExceptionParameter(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
+		const string basicLogger =
 			@"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -21,20 +22,22 @@ public interface ITestLogger {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenMethodWithCustomException_UsesExceptionParameter()
+	public async Task Generate_GivenMethodWithCustomException_UsesExceptionParameter(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
+		const string basicLogger =
 			@"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -49,20 +52,22 @@ public class BadLuckException : Exception { }
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenMethodWithMultipleExceptionParameters_GeneratesEntry()
+	public async Task Generate_GivenMethodWithMultipleExceptionParameters_GeneratesEntry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
+		const string basicLogger =
 			@"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -77,10 +82,11 @@ public class BadLuckException : Exception { }
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

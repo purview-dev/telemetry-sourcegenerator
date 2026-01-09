@@ -17,39 +17,39 @@ partial class Constants
 		public const int DefaultLevel = 2;
 
 		public static readonly TemplateInfo LoggerGenerationAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Logging.LoggerGenerationAttribute"
+			"Purview.Telemetry.LoggerGenerationAttribute"
 		);
 		public static readonly TemplateInfo LoggerAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Logging.LoggerAttribute"
+			"Purview.Telemetry.LoggerAttribute"
 		);
 		public static readonly TemplateInfo LogAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Logging.LogAttribute"
+			"Purview.Telemetry.LogAttribute"
 		);
 		public static readonly TemplateInfo LogPrefixType = TemplateInfo.Create(
-			"Purview.Telemetry.Logging.LogPrefixType"
+			"Purview.Telemetry.LogPrefixType"
 		);
 
 		public static readonly TemplateInfo ExpandEnumerableAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Logging.ExpandEnumerableAttribute"
+			"Purview.Telemetry.ExpandEnumerableAttribute"
 		);
 
 		public static readonly TemplateInfo TraceAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Logging.TraceAttribute"
+			"Purview.Telemetry.TraceAttribute"
 		);
 		public static readonly TemplateInfo DebugAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Logging.DebugAttribute"
+			"Purview.Telemetry.DebugAttribute"
 		);
 		public static readonly TemplateInfo InfoAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Logging.InfoAttribute"
+			"Purview.Telemetry.InfoAttribute"
 		);
 		public static readonly TemplateInfo WarningAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Logging.WarningAttribute"
+			"Purview.Telemetry.WarningAttribute"
 		);
 		public static readonly TemplateInfo ErrorAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Logging.ErrorAttribute"
+			"Purview.Telemetry.ErrorAttribute"
 		);
 		public static readonly TemplateInfo CriticalAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Logging.CriticalAttribute"
+			"Purview.Telemetry.CriticalAttribute"
 		);
 
 		public static readonly TemplateInfo[] SpecificLogAttributes =

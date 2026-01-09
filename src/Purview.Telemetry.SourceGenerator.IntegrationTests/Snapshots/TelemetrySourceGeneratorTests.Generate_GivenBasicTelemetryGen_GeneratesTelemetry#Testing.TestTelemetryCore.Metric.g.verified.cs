@@ -13,21 +13,11 @@
 
 namespace Testing
 {
-	[global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
-	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class TestTelemetryCore : global::Testing.ITestTelemetry
 	{
 		global::System.Diagnostics.Metrics.Meter _meter = default!;
 
 		global::System.Diagnostics.Metrics.Counter<int>? _counterInstrument = null;
-
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-		public TestTelemetryCore(global::Microsoft.Extensions.Logging.ILogger<global::Testing.ITestTelemetry> logger, global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
-		{
-			_logger = logger;
-			InitializeMeters(meterFactory);
-		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

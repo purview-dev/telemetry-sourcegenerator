@@ -1,20 +1,20 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Metrics;
+namespace Purview.Telemetry.SourceGenerator.Metrics;
 
 partial class TelemetrySourceGeneratorMetricsTests
 {
 	[Test]
-	public async Task Generate_GivenNameWithInterfacePrefix_GeneratesMetricsWithPrefix()
+	public async Task Generate_GivenNameWithInterfacePrefix_GeneratesMetricsWithPrefix(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicMetric =
-			"""
+		const string basicMetric = """
 
-using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
 [Meter("testing-meter", InstrumentPrefix = "This.Is.A.Prefix")]
-interface ITestMetrics 
+interface ITestMetrics
 {
 	[AutoCounter]
 	void AutoCounterMetric();
@@ -23,27 +23,30 @@ interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenNameWithAssemblyPrefix_GeneratesMetricsWithPrefix()
+	public async Task Generate_GivenNameWithAssemblyPrefix_GeneratesMetricsWithPrefix(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicMetric =
-			"""
+		const string basicMetric = """
 
-using Purview.Telemetry.Metrics;
 
 [assembly: MeterGeneration(InstrumentPrefix = "This.Is.An.Assembly.Prefix")]
 
 namespace Testing;
 
 [Meter("testing-meter")]
-interface ITestMetrics 
+interface ITestMetrics
 {
 	[AutoCounter]
 	void AutoCounterMetric();
@@ -52,27 +55,30 @@ interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenNameWithAssemblyAndInterfacePrefix_GeneratesMetricsWithPrefix()
+	public async Task Generate_GivenNameWithAssemblyAndInterfacePrefix_GeneratesMetricsWithPrefix(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicMetric =
-			"""
+		const string basicMetric = """
 
-using Purview.Telemetry.Metrics;
 
 [assembly: MeterGeneration(InstrumentPrefix = "This.Is.An.Assembly.Prefix")]
 
 namespace Testing;
 
 [Meter("testing-meter", InstrumentPrefix = "This.Is.A.Prefix")]
-interface ITestMetrics 
+interface ITestMetrics
 {
 	[AutoCounter]
 	void AutoCounterMetric();
@@ -81,27 +87,30 @@ interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenNameWithAssemblyAndInterfacePrefixAndName_GeneratesMetricsWithPrefix()
+	public async Task Generate_GivenNameWithAssemblyAndInterfacePrefixAndName_GeneratesMetricsWithPrefix(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicMetric =
-			"""
+		const string basicMetric = """
 
-using Purview.Telemetry.Metrics;
 
 [assembly: MeterGeneration(InstrumentPrefix = "This.Is.An.Assembly.Prefix")]
 
 namespace Testing;
 
 [Meter("testing-meter", InstrumentPrefix = "This.Is.A.Prefix")]
-interface ITestMetrics 
+interface ITestMetrics
 {
 	[AutoCounter("auto-counter")]
 	void AutoCounterMetric();
@@ -110,25 +119,28 @@ interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenNameShouldBeLowerCase_GeneratesMetricsWithLowercaseName()
+	public async Task Generate_GivenNameShouldBeLowerCase_GeneratesMetricsWithLowercaseName(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicMetric =
-			"""
+		const string basicMetric = """
 
-using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
 [Meter("testing-meter")]
-interface ITestMetrics 
+interface ITestMetrics
 {
 	[AutoCounter]
 	void AutoCounterMetric();
@@ -137,25 +149,28 @@ interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenNameShouldBeDefaultLowerCase_GeneratesMetricsWithLowercaseName()
+	public async Task Generate_GivenNameShouldBeDefaultLowerCase_GeneratesMetricsWithLowercaseName(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicMetric =
-			"""
+		const string basicMetric = """
 
-using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
 [Meter("testing-meter")]
-interface ITestMetrics 
+interface ITestMetrics
 {
 	[AutoCounter]
 	void AutoCounterMetric();
@@ -164,20 +179,23 @@ interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenNameShouldBeDefinedCase_GeneratesMetricsWithLowercaseName()
+	public async Task Generate_GivenNameShouldBeDefinedCase_GeneratesMetricsWithLowercaseName(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicMetric =
-			"""
+		const string basicMetric = """
 
-using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
@@ -191,9 +209,12 @@ interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

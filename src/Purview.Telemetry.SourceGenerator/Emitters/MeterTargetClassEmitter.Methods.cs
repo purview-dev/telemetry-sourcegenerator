@@ -26,6 +26,20 @@ partial class MeterTargetClassEmitter
 			if (!methodTarget.TargetGenerationState.IsValid)
 				continue;
 
+			// Report warning for Activity parameter without Activity target
+			if (methodTarget.TargetGenerationState.ActivityParameterWithoutTarget != null)
+			{
+				logger?.Debug(
+					$"Activity parameter '{methodTarget.TargetGenerationState.ActivityParameterWithoutTarget}' on {methodTarget.MethodName} has no Activity target."
+				);
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.General.ActivityParameterWithoutActivityTarget,
+					methodTarget.Locations,
+					methodTarget.TargetGenerationState.ActivityParameterWithoutTarget
+				);
+			}
+
 			EmitMethod(builder, indent, methodTarget, context, logger);
 		}
 
@@ -96,16 +110,40 @@ partial class MeterTargetClassEmitter
 
 		logger?.Debug($"Emitting instrument method: {methodTarget.MethodName}.");
 
+		var isMultiTarget = methodTarget.TargetGenerationState.IsMultiTarget;
+		var methodTargets = methodTarget.TargetGenerationState.MethodTargets;
+
+		// Determine if Activity or Logging target owns the public method
+		var activityOwnsPublicMethod = methodTargets.HasFlag(GenerationType.Activities);
+		var loggingOwnsPublicMethod =
+			!activityOwnsPublicMethod && methodTargets.HasFlag(GenerationType.Logging);
+		var metricsOwnsPublicMethod = !activityOwnsPublicMethod && !loggingOwnsPublicMethod;
+
+		// For multi-target where Activity or Logging owns public method, generate private method
+		var accessModifier = isMultiTarget && !metricsOwnsPublicMethod ? "private" : "public";
+		var methodName =
+			isMultiTarget && !metricsOwnsPublicMethod
+				? methodTarget.MethodName + "_Metrics"
+				: methodTarget.MethodName;
+
 		builder
 			.CodeGen(indent)
 			.AggressiveInlining(indent)
-			.Append(indent, "public ", withNewLine: false)
-			.Append(methodTarget.ReturnType);
+			.Append(indent, accessModifier + " ", withNewLine: false);
 
-		if (methodTarget.IsNullableReturn)
-			builder.Append('?');
+		// For multi-target private methods, always return void
+		if (isMultiTarget && !metricsOwnsPublicMethod)
+		{
+			builder.Append(Constants.System.VoidKeyword);
+		}
+		else
+		{
+			builder.Append(methodTarget.ReturnType);
+			if (methodTarget.IsNullableReturn)
+				builder.Append('?');
+		}
 
-		builder.Append(' ').Append(methodTarget.MethodName).Append('(');
+		builder.Append(' ').Append(methodName).Append('(');
 
 		var index = 0;
 		foreach (var parameter in methodTarget.Parameters)

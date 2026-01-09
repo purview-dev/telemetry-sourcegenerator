@@ -20,7 +20,7 @@ namespace Testing
 	{
 		readonly global::Microsoft.Extensions.Logging.ILogger<global::Testing.IInvalidTelemetry> _logger;
 
-		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, string, global::System.Exception?> _invalidScopedReturnAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<string>(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(1317069322, "InvalidScopedReturn"), "InvalidScopedReturn: Message = {Message}");
+		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, string, global::System.Exception?> _validNonScopedLogAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<string>(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(1232230778, "ValidNonScopedLog"), "ValidNonScopedLog: Message = {Message}");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public InvalidTelemetryCore(global::Microsoft.Extensions.Logging.ILogger<global::Testing.IInvalidTelemetry> logger)
@@ -30,14 +30,14 @@ namespace Testing
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		public void InvalidScopedReturn(string message)
+		public void ValidNonScopedLog(string message)
 		{
 			if (!_logger.IsEnabled(global::Microsoft.Extensions.Logging.LogLevel.Information))
 			{
 				return;
 			}
 
-			_invalidScopedReturnAction(_logger, message, null);
+			_validNonScopedLogAction(_logger, message, null);
 		}
 
 	}

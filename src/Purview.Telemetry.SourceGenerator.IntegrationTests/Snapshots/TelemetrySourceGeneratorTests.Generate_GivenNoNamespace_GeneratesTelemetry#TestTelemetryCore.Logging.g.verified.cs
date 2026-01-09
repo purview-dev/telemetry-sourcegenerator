@@ -19,6 +19,13 @@ sealed partial class TestTelemetryCore : global::ITestTelemetry
 	static readonly global::System.Func<global::Microsoft.Extensions.Logging.ILogger, int, bool, global::System.IDisposable?> _logScopeAction = global::Microsoft.Extensions.Logging.LoggerMessage.DefineScope<int, bool>("LogScope: IntParam = {IntParam}, BoolParam = {BoolParam}");
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+	public TestTelemetryCore(global::Microsoft.Extensions.Logging.ILogger<global::ITestTelemetry> logger, global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
+	{
+		_logger = logger;
+		InitializeMeters(meterFactory);
+	}
+
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public void Log(int intParam, bool boolParam)
 	{

@@ -11,13 +11,16 @@ enum GenerationType
 	Activities = 1,
 	Logging = 2,
 	Metrics = 4,
-	All = Activities | Logging | Metrics
+	All = Activities | Logging | Metrics,
 }
 
 sealed record TargetGeneration(
 	bool IsValid,
 	bool RaiseInferenceNotSupportedWithMultiTargeting,
-	bool RaiseMultiGenerationTargetsNotSupported
+	bool RaiseMultiGenerationTargetsNotSupported,
+	bool IsMultiTarget = false,
+	GenerationType MethodTargets = GenerationType.None,
+	string? ActivityParameterWithoutTarget = null
 );
 
 sealed record AttributeValue<T>
@@ -31,8 +34,7 @@ sealed record AttributeValue<T>
 
 	public AttributeValue() => IsSet = false;
 
-	public T? Or(T value)
-		=> IsSet ? Value : value;
+	public T? Or(T value) => IsSet ? Value : value;
 
 	public T? Value { get; }
 
@@ -103,7 +105,7 @@ public record struct MessageTemplateHole(
 
 	static MessageTemplateHole FromMatch(Match match)
 	{
-		if (match == null || !match.Success)
+		if (match?.Success != true)
 			throw new ArgumentException("Match must be successful.", nameof(match));
 
 		string? name = null;

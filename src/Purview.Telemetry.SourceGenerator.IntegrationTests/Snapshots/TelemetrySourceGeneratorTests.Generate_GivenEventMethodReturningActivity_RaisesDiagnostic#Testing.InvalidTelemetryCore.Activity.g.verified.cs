@@ -42,6 +42,25 @@ namespace Testing
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		public global::System.Diagnostics.Activity? ValidActivity(string operationId)
+		{
+			if (!_activitySource.HasListeners())
+			{
+				return null;
+			}
+
+			global::System.Diagnostics.Activity? activityValidActivity = _activitySource.StartActivity("ValidActivity", global::System.Diagnostics.ActivityKind.Internal, parentId: default, tags: default, links: default, startTime: default);
+
+			if (activityValidActivity != null)
+			{
+				activityValidActivity.SetTag("operationid", operationId);
+			}
+
+			return activityValidActivity;
+		}
+
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public global::System.Diagnostics.Activity? InvalidEventReturn(global::System.Diagnostics.Activity? activity, string eventName)
 		{
 			if (!_activitySource.HasListeners())

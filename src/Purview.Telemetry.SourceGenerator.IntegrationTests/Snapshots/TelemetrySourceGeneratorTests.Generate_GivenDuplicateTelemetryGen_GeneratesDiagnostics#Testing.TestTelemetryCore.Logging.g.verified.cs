@@ -17,5 +17,77 @@ namespace Testing
 	{
 		readonly global::Microsoft.Extensions.Logging.ILogger<global::Testing.ITestTelemetry> _logger;
 
+		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, string, int, bool, global::System.Exception?> _activityAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<string, int, bool>(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(1636461556, "Activity"), "Activity: StringParam = {StringParam}, IntParam = {IntParam}, BoolParam = {BoolParam}");
+		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, int, bool, global::System.Exception?> _logAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<int, bool>(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(1579320335, "Log"), "Log: IntParam = {IntParam}, BoolParam = {BoolParam}");
+		static readonly global::System.Func<global::Microsoft.Extensions.Logging.ILogger, int, bool, global::System.IDisposable?> _logScopeAction = global::Microsoft.Extensions.Logging.LoggerMessage.DefineScope<int, bool>("LogScope: IntParam = {IntParam}, BoolParam = {BoolParam}");
+		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, int, int, bool, global::System.Exception?> _counterAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<int, int, bool>(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(66112573, "Counter"), "Counter: CounterValue = {CounterValue}, IntParam = {IntParam}, BoolParam = {BoolParam}");
+
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+		public TestTelemetryCore(global::Microsoft.Extensions.Logging.ILogger<global::Testing.ITestTelemetry> logger, global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
+		{
+			_logger = logger;
+			InitializeMeters(meterFactory);
+		}
+
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		private void Activity_Logging(string stringParam, int intParam, bool boolParam)
+		{
+			if (!_logger.IsEnabled(global::Microsoft.Extensions.Logging.LogLevel.Information))
+			{
+				return;
+			}
+
+			_activityAction(_logger, stringParam, intParam, boolParam, null);
+		}
+
+
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		private void Log_Logging(int intParam, bool boolParam)
+		{
+			if (!_logger.IsEnabled(global::Microsoft.Extensions.Logging.LogLevel.Information))
+			{
+				return;
+			}
+
+			_logAction(_logger, intParam, boolParam, null);
+		}
+
+
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		public void Log(int intParam, bool boolParam)
+		{
+			Log_Logging(intParam, boolParam);
+			Log_Metrics(intParam, boolParam);
+		}
+
+
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		private void LogScope_Logging(int intParam, bool boolParam)
+		{
+			if (!_logger.IsEnabled(global::Microsoft.Extensions.Logging.LogLevel.Information))
+			{
+				return;
+			}
+
+			_logScopeAction(_logger, intParam, boolParam);
+		}
+
+
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		private void Counter_Logging(int counterValue, int intParam, bool boolParam)
+		{
+			if (!_logger.IsEnabled(global::Microsoft.Extensions.Logging.LogLevel.Information))
+			{
+				return;
+			}
+
+			_counterAction(_logger, counterValue, intParam, boolParam, null);
+		}
+
 	}
 }

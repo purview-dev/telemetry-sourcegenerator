@@ -1,4 +1,4 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Activities;
+namespace Purview.Telemetry.SourceGenerator.Activities;
 
 partial class TelemetrySourceGeneratorActivityTests
 {
@@ -8,14 +8,13 @@ partial class TelemetrySourceGeneratorActivityTests
 	[Arguments("System.Diagnostics.Activity")]
 	[Arguments("System.Diagnostics.Activity?")]
 	public async Task Generate_GivenEventWithFirstParameterAsActivityAndNoEventAttribute_GeneratesEventByInference(
-		string activityType
+		string activityType,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
-		var basicActivity =
-			$$"""
+		var basicActivity = $$"""
 
-using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
@@ -32,20 +31,27 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, parameters: activityType);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			cancellationToken: cancellationToken,
+			parameters: activityType
+		);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicEventWithActivityParameter_GeneratesEvent()
+	public async Task Generate_GivenBasicEventWithActivityParameter_GeneratesEvent(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
@@ -63,20 +69,23 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicEventWithNullableActivityParameter_GeneratesEvent()
+	public async Task Generate_GivenBasicEventWithNullableActivityParameter_GeneratesEvent(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
@@ -94,20 +103,23 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicEventStatusCodeParameterSetToOk_GeneratesEvent()
+	public async Task Generate_GivenBasicEventStatusCodeParameterSetToOk_GeneratesEvent(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
@@ -125,20 +137,23 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicEventStatusCodeParameterSetToError_GeneratesEvent()
+	public async Task Generate_GivenBasicEventStatusCodeParameterSetToError_GeneratesEvent(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
@@ -156,20 +171,23 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicEventStatusCodeParameterSetToErrorWithException_GeneratesEvent()
+	public async Task Generate_GivenBasicEventStatusCodeParameterSetToErrorWithException_GeneratesEvent(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
@@ -187,20 +205,23 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicEventStatusCodeParameterSetToErrorWithStatusDescriptionOnEventAttribute_GeneratesEvent()
+	public async Task Generate_GivenBasicEventStatusCodeParameterSetToErrorWithStatusDescriptionOnEventAttribute_GeneratesEvent(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
@@ -218,20 +239,23 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicEventStatusCodeParameterSetToErrorWithStatusDescriptionOnParameter_GeneratesEvent()
+	public async Task Generate_GivenBasicEventStatusCodeParameterSetToErrorWithStatusDescriptionOnParameter_GeneratesEvent(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			"""
+		const string basicActivity = """
 
-using Purview.Telemetry.Activities;
 using System.Diagnostics;
 
 namespace Testing;
@@ -252,9 +276,12 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

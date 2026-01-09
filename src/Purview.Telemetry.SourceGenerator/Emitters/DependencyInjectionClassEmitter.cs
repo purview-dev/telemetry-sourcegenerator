@@ -27,7 +27,7 @@ static class DependencyInjectionClassEmitter
 			return;
 		}
 
-		if (!SharedHelpers.ShouldEmit(requestingType, generationType))
+		if (!SharedHelpers.ShouldEmitDIExtension(requestingType, generationType))
 		{
 			logger?.Debug(
 				$"Skipping dependency injection emit for {requestingType} ({generationType})."

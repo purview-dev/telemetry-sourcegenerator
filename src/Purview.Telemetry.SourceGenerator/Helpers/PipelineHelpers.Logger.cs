@@ -87,7 +87,8 @@ partial class PipelineHelpers
 			logger,
 			token
 		);
-		var defaultLogLevel = loggerGenerationAttribute?.DefaultLevel?.Value ?? Constants.Logging.DefaultLevel;
+		var defaultLogLevel =
+			loggerGenerationAttribute?.DefaultLevel?.Value ?? Constants.Logging.DefaultLevel;
 		var disableMSLoggingTelemetryGeneration =
 			loggerAttribute.DisableMSLoggingTelemetryGeneration.Value
 			?? loggerGenerationAttribute?.DisableMSLoggingTelemetryGeneration.Value
@@ -173,21 +174,19 @@ partial class PipelineHelpers
 				continue;
 			}
 
-			// In multi-target scenarios, skip methods with explicit Activity or Metrics attributes
+			// For multi-target interfaces (generationType != GenerationType.Logging means interface has multiple targets):
+			// - Include method ONLY if it has an explicit Logging attribute
+			// - Methods with only Activity/Metrics attributes should be skipped
 			if (generationType != GenerationType.Logging)
 			{
-				if (SharedHelpers.IsActivityMethod(method, token))
-				{
-					logger?.Debug(
-						$"Skipping {interfaceSymbol.Name}.{method.Name} from logging - has Activity attribute."
-					);
-					continue;
-				}
+				// Check if this method has an explicit logging attribute
+				var hasLoggingAttribute =
+					SharedHelpers.GetLogAttribute(method, semanticModel, logger, token) != null;
 
-				if (Utilities.HasMetricsAttribute(method, token))
+				if (!hasLoggingAttribute)
 				{
 					logger?.Debug(
-						$"Skipping {interfaceSymbol.Name}.{method.Name} from logging - has Metrics attribute."
+						$"Skipping {interfaceSymbol.Name}.{method.Name} from logging - no explicit Logging attribute on multi-target interface."
 					);
 					continue;
 				}
@@ -263,7 +262,7 @@ partial class PipelineHelpers
 				: methodParameters.FirstOrDefault(m => m.IsException);
 
 			var inferredErrorLevel = exceptionParam != null;
-			if ((logAttribute?.Level.IsSet ?? false) == true)
+			if (logAttribute?.Level.IsSet ?? false)
 				inferredErrorLevel = false;
 
 			var level = (
@@ -320,8 +319,8 @@ partial class PipelineHelpers
 						.Where(m =>
 							(m.IsPositional && m.Ordinal == i)
 							|| (
-								m.Name != null
-								&& m.Name.Equals(param.Name, StringComparison.OrdinalIgnoreCase)
+								m.Name?.Equals(param.Name, StringComparison.OrdinalIgnoreCase)
+								== true
 							)
 						)
 						.ToArray();
@@ -482,6 +481,22 @@ partial class PipelineHelpers
 		{
 			token.ThrowIfCancellationRequested();
 
+			// Skip Activity-related parameters and TagList - they are not valid for logging
+			var parameterType = PurviewTypeFactory.Create(parameter.Type);
+			if (
+				Constants.Activities.SystemDiagnostics.Activity.Equals(parameterType)
+				|| Constants.Activities.SystemDiagnostics.ActivityContext.Equals(parameterType)
+				|| Constants.Activities.SystemDiagnostics.ActivityLink.Equals(parameterType)
+				|| Constants.Activities.SystemDiagnostics.ActivityLinkArray.Equals(parameterType)
+				|| Constants.System.TagList.Equals(parameterType)
+			)
+			{
+				logger?.Debug(
+					$"Skipping parameter '{parameter.Name}' of type '{parameterType}' from logging."
+				);
+				continue;
+			}
+
 			var logPropertiesAttribute = SharedHelpers.GetLogPropertiesAttribute(
 				parameter,
 				semanticModel,
@@ -554,7 +569,11 @@ partial class PipelineHelpers
 					Locations: parameter.Locations,
 					LogPropertiesAttribute: logPropertiesAttribute,
 					LogProperties: logProperties?.ToImmutableArray(),
-					ExpandEnumerableAttribute: expandEnumerableAttribute
+					ExpandEnumerableAttribute: expandEnumerableAttribute,
+					ExcludedTargets: SharedHelpers
+						.GetExcludeTargetsAttribute(parameter, semanticModel, logger, token)
+						?.ExcludedTargets
+						?? GenerationType.None
 				)
 			);
 
@@ -569,7 +588,7 @@ partial class PipelineHelpers
 
 	static (TelemetryDiagnosticDescriptor, ImmutableArray<Location>)? ValidateLogReturnType(
 		IMethodSymbol method,
-		SemanticModel semanticModel,
+		SemanticModel _, // semanticModel
 		GenerationLogger? logger,
 		CancellationToken token
 	)
@@ -579,6 +598,7 @@ partial class PipelineHelpers
 		// Valid return types for logging:
 		// - void (non-scoped)
 		// - IDisposable or IDisposable? (scoped)
+		// - Activity? (multi-target with Activity - Activity return type takes priority)
 		// Everything else is invalid
 
 		var isVoid = method.ReturnsVoid;
@@ -593,9 +613,22 @@ partial class PipelineHelpers
 			// Get the underlying type without the nullable annotation
 			if (returnType is INamedTypeSymbol namedType && !namedType.IsValueType)
 			{
-				isIDisposable = Constants.System.IDisposable.Equals(namedType.OriginalDefinition) ||
-								Constants.System.IDisposable.FullyQualifiedName == namedType.ConstructedFrom.ToString();
+				isIDisposable =
+					Constants.System.IDisposable.Equals(namedType.OriginalDefinition)
+					|| Constants.System.IDisposable.FullyQualifiedName
+						== namedType.ConstructedFrom.ToString();
 			}
+		}
+
+		// Check if return type is Activity? (allowed for multi-target with Activity attributes)
+		var isActivity = Constants.Activities.SystemDiagnostics.Activity.Equals(returnType);
+
+		// If it's Activity, check if this is a valid multi-target scenario
+		// (method has Activity attribute that determines return type)
+		if (isActivity && SharedHelpers.IsActivityMethod(method, token))
+		{
+			// Multi-target with Activity - Activity wins return type
+			return null;
 		}
 
 		// If it's one of the valid types, allow it
@@ -609,9 +642,6 @@ partial class PipelineHelpers
 			$"Log method {method.Name} must return void or IDisposable (for scoped logs), but returns {method.ReturnType}."
 		);
 
-		return (
-			TelemetryDiagnostics.Logging.LogMustReturnVoidOrAsync,
-			method.ReturnType.Locations
-		);
+		return (TelemetryDiagnostics.Logging.LogMustReturnVoidOrAsync, method.ReturnType.Locations);
 	}
 }

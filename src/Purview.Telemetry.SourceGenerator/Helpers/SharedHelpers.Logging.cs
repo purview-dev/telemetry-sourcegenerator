@@ -48,29 +48,29 @@ partial class SharedHelpers
 						level = new((int)value);
 					}
 					else if (
-											name.Equals(
-												nameof(LogAttributeRecord.MessageTemplate),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(LogAttributeRecord.MessageTemplate),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						messageTemplate = new((string)value);
 					}
 					else if (
-											name.Equals(
-												nameof(LogAttributeRecord.EventId),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(LogAttributeRecord.EventId),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						eventId = new((int)value);
 					}
 					else if (
-											name.Equals(
-												nameof(LogAttributeRecord.Name),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(LogAttributeRecord.Name),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						nameValue = new((string)value);
 					}
@@ -132,29 +132,29 @@ partial class SharedHelpers
 						defaultLevel = new((int)value);
 					}
 					else if (
-											name.Equals(
-												nameof(LoggerAttributeRecord.CustomPrefix),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(LoggerAttributeRecord.CustomPrefix),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						customPrefix = new((string)value);
 					}
 					else if (
-											name.Equals(
-												nameof(LoggerAttributeRecord.PrefixType),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(LoggerAttributeRecord.PrefixType),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						prefixType = new((int)value);
 					}
 					else if (
-											name.Equals(
-												nameof(LoggerAttributeRecord.DisableMSLoggingTelemetryGeneration),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(LoggerAttributeRecord.DisableMSLoggingTelemetryGeneration),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						disableMSLoggingTelemetryGeneration = new((bool)value);
 					}
@@ -215,22 +215,22 @@ partial class SharedHelpers
 						defaultLevel = new((int)value);
 					}
 					else if (
-											name.Equals(
-												nameof(
-													LoggerGenerationAttributeRecord.DisableMSLoggingTelemetryGeneration
-												),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(
+								LoggerGenerationAttributeRecord.DisableMSLoggingTelemetryGeneration
+							),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						disableMSLoggingTelemetryGeneration = new((bool)value);
 					}
 					else if (
-											name.Equals(
-												nameof(LoggerGenerationAttributeRecord.DefaultPrefixType),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(LoggerGenerationAttributeRecord.DefaultPrefixType),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						prefixType = new((int)value);
 					}
@@ -290,20 +290,20 @@ partial class SharedHelpers
 						omitReferenceName = new((bool)value);
 					}
 					else if (
-											name.Equals(
-												nameof(LogPropertiesAttributeRecord.SkipNullProperties),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(LogPropertiesAttributeRecord.SkipNullProperties),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						skipNullProperties = new((bool)value);
 					}
 					else if (
-											name.Equals(
-												nameof(LogPropertiesAttributeRecord.Transitive),
-												StringComparison.OrdinalIgnoreCase
-											)
-										)
+						name.Equals(
+							nameof(LogPropertiesAttributeRecord.Transitive),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 					{
 						transitive = new((bool)value);
 					}

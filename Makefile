@@ -45,7 +45,7 @@ build: ## Builds the project.
 
 test: ## Runs the tests for the project.
 	@echo -e "Running tests for $(COLOUR_BLUE)$(TEST_PROJECT)$(COLOUR_RESET) with $(COLOUR_ORANGE)$(CONFIGURATION)$(COLOUR_RESET)..."
-	@dotnet test $(TEST_PROJECT) --configuration $(CONFIGURATION)
+	@dotnet test --solution $(TEST_PROJECT) --configuration $(CONFIGURATION)
 
 release-final: ## Creates a new release, e.g. v3.0.1.
 	@echo -e "Committing the changes and creating a new release..."

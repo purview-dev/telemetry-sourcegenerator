@@ -1,4 +1,4 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Metrics;
+namespace Purview.Telemetry.SourceGenerator.Metrics;
 
 partial class TelemetrySourceGeneratorMetricsTests
 {
@@ -6,14 +6,13 @@ partial class TelemetrySourceGeneratorMetricsTests
 	[MethodDataSource(nameof(NameUnitsDescriptorData))]
 	public async Task Generate_GivenNameUnitsDescription_GeneratesMetrics(
 		string attribute,
-		string measurementParameter
+		string measurementParameter,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
-		var basicMetric =
-			$$"""
+		var basicMetric = $$"""
 
-using Purview.Telemetry.Metrics;
 using System.Diagnostics.Metrics;
 using System.Collections.Generic;
 
@@ -28,10 +27,17 @@ public interface ITestMetrics {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, parameters: [attribute, measurementParameter]);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			cancellationToken: cancellationToken,
+			parameters: [attribute, measurementParameter]
+		);
 	}
 
 	public static IEnumerable<(string, string)> NameUnitsDescriptorData

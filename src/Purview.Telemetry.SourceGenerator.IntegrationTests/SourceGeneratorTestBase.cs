@@ -7,12 +7,11 @@ using Assembly = System.Reflection.Assembly;
 
 namespace Purview.Telemetry.SourceGenerator;
 
-public abstract class IncrementalSourceGeneratorTestBase<TGenerator> : SourceGeneratorTestBase<ISourceGenerator>
+public abstract class IncrementalSourceGeneratorTestBase<TGenerator>
+	: SourceGeneratorTestBase<ISourceGenerator>
 	where TGenerator : class, IIncrementalGenerator
 {
-	protected IncrementalSourceGeneratorTestBase(
-		bool throwOnLoggedOnError = true
-	)
+	protected IncrementalSourceGeneratorTestBase(bool throwOnLoggedOnError = true)
 		: base(throwOnLoggedOnError)
 	{
 		ThrowOnLoggedOnError = throwOnLoggedOnError;
@@ -68,9 +67,9 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 
 					TestContext.Current.OutputWriter.WriteLine($"{prefix}: {message}");
 
-					if (ThrowOnLoggedOnError)
-						outputType.ShouldNotBe(OutputType.Error, message);
-				}
+						if (ThrowOnLoggedOnError && outputType == OutputType.Error)
+							throw new InvalidOperationException($"Generator logged error: {message}");
+					}
 			);
 		}
 	}
@@ -127,7 +126,9 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 	{
 		var assembly = GetAssembly(result);
 
-		return assembly.GetType(typeName, true).ShouldNotBeNull();
+		var type = assembly.GetType(typeName, true);
+		ArgumentNullException.ThrowIfNull(type, nameof(typeName));
+		return type;
 	}
 
 	protected Assembly GetAssembly(GenerationResult result)
@@ -138,8 +139,9 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 		using (var stream = new MemoryStream())
 		{
 			var emitResult = result.Compilation.Emit(stream);
-			emitResult.ShouldNotBeNull();
-			emitResult.Success.ShouldBeTrue(string.Join("\n", emitResult.Diagnostics));
+			ArgumentNullException.ThrowIfNull(emitResult);
+			if (!emitResult.Success)
+				throw new InvalidOperationException($"Compilation failed: {string.Join("\n", emitResult.Diagnostics)}");
 
 			assembly = Assembly.Load(stream.GetBuffer());
 		}
@@ -155,7 +157,8 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 		bool disableDependencyInjection = true,
 		bool autoIncludeUsings = true,
 		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
-		bool debugLog = true
+		bool debugLog = true,
+		CancellationToken cancellationToken = default
 	)
 	{
 		return await GenerateAsync(
@@ -165,7 +168,8 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 			projectModifier,
 			disableDependencyInjection,
 			includeLoggerTypes,
-			debugLog
+			debugLog,
+			cancellationToken: cancellationToken
 		);
 	}
 
@@ -176,7 +180,8 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 		Func<Project, Project>? projectModifier = null,
 		bool disableDependencyInjection = true,
 		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
-		bool debugLog = true
+		bool debugLog = true,
+		CancellationToken cancellationToken = default
 	)
 	{
 		return await GenerateAsync(
@@ -186,7 +191,8 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 			projectModifier,
 			disableDependencyInjection,
 			includeLoggerTypes,
-			debugLog
+			debugLog,
+			cancellationToken: cancellationToken
 		);
 	}
 
@@ -197,7 +203,8 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 		Func<Project, Project>? projectModifier = null,
 		bool disableDependencyInjection = true,
 		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
-		bool debugLog = true
+		bool debugLog = true,
+		CancellationToken cancellationToken = default
 	)
 	{
 		List<string> preprocessorSymbols = [];
@@ -210,7 +217,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 			preprocessorSymbols: preprocessorSymbols
 		);
 
-		globalOptions ??= ImmutableDictionary<string, string>.Empty;
+		globalOptions ??= [];
 		if (debugLog)
 			globalOptions = globalOptions.SetItem("purview_debug_log", "true");
 
@@ -253,13 +260,15 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 		(var _, var compilation) = await ObtainProjectAndCompilationAsync(
 			projectModifier,
 			csharpDocuments,
-			includeLoggerTypes
+			includeLoggerTypes,
+			cancellationToken
 		);
 
 		var result = driver.RunGeneratorsAndUpdateCompilation(
 			compilation,
 			out var outputCompilation,
-			out var diagnostics
+			out var diagnostics,
+			cancellationToken
 		);
 		if (TestContext.Current is not null)
 		{
@@ -269,13 +278,14 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 					await TestContext.Current.ErrorOutputWriter.WriteLineAsync(d.ToString());
 				else
 					await TestContext.Current.OutputWriter.WriteLineAsync(d.ToString());
-
 			}
 		}
 
 		var runResult = result.GetRunResult();
 
-		runResult.Results.Where(m => m.Exception != null).Select(m => m.Exception).ShouldBeEmpty();
+		await Assert
+			.That(runResult.Results.Where(m => m.Exception != null).Select(m => m.Exception))
+			.IsEmpty();
 
 		return new(runResult, diagnostics, outputCompilation);
 	}
@@ -300,7 +310,8 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 	)> ObtainProjectAndCompilationAsync(
 		Func<Project, Project>? projectModifier = null,
 		AdditionalText[]? csharpDocuments = null,
-		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly
+		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
+		CancellationToken cancellationToken = default
 	)
 	{
 		using AdhocWorkspace workspace = new();
@@ -317,10 +328,14 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 				MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location)
 			);
 
-		if (csharpDocuments != null && csharpDocuments.Length > 0)
+		if (csharpDocuments?.Length > 0)
 		{
 			foreach (var csDoc in csharpDocuments)
-				project = project.AddDocument(csDoc.Path, csDoc.GetText()!).Project;
+			{
+				project = project
+					.AddDocument(csDoc.Path, csDoc.GetText(cancellationToken)!)
+					.Project;
+			}
 		}
 
 		project = SetupProject(project);
@@ -388,7 +403,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 
 		project = projectModifier?.Invoke(project) ?? project;
 
-		var compilation = await project.GetCompilationAsync();
+		var compilation = await project.GetCompilationAsync(cancellationToken);
 		return (project, compilation!);
 	}
 

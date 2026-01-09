@@ -24,6 +24,20 @@ partial class LoggerGenTargetClassEmitter
 			if (!methodTarget.TargetGenerationState.IsValid)
 				continue;
 
+			// Report warning for Activity parameter without Activity target
+			if (methodTarget.TargetGenerationState.ActivityParameterWithoutTarget != null)
+			{
+				logger?.Debug(
+					$"Activity parameter '{methodTarget.TargetGenerationState.ActivityParameterWithoutTarget}' on {methodTarget.MethodName} has no Activity target."
+				);
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.General.ActivityParameterWithoutActivityTarget,
+					methodTarget.MethodLocation,
+					methodTarget.TargetGenerationState.ActivityParameterWithoutTarget
+				);
+			}
+
 			EmitMethod(builder, indent, methodTarget, context, logger);
 		}
 
@@ -42,18 +56,40 @@ partial class LoggerGenTargetClassEmitter
 
 		logger?.Debug($"Building logging method: {methodTarget.MethodName}");
 
+		var isMultiTarget = methodTarget.TargetGenerationState.IsMultiTarget;
+		var methodTargets = methodTarget.TargetGenerationState.MethodTargets;
+
+		// Determine ownership hierarchy: Activity > Logging > Metrics
+		var activityOwnsPublicMethod = methodTargets.HasFlag(GenerationType.Activities);
+		var loggingOwnsPublicMethod =
+			!activityOwnsPublicMethod && methodTargets.HasFlag(GenerationType.Logging);
+		var hasMetricsTarget = methodTargets.HasFlag(GenerationType.Metrics);
+
+		// For multi-target where Logging owns the public method, we need to:
+		// 1. Generate a private _Logging method
+		// 2. Generate a public delegating method
+		var generatePrivateLogging =
+			isMultiTarget
+			&& (activityOwnsPublicMethod || (loggingOwnsPublicMethod && hasMetricsTarget));
+		var generatePublicDelegator = isMultiTarget && loggingOwnsPublicMethod && hasMetricsTarget;
+
+		var accessModifier = generatePrivateLogging ? "private" : "public";
+		var methodName = generatePrivateLogging
+			? methodTarget.MethodName + "_Logging"
+			: methodTarget.MethodName;
+
 		builder
 			.AppendLine()
 			.CodeGen(indent)
 			.AggressiveInlining(indent)
-			.Append(indent, "public ", withNewLine: false);
+			.Append(indent, accessModifier + " ", withNewLine: false);
 
 		if (methodTarget.IsScoped)
 			builder.Append(Constants.System.IDisposable.WithNullable());
 		else
 			builder.Append(Constants.System.VoidKeyword);
 
-		builder.Append(' ').Append(methodTarget.MethodName).Append('(');
+		builder.Append(' ').Append(methodName).Append('(');
 
 		EmitParametersAsMethodArgumentList(methodTarget, builder, context);
 
@@ -242,6 +278,12 @@ partial class LoggerGenTargetClassEmitter
 		}
 
 		builder.Append(--indent, '}').AppendLine();
+
+		// Generate public delegating method if Logging owns it
+		if (generatePublicDelegator)
+		{
+			EmitPublicLoggingDelegatingMethod(builder, indent, methodTarget, context, logger);
+		}
 	}
 
 	static void EmitStateContent(
@@ -329,13 +371,13 @@ partial class LoggerGenTargetClassEmitter
 			else if (parameter.LogProperties != null)
 			{
 				OutputLogPropertyDetails(
-								indent,
-								stateVarName,
-								context,
-								ref postSetProperties,
-								parameter,
-								existingParamNames
-							);
+					indent,
+					stateVarName,
+					context,
+					ref postSetProperties,
+					parameter,
+					existingParamNames
+				);
 			}
 		}
 
@@ -368,19 +410,14 @@ partial class LoggerGenTargetClassEmitter
 
 				var logPropertyValue = $"{parameter.Name}?.{logProperty.PropertyName}";
 				var logPropertyName = logProperty.PropertyName;
-				if (
-					!parameter.LogPropertiesAttribute!.OmitReferenceName.Value.GetValueOrDefault(
-						false
-					)
-				)
+				if (!(parameter.LogPropertiesAttribute!.OmitReferenceName.Value ?? false))
 				{
 					logPropertyName = $"{parameter.Name}.{logPropertyName}";
 				}
 
 				var shouldSkipNull =
-					parameter.LogPropertiesAttribute.SkipNullProperties.Value.GetValueOrDefault(
-						false
-					) && logProperty.IsNullable;
+					(parameter.LogPropertiesAttribute.SkipNullProperties.Value ?? false)
+					&& logProperty.IsNullable;
 				if (shouldSkipNull)
 				{
 					var tmpVarName = FindUniqueName("tmp", existingParamNames);
@@ -606,7 +643,7 @@ partial class LoggerGenTargetClassEmitter
 			string varName;
 
 			var isUsingExpressionException =
-				exceptionParameter != null && exceptionParameter.ReferencedHoles.Contains(hole);
+				exceptionParameter?.ReferencedHoles.Contains(hole) == true;
 			if (isUsingExpressionException)
 			{
 				varName = expressionExceptionVarName!;
@@ -636,5 +673,105 @@ partial class LoggerGenTargetClassEmitter
 		escapedTemplate = escapedTemplate.Replace("\u0001", "{{").Replace("\u0002", "}}");
 
 		return (escapedTemplate, [.. variableDefinitions]);
+	}
+
+	static void EmitPublicLoggingDelegatingMethod(
+		StringBuilder builder,
+		int indent,
+		LogMethodTarget methodTarget,
+		SourceProductionContext context,
+		GenerationLogger? logger
+	)
+	{
+		logger?.Debug($"Building public delegating logging method: {methodTarget.MethodName}");
+
+		builder
+			.AppendLine()
+			.CodeGen(indent)
+			.AggressiveInlining(indent)
+			.Append(indent, "public ", withNewLine: false);
+
+		// When Logging owns the public method (with Metrics), return void
+		// (Logging without Activity means the return type is void or IDisposable for scoped)
+		if (methodTarget.IsScoped)
+		{
+			builder.Append(Constants.System.IDisposable).Append('?');
+		}
+		else
+		{
+			builder.Append(Constants.System.VoidKeyword);
+		}
+
+		builder.Append(' ').Append(methodTarget.MethodName).Append('(');
+
+		EmitParametersAsMethodArgumentList(methodTarget, builder, context);
+
+		builder.Append(')').AppendLine().Append(indent, '{');
+
+		// Call the private Logging method
+		if (methodTarget.IsScoped)
+		{
+			builder.Append(indent + 1, "var loggingResult = ", withNewLine: false);
+		}
+		else
+		{
+			builder
+				.Append(indent + 1, methodTarget.MethodName, withNewLine: false)
+				.Append("_Logging(");
+		}
+
+		if (!methodTarget.IsScoped)
+		{
+			// Emit parameters
+			for (var i = 0; i < methodTarget.TotalParameterCount; i++)
+			{
+				context.CancellationToken.ThrowIfCancellationRequested();
+
+				builder.Append(methodTarget.Parameters[i].Name);
+
+				if (i < methodTarget.TotalParameterCount - 1)
+					builder.Append(", ");
+			}
+			builder.AppendLine(");");
+		}
+		else
+		{
+			// For scoped, we need special handling
+			builder.Append(methodTarget.MethodName).Append("_Logging(");
+			for (var i = 0; i < methodTarget.TotalParameterCount; i++)
+			{
+				context.CancellationToken.ThrowIfCancellationRequested();
+
+				builder.Append(methodTarget.Parameters[i].Name);
+
+				if (i < methodTarget.TotalParameterCount - 1)
+					builder.Append(", ");
+			}
+			builder.AppendLine(");");
+		}
+
+		// Call the private Metrics method
+		builder
+			.Append(indent + 1, methodTarget.MethodName, withNewLine: false)
+			.Append("_Metrics(");
+
+		for (var i = 0; i < methodTarget.TotalParameterCount; i++)
+		{
+			context.CancellationToken.ThrowIfCancellationRequested();
+
+			builder.Append(methodTarget.Parameters[i].Name);
+
+			if (i < methodTarget.TotalParameterCount - 1)
+				builder.Append(", ");
+		}
+		builder.AppendLine(");");
+
+		// Return if scoped
+		if (methodTarget.IsScoped)
+		{
+			builder.AppendLine().Append(indent + 1, "return loggingResult;");
+		}
+
+		builder.Append(indent, '}').AppendLine();
 	}
 }

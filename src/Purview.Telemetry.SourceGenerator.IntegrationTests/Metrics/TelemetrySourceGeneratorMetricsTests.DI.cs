@@ -1,16 +1,15 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Metrics;
+namespace Purview.Telemetry.SourceGenerator.Metrics;
 
 partial class TelemetrySourceGeneratorMetricsTests
 {
 	[Test]
-	public async Task Generate_GivenAssemblyEnableDI_GeneratesMetrics()
+	public async Task Generate_GivenAssemblyEnableDI_GeneratesMetrics(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicMetric =
-			"""
+		const string basicMetric = """
 
-using Purview.Telemetry;
-using Purview.Telemetry.Metrics;
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = true)]
 
@@ -25,21 +24,24 @@ public interface ITestMetrics {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric, disableDependencyInjection: false);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenInterfaceEnableDI_GeneratesMetrics()
+	public async Task Generate_GivenInterfaceEnableDI_GeneratesMetrics(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicMetric =
-			"""
+		const string basicMetric = """
 
-using Purview.Telemetry;
-using Purview.Telemetry.Metrics;
 
 namespace Testing;
 
@@ -53,21 +55,24 @@ public interface ITestMetrics {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric, disableDependencyInjection: false);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenDIDisabledAtAssemblyAndInterfaceEnableDI_GeneratesMetrics()
+	public async Task Generate_GivenDIDisabledAtAssemblyAndInterfaceEnableDI_GeneratesMetrics(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicMetric =
-			"""
+		const string basicMetric = """
 
-using Purview.Telemetry;
-using Purview.Telemetry.Metrics;
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = false)]
 
@@ -83,21 +88,24 @@ public interface ITestMetrics {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric, disableDependencyInjection: false);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenDIEnabledAtAssemblyAndInterfaceDisabledDI_GeneratesMetrics()
+	public async Task Generate_GivenDIEnabledAtAssemblyAndInterfaceDisabledDI_GeneratesMetrics(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicMetric =
-			"""
+		const string basicMetric = """
 
-using Purview.Telemetry;
-using Purview.Telemetry.Metrics;
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = true)]
 
@@ -113,9 +121,13 @@ public interface ITestMetrics {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric, disableDependencyInjection: false);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

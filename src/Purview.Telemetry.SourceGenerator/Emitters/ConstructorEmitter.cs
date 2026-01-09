@@ -22,7 +22,8 @@ static class ConstructorEmitter
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		if (!SharedHelpers.ShouldEmit(requestingType, generationType))
+		// Only emit constructor from one target to avoid duplicate definitions
+		if (!SharedHelpers.ShouldEmitConstructor(requestingType, generationType))
 		{
 			logger?.Debug($"Skipping constructor emit for {requestingType} ({generationType}).");
 
@@ -86,7 +87,6 @@ static class ConstructorEmitter
 				.Append(" = ")
 				.Append(LoggerParameterName)
 				.AppendLine(';');
-
 		}
 
 		if (generationType.HasFlag(GenerationType.Metrics))

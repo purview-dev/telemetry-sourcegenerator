@@ -13,9 +13,6 @@
 
 namespace Testing
 {
-	[global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
-	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
-	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class MultiTelemetryCore : global::Testing.IMultiTelemetry
 	{
 		global::System.Diagnostics.Metrics.Meter _meter = default!;

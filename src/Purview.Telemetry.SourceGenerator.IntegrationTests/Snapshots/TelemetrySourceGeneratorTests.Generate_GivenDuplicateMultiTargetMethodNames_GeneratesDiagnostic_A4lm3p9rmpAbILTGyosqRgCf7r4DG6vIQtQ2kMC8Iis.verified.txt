@@ -7,7 +7,45 @@
                               ^^^^^^^^^^^^^^^^^^^
 
 */
- Guid_1: (15,30)-(15,49),
+ Guid_1: (12,30)-(12,49),
+      Message: Two or more methods named 'DuplicateMethodName' are defined. Keep method names unique as they're used to generate other members on the implementation class.,
+      Severity: Error,
+      Descriptor: {
+        Id: TSG1003,
+        Title: Duplicate method names are not supported,
+        MessageFormat: Two or more methods named '{0}' are defined. Keep method names unique as they're used to generate other members on the implementation class.,
+        Category: Usage,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    },
+    {
+      Location: /*
+	[Activity]
+	System.Diagnostics.Activity? DuplicateMethodName([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
+                              ^^^^^^^^^^^^^^^^^^^
+
+*/
+ Guid_1: (12,30)-(12,49),
+      Message: Two or more methods named 'DuplicateMethodName' are defined. Keep method names unique as they're used to generate other members on the implementation class.,
+      Severity: Error,
+      Descriptor: {
+        Id: TSG1003,
+        Title: Duplicate method names are not supported,
+        MessageFormat: Two or more methods named '{0}' are defined. Keep method names unique as they're used to generate other members on the implementation class.,
+        Category: Usage,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    },
+    {
+      Location: /*
+	[Activity]
+	System.Diagnostics.Activity? DuplicateMethodName([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
+                              ^^^^^^^^^^^^^^^^^^^
+
+*/
+ Guid_1: (12,30)-(12,49),
       Message: Two or more methods named 'DuplicateMethodName' are defined. Keep method names unique as they're used to generate other members on the implementation class.,
       Severity: Error,
       Descriptor: {

@@ -7,7 +7,7 @@
         ^^^^^^^^^^^^^^^^^
 }
 */
- Guid_1: (13,8)-(13,25),
+ Guid_1: (12,8)-(12,25),
       Message: An activity or event must return either void or an System.Diagnostics.Activity.,
       Severity: Error,
       Descriptor: {

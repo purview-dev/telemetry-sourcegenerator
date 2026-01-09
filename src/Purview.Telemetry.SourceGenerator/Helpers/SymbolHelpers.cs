@@ -11,10 +11,10 @@ static class SymbolHelpers
 	);
 
 	static readonly SymbolDisplayFormat NamespaceOnly = new(
-		globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted
-,
+		globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,
 		typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-		genericsOptions: SymbolDisplayGenericsOptions.None);
+		genericsOptions: SymbolDisplayGenericsOptions.None
+	);
 
 	public static string GetTypeName(ITypeSymbol symbol) => StripNullableAndGenerics(symbol).Name; // "List"
 

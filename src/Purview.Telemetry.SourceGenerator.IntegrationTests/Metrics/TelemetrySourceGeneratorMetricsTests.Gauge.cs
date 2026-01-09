@@ -1,15 +1,15 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Metrics;
+namespace Purview.Telemetry.SourceGenerator.Metrics;
 
 partial class TelemetrySourceGeneratorMetricsTests
 {
 	[Test]
-	public async Task Generate_GivenBasicObservableGauge_GeneratesMetrics()
+	public async Task Generate_GivenBasicObservableGauge_GeneratesMetrics(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicMetric =
-			"""
+		const string basicMetric = """
 
-using Purview.Telemetry.Metrics;
 using System.Diagnostics.Metrics;
 using System.Collections.Generic;
 
@@ -30,9 +30,12 @@ public interface ITestMetrics {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }
