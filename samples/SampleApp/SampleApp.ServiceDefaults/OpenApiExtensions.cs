@@ -67,11 +67,10 @@ public static class OpenApiExtensions
 				description,
 				options =>
 				{
-					options
-						.ApplyAPIVersionInfo(
-							openApiSection.GetRequiredValue("Document:Title"),
-							openApiSection.GetRequiredValue("Document:Description")
-						);
+					options.ApplyAPIVersionInfo(
+						openApiSection.GetRequiredValue("Document:Title"),
+						openApiSection.GetRequiredValue("Document:Description")
+					);
 
 					// Clear out the default servers so we can fallback to
 					// whatever ports have been allocated for the service by Aspire

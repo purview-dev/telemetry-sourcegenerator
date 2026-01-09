@@ -1,0 +1,166 @@
+@page "/weather"
+@page "/weather/{Count:int?}"
+@page "/weather/error/{ErrorType?}"
+@rendermode InteractiveServer
+@inject WeatherAPIClient WeatherApi
+@implements IAsyncDisposable
+
+<PageTitle>Weather</PageTitle>
+
+<h1>Weather</h1>
+
+<p>This component fetches weather data from the API service with distributed tracing.</p>
+
+<div class="mb-3">
+    <label for="Count" class="form-label">Number of forecasts (5-20):</label>
+    <input type="number" class="form-control" id="Count" @bind="requestCount" min="5" max="20" style="width: 100px" disabled="@isLoading" />
+    <button type="button" class="btn btn-primary mt-2" disabled="@isLoading" @onclick="LoadWeatherAsync">Load Weather</button>
+</div>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        <strong>Error:</strong> @errorMessage
+    </div>
+}
+
+@if (isLoading)
+{
+    <p><em>Loading...</em></p>
+}
+else if (forecasts is not null && forecasts.Length > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th aria-label="Temperature in Celsius">Temp. (C)</th>
+                <th aria-label="Temperature in Fahrenheit">Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in forecasts)
+            {
+                <tr>
+                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.TemperatureC</td>
+                    <td>@forecast.TemperatureF</td>
+                    <td>@forecast.Summary</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<hr />
+
+<h2>Failure Scenarios</h2>
+
+<p>Test HTTP resiliency with retry behavior (these will trigger validation errors):</p>
+
+<div class="d-flex gap-2 flex-wrap">
+    <button type="button" class="btn btn-warning" disabled="@isLoading" @onclick="@(() => TriggerErrorScenarioAsync(1))">Trigger Validation Error (count=1)</button>
+    <button type="button" class="btn btn-danger" disabled="@isLoading" @onclick="@(() => TriggerErrorScenarioAsync(100))">Trigger Large Count Error (count=100)</button>
+    <button type="button" class="btn btn-secondary" disabled="@isLoading" @onclick="ResetAsync">Reset</button>
+    @if (isLoading)
+    {
+        <button type="button" class="btn btn-outline-danger" @onclick="CancelRequest">Cancel</button>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int? Count { get; set; }
+
+    [Parameter]
+    public string? ErrorType { get; set; }
+
+    private int requestCount = 5;
+    private WeatherForecast[]? forecasts;
+    private bool isLoading;
+    private string? errorMessage;
+    private CancellationTokenSource? cancellationTokenSource;
+
+    protected override void OnInitialized()
+    {
+        requestCount = Count ?? 5;
+        // Don't load data in OnInitialized - wait for user interaction
+        // This makes the page load faster
+    }
+
+    private async Task LoadWeatherAsync()
+    {
+        await ExecuteRequestAsync(async token =>
+        {
+            forecasts = await WeatherApi.GetWeatherForecastsAsync(requestCount, token);
+        });
+    }
+
+    private async Task TriggerErrorScenarioAsync(int invalidCount)
+    {
+        await ExecuteRequestAsync(async token =>
+        {
+            try
+            {
+                forecasts = await WeatherApi.GetWeatherForecastsAsync(invalidCount, token);
+            }
+            catch (HttpRequestException ex)
+            {
+                errorMessage = $"Validation error (expected): Request with count={invalidCount} failed - {ex.Message}";
+            }
+        });
+    }
+
+    private async Task ResetAsync()
+    {
+        requestCount = 5;
+        await LoadWeatherAsync();
+    }
+
+    private async Task ExecuteRequestAsync(Func<CancellationToken, Task> action)
+    {
+        // Cancel any existing request
+        cancellationTokenSource?.Cancel();
+        cancellationTokenSource?.Dispose();
+        cancellationTokenSource = new CancellationTokenSource();
+
+        // Clear previous state
+        forecasts = null;
+        errorMessage = null;
+        isLoading = true;
+
+        try
+        {
+            await action(cancellationTokenSource.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            errorMessage = "Request was cancelled.";
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = $"Failed to fetch weather data: {ex.Message}";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Unexpected error: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void CancelRequest()
+    {
+        cancellationTokenSource?.Cancel();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        cancellationTokenSource?.Cancel();
+        cancellationTokenSource?.Dispose();
+        await ValueTask.CompletedTask;
+    }
+}

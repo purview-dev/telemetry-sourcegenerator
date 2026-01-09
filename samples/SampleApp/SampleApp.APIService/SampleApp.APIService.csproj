@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+	<PropertyGroup>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);CS1591</NoWarn>
+	</PropertyGroup>
+	<ItemGroup>
+		<!-- Use ProjectReference for local development -->
+		<ProjectReference
+			Include="..\..\..\src\Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.csproj"
+			OutputItemType="Analyzer"
+			ReferenceOutputAssembly="false"
+		/>
+		<ProjectReference Include="..\SampleApp.ServiceDefaults\SampleApp.ServiceDefaults.csproj" />
+		<ProjectReference Include="..\SampleApp.Shared\SampleApp.Shared.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<Using Include="ErrorOr" />
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+			<_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
+		</AssemblyAttribute>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+			<_Parameter1>SampleApp.APIService.UnitTests</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
+</Project>

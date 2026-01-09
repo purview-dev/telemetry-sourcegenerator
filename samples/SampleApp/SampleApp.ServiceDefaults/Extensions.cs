@@ -57,11 +57,11 @@ public static class Extensions
 					.AddHttpClientInstrumentation()
 					.AddProcessInstrumentation()
 					.AddRuntimeInstrumentation()
-					.AddMeter(
-						[
-							"WeatherServiceTelemetry", // This is the name of the meter
-						]
-					)
+					.AddMeter([
+						 // These are the names of the meters...
+						"WeatherServiceTelemetry",
+						"WeatherAPIClientTelemetry"
+					])
 			)
 			.WithTracing(tracing =>
 			{
@@ -75,11 +75,9 @@ public static class Extensions
 					.AddAspNetCoreInstrumentation()
 					.AddGrpcClientInstrumentation()
 					.AddHttpClientInstrumentation()
-					.AddSource(
-						[
-							"sample-weather-app", // This is the name of the activity source
-						]
-					);
+					.AddSource([
+						"sample-weather-app", // This is the name of the activity source
+					]);
 			});
 
 		builder.AddOpenTelemetryExporters();

@@ -11,11 +11,15 @@
 		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0" />
 		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.11.0-beta.2" />
+		<PackageReference
+			Include="OpenTelemetry.Instrumentation.GrpcNetClient"
+			Version="1.11.0-beta.2"
+		/>
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.14.0" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Process" Version="1.11.0-beta.2" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0" />
-		<PackageReference Include="Scalar.AspNetCore" Version="2.12.3" />
+		<PackageReference Include="Scalar.AspNetCore" Version="2.12.4" />
 		<PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.1" />
+		<PackageReference Include="ErrorOr" Version="2.0.1" />
 	</ItemGroup>
 </Project>

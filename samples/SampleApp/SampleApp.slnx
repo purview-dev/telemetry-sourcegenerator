@@ -1,11 +1,16 @@
 <Solution>
-  <Folder Name="/Solution Items/">
-    <File Path="../../global.json" />
-    <File Path=".editorconfig" />
-    <File Path="Directory.Build.props" />
-  </Folder>
-  <Project Path="SampleApp.AppHost/SampleApp.AppHost.csproj" />
-  <Project Path="SampleApp.Host/SampleApp.Host.csproj" />
-  <Project Path="SampleApp.ServiceDefaults/SampleApp.ServiceDefaults.csproj" />
-  <Project Path="SampleApp.UnitTests/SampleApp.UnitTests.csproj" Id="5319a647-e3a7-410c-8d71-06adc179e663" />
+	<Folder Name="/Solution Items/">
+		<File Path="../../global.json" />
+		<File Path=".editorconfig" />
+		<File Path="Directory.Build.props" />
+	</Folder>
+	<Project Path="SampleApp.APIService.UnitTests/SampleApp.APIService.UnitTests.csproj" />
+	<Project Path="SampleApp.APIService/SampleApp.APIService.csproj" />
+	<Project Path="SampleApp.AppHost/SampleApp.AppHost.csproj" />
+	<Project Path="SampleApp.ServiceDefaults/SampleApp.ServiceDefaults.csproj" />
+	<Project
+		Path="SampleApp.Shared/SampleApp.Shared.csproj"
+		Id="01c46589-63a0-4fa2-ac8c-366a384879eb"
+	/>
+	<Project Path="SampleApp.Web/SampleApp.Web.csproj" />
 </Solution>
