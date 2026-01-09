@@ -382,9 +382,6 @@ public interface IInvalidTelemetry
 	}
 
 	[Test]
-	[Skip(
-		"Generator bug: Event/Context return type validation not implemented - TSG3002 not emitted for non-void return types"
-	)]
 	public async Task Generate_GivenEventMethodReturningActivity_RaisesDiagnostic(
 		CancellationToken cancellationToken
 	)
@@ -425,9 +422,6 @@ public interface IInvalidTelemetry
 	}
 
 	[Test]
-	[Skip(
-		"Generator bug: Context return type validation not implemented - TSG3002 not emitted for non-void return types"
-	)]
 	public async Task Generate_GivenContextMethodReturningBool_RaisesDiagnostic(
 		CancellationToken cancellationToken
 	)

@@ -67,11 +67,11 @@ namespace Testing
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		public global::System.Diagnostics.Activity Event(global::System.Diagnostics.Activity? activity, string stringParam, int intParam, bool boolParam)
+		public void Event(global::System.Diagnostics.Activity? activity, string stringParam, int intParam, bool boolParam)
 		{
 			if (!_activitySource.HasListeners())
 			{
-				return null!;
+				return;
 			}
 
 			if (activity != null)
@@ -86,8 +86,6 @@ namespace Testing
 
 				activity.SetBaggage("stringparam", stringParam);
 			}
-
-			return activity;
 		}
 
 	}

@@ -168,9 +168,6 @@ public interface IMultiTelemetry
 	}
 
 	[Test]
-	[Skip(
-		"Generator bug: Metrics validation doesn't account for Activity return type priority in multi-target scenarios - TSG4001 incorrectly raised"
-	)]
 	public async Task Generate_GivenMethodWithActivityAndMetricAttributes_GeneratesBothTargets(
 		CancellationToken cancellationToken
 	)
@@ -237,9 +234,6 @@ public interface IMultiTelemetry
 	}
 
 	[Test]
-	[Skip(
-		"Generator bug: Metrics validation doesn't account for Activity return type priority in multi-target scenarios - TSG4001 incorrectly raised"
-	)]
 	public async Task Generate_GivenMethodWithAllThreeAttributes_GeneratesAllTargets(
 		CancellationToken cancellationToken
 	)
@@ -738,9 +732,6 @@ public interface IMultiTelemetry
 	}
 
 	[Test]
-	[Skip(
-		"Generator bug: TSG3012 diagnostic not being emitted when Event/Context methods exist without Activity method"
-	)]
 	public async Task Generate_GivenOnlyEventAndContextWithoutActivity_RaisesDiagnostic(
 		CancellationToken cancellationToken
 	)

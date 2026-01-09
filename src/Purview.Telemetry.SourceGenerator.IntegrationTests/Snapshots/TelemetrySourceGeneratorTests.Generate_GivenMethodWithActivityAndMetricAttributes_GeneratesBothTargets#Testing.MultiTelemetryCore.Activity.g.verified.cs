@@ -42,7 +42,7 @@ namespace Testing
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		public global::System.Diagnostics.Activity? TraceAndCountMethod(int counterValue, string operationId)
+		private global::System.Diagnostics.Activity? TraceAndCountMethod_Activity(int counterValue, string operationId)
 		{
 			if (!_activitySource.HasListeners())
 			{
@@ -58,6 +58,17 @@ namespace Testing
 			}
 
 			return activityTraceAndCountMethod;
+		}
+
+
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		public global::System.Diagnostics.Activity? TraceAndCountMethod(int counterValue, string operationId)
+		{
+			var activityResult = TraceAndCountMethod_Activity(counterValue, operationId);
+			TraceAndCountMethod_Metrics(counterValue, operationId);
+
+			return activityResult;
 		}
 
 	}

@@ -59,27 +59,5 @@ namespace Testing
 			return activityValidActivity;
 		}
 
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		public global::System.Diagnostics.Activity? InvalidEventReturn(global::System.Diagnostics.Activity? activity, string eventName)
-		{
-			if (!_activitySource.HasListeners())
-			{
-				return null;
-			}
-
-			if (activity != null)
-			{
-				global::System.Diagnostics.ActivityTagsCollection tagsCollectionInvalidEventReturn = new();
-				tagsCollectionInvalidEventReturn.Add("eventname", eventName);
-
-				global::System.Diagnostics.ActivityEvent activityEventInvalidEventReturn = new(name: "InvalidEventReturn", timestamp: default, tags: tagsCollectionInvalidEventReturn);
-
-				activity.AddEvent(activityEventInvalidEventReturn);
-			}
-
-			return activity;
-		}
-
 	}
 }

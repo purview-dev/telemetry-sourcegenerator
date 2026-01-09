@@ -115,7 +115,9 @@ namespace Test {
 		// Assert
 		await Assert.That(result.IsValid).IsFalse();
 		await Assert.That(result.Errors.Count()).IsEqualTo(1);
-		await Assert.That(result.Errors.First().Error).IsEqualTo(ReturnTypeValidationError.ScopedLoggerMustReturnIDisposable);
+		await Assert
+			.That(result.Errors.First().Error)
+			.IsEqualTo(ReturnTypeValidationError.ScopedLoggerMustReturnIDisposable);
 	}
 
 	[Test]
@@ -197,7 +199,9 @@ namespace Test {
 
 		// Assert
 		await Assert.That(result.IsValid).IsFalse();
-		await Assert.That(result.Errors.First().Error).IsEqualTo(ReturnTypeValidationError.InvalidActivityReturnType);
+		await Assert
+			.That(result.Errors.First().Error)
+			.IsEqualTo(ReturnTypeValidationError.InvalidActivityReturnType);
 	}
 
 	[Test]
@@ -339,7 +343,9 @@ namespace Test {
 
 		// Assert
 		await Assert.That(result.IsExcludedFrom(GenerationType.Logging)).IsTrue();
-		await Assert.That(result.GetExclusionFor(GenerationType.Logging)?.Reason).IsEqualTo(ParameterExclusionReason.ActivityParameterNotAllowedInLogging);
+		await Assert
+			.That(result.GetExclusionFor(GenerationType.Logging)?.Reason)
+			.IsEqualTo(ParameterExclusionReason.ActivityParameterNotAllowedInLogging);
 	}
 
 	[Test]
@@ -368,7 +374,9 @@ namespace Test {
 
 		// Assert
 		await Assert.That(result.IsExcludedFrom(GenerationType.Metrics)).IsTrue();
-		await Assert.That(result.GetExclusionFor(GenerationType.Metrics)?.Reason).IsEqualTo(ParameterExclusionReason.ActivityParameterNotAllowedInMetrics);
+		await Assert
+			.That(result.GetExclusionFor(GenerationType.Metrics)?.Reason)
+			.IsEqualTo(ParameterExclusionReason.ActivityParameterNotAllowedInMetrics);
 	}
 
 	[Test]
@@ -425,7 +433,9 @@ namespace Test {
 
 		// Assert
 		await Assert.That(result.IsExcludedFrom(GenerationType.Logging)).IsTrue();
-		await Assert.That(result.GetExclusionFor(GenerationType.Logging)?.Reason).IsEqualTo(ParameterExclusionReason.ActivityContextParameterNotAllowedInLogging);
+		await Assert
+			.That(result.GetExclusionFor(GenerationType.Logging)?.Reason)
+			.IsEqualTo(ParameterExclusionReason.ActivityContextParameterNotAllowedInLogging);
 	}
 
 	[Test]
@@ -454,7 +464,9 @@ namespace Test {
 
 		// Assert
 		await Assert.That(result.IsExcludedFrom(GenerationType.Logging)).IsTrue();
-		await Assert.That(result.GetExclusionFor(GenerationType.Logging)?.Reason).IsEqualTo(ParameterExclusionReason.TagListParameterNotAllowedInLogging);
+		await Assert
+			.That(result.GetExclusionFor(GenerationType.Logging)?.Reason)
+			.IsEqualTo(ParameterExclusionReason.TagListParameterNotAllowedInLogging);
 	}
 
 	[Test]
@@ -508,10 +520,15 @@ namespace Test {
 		);
 
 		// Assert
-		await Assert.That(result.Exclusions.Any(e =>
-			e.Target == GenerationType.Logging
-			&& e.Reason == ParameterExclusionReason.MetricsMeasurementParameterNotAllowedInLogging
-		)).IsTrue();
+		await Assert
+			.That(
+				result.Exclusions.Any(e =>
+					e.Target == GenerationType.Logging
+					&& e.Reason
+						== ParameterExclusionReason.MetricsMeasurementParameterNotAllowedInLogging
+				)
+			)
+			.IsTrue();
 	}
 
 	[Test]

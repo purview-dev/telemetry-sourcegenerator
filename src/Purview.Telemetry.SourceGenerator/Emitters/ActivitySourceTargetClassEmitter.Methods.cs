@@ -19,9 +19,16 @@ partial class ActivitySourceTargetClassEmitter
 
 		EmitRecordExceptionEvent(builder, indent, context, logger);
 
-		if (!target.ActivityMethods.Any(m => m.MethodType == ActivityMethodType.Activity))
+		// Filter to only methods that are valid for Activities target
+		// (have explicit Activity/Event/Context attributes, or valid inference in single-target)
+		var validActivityMethods = target
+			.ActivityMethods.Where(m => m.TargetGenerationState.IsValid)
+			.ToArray();
+
+		// Check for TSG3012: Event/Context methods exist but no Activity method
+		if (!validActivityMethods.Any(m => m.MethodType == ActivityMethodType.Activity))
 		{
-			if (target.ActivityMethods.Any(m => m.MethodType != ActivityMethodType.Activity))
+			if (validActivityMethods.Any(m => m.MethodType != ActivityMethodType.Activity))
 			{
 				logger?.Diagnostic(
 					"There are no Activity methods defined, however there are Events/ Context methods."
@@ -444,13 +451,19 @@ partial class ActivitySourceTargetClassEmitter
 			return false;
 		}
 
-		if (
-			methodTarget.ReturnType.SpecialType != SpecialType.System_Void
-			&& !Constants.Activities.SystemDiagnostics.Activity.Equals(methodTarget.ReturnType)
-		)
+		// Event methods must return void only
+		// Activity and Context methods can return void or Activity?
+		var isEvent = methodTarget.MethodType == ActivityMethodType.Event;
+
+		var isValidReturnType = isEvent
+			? methodTarget.ReturnType.SpecialType == SpecialType.System_Void
+			: methodTarget.ReturnType.SpecialType == SpecialType.System_Void
+				|| Constants.Activities.SystemDiagnostics.Activity.Equals(methodTarget.ReturnType);
+
+		if (!isValidReturnType)
 		{
 			logger?.Diagnostic(
-				$"The return type {methodTarget.ReturnType} isn't valid for an activity or event."
+				$"The return type {methodTarget.ReturnType} isn't valid for an activity, event, or context method."
 			);
 
 			TelemetryDiagnostics.Report(

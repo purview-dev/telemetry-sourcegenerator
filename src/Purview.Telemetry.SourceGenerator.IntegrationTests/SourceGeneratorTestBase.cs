@@ -67,9 +67,9 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 
 					TestContext.Current.OutputWriter.WriteLine($"{prefix}: {message}");
 
-						if (ThrowOnLoggedOnError && outputType == OutputType.Error)
-							throw new InvalidOperationException($"Generator logged error: {message}");
-					}
+					if (ThrowOnLoggedOnError && outputType == OutputType.Error)
+						throw new InvalidOperationException($"Generator logged error: {message}");
+				}
 			);
 		}
 	}
@@ -141,7 +141,11 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 			var emitResult = result.Compilation.Emit(stream);
 			ArgumentNullException.ThrowIfNull(emitResult);
 			if (!emitResult.Success)
-				throw new InvalidOperationException($"Compilation failed: {string.Join("\n", emitResult.Diagnostics)}");
+			{
+				throw new InvalidOperationException(
+					$"Compilation failed: {string.Join("\n", emitResult.Diagnostics)}"
+				);
+			}
 
 			assembly = Assembly.Load(stream.GetBuffer());
 		}
@@ -157,7 +161,6 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 		bool disableDependencyInjection = true,
 		bool autoIncludeUsings = true,
 		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
-		bool debugLog = true,
 		CancellationToken cancellationToken = default
 	)
 	{
@@ -168,7 +171,6 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 			projectModifier,
 			disableDependencyInjection,
 			includeLoggerTypes,
-			debugLog,
 			cancellationToken: cancellationToken
 		);
 	}
@@ -180,7 +182,6 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 		Func<Project, Project>? projectModifier = null,
 		bool disableDependencyInjection = true,
 		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
-		bool debugLog = true,
 		CancellationToken cancellationToken = default
 	)
 	{
@@ -191,7 +192,6 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 			projectModifier,
 			disableDependencyInjection,
 			includeLoggerTypes,
-			debugLog,
 			cancellationToken: cancellationToken
 		);
 	}
@@ -203,7 +203,6 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 		Func<Project, Project>? projectModifier = null,
 		bool disableDependencyInjection = true,
 		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
-		bool debugLog = true,
 		CancellationToken cancellationToken = default
 	)
 	{
@@ -218,10 +217,6 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 		);
 
 		globalOptions ??= [];
-		if (debugLog)
-			globalOptions = globalOptions.SetItem("purview_debug_log", "true");
-
-		globalOptions = globalOptions.SetItem("CompilerVersion", "v4.7");
 
 		var optionsProvider = TestAnalyzerConfigOptionsProvider.Empty.WithGlobalOptions(
 			new TestAnalyzerConfigOptions(globalOptions)

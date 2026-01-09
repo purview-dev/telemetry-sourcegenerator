@@ -208,12 +208,12 @@ using Purview.Telemetry;
 			diag = [.. diag.Where(m => m.Severity == DiagnosticSeverity.Error)];
 
 		if (expectsDiagnostics)
-			{
-				await Assert.That(diag).IsNotEmpty();
+		{
+			await Assert.That(diag).IsNotEmpty();
 
-				// Assert on expected diagnostic codes if provided
-				if (expectedDiagnosticCodes?.Length > 0)
-				{
+			// Assert on expected diagnostic codes if provided
+			if (expectedDiagnosticCodes?.Length > 0)
+			{
 				var actualDiagnosticCodes = diag.Select(d => d.Id).Distinct().ToArray();
 				var expectedCodes = expectedDiagnosticCodes.ToArray();
 

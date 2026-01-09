@@ -159,7 +159,7 @@ public interface ITestActivities {
 	Activity Activity([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 
 	[Event]
-	Activity Event(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
+	void Event(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
 
 """;

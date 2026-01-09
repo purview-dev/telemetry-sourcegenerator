@@ -1,0 +1,23 @@
+﻿{
+  Diagnostics: [
+    {
+      Location: /*
+	[Event]
+	System.Diagnostics.Activity? InvalidEventReturn(
+                              ^^^^^^^^^^^^^^^^^^
+		System.Diagnostics.Activity? activity,
+*/
+ Guid_1: (15,30)-(15,48),
+      Message: An activity or event must return either void or an System.Diagnostics.Activity.,
+      Severity: Error,
+      Descriptor: {
+        Id: TSG3002,
+        Title: Invalid return type,
+        MessageFormat: An activity or event must return either void or an System.Diagnostics.Activity.,
+        Category: Activity.Usage,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}
