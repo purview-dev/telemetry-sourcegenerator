@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.0.0-alpha.2](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v3.2.4...v4.0.0-alpha.2) (2026-01-27)
+
+
+### Features
+
+* updated the sample app to include a web app ([4e0035c](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/4e0035c11a526a0c83808ebad7ae89945fa305a7))
+
+
+### Bug Fixes
+
+* **logging:** correct isScoped detection to only IDisposable return types ([5338501](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/5338501b12864c9532a10660b446b6543f508ffd))
+
 ## [3.2.4](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v3.2.4-prerelease.1...v3.2.4) (2025-07-27)
 
 ## [3.2.4-prerelease.1](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v3.2.4-prerelease.0...v3.2.4-prerelease.1) (2025-07-27)
