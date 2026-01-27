@@ -17,7 +17,7 @@ namespace Testing
 	{
 		readonly global::Microsoft.Extensions.Logging.ILogger<global::Testing.IMultiTelemetry> _logger;
 
-		static readonly global::System.Func<global::Microsoft.Extensions.Logging.ILogger, int, string, string, global::System.IDisposable?> _fullTelemetryMethodAction = global::Microsoft.Extensions.Logging.LoggerMessage.DefineScope<int, string, string>("FullTelemetryMethod: CounterValue = {CounterValue}, OperationId = {OperationId}, Message = {Message}");
+		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, int, string, string, global::System.Exception?> _fullTelemetryMethodAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<int, string, string>(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(676765018, "FullTelemetryMethod"), "FullTelemetryMethod: CounterValue = {CounterValue}, OperationId = {OperationId}, Message = {Message}");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public MultiTelemetryCore(global::Microsoft.Extensions.Logging.ILogger<global::Testing.IMultiTelemetry> logger, global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
@@ -35,7 +35,7 @@ namespace Testing
 				return;
 			}
 
-			_fullTelemetryMethodAction(_logger, counterValue, operationId, message);
+			_fullTelemetryMethodAction(_logger, counterValue, operationId, message, null);
 		}
 
 	}

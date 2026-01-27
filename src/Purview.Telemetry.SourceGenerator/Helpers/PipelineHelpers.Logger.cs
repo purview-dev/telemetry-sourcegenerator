@@ -214,7 +214,7 @@ partial class PipelineHelpers
 					continue;
 			}
 
-			var isScoped = !method.ReturnsVoid;
+			var isScoped = Constants.System.IDisposable.Equals(method.ReturnType);
 			var methodParameters = GetLogMethodParameters(
 				method,
 				semanticModel,

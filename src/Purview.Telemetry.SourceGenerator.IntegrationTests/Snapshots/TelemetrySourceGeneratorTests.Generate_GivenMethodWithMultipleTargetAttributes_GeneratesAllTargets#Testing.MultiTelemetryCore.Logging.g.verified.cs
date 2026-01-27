@@ -17,7 +17,7 @@ namespace Testing
 	{
 		readonly global::Microsoft.Extensions.Logging.ILogger<global::Testing.IMultiTelemetry> _logger;
 
-		static readonly global::System.Func<global::Microsoft.Extensions.Logging.ILogger, string, global::System.IDisposable?> _traceAndLogMethodAction = global::Microsoft.Extensions.Logging.LoggerMessage.DefineScope<string>("TraceAndLogMethod: Message = {Message}");
+		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, string, global::System.Exception?> _traceAndLogMethodAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<string>(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(27351070, "TraceAndLogMethod"), "TraceAndLogMethod: Message = {Message}");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public MultiTelemetryCore(global::Microsoft.Extensions.Logging.ILogger<global::Testing.IMultiTelemetry> logger)
@@ -34,7 +34,7 @@ namespace Testing
 				return;
 			}
 
-			_traceAndLogMethodAction(_logger, message);
+			_traceAndLogMethodAction(_logger, message, null);
 		}
 
 	}
