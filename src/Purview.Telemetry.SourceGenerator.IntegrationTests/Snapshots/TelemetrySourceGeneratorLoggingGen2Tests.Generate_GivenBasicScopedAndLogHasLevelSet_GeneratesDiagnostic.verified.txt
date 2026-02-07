@@ -1,6 +1,13 @@
 ﻿{
   Diagnostics: [
     {
+      Location: /*
+	[Log(Level = LogLevel.Information)]
+	IDisposable BasicScoped();
+             ^^^^^^^^^^^
+}
+*/
+ Guid_1: (13,13)-(13,24),
       Message: Scoped log entries do not support having a log level set.,
       Severity: Warning,
       WarningLevel: 1,

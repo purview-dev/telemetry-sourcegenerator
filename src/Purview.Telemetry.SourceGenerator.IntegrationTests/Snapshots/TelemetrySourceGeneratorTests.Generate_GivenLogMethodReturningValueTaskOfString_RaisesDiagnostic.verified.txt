@@ -1,6 +1,7 @@
 ﻿{
   Diagnostics: [
     {
+      Location: ,
       Message: Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.,
       Severity: Error,
       Descriptor: {

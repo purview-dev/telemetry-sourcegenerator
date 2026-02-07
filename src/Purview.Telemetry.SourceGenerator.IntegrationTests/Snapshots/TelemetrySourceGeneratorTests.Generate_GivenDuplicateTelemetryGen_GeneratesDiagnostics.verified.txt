@@ -99,6 +99,13 @@
       }
     },
     {
+      Location: /*
+	[Counter]
+	void Event([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
+      ^^^^^
+
+*/
+ Guid_1: (19,6)-(19,11),
       Message: Either define a measurement parameter, or provide a supported type parameter that is not a tag to enable inferring.,
       Severity: Error,
       Descriptor: {
@@ -111,6 +118,13 @@
       }
     },
     {
+      Location: /*
+	[Activity]
+	void Context([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
+      ^^^^^^^
+
+*/
+ Guid_1: (23,6)-(23,13),
       Message: Only a single attribute per target family (Activities, Logs, or Metrics) is allowed on each method. For Activities: use one of ActivityAttribute, EventAttribute, or ContextAttribute. For Logging: use one of LogAttribute or a semantic level attribute (TraceAttribute, DebugAttribute, etc.). For Metrics: use one instrument attribute (CounterAttribute, HistogramAttribute, etc.).,
       Severity: Error,
       Descriptor: {
@@ -123,6 +137,13 @@
       }
     },
     {
+      Location: /*
+	[Counter]
+	void Log([Tag]int intParam, bool boolParam);
+      ^^^
+
+*/
+ Guid_1: (27,6)-(27,9),
       Message: Either define a measurement parameter, or provide a supported type parameter that is not a tag to enable inferring.,
       Severity: Error,
       Descriptor: {

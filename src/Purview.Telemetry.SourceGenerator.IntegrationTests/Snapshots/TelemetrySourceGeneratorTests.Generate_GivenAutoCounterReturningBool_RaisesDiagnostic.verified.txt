@@ -1,6 +1,7 @@
 ﻿{
   Diagnostics: [
     {
+      Location: ,
       Message: AutoCounter methods must return void. Boolean or other return types are not supported.,
       Severity: Error,
       Descriptor: {

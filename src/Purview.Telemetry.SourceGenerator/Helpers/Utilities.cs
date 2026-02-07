@@ -8,6 +8,8 @@ namespace Purview.Telemetry.SourceGenerator.Helpers;
 
 static partial class Utilities
 {
+	private static readonly Regex WhitespaceRegex = new(@"\s+", RegexOptions.Compiled, TimeSpan.FromMilliseconds(2000));
+
 	public static TargetGeneration IsValidGenerationTarget(
 		IMethodSymbol method,
 		GenerationType generationType,
@@ -163,12 +165,16 @@ static partial class Utilities
 		List<string> parentClasses = [];
 		while (parentClass != null)
 		{
-			parentClasses.Insert(0, parentClass.Identifier.Text);
+			parentClasses.Add(parentClass.Identifier.Text);
 
 			parentClass = parentClass.Parent as ClassDeclarationSyntax;
 		}
 
-		return parentClasses.Count == 0 ? null : string.Join(".", parentClasses);
+		if (parentClasses.Count == 0)
+			return null;
+
+		parentClasses.Reverse();
+		return string.Join(".", parentClasses);
 	}
 
 	public static string? GetNamespace(TypeDeclarationSyntax typeSymbol)
@@ -310,7 +316,7 @@ static partial class Utilities
 		syntax.WithoutTrivia().ToString().Flatten();
 
 	public static string Flatten(this string value) =>
-		Regex.Replace(value, @"\s+", " ", RegexOptions.None, TimeSpan.FromMilliseconds(2000));
+		WhitespaceRegex.Replace(value, " ");
 
 	public static bool ContainsAttribute(
 		ISymbol symbol,

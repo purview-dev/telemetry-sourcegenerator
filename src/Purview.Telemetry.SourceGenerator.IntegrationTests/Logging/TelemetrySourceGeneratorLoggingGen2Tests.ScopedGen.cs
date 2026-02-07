@@ -173,6 +173,7 @@ public interface ITestLogger
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
+			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			cancellationToken: cancellationToken
 		);
@@ -208,6 +209,7 @@ public interface ITestLogger
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
+			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			cancellationToken: cancellationToken
 		);

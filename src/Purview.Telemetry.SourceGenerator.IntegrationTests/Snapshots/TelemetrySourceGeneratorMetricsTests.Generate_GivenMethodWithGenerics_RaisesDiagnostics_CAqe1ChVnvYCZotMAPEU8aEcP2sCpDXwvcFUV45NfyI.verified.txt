@@ -1,6 +1,13 @@
 ﻿{
   Diagnostics: [
     {
+      Location: /*
+[Meter("testing-meter")]
+public interface ITestMetrics<T0>  {
+                 ^^^^^^^^^^^^
+	[AutoCounter]
+*/
+ Guid_1: (9,17)-(9,29),
       Message: Remove the generic type(s) from the interface, this type of generation is not supported.,
       Severity: Error,
       Descriptor: {

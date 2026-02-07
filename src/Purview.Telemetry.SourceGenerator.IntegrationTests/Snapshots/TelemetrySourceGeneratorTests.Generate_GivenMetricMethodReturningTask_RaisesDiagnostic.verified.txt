@@ -1,6 +1,7 @@
 ﻿{
   Diagnostics: [
     {
+      Location: ,
       Message: Instrument methods can only return void or boolean.,
       Severity: Error,
       Descriptor: {
