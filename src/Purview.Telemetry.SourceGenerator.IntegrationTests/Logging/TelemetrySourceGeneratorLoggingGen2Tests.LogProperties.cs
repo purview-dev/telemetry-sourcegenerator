@@ -75,6 +75,7 @@ public class WeatherForecast
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
+			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			cancellationToken: cancellationToken
 		);

@@ -1,6 +1,13 @@
 ﻿{
   Diagnostics: [
     {
+      Location: /*
+{
+	void LogWeather([LogProperties][ExpandEnumerable]WeatherForecast[] weather);
+                                                                    ^^^^^^^
+}
+*/
+ Guid_1: (12,68)-(12,75),
       Message: Expanding an array/ IEnumerable, and the expanding the complex type of the items in the array are not supported.,
       Severity: Error,
       Descriptor: {

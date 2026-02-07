@@ -340,6 +340,5 @@ partial class SharedHelpers
 	}
 
 	public static bool IsValidMeasurementValueType(ITypeSymbol type) =>
-		Array.FindIndex(Constants.Metrics.ValidMeasurementSpecialTypes, m => m == type.SpecialType)
-		> -1;
+		Array.Exists(Constants.Metrics.ValidMeasurementSpecialTypes, m => m == type.SpecialType);
 }

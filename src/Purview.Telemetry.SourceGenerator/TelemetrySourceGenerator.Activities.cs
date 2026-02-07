@@ -64,10 +64,11 @@ partial class TelemetrySourceGenerator
 		if (targets.Length == 0)
 			return;
 
-		if (targets.Any(m => m!.Failures?.Length > 0))
+		var failures = targets.Where(m => m!.Failures?.Length > 0).SelectMany(m => m!.Failures!.Value).ToArray();
+		if (failures.Length > 0)
 		{
-			foreach (var failure in targets.SelectMany(m => m!.Failures!.Value))
-				TelemetryDiagnostics.Report(spc.ReportDiagnostic, failure.Item1, failure.Item1);
+			foreach (var failure in failures)
+				TelemetryDiagnostics.Report(spc.ReportDiagnostic, failure.Item1, failure.Item2);
 		}
 
 		try

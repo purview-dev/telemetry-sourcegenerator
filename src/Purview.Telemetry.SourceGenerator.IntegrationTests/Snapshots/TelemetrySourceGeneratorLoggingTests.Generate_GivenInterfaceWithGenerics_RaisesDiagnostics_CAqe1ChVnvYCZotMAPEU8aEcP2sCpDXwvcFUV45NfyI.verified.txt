@@ -1,6 +1,13 @@
 ﻿{
   Diagnostics: [
     {
+      Location: /*
+[Logger]
+public interface ITestLogger<T0> {
+                 ^^^^^^^^^^^
+	void LogEntryWithGenericTypeParam();
+*/
+ Guid_1: (9,17)-(9,28),
       Message: Remove the generic type(s) from the interface, this type of generation is not supported.,
       Severity: Error,
       Descriptor: {

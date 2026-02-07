@@ -1,6 +1,13 @@
 ﻿{
   Diagnostics: [
     {
+      Location: /*
+[ActivitySource]
+public interface ITestActivities<T0, T1, T2, T3, T4>
+                 ^^^^^^^^^^^^^^^
+{
+*/
+ Guid_1: (9,17)-(9,32),
       Message: Remove the generic type(s) from the interface, this type of generation is not supported.,
       Severity: Error,
       Descriptor: {

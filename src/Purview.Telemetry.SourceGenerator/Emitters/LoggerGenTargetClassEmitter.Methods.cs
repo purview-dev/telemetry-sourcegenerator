@@ -104,7 +104,11 @@ partial class LoggerGenTargetClassEmitter
 		// exception and output it as the exception parameter in
 		// the Log method.
 
-		List<string> existingParamNames = [.. methodTarget.Parameters.Select(m => m.Name)];
+		List<string> existingParamNames = new(methodTarget.Parameters.Length);
+		foreach (var param in methodTarget.Parameters)
+		{
+			existingParamNames.Add(param.Name);
+		}
 		var stateVarName = FindUniqueName("state", existingParamNames);
 
 		// Should always be state, because we'll use the messageFormat. And we'll generate one if
