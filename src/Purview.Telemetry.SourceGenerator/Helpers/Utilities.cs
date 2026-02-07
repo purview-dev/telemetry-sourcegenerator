@@ -16,34 +16,48 @@ static partial class Utilities
 		GenerationType requestedType
 	)
 	{
-		var attributes = method
-			.GetAttributes()
-			.Where(m => m.AttributeClass != null)
-			.Select(m => PurviewTypeFactory.Create(m.AttributeClass!))
-			.ToArray();
-		var activityCount = attributes.Count(static m =>
-			Constants.Activities.ActivityAttribute == m
-			|| Constants.Activities.EventAttribute == m
-			|| Constants.Activities.ContextAttribute == m
-		);
-		var loggingCount = attributes.Count(static m =>
-			Constants.Logging.LogAttribute == m
-			|| Constants.Logging.TraceAttribute == m
-			|| Constants.Logging.DebugAttribute == m
-			|| Constants.Logging.InfoAttribute == m
-			|| Constants.Logging.WarningAttribute == m
-			|| Constants.Logging.ErrorAttribute == m
-			|| Constants.Logging.CriticalAttribute == m
-		);
-		var metricsCount = attributes.Count(static m =>
-			Constants.Metrics.CounterAttribute == m
-			|| Constants.Metrics.AutoCounterAttribute == m
-			|| Constants.Metrics.UpDownCounterAttribute == m
-			|| Constants.Metrics.HistogramAttribute == m
-			|| Constants.Metrics.ObservableCounterAttribute == m
-			|| Constants.Metrics.ObservableGaugeAttribute == m
-			|| Constants.Metrics.ObservableUpDownCounterAttribute == m
-		);
+		// Optimized: Count in single pass instead of multiple enumerations
+		var activityCount = 0;
+		var loggingCount = 0;
+		var metricsCount = 0;
+
+		foreach (var attribute in method.GetAttributes())
+		{
+			if (attribute.AttributeClass == null)
+				continue;
+
+			var attributeType = PurviewTypeFactory.Create(attribute.AttributeClass);
+
+			// Check activities
+			if (Constants.Activities.ActivityAttribute == attributeType
+				|| Constants.Activities.EventAttribute == attributeType
+				|| Constants.Activities.ContextAttribute == attributeType)
+			{
+				activityCount++;
+			}
+			// Check logging
+			else if (Constants.Logging.LogAttribute == attributeType
+				|| Constants.Logging.TraceAttribute == attributeType
+				|| Constants.Logging.DebugAttribute == attributeType
+				|| Constants.Logging.InfoAttribute == attributeType
+				|| Constants.Logging.WarningAttribute == attributeType
+				|| Constants.Logging.ErrorAttribute == attributeType
+				|| Constants.Logging.CriticalAttribute == attributeType)
+			{
+				loggingCount++;
+			}
+			// Check metrics
+			else if (Constants.Metrics.CounterAttribute == attributeType
+				|| Constants.Metrics.AutoCounterAttribute == attributeType
+				|| Constants.Metrics.UpDownCounterAttribute == attributeType
+				|| Constants.Metrics.HistogramAttribute == attributeType
+				|| Constants.Metrics.ObservableCounterAttribute == attributeType
+				|| Constants.Metrics.ObservableGaugeAttribute == attributeType
+				|| Constants.Metrics.ObservableUpDownCounterAttribute == attributeType)
+			{
+				metricsCount++;
+			}
+		}
 
 		var inferenceNotSupportedWithMultiTargeting = false;
 		var multiGenerationTargetsNotSupported = false;
