@@ -65,10 +65,10 @@ namespace Testing
 
 			global::System.Diagnostics.TagList observableGaugeTagList = new();
 
-			observableGaugeTagList.Add("intparam", intParam);
-			observableGaugeTagList.Add("boolparam", boolParam);
+			observableGaugeTagList.Add("int_param", intParam);
+			observableGaugeTagList.Add("bool_param", boolParam);
 
-			_observableGaugeInstrument = _meter.CreateObservableGauge<int>("observablegauge", f, unit: null, description: null
+			_observableGaugeInstrument = _meter.CreateObservableGauge<int>("testing-meter.observable.gauge", f, unit: null, description: null
 				, tags: observableGaugeTagList
 			);
 		}
@@ -78,15 +78,15 @@ namespace Testing
 		{
 			if (_observableGauge2Instrument != null)
 			{
-				throw new global::System.Exception("observablegauge2 has already been initialized.");
+				throw new global::System.Exception("testing-meter.observable.gauge2 has already been initialized.");
 			}
 
 			global::System.Diagnostics.TagList observableGauge2TagList = new();
 
-			observableGauge2TagList.Add("intparam", intParam);
-			observableGauge2TagList.Add("boolparam", boolParam);
+			observableGauge2TagList.Add("int_param", intParam);
+			observableGauge2TagList.Add("bool_param", boolParam);
 
-			_observableGauge2Instrument = _meter.CreateObservableGauge<int>("observablegauge2", f, unit: null, description: null
+			_observableGauge2Instrument = _meter.CreateObservableGauge<int>("testing-meter.observable.gauge2", f, unit: null, description: null
 				, tags: observableGauge2TagList
 			);
 		}
@@ -101,10 +101,10 @@ namespace Testing
 
 			global::System.Diagnostics.TagList observableGauge3TagList = new();
 
-			observableGauge3TagList.Add("intparam", intParam);
-			observableGauge3TagList.Add("boolparam", boolParam);
+			observableGauge3TagList.Add("int_param", intParam);
+			observableGauge3TagList.Add("bool_param", boolParam);
 
-			_observableGauge3Instrument = _meter.CreateObservableGauge<int>("observablegauge3", f, unit: null, description: null
+			_observableGauge3Instrument = _meter.CreateObservableGauge<int>("testing-meter.observable.gauge3", f, unit: null, description: null
 				, tags: observableGauge3TagList
 			);
 		}

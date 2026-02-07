@@ -53,13 +53,13 @@ namespace Testing
 
 			if (activityActivity != null)
 			{
-				activityActivity.SetTag("intparam", intParam);
-				activityActivity.SetTag("boolparam", boolParam);
+				activityActivity.SetTag("int_param", intParam);
+				activityActivity.SetTag("bool_param", boolParam);
 			}
 
 			if (activityActivity != null)
 			{
-				activityActivity.SetBaggage("stringparam", stringParam);
+				activityActivity.SetBaggage("string_param", stringParam);
 			}
 
 			return activityActivity;
@@ -77,14 +77,14 @@ namespace Testing
 			if (activity != null)
 			{
 				global::System.Diagnostics.ActivityTagsCollection tagsCollectionEvent = new();
-				tagsCollectionEvent.Add("intparam", intParam);
-				tagsCollectionEvent.Add("boolparam", boolParam);
+				tagsCollectionEvent.Add("int_param", intParam);
+				tagsCollectionEvent.Add("bool_param", boolParam);
 
 				global::System.Diagnostics.ActivityEvent activityEventEvent = new(name: "Event", timestamp: default, tags: tagsCollectionEvent);
 
 				activity.AddEvent(activityEventEvent);
 
-				activity.SetBaggage("stringparam", stringParam);
+				activity.SetBaggage("string_param", stringParam);
 			}
 		}
 
@@ -99,9 +99,9 @@ namespace Testing
 
 			if (activity != null)
 			{
-				activity.SetTag("intparam", intParam);
-				activity.SetTag("boolparam", boolParam);
-				activity.SetBaggage("stringparam", stringParam);
+				activity.SetTag("int_param", intParam);
+				activity.SetTag("bool_param", boolParam);
+				activity.SetBaggage("string_param", stringParam);
 			}
 		}
 

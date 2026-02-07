@@ -42,7 +42,7 @@ namespace Testing
 
 			PopulateIncrementCounterTags(incrementCounterTags);
 
-			_incrementCounterInstrument = _meter.CreateCounter<int>(name: "incrementcounter", unit: null, description: null, tags: incrementCounterTags);
+			_incrementCounterInstrument = _meter.CreateCounter<int>(name: "testing-meter.increment.counter", unit: null, description: null, tags: incrementCounterTags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
@@ -62,7 +62,7 @@ namespace Testing
 
 			global::System.Diagnostics.TagList incrementCounterTagList = new();
 
-			incrementCounterTagList.Add("operationid", operationId);
+			incrementCounterTagList.Add("operation_id", operationId);
 
 			_incrementCounterInstrument.Add(value, tagList: incrementCounterTagList);
 		}

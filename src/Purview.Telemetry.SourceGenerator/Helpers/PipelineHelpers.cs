@@ -19,10 +19,26 @@ static partial class PipelineHelpers
 		"Globalization",
 		"CA1308:Normalize strings to uppercase"
 	)]
-	static string GenerateParameterName(string name, string? prefix, bool lowercase)
+	static string GenerateParameterName(
+		string name,
+		string? prefix,
+		bool lowercase,
+		int namingConvention = 1
+	)
 	{
-		if (lowercase)
+		// NamingConvention: 0 = Legacy, 1 = OpenTelemetry
+		var isLegacy = namingConvention == 0;
+
+		if (!isLegacy && lowercase)
+		{
+			// OpenTelemetry: Convert PascalCase to snake_case for tags/baggage
+			name = Utilities.ConvertToSeparatedLowercase(name, '_');
+		}
+		else if (lowercase)
+		{
+			// Legacy: Just lowercase without word-boundary splitting
 			name = name.ToLowerInvariant();
+		}
 
 		return $"{prefix}{name}";
 	}

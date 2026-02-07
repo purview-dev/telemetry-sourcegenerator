@@ -53,7 +53,7 @@ namespace Testing
 
 			if (activityStartActivity != null)
 			{
-				activityStartActivity.SetTag("operationid", operationId);
+				activityStartActivity.SetTag("operation_id", operationId);
 			}
 
 			return activityStartActivity;

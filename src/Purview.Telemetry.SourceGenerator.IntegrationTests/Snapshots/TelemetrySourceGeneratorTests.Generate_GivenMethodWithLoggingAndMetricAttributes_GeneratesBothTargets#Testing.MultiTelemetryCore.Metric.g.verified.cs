@@ -42,7 +42,7 @@ namespace Testing
 
 			PopulateLogAndCountMethodTags(logAndCountMethodTags);
 
-			_logAndCountMethodInstrument = _meter.CreateCounter<int>(name: "logandcountmethod", unit: null, description: null, tags: logAndCountMethodTags);
+			_logAndCountMethodInstrument = _meter.CreateCounter<int>(name: "testing-meter.log.and.count.method", unit: null, description: null, tags: logAndCountMethodTags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

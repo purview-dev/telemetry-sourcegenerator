@@ -44,17 +44,17 @@ namespace Testing
 
 			PopulateIncrementOperationCounterTags(incrementOperationCounterTags);
 
-			_incrementOperationCounterInstrument = _meter.CreateCounter<int>(name: "incrementoperationcounter", unit: null, description: null, tags: incrementOperationCounterTags);
+			_incrementOperationCounterInstrument = _meter.CreateCounter<int>(name: "testing-meter.increment.operation.counter", unit: null, description: null, tags: incrementOperationCounterTags);
 			global::System.Collections.Generic.Dictionary<string, object?> recordOperationDurationTags = new();
 
 			PopulateRecordOperationDurationTags(recordOperationDurationTags);
 
-			_recordOperationDurationInstrument = _meter.CreateHistogram<double>(name: "recordoperationduration", unit: null, description: null, tags: recordOperationDurationTags);
+			_recordOperationDurationInstrument = _meter.CreateHistogram<double>(name: "testing-meter.record.operation.duration", unit: null, description: null, tags: recordOperationDurationTags);
 			global::System.Collections.Generic.Dictionary<string, object?> updateActiveConnectionsTags = new();
 
 			PopulateUpdateActiveConnectionsTags(updateActiveConnectionsTags);
 
-			_updateActiveConnectionsInstrument = _meter.CreateUpDownCounter<int>(name: "updateactiveconnections", unit: null, description: null, tags: updateActiveConnectionsTags);
+			_updateActiveConnectionsInstrument = _meter.CreateUpDownCounter<int>(name: "testing-meter.update.active.connections", unit: null, description: null, tags: updateActiveConnectionsTags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

@@ -63,10 +63,10 @@ namespace Testing
 
 			global::System.Diagnostics.TagList metricTagList = new();
 
-			metricTagList.Add("intparam", intParam);
-			metricTagList.Add("boolparam", boolParam);
+			metricTagList.Add("int_param", intParam);
+			metricTagList.Add("bool_param", boolParam);
 
-			_metricInstrument = _meter.CreateObservableUpDownCounter<byte>("an-observableupdowncounter-name-property", f, unit: "beer-property", description: "beer sales per-capita-property."
+			_metricInstrument = _meter.CreateObservableUpDownCounter<byte>("testing-meter.an-observableupdowncounter-name-property", f, unit: "beer-property", description: "beer sales per-capita-property."
 				, tags: metricTagList
 			);
 		}

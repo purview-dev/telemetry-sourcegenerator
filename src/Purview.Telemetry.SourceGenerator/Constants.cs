@@ -45,6 +45,23 @@ static partial class Constants
 		"Fake.Fake.Fake.Fake.Empty"
 	);
 
+	/// <summary>
+	/// Naming convention strategies for generated telemetry names.
+	/// </summary>
+	public enum NamingConvention
+	{
+		/// <summary>
+		/// Legacy naming (pre-v4): Lowercase ActivitySource names, smashed compound words.
+		/// </summary>
+		Legacy = 0,
+
+		/// <summary>
+		/// OpenTelemetry-aligned naming (default from v4): Preserves casing, uses dot.separated.lowercase for metrics,
+		/// snake_case for tags, follows OTel semantic conventions.
+		/// </summary>
+		OpenTelemetry = 1
+	}
+
 	public static partial class Shared
 	{
 		public static readonly TemplateInfo TagAttribute = TemplateInfo.Create(
@@ -59,6 +76,9 @@ static partial class Constants
 		public static readonly TemplateInfo TargetsEnum = TemplateInfo.Create(
 			"Purview.Telemetry.Targets"
 		);
+		public static readonly TemplateInfo NamingConventionEnum = TemplateInfo.Create(
+			"Purview.Telemetry.NamingConvention"
+		);
 		public static readonly TemplateInfo ExcludeTargetsAttribute = TemplateInfo.Create(
 			"Purview.Telemetry.ExcludeTargetsAttribute"
 		);
@@ -69,6 +89,7 @@ static partial class Constants
 				ExcludeAttribute,
 				TelemetryGenerationAttribute,
 				TargetsEnum,
+				NamingConventionEnum,
 				ExcludeTargetsAttribute,
 			];
 	}

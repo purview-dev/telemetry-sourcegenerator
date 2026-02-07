@@ -89,4 +89,10 @@ sealed class TelemetryGenerationAttribute : global::System.Attribute
 	/// Determines if the generated dependency injection class is generated as public. Defaults to false (internal).
 	/// </summary>
 	public bool DependencyInjectionClassIsPublic { get; set; }
+
+	/// <summary>
+	/// Specifies which naming convention to use for generated telemetry names.
+	/// Defaults to <see cref="Purview.Telemetry.NamingConvention.OpenTelemetry"/>.
+	/// </summary>
+	public NamingConvention NamingConvention { get; set; } = NamingConvention.OpenTelemetry;
 }

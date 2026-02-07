@@ -18,7 +18,7 @@ namespace Purview.Interfaces.ApplicationServices.Caching
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class CacheServiceProviderTelemetryCore : global::Purview.Interfaces.ApplicationServices.Caching.ICacheServiceProviderTelemetry
 	{
-		readonly static global::System.Diagnostics.ActivitySource _activitySource = new("purview.telemetry.sourcegenerator");
+		readonly static global::System.Diagnostics.ActivitySource _activitySource = new("Purview.Telemetry.SourceGenerator");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -97,7 +97,7 @@ namespace Purview.Interfaces.ApplicationServices.Caching
 
 			if (global::System.Diagnostics.Activity.Current != null)
 			{
-				global::System.Diagnostics.Activity.Current.SetTag("payloadstringlength", payloadStringLength);
+				global::System.Diagnostics.Activity.Current.SetTag("payload_string_length", payloadStringLength);
 			}
 		}
 
@@ -126,9 +126,9 @@ namespace Purview.Interfaces.ApplicationServices.Caching
 
 			if (global::System.Diagnostics.Activity.Current != null)
 			{
-				global::System.Diagnostics.Activity.Current.SetTag("distributedcachetype", distributedCacheType);
-				global::System.Diagnostics.Activity.Current.SetTag("cachekey", cacheKey);
-				global::System.Diagnostics.Activity.Current.SetTag("entitytype", entityType);
+				global::System.Diagnostics.Activity.Current.SetTag("distributed_cache_type", distributedCacheType);
+				global::System.Diagnostics.Activity.Current.SetTag("cache_key", cacheKey);
+				global::System.Diagnostics.Activity.Current.SetTag("entity_type", entityType);
 			}
 		}
 
@@ -180,7 +180,7 @@ namespace Purview.Interfaces.ApplicationServices.Caching
 			if (global::System.Diagnostics.Activity.Current != null)
 			{
 				global::System.Diagnostics.ActivityTagsCollection tagsCollectionCacheHit = new();
-				tagsCollectionCacheHit.Add("datalength", dataLength);
+				tagsCollectionCacheHit.Add("data_length", dataLength);
 
 				global::System.Diagnostics.ActivityEvent activityEventCacheHit = new(name: "CacheHit", timestamp: default, tags: tagsCollectionCacheHit);
 

@@ -51,7 +51,7 @@ namespace Testing
 
 			PopulateMetricTags(metricTags);
 
-			_metricInstrument = _meter.CreateCounter<byte>(name: "a-counter-name-property", unit: "cakes-property", description: "cake sales per-capita-property.", tags: metricTags);
+			_metricInstrument = _meter.CreateCounter<byte>(name: "testing-meter.a-counter-name-property", unit: "cakes-property", description: "cake sales per-capita-property.", tags: metricTags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
@@ -71,8 +71,8 @@ namespace Testing
 
 			global::System.Diagnostics.TagList metricTagList = new();
 
-			metricTagList.Add("intparam", intParam);
-			metricTagList.Add("boolparam", boolParam);
+			metricTagList.Add("int_param", intParam);
+			metricTagList.Add("bool_param", boolParam);
 
 			_metricInstrument.Add(counterValue, tagList: metricTagList);
 		}

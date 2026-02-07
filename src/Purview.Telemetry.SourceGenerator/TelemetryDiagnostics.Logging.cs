@@ -105,5 +105,21 @@ partial class TelemetryDiagnostics
 			Severity: DiagnosticSeverity.Error,
 			Category: Constants.Diagnostics.Logging.Usage
 		);
+
+		public static readonly TelemetryDiagnosticDescriptor DefaultPrefixTypeUsed = new(
+			Id: "TSG2023",
+			Title: "Log prefix type is Default (no prefix)",
+			Description: "Using Default prefix type results in log names with no context prefix. Consider using TrimmedClassName or Custom prefix for better log categorization and searchability.",
+			Severity: DiagnosticSeverity.Info,
+			Category: Constants.Diagnostics.Logging.Usage
+		);
+
+		public static readonly TelemetryDiagnosticDescriptor LogMethodNameTooShortOrGeneric = new(
+			Id: "TSG2024",
+			Title: "Log method name is very short or generic",
+			Description: "Log method name '{0}' is very short or generic. Consider using a more descriptive name that identifies the logging context.",
+			Severity: DiagnosticSeverity.Warning,
+			Category: Constants.Diagnostics.Logging.Usage
+		);
 	}
 }

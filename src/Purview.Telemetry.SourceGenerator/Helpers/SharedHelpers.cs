@@ -347,7 +347,10 @@ static partial class SharedHelpers
 					?? new(),
 				DependencyInjectionClassIsPublic: typeGeneration?.DependencyInjectionClassIsPublic
 					?? assemblyTelemetryGeneration?.DependencyInjectionClassIsPublic
-					?? new(false)
+					?? new(false),
+				NamingConvention: typeGeneration?.NamingConvention
+					?? assemblyTelemetryGeneration?.NamingConvention
+					?? new(1) // Default to OpenTelemetry
 			);
 
 		static TelemetryGenerationAttributeRecord CreateDefault() =>
@@ -355,7 +358,8 @@ static partial class SharedHelpers
 				GenerateDependencyExtension: new(true),
 				ClassName: new(),
 				DependencyInjectionClassName: new(),
-				DependencyInjectionClassIsPublic: new(false)
+				DependencyInjectionClassIsPublic: new(false),
+				NamingConvention: new(1) // Default to OpenTelemetry
 			);
 	}
 
@@ -370,6 +374,7 @@ static partial class SharedHelpers
 		AttributeStringValue? className = null;
 		AttributeStringValue? dependencyInjectionClassName = null;
 		AttributeValue<bool>? dependencyInjectionClassIsPublic = null;
+		AttributeValue<int>? namingConvention = null;
 
 		return AttributeParser(
 			attributeData,
@@ -411,6 +416,15 @@ static partial class SharedHelpers
 				{
 					dependencyInjectionClassIsPublic = new((bool)value);
 				}
+				else if (
+					name.Equals(
+						nameof(TelemetryGenerationAttributeRecord.NamingConvention),
+						StringComparison.OrdinalIgnoreCase
+					)
+				)
+				{
+					namingConvention = new((int)value);
+				}
 			},
 			semanticModel,
 			logger,
@@ -420,7 +434,8 @@ static partial class SharedHelpers
 				GenerateDependencyExtension: generateDependencyExtension ?? new(true),
 				ClassName: className ?? new(),
 				DependencyInjectionClassName: dependencyInjectionClassName ?? new(),
-				DependencyInjectionClassIsPublic: dependencyInjectionClassIsPublic ?? new(false)
+				DependencyInjectionClassIsPublic: dependencyInjectionClassIsPublic ?? new(false),
+				NamingConvention: namingConvention ?? new(1) // Default to OpenTelemetry
 			)
 			: null;
 	}

@@ -63,10 +63,10 @@ namespace Testing
 
 			global::System.Diagnostics.TagList metricTagList = new();
 
-			metricTagList.Add("intparam", intParam);
-			metricTagList.Add("boolparam", boolParam);
+			metricTagList.Add("int_param", intParam);
+			metricTagList.Add("bool_param", boolParam);
 
-			_metricInstrument = _meter.CreateObservableGauge<int>("an-observablegauge-name-param", f, unit: "biscuits-param", description: "biscuit ake sales per-capita-param."
+			_metricInstrument = _meter.CreateObservableGauge<int>("testing-meter.an-observablegauge-name-param", f, unit: "biscuits-param", description: "biscuit ake sales per-capita-param."
 				, tags: metricTagList
 			);
 		}

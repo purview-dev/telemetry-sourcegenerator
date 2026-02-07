@@ -56,27 +56,27 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 
 		PopulateAutoCounterMeterTags(autoCounterMeterTags);
 
-		_autoCounterMeterInstrument = _meter.CreateCounter<int>(name: "autocountermeter", unit: null, description: null, tags: autoCounterMeterTags);
+		_autoCounterMeterInstrument = _meter.CreateCounter<int>(name: "meter.telemetry.auto.counter.meter", unit: null, description: null, tags: autoCounterMeterTags);
 		global::System.Collections.Generic.Dictionary<string, object?> autoIncrementMeterTags = new();
 
 		PopulateAutoIncrementMeterTags(autoIncrementMeterTags);
 
-		_autoIncrementMeterInstrument = _meter.CreateCounter<int>(name: "autoincrementmeter", unit: null, description: null, tags: autoIncrementMeterTags);
+		_autoIncrementMeterInstrument = _meter.CreateCounter<int>(name: "meter.telemetry.auto.increment.meter", unit: null, description: null, tags: autoIncrementMeterTags);
 		global::System.Collections.Generic.Dictionary<string, object?> counterMeterTags = new();
 
 		PopulateCounterMeterTags(counterMeterTags);
 
-		_counterMeterInstrument = _meter.CreateCounter<int>(name: "countermeter", unit: null, description: null, tags: counterMeterTags);
+		_counterMeterInstrument = _meter.CreateCounter<int>(name: "meter.telemetry.counter.meter", unit: null, description: null, tags: counterMeterTags);
 		global::System.Collections.Generic.Dictionary<string, object?> histogramMeterTags = new();
 
 		PopulateHistogramMeterTags(histogramMeterTags);
 
-		_histogramMeterInstrument = _meter.CreateHistogram<int>(name: "histogrammeter", unit: null, description: null, tags: histogramMeterTags);
+		_histogramMeterInstrument = _meter.CreateHistogram<int>(name: "meter.telemetry.histogram.meter", unit: null, description: null, tags: histogramMeterTags);
 		global::System.Collections.Generic.Dictionary<string, object?> upDownCounterMeterTags = new();
 
 		PopulateUpDownCounterMeterTags(upDownCounterMeterTags);
 
-		_upDownCounterMeterInstrument = _meter.CreateUpDownCounter<decimal>(name: "updowncountermeter", unit: null, description: null, tags: upDownCounterMeterTags);
+		_upDownCounterMeterInstrument = _meter.CreateUpDownCounter<decimal>(name: "meter.telemetry.up.down.counter.meter", unit: null, description: null, tags: upDownCounterMeterTags);
 	}
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
@@ -108,7 +108,7 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 
 		global::System.Diagnostics.TagList autoCounterMeterTagList = new();
 
-		autoCounterMeterTagList.Add("somevalue", someValue);
+		autoCounterMeterTagList.Add("some_value", someValue);
 
 		_autoCounterMeterInstrument.Add(1, tagList: autoCounterMeterTagList);
 	}
@@ -123,7 +123,7 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 
 		global::System.Diagnostics.TagList autoIncrementMeterTagList = new();
 
-		autoIncrementMeterTagList.Add("somevalue", someValue);
+		autoIncrementMeterTagList.Add("some_value", someValue);
 
 		_autoIncrementMeterInstrument.Add(1, tagList: autoIncrementMeterTagList);
 	}
@@ -138,7 +138,7 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 
 		global::System.Diagnostics.TagList counterMeterTagList = new();
 
-		counterMeterTagList.Add("somevalue", someValue);
+		counterMeterTagList.Add("some_value", someValue);
 
 		_counterMeterInstrument.Add(measurement, tagList: counterMeterTagList);
 	}
@@ -153,8 +153,8 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 
 		global::System.Diagnostics.TagList histogramMeterTagList = new();
 
-		histogramMeterTagList.Add("somevalue", someValue);
-		histogramMeterTagList.Add("anothervalue", anotherValue);
+		histogramMeterTagList.Add("some_value", someValue);
+		histogramMeterTagList.Add("another_value", anotherValue);
 
 		_histogramMeterInstrument.Record(measurement, tagList: histogramMeterTagList);
 	}
@@ -169,9 +169,9 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 
 		global::System.Diagnostics.TagList observableCounterMeterTagList = new();
 
-		observableCounterMeterTagList.Add("somevalue", someValue);
+		observableCounterMeterTagList.Add("some_value", someValue);
 
-		_observableCounterMeterInstrument = _meter.CreateObservableCounter<float>("observablecountermeter", measurement, unit: null, description: null
+		_observableCounterMeterInstrument = _meter.CreateObservableCounter<float>("meter.telemetry.observable.counter.meter", measurement, unit: null, description: null
 			, tags: observableCounterMeterTagList
 		);
 	}
@@ -186,9 +186,9 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 
 		global::System.Diagnostics.TagList observableGaugeMeterTagList = new();
 
-		observableGaugeMeterTagList.Add("somevalue", someValue);
+		observableGaugeMeterTagList.Add("some_value", someValue);
 
-		_observableGaugeMeterInstrument = _meter.CreateObservableGauge<float>("observablegaugemeter", measurement, unit: null, description: null
+		_observableGaugeMeterInstrument = _meter.CreateObservableGauge<float>("meter.telemetry.observable.gauge.meter", measurement, unit: null, description: null
 			, tags: observableGaugeMeterTagList
 		);
 	}
@@ -203,9 +203,9 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 
 		global::System.Diagnostics.TagList observableUpDownCounterTagList = new();
 
-		observableUpDownCounterTagList.Add("somevalue", someValue);
+		observableUpDownCounterTagList.Add("some_value", someValue);
 
-		_observableUpDownCounterInstrument = _meter.CreateObservableUpDownCounter<byte>("observableupdowncounter", measurement, unit: null, description: null
+		_observableUpDownCounterInstrument = _meter.CreateObservableUpDownCounter<byte>("meter.telemetry.observable.up.down.counter", measurement, unit: null, description: null
 			, tags: observableUpDownCounterTagList
 		);
 	}
@@ -220,7 +220,7 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 
 		global::System.Diagnostics.TagList upDownCounterMeterTagList = new();
 
-		upDownCounterMeterTagList.Add("somevalue", someValue);
+		upDownCounterMeterTagList.Add("some_value", someValue);
 
 		_upDownCounterMeterInstrument.Add(measurement, tagList: upDownCounterMeterTagList);
 	}

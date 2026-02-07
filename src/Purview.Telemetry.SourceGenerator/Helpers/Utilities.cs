@@ -448,6 +448,99 @@ static partial class Utilities
 	}
 
 	/// <summary>
+	/// Converts PascalCase or camelCase identifiers to lowercase with separators between words.
+	/// E.g., "EntityId" -> "entity.id" (dot separator), "entity_id" (underscore separator)
+	/// </summary>
+	public static string ConvertToSeparatedLowercase(string pascalCaseName, char separator = '.')
+	{
+		if (string.IsNullOrEmpty(pascalCaseName))
+			return pascalCaseName;
+
+		System.Text.StringBuilder result = new();
+		bool previousWasUpper = false;
+		bool previousWasLower = false;
+
+		for (int i = 0; i < pascalCaseName.Length; i++)
+		{
+			char current = pascalCaseName[i];
+			bool isUpper = char.IsUpper(current);
+			bool isLower = char.IsLower(current);
+
+			if (i > 0 && isUpper)
+			{
+				// Add separator before uppercase if:
+				// 1. Previous was lowercase (camelCase boundary: "entityId" -> "entity.id")
+				// 2. Next is lowercase and previous was uppercase (acronym boundary: "HTTPSConnection" -> "https.connection")
+				bool nextIsLower = i + 1 < pascalCaseName.Length && char.IsLower(pascalCaseName[i + 1]);
+
+				if (previousWasLower || (previousWasUpper && nextIsLower))
+				{
+					result.Append(separator);
+				}
+			}
+
+			result.Append(char.ToLowerInvariant(current));
+
+			previousWasUpper = isUpper;
+			previousWasLower = isLower;
+		}
+
+		return result.ToString();
+	}
+
+	/// <summary>
+	/// Detects if a lowercase string appears to be a compound word without separators.
+	/// E.g., "entityid", "requestcount", "httpconnection" (likely compounds)
+	/// Returns true if the string is likely multiple words smashed together.
+	/// </summary>
+	public static bool IsLikelyCompoundWord(string lowercaseName)
+	{
+		if (string.IsNullOrEmpty(lowercaseName) || lowercaseName.Length < 6)
+			return false;
+
+		// If it contains separators already, it's not a compound
+		if (lowercaseName.Contains('.') || lowercaseName.Contains('_') || lowercaseName.Contains('-'))
+			return false;
+
+		// Common compound patterns (heuristic)
+		string[] commonSuffixes = ["id", "key", "name", "type", "count", "value", "time", "date", "code", "number"];
+		string[] commonPrefixes = ["get", "set", "is", "has", "can", "should", "will"];
+
+		foreach (var suffix in commonSuffixes)
+		{
+			if (lowercaseName.EndsWith(suffix, StringComparison.Ordinal) && lowercaseName.Length > suffix.Length + 2)
+				return true;
+		}
+
+		foreach (var prefix in commonPrefixes)
+		{
+			if (lowercaseName.StartsWith(prefix, StringComparison.Ordinal) && lowercaseName.Length > prefix.Length + 2)
+				return true;
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	/// Checks if a name is a generic or reserved term that provides little semantic value.
+	/// </summary>
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase")]
+	public static bool IsGenericOrReservedName(string name)
+	{
+		if (string.IsNullOrWhiteSpace(name))
+			return false;
+
+		string[] genericTerms =
+		[
+			"activity", "event", "error", "exception", "start", "stop", "begin", "end",
+			"task", "action", "func", "method", "operation", "process", "handler"
+		];
+
+		string lowerName = name.ToLowerInvariant();
+		return genericTerms.Contains(lowerName);
+	}
+
+	/// <summary>
 	/// Checks if a method has any metrics-related attribute (Counter, AutoCounter, UpDownCounter, Histogram, etc.)
 	/// </summary>
 	public static bool HasMetricsAttribute(IMethodSymbol method, CancellationToken token)

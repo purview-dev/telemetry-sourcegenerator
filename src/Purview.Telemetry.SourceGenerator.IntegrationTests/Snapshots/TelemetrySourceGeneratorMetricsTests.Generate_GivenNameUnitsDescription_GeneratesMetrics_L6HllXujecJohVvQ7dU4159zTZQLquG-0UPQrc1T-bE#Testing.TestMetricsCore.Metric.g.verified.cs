@@ -51,7 +51,7 @@ namespace Testing
 
 			PopulateMetricTags(metricTags);
 
-			_metricInstrument = _meter.CreateUpDownCounter<int>(name: "an-updown-counter-name-param", unit: "sponges-param", description: "sponge sales per-capita-param.", tags: metricTags);
+			_metricInstrument = _meter.CreateUpDownCounter<int>(name: "testing-meter.an-updown-counter-name-param", unit: "sponges-param", description: "sponge sales per-capita-param.", tags: metricTags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
@@ -71,8 +71,8 @@ namespace Testing
 
 			global::System.Diagnostics.TagList metricTagList = new();
 
-			metricTagList.Add("intparam", intParam);
-			metricTagList.Add("boolparam", boolParam);
+			metricTagList.Add("int_param", intParam);
+			metricTagList.Add("bool_param", boolParam);
 
 			_metricInstrument.Add(counterValue, tagList: metricTagList);
 		}

@@ -79,13 +79,23 @@ partial class PipelineHelpers
 			: activitySourceAttribute.Name.IsSet ? activitySourceAttribute.Name.Value!
 			: null;
 
+		// Get naming convention from TelemetryGenerationAttribute (default to OpenTelemetry = 1)
+		var namingConvention = telemetryGeneration?.NamingConvention.Value ?? 1;
+		var isLegacy = namingConvention == 0;
+
 		if (activitySourceName == null)
 		{
-#pragma warning disable CA1308 // Normalize strings to uppercase
-			var assemblyName = context.SemanticModel.Compilation.AssemblyName?.ToLowerInvariant();
-#pragma warning restore CA1308 // Normalize strings to uppercase
+			var assemblyName = context.SemanticModel.Compilation.AssemblyName;
 			if (!string.IsNullOrWhiteSpace(assemblyName))
-				activitySourceName = assemblyName;
+			{
+				// Legacy mode: lowercase the assembly name
+				// OpenTelemetry mode: preserve casing
+#pragma warning disable CA1308 // Intentional lowercase for legacy compatibility
+				activitySourceName = isLegacy
+					? assemblyName!.ToLowerInvariant()
+					: assemblyName;
+#pragma warning restore CA1308
+			}
 		}
 
 		var fullNamespace = Utilities.GetFullNamespace(interfaceDeclaration, true);
@@ -94,6 +104,7 @@ partial class PipelineHelpers
 			generationType,
 			activitySourceAttribute,
 			activitySourceGenerationAttribute,
+			telemetryGeneration,
 			semanticModel,
 			interfaceSymbol,
 			logger,
@@ -124,6 +135,7 @@ partial class PipelineHelpers
 		GenerationType generationType,
 		ActivitySourceAttributeRecord activitySourceAttribute,
 		ActivitySourceGenerationAttributeRecord? activitySourceGenerationAttribute,
+		TelemetryGenerationAttributeRecord telemetryGeneration,
 		SemanticModel semanticModel,
 		INamedTypeSymbol interfaceSymbol,
 		GenerationLogger? logger,
@@ -132,6 +144,9 @@ partial class PipelineHelpers
 	)
 	{
 		token.ThrowIfCancellationRequested();
+
+		// Get naming convention from TelemetryGenerationAttribute (default to OpenTelemetry = 1)
+		var namingConvention = telemetryGeneration?.NamingConvention.Value ?? 1;
 
 		var prefix = GeneratePrefix(
 			activitySourceGenerationAttribute,
@@ -197,6 +212,7 @@ partial class PipelineHelpers
 				prefix,
 				defaultToTags,
 				lowercaseBaggageAndTagKeys,
+				namingConvention,
 				semanticModel,
 				logger,
 				token
@@ -242,6 +258,7 @@ partial class PipelineHelpers
 		string? prefix,
 		bool defaultToTags,
 		bool lowercaseBaggageAndTagKeys,
+		int namingConvention,
 		SemanticModel semanticModel,
 		GenerationLogger? logger,
 		CancellationToken token
@@ -376,7 +393,8 @@ partial class PipelineHelpers
 			var generatedName = GenerateParameterName(
 				tagOrBaggageAttribute?.Name.Value ?? parameterName,
 				prefix,
-				lowercaseBaggageAndTagKeys
+				lowercaseBaggageAndTagKeys,
+				namingConvention
 			);
 
 			parameterTargets.Add(

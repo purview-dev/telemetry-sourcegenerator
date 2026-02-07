@@ -53,13 +53,13 @@ namespace Testing
 
 			if (activityActivity != null)
 			{
-				activityActivity.SetTag("intparam", intParam);
-				activityActivity.SetTag("boolparam", boolParam);
+				activityActivity.SetTag("int_param", intParam);
+				activityActivity.SetTag("bool_param", boolParam);
 			}
 
 			if (activityActivity != null)
 			{
-				activityActivity.SetBaggage("stringparam", stringParam);
+				activityActivity.SetBaggage("string_param", stringParam);
 			}
 		}
 
@@ -84,14 +84,14 @@ namespace Testing
 			if (global::System.Diagnostics.Activity.Current != null)
 			{
 				global::System.Diagnostics.ActivityTagsCollection tagsCollectionEvent = new();
-				tagsCollectionEvent.Add("intparam", intParam);
-				tagsCollectionEvent.Add("boolparam", boolParam);
+				tagsCollectionEvent.Add("int_param", intParam);
+				tagsCollectionEvent.Add("bool_param", boolParam);
 
 				global::System.Diagnostics.ActivityEvent activityEventEvent = new(name: "Event", timestamp: default, tags: tagsCollectionEvent);
 
 				global::System.Diagnostics.Activity.Current.AddEvent(activityEventEvent);
 
-				global::System.Diagnostics.Activity.Current.SetBaggage("stringparam", stringParam);
+				global::System.Diagnostics.Activity.Current.SetBaggage("string_param", stringParam);
 			}
 		}
 
@@ -116,9 +116,9 @@ namespace Testing
 			if (global::System.Diagnostics.Activity.Current != null)
 			{
 				global::System.Diagnostics.ActivityTagsCollection tagsCollectionCounter = new();
-				tagsCollectionCounter.Add("countervalue", counterValue);
-				tagsCollectionCounter.Add("intparam", intParam);
-				tagsCollectionCounter.Add("boolparam", boolParam);
+				tagsCollectionCounter.Add("counter_value", counterValue);
+				tagsCollectionCounter.Add("int_param", intParam);
+				tagsCollectionCounter.Add("bool_param", boolParam);
 
 				global::System.Diagnostics.ActivityEvent activityEventCounter = new(name: "Counter", timestamp: default, tags: tagsCollectionCounter);
 

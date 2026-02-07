@@ -48,7 +48,7 @@ namespace Testing
 
 			PopulateIncrementCounterTags(incrementCounterTags);
 
-			_incrementCounterInstrument = _meter.CreateCounter<int>(name: "incrementcounter", unit: null, description: null, tags: incrementCounterTags);
+			_incrementCounterInstrument = _meter.CreateCounter<int>(name: "testing-meter.increment.counter", unit: null, description: null, tags: incrementCounterTags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

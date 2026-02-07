@@ -66,8 +66,8 @@ namespace Testing
 			if (activity != null)
 			{
 				global::System.Diagnostics.ActivityTagsCollection tagsCollectionEvent = new();
-				tagsCollectionEvent.Add("intparam", intParam);
-				tagsCollectionEvent.Add("boolparam", boolParam);
+				tagsCollectionEvent.Add("int_param", intParam);
+				tagsCollectionEvent.Add("bool_param", boolParam);
 
 				RecordExceptionInternal(activity: activity, exception: anException, escape: escape);
 
@@ -75,7 +75,7 @@ namespace Testing
 
 				activity.AddEvent(activityEventEvent);
 
-				activity.SetBaggage("stringparam", stringParam);
+				activity.SetBaggage("string_param", stringParam);
 			}
 		}
 

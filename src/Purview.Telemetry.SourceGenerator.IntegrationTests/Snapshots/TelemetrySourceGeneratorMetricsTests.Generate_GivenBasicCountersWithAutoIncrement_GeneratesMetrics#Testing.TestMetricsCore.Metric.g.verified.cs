@@ -53,17 +53,17 @@ namespace Testing
 
 			PopulateCounter1Tags(counter1Tags);
 
-			_counter1Instrument = _meter.CreateCounter<int>(name: "counter1", unit: null, description: null, tags: counter1Tags);
+			_counter1Instrument = _meter.CreateCounter<int>(name: "testing-meter.counter1", unit: null, description: null, tags: counter1Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> counter2Tags = new();
 
 			PopulateCounter2Tags(counter2Tags);
 
-			_counter2Instrument = _meter.CreateCounter<int>(name: "counter2", unit: null, description: null, tags: counter2Tags);
+			_counter2Instrument = _meter.CreateCounter<int>(name: "testing-meter.counter2", unit: null, description: null, tags: counter2Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> counter3Tags = new();
 
 			PopulateCounter3Tags(counter3Tags);
 
-			_counter3Instrument = _meter.CreateCounter<int>(name: "counter3", unit: null, description: null, tags: counter3Tags);
+			_counter3Instrument = _meter.CreateCounter<int>(name: "testing-meter.counter3", unit: null, description: null, tags: counter3Tags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
@@ -89,8 +89,8 @@ namespace Testing
 
 			global::System.Diagnostics.TagList counter1TagList = new();
 
-			counter1TagList.Add("intparam", intParam);
-			counter1TagList.Add("boolparam", boolParam);
+			counter1TagList.Add("int_param", intParam);
+			counter1TagList.Add("bool_param", boolParam);
 
 			_counter1Instrument.Add(1, tagList: counter1TagList);
 		}
@@ -105,8 +105,8 @@ namespace Testing
 
 			global::System.Diagnostics.TagList counter2TagList = new();
 
-			counter2TagList.Add("intparam", intParam);
-			counter2TagList.Add("boolparam", boolParam);
+			counter2TagList.Add("int_param", intParam);
+			counter2TagList.Add("bool_param", boolParam);
 
 			_counter2Instrument.Add(1, tagList: counter2TagList);
 		}
@@ -121,8 +121,8 @@ namespace Testing
 
 			global::System.Diagnostics.TagList counter3TagList = new();
 
-			counter3TagList.Add("intparam", intParam);
-			counter3TagList.Add("boolparam", boolParam);
+			counter3TagList.Add("int_param", intParam);
+			counter3TagList.Add("bool_param", boolParam);
 
 			_counter3Instrument.Add(1, tagList: counter3TagList);
 		}

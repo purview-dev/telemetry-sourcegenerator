@@ -46,9 +46,9 @@ interface IEntityStoreTelemetry
     [AutoCounter]
     Activity? GettingEntityFromStore(int entityId, [Baggage]string serviceUrl);
 
-    // MULTI-TARGET: Adds ActivityEvent + Logs the duration
+    // MULTI-TARGET: Adds ActivityEvent + Logs the duration as Trace.
     [Event]
-    [Log]
+    [Trace]
     void GetDuration(Activity? activity, int durationInMS);
 
     // Single-target examples (when you only need one telemetry type):
@@ -147,6 +147,7 @@ The [.NET Aspire Sample](https://github.com/kjldev/purview-telemetry-sourcegener
 v4 consolidates all attributes into a single namespace. Update your using statements:
 
 **Before (v3):**
+
 ```csharp
 using Purview.Telemetry.Activities;
 using Purview.Telemetry.Logging;
@@ -154,8 +155,77 @@ using Purview.Telemetry.Metrics;
 ```
 
 **After (v4):**
+
 ```csharp
 using Purview.Telemetry;
 ```
 
 All attributes (`[ActivitySource]`, `[Logger]`, `[Meter]`, `[Activity]`, `[Event]`, `[Log]`, `[Counter]`, etc.) are now in the unified `Purview.Telemetry` namespace.
+
+### OpenTelemetry-Aligned Naming (NEW in v4.0.0-alpha.5+)
+
+v4 defaults to **OpenTelemetry semantic conventions** for generated telemetry names, improving observability and cross-platform compatibility. This is a **breaking change** if you rely on specific telemetry names.
+
+#### What Changed
+
+| Telemetry Type | v3 Behavior | v4 Default | Impact |
+|----------------|-------------|------------|--------|
+| **ActivitySource Name** | Assembly name lowercased: `"myapp"` | Assembly name preserved: `"MyApp"` | ActivitySource names change casing |
+| **Tag/Baggage Keys** | Lowercased, smashed: `"entityid"` | snake_case: `"entity_id"` | Tag keys have underscores for word boundaries |
+| **Metric Instrument Names** | Lowercased, smashed: `"recordhistogram"` | Hierarchical dot.separated: `"myapp.products.record.histogram"` | Includes meter name prefix + word boundaries |
+| **Metric Tag Keys** | Lowercased, smashed: `"requestcount"` | snake_case: `"request_count"` | Metric tag keys have underscores |
+
+#### Examples
+
+**Before (v3/Legacy):**
+
+```csharp
+// Generated code:
+new ActivitySource("myapp")           // lowercase
+activity.SetTag("entityid", ...)      // smashed compound
+var meter = meterFactory.Create("MyApp.Products");
+meter.CreateCounter<int>("recordcount")  // smashed compound, no meter prefix
+```
+
+**After (v4 OpenTelemetry mode - DEFAULT):**
+
+```csharp
+// Generated code:
+new ActivitySource("MyApp")           // preserves casing
+activity.SetTag("entity_id", ...)     // snake_case
+var meter = meterFactory.Create("MyApp.Products");
+meter.CreateCounter<int>("myapp.products.record.count")  // hierarchical: meter + instrument
+```
+
+**Note**: In OpenTelemetry mode, instrument names automatically include the meter name prefix (converted to lowercase dot.separated), following OpenTelemetry best practices for hierarchical metric naming.
+
+#### Reverting to v3 Naming (Legacy Mode)
+
+If you need to maintain v3-style naming for backward compatibility, set `NamingConvention = Legacy` on the `[TelemetryGeneration]` attribute:
+
+```csharp
+using Purview.Telemetry;
+
+// Revert ALL telemetry to v3 naming (assembly-level)
+[assembly: TelemetryGeneration(NamingConvention = NamingConvention.Legacy)]
+```
+
+Or set per-interface:
+
+```csharp
+// Legacy naming for this interface only
+[TelemetryGeneration(NamingConvention = NamingConvention.Legacy)]
+interface IMyTelemetry { }
+```
+
+#### Available Naming Conventions
+
+```csharp
+public enum NamingConvention
+{
+    Legacy = 0,          // v3 behaviour: lowercase, smashed compounds
+    OpenTelemetry = 1    // v4 default: OTel conventions (dot.separated, snake_case)
+}
+```
+
+**Recommendation:** Use `NamingConvention.OpenTelemetry` (default) for new projects. Only use `Legacy` if you need exact v3 compatibility.

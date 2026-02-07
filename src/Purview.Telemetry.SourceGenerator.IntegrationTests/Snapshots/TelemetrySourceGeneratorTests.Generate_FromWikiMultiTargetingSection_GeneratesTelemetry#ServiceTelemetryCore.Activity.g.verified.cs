@@ -51,12 +51,12 @@ sealed partial class ServiceTelemetryCore : global::IServiceTelemetry
 
 		if (activityStartAnActivity != null)
 		{
-			activityStartAnActivity.SetTag("tagintparam", tagIntParam);
+			activityStartAnActivity.SetTag("tag_int_param", tagIntParam);
 		}
 
 		if (activityStartAnActivity != null)
 		{
-			activityStartAnActivity.SetBaggage("entityid", entityId);
+			activityStartAnActivity.SetBaggage("entity_id", entityId);
 		}
 
 		return activityStartAnActivity;
@@ -74,7 +74,7 @@ sealed partial class ServiceTelemetryCore : global::IServiceTelemetry
 		if (activity != null)
 		{
 			global::System.Diagnostics.ActivityTagsCollection tagsCollectionAnInterestingEvent = new();
-			tagsCollectionAnInterestingEvent.Add("atagvalue", aTagValue);
+			tagsCollectionAnInterestingEvent.Add("a_tag_value", aTagValue);
 
 			global::System.Diagnostics.ActivityEvent activityEventAnInterestingEvent = new(name: "AnInterestingEvent", timestamp: default, tags: tagsCollectionAnInterestingEvent);
 
@@ -93,8 +93,8 @@ sealed partial class ServiceTelemetryCore : global::IServiceTelemetry
 
 		if (activity != null)
 		{
-			activity.SetTag("anothertagvalue", anotherTagValue);
-			activity.SetTag("inttagvalue", intTagValue);
+			activity.SetTag("another_tag_value", anotherTagValue);
+			activity.SetTag("int_tag_value", intTagValue);
 		}
 	}
 

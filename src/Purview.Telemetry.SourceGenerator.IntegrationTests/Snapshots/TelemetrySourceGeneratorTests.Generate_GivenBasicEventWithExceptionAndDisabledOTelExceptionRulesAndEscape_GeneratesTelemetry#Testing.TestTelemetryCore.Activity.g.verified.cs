@@ -66,15 +66,15 @@ namespace Testing
 			if (activity != null)
 			{
 				global::System.Diagnostics.ActivityTagsCollection tagsCollectionEventMethod = new();
-				tagsCollectionEventMethod.Add("intparam", intParam);
-				tagsCollectionEventMethod.Add("boolparam", boolParam);
-				tagsCollectionEventMethod.Add("anexception", anException.ToString());
+				tagsCollectionEventMethod.Add("int_param", intParam);
+				tagsCollectionEventMethod.Add("bool_param", boolParam);
+				tagsCollectionEventMethod.Add("an_exception", anException.ToString());
 
 				global::System.Diagnostics.ActivityEvent activityEventEventMethod = new(name: "EventMethod", timestamp: default, tags: tagsCollectionEventMethod);
 
 				activity.AddEvent(activityEventEventMethod);
 
-				activity.SetBaggage("stringparam", stringParam);
+				activity.SetBaggage("string_param", stringParam);
 			}
 		}
 

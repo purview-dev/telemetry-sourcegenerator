@@ -54,22 +54,22 @@ namespace Testing
 
 			PopulateIncrementCounterTags(incrementCounterTags);
 
-			_incrementCounterInstrument = _meter.CreateCounter<int>(name: "incrementcounter", unit: null, description: null, tags: incrementCounterTags);
+			_incrementCounterInstrument = _meter.CreateCounter<int>(name: "testing-meter.increment.counter", unit: null, description: null, tags: incrementCounterTags);
 			global::System.Collections.Generic.Dictionary<string, object?> autoIncrementTags = new();
 
 			PopulateAutoIncrementTags(autoIncrementTags);
 
-			_autoIncrementInstrument = _meter.CreateCounter<int>(name: "autoincrement", unit: null, description: null, tags: autoIncrementTags);
+			_autoIncrementInstrument = _meter.CreateCounter<int>(name: "testing-meter.auto.increment", unit: null, description: null, tags: autoIncrementTags);
 			global::System.Collections.Generic.Dictionary<string, object?> updateUpDownCounterTags = new();
 
 			PopulateUpdateUpDownCounterTags(updateUpDownCounterTags);
 
-			_updateUpDownCounterInstrument = _meter.CreateUpDownCounter<int>(name: "updateupdowncounter", unit: null, description: null, tags: updateUpDownCounterTags);
+			_updateUpDownCounterInstrument = _meter.CreateUpDownCounter<int>(name: "testing-meter.update.up.down.counter", unit: null, description: null, tags: updateUpDownCounterTags);
 			global::System.Collections.Generic.Dictionary<string, object?> recordHistogramTags = new();
 
 			PopulateRecordHistogramTags(recordHistogramTags);
 
-			_recordHistogramInstrument = _meter.CreateHistogram<double>(name: "recordhistogram", unit: null, description: null, tags: recordHistogramTags);
+			_recordHistogramInstrument = _meter.CreateHistogram<double>(name: "testing-meter.record.histogram", unit: null, description: null, tags: recordHistogramTags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
@@ -140,7 +140,7 @@ namespace Testing
 				return;
 			}
 
-			_getObservableCounterInstrument = _meter.CreateObservableCounter<long>("getobservablecounter", valueFunc, unit: null, description: null);
+			_getObservableCounterInstrument = _meter.CreateObservableCounter<long>("testing-meter.get.observable.counter", valueFunc, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -151,7 +151,7 @@ namespace Testing
 				return;
 			}
 
-			_getObservableGaugeInstrument = _meter.CreateObservableGauge<double>("getobservablegauge", valueFunc, unit: null, description: null);
+			_getObservableGaugeInstrument = _meter.CreateObservableGauge<double>("testing-meter.get.observable.gauge", valueFunc, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -162,7 +162,7 @@ namespace Testing
 				return;
 			}
 
-			_getObservableUpDownCounterInstrument = _meter.CreateObservableUpDownCounter<int>("getobservableupdowncounter", valueFunc, unit: null, description: null);
+			_getObservableUpDownCounterInstrument = _meter.CreateObservableUpDownCounter<int>("testing-meter.get.observable.up.down.counter", valueFunc, unit: null, description: null);
 		}
 	}
 }

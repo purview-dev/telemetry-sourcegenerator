@@ -57,37 +57,37 @@ namespace Testing
 
 			PopulateCounterTags(counterTags);
 
-			_counterInstrument = _meter.CreateCounter<int>(name: "counter", unit: null, description: null, tags: counterTags);
+			_counterInstrument = _meter.CreateCounter<int>(name: "testing-meter.counter", unit: null, description: null, tags: counterTags);
 			global::System.Collections.Generic.Dictionary<string, object?> counter2Tags = new();
 
 			PopulateCounter2Tags(counter2Tags);
 
-			_counter2Instrument = _meter.CreateCounter<byte>(name: "counter2", unit: null, description: null, tags: counter2Tags);
+			_counter2Instrument = _meter.CreateCounter<byte>(name: "testing-meter.counter2", unit: null, description: null, tags: counter2Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> counter3Tags = new();
 
 			PopulateCounter3Tags(counter3Tags);
 
-			_counter3Instrument = _meter.CreateCounter<long>(name: "counter3", unit: null, description: null, tags: counter3Tags);
+			_counter3Instrument = _meter.CreateCounter<long>(name: "testing-meter.counter3", unit: null, description: null, tags: counter3Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> counter4Tags = new();
 
 			PopulateCounter4Tags(counter4Tags);
 
-			_counter4Instrument = _meter.CreateCounter<short>(name: "counter4", unit: null, description: null, tags: counter4Tags);
+			_counter4Instrument = _meter.CreateCounter<short>(name: "testing-meter.counter4", unit: null, description: null, tags: counter4Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> counter5Tags = new();
 
 			PopulateCounter5Tags(counter5Tags);
 
-			_counter5Instrument = _meter.CreateCounter<double>(name: "counter5", unit: null, description: null, tags: counter5Tags);
+			_counter5Instrument = _meter.CreateCounter<double>(name: "testing-meter.counter5", unit: null, description: null, tags: counter5Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> counter6Tags = new();
 
 			PopulateCounter6Tags(counter6Tags);
 
-			_counter6Instrument = _meter.CreateCounter<float>(name: "counter6", unit: null, description: null, tags: counter6Tags);
+			_counter6Instrument = _meter.CreateCounter<float>(name: "testing-meter.counter6", unit: null, description: null, tags: counter6Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> counter7Tags = new();
 
 			PopulateCounter7Tags(counter7Tags);
 
-			_counter7Instrument = _meter.CreateCounter<decimal>(name: "counter7", unit: null, description: null, tags: counter7Tags);
+			_counter7Instrument = _meter.CreateCounter<decimal>(name: "testing-meter.counter7", unit: null, description: null, tags: counter7Tags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
@@ -125,8 +125,8 @@ namespace Testing
 
 			global::System.Diagnostics.TagList counterTagList = new();
 
-			counterTagList.Add("intparam", intParam);
-			counterTagList.Add("boolparam", boolParam);
+			counterTagList.Add("int_param", intParam);
+			counterTagList.Add("bool_param", boolParam);
 
 			_counterInstrument.Add(counterValue, tagList: counterTagList);
 		}
@@ -141,8 +141,8 @@ namespace Testing
 
 			global::System.Diagnostics.TagList counter2TagList = new();
 
-			counter2TagList.Add("intparam", intParam);
-			counter2TagList.Add("boolparam", boolParam);
+			counter2TagList.Add("int_param", intParam);
+			counter2TagList.Add("bool_param", boolParam);
 
 			_counter2Instrument.Add(counterValue, tagList: counter2TagList);
 		}
@@ -157,8 +157,8 @@ namespace Testing
 
 			global::System.Diagnostics.TagList counter3TagList = new();
 
-			counter3TagList.Add("intparam", intParam);
-			counter3TagList.Add("boolparam", boolParam);
+			counter3TagList.Add("int_param", intParam);
+			counter3TagList.Add("bool_param", boolParam);
 
 			_counter3Instrument.Add(counterValue, tagList: counter3TagList);
 		}
@@ -173,8 +173,8 @@ namespace Testing
 
 			global::System.Diagnostics.TagList counter4TagList = new();
 
-			counter4TagList.Add("intparam", intParam);
-			counter4TagList.Add("boolparam", boolParam);
+			counter4TagList.Add("int_param", intParam);
+			counter4TagList.Add("bool_param", boolParam);
 
 			_counter4Instrument.Add(counterValue, tagList: counter4TagList);
 		}
@@ -189,8 +189,8 @@ namespace Testing
 
 			global::System.Diagnostics.TagList counter5TagList = new();
 
-			counter5TagList.Add("intparam", intParam);
-			counter5TagList.Add("boolparam", boolParam);
+			counter5TagList.Add("int_param", intParam);
+			counter5TagList.Add("bool_param", boolParam);
 
 			_counter5Instrument.Add(counterValue, tagList: counter5TagList);
 		}
@@ -205,8 +205,8 @@ namespace Testing
 
 			global::System.Diagnostics.TagList counter6TagList = new();
 
-			counter6TagList.Add("intparam", intParam);
-			counter6TagList.Add("boolparam", boolParam);
+			counter6TagList.Add("int_param", intParam);
+			counter6TagList.Add("bool_param", boolParam);
 
 			_counter6Instrument.Add(counterValue, tagList: counter6TagList);
 		}
@@ -221,8 +221,8 @@ namespace Testing
 
 			global::System.Diagnostics.TagList counter7TagList = new();
 
-			counter7TagList.Add("intparam", intParam);
-			counter7TagList.Add("boolparam", boolParam);
+			counter7TagList.Add("int_param", intParam);
+			counter7TagList.Add("bool_param", boolParam);
 
 			_counter7Instrument.Add(counterValue, tagList: counter7TagList);
 		}

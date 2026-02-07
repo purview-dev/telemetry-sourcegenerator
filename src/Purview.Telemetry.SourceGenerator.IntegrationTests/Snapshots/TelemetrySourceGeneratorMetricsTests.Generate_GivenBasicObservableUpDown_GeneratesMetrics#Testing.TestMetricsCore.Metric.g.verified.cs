@@ -65,10 +65,10 @@ namespace Testing
 
 			global::System.Diagnostics.TagList observableUpDownTagList = new();
 
-			observableUpDownTagList.Add("intparam", intParam);
-			observableUpDownTagList.Add("boolparam", boolParam);
+			observableUpDownTagList.Add("int_param", intParam);
+			observableUpDownTagList.Add("bool_param", boolParam);
 
-			_observableUpDownInstrument = _meter.CreateObservableUpDownCounter<int>("observableupdown", f, unit: null, description: null
+			_observableUpDownInstrument = _meter.CreateObservableUpDownCounter<int>("testing-observable-meter.observable.up.down", f, unit: null, description: null
 				, tags: observableUpDownTagList
 			);
 		}
@@ -78,15 +78,15 @@ namespace Testing
 		{
 			if (_observableUpDown2Instrument != null)
 			{
-				throw new global::System.Exception("observableupdown2 has already been initialized.");
+				throw new global::System.Exception("testing-observable-meter.observable.up.down2 has already been initialized.");
 			}
 
 			global::System.Diagnostics.TagList observableUpDown2TagList = new();
 
-			observableUpDown2TagList.Add("intparam", intParam);
-			observableUpDown2TagList.Add("boolparam", boolParam);
+			observableUpDown2TagList.Add("int_param", intParam);
+			observableUpDown2TagList.Add("bool_param", boolParam);
 
-			_observableUpDown2Instrument = _meter.CreateObservableUpDownCounter<int>("observableupdown2", f, unit: null, description: null
+			_observableUpDown2Instrument = _meter.CreateObservableUpDownCounter<int>("testing-observable-meter.observable.up.down2", f, unit: null, description: null
 				, tags: observableUpDown2TagList
 			);
 		}
@@ -101,10 +101,10 @@ namespace Testing
 
 			global::System.Diagnostics.TagList observableUpDown3TagList = new();
 
-			observableUpDown3TagList.Add("intparam", intParam);
-			observableUpDown3TagList.Add("boolparam", boolParam);
+			observableUpDown3TagList.Add("int_param", intParam);
+			observableUpDown3TagList.Add("bool_param", boolParam);
 
-			_observableUpDown3Instrument = _meter.CreateObservableUpDownCounter<int>("observableupdown3", f, unit: null, description: null
+			_observableUpDown3Instrument = _meter.CreateObservableUpDownCounter<int>("testing-observable-meter.observable.up.down3", f, unit: null, description: null
 				, tags: observableUpDown3TagList
 			);
 		}

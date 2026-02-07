@@ -53,8 +53,8 @@ namespace Testing
 
 			if (activityFullTelemetryMethod != null)
 			{
-				activityFullTelemetryMethod.SetTag("countervalue", counterValue);
-				activityFullTelemetryMethod.SetTag("operationid", operationId);
+				activityFullTelemetryMethod.SetTag("counter_value", counterValue);
+				activityFullTelemetryMethod.SetTag("operation_id", operationId);
 				activityFullTelemetryMethod.SetTag("message", message);
 			}
 

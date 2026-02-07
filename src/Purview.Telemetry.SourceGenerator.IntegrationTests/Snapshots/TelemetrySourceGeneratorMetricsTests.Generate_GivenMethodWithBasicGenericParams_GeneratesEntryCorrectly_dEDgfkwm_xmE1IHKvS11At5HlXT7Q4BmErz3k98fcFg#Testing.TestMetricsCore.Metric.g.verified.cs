@@ -58,27 +58,27 @@ namespace Testing
 
 			PopulateAutoCounterTags(autoCounterTags);
 
-			_autoCounterInstrument = _meter.CreateCounter<int>(name: "autocounter", unit: null, description: null, tags: autoCounterTags);
+			_autoCounterInstrument = _meter.CreateCounter<int>(name: "testing-meter.auto.counter", unit: null, description: null, tags: autoCounterTags);
 			global::System.Collections.Generic.Dictionary<string, object?> counter_AutoIncrementTags = new();
 
 			PopulateCounter_AutoIncrementTags(counter_AutoIncrementTags);
 
-			_counter_AutoIncrementInstrument = _meter.CreateCounter<int>(name: "counter_autoincrement", unit: null, description: null, tags: counter_AutoIncrementTags);
+			_counter_AutoIncrementInstrument = _meter.CreateCounter<int>(name: "testing-meter.counter_auto.increment", unit: null, description: null, tags: counter_AutoIncrementTags);
 			global::System.Collections.Generic.Dictionary<string, object?> counterTags = new();
 
 			PopulateCounterTags(counterTags);
 
-			_counterInstrument = _meter.CreateCounter<int>(name: "counter", unit: null, description: null, tags: counterTags);
+			_counterInstrument = _meter.CreateCounter<int>(name: "testing-meter.counter", unit: null, description: null, tags: counterTags);
 			global::System.Collections.Generic.Dictionary<string, object?> histogramTags = new();
 
 			PopulateHistogramTags(histogramTags);
 
-			_histogramInstrument = _meter.CreateHistogram<int>(name: "histogram", unit: null, description: null, tags: histogramTags);
+			_histogramInstrument = _meter.CreateHistogram<int>(name: "testing-meter.histogram", unit: null, description: null, tags: histogramTags);
 			global::System.Collections.Generic.Dictionary<string, object?> upDownCounterTags = new();
 
 			PopulateUpDownCounterTags(upDownCounterTags);
 
-			_upDownCounterInstrument = _meter.CreateUpDownCounter<int>(name: "updowncounter", unit: null, description: null, tags: upDownCounterTags);
+			_upDownCounterInstrument = _meter.CreateUpDownCounter<int>(name: "testing-meter.up.down.counter", unit: null, description: null, tags: upDownCounterTags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
@@ -110,7 +110,7 @@ namespace Testing
 
 			global::System.Diagnostics.TagList autoCounterTagList = new();
 
-			autoCounterTagList.Add("genericparameter", genericParameter);
+			autoCounterTagList.Add("generic_parameter", genericParameter);
 
 			_autoCounterInstrument.Add(1, tagList: autoCounterTagList);
 		}
@@ -125,7 +125,7 @@ namespace Testing
 
 			global::System.Diagnostics.TagList counter_AutoIncrementTagList = new();
 
-			counter_AutoIncrementTagList.Add("genericparameter", genericParameter);
+			counter_AutoIncrementTagList.Add("generic_parameter", genericParameter);
 
 			_counter_AutoIncrementInstrument.Add(1, tagList: counter_AutoIncrementTagList);
 		}
@@ -140,7 +140,7 @@ namespace Testing
 
 			global::System.Diagnostics.TagList counterTagList = new();
 
-			counterTagList.Add("genericparameter", genericParameter);
+			counterTagList.Add("generic_parameter", genericParameter);
 
 			_counterInstrument.Add(value, tagList: counterTagList);
 		}
@@ -155,7 +155,7 @@ namespace Testing
 
 			global::System.Diagnostics.TagList histogramTagList = new();
 
-			histogramTagList.Add("genericparameter", genericParameter);
+			histogramTagList.Add("generic_parameter", genericParameter);
 
 			_histogramInstrument.Record(value, tagList: histogramTagList);
 		}
@@ -170,7 +170,7 @@ namespace Testing
 
 			global::System.Diagnostics.TagList upDownCounterTagList = new();
 
-			upDownCounterTagList.Add("genericparameter", genericParameter);
+			upDownCounterTagList.Add("generic_parameter", genericParameter);
 
 			_upDownCounterInstrument.Add(value, tagList: upDownCounterTagList);
 		}
@@ -185,9 +185,9 @@ namespace Testing
 
 			global::System.Diagnostics.TagList observableCounterTagList = new();
 
-			observableCounterTagList.Add("genericparameter", genericParameter);
+			observableCounterTagList.Add("generic_parameter", genericParameter);
 
-			_observableCounterInstrument = _meter.CreateObservableCounter<int>("observablecounter", valueFunc, unit: null, description: null
+			_observableCounterInstrument = _meter.CreateObservableCounter<int>("testing-meter.observable.counter", valueFunc, unit: null, description: null
 				, tags: observableCounterTagList
 			);
 		}
@@ -202,9 +202,9 @@ namespace Testing
 
 			global::System.Diagnostics.TagList observableGaugeTagList = new();
 
-			observableGaugeTagList.Add("genericparameter", genericParameter);
+			observableGaugeTagList.Add("generic_parameter", genericParameter);
 
-			_observableGaugeInstrument = _meter.CreateObservableGauge<int>("observablegauge", valueFunc, unit: null, description: null
+			_observableGaugeInstrument = _meter.CreateObservableGauge<int>("testing-meter.observable.gauge", valueFunc, unit: null, description: null
 				, tags: observableGaugeTagList
 			);
 		}
@@ -219,9 +219,9 @@ namespace Testing
 
 			global::System.Diagnostics.TagList observableUpDownCounterTagList = new();
 
-			observableUpDownCounterTagList.Add("genericparameter", genericParameter);
+			observableUpDownCounterTagList.Add("generic_parameter", genericParameter);
 
-			_observableUpDownCounterInstrument = _meter.CreateObservableUpDownCounter<int>("observableupdowncounter", valueFunc, unit: null, description: null
+			_observableUpDownCounterInstrument = _meter.CreateObservableUpDownCounter<int>("testing-meter.observable.up.down.counter", valueFunc, unit: null, description: null
 				, tags: observableUpDownCounterTagList
 			);
 		}

@@ -155,5 +155,37 @@ partial class TelemetryDiagnostics
 				Severity: DiagnosticSeverity.Error,
 				Category: Constants.Diagnostics.Activity.Usage
 			);
+
+		public static readonly TelemetryDiagnosticDescriptor GenericOrReservedSpanName = new(
+			Id: "TSG3018",
+			Title: "Span name is generic or reserved",
+			Description: "Span name '{0}' is a generic or reserved term. Consider using a more descriptive name that identifies what operation is being performed.",
+			Severity: DiagnosticSeverity.Info,
+			Category: Constants.Diagnostics.Activity.Usage
+		);
+
+		public static readonly TelemetryDiagnosticDescriptor ActivitySourceNameDefaultsToAssembly = new(
+			Id: "TSG3019",
+			Title: "ActivitySource name is defaulting to assembly name",
+			Description: "ActivitySource name is defaulting to the assembly name '{0}'. Consider specifying an explicit name using [ActivitySource(Name = \"...\")] for better control.",
+			Severity: DiagnosticSeverity.Info,
+			Category: Constants.Diagnostics.Activity.Usage
+		);
+
+		public static readonly TelemetryDiagnosticDescriptor ActivitySourceNameIsEmpty = new(
+			Id: "TSG3020",
+			Title: "ActivitySource name is empty or whitespace",
+			Description: "ActivitySource name cannot be empty or whitespace. Provide a valid name.",
+			Severity: DiagnosticSeverity.Warning,
+			Category: Constants.Diagnostics.Activity.Usage
+		);
+
+		public static readonly TelemetryDiagnosticDescriptor ExceptionEventNotStandardName = new(
+			Id: "TSG3021",
+			Title: "Exception event does not use OpenTelemetry standard name",
+			Description: "Event '{0}' records an exception but does not use the OpenTelemetry standard name 'exception'. Consider using [Event(Name = \"exception\")] for better observability.",
+			Severity: DiagnosticSeverity.Info,
+			Category: Constants.Diagnostics.Activity.Usage
+		);
 	}
 }

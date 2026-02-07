@@ -72,16 +72,6 @@ partial class PipelineHelpers
 			token
 		);
 		var fullNamespace = Utilities.GetFullNamespace(interfaceDeclaration, true);
-		var instrumentMethods = BuildInstrumentationMethods(
-			generationType,
-			meterAttribute,
-			meterGenerationAttribute,
-			semanticModel,
-			interfaceSymbol,
-			logger,
-			token,
-			out var methodDiagnostics
-		);
 
 		var meterName = meterAttribute.Name.Value;
 		if (string.IsNullOrWhiteSpace(meterName))
@@ -90,6 +80,19 @@ partial class PipelineHelpers
 			if (meterName[0] == 'I')
 				meterName = meterName.Substring(1);
 		}
+
+		var instrumentMethods = BuildInstrumentationMethods(
+			generationType,
+			meterAttribute,
+			meterGenerationAttribute,
+			telemetryGeneration,
+			meterName,
+			semanticModel,
+			interfaceSymbol,
+			logger,
+			token,
+			out var methodDiagnostics
+		);
 
 		return new(
 			TelemetryGeneration: telemetryGeneration,
@@ -112,6 +115,8 @@ partial class PipelineHelpers
 		GenerationType generationType,
 		MeterAttributeRecord meterAttribute,
 		MeterGenerationAttributeRecord? meterGenerationAttribute,
+		TelemetryGenerationAttributeRecord telemetryGeneration,
+		string meterName,
 		SemanticModel semanticModel,
 		INamedTypeSymbol interfaceSymbol,
 		GenerationLogger? logger,
@@ -120,6 +125,9 @@ partial class PipelineHelpers
 	)
 	{
 		token.ThrowIfCancellationRequested();
+
+		// Get naming convention from TelemetryGenerationAttribute (default to OpenTelemetry = 1)
+		var namingConvention = telemetryGeneration?.NamingConvention.Value ?? 1;
 
 		List<(TelemetryDiagnosticDescriptor, ImmutableArray<Location>)>? methodDiagnosticsList =
 			null;
@@ -176,6 +184,7 @@ partial class PipelineHelpers
 				method,
 				lowercaseTagKeys,
 				validAutoCounter,
+				namingConvention,
 				semanticModel,
 				logger,
 				token
@@ -193,12 +202,34 @@ partial class PipelineHelpers
 			if (string.IsNullOrWhiteSpace(instrumentName))
 				instrumentName = method.Name;
 
+			var isLegacy = namingConvention == 0;
+
 			if (lowercaseInstrumentName)
 			{
-#pragma warning disable CA1308 // Normalize strings to uppercase
-				instrumentName = instrumentName!.ToLowerInvariant();
-				prefix = prefix?.ToLowerInvariant();
-#pragma warning restore CA1308 // Normalize strings to uppercase
+				if (!isLegacy)
+				{
+					// OpenTelemetry: Convert PascalCase to dot.separated
+					instrumentName = Utilities.ConvertToSeparatedLowercase(instrumentName!, '.');
+					if (!string.IsNullOrEmpty(prefix))
+						prefix = Utilities.ConvertToSeparatedLowercase(prefix!, '.');
+
+					// OpenTelemetry: Prepend meter name to instrument name for hierarchical naming
+					// e.g., meter "MyApp.Products" + instrument "pricing_page_requests" 
+					//       -> "myapp.products.pricing_page_requests"
+					if (!string.IsNullOrWhiteSpace(meterName))
+					{
+						var meterPrefix = Utilities.ConvertToSeparatedLowercase(meterName, '.');
+						instrumentName = $"{meterPrefix}.{instrumentName}";
+					}
+				}
+				else
+				{
+					// Legacy: Just lowercase without word-boundary splitting
+#pragma warning disable CA1308 // Intentional lowercase for legacy compatibility
+					instrumentName = instrumentName!.ToLowerInvariant();
+					prefix = prefix?.ToLowerInvariant();
+#pragma warning restore CA1308
+				}
 			}
 
 			var returnsBool = method.ReturnType.SpecialType == SpecialType.System_Boolean;
@@ -406,6 +437,7 @@ partial class PipelineHelpers
 		IMethodSymbol method,
 		bool lowercaseTagKeys,
 		bool isAutoCounter,
+		int namingConvention,
 		SemanticModel semanticModel,
 		GenerationLogger? logger,
 		CancellationToken token
@@ -603,7 +635,8 @@ partial class PipelineHelpers
 			var generatedName = GenerateParameterName(
 				tagAttribute?.Name.Value ?? parameterName,
 				null,
-				lowercaseTagKeys
+				lowercaseTagKeys,
+				namingConvention
 			);
 
 			// Check for ExcludeTargetsAttribute

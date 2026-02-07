@@ -53,7 +53,7 @@ namespace Testing
 
 			if (activityStartOperation != null)
 			{
-				activityStartOperation.SetTag("operationid", operationId);
+				activityStartOperation.SetTag("operation_id", operationId);
 			}
 
 			return activityStartOperation;
@@ -87,7 +87,7 @@ namespace Testing
 			if (activity != null)
 			{
 				global::System.Diagnostics.ActivityTagsCollection tagsCollectionRecordEvent = new();
-				tagsCollectionRecordEvent.Add("eventname", eventName);
+				tagsCollectionRecordEvent.Add("event_name", eventName);
 
 				global::System.Diagnostics.ActivityEvent activityEventRecordEvent = new(name: "RecordEvent", timestamp: default, tags: tagsCollectionRecordEvent);
 

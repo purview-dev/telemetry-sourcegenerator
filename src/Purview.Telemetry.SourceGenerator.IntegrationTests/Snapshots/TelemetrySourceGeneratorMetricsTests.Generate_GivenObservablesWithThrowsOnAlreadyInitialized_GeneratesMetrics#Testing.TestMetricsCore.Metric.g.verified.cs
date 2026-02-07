@@ -60,15 +60,15 @@ namespace Testing
 		{
 			if (_counterInstrument != null)
 			{
-				throw new global::System.Exception("counter has already been initialized.");
+				throw new global::System.Exception("testing-meter.counter has already been initialized.");
 			}
 
 			global::System.Diagnostics.TagList counterTagList = new();
 
-			counterTagList.Add("intparam", intParam);
-			counterTagList.Add("boolparam", boolParam);
+			counterTagList.Add("int_param", intParam);
+			counterTagList.Add("bool_param", boolParam);
 
-			_counterInstrument = _meter.CreateObservableCounter<int>("counter", counterValue, unit: null, description: null
+			_counterInstrument = _meter.CreateObservableCounter<int>("testing-meter.counter", counterValue, unit: null, description: null
 				, tags: counterTagList
 			);
 		}
@@ -78,15 +78,15 @@ namespace Testing
 		{
 			if (_gaugeInstrument != null)
 			{
-				throw new global::System.Exception("gauge has already been initialized.");
+				throw new global::System.Exception("testing-meter.gauge has already been initialized.");
 			}
 
 			global::System.Diagnostics.TagList gaugeTagList = new();
 
-			gaugeTagList.Add("intparam", intParam);
-			gaugeTagList.Add("boolparam", boolParam);
+			gaugeTagList.Add("int_param", intParam);
+			gaugeTagList.Add("bool_param", boolParam);
 
-			_gaugeInstrument = _meter.CreateObservableGauge<int>("gauge", gaugeValue, unit: null, description: null
+			_gaugeInstrument = _meter.CreateObservableGauge<int>("testing-meter.gauge", gaugeValue, unit: null, description: null
 				, tags: gaugeTagList
 			);
 		}
@@ -96,15 +96,15 @@ namespace Testing
 		{
 			if (_upDownInstrument != null)
 			{
-				throw new global::System.Exception("updown has already been initialized.");
+				throw new global::System.Exception("testing-meter.up.down has already been initialized.");
 			}
 
 			global::System.Diagnostics.TagList upDownTagList = new();
 
-			upDownTagList.Add("intparam", intParam);
-			upDownTagList.Add("boolparam", boolParam);
+			upDownTagList.Add("int_param", intParam);
+			upDownTagList.Add("bool_param", boolParam);
 
-			_upDownInstrument = _meter.CreateObservableUpDownCounter<int>("updown", upDownValue, unit: null, description: null
+			_upDownInstrument = _meter.CreateObservableUpDownCounter<int>("testing-meter.up.down", upDownValue, unit: null, description: null
 				, tags: upDownTagList
 			);
 		}

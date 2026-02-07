@@ -53,13 +53,13 @@ namespace Testing
 
 			if (activityProcessRequest != null)
 			{
-				activityProcessRequest.SetTag("requestid", requestId);
-				activityProcessRequest.SetTag("userid", userId);
+				activityProcessRequest.SetTag("request_id", requestId);
+				activityProcessRequest.SetTag("user_id", userId);
 			}
 
 			if (activityProcessRequest != null)
 			{
-				activityProcessRequest.SetBaggage("correlationid", correlationId);
+				activityProcessRequest.SetBaggage("correlation_id", correlationId);
 			}
 
 			return activityProcessRequest;

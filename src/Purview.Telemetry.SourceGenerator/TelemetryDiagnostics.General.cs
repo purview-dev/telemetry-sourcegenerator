@@ -90,5 +90,13 @@ partial class TelemetryDiagnostics
 				Severity: DiagnosticSeverity.Warning,
 				Category: Constants.Diagnostics.Usage
 			);
+
+		public static readonly TelemetryDiagnosticDescriptor CompoundKeyWithoutSeparator = new(
+			Id: "TSG1009",
+			Title: "Tag/baggage key appears to be a compound word without separators",
+			Description: "Tag/baggage key '{0}' appears to be a compound word without separators. Consider providing an explicit name using snake_case or dot.notation for better observability.",
+			Severity: DiagnosticSeverity.Info,
+			Category: Constants.Diagnostics.Usage
+		);
 	}
 }

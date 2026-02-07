@@ -18,7 +18,7 @@ namespace Testing
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class TestActivitiesCore : global::Testing.ITestActivities
 	{
-		readonly static global::System.Diagnostics.ActivitySource _activitySource = new("purview.telemetry.sourcegenerator");
+		readonly static global::System.Diagnostics.ActivitySource _activitySource = new("Purview.Telemetry.SourceGenerator");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -53,7 +53,7 @@ namespace Testing
 
 			if (activityActivity != null)
 			{
-				activityActivity.SetTag("paramname", paramName);
+				activityActivity.SetTag("param_name", paramName);
 			}
 
 			return activityActivity;
@@ -71,7 +71,7 @@ namespace Testing
 			if (activity != null)
 			{
 				global::System.Diagnostics.ActivityTagsCollection tagsCollectionEvent = new();
-				tagsCollectionEvent.Add("paramname", paramName);
+				tagsCollectionEvent.Add("param_name", paramName);
 
 				global::System.Diagnostics.ActivityEvent activityEventEvent = new(name: "Event", timestamp: default, tags: tagsCollectionEvent);
 
@@ -90,7 +90,7 @@ namespace Testing
 
 			if (activity != null)
 			{
-				activity.SetTag("paramname", paramName);
+				activity.SetTag("param_name", paramName);
 			}
 		}
 

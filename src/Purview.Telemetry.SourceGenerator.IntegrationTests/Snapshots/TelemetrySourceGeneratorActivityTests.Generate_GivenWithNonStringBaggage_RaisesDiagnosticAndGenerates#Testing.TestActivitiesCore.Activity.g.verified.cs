@@ -53,9 +53,9 @@ namespace Testing
 
 			if (activityActivity != null)
 			{
-				activityActivity.SetBaggage("stringnonnullparam", stringNonNullParam);
-				activityActivity.SetBaggage("intparam", intParam.ToString());
-				activityActivity.SetBaggage("boolparam", boolParam.ToString());
+				activityActivity.SetBaggage("string_non_null_param", stringNonNullParam);
+				activityActivity.SetBaggage("int_param", intParam.ToString());
+				activityActivity.SetBaggage("bool_param", boolParam.ToString());
 			}
 
 			return activityActivity;
@@ -77,9 +77,9 @@ namespace Testing
 
 				activity.AddEvent(activityEventEvent);
 
-				activity.SetBaggage("stringnullableparam", stringNullableParam);
-				activity.SetBaggage("intparam", intParam?.ToString());
-				activity.SetBaggage("boolparam", boolParam?.ToString());
+				activity.SetBaggage("string_nullable_param", stringNullableParam);
+				activity.SetBaggage("int_param", intParam?.ToString());
+				activity.SetBaggage("bool_param", boolParam?.ToString());
 			}
 		}
 
@@ -94,9 +94,9 @@ namespace Testing
 
 			if (activity != null)
 			{
-				activity.SetBaggage("objectparam", objectParam?.ToString());
-				activity.SetBaggage("stringnonnullparam", stringNonNullParam);
-				activity.SetBaggage("floatparam", floatParam?.ToString());
+				activity.SetBaggage("object_param", objectParam?.ToString());
+				activity.SetBaggage("string_non_null_param", stringNonNullParam);
+				activity.SetBaggage("float_param", floatParam?.ToString());
 			}
 		}
 

@@ -65,9 +65,9 @@ namespace Testing
 
 			if (activity != null)
 			{
-				activity.SetTag("intparam", intParam);
-				activity.SetTag("boolparam", boolParam);
-				activity.SetBaggage("stringparam", stringParam);
+				activity.SetTag("int_param", intParam);
+				activity.SetTag("bool_param", boolParam);
+				activity.SetBaggage("string_param", stringParam);
 			}
 
 			return activity;
@@ -84,9 +84,9 @@ namespace Testing
 
 			if (activity != null)
 			{
-				activity.SetTag("intparam", intParam);
-				activity.SetTag("boolparam", boolParam);
-				activity.SetBaggage("stringparam", stringParam);
+				activity.SetTag("int_param", intParam);
+				activity.SetTag("bool_param", boolParam);
+				activity.SetBaggage("string_param", stringParam);
 			}
 
 			return activity;

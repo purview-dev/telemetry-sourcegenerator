@@ -52,12 +52,12 @@ namespace Testing
 
 			PopulateHistogramTags(histogramTags);
 
-			_histogramInstrument = _meter.CreateHistogram<int>(name: "histogram", unit: null, description: null, tags: histogramTags);
+			_histogramInstrument = _meter.CreateHistogram<int>(name: "testing-meter.histogram", unit: null, description: null, tags: histogramTags);
 			global::System.Collections.Generic.Dictionary<string, object?> histogram1Tags = new();
 
 			PopulateHistogram1Tags(histogram1Tags);
 
-			_histogram1Instrument = _meter.CreateHistogram<int>(name: "histogram1", unit: null, description: null, tags: histogram1Tags);
+			_histogram1Instrument = _meter.CreateHistogram<int>(name: "testing-meter.histogram1", unit: null, description: null, tags: histogram1Tags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
@@ -80,8 +80,8 @@ namespace Testing
 
 			global::System.Diagnostics.TagList histogramTagList = new();
 
-			histogramTagList.Add("intparam", intParam);
-			histogramTagList.Add("boolparam", boolParam);
+			histogramTagList.Add("int_param", intParam);
+			histogramTagList.Add("bool_param", boolParam);
 
 			_histogramInstrument.Record(counterValue, tagList: histogramTagList);
 		}
@@ -96,8 +96,8 @@ namespace Testing
 
 			global::System.Diagnostics.TagList histogram1TagList = new();
 
-			histogram1TagList.Add("intparam", intParam);
-			histogram1TagList.Add("boolparam", boolParam);
+			histogram1TagList.Add("int_param", intParam);
+			histogram1TagList.Add("bool_param", boolParam);
 
 			_histogram1Instrument.Record(counterValue, tagList: histogram1TagList);
 		}

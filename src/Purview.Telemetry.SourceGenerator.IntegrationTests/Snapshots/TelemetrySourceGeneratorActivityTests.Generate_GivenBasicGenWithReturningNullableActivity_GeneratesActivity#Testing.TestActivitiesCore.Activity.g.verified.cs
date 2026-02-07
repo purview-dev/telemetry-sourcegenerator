@@ -53,13 +53,13 @@ namespace Testing
 
 			if (activityActivity != null)
 			{
-				activityActivity.SetTag("intparam", intParam);
-				activityActivity.SetTag("boolparam", boolParam);
+				activityActivity.SetTag("int_param", intParam);
+				activityActivity.SetTag("bool_param", boolParam);
 			}
 
 			if (activityActivity != null)
 			{
-				activityActivity.SetBaggage("stringparam", stringParam);
+				activityActivity.SetBaggage("string_param", stringParam);
 			}
 
 			return activityActivity;
@@ -78,13 +78,13 @@ namespace Testing
 
 			if (activityActivityWithNullableReturnActivity != null)
 			{
-				activityActivityWithNullableReturnActivity.SetTag("intparam", intParam);
-				activityActivityWithNullableReturnActivity.SetTag("boolparam", boolParam);
+				activityActivityWithNullableReturnActivity.SetTag("int_param", intParam);
+				activityActivityWithNullableReturnActivity.SetTag("bool_param", boolParam);
 			}
 
 			if (activityActivityWithNullableReturnActivity != null)
 			{
-				activityActivityWithNullableReturnActivity.SetBaggage("stringparam", stringParam);
+				activityActivityWithNullableReturnActivity.SetBaggage("string_param", stringParam);
 			}
 
 			return activityActivityWithNullableReturnActivity;

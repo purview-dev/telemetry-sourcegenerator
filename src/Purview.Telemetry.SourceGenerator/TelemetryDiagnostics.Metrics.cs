@@ -81,5 +81,37 @@ partial class TelemetryDiagnostics
 			Severity: DiagnosticSeverity.Error,
 			Category: Constants.Diagnostics.Metrics.Usage
 		);
+
+		public static readonly TelemetryDiagnosticDescriptor InstrumentNameMatchesType = new(
+			Id: "TSG4009",
+			Title: "Instrument name matches the instrument type name",
+			Description: "Instrument name '{0}' matches the instrument type name. Use a name that describes what is being measured, not the instrument type.",
+			Severity: DiagnosticSeverity.Warning,
+			Category: Constants.Diagnostics.Metrics.Usage
+		);
+
+		public static readonly TelemetryDiagnosticDescriptor InstrumentNameLikelyCompound = new(
+			Id: "TSG4010",
+			Title: "Instrument name appears to contain compound words without separators",
+			Description: "Instrument name '{0}' appears to contain compound words without separators. Consider using dot.notation or explicit naming for better observability.",
+			Severity: DiagnosticSeverity.Warning,
+			Category: Constants.Diagnostics.Metrics.Usage
+		);
+
+		public static readonly TelemetryDiagnosticDescriptor MeterNameDefaultsToInterface = new(
+			Id: "TSG4011",
+			Title: "Meter name is defaulting to interface name",
+			Description: "Meter name is defaulting to interface name '{0}'. Consider using assembly name or explicit naming with [Meter(Name = \"...\")] for stable meter identity.",
+			Severity: DiagnosticSeverity.Info,
+			Category: Constants.Diagnostics.Metrics.Usage
+		);
+
+		public static readonly TelemetryDiagnosticDescriptor InstrumentNameStartsWithType = new(
+			Id: "TSG4012",
+			Title: "Instrument name starts with instrument type verb",
+			Description: "Instrument name '{0}' starts with the instrument type verb. Consider naming after the measured concept instead (e.g., 'request.duration' instead of 'RecordRequestDuration').",
+			Severity: DiagnosticSeverity.Info,
+			Category: Constants.Diagnostics.Metrics.Usage
+		);
 	}
 }

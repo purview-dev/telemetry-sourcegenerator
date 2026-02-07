@@ -53,8 +53,8 @@ namespace Testing
 
 			if (activityTraceAndCountMethod != null)
 			{
-				activityTraceAndCountMethod.SetTag("countervalue", counterValue);
-				activityTraceAndCountMethod.SetTag("operationid", operationId);
+				activityTraceAndCountMethod.SetTag("counter_value", counterValue);
+				activityTraceAndCountMethod.SetTag("operation_id", operationId);
 			}
 
 			return activityTraceAndCountMethod;
