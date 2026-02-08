@@ -63,14 +63,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList observableCounterTagList = new();
-
-			observableCounterTagList.Add("int_param", intParam);
-			observableCounterTagList.Add("bool_param", boolParam);
-
-			_observableCounterInstrument = _meter.CreateObservableCounter<int>("testing-observable-meter.observable_counter", f, unit: null, description: null
-				, tags: observableCounterTagList
-			);
+			_observableCounterInstrument = _meter.CreateObservableCounter<int>("testing-observable-meter.observable_counter", f, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -81,14 +74,7 @@ namespace Testing
 				throw new global::System.Exception("testing-observable-meter.observable_counter2 has already been initialized.");
 			}
 
-			global::System.Diagnostics.TagList observableCounter2TagList = new();
-
-			observableCounter2TagList.Add("int_param", intParam);
-			observableCounter2TagList.Add("bool_param", boolParam);
-
-			_observableCounter2Instrument = _meter.CreateObservableCounter<int>("testing-observable-meter.observable_counter2", f, unit: null, description: null
-				, tags: observableCounter2TagList
-			);
+			_observableCounter2Instrument = _meter.CreateObservableCounter<int>("testing-observable-meter.observable_counter2", f, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -99,14 +85,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList observableCounter3TagList = new();
-
-			observableCounter3TagList.Add("int_param", intParam);
-			observableCounter3TagList.Add("bool_param", boolParam);
-
-			_observableCounter3Instrument = _meter.CreateObservableCounter<int>("testing-observable-meter.observable_counter3", f, unit: null, description: null
-				, tags: observableCounter3TagList
-			);
+			_observableCounter3Instrument = _meter.CreateObservableCounter<int>("testing-observable-meter.observable_counter3", f, unit: null, description: null);
 		}
 	}
 }

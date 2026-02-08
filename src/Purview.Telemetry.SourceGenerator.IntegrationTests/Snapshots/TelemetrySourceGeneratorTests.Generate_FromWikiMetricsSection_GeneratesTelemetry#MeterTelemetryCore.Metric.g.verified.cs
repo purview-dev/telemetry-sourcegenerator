@@ -106,11 +106,7 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 			return;
 		}
 
-		global::System.Diagnostics.TagList autoCounterMeterTagList = new();
-
-		autoCounterMeterTagList.Add("some_value", someValue);
-
-		_autoCounterMeterInstrument.Add(1, tagList: autoCounterMeterTagList);
+		_autoCounterMeterInstrument.Add(1, new global::System.Collections.Generic.KeyValuePair<string, object?>("some_value", someValue));
 	}
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -121,11 +117,7 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 			return;
 		}
 
-		global::System.Diagnostics.TagList autoIncrementMeterTagList = new();
-
-		autoIncrementMeterTagList.Add("some_value", someValue);
-
-		_autoIncrementMeterInstrument.Add(1, tagList: autoIncrementMeterTagList);
+		_autoIncrementMeterInstrument.Add(1, new global::System.Collections.Generic.KeyValuePair<string, object?>("some_value", someValue));
 	}
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -136,11 +128,7 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 			return;
 		}
 
-		global::System.Diagnostics.TagList counterMeterTagList = new();
-
-		counterMeterTagList.Add("some_value", someValue);
-
-		_counterMeterInstrument.Add(measurement, tagList: counterMeterTagList);
+		_counterMeterInstrument.Add(measurement, new global::System.Collections.Generic.KeyValuePair<string, object?>("some_value", someValue));
 	}
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -151,12 +139,7 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 			return;
 		}
 
-		global::System.Diagnostics.TagList histogramMeterTagList = new();
-
-		histogramMeterTagList.Add("some_value", someValue);
-		histogramMeterTagList.Add("another_value", anotherValue);
-
-		_histogramMeterInstrument.Record(measurement, tagList: histogramMeterTagList);
+		_histogramMeterInstrument.Record(measurement, new global::System.Collections.Generic.KeyValuePair<string, object?>("some_value", someValue), new global::System.Collections.Generic.KeyValuePair<string, object?>("another_value", anotherValue));
 	}
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -167,13 +150,7 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 			return;
 		}
 
-		global::System.Diagnostics.TagList observableCounterMeterTagList = new();
-
-		observableCounterMeterTagList.Add("some_value", someValue);
-
-		_observableCounterMeterInstrument = _meter.CreateObservableCounter<float>("meter_telemetry.observable_counter_meter", measurement, unit: null, description: null
-			, tags: observableCounterMeterTagList
-		);
+		_observableCounterMeterInstrument = _meter.CreateObservableCounter<float>("meter_telemetry.observable_counter_meter", measurement, unit: null, description: null);
 	}
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -184,13 +161,7 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 			return;
 		}
 
-		global::System.Diagnostics.TagList observableGaugeMeterTagList = new();
-
-		observableGaugeMeterTagList.Add("some_value", someValue);
-
-		_observableGaugeMeterInstrument = _meter.CreateObservableGauge<float>("meter_telemetry.observable_gauge_meter", measurement, unit: null, description: null
-			, tags: observableGaugeMeterTagList
-		);
+		_observableGaugeMeterInstrument = _meter.CreateObservableGauge<float>("meter_telemetry.observable_gauge_meter", measurement, unit: null, description: null);
 	}
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -201,13 +172,7 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 			return;
 		}
 
-		global::System.Diagnostics.TagList observableUpDownCounterTagList = new();
-
-		observableUpDownCounterTagList.Add("some_value", someValue);
-
-		_observableUpDownCounterInstrument = _meter.CreateObservableUpDownCounter<byte>("meter_telemetry.observable_up_down_counter", measurement, unit: null, description: null
-			, tags: observableUpDownCounterTagList
-		);
+		_observableUpDownCounterInstrument = _meter.CreateObservableUpDownCounter<byte>("meter_telemetry.observable_up_down_counter", measurement, unit: null, description: null);
 	}
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -218,10 +183,6 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 			return;
 		}
 
-		global::System.Diagnostics.TagList upDownCounterMeterTagList = new();
-
-		upDownCounterMeterTagList.Add("some_value", someValue);
-
-		_upDownCounterMeterInstrument.Add(measurement, tagList: upDownCounterMeterTagList);
+		_upDownCounterMeterInstrument.Add(measurement, new global::System.Collections.Generic.KeyValuePair<string, object?>("some_value", someValue));
 	}
 }

@@ -60,11 +60,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList logAndCountMethodTagList = new();
-
-			logAndCountMethodTagList.Add("message", message);
-
-			_logAndCountMethodInstrument.Add(value, tagList: logAndCountMethodTagList);
+			_logAndCountMethodInstrument.Add(value, new global::System.Collections.Generic.KeyValuePair<string, object?>("message", message));
 		}
 	}
 }

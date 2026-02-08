@@ -69,12 +69,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList autoCounterTagList = new();
-
-			autoCounterTagList.Add("int_param", intParam);
-			autoCounterTagList.Add("bool_param", boolParam);
-
-			_autoCounterInstrument.Add(1, tagList: autoCounterTagList);
+			_autoCounterInstrument.Add(1, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 	}
 }

@@ -66,11 +66,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList traceAndCountMethodTagList = new();
-
-			traceAndCountMethodTagList.Add("operation_id", operationId);
-
-			_traceAndCountMethodInstrument.Add(counterValue, tagList: traceAndCountMethodTagList);
+			_traceAndCountMethodInstrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("operation_id", operationId));
 		}
 	}
 }

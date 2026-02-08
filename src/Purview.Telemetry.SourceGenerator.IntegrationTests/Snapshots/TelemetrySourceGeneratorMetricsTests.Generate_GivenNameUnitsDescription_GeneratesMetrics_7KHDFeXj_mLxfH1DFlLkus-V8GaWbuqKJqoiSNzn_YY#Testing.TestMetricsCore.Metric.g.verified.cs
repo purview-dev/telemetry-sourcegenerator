@@ -69,12 +69,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList metricTagList = new();
-
-			metricTagList.Add("int_param", intParam);
-			metricTagList.Add("bool_param", boolParam);
-
-			_metricInstrument.Add(1, tagList: metricTagList);
+			_metricInstrument.Add(1, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 	}
 }

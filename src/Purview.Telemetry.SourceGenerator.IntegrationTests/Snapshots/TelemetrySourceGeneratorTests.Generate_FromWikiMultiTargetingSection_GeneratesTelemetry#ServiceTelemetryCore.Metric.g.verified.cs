@@ -58,10 +58,6 @@ sealed partial class ServiceTelemetryCore : global::IServiceTelemetry
 			return;
 		}
 
-		global::System.Diagnostics.TagList anAutoIncrementTagList = new();
-
-		anAutoIncrementTagList.Add("value", value);
-
-		_anAutoIncrementInstrument.Add(1, tagList: anAutoIncrementTagList);
+		_anAutoIncrementInstrument.Add(1, new global::System.Collections.Generic.KeyValuePair<string, object?>("value", value));
 	}
 }

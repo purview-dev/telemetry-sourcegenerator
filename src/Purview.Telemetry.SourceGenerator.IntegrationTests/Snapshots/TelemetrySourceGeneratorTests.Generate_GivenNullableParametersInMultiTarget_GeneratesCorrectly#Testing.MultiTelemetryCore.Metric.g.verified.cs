@@ -60,11 +60,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList incrementCounterTagList = new();
-
-			incrementCounterTagList.Add("operation_id", operationId);
-
-			_incrementCounterInstrument.Add(value, tagList: incrementCounterTagList);
+			_incrementCounterInstrument.Add(value, new global::System.Collections.Generic.KeyValuePair<string, object?>("operation_id", operationId));
 		}
 	}
 }

@@ -61,14 +61,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList metricTagList = new();
-
-			metricTagList.Add("int_param", intParam);
-			metricTagList.Add("bool_param", boolParam);
-
-			_metricInstrument = _meter.CreateObservableCounter<byte>("testing-meter.an-observablecounter-name-property", f, unit: "pie-property", description: "pie sales per-capita-property."
-				, tags: metricTagList
-			);
+			_metricInstrument = _meter.CreateObservableCounter<byte>("testing-meter.an-observablecounter-name-property", f, unit: "pie-property", description: "pie sales per-capita-property.");
 		}
 	}
 }

@@ -123,12 +123,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList counterTagList = new();
-
-			counterTagList.Add("int_param", intParam);
-			counterTagList.Add("bool_param", boolParam);
-
-			_counterInstrument.Add(counterValue, tagList: counterTagList);
+			_counterInstrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -139,12 +134,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList counter2TagList = new();
-
-			counter2TagList.Add("int_param", intParam);
-			counter2TagList.Add("bool_param", boolParam);
-
-			_counter2Instrument.Add(counterValue, tagList: counter2TagList);
+			_counter2Instrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -155,12 +145,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList counter3TagList = new();
-
-			counter3TagList.Add("int_param", intParam);
-			counter3TagList.Add("bool_param", boolParam);
-
-			_counter3Instrument.Add(counterValue, tagList: counter3TagList);
+			_counter3Instrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -171,12 +156,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList counter4TagList = new();
-
-			counter4TagList.Add("int_param", intParam);
-			counter4TagList.Add("bool_param", boolParam);
-
-			_counter4Instrument.Add(counterValue, tagList: counter4TagList);
+			_counter4Instrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -187,12 +167,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList counter5TagList = new();
-
-			counter5TagList.Add("int_param", intParam);
-			counter5TagList.Add("bool_param", boolParam);
-
-			_counter5Instrument.Add(counterValue, tagList: counter5TagList);
+			_counter5Instrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -203,12 +178,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList counter6TagList = new();
-
-			counter6TagList.Add("int_param", intParam);
-			counter6TagList.Add("bool_param", boolParam);
-
-			_counter6Instrument.Add(counterValue, tagList: counter6TagList);
+			_counter6Instrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -219,12 +189,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList counter7TagList = new();
-
-			counter7TagList.Add("int_param", intParam);
-			counter7TagList.Add("bool_param", boolParam);
-
-			_counter7Instrument.Add(counterValue, tagList: counter7TagList);
+			_counter7Instrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 	}
 }

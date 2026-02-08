@@ -66,11 +66,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList countOperationTagList = new();
-
-			countOperationTagList.Add("operation_type", operationType);
-
-			_countOperationInstrument.Add(counterValue, tagList: countOperationTagList);
+			_countOperationInstrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("operation_type", operationType));
 		}
 	}
 }

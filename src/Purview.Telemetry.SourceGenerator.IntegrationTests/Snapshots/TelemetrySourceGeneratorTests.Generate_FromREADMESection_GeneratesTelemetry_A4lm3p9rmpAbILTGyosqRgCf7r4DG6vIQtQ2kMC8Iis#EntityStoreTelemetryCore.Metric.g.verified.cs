@@ -58,10 +58,6 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 			return;
 		}
 
-		global::System.Diagnostics.TagList retrievingEntityTagList = new();
-
-		retrievingEntityTagList.Add("entity_id", entityId);
-
-		_retrievingEntityInstrument.Add(1, tagList: retrievingEntityTagList);
+		_retrievingEntityInstrument.Add(1, new global::System.Collections.Generic.KeyValuePair<string, object?>("entity_id", entityId));
 	}
 }

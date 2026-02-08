@@ -60,12 +60,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList fullTelemetryMethodTagList = new();
-
-			fullTelemetryMethodTagList.Add("operation_id", operationId);
-			fullTelemetryMethodTagList.Add("message", message);
-
-			_fullTelemetryMethodInstrument.Add(counterValue, tagList: fullTelemetryMethodTagList);
+			_fullTelemetryMethodInstrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("operation_id", operationId), new global::System.Collections.Generic.KeyValuePair<string, object?>("message", message));
 		}
 	}
 }

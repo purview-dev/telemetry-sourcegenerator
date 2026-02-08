@@ -108,11 +108,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList autoCounterTagList = new();
-
-			autoCounterTagList.Add("generic_parameter", genericParameter);
-
-			_autoCounterInstrument.Add(1, tagList: autoCounterTagList);
+			_autoCounterInstrument.Add(1, new global::System.Collections.Generic.KeyValuePair<string, object?>("generic_parameter", genericParameter));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -123,11 +119,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList counter_AutoIncrementTagList = new();
-
-			counter_AutoIncrementTagList.Add("generic_parameter", genericParameter);
-
-			_counter_AutoIncrementInstrument.Add(1, tagList: counter_AutoIncrementTagList);
+			_counter_AutoIncrementInstrument.Add(1, new global::System.Collections.Generic.KeyValuePair<string, object?>("generic_parameter", genericParameter));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -138,11 +130,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList counterTagList = new();
-
-			counterTagList.Add("generic_parameter", genericParameter);
-
-			_counterInstrument.Add(value, tagList: counterTagList);
+			_counterInstrument.Add(value, new global::System.Collections.Generic.KeyValuePair<string, object?>("generic_parameter", genericParameter));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -153,11 +141,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList histogramTagList = new();
-
-			histogramTagList.Add("generic_parameter", genericParameter);
-
-			_histogramInstrument.Record(value, tagList: histogramTagList);
+			_histogramInstrument.Record(value, new global::System.Collections.Generic.KeyValuePair<string, object?>("generic_parameter", genericParameter));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -168,11 +152,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList upDownCounterTagList = new();
-
-			upDownCounterTagList.Add("generic_parameter", genericParameter);
-
-			_upDownCounterInstrument.Add(value, tagList: upDownCounterTagList);
+			_upDownCounterInstrument.Add(value, new global::System.Collections.Generic.KeyValuePair<string, object?>("generic_parameter", genericParameter));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -183,13 +163,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList observableCounterTagList = new();
-
-			observableCounterTagList.Add("generic_parameter", genericParameter);
-
-			_observableCounterInstrument = _meter.CreateObservableCounter<int>("testing-meter.observable_counter", valueFunc, unit: null, description: null
-				, tags: observableCounterTagList
-			);
+			_observableCounterInstrument = _meter.CreateObservableCounter<int>("testing-meter.observable_counter", valueFunc, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -200,13 +174,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList observableGaugeTagList = new();
-
-			observableGaugeTagList.Add("generic_parameter", genericParameter);
-
-			_observableGaugeInstrument = _meter.CreateObservableGauge<int>("testing-meter.observable_gauge", valueFunc, unit: null, description: null
-				, tags: observableGaugeTagList
-			);
+			_observableGaugeInstrument = _meter.CreateObservableGauge<int>("testing-meter.observable_gauge", valueFunc, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -217,13 +185,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList observableUpDownCounterTagList = new();
-
-			observableUpDownCounterTagList.Add("generic_parameter", genericParameter);
-
-			_observableUpDownCounterInstrument = _meter.CreateObservableUpDownCounter<int>("testing-meter.observable_up_down_counter", valueFunc, unit: null, description: null
-				, tags: observableUpDownCounterTagList
-			);
+			_observableUpDownCounterInstrument = _meter.CreateObservableUpDownCounter<int>("testing-meter.observable_up_down_counter", valueFunc, unit: null, description: null);
 		}
 	}
 }

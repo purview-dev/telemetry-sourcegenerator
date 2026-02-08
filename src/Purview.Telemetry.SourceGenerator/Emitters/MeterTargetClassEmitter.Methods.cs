@@ -309,20 +309,46 @@ partial class MeterTargetClassEmitter
 				? "Record"
 				: "Add";
 
+		var tagCount = methodTarget.Tags.Length;
+		var hasConditionalTags = methodTarget.Tags.Any(t => t.SkipOnNullOrEmpty);
+		var useDirectTagParams = tagCount <= 3 && tagCount > 0 && !hasConditionalTags;
+
 		builder
 			.Append(indent, methodTarget.FieldName, withNewLine: false)
 			.Append('.')
 			.Append(instrumentMeasureMethodName)
 			.Append('(')
-			.Append(methodTarget.MeasurementParameter?.ParameterName ?? "1")
-			.Append(", tagList: ");
+			.Append(methodTarget.MeasurementParameter?.ParameterName ?? "1");
 
-		if (tagVariableName == null)
-			builder.Append("default");
+		if (useDirectTagParams)
+		{
+			// For 1-3 tags without conditionals, pass as direct KeyValuePair parameters
+			foreach (var tag in methodTarget.Tags)
+			{
+				builder
+					.Append(
+						", new global::System.Collections.Generic.KeyValuePair<string, object?>("
+					)
+					.Append(tag.GeneratedName.Wrap())
+					.Append(", ")
+					.Append(tag.ParameterName)
+					.Append(')');
+			}
+
+			builder.AppendLine(");");
+		}
 		else
-			builder.Append(tagVariableName);
+		{
+			// For 4+ tags or conditional tags, use TagList
+			builder.Append(", tagList: ");
 
-		builder.AppendLine(");");
+			if (tagVariableName == null)
+				builder.Append("default");
+			else
+				builder.Append(tagVariableName);
+
+			builder.AppendLine(");");
+		}
 
 		if (methodTarget.ReturnsBool)
 		{
@@ -334,6 +360,19 @@ partial class MeterTargetClassEmitter
 	{
 		if (methodTarget.Tags.Length == 0)
 			return null;
+
+		var tagCount = methodTarget.Tags.Length;
+		var hasConditionalTags = methodTarget.Tags.Any(t => t.SkipOnNullOrEmpty);
+
+		// OpenTelemetry best practice:
+		// - 0-3 tags without conditionals: pass directly as KeyValuePair parameters (no TagList needed)
+		// - 4+ tags OR any conditional tags: use TagList to avoid heap allocation or handle conditionals
+		// From: https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/docs/metrics#instruments
+		if (tagCount < Constants.Metrics.MinimumParamsForTagList && !hasConditionalTags)
+		{
+			// No TagList needed - tags will be passed directly as parameters
+			return null;
+		}
 
 		indent++;
 

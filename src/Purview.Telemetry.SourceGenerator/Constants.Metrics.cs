@@ -9,6 +9,8 @@ partial class Constants
 {
 	public static class Metrics
 	{
+		public const int MinimumParamsForTagList = 4;
+
 		public const string MeterInitializationMethod = "InitializeMeters";
 		public const string MeterFactoryParameterName = "meterFactory";
 

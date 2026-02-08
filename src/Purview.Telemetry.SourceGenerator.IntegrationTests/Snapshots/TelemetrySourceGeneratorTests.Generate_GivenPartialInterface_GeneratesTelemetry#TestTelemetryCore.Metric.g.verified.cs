@@ -58,12 +58,7 @@ sealed partial class TestTelemetryCore : global::ITestTelemetry
 			return false;
 		}
 
-		global::System.Diagnostics.TagList counterTagList = new();
-
-		counterTagList.Add("int_param", intParam);
-		counterTagList.Add("bool_param", boolParam);
-
-		_counterInstrument.Add(counterValue, tagList: counterTagList);
+		_counterInstrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 
 		return true;
 	}

@@ -61,14 +61,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList metricTagList = new();
-
-			metricTagList.Add("int_param", intParam);
-			metricTagList.Add("bool_param", boolParam);
-
-			_metricInstrument = _meter.CreateObservableUpDownCounter<int>("testing-meter.an-observableupdowncounter-name-param", f, unit: "beer-param", description: "beer sales per-capita-param."
-				, tags: metricTagList
-			);
+			_metricInstrument = _meter.CreateObservableUpDownCounter<int>("testing-meter.an-observableupdowncounter-name-param", f, unit: "beer-param", description: "beer sales per-capita-param.");
 		}
 	}
 }
