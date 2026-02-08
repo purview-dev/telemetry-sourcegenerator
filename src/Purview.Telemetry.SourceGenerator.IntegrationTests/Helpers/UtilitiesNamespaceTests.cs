@@ -1,8 +1,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Purview.Telemetry.SourceGenerator.Helpers;
 
-namespace Purview.Telemetry.SourceGenerator.Tests.Helpers;
+namespace Purview.Telemetry.SourceGenerator.Helpers;
 
 public class UtilitiesNamespaceTests
 {
@@ -10,14 +9,15 @@ public class UtilitiesNamespaceTests
 	{
 		var tree = CSharpSyntaxTree.ParseText(source);
 		var root = tree.GetRoot();
-		return root
-			.DescendantNodes()
+		return root.DescendantNodes()
 			.OfType<TypeDeclarationSyntax>()
 			.First(t => t.Identifier.Text == typeName);
 	}
 
 	[Test]
-	public async Task GetNamespace_GivenSimpleNamespace_ReturnsNamespace(CancellationToken cancellationToken)
+	public async Task GetNamespace_GivenSimpleNamespace_ReturnsNamespace(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -36,7 +36,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetNamespace_GivenNestedNamespace_ReturnsFullNamespace(CancellationToken cancellationToken)
+	public async Task GetNamespace_GivenNestedNamespace_ReturnsFullNamespace(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -55,7 +57,9 @@ namespace Test.Services {
 	}
 
 	[Test]
-	public async Task GetNamespace_GivenFileScopedNamespace_ReturnsNamespace(CancellationToken cancellationToken)
+	public async Task GetNamespace_GivenFileScopedNamespace_ReturnsNamespace(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -74,7 +78,9 @@ public class CustomerService {
 	}
 
 	[Test]
-	public async Task GetNamespace_GivenGlobalNamespace_ReturnsNull(CancellationToken cancellationToken)
+	public async Task GetNamespace_GivenGlobalNamespace_ReturnsNull(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -91,7 +97,9 @@ public class Program {
 	}
 
 	[Test]
-	public async Task GetNamespace_GivenNestedClass_ReturnsNamespace(CancellationToken cancellationToken)
+	public async Task GetNamespace_GivenNestedClass_ReturnsNamespace(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -112,7 +120,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetParentClasses_GivenTopLevelClass_ReturnsEmpty(CancellationToken cancellationToken)
+	public async Task GetParentClasses_GivenTopLevelClass_ReturnsEmpty(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -131,7 +141,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetParentClasses_GivenNestedClass_ReturnsParent(CancellationToken cancellationToken)
+	public async Task GetParentClasses_GivenNestedClass_ReturnsParent(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -153,7 +165,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetParentClasses_GivenDeeplyNestedClass_ReturnsAllParents(CancellationToken cancellationToken)
+	public async Task GetParentClasses_GivenDeeplyNestedClass_ReturnsAllParents(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -178,7 +192,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetParentClassesAsNamespace_GivenTopLevelClass_ReturnsNull(CancellationToken cancellationToken)
+	public async Task GetParentClassesAsNamespace_GivenTopLevelClass_ReturnsNull(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -197,7 +213,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetParentClassesAsNamespace_GivenNestedClass_ReturnsParentAsNamespace(CancellationToken cancellationToken)
+	public async Task GetParentClassesAsNamespace_GivenNestedClass_ReturnsParentAsNamespace(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -218,7 +236,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetParentClassesAsNamespace_GivenDeeplyNestedClass_ReturnsParentsAsNamespace(CancellationToken cancellationToken)
+	public async Task GetParentClassesAsNamespace_GivenDeeplyNestedClass_ReturnsParentsAsNamespace(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -241,7 +261,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetFullNamespace_GivenSimpleClass_ReturnsNull(CancellationToken cancellationToken)
+	public async Task GetFullNamespace_GivenSimpleClass_ReturnsNull(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -260,7 +282,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetFullNamespace_GivenNestedClass_ReturnsFullNamespace(CancellationToken cancellationToken)
+	public async Task GetFullNamespace_GivenNestedClass_ReturnsFullNamespace(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -281,7 +305,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetFullNamespace_GivenNestedClassWithTrailingSeparator_ReturnsFullNamespaceWithDot(CancellationToken cancellationToken)
+	public async Task GetFullNamespace_GivenNestedClassWithTrailingSeparator_ReturnsFullNamespaceWithDot(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -302,7 +328,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetFullNamespace_GivenGlobalClass_ReturnsNull(CancellationToken cancellationToken)
+	public async Task GetFullNamespace_GivenGlobalClass_ReturnsNull(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -319,7 +347,9 @@ public class Program {
 	}
 
 	[Test]
-	public async Task GetFullNamespace_GivenDeeplyNestedClass_ReturnsCompleteNamespace(CancellationToken cancellationToken)
+	public async Task GetFullNamespace_GivenDeeplyNestedClass_ReturnsCompleteNamespace(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -340,5 +370,4 @@ namespace Test.Services {
 		// Assert
 		await Assert.That(result).IsEqualTo("Test.Services.Level1.Level2");
 	}
-
 }

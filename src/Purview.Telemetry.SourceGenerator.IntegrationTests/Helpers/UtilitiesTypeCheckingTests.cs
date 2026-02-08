@@ -1,8 +1,6 @@
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Purview.Telemetry.SourceGenerator.Helpers;
 
-namespace Purview.Telemetry.SourceGenerator.Tests.Helpers;
+namespace Purview.Telemetry.SourceGenerator.Helpers;
 
 public class UtilitiesTypeCheckingTests
 {
@@ -23,13 +21,14 @@ public class UtilitiesTypeCheckingTests
 		);
 	}
 
-	static ITypeSymbol GetPropertyType(Compilation compilation, string typeName, string propertyName)
+	static ITypeSymbol GetPropertyType(
+		Compilation compilation,
+		string typeName,
+		string propertyName
+	)
 	{
 		var typeSymbol = compilation.GetTypeByMetadataName(typeName)!;
-		var propertySymbol = typeSymbol
-			.GetMembers(propertyName)
-			.OfType<IPropertySymbol>()
-			.First();
+		var propertySymbol = typeSymbol.GetMembers(propertyName).OfType<IPropertySymbol>().First();
 		return propertySymbol.Type;
 	}
 
@@ -230,7 +229,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task IsExceptionType_GivenException_ReturnsTrue(CancellationToken cancellationToken)
+	public async Task IsExceptionType_GivenException_ReturnsTrue(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -252,7 +253,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task IsExceptionType_GivenCustomException_ReturnsTrue(CancellationToken cancellationToken)
+	public async Task IsExceptionType_GivenCustomException_ReturnsTrue(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -276,7 +279,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task IsExceptionType_GivenDerivedException_ReturnsTrue(CancellationToken cancellationToken)
+	public async Task IsExceptionType_GivenDerivedException_ReturnsTrue(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -321,7 +326,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task IsExceptionType_GivenCustomClass_ReturnsFalse(CancellationToken cancellationToken)
+	public async Task IsExceptionType_GivenCustomClass_ReturnsFalse(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -343,5 +350,4 @@ namespace Test {
 		// Assert
 		await Assert.That(result).IsFalse();
 	}
-
 }

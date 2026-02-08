@@ -1,14 +1,11 @@
 using System.Text;
-using Purview.Telemetry.SourceGenerator.Helpers;
-using Purview.Telemetry.SourceGenerator.Templates;
 
-namespace Purview.Telemetry.SourceGenerator.Tests.Helpers;
+namespace Purview.Telemetry.SourceGenerator.Helpers;
 
 public class StringBuilderExtensionsTests
 {
-
 	[Test]
-	public async Task WithIndent_GivenZero_ReturnsNoIndent(CancellationToken cancellationToken)
+	public async Task WithIndent_GivenZero_ReturnsNoIndent()
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -22,7 +19,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task WithIndent_GivenOne_ReturnsOneTab(CancellationToken cancellationToken)
+	public async Task WithIndent_GivenOne_ReturnsOneTab()
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -36,7 +33,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task WithIndent_GivenFive_ReturnsFiveTabs(CancellationToken cancellationToken)
+	public async Task WithIndent_GivenFive_ReturnsFiveTabs()
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -50,7 +47,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task WithIndent_GivenEight_ReturnsEightTabs(CancellationToken cancellationToken)
+	public async Task WithIndent_GivenEight_ReturnsEightTabs()
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -64,7 +61,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task WithIndent_GivenTen_ReturnsTenTabs(CancellationToken cancellationToken)
+	public async Task WithIndent_GivenTen_ReturnsTenTabs()
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -78,7 +75,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task WithIndent_GivenLargeNumber_ReturnsCorrectTabs(CancellationToken cancellationToken)
+	public async Task WithIndent_GivenLargeNumber_ReturnsCorrectTabs()
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -93,7 +90,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task Append_GivenTabsAndString_AppendsWithIndent(CancellationToken cancellationToken)
+	public async Task Append_GivenTabsAndString_AppendsWithIndent()
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -108,7 +105,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task Append_GivenTabsAndStringWithoutNewLine_AppendsWithoutNewLine(CancellationToken cancellationToken)
+	public async Task Append_GivenTabsAndStringWithoutNewLine_AppendsWithoutNewLine()
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -122,7 +119,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task Append_GivenTabsAndChar_AppendsWithIndent(CancellationToken cancellationToken)
+	public async Task Append_GivenTabsAndChar_AppendsWithIndent()
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -137,7 +134,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task Append_GivenTabsAndCharWithoutNewLine_AppendsWithoutNewLine(CancellationToken cancellationToken)
+	public async Task Append_GivenTabsAndCharWithoutNewLine_AppendsWithoutNewLine()
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -151,7 +148,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task AppendLine_GivenChar_AppendsCharWithNewLine(CancellationToken cancellationToken)
+	public async Task AppendLine_GivenChar_AppendsCharWithNewLine()
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -166,7 +163,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task AggressiveInlining_GivenIndent_AppendsAttribute(CancellationToken cancellationToken)
+	public async Task AggressiveInlining_GivenIndent_AppendsAttribute()
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -181,7 +178,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task CodeGen_GivenIndent_AppendsAttribute(CancellationToken cancellationToken)
+	public async Task CodeGen_GivenIndent_AppendsAttribute()
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -195,7 +192,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task IfDefines_GivenCondition_AddsIfDefine(CancellationToken cancellationToken)
+	public async Task IfDefines_GivenCondition_AddsIfDefine()
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -211,7 +208,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task IfDefines_GivenConditionWithIndent_AddsIfDefineWithIndent(CancellationToken cancellationToken)
+	public async Task IfDefines_GivenConditionWithIndent_AddsIfDefineWithIndent()
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -227,7 +224,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task IfDefines_GivenMultipleValues_AddsAllValues(CancellationToken cancellationToken)
+	public async Task IfDefines_GivenMultipleValues_AddsAllValues()
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -245,7 +242,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task Chaining_MultipleOperations_WorksCorrectly(CancellationToken cancellationToken)
+	public async Task Chaining_MultipleOperations_WorksCorrectly()
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -257,5 +254,4 @@ public class StringBuilderExtensionsTests
 		// Assert
 		await Assert.That(result).IsEqualTo("\ttest\t\tanother");
 	}
-
 }

@@ -5,6 +5,7 @@ This sample demonstrates the **Purview Telemetry Source Generator** in a real-wo
 ## Overview
 
 The sample app is a weather forecast API built with:
+
 - **Backend API** (`SampleApp.APIService`) - RESTful weather service with generated telemetry
 - **Blazor Web Frontend** (`SampleApp.Web`) - Interactive UI consuming the API
 - **.NET Aspire** (`SampleApp.AppHost`) - Orchestration and observability dashboard
@@ -72,7 +73,7 @@ public interface IWeatherServiceTelemetry
 
 ## Project Structure
 
-```
+```text
 SampleApp/
 ├── SampleApp.AppHost/              # .NET Aspire orchestrator
 │   └── Program.cs                  # Aspire app configuration
@@ -96,7 +97,7 @@ SampleApp/
 
 ### Prerequisites
 
-- [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) or later
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) or later
 - [.NET Aspire workload](https://learn.microsoft.com/en-us/dotnet/aspire/fundamentals/setup-tooling)
 
 Install the Aspire workload:
@@ -115,7 +116,7 @@ dotnet workload install aspire
    ```
 
 2. **Access the Applications:**
-   - **Aspire Dashboard**: http://localhost:15888 (or port shown in console)
+   - **Aspire Dashboard**: <http://localhost:15888> (or port shown in console)
    - **Web Frontend**: Listed in Aspire dashboard
    - **API Service**: Listed in Aspire dashboard
    - **Scalar API Docs**: Listed in Aspire dashboard
@@ -132,6 +133,7 @@ dotnet test
 ```
 
 Tests validate business logic while mocking telemetry calls. See `SampleApp.APIService.UnitTests` for examples of:
+
 - Mocking telemetry interfaces
 - Verifying telemetry method calls
 - Testing with and without telemetry
@@ -163,7 +165,15 @@ The .NET Aspire dashboard provides a comprehensive view of your application's te
 
 [`dotnet-counter`](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-counters) is a command-line tool for monitoring .NET metrics in real-time.
 
-#### Install dotnet-counter
+#### Use dotnet-counter
+
+Either via `dnx` (recommended):
+
+```bash
+dnx dotnet-counters [options]
+```
+
+Or install the tool globally:
 
 ```bash
 dotnet tool install --global dotnet-counters
@@ -174,6 +184,8 @@ dotnet tool install --global dotnet-counters
 1. **Find the Process ID:**
 
    ```bash
+   dnx dotnet-counters ps
+   // or
    dotnet-counters ps
    ```
 
@@ -182,6 +194,8 @@ dotnet tool install --global dotnet-counters
 2. **Monitor All Meters:**
 
    ```bash
+   dnx dotnet-counters monitor --process-id <PID>
+   // or
    dotnet-counters monitor --process-id <PID>
    ```
 
@@ -190,6 +204,8 @@ dotnet tool install --global dotnet-counters
    The sample app uses a meter named based on the interface. To monitor only weather service metrics:
 
    ```bash
+   dnx dotnet-counters monitor --process-id <PID> --counters SampleApp.APIService.Services.IWeatherServiceTelemetry
+   // or
    dotnet-counters monitor --process-id <PID> --counters SampleApp.APIService.Services.IWeatherServiceTelemetry
    ```
 
@@ -197,15 +213,19 @@ dotnet tool install --global dotnet-counters
 
    ```bash
    # Monitor the "too cold" counter
+   dnx dotnet-counters monitor --process-id <PID> --counters SampleApp.APIService.Services.IWeatherServiceTelemetry[its-too-cold]
+   // or
    dotnet-counters monitor --process-id <PID> --counters SampleApp.APIService.Services.IWeatherServiceTelemetry[its-too-cold]
 
    # Monitor temperature histogram
+   dnx dotnet-counters monitor --process-id <PID> --counters SampleApp.APIService.Services.IWeatherServiceTelemetry[histogram-of-temperature]
+   // or
    dotnet-counters monitor --process-id <PID> --counters SampleApp.APIService.Services.IWeatherServiceTelemetry[histogram-of-temperature]
    ```
 
 #### Example Output
 
-```
+```plain
 Press p to pause, r to resume, q to quit.
     Status: Running
 
@@ -227,15 +247,13 @@ Capture detailed trace files for offline analysis:
 dotnet tool install --global dotnet-trace
 
 # Collect traces
-dotnet-trace collect --process-id <PID> --format speedscope
-
-# View in browser
-# Upload the .speedscope.json file to https://www.speedscope.app/
+dotnet-trace collect --process-id <PID> --format <Chromium|NetTrace|Speedscope>
 ```
 
 ### Using OpenTelemetry Collector
 
 For production scenarios, configure the Aspire app to export to an OpenTelemetry Collector, which can forward to:
+
 - **Jaeger** - Distributed tracing visualization
 - **Prometheus** - Metrics storage and querying
 - **Grafana** - Dashboards and alerting
@@ -248,9 +266,10 @@ See the [.NET Aspire telemetry documentation](https://learn.microsoft.com/en-us/
 
 The source generator creates implementation code that you can inspect:
 
-**Location:** `SampleApp.APIService/obj/Debug/net9.0/generated/`
+**Location:** `SampleApp.APIService/obj/Debug/net10.0/generated/`
 
 Generated files include:
+
 - `IWeatherServiceTelemetry.Activity.g.cs` - Activity source implementation
 - `IWeatherServiceTelemetry.Logging.g.cs` - ILogger implementation  
 - `IWeatherServiceTelemetry.Metrics.g.cs` - Metrics implementation

@@ -1,8 +1,6 @@
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Purview.Telemetry.SourceGenerator.Helpers;
 
-namespace Purview.Telemetry.SourceGenerator.Tests.Helpers;
+namespace Purview.Telemetry.SourceGenerator.Helpers;
 
 public class SymbolHelpersTests
 {
@@ -29,7 +27,9 @@ public class SymbolHelpersTests
 	}
 
 	[Test]
-	public async Task GetTypeName_GivenSimpleType_ReturnsTypeName(CancellationToken cancellationToken)
+	public async Task GetTypeName_GivenSimpleType_ReturnsTypeName(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -49,7 +49,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetTypeName_GivenGenericType_ReturnsBaseTypeName(CancellationToken cancellationToken)
+	public async Task GetTypeName_GivenGenericType_ReturnsBaseTypeName(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -69,7 +71,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetTypeName_GivenNullableType_ReturnsBaseTypeName(CancellationToken cancellationToken)
+	public async Task GetTypeName_GivenNullableType_ReturnsBaseTypeName(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -81,10 +85,7 @@ namespace Test {
 }";
 		var compilation = CreateCompilation(source);
 		var typeSymbol = compilation.GetTypeByMetadataName("Test.Program")!;
-		var propertySymbol = typeSymbol
-			.GetMembers("Value")
-			.OfType<IPropertySymbol>()
-			.First();
+		var propertySymbol = typeSymbol.GetMembers("Value").OfType<IPropertySymbol>().First();
 
 		// Act
 		var result = SymbolHelpers.GetTypeName(propertySymbol.Type);
@@ -94,7 +95,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetNamespace_GivenTypeInNamespace_ReturnsNamespace(CancellationToken cancellationToken)
+	public async Task GetNamespace_GivenTypeInNamespace_ReturnsNamespace(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -114,7 +117,9 @@ namespace Test.Services {
 	}
 
 	[Test]
-	public async Task GetNamespace_GivenTypeInGlobalNamespace_ReturnsNull(CancellationToken cancellationToken)
+	public async Task GetNamespace_GivenTypeInGlobalNamespace_ReturnsNull(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -132,7 +137,9 @@ public class GlobalClass {
 	}
 
 	[Test]
-	public async Task GetNamespace_GivenGenericType_ReturnsNamespace(CancellationToken cancellationToken)
+	public async Task GetNamespace_GivenGenericType_ReturnsNamespace(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -152,7 +159,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetFullyQualifiedName_GivenSimpleType_ReturnsFullyQualifiedName(CancellationToken cancellationToken)
+	public async Task GetFullyQualifiedName_GivenSimpleType_ReturnsFullyQualifiedName(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -172,7 +181,9 @@ namespace Test.Services {
 	}
 
 	[Test]
-	public async Task GetFullyQualifiedName_GivenGenericType_ReturnsFullyQualifiedNameWithoutTypeArgs(CancellationToken cancellationToken)
+	public async Task GetFullyQualifiedName_GivenGenericType_ReturnsFullyQualifiedNameWithoutTypeArgs(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -193,7 +204,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetFullyQualifiedName_GivenNullableType_ReturnsFullyQualifiedNameWithoutNullable(CancellationToken cancellationToken)
+	public async Task GetFullyQualifiedName_GivenNullableType_ReturnsFullyQualifiedNameWithoutNullable(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -205,10 +218,7 @@ namespace Test {
 }";
 		var compilation = CreateCompilation(source);
 		var typeSymbol = compilation.GetTypeByMetadataName("Test.Program")!;
-		var propertySymbol = typeSymbol
-			.GetMembers("Value")
-			.OfType<IPropertySymbol>()
-			.First();
+		var propertySymbol = typeSymbol.GetMembers("Value").OfType<IPropertySymbol>().First();
 
 		// Act
 		var result = SymbolHelpers.GetFullyQualifiedName(propertySymbol.Type);
@@ -218,7 +228,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetFullyQualifiedName_GivenNestedGenericType_ReturnsCorrectFormat(CancellationToken cancellationToken)
+	public async Task GetFullyQualifiedName_GivenNestedGenericType_ReturnsCorrectFormat(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -242,7 +254,9 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetFullyQualifiedName_GivenReferenceTypeWithNullableAnnotation_StripsnullableAnnotation(CancellationToken cancellationToken)
+	public async Task GetFullyQualifiedName_GivenReferenceTypeWithNullableAnnotation_StripsnullableAnnotation(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string source =
@@ -255,10 +269,7 @@ namespace Test {
 }";
 		var compilation = CreateCompilation(source);
 		var typeSymbol = compilation.GetTypeByMetadataName("Test.Program")!;
-		var propertySymbol = typeSymbol
-			.GetMembers("Value")
-			.OfType<IPropertySymbol>()
-			.First();
+		var propertySymbol = typeSymbol.GetMembers("Value").OfType<IPropertySymbol>().First();
 
 		// Act
 		var result = SymbolHelpers.GetFullyQualifiedName(propertySymbol.Type);
