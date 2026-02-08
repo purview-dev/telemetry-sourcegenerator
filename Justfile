@@ -1,5 +1,3 @@
-#set shell := ["bash", "-uc"]
-
 root_folder := "./src/"
 solution_file := root_folder + "Purview.Telemetry.SourceGenerator.slnx"
 test_solution := solution_file
@@ -62,24 +60,13 @@ update-version:
     @bun .build/update-version.js
 
 build-pack:
-    @pack_version="$$(bun -e 'console.log(require("./package.json").version)')"; \
-     git_branch="$$(git rev-parse --abbrev-ref HEAD)"; \
-     git_commit="$$(git rev-parse HEAD)"; \
-     copyright_year="$$(date +%Y)"; \
-     echo -e "Packing {{ colour_blue }}Source Generator{{ colour_reset }} with {{ colour_orange }}$${pack_version}{{ colour_reset }}..."; \
-     echo -e "  Configuration:   {{ colour_green }}{{ configuration }}{{ colour_reset }}"; \
-     echo -e "  Branch:          {{ colour_green }}$${git_branch}{{ colour_reset }}"; \
-     echo -e "  Commit:          {{ colour_green }}$${git_commit}{{ colour_reset }}"; \
-     echo -e "  Copyright Year:  {{ colour_green }}$${copyright_year}{{ colour_reset }}"; \
-     echo -e "  Output Folder:   {{ colour_green }}{{ artifact_folder }}{{ colour_reset }}"; \
-     dotnet pack "{{ root_folder }}Purview.Telemetry.SourceGenerator/Purview.Telemetry.SourceGenerator.csproj" \
-       --configuration "{{ configuration }}" \
-       --output "{{ artifact_folder }}" \
-       --include-symbols \
-       --property:Version="$${pack_version}" \
-       --property:RepositoryBranch="$${git_branch}" \
-       --property:RepositoryCommit="$${git_commit}" \
-       --property:COPYRIGHT_YEAR="$${copyright_year}"
+    @bun -e "const version = require('./package.json').version; console.log('Packing {{ colour_blue }}Source Generator{{ colour_reset }} with {{ colour_orange }}' + version + '{{ colour_reset }}...');"
+    @echo -e "  Configuration:   {{ colour_green }}{{ configuration }}{{ colour_reset }}"
+    @bun -e "const exec = require('child_process').execSync; console.log('  Branch:          {{ colour_green }}' + exec('git rev-parse --abbrev-ref HEAD').toString().trim() + '{{ colour_reset }}');"
+    @bun -e "const exec = require('child_process').execSync; console.log('  Commit:          {{ colour_green }}' + exec('git rev-parse HEAD').toString().trim() + '{{ colour_reset }}');"
+    @bun -e "console.log('  Copyright Year:  {{ colour_green }}' + new Date().getFullYear() + '{{ colour_reset }}');"
+    @echo -e "  Output Folder:   {{ colour_green }}{{ artifact_folder }}{{ colour_reset }}"
+    @bun -e "const version = require('./package.json').version; const exec = require('child_process').execSync; const branch = exec('git rev-parse --abbrev-ref HEAD').toString().trim(); const commit = exec('git rev-parse HEAD').toString().trim(); const year = new Date().getFullYear(); const cmd = 'dotnet pack \"{{ root_folder }}Purview.Telemetry.SourceGenerator/Purview.Telemetry.SourceGenerator.csproj\" --configuration \"{{ configuration }}\" --output \"{{ artifact_folder }}\" --include-symbols --property:Version=\"' + version + '\" --property:RepositoryBranch=\"' + branch + '\" --property:RepositoryCommit=\"' + commit + '\" --property:COPYRIGHT_YEAR=\"' + year + '\"'; exec(cmd, {stdio: 'inherit'});"
 
 act:
     @echo -e "Running {{ colour_blue }}act{{ colour_reset }}..."
