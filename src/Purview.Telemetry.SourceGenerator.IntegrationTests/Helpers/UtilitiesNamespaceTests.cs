@@ -16,10 +16,8 @@ public class UtilitiesNamespaceTests
 			.First(t => t.Identifier.Text == typeName);
 	}
 
-	#region GetNamespace Tests
-
 	[Test]
-	public async Task GetNamespace_GivenSimpleNamespace_ReturnsNamespace()
+	public async Task GetNamespace_GivenSimpleNamespace_ReturnsNamespace(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -38,7 +36,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetNamespace_GivenNestedNamespace_ReturnsFullNamespace()
+	public async Task GetNamespace_GivenNestedNamespace_ReturnsFullNamespace(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -57,7 +55,7 @@ namespace Test.Services {
 	}
 
 	[Test]
-	public async Task GetNamespace_GivenFileScopedNamespace_ReturnsNamespace()
+	public async Task GetNamespace_GivenFileScopedNamespace_ReturnsNamespace(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -76,7 +74,7 @@ public class CustomerService {
 	}
 
 	[Test]
-	public async Task GetNamespace_GivenGlobalNamespace_ReturnsNull()
+	public async Task GetNamespace_GivenGlobalNamespace_ReturnsNull(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -93,7 +91,7 @@ public class Program {
 	}
 
 	[Test]
-	public async Task GetNamespace_GivenNestedClass_ReturnsNamespace()
+	public async Task GetNamespace_GivenNestedClass_ReturnsNamespace(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -113,12 +111,8 @@ namespace Test {
 		await Assert.That(result).IsEqualTo("Test");
 	}
 
-	#endregion
-
-	#region GetParentClasses Tests
-
 	[Test]
-	public async Task GetParentClasses_GivenTopLevelClass_ReturnsEmpty()
+	public async Task GetParentClasses_GivenTopLevelClass_ReturnsEmpty(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -137,7 +131,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetParentClasses_GivenNestedClass_ReturnsParent()
+	public async Task GetParentClasses_GivenNestedClass_ReturnsParent(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -159,7 +153,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetParentClasses_GivenDeeplyNestedClass_ReturnsAllParents()
+	public async Task GetParentClasses_GivenDeeplyNestedClass_ReturnsAllParents(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -183,12 +177,8 @@ namespace Test {
 		await Assert.That(result[1]).IsEqualTo("Level1");
 	}
 
-	#endregion
-
-	#region GetParentClassesAsNamespace Tests
-
 	[Test]
-	public async Task GetParentClassesAsNamespace_GivenTopLevelClass_ReturnsNull()
+	public async Task GetParentClassesAsNamespace_GivenTopLevelClass_ReturnsNull(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -207,7 +197,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetParentClassesAsNamespace_GivenNestedClass_ReturnsParentAsNamespace()
+	public async Task GetParentClassesAsNamespace_GivenNestedClass_ReturnsParentAsNamespace(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -228,7 +218,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetParentClassesAsNamespace_GivenDeeplyNestedClass_ReturnsParentsAsNamespace()
+	public async Task GetParentClassesAsNamespace_GivenDeeplyNestedClass_ReturnsParentsAsNamespace(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -250,12 +240,8 @@ namespace Test {
 		await Assert.That(result).IsEqualTo("Level1.Level2");
 	}
 
-	#endregion
-
-	#region GetFullNamespace Tests
-
 	[Test]
-	public async Task GetFullNamespace_GivenSimpleClass_ReturnsNull()
+	public async Task GetFullNamespace_GivenSimpleClass_ReturnsNull(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -274,7 +260,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetFullNamespace_GivenNestedClass_ReturnsFullNamespace()
+	public async Task GetFullNamespace_GivenNestedClass_ReturnsFullNamespace(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -295,7 +281,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetFullNamespace_GivenNestedClassWithTrailingSeparator_ReturnsFullNamespaceWithDot()
+	public async Task GetFullNamespace_GivenNestedClassWithTrailingSeparator_ReturnsFullNamespaceWithDot(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -316,7 +302,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetFullNamespace_GivenGlobalClass_ReturnsNull()
+	public async Task GetFullNamespace_GivenGlobalClass_ReturnsNull(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -333,7 +319,7 @@ public class Program {
 	}
 
 	[Test]
-	public async Task GetFullNamespace_GivenDeeplyNestedClass_ReturnsCompleteNamespace()
+	public async Task GetFullNamespace_GivenDeeplyNestedClass_ReturnsCompleteNamespace(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -355,5 +341,4 @@ namespace Test.Services {
 		await Assert.That(result).IsEqualTo("Test.Services.Level1.Level2");
 	}
 
-	#endregion
 }

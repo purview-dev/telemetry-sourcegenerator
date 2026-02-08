@@ -6,10 +6,9 @@ namespace Purview.Telemetry.SourceGenerator.Tests.Helpers;
 
 public class StringBuilderExtensionsTests
 {
-	#region WithIndent Tests
 
 	[Test]
-	public async Task WithIndent_GivenZero_ReturnsNoIndent()
+	public async Task WithIndent_GivenZero_ReturnsNoIndent(CancellationToken cancellationToken)
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -23,7 +22,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task WithIndent_GivenOne_ReturnsOneTab()
+	public async Task WithIndent_GivenOne_ReturnsOneTab(CancellationToken cancellationToken)
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -37,7 +36,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task WithIndent_GivenFive_ReturnsFiveTabs()
+	public async Task WithIndent_GivenFive_ReturnsFiveTabs(CancellationToken cancellationToken)
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -51,7 +50,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task WithIndent_GivenEight_ReturnsEightTabs()
+	public async Task WithIndent_GivenEight_ReturnsEightTabs(CancellationToken cancellationToken)
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -65,7 +64,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task WithIndent_GivenTen_ReturnsTenTabs()
+	public async Task WithIndent_GivenTen_ReturnsTenTabs(CancellationToken cancellationToken)
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -79,7 +78,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task WithIndent_GivenLargeNumber_ReturnsCorrectTabs()
+	public async Task WithIndent_GivenLargeNumber_ReturnsCorrectTabs(CancellationToken cancellationToken)
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -93,12 +92,8 @@ public class StringBuilderExtensionsTests
 		await Assert.That(result).IsEqualTo("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t");
 	}
 
-	#endregion
-
-	#region Append Tests
-
 	[Test]
-	public async Task Append_GivenTabsAndString_AppendsWithIndent()
+	public async Task Append_GivenTabsAndString_AppendsWithIndent(CancellationToken cancellationToken)
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -113,7 +108,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task Append_GivenTabsAndStringWithoutNewLine_AppendsWithoutNewLine()
+	public async Task Append_GivenTabsAndStringWithoutNewLine_AppendsWithoutNewLine(CancellationToken cancellationToken)
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -127,7 +122,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task Append_GivenTabsAndChar_AppendsWithIndent()
+	public async Task Append_GivenTabsAndChar_AppendsWithIndent(CancellationToken cancellationToken)
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -142,7 +137,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task Append_GivenTabsAndCharWithoutNewLine_AppendsWithoutNewLine()
+	public async Task Append_GivenTabsAndCharWithoutNewLine_AppendsWithoutNewLine(CancellationToken cancellationToken)
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -155,12 +150,8 @@ public class StringBuilderExtensionsTests
 		await Assert.That(result).IsEqualTo("\tx");
 	}
 
-	#endregion
-
-	#region AppendLine Tests
-
 	[Test]
-	public async Task AppendLine_GivenChar_AppendsCharWithNewLine()
+	public async Task AppendLine_GivenChar_AppendsCharWithNewLine(CancellationToken cancellationToken)
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -174,12 +165,8 @@ public class StringBuilderExtensionsTests
 		await Assert.That(result.TrimEnd()).IsEqualTo("x");
 	}
 
-	#endregion
-
-	#region AggressiveInlining Tests
-
 	[Test]
-	public async Task AggressiveInlining_GivenIndent_AppendsAttribute()
+	public async Task AggressiveInlining_GivenIndent_AppendsAttribute(CancellationToken cancellationToken)
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -193,12 +180,8 @@ public class StringBuilderExtensionsTests
 		await Assert.That(result).Contains("AggressiveInlining");
 	}
 
-	#endregion
-
-	#region CodeGen Tests
-
 	[Test]
-	public async Task CodeGen_GivenIndent_AppendsAttribute()
+	public async Task CodeGen_GivenIndent_AppendsAttribute(CancellationToken cancellationToken)
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -211,12 +194,8 @@ public class StringBuilderExtensionsTests
 		await Assert.That(result).Contains("GeneratedCode");
 	}
 
-	#endregion
-
-	#region IfDefines Tests
-
 	[Test]
-	public async Task IfDefines_GivenCondition_AddsIfDefine()
+	public async Task IfDefines_GivenCondition_AddsIfDefine(CancellationToken cancellationToken)
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -232,7 +211,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task IfDefines_GivenConditionWithIndent_AddsIfDefineWithIndent()
+	public async Task IfDefines_GivenConditionWithIndent_AddsIfDefineWithIndent(CancellationToken cancellationToken)
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -248,7 +227,7 @@ public class StringBuilderExtensionsTests
 	}
 
 	[Test]
-	public async Task IfDefines_GivenMultipleValues_AddsAllValues()
+	public async Task IfDefines_GivenMultipleValues_AddsAllValues(CancellationToken cancellationToken)
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -265,12 +244,8 @@ public class StringBuilderExtensionsTests
 		await Assert.That(result).Contains("value3");
 	}
 
-	#endregion
-
-	#region Chaining Tests
-
 	[Test]
-	public async Task Chaining_MultipleOperations_WorksCorrectly()
+	public async Task Chaining_MultipleOperations_WorksCorrectly(CancellationToken cancellationToken)
 	{
 		// Arrange
 		var builder = new StringBuilder();
@@ -283,5 +258,4 @@ public class StringBuilderExtensionsTests
 		await Assert.That(result).IsEqualTo("\ttest\t\tanother");
 	}
 
-	#endregion
 }

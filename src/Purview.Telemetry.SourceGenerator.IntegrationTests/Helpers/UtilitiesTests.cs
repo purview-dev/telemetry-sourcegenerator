@@ -4,10 +4,8 @@ namespace Purview.Telemetry.SourceGenerator.Tests.Helpers;
 
 public class UtilitiesTests
 {
-	#region String Manipulation Tests
-
 	[Test]
-	public async Task WithComma_GivenString_AddsComma()
+	public async Task WithComma_GivenString_AddsComma(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "test";
@@ -20,7 +18,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task WithComma_GivenStringWithoutSpace_AddsCommaOnly()
+	public async Task WithComma_GivenStringWithoutSpace_AddsCommaOnly(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "test";
@@ -33,7 +31,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task Wrap_GivenString_WrapsWithDefaultQuotes()
+	public async Task Wrap_GivenString_WrapsWithDefaultQuotes(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "test";
@@ -46,7 +44,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task Wrap_GivenStringWithCustomChar_WrapsWithCustomChar()
+	public async Task Wrap_GivenStringWithCustomChar_WrapsWithCustomChar(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "test";
@@ -59,7 +57,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task LowercaseFirstChar_GivenCapitalizedString_LowercasesFirstChar()
+	public async Task LowercaseFirstChar_GivenCapitalizedString_LowercasesFirstChar(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "TestString";
@@ -72,7 +70,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task LowercaseFirstChar_GivenEmptyString_ReturnsEmpty()
+	public async Task LowercaseFirstChar_GivenEmptyString_ReturnsEmpty(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "";
@@ -85,7 +83,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task LowercaseFirstChar_GivenSingleChar_LowercasesThatChar()
+	public async Task LowercaseFirstChar_GivenSingleChar_LowercasesThatChar(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "T";
@@ -98,7 +96,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task UppercaseFirstChar_GivenLowercaseString_UppercasesFirstChar()
+	public async Task UppercaseFirstChar_GivenLowercaseString_UppercasesFirstChar(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "testString";
@@ -111,7 +109,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task UppercaseFirstChar_GivenEmptyString_ReturnsEmpty()
+	public async Task UppercaseFirstChar_GivenEmptyString_ReturnsEmpty(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "";
@@ -124,7 +122,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task UppercaseFirstChar_GivenSingleChar_UppercasesThatChar()
+	public async Task UppercaseFirstChar_GivenSingleChar_UppercasesThatChar(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "t";
@@ -137,7 +135,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task Flatten_GivenStringWithMultipleSpaces_CollapsesToSingleSpace()
+	public async Task Flatten_GivenStringWithMultipleSpaces_CollapsesToSingleSpace(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "test    string   with     spaces";
@@ -150,7 +148,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task Flatten_GivenStringWithTabs_CollapsesToSingleSpace()
+	public async Task Flatten_GivenStringWithTabs_CollapsesToSingleSpace(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "test\t\tstring\twith\t\t\ttabs";
@@ -163,7 +161,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task Flatten_GivenStringWithNewlines_CollapsesToSingleSpace()
+	public async Task Flatten_GivenStringWithNewlines_CollapsesToSingleSpace(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "test\n\nstring\nwith\n\n\nnewlines";
@@ -175,12 +173,8 @@ public class UtilitiesTests
 		await Assert.That(result).IsEqualTo("test string with newlines");
 	}
 
-	#endregion
-
-	#region ConvertToSeparatedLowercase Tests
-
 	[Test]
-	public async Task ConvertToSeparatedLowercase_GivenPascalCase_ConvertsToDotSeparated()
+	public async Task ConvertToSeparatedLowercase_GivenPascalCase_ConvertsToDotSeparated(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "EntityId";
@@ -193,7 +187,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task ConvertToSeparatedLowercase_GivenCamelCase_ConvertsToDotSeparated()
+	public async Task ConvertToSeparatedLowercase_GivenCamelCase_ConvertsToDotSeparated(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "entityId";
@@ -206,7 +200,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task ConvertToSeparatedLowercase_GivenAcronym_HandlesCorrectly()
+	public async Task ConvertToSeparatedLowercase_GivenAcronym_HandlesCorrectly(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "HTTPSConnection";
@@ -219,7 +213,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task ConvertToSeparatedLowercase_GivenMultipleWords_ConvertsToDotSeparated()
+	public async Task ConvertToSeparatedLowercase_GivenMultipleWords_ConvertsToDotSeparated(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "CustomerFirstNameValue";
@@ -232,7 +226,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task ConvertToSeparatedLowercase_GivenUnderscoreSeparator_ConvertsToUnderscoreSeparated()
+	public async Task ConvertToSeparatedLowercase_GivenUnderscoreSeparator_ConvertsToUnderscoreSeparated(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "EntityId";
@@ -245,7 +239,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task ConvertToSeparatedLowercase_GivenEmptyString_ReturnsEmpty()
+	public async Task ConvertToSeparatedLowercase_GivenEmptyString_ReturnsEmpty(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "";
@@ -258,7 +252,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task ConvertToSeparatedLowercase_GivenSingleLowercaseChar_ReturnsSameChar()
+	public async Task ConvertToSeparatedLowercase_GivenSingleLowercaseChar_ReturnsSameChar(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "a";
@@ -271,7 +265,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task ConvertToSeparatedLowercase_GivenSingleUppercaseChar_ReturnsLowercase()
+	public async Task ConvertToSeparatedLowercase_GivenSingleUppercaseChar_ReturnsLowercase(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "A";
@@ -283,12 +277,8 @@ public class UtilitiesTests
 		await Assert.That(result).IsEqualTo("a");
 	}
 
-	#endregion
-
-	#region IsLikelyCompoundWord Tests
-
 	[Test]
-	public async Task IsLikelyCompoundWord_GivenEntityId_ReturnsTrue()
+	public async Task IsLikelyCompoundWord_GivenEntityId_ReturnsTrue(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "entityid";
@@ -301,7 +291,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task IsLikelyCompoundWord_GivenRequestCount_ReturnsTrue()
+	public async Task IsLikelyCompoundWord_GivenRequestCount_ReturnsTrue(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "requestcount";
@@ -314,7 +304,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task IsLikelyCompoundWord_GivenHttpConnection_ReturnsTrue()
+	public async Task IsLikelyCompoundWord_GivenHttpConnection_ReturnsTrue(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "httpconnection";
@@ -327,7 +317,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task IsLikelyCompoundWord_GivenShortString_ReturnsFalse()
+	public async Task IsLikelyCompoundWord_GivenShortString_ReturnsFalse(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "test";
@@ -340,7 +330,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task IsLikelyCompoundWord_GivenStringWithDot_ReturnsFalse()
+	public async Task IsLikelyCompoundWord_GivenStringWithDot_ReturnsFalse(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "entity.id";
@@ -353,7 +343,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task IsLikelyCompoundWord_GivenStringWithUnderscore_ReturnsFalse()
+	public async Task IsLikelyCompoundWord_GivenStringWithUnderscore_ReturnsFalse(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "entity_id";
@@ -366,7 +356,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task IsLikelyCompoundWord_GivenEmptyString_ReturnsFalse()
+	public async Task IsLikelyCompoundWord_GivenEmptyString_ReturnsFalse(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "";
@@ -379,7 +369,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task IsLikelyCompoundWord_GivenGetMethod_ReturnsTrue()
+	public async Task IsLikelyCompoundWord_GivenGetMethod_ReturnsTrue(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "getvalue";
@@ -391,12 +381,8 @@ public class UtilitiesTests
 		await Assert.That(result).IsTrue();
 	}
 
-	#endregion
-
-	#region IsGenericOrReservedName Tests
-
 	[Test]
-	public async Task IsGenericOrReservedName_GivenActivity_ReturnsTrue()
+	public async Task IsGenericOrReservedName_GivenActivity_ReturnsTrue(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "activity";
@@ -409,7 +395,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task IsGenericOrReservedName_GivenEvent_ReturnsTrue()
+	public async Task IsGenericOrReservedName_GivenEvent_ReturnsTrue(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "event";
@@ -422,7 +408,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task IsGenericOrReservedName_GivenError_ReturnsTrue()
+	public async Task IsGenericOrReservedName_GivenError_ReturnsTrue(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "error";
@@ -435,7 +421,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task IsGenericOrReservedName_GivenCustomerName_ReturnsFalse()
+	public async Task IsGenericOrReservedName_GivenCustomerName_ReturnsFalse(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "CustomerName";
@@ -448,7 +434,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task IsGenericOrReservedName_GivenEmptyString_ReturnsFalse()
+	public async Task IsGenericOrReservedName_GivenEmptyString_ReturnsFalse(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "";
@@ -461,7 +447,7 @@ public class UtilitiesTests
 	}
 
 	[Test]
-	public async Task IsGenericOrReservedName_GivenMixedCaseActivity_ReturnsTrue()
+	public async Task IsGenericOrReservedName_GivenMixedCaseActivity_ReturnsTrue(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string input = "Activity";
@@ -472,6 +458,4 @@ public class UtilitiesTests
 		// Assert
 		await Assert.That(result).IsTrue();
 	}
-
-	#endregion
 }

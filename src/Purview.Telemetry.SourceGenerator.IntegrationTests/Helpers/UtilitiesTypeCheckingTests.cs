@@ -33,10 +33,8 @@ public class UtilitiesTypeCheckingTests
 		return propertySymbol.Type;
 	}
 
-	#region IsComplexType Tests
-
 	[Test]
-	public async Task IsComplexType_GivenClass_ReturnsTrue()
+	public async Task IsComplexType_GivenClass_ReturnsTrue(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -60,7 +58,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task IsComplexType_GivenStruct_ReturnsTrue()
+	public async Task IsComplexType_GivenStruct_ReturnsTrue(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -84,7 +82,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task IsComplexType_GivenString_ReturnsFalse()
+	public async Task IsComplexType_GivenString_ReturnsFalse(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -105,7 +103,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task IsComplexType_GivenInt_ReturnsFalse()
+	public async Task IsComplexType_GivenInt_ReturnsFalse(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -125,12 +123,8 @@ namespace Test {
 		await Assert.That(result).IsFalse();
 	}
 
-	#endregion
-
-	#region IsArray Tests
-
 	[Test]
-	public async Task IsArray_GivenIntArray_ReturnsTrue()
+	public async Task IsArray_GivenIntArray_ReturnsTrue(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -151,7 +145,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task IsArray_GivenString_ReturnsFalse()
+	public async Task IsArray_GivenString_ReturnsFalse(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -172,7 +166,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task IsArray_GivenList_ReturnsFalse()
+	public async Task IsArray_GivenList_ReturnsFalse(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -193,12 +187,8 @@ namespace Test {
 		await Assert.That(result).IsFalse();
 	}
 
-	#endregion
-
-	#region IsIEnumerable Tests
-
 	[Test]
-	public async Task IsIEnumerable_GivenString_ReturnsFalse()
+	public async Task IsIEnumerable_GivenString_ReturnsFalse(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -219,7 +209,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task IsIEnumerable_GivenInt_ReturnsFalse()
+	public async Task IsIEnumerable_GivenInt_ReturnsFalse(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -239,12 +229,8 @@ namespace Test {
 		await Assert.That(result).IsFalse();
 	}
 
-	#endregion
-
-	#region IsExceptionType Tests
-
 	[Test]
-	public async Task IsExceptionType_GivenException_ReturnsTrue()
+	public async Task IsExceptionType_GivenException_ReturnsTrue(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -266,7 +252,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task IsExceptionType_GivenCustomException_ReturnsTrue()
+	public async Task IsExceptionType_GivenCustomException_ReturnsTrue(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -290,7 +276,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task IsExceptionType_GivenDerivedException_ReturnsTrue()
+	public async Task IsExceptionType_GivenDerivedException_ReturnsTrue(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -314,7 +300,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task IsExceptionType_GivenString_ReturnsFalse()
+	public async Task IsExceptionType_GivenString_ReturnsFalse(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -335,7 +321,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task IsExceptionType_GivenCustomClass_ReturnsFalse()
+	public async Task IsExceptionType_GivenCustomClass_ReturnsFalse(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string source =
@@ -358,5 +344,4 @@ namespace Test {
 		await Assert.That(result).IsFalse();
 	}
 
-	#endregion
 }
