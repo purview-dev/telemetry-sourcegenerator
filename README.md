@@ -23,7 +23,7 @@ Add to your `Directory.Build.props` or `.csproj` file:
 ```xml
 <PackageReference Include="Purview.Telemetry.SourceGenerator" Version="4.0.0-prerelease.1">
   <PrivateAssets>all</PrivateAssets>
-  <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+  <IncludeAssets>analyzers</IncludeAssets>
 </PackageReference>
 ```
 
