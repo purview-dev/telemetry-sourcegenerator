@@ -68,7 +68,7 @@ namespace Testing
 			observableUpDownTagList.Add("int_param", intParam);
 			observableUpDownTagList.Add("bool_param", boolParam);
 
-			_observableUpDownInstrument = _meter.CreateObservableUpDownCounter<int>("testing-observable-meter.observable.up.down", f, unit: null, description: null
+			_observableUpDownInstrument = _meter.CreateObservableUpDownCounter<int>("testing-observable-meter.observable_up_down", f, unit: null, description: null
 				, tags: observableUpDownTagList
 			);
 		}
@@ -78,7 +78,7 @@ namespace Testing
 		{
 			if (_observableUpDown2Instrument != null)
 			{
-				throw new global::System.Exception("testing-observable-meter.observable.up.down2 has already been initialized.");
+				throw new global::System.Exception("testing-observable-meter.observable_up_down2 has already been initialized.");
 			}
 
 			global::System.Diagnostics.TagList observableUpDown2TagList = new();
@@ -86,7 +86,7 @@ namespace Testing
 			observableUpDown2TagList.Add("int_param", intParam);
 			observableUpDown2TagList.Add("bool_param", boolParam);
 
-			_observableUpDown2Instrument = _meter.CreateObservableUpDownCounter<int>("testing-observable-meter.observable.up.down2", f, unit: null, description: null
+			_observableUpDown2Instrument = _meter.CreateObservableUpDownCounter<int>("testing-observable-meter.observable_up_down2", f, unit: null, description: null
 				, tags: observableUpDown2TagList
 			);
 		}
@@ -104,7 +104,7 @@ namespace Testing
 			observableUpDown3TagList.Add("int_param", intParam);
 			observableUpDown3TagList.Add("bool_param", boolParam);
 
-			_observableUpDown3Instrument = _meter.CreateObservableUpDownCounter<int>("testing-observable-meter.observable.up.down3", f, unit: null, description: null
+			_observableUpDown3Instrument = _meter.CreateObservableUpDownCounter<int>("testing-observable-meter.observable_up_down3", f, unit: null, description: null
 				, tags: observableUpDown3TagList
 			);
 		}

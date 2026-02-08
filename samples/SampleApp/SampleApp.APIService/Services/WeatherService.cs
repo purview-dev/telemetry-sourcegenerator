@@ -60,7 +60,7 @@ sealed class WeatherService(IWeatherServiceTelemetry telemetry, Func<int>? rng =
 			try
 			{
 				throw new Exception(
-					"Simulated failure - maybe a database or something went fizz-bang."
+					"Simulated failure - maybe a database or something went ~{fizz-bang}~."
 				);
 			}
 			catch (Exception ex)

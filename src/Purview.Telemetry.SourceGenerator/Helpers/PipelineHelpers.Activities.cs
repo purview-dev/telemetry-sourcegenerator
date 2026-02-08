@@ -80,7 +80,7 @@ partial class PipelineHelpers
 			: null;
 
 		// Get naming convention from TelemetryGenerationAttribute (default to OpenTelemetry = 1)
-		var namingConvention = telemetryGeneration?.NamingConvention.Value ?? 1;
+		var namingConvention = telemetryGeneration.NamingConvention.Value ?? 1;
 		var isLegacy = namingConvention == 0;
 
 		if (activitySourceName == null)
@@ -91,9 +91,7 @@ partial class PipelineHelpers
 				// Legacy mode: lowercase the assembly name
 				// OpenTelemetry mode: preserve casing
 #pragma warning disable CA1308 // Intentional lowercase for legacy compatibility
-				activitySourceName = isLegacy
-					? assemblyName!.ToLowerInvariant()
-					: assemblyName;
+				activitySourceName = isLegacy ? assemblyName!.ToLowerInvariant() : assemblyName;
 #pragma warning restore CA1308
 			}
 		}

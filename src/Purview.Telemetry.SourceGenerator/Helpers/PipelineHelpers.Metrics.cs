@@ -86,7 +86,7 @@ partial class PipelineHelpers
 			meterAttribute,
 			meterGenerationAttribute,
 			telemetryGeneration,
-			meterName,
+			meterName!,
 			semanticModel,
 			interfaceSymbol,
 			logger,
@@ -208,17 +208,19 @@ partial class PipelineHelpers
 			{
 				if (!isLegacy)
 				{
-					// OpenTelemetry: Convert PascalCase to dot.separated
-					instrumentName = Utilities.ConvertToSeparatedLowercase(instrumentName!, '.');
+					// OpenTelemetry: Convert PascalCase to snake_case (underscores separate words)
+					// Per OTel semantic conventions: dots separate namespace hierarchy, underscores separate words
+					// Example: dotnet.gc.last_collection.memory.committed_size
+					instrumentName = Utilities.ConvertToSeparatedLowercase(instrumentName!, '_');
 					if (!string.IsNullOrEmpty(prefix))
-						prefix = Utilities.ConvertToSeparatedLowercase(prefix!, '.');
+						prefix = Utilities.ConvertToSeparatedLowercase(prefix!, '_');
 
-					// OpenTelemetry: Prepend meter name to instrument name for hierarchical naming
-					// e.g., meter "MyApp.Products" + instrument "pricing_page_requests" 
-					//       -> "myapp.products.pricing_page_requests"
+					// OpenTelemetry: Prepend meter name as namespace with dot separator
+					// e.g., meter "MyApp.Products" + instrument "pricing_page_requests"
+					//       -> "myapp_products.pricing_page_requests"
 					if (!string.IsNullOrWhiteSpace(meterName))
 					{
-						var meterPrefix = Utilities.ConvertToSeparatedLowercase(meterName, '.');
+						var meterPrefix = Utilities.ConvertToSeparatedLowercase(meterName, '_');
 						instrumentName = $"{meterPrefix}.{instrumentName}";
 					}
 				}

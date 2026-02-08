@@ -5,6 +5,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Aspire.Hosting.AppHost" Version="13.1.0" />
+		<PackageReference Include="Scalar.Aspire" Version="0.8.45" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\SampleApp.APIService\SampleApp.APIService.csproj" />

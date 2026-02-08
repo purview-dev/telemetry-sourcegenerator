@@ -51,7 +51,7 @@ namespace Testing
 
 			PopulateAutoCounterMetricTags(autoCounterMetricTags);
 
-			_autoCounterMetricInstrument = _meter.CreateCounter<int>(name: "this.is.a.prefixtesting-meter.auto.counter.metric", unit: null, description: null, tags: autoCounterMetricTags);
+			_autoCounterMetricInstrument = _meter.CreateCounter<int>(name: "this.is.a.prefixtesting-meter.auto_counter_metric", unit: null, description: null, tags: autoCounterMetricTags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

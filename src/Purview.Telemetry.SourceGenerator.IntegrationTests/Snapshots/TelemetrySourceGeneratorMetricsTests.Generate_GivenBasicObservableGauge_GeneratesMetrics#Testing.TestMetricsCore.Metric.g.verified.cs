@@ -68,7 +68,7 @@ namespace Testing
 			observableGaugeTagList.Add("int_param", intParam);
 			observableGaugeTagList.Add("bool_param", boolParam);
 
-			_observableGaugeInstrument = _meter.CreateObservableGauge<int>("testing-meter.observable.gauge", f, unit: null, description: null
+			_observableGaugeInstrument = _meter.CreateObservableGauge<int>("testing-meter.observable_gauge", f, unit: null, description: null
 				, tags: observableGaugeTagList
 			);
 		}
@@ -78,7 +78,7 @@ namespace Testing
 		{
 			if (_observableGauge2Instrument != null)
 			{
-				throw new global::System.Exception("testing-meter.observable.gauge2 has already been initialized.");
+				throw new global::System.Exception("testing-meter.observable_gauge2 has already been initialized.");
 			}
 
 			global::System.Diagnostics.TagList observableGauge2TagList = new();
@@ -86,7 +86,7 @@ namespace Testing
 			observableGauge2TagList.Add("int_param", intParam);
 			observableGauge2TagList.Add("bool_param", boolParam);
 
-			_observableGauge2Instrument = _meter.CreateObservableGauge<int>("testing-meter.observable.gauge2", f, unit: null, description: null
+			_observableGauge2Instrument = _meter.CreateObservableGauge<int>("testing-meter.observable_gauge2", f, unit: null, description: null
 				, tags: observableGauge2TagList
 			);
 		}
@@ -104,7 +104,7 @@ namespace Testing
 			observableGauge3TagList.Add("int_param", intParam);
 			observableGauge3TagList.Add("bool_param", boolParam);
 
-			_observableGauge3Instrument = _meter.CreateObservableGauge<int>("testing-meter.observable.gauge3", f, unit: null, description: null
+			_observableGauge3Instrument = _meter.CreateObservableGauge<int>("testing-meter.observable_gauge3", f, unit: null, description: null
 				, tags: observableGauge3TagList
 			);
 		}

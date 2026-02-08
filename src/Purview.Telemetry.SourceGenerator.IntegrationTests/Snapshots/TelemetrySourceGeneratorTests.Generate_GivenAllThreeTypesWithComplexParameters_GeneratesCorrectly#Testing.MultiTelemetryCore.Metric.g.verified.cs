@@ -43,12 +43,12 @@ namespace Testing
 
 			PopulateIncrementRequestCountTags(incrementRequestCountTags);
 
-			_incrementRequestCountInstrument = _meter.CreateCounter<int>(name: "testing-meter.increment.request.count", unit: null, description: null, tags: incrementRequestCountTags);
+			_incrementRequestCountInstrument = _meter.CreateCounter<int>(name: "testing-meter.increment_request_count", unit: null, description: null, tags: incrementRequestCountTags);
 			global::System.Collections.Generic.Dictionary<string, object?> recordRequestDurationTags = new();
 
 			PopulateRecordRequestDurationTags(recordRequestDurationTags);
 
-			_recordRequestDurationInstrument = _meter.CreateHistogram<double>(name: "testing-meter.record.request.duration", unit: null, description: null, tags: recordRequestDurationTags);
+			_recordRequestDurationInstrument = _meter.CreateHistogram<double>(name: "testing-meter.record_request_duration", unit: null, description: null, tags: recordRequestDurationTags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

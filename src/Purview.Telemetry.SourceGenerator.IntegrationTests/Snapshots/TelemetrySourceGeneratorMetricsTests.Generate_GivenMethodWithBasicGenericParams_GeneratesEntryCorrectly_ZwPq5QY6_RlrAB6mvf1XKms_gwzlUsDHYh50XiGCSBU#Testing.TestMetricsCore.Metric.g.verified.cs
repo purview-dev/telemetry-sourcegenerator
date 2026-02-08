@@ -58,12 +58,12 @@ namespace Testing
 
 			PopulateAutoCounterTags(autoCounterTags);
 
-			_autoCounterInstrument = _meter.CreateCounter<int>(name: "testing-meter.auto.counter", unit: null, description: null, tags: autoCounterTags);
+			_autoCounterInstrument = _meter.CreateCounter<int>(name: "testing-meter.auto_counter", unit: null, description: null, tags: autoCounterTags);
 			global::System.Collections.Generic.Dictionary<string, object?> counter_AutoIncrementTags = new();
 
 			PopulateCounter_AutoIncrementTags(counter_AutoIncrementTags);
 
-			_counter_AutoIncrementInstrument = _meter.CreateCounter<int>(name: "testing-meter.counter_auto.increment", unit: null, description: null, tags: counter_AutoIncrementTags);
+			_counter_AutoIncrementInstrument = _meter.CreateCounter<int>(name: "testing-meter.counter_auto_increment", unit: null, description: null, tags: counter_AutoIncrementTags);
 			global::System.Collections.Generic.Dictionary<string, object?> counterTags = new();
 
 			PopulateCounterTags(counterTags);
@@ -78,7 +78,7 @@ namespace Testing
 
 			PopulateUpDownCounterTags(upDownCounterTags);
 
-			_upDownCounterInstrument = _meter.CreateUpDownCounter<int>(name: "testing-meter.up.down.counter", unit: null, description: null, tags: upDownCounterTags);
+			_upDownCounterInstrument = _meter.CreateUpDownCounter<int>(name: "testing-meter.up_down_counter", unit: null, description: null, tags: upDownCounterTags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
@@ -187,7 +187,7 @@ namespace Testing
 
 			observableCounterTagList.Add("generic_parameter", genericParameter);
 
-			_observableCounterInstrument = _meter.CreateObservableCounter<int>("testing-meter.observable.counter", valueFunc, unit: null, description: null
+			_observableCounterInstrument = _meter.CreateObservableCounter<int>("testing-meter.observable_counter", valueFunc, unit: null, description: null
 				, tags: observableCounterTagList
 			);
 		}
@@ -204,7 +204,7 @@ namespace Testing
 
 			observableGaugeTagList.Add("generic_parameter", genericParameter);
 
-			_observableGaugeInstrument = _meter.CreateObservableGauge<int>("testing-meter.observable.gauge", valueFunc, unit: null, description: null
+			_observableGaugeInstrument = _meter.CreateObservableGauge<int>("testing-meter.observable_gauge", valueFunc, unit: null, description: null
 				, tags: observableGaugeTagList
 			);
 		}
@@ -221,7 +221,7 @@ namespace Testing
 
 			observableUpDownCounterTagList.Add("generic_parameter", genericParameter);
 
-			_observableUpDownCounterInstrument = _meter.CreateObservableUpDownCounter<int>("testing-meter.observable.up.down.counter", valueFunc, unit: null, description: null
+			_observableUpDownCounterInstrument = _meter.CreateObservableUpDownCounter<int>("testing-meter.observable_up_down_counter", valueFunc, unit: null, description: null
 				, tags: observableUpDownCounterTagList
 			);
 		}

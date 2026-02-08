@@ -64,7 +64,10 @@ partial class TelemetrySourceGenerator
 		if (targets.Length == 0)
 			return;
 
-		var failures = targets.Where(m => m!.Failures?.Length > 0).SelectMany(m => m!.Failures!.Value).ToArray();
+		var failures = targets
+			.Where(m => m!.Failures?.Length > 0)
+			.SelectMany(m => m!.Failures!.Value)
+			.ToArray();
 		if (failures.Length > 0)
 		{
 			foreach (var failure in failures)

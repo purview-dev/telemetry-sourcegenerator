@@ -1,50 +1,39 @@
 ﻿using System.Diagnostics;
 using Purview.Telemetry;
 
-// ************************************************
-// This is the sample from the README.md file.
-// ************************************************
+/* This is the interface from the README.md
+ * It demonstrates how you can use Purview's multi-target attributes to
+ * generate multiple types of telemetry from a single method.
+ */
 
-namespace SampleApp.APIService.Services;
-
+// Multi-target interface: generates Activities, Logging, AND Metrics from combined methods
 [ActivitySource]
 [Logger]
 [Meter]
 interface IEntityStoreTelemetry
 {
-	/// <summary>
-	/// Creates and starts an Activity and adds the parameters as Tags and Baggage.
-	/// </summary>
+	// MULTI-TARGET: Creates Activity + Logs Info + Increments Counter - all from one method!
 	[Activity]
+	[Info]
+	[AutoCounter]
 	Activity? GettingEntityFromStore(int entityId, [Baggage] string serviceUrl);
 
-	/// <summary>
-	/// Adds an ActivityEvent to the Activity with the parameters as Tags.
-	/// </summary>
+	// MULTI-TARGET: Adds ActivityEvent + Logs the duration as Trace.
 	[Event]
+	[Trace]
 	void GetDuration(Activity? activity, int durationInMS);
 
-	/// <summary>
-	/// Adds the parameters as Baggage to the Activity.
-	/// </summary>
+	// Single-target examples (when you only need one telemetry type):
+
+	// Activity-only: Adds Baggage to the Activity
 	[Context]
 	void RetrievedEntity(Activity? activity, float totalValue, int lastUpdatedByUserId);
 
-	/// <summary>
-	/// Generates a structured log message using an ILogger - defaults to Informational.
-	/// </summary>
-	[Log]
-	void ProcessingEntity(int entityId, string updateState);
+	// Log-only: Structured log message
+	[Warning]
+	void EntityNotFound(int entityId);
 
-	/// <summary>
-	/// Generates a structured log message using an ILogger, specifically defined as Informational.
-	/// </summary>
-	[Info]
-	void ProcessingAnotherEntity(int entityId, string updateState);
-
-	/// <summary>
-	/// Adds 1 to a Counter{T} with the entityId as a Tag.
-	/// </summary>
-	[AutoCounter]
-	void RetrievingEntity(int entityId);
+	// Metric-only: Histogram for tracking values
+	[Histogram]
+	void RecordEntitySize(int sizeInBytes);
 }

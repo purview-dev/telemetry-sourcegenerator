@@ -6,17 +6,17 @@ namespace Purview.Telemetry.SourceGenerator.Helpers;
 static class StringBuilderExtensions
 {
 	// Cache common indent strings to avoid repeated allocations
-	private static readonly string[] CachedIndents =
+	static readonly string[] CachedIndents =
 	[
-		"",           // 0
-		"\t",         // 1
-		"\t\t",       // 2
-		"\t\t\t",     // 3
-		"\t\t\t\t",   // 4
+		"", // 0
+		"\t", // 1
+		"\t\t", // 2
+		"\t\t\t", // 3
+		"\t\t\t\t", // 4
 		"\t\t\t\t\t", // 5
 		"\t\t\t\t\t\t", // 6
 		"\t\t\t\t\t\t\t", // 7
-		"\t\t\t\t\t\t\t\t" // 8
+		"\t\t\t\t\t\t\t\t", // 8
 	];
 
 	public static StringBuilder AggressiveInlining(this StringBuilder builder, int indent) =>

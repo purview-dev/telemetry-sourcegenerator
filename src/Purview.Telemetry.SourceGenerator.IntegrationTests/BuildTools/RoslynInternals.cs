@@ -31,7 +31,7 @@ sealed class InMemoryAdditionalText(
 
 	public override SourceText GetText(CancellationToken cancellationToken = default) => _content;
 
-	private class InMemoryConfigOptions(ImmutableDictionary<string, string> values)
+	private sealed class InMemoryConfigOptions(ImmutableDictionary<string, string> values)
 		: AnalyzerConfigOptions
 	{
 		public static AnalyzerConfigOptions Empty { get; } = new InMemoryConfigOptions([]);

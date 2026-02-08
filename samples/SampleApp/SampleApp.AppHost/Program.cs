@@ -1,3 +1,5 @@
+using Scalar.Aspire;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 Console.Title = "Aspire: Purview Telemetry Sample App";
@@ -14,5 +16,9 @@ builder
 	.WithExternalHttpEndpoints()
 	.WithReference(apiService)
 	.WaitFor(apiService);
+
+var scalar = builder.AddScalarApiReference();
+
+scalar.WithApiReference(apiService);
 
 await builder.Build().RunAsync();

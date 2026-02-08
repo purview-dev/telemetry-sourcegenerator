@@ -96,7 +96,7 @@ namespace Testing
 		{
 			if (_upDownInstrument != null)
 			{
-				throw new global::System.Exception("testing-meter.up.down has already been initialized.");
+				throw new global::System.Exception("testing-meter.up_down has already been initialized.");
 			}
 
 			global::System.Diagnostics.TagList upDownTagList = new();
@@ -104,7 +104,7 @@ namespace Testing
 			upDownTagList.Add("int_param", intParam);
 			upDownTagList.Add("bool_param", boolParam);
 
-			_upDownInstrument = _meter.CreateObservableUpDownCounter<int>("testing-meter.up.down", upDownValue, unit: null, description: null
+			_upDownInstrument = _meter.CreateObservableUpDownCounter<int>("testing-meter.up_down", upDownValue, unit: null, description: null
 				, tags: upDownTagList
 			);
 		}

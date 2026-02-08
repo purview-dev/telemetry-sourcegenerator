@@ -274,9 +274,19 @@ static partial class SharedHelpers
 				attributeData,
 				(name, value) =>
 				{
-					if (name.Equals("Name", StringComparison.OrdinalIgnoreCase))
+					if (
+						name.Equals(
+							nameof(TagOrBaggageAttributeRecord.Name),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 						nameValue = new((string)value);
-					else if (name.Equals("SkipOnNullOrEmpty", StringComparison.OrdinalIgnoreCase))
+					else if (
+						name.Equals(
+							nameof(TagOrBaggageAttributeRecord.SkipOnNullOrEmpty),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
 						skipOnNullOrEmpty = new((bool)value);
 				},
 				semanticModel,

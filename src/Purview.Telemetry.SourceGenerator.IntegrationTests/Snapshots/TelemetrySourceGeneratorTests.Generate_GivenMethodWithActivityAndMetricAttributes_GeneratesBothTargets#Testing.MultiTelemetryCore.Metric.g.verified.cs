@@ -48,7 +48,7 @@ namespace Testing
 
 			PopulateTraceAndCountMethodTags(traceAndCountMethodTags);
 
-			_traceAndCountMethodInstrument = _meter.CreateCounter<int>(name: "testing-meter.trace.and.count.method", unit: null, description: null, tags: traceAndCountMethodTags);
+			_traceAndCountMethodInstrument = _meter.CreateCounter<int>(name: "testing-meter.trace_and_count_method", unit: null, description: null, tags: traceAndCountMethodTags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

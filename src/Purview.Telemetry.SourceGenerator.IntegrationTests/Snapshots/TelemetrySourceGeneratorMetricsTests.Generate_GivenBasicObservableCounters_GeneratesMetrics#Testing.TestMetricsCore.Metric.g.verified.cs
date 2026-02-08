@@ -68,7 +68,7 @@ namespace Testing
 			observableCounterTagList.Add("int_param", intParam);
 			observableCounterTagList.Add("bool_param", boolParam);
 
-			_observableCounterInstrument = _meter.CreateObservableCounter<int>("testing-observable-meter.observable.counter", f, unit: null, description: null
+			_observableCounterInstrument = _meter.CreateObservableCounter<int>("testing-observable-meter.observable_counter", f, unit: null, description: null
 				, tags: observableCounterTagList
 			);
 		}
@@ -78,7 +78,7 @@ namespace Testing
 		{
 			if (_observableCounter2Instrument != null)
 			{
-				throw new global::System.Exception("testing-observable-meter.observable.counter2 has already been initialized.");
+				throw new global::System.Exception("testing-observable-meter.observable_counter2 has already been initialized.");
 			}
 
 			global::System.Diagnostics.TagList observableCounter2TagList = new();
@@ -86,7 +86,7 @@ namespace Testing
 			observableCounter2TagList.Add("int_param", intParam);
 			observableCounter2TagList.Add("bool_param", boolParam);
 
-			_observableCounter2Instrument = _meter.CreateObservableCounter<int>("testing-observable-meter.observable.counter2", f, unit: null, description: null
+			_observableCounter2Instrument = _meter.CreateObservableCounter<int>("testing-observable-meter.observable_counter2", f, unit: null, description: null
 				, tags: observableCounter2TagList
 			);
 		}
@@ -104,7 +104,7 @@ namespace Testing
 			observableCounter3TagList.Add("int_param", intParam);
 			observableCounter3TagList.Add("bool_param", boolParam);
 
-			_observableCounter3Instrument = _meter.CreateObservableCounter<int>("testing-observable-meter.observable.counter3", f, unit: null, description: null
+			_observableCounter3Instrument = _meter.CreateObservableCounter<int>("testing-observable-meter.observable_counter3", f, unit: null, description: null
 				, tags: observableCounter3TagList
 			);
 		}

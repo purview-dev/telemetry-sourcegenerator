@@ -104,7 +104,7 @@ namespace Testing
 			upDownTagList.Add("int_param", intParam);
 			upDownTagList.Add("bool_param", boolParam);
 
-			_upDownInstrument = _meter.CreateObservableUpDownCounter<int>("testing-meter.up.down", upDownValue, unit: null, description: null
+			_upDownInstrument = _meter.CreateObservableUpDownCounter<int>("testing-meter.up_down", upDownValue, unit: null, description: null
 				, tags: upDownTagList
 			);
 		}

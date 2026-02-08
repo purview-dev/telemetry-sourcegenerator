@@ -40,7 +40,7 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 
 		PopulateRetrievingEntityTags(retrievingEntityTags);
 
-		_retrievingEntityInstrument = _meter.CreateCounter<int>(name: "entity.store.telemetry.retrieving.entity", unit: null, description: null, tags: retrievingEntityTags);
+		_retrievingEntityInstrument = _meter.CreateCounter<int>(name: "entity_store_telemetry.retrieving_entity", unit: null, description: null, tags: retrievingEntityTags);
 	}
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

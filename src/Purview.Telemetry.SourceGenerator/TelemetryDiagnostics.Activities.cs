@@ -164,13 +164,14 @@ partial class TelemetryDiagnostics
 			Category: Constants.Diagnostics.Activity.Usage
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor ActivitySourceNameDefaultsToAssembly = new(
-			Id: "TSG3019",
-			Title: "ActivitySource name is defaulting to assembly name",
-			Description: "ActivitySource name is defaulting to the assembly name '{0}'. Consider specifying an explicit name using [ActivitySource(Name = \"...\")] for better control.",
-			Severity: DiagnosticSeverity.Info,
-			Category: Constants.Diagnostics.Activity.Usage
-		);
+		public static readonly TelemetryDiagnosticDescriptor ActivitySourceNameDefaultsToAssembly =
+			new(
+				Id: "TSG3019",
+				Title: "ActivitySource name is defaulting to assembly name",
+				Description: "ActivitySource name is defaulting to the assembly name '{0}'. Consider specifying an explicit name using [ActivitySource(Name = \"...\")] for better control.",
+				Severity: DiagnosticSeverity.Info,
+				Category: Constants.Diagnostics.Activity.Usage
+			);
 
 		public static readonly TelemetryDiagnosticDescriptor ActivitySourceNameIsEmpty = new(
 			Id: "TSG3020",

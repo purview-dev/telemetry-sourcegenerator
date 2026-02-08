@@ -59,7 +59,7 @@ static partial class Constants
 		/// OpenTelemetry-aligned naming (default from v4): Preserves casing, uses dot.separated.lowercase for metrics,
 		/// snake_case for tags, follows OTel semantic conventions.
 		/// </summary>
-		OpenTelemetry = 1
+		OpenTelemetry = 1,
 	}
 
 	public static partial class Shared

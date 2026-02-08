@@ -48,7 +48,7 @@ namespace Testing
 
 			PopulateCountOperationTags(countOperationTags);
 
-			_countOperationInstrument = _meter.CreateCounter<int>(name: "testing-meter.count.operation", unit: null, description: null, tags: countOperationTags);
+			_countOperationInstrument = _meter.CreateCounter<int>(name: "testing-meter.count_operation", unit: null, description: null, tags: countOperationTags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

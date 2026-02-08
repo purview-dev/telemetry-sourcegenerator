@@ -52,12 +52,12 @@ namespace Testing
 
 			PopulateUpDownTags(upDownTags);
 
-			_upDownInstrument = _meter.CreateUpDownCounter<int>(name: "testing-meter.up.down", unit: null, description: null, tags: upDownTags);
+			_upDownInstrument = _meter.CreateUpDownCounter<int>(name: "testing-meter.up_down", unit: null, description: null, tags: upDownTags);
 			global::System.Collections.Generic.Dictionary<string, object?> upDown2Tags = new();
 
 			PopulateUpDown2Tags(upDown2Tags);
 
-			_upDown2Instrument = _meter.CreateUpDownCounter<int>(name: "testing-meter.up.down2", unit: null, description: null, tags: upDown2Tags);
+			_upDown2Instrument = _meter.CreateUpDownCounter<int>(name: "testing-meter.up_down2", unit: null, description: null, tags: upDown2Tags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

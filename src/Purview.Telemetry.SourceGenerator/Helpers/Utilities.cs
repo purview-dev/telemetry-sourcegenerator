@@ -8,7 +8,11 @@ namespace Purview.Telemetry.SourceGenerator.Helpers;
 
 static partial class Utilities
 {
-	private static readonly Regex WhitespaceRegex = new(@"\s+", RegexOptions.Compiled, TimeSpan.FromMilliseconds(2000));
+	static readonly Regex WhitespaceRegex = new(
+		@"\s+",
+		RegexOptions.Compiled,
+		TimeSpan.FromMilliseconds(2000)
+	);
 
 	public static TargetGeneration IsValidGenerationTarget(
 		IMethodSymbol method,
@@ -29,31 +33,37 @@ static partial class Utilities
 			var attributeType = PurviewTypeFactory.Create(attribute.AttributeClass);
 
 			// Check activities
-			if (Constants.Activities.ActivityAttribute == attributeType
+			if (
+				Constants.Activities.ActivityAttribute == attributeType
 				|| Constants.Activities.EventAttribute == attributeType
-				|| Constants.Activities.ContextAttribute == attributeType)
+				|| Constants.Activities.ContextAttribute == attributeType
+			)
 			{
 				activityCount++;
 			}
 			// Check logging
-			else if (Constants.Logging.LogAttribute == attributeType
+			else if (
+				Constants.Logging.LogAttribute == attributeType
 				|| Constants.Logging.TraceAttribute == attributeType
 				|| Constants.Logging.DebugAttribute == attributeType
 				|| Constants.Logging.InfoAttribute == attributeType
 				|| Constants.Logging.WarningAttribute == attributeType
 				|| Constants.Logging.ErrorAttribute == attributeType
-				|| Constants.Logging.CriticalAttribute == attributeType)
+				|| Constants.Logging.CriticalAttribute == attributeType
+			)
 			{
 				loggingCount++;
 			}
 			// Check metrics
-			else if (Constants.Metrics.CounterAttribute == attributeType
+			else if (
+				Constants.Metrics.CounterAttribute == attributeType
 				|| Constants.Metrics.AutoCounterAttribute == attributeType
 				|| Constants.Metrics.UpDownCounterAttribute == attributeType
 				|| Constants.Metrics.HistogramAttribute == attributeType
 				|| Constants.Metrics.ObservableCounterAttribute == attributeType
 				|| Constants.Metrics.ObservableGaugeAttribute == attributeType
-				|| Constants.Metrics.ObservableUpDownCounterAttribute == attributeType)
+				|| Constants.Metrics.ObservableUpDownCounterAttribute == attributeType
+			)
 			{
 				metricsCount++;
 			}
@@ -329,8 +339,7 @@ static partial class Utilities
 	public static string Flatten(this SyntaxNode syntax) =>
 		syntax.WithoutTrivia().ToString().Flatten();
 
-	public static string Flatten(this string value) =>
-		WhitespaceRegex.Replace(value, " ");
+	public static string Flatten(this string value) => WhitespaceRegex.Replace(value, " ");
 
 	public static bool ContainsAttribute(
 		ISymbol symbol,
@@ -485,7 +494,8 @@ static partial class Utilities
 				// Add separator before uppercase if:
 				// 1. Previous was lowercase (camelCase boundary: "entityId" -> "entity.id")
 				// 2. Next is lowercase and previous was uppercase (acronym boundary: "HTTPSConnection" -> "https.connection")
-				bool nextIsLower = i + 1 < pascalCaseName.Length && char.IsLower(pascalCaseName[i + 1]);
+				bool nextIsLower =
+					i + 1 < pascalCaseName.Length && char.IsLower(pascalCaseName[i + 1]);
 
 				if (previousWasLower || (previousWasUpper && nextIsLower))
 				{
@@ -513,22 +523,44 @@ static partial class Utilities
 			return false;
 
 		// If it contains separators already, it's not a compound
-		if (lowercaseName.Contains('.') || lowercaseName.Contains('_') || lowercaseName.Contains('-'))
+		if (
+			lowercaseName.Contains('.')
+			|| lowercaseName.Contains('_')
+			|| lowercaseName.Contains('-')
+		)
 			return false;
 
 		// Common compound patterns (heuristic)
-		string[] commonSuffixes = ["id", "key", "name", "type", "count", "value", "time", "date", "code", "number"];
+		string[] commonSuffixes =
+		[
+			"id",
+			"key",
+			"name",
+			"type",
+			"count",
+			"value",
+			"time",
+			"date",
+			"code",
+			"number",
+		];
 		string[] commonPrefixes = ["get", "set", "is", "has", "can", "should", "will"];
 
 		foreach (var suffix in commonSuffixes)
 		{
-			if (lowercaseName.EndsWith(suffix, StringComparison.Ordinal) && lowercaseName.Length > suffix.Length + 2)
+			if (
+				lowercaseName.EndsWith(suffix, StringComparison.Ordinal)
+				&& lowercaseName.Length > suffix.Length + 2
+			)
 				return true;
 		}
 
 		foreach (var prefix in commonPrefixes)
 		{
-			if (lowercaseName.StartsWith(prefix, StringComparison.Ordinal) && lowercaseName.Length > prefix.Length + 2)
+			if (
+				lowercaseName.StartsWith(prefix, StringComparison.Ordinal)
+				&& lowercaseName.Length > prefix.Length + 2
+			)
 				return true;
 		}
 
@@ -538,7 +570,10 @@ static partial class Utilities
 	/// <summary>
 	/// Checks if a name is a generic or reserved term that provides little semantic value.
 	/// </summary>
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase")]
+	[System.Diagnostics.CodeAnalysis.SuppressMessage(
+		"Globalization",
+		"CA1308:Normalize strings to uppercase"
+	)]
 	public static bool IsGenericOrReservedName(string name)
 	{
 		if (string.IsNullOrWhiteSpace(name))
@@ -546,8 +581,21 @@ static partial class Utilities
 
 		string[] genericTerms =
 		[
-			"activity", "event", "error", "exception", "start", "stop", "begin", "end",
-			"task", "action", "func", "method", "operation", "process", "handler"
+			"activity",
+			"event",
+			"error",
+			"exception",
+			"start",
+			"stop",
+			"begin",
+			"end",
+			"task",
+			"action",
+			"func",
+			"method",
+			"operation",
+			"process",
+			"handler",
 		];
 
 		string lowerName = name.ToLowerInvariant();

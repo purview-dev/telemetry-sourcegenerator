@@ -15,9 +15,10 @@ namespace SampleApp.APIService.Services;
 [Meter]
 public interface IWeatherServiceTelemetry
 {
-	// --> SINGLE-TARGET: Activity only
+	// --> MULTI-TARGET: Activity, with Trace log entry
 	// Single Activity method
 	[Activity(ActivityKind.Client)]
+	[Trace]
 	Activity? GettingWeatherForecast([Baggage] string someRandomBaggageInfo, int requestedCount);
 
 	// --> SINGLE-TARGET: Event
@@ -32,10 +33,10 @@ public interface IWeatherServiceTelemetry
 	[Event(ActivityStatusCode.Ok)]
 	void TemperaturesReceived(Activity? activity, TimeSpan elapsed);
 
-	// --> MULTI-TARGET: AutoCounter + Warning Log (v4.0 feature)
+	// --> MULTI-TARGET: AutoCounter + Warning Log entry
 	// Increments "too cold" counter AND logs warning in a single call
 	[AutoCounter]
-	[Log(LogLevel.Warning)]
+	[Warning]
 	[Event]
 	void ItsTooCold(Activity? activity, int minTempInC, int tooColdCount);
 
@@ -44,9 +45,10 @@ public interface IWeatherServiceTelemetry
 	[Histogram]
 	void HistogramOfTemperature(int temperature);
 
-	// --> SINGLE-TARGET: Error Log only
+	// --> MULTI-TARGET: Error Log entry, and AutoCounter increment
 	// Request count validation error
 	[Error]
+	[AutoCounter]
 	void RequestedCountIsTooSmall(int requestCount);
 
 	// --> SINGLE-TARGET: Info Log with enumerable expansion

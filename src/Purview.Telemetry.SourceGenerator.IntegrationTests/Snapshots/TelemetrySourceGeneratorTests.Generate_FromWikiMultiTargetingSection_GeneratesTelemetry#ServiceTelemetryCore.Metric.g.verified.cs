@@ -40,7 +40,7 @@ sealed partial class ServiceTelemetryCore : global::IServiceTelemetry
 
 		PopulateAnAutoIncrementTags(anAutoIncrementTags);
 
-		_anAutoIncrementInstrument = _meter.CreateCounter<int>(name: "service.telemetry.an.auto.increment", unit: null, description: null, tags: anAutoIncrementTags);
+		_anAutoIncrementInstrument = _meter.CreateCounter<int>(name: "service_telemetry.an_auto_increment", unit: null, description: null, tags: anAutoIncrementTags);
 	}
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
