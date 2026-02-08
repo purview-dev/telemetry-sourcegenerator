@@ -57,10 +57,9 @@ version:
     @bun -e "console.log('Current Version: {{ colour_green }}' + require('./package.json').version + '{{ colour_reset }}')"
 
 update-version:
-    @pack_version="$$(bun -e 'console.log(require("./package.json").version)')"; \
-     echo -e "Update related samples and docs to new version: {{ colour_green }}$${pack_version}{{ colour_reset }}"; \
-     git submodule update --init --recursive; \
-     bun .build/update-version.js
+    @bun -e "console.log('Update related samples and docs to new version: {{ colour_green }}' + require('./package.json').version + '{{ colour_reset }}')"
+    @git submodule update --init --recursive
+    @bun .build/update-version.js
 
 build-pack:
     @pack_version="$$(bun -e 'console.log(require("./package.json").version)')"; \
