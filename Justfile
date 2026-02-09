@@ -5,69 +5,85 @@ configuration := "Release"
 sample_solution_file := "./samples/SampleApp/SampleApp.slnx"
 artifact_folder := "p:/sync-projects/.local-nuget/"
 
-# Colour codes (ANSI)
-
-esc := "\u{001b}"
-colour_reset := esc + "[0m"
-colour_green := esc + "[32m"
-colour_orange := esc + "[33m"
-colour_blue := esc + "[34m"
-
+# Displays the list of available commands
 default:
     @just --list
 
+# Builds the solution with the specified configuration (default: Release)
+[group('Build and Test')]
 build:
-    @echo -e "Building {{ colour_blue }}{{ solution_file }}{{ colour_reset }} with {{ colour_orange }}{{ configuration }}{{ colour_reset }}..."
+    @echo -e "Building {{ BLUE }}{{ solution_file }}{{ NORMAL }} with {{ YELLOW }}{{ configuration }}{{ NORMAL }}..."
     @dotnet build "{{ solution_file }}" --configuration "{{ configuration }}"
 
+# Runs tests for the solution with the specified configuration (default: Release)
+[group('Build and Test')]
 test:
-    @echo -e "Running tests for {{ colour_blue }}{{ test_solution }}{{ colour_reset }} with {{ colour_orange }}{{ configuration }}{{ colour_reset }}..."
+    @echo -e "Running tests for {{ BLUE }}{{ test_solution }}{{ NORMAL }} with {{ YELLOW }}{{ configuration }}{{ NORMAL }}..."
     @dotnet test --solution "{{ test_solution }}" --configuration "{{ configuration }}"
 
+# Creates a new release (final or prerelease) using bun
+[group('Versioning and Release')]
 release-final:
     @echo -e "Committing the changes and creating a new release..."
     @bun release
 
+# Creates a new prerelease using bun
+[group('Versioning and Release')]
 release-pre:
     @echo -e "Committing the changes and creating a new release..."
     @bun release -- --prerelease prerelease
 
+# Packs the source generator into a NuGet package and outputs it to the specified folder
+[group('Build and Test')]
 pack: update-version build-pack
 
+# Formats the code in the root folder
 format:
-    @echo -e "Formatting {{ colour_blue }}{{ root_folder }}{{ colour_reset }}..."
+    @echo -e "Formatting {{ BLUE }}{{ root_folder }}{{ NORMAL }}..."
     @dotnet format "{{ root_folder }}"
 
+# Opens the solution file in Visual Studio
+[group('System/ Shell')]
 vs:
-    @echo -e "Opening {{ colour_blue }}{{ solution_file }}{{ colour_reset }} in {{ colour_orange }}Visual Studio{{ colour_reset }}..."
-    @start "" "{{ solution_file }}"
+    @echo -e "Opening {{ BLUE }}{{ solution_file }}{{ NORMAL }} in {{ YELLOW }}Visual Studio{{ NORMAL }}..."
+    @start "{{ solution_file }}"
 
+# Opens the root folder in Visual Studio Code
+[group('System/ Shell')]
 code:
-    @echo -e "Opening {{ colour_blue }}Visual Studio Code{{ colour_reset }}..."
-    @code .
+    @echo -e "Opening {{ BLUE }}Visual Studio Code{{ NORMAL }}..."
+    @code "{{ root_folder }}"
 
+# Opens the sample solution file in Visual Studio
+[group('System/ Shell')]
 vs-s:
-    @echo -e "Opening {{ colour_blue }}{{ sample_solution_file }}{{ colour_reset }} in {{ colour_orange }}Visual Studio{{ colour_reset }}..."
-    @start "" "{{ sample_solution_file }}"
+    @echo -e "Opening {{ BLUE }}{{ sample_solution_file }}{{ NORMAL }} in {{ YELLOW }}Visual Studio{{ NORMAL }}..."
+    @start "{{ sample_solution_file }}"
 
 # Displays the current version of the project (requires bun)
+[group('Versioning and Release')]
 version:
-    @bun -e "console.log('Current Version: {{ colour_green }}' + require('./package.json').version + '{{ colour_reset }}')"
+    @bun -e "console.log('Current Version: {{ GREEN }}' + require('./package.json').version + '{{ NORMAL }}')"
 
+# Updates related samples and docs to new version (requires bun)
+[group('Versioning and Release')]
 update-version:
-    @bun -e "console.log('Update related samples and docs to new version: {{ colour_green }}' + require('./package.json').version + '{{ colour_reset }}')"
+    @bun -e "console.log('Update related samples and docs to new version: {{ GREEN }}' + require('./package.json').version + '{{ NORMAL }}')"
     @git submodule update --init --recursive
     @bun .build/update-version.js
 
+# Packs the source generator into a NuGet package and outputs it to the specified folder, including version, branch, commit, and copyright year information in the package metadata
+[group('Build and Test')]
 build-pack:
-    @bun -e "const version = require('./package.json').version; console.log('Packing {{ colour_blue }}Source Generator{{ colour_reset }} with {{ colour_orange }}' + version + '{{ colour_reset }}...');"
-    @echo -e "  Configuration:   {{ colour_green }}{{ configuration }}{{ colour_reset }}"
-    @bun -e "const exec = require('child_process').execSync; console.log('  Branch:          {{ colour_green }}' + exec('git rev-parse --abbrev-ref HEAD').toString().trim() + '{{ colour_reset }}');"
-    @bun -e "const exec = require('child_process').execSync; console.log('  Commit:          {{ colour_green }}' + exec('git rev-parse HEAD').toString().trim() + '{{ colour_reset }}');"
-    @bun -e "console.log('  Copyright Year:  {{ colour_green }}' + new Date().getFullYear() + '{{ colour_reset }}');"
-    @echo -e "  Output Folder:   {{ colour_green }}{{ artifact_folder }}{{ colour_reset }}"
+    @bun -e "const version = require('./package.json').version; console.log('Packing {{ BLUE }}Source Generator{{ NORMAL }} with {{ YELLOW }}' + version + '{{ NORMAL }}...');"
+    @echo -e "  Configuration:   {{ GREEN }}{{ configuration }}{{ NORMAL }}"
+    @bun -e "const exec = require('child_process').execSync; console.log('  Branch:          {{ GREEN }}' + exec('git rev-parse --abbrev-ref HEAD').toString().trim() + '{{ NORMAL }}');"
+    @bun -e "const exec = require('child_process').execSync; console.log('  Commit:          {{ GREEN }}' + exec('git rev-parse HEAD').toString().trim() + '{{ NORMAL }}');"
+    @bun -e "console.log('  Copyright Year:  {{ GREEN }}' + new Date().getFullYear() + '{{ NORMAL }}');"
+    @echo -e "  Output Folder:   {{ GREEN }}{{ artifact_folder }}{{ NORMAL }}"
     @bun -e "const version = require('./package.json').version; const exec = require('child_process').execSync; const branch = exec('git rev-parse --abbrev-ref HEAD').toString().trim(); const commit = exec('git rev-parse HEAD').toString().trim(); const year = new Date().getFullYear(); const cmd = 'dotnet pack \"{{ root_folder }}Purview.Telemetry.SourceGenerator/Purview.Telemetry.SourceGenerator.csproj\" --configuration \"{{ configuration }}\" --output \"{{ artifact_folder }}\" --include-symbols --property:Version=\"' + version + '\" --property:RepositoryBranch=\"' + branch + '\" --property:RepositoryCommit=\"' + commit + '\" --property:COPYRIGHT_YEAR=\"' + year + '\"'; exec(cmd, {stdio: 'inherit'});"
 
+# Runs GitHub Actions locally using act (requires act to be installed and configured)
 act:
-    @echo -e "Running {{ colour_blue }}act{{ colour_reset }}..."
+    @echo -e "Running {{ BLUE }}act{{ NORMAL }}..."
     @act -P ubuntu-latest=-self-hosted
