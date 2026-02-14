@@ -22,13 +22,14 @@ partial class WeatherServiceTests
 
 		telemetry.GettingWeatherForecast(Arg.Any<string>(), requestCount).Returns(activity);
 
-		// Act & Assert
-		var ex = await Assert
-			.That(async () =>
-				await service.GetWeatherForecastsAsync(requestCount, cancellationToken)
-			)
-			.ThrowsExactly<Exception>();
+		// Act
+		var err = await service.GetWeatherForecastsAsync(requestCount, cancellationToken);
 
-		telemetry.Received(1).FailedToRetrieveForecast(Arg.Is(activity), Arg.Is(ex!));
+		// Assert
+		await Assert.That(err.IsError).IsTrue();
+		await Assert.That(err.FirstError.Code).IsEqualTo("WeatherForecast.RetrievalFailed");
+		await Assert.That(err.FirstError.Type).IsEqualTo(ErrorOr.ErrorType.Failure);
+
+		telemetry.Received(1).FailedToRetrieveForecast(Arg.Is(activity), Arg.Any<Exception>());
 	}
 }

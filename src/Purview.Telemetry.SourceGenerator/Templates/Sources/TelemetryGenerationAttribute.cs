@@ -3,6 +3,7 @@
 /// <summary>
 /// Marker attribute to control the generation of telemetry-based classes.
 /// </summary>
+{CodeGen}
 [global::System.AttributeUsage(
 	global::System.AttributeTargets.Assembly | global::System.AttributeTargets.Interface,
 	AllowMultiple = false
@@ -82,4 +83,16 @@ sealed class TelemetryGenerationAttribute : global::System.Attribute
 	/// Defaults to <see cref="Purview.Telemetry.NamingConvention.OpenTelemetry"/>.
 	/// </summary>
 	public NamingConvention NamingConvention { get; set; } = NamingConvention.OpenTelemetry;
+
+	/// <summary>
+	/// Determines if a static TelemetryNames class should be generated containing all meter and activity source names.
+	/// Defaults to true.
+	/// </summary>
+	public bool GenerateTelemetryNamesClass { get; set; } = true;
+
+	/// <summary>
+	/// Optionally specifies the name of the TelemetryNames class to generate.
+	/// Defaults to "TelemetryNames" when null or empty.
+	/// </summary>
+	public string? TelemetryNamesClassName { get; set; }
 }

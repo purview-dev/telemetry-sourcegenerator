@@ -17,11 +17,17 @@ public static class HostApplicationBuilderExtensions
 {
 	extension([NotNull] IHostApplicationBuilder builder)
 	{
-		public IHostApplicationBuilder AddServiceDefaults()
+		public IHostApplicationBuilder AddServiceDefaults(
+			string[]? meterNames = null,
+			string[]? activitySourceNames = null,
+			bool throwOnMissingOpenApiConfig = true
+		)
 		{
-			builder.ConfigureOpenTelemetry();
+			builder.ConfigureOpenTelemetry(meterNames, activitySourceNames);
 
-			builder.AddDefaultHealthChecks();
+			builder
+				.AddDefaultHealthChecks()
+				.AddDefaultOpenAPI(throwOnMissing: throwOnMissingOpenApiConfig);
 
 			builder.Services.AddServiceDiscovery();
 
@@ -37,7 +43,10 @@ public static class HostApplicationBuilderExtensions
 			return builder;
 		}
 
-		public IHostApplicationBuilder ConfigureOpenTelemetry()
+		IHostApplicationBuilder ConfigureOpenTelemetry(
+			string[]? meterNames = null,
+			string[]? activitySourceNames = null
+		)
 		{
 			builder.Logging.AddOpenTelemetry(logging =>
 			{
@@ -54,7 +63,7 @@ public static class HostApplicationBuilderExtensions
 						.AddHttpClientInstrumentation()
 						.AddProcessInstrumentation()
 						.AddRuntimeInstrumentation()
-						.AddMeter([metricsAssembly])
+						.AddMeter(meterNames ?? [])
 				)
 				.WithTracing(tracing =>
 				{
@@ -68,11 +77,7 @@ public static class HostApplicationBuilderExtensions
 						.AddAspNetCoreInstrumentation()
 						.AddGrpcClientInstrumentation()
 						.AddHttpClientInstrumentation()
-						.AddSource([
-							// These are set in the AssemblyInfo.cs	files for the API and Web projects.
-							"sample-weather-app-api",
-							"sample-weather-app-web",
-						]);
+						.AddSource(activitySourceNames ?? []);
 				});
 
 			builder.AddOpenTelemetryExporters();
@@ -80,7 +85,7 @@ public static class HostApplicationBuilderExtensions
 			return builder;
 		}
 
-		public IHostApplicationBuilder AddDefaultHealthChecks()
+		IHostApplicationBuilder AddDefaultHealthChecks()
 		{
 			builder
 				.Services.AddHealthChecks()
@@ -90,7 +95,7 @@ public static class HostApplicationBuilderExtensions
 			return builder;
 		}
 
-		public IHostApplicationBuilder AddDefaultOpenAPI(
+		IHostApplicationBuilder AddDefaultOpenAPI(
 			IApiVersioningBuilder? apiVersioning = default,
 			bool throwOnMissing = true
 		)
@@ -137,38 +142,38 @@ public static class HostApplicationBuilderExtensions
 
 			return builder;
 		}
-	}
 
-	static IHostApplicationBuilder AddOpenTelemetryExporters(this IHostApplicationBuilder builder)
-	{
-		var useOtlpExporter = !string.IsNullOrWhiteSpace(
-			builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]
-		);
-
-		if (useOtlpExporter)
+		IHostApplicationBuilder AddOpenTelemetryExporters()
 		{
-			builder.Services.Configure<OpenTelemetryLoggerOptions>(logging =>
-				logging.AddOtlpExporter()
+			var useOtlpExporter = !string.IsNullOrWhiteSpace(
+				builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]
 			);
-			builder.Services.ConfigureOpenTelemetryMeterProvider(metrics =>
-				metrics.AddOtlpExporter()
-			);
-			builder.Services.ConfigureOpenTelemetryTracerProvider(tracing =>
-				tracing.AddOtlpExporter()
-			);
+
+			if (useOtlpExporter)
+			{
+				builder.Services.Configure<OpenTelemetryLoggerOptions>(logging =>
+					logging.AddOtlpExporter()
+				);
+				builder.Services.ConfigureOpenTelemetryMeterProvider(metrics =>
+					metrics.AddOtlpExporter()
+				);
+				builder.Services.ConfigureOpenTelemetryTracerProvider(tracing =>
+					tracing.AddOtlpExporter()
+				);
+			}
+
+			// Uncomment the following lines to enable the Prometheus exporter (requires the OpenTelemetry.Exporter.Prometheus.AspNetCore package)
+			// builder.Services.AddOpenTelemetry()
+			//    .WithMetrics(metrics => metrics.AddPrometheusExporter());
+
+			// Uncomment the following lines to enable the Azure Monitor exporter (requires the Azure.Monitor.OpenTelemetry.AspNetCore package)
+			//if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
+			//{
+			//    builder.Services.AddOpenTelemetry()
+			//       .UseAzureMonitor();
+			//}
+
+			return builder;
 		}
-
-		// Uncomment the following lines to enable the Prometheus exporter (requires the OpenTelemetry.Exporter.Prometheus.AspNetCore package)
-		// builder.Services.AddOpenTelemetry()
-		//    .WithMetrics(metrics => metrics.AddPrometheusExporter());
-
-		// Uncomment the following lines to enable the Azure Monitor exporter (requires the Azure.Monitor.OpenTelemetry.AspNetCore package)
-		//if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
-		//{
-		//    builder.Services.AddOpenTelemetry()
-		//       .UseAzureMonitor();
-		//}
-
-		return builder;
 	}
 }

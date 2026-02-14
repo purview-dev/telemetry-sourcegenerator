@@ -1,6 +1,7 @@
 @page "/weather"
 @page "/weather/{Count:int?}"
 @page "/weather/error/{ErrorType?}"
+@using System.Security.Cryptography
 @rendermode InteractiveServer
 @inject WeatherAPIClient WeatherApi
 @implements IAsyncDisposable
@@ -10,6 +11,7 @@
 <h1>Weather</h1>
 
 <p>This component fetches weather data from the API service with distributed tracing.</p>
+<i>There is an artifical delay in the server to represent 'processing'.</i>
 
 <div class="mb-3">
     <label for="Count" class="form-label">Number of forecasts (5-20):</label>
@@ -61,7 +63,7 @@ else if (forecasts is not null && forecasts.Length > 0)
 
 <div class="d-flex gap-2 flex-wrap">
     <button type="button" class="btn btn-warning" disabled="@isLoading" @onclick="@(() => TriggerErrorScenarioAsync(1))">Trigger Validation Error (count=1)</button>
-    <button type="button" class="btn btn-danger" disabled="@isLoading" @onclick="@(() => TriggerErrorScenarioAsync(100))">Trigger Large Count Error (count=100)</button>
+    <button type="button" class="btn btn-danger" disabled="@isLoading" @onclick="@(() => TriggerErrorScenarioAsync(tooLargeCount))">Trigger Large Count Error (count=@tooLargeCount)</button>
     <button type="button" class="btn btn-secondary" disabled="@isLoading" @onclick="ResetAsync">Reset</button>
     @if (isLoading)
     {
@@ -76,6 +78,7 @@ else if (forecasts is not null && forecasts.Length > 0)
     [Parameter]
     public string? ErrorType { get; set; }
 
+    private int tooLargeCount;
     private int requestCount = 5;
     private WeatherForecast[]? forecasts;
     private bool isLoading;
@@ -84,7 +87,8 @@ else if (forecasts is not null && forecasts.Length > 0)
 
     protected override void OnInitialized()
     {
-        requestCount = Count ?? 5;
+        requestCount = Count ?? 10;
+        ResetTooLarge();
         // Don't load data in OnInitialized - wait for user interaction
         // This makes the page load faster
     }
@@ -114,8 +118,15 @@ else if (forecasts is not null && forecasts.Length > 0)
 
     private async Task ResetAsync()
     {
-        requestCount = 5;
+        requestCount = 10;
+        ResetTooLarge();
+
         await LoadWeatherAsync();
+    }
+
+    void ResetTooLarge()
+    {
+        tooLargeCount = RandomNumberGenerator.GetInt32(21, 101);
     }
 
     private async Task ExecuteRequestAsync(Func<CancellationToken, Task> action)
@@ -148,6 +159,8 @@ else if (forecasts is not null && forecasts.Length > 0)
         }
         finally
         {
+            ResetTooLarge();
+
             isLoading = false;
         }
     }

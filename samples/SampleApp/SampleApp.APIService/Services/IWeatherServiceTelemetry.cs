@@ -49,7 +49,7 @@ public interface IWeatherServiceTelemetry
 	// Request count validation error
 	[Error]
 	[AutoCounter]
-	void RequestedCountIsTooSmall(int requestCount);
+	void RequestedCountIsOutOfRange(int requestCount);
 
 	// --> SINGLE-TARGET: Info Log with enumerable expansion
 #pragma warning disable TSG2008 // Unbounded enumeration possible

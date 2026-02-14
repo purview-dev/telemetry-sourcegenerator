@@ -1,10 +1,11 @@
+using SampleApp.Web;
 using SampleApp.Web.Clients;
 using SampleApp.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add Aspire service defaults (OpenTelemetry, health checks, service discovery, resiliency)
-builder.AddServiceDefaults();
+builder.AddServiceDefaults(TelemetryNames.MeterNames, TelemetryNames.ActivitySourceNames, false);
 
 // Add services to the container.
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();

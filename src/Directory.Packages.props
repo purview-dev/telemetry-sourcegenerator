@@ -18,7 +18,7 @@
   <ItemGroup Label="Testing">
     <PackageVersion Include="NSubstitute" Version="5.3.0" />
     <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.17" />
-    <PackageVersion Include="TUnit" Version="1.13.60" />
+    <PackageVersion Include="TUnit" Version="1.13.70" />
     <PackageVersion Include="Verify.SourceGenerators" Version="2.5.0" />
     <PackageVersion Include="Verify.TUnit" Version="31.12.5" />
     <PackageVersion Include="Verify.DiffPlex" Version="3.1.2" />

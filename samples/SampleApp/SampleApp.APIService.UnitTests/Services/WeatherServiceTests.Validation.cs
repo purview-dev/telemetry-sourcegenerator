@@ -16,13 +16,14 @@ partial class WeatherServiceTests
 		var telemetry = CreateTelemetry();
 		var service = CreateService(telemetry);
 
-		// Act & Assert
-		await Assert
-			.That(async () =>
-				await service.GetWeatherForecastsAsync(requestCount, cancellationToken)
-			)
-			.Throws<ArgumentOutOfRangeException>();
+		// Act
+		var err = await service.GetWeatherForecastsAsync(requestCount, cancellationToken);
 
-		telemetry.Received(1).RequestedCountIsTooSmall(Arg.Is(requestCount));
+		// Assert
+		await Assert.That(err.IsError).IsTrue();
+		await Assert.That(err.FirstError.Code).IsEqualTo("RequestCount.Invalid");
+		await Assert.That(err.FirstError.Type).IsEqualTo(ErrorOr.ErrorType.Validation);
+
+		telemetry.Received(1).RequestedCountIsOutOfRange(Arg.Is(requestCount));
 	}
 }

@@ -36,15 +36,10 @@ sealed class WeatherService(IWeatherServiceTelemetry telemetry, Func<int>? rng =
 
 		if (requestCount < minRequestCount || requestCount > maxRequestCount)
 		{
-			telemetry.RequestedCountIsTooSmall(requestCount);
+			telemetry.RequestedCountIsOutOfRange(requestCount);
 
 			return Error.Validation(
 				"RequestCount.Invalid",
-				$"Requested count must be at least {minRequestCount}, and no greater than {maxRequestCount}."
-			);
-
-			throw new ArgumentOutOfRangeException(
-				nameof(requestCount),
 				$"Requested count must be at least {minRequestCount}, and no greater than {maxRequestCount}."
 			);
 		}

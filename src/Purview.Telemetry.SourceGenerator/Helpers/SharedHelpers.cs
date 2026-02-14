@@ -360,7 +360,13 @@ static partial class SharedHelpers
 					?? new(false),
 				NamingConvention: typeGeneration?.NamingConvention
 					?? assemblyTelemetryGeneration?.NamingConvention
-					?? new(1) // Default to OpenTelemetry
+					?? new(1), // Default to OpenTelemetry
+				GenerateTelemetryNamesClass: typeGeneration?.GenerateTelemetryNamesClass
+					?? assemblyTelemetryGeneration?.GenerateTelemetryNamesClass
+					?? new(true),
+				TelemetryNamesClassName: typeGeneration?.TelemetryNamesClassName
+					?? assemblyTelemetryGeneration?.TelemetryNamesClassName
+					?? new()
 			);
 
 		static TelemetryGenerationAttributeRecord CreateDefault() =>
@@ -369,7 +375,9 @@ static partial class SharedHelpers
 				ClassName: new(),
 				DependencyInjectionClassName: new(),
 				DependencyInjectionClassIsPublic: new(false),
-				NamingConvention: new(1) // Default to OpenTelemetry
+				NamingConvention: new(1), // Default to OpenTelemetry
+				GenerateTelemetryNamesClass: new(true),
+				TelemetryNamesClassName: new()
 			);
 	}
 
@@ -385,6 +393,8 @@ static partial class SharedHelpers
 		AttributeStringValue? dependencyInjectionClassName = null;
 		AttributeValue<bool>? dependencyInjectionClassIsPublic = null;
 		AttributeValue<int>? namingConvention = null;
+		AttributeValue<bool>? generateTelemetryNamesClass = null;
+		AttributeStringValue? telemetryNamesClassName = null;
 
 		return AttributeParser(
 			attributeData,
@@ -435,6 +445,24 @@ static partial class SharedHelpers
 				{
 					namingConvention = new((int)value);
 				}
+				else if (
+					name.Equals(
+						nameof(TelemetryGenerationAttributeRecord.GenerateTelemetryNamesClass),
+						StringComparison.OrdinalIgnoreCase
+					)
+				)
+				{
+					generateTelemetryNamesClass = new((bool)value);
+				}
+				else if (
+					name.Equals(
+						nameof(TelemetryGenerationAttributeRecord.TelemetryNamesClassName),
+						StringComparison.OrdinalIgnoreCase
+					)
+				)
+				{
+					telemetryNamesClassName = new((string)value);
+				}
 			},
 			semanticModel,
 			logger,
@@ -445,7 +473,9 @@ static partial class SharedHelpers
 				ClassName: className ?? new(),
 				DependencyInjectionClassName: dependencyInjectionClassName ?? new(),
 				DependencyInjectionClassIsPublic: dependencyInjectionClassIsPublic ?? new(false),
-				NamingConvention: namingConvention ?? new(1) // Default to OpenTelemetry
+				NamingConvention: namingConvention ?? new(1), // Default to OpenTelemetry
+				GenerateTelemetryNamesClass: generateTelemetryNamesClass ?? new(true),
+				TelemetryNamesClassName: telemetryNamesClassName ?? new()
 			)
 			: null;
 	}

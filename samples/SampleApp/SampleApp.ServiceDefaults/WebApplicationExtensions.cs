@@ -24,22 +24,18 @@ public static class WebApplicationExtensions
 				new HealthCheckOptions { Predicate = r => r.Tags.Contains("live") }
 			);
 
+			app.UseDefaultOpenAPI();
+
 			return app;
 		}
 
-		public IApplicationBuilder UseDefaultOpenAPI(bool throwOnMissing = true)
+		void UseDefaultOpenAPI()
 		{
 			var configuration = app.Configuration;
 			var openApiSection = configuration.GetSection("OpenAPI");
 
 			if (!openApiSection.Exists())
-			{
-				return throwOnMissing
-					? throw new InvalidOperationException(
-						"OpenAPI configuration section is missing."
-					)
-					: app;
-			}
+				return;
 
 			app.MapOpenApi();
 
@@ -48,8 +44,6 @@ public static class WebApplicationExtensions
 				app.MapScalarApiReference();
 				app.MapGet("/", () => Results.Redirect("/scalar/v1")).ExcludeFromDescription();
 			}
-
-			return app;
 		}
 	}
 }

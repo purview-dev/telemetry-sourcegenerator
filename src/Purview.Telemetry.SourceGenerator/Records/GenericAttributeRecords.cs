@@ -10,7 +10,9 @@ record TelemetryGenerationAttributeRecord(
 	AttributeStringValue ClassName,
 	AttributeStringValue DependencyInjectionClassName,
 	AttributeValue<bool> DependencyInjectionClassIsPublic,
-	AttributeValue<int> NamingConvention
+	AttributeValue<int> NamingConvention,
+	AttributeValue<bool> GenerateTelemetryNamesClass,
+	AttributeStringValue TelemetryNamesClassName
 );
 
 /// <summary>
