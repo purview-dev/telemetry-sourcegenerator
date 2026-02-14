@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.0.0-prerelease.2](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.1...v4.0.0-prerelease.2) (2026-02-14)
+
+
+### Features
+
+* added Telemetry Names generated clases with meter and activity names ([8681033](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/86810330314cae7bc540c99f029d4bc4bf6ad402))
+
+
+### Bug Fixes
+
+* ensured the meter and metric generated names are standard ([c949c29](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/c949c292c68dc4b91e7e44442eb338000bb929d3))
+
 ## [4.0.0-prerelease.1](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.0...v4.0.0-prerelease.1) (2026-02-08)
 
 ## [4.0.0-prerelease.0](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-alpha.4...v4.0.0-prerelease.0) (2026-02-08)
