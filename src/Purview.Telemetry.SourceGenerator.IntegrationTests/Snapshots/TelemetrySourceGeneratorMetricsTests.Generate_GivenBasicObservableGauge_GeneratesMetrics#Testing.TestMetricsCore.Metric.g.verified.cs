@@ -63,7 +63,7 @@ namespace Testing
 				return;
 			}
 
-			_observableGaugeInstrument = _meter.CreateObservableGauge<int>("testing-meter.observable_gauge", f, unit: null, description: null);
+			_observableGaugeInstrument = _meter.CreateObservableGauge<int>("test_metrics.observable_gauge", f, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -71,10 +71,10 @@ namespace Testing
 		{
 			if (_observableGauge2Instrument != null)
 			{
-				throw new global::System.Exception("testing-meter.observable_gauge2 has already been initialized.");
+				throw new global::System.Exception("test_metrics.observable_gauge2 has already been initialized.");
 			}
 
-			_observableGauge2Instrument = _meter.CreateObservableGauge<int>("testing-meter.observable_gauge2", f, unit: null, description: null);
+			_observableGauge2Instrument = _meter.CreateObservableGauge<int>("test_metrics.observable_gauge2", f, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -85,7 +85,7 @@ namespace Testing
 				return;
 			}
 
-			_observableGauge3Instrument = _meter.CreateObservableGauge<int>("testing-meter.observable_gauge3", f, unit: null, description: null);
+			_observableGauge3Instrument = _meter.CreateObservableGauge<int>("test_metrics.observable_gauge3", f, unit: null, description: null);
 		}
 	}
 }

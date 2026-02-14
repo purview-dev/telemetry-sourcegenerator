@@ -6,7 +6,7 @@ namespace SampleApp.Web.Clients;
 
 [ActivitySource]
 [Logger]
-[Meter]
+[Meter(InstrumentPrefix = "weather")]
 public interface IWeatherAPIClientTelemetry
 {
 	[Activity(ActivityKind.Client)]

@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -76,9 +76,28 @@ partial class PipelineHelpers
 		var meterName = meterAttribute.Name.Value;
 		if (string.IsNullOrWhiteSpace(meterName))
 		{
-			meterName = interfaceSymbol.Name;
-			if (meterName[0] == 'I')
-				meterName = meterName.Substring(1);
+			// First check assembly-wide MeterName from MeterGenerationAttribute
+			meterName = meterGenerationAttribute?.MeterName.Value;
+
+			if (string.IsNullOrWhiteSpace(meterName))
+			{
+				// Fall back to assembly name with generation type convention
+				var assemblyName = semanticModel.Compilation.Assembly.Name;
+				var meterNameGenType = meterGenerationAttribute?.MeterNameGenerationType.Value ?? 1; // Default to DotNet
+
+				if (meterNameGenType == 0) // OpenTelemetry
+				{
+					// OpenTelemetry: lowercase assembly name
+#pragma warning disable CA1308 // Intentional lowercase for OpenTelemetry convention
+					meterName = assemblyName.ToLowerInvariant();
+#pragma warning restore CA1308
+				}
+				else // DotNet
+				{
+					// .NET: preserve assembly name as-is
+					meterName = assemblyName;
+				}
+			}
 		}
 
 		var instrumentMethods = BuildInstrumentationMethods(
@@ -136,7 +155,12 @@ partial class PipelineHelpers
 			: (meterGenerationAttribute?.LowercaseInstrumentName?.IsSet) != true
 				|| meterGenerationAttribute.LowercaseInstrumentName.Value!.Value;
 
-		var prefix = GeneratePrefix(meterGenerationAttribute, meterAttribute, token);
+		var prefix = GeneratePrefix(
+			meterGenerationAttribute,
+			meterAttribute,
+			interfaceSymbol.Name,
+			token
+		);
 		var lowercaseTagKeys =
 			meterAttribute.LowercaseTagKeys?.IsSet == true
 			&& meterAttribute.LowercaseTagKeys.Value!.Value;
@@ -213,12 +237,19 @@ partial class PipelineHelpers
 					// Example: dotnet.gc.last_collection.memory.committed_size
 					instrumentName = Utilities.ConvertToSeparatedLowercase(instrumentName!, '_');
 					if (!string.IsNullOrEmpty(prefix))
+					{
+						// Convert prefix components while preserving separator structure
+						// This handles both explicitly-set prefixes (e.g., "This.Is.A.Prefix") 
+						// and auto-generated prefixes (already in snake_case, won't be affected)
 						prefix = Utilities.ConvertToSeparatedLowercase(prefix!, '_');
+					}
 
-					// OpenTelemetry: Prepend meter name as namespace with dot separator
-					// e.g., meter "MyApp.Products" + instrument "pricing_page_requests"
+					// For OpenTelemetry convention only: Prepend meter name as namespace with dot separator
+					// Check if we're using OpenTelemetry meter name generation (lowercase assembly name)
+					// e.g., meter "myapp.products" + instrument "pricing_page_requests"
 					//       -> "myapp_products.pricing_page_requests"
-					if (!string.IsNullOrWhiteSpace(meterName))
+					var meterNameGenType = meterGenerationAttribute?.MeterNameGenerationType.Value ?? 1; // Default to DotNet
+					if (meterNameGenType == 0 && !string.IsNullOrWhiteSpace(meterName)) // OpenTelemetry only
 					{
 						var meterPrefix = Utilities.ConvertToSeparatedLowercase(meterName, '_');
 						instrumentName = $"{meterPrefix}.{instrumentName}";
@@ -673,6 +704,7 @@ partial class PipelineHelpers
 	static string? GeneratePrefix(
 		MeterGenerationAttributeRecord? meterGenerationAttribute,
 		MeterAttributeRecord meterAttribute,
+		string interfaceName,
 		CancellationToken token
 	)
 	{
@@ -681,7 +713,7 @@ partial class PipelineHelpers
 		string? prefix = null;
 		var separator = meterGenerationAttribute?.InstrumentSeparator.Or(
 			Constants.Metrics.InstrumentSeparatorDefault
-		);
+		) ?? Constants.Metrics.InstrumentSeparatorDefault;
 
 		if (meterAttribute.IncludeAssemblyInstrumentPrefix.Value == true)
 		{
@@ -694,8 +726,18 @@ partial class PipelineHelpers
 			}
 		}
 
+		// Check if interface-level prefix is explicitly set
 		if (!string.IsNullOrWhiteSpace(meterAttribute.InstrumentPrefix.Value))
+		{
 			prefix += meterAttribute.InstrumentPrefix.Value! + separator;
+		}
+		else
+		{
+			// Auto-generate prefix from interface name if not explicitly set
+			var autoPrefix = Utilities.GenerateInstrumentPrefixFromInterfaceName(interfaceName);
+			if (!string.IsNullOrWhiteSpace(autoPrefix))
+				prefix += autoPrefix + separator;
+		}
 
 		return prefix;
 	}

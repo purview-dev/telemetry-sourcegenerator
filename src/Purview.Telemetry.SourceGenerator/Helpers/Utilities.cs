@@ -513,6 +513,38 @@ static partial class Utilities
 	}
 
 	/// <summary>
+	/// Generates an instrument prefix from an interface name by:
+	/// 1. Stripping leading 'I' if present
+	/// 2. Stripping trailing 'Logs' or 'Telemetry' if present
+	/// 3. Converting to snake_case
+	/// Example: "IWeatherServiceTelemetry" -> "weather_service"
+	/// </summary>
+	public static string GenerateInstrumentPrefixFromInterfaceName(string interfaceName)
+	{
+		if (string.IsNullOrWhiteSpace(interfaceName))
+			return string.Empty;
+
+		var name = interfaceName;
+
+		// Strip leading 'I' if present
+		if (name.Length > 1 && name[0] == 'I' && char.IsUpper(name[1]))
+			name = name.Substring(1);
+
+		// Strip trailing 'Telemetry' or 'Logs'
+		if (name.EndsWith("Telemetry", StringComparison.Ordinal))
+			name = name.Substring(0, name.Length - "Telemetry".Length);
+		else if (name.EndsWith("Logs", StringComparison.Ordinal))
+			name = name.Substring(0, name.Length - "Logs".Length);
+
+		// If we stripped everything, return empty
+		if (string.IsNullOrWhiteSpace(name))
+			return string.Empty;
+
+		// Convert to snake_case
+		return ConvertToSeparatedLowercase(name, '_');
+	}
+
+	/// <summary>
 	/// Detects if a lowercase string appears to be a compound word without separators.
 	/// E.g., "entityid", "requestcount", "httpconnection" (likely compounds)
 	/// Returns true if the string is likely multiple words smashed together.

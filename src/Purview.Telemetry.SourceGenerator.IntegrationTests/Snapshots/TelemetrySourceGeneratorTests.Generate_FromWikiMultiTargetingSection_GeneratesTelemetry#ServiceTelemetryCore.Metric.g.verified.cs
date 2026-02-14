@@ -30,7 +30,7 @@ sealed partial class ServiceTelemetryCore : global::IServiceTelemetry
 
 		PopulateMeterTags(meterTags);
 
-		_meter = meterFactory.Create(new global::System.Diagnostics.Metrics.MeterOptions("ServiceTelemetry")
+		_meter = meterFactory.Create(new global::System.Diagnostics.Metrics.MeterOptions("Purview.Telemetry.SourceGenerator")
 		{
 			Version = null,
 			Tags = meterTags
@@ -40,7 +40,7 @@ sealed partial class ServiceTelemetryCore : global::IServiceTelemetry
 
 		PopulateAnAutoIncrementTags(anAutoIncrementTags);
 
-		_anAutoIncrementInstrument = _meter.CreateCounter<int>(name: "service_telemetry.an_auto_increment", unit: null, description: null, tags: anAutoIncrementTags);
+		_anAutoIncrementInstrument = _meter.CreateCounter<int>(name: "service.an_auto_increment", unit: null, description: null, tags: anAutoIncrementTags);
 	}
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

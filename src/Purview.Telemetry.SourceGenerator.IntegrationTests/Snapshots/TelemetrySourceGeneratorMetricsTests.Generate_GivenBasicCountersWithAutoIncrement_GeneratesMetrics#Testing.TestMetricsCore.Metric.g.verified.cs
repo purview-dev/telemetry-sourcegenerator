@@ -53,17 +53,17 @@ namespace Testing
 
 			PopulateCounter1Tags(counter1Tags);
 
-			_counter1Instrument = _meter.CreateCounter<int>(name: "testing-meter.counter1", unit: null, description: null, tags: counter1Tags);
+			_counter1Instrument = _meter.CreateCounter<int>(name: "test_metrics.counter1", unit: null, description: null, tags: counter1Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> counter2Tags = new();
 
 			PopulateCounter2Tags(counter2Tags);
 
-			_counter2Instrument = _meter.CreateCounter<int>(name: "testing-meter.counter2", unit: null, description: null, tags: counter2Tags);
+			_counter2Instrument = _meter.CreateCounter<int>(name: "test_metrics.counter2", unit: null, description: null, tags: counter2Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> counter3Tags = new();
 
 			PopulateCounter3Tags(counter3Tags);
 
-			_counter3Instrument = _meter.CreateCounter<int>(name: "testing-meter.counter3", unit: null, description: null, tags: counter3Tags);
+			_counter3Instrument = _meter.CreateCounter<int>(name: "test_metrics.counter3", unit: null, description: null, tags: counter3Tags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

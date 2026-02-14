@@ -63,7 +63,7 @@ namespace Testing
 				return;
 			}
 
-			_observableCounterInstrument = _meter.CreateObservableCounter<int>("testing-observable-meter.observable_counter", f, unit: null, description: null);
+			_observableCounterInstrument = _meter.CreateObservableCounter<int>("test_metrics.observable_counter", f, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -71,10 +71,10 @@ namespace Testing
 		{
 			if (_observableCounter2Instrument != null)
 			{
-				throw new global::System.Exception("testing-observable-meter.observable_counter2 has already been initialized.");
+				throw new global::System.Exception("test_metrics.observable_counter2 has already been initialized.");
 			}
 
-			_observableCounter2Instrument = _meter.CreateObservableCounter<int>("testing-observable-meter.observable_counter2", f, unit: null, description: null);
+			_observableCounter2Instrument = _meter.CreateObservableCounter<int>("test_metrics.observable_counter2", f, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -85,7 +85,7 @@ namespace Testing
 				return;
 			}
 
-			_observableCounter3Instrument = _meter.CreateObservableCounter<int>("testing-observable-meter.observable_counter3", f, unit: null, description: null);
+			_observableCounter3Instrument = _meter.CreateObservableCounter<int>("test_metrics.observable_counter3", f, unit: null, description: null);
 		}
 	}
 }

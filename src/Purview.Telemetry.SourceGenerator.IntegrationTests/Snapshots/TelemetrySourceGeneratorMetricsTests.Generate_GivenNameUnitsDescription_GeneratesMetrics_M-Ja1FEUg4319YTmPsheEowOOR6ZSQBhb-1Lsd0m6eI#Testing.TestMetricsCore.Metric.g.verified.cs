@@ -51,7 +51,7 @@ namespace Testing
 
 			PopulateMetricTags(metricTags);
 
-			_metricInstrument = _meter.CreateUpDownCounter<byte>(name: "testing-meter.an-updown-counter-name-property", unit: "sponges-property", description: "sponge sales per-capita-property.", tags: metricTags);
+			_metricInstrument = _meter.CreateUpDownCounter<byte>(name: "test_metrics.an-updown-counter-name-property", unit: "sponges-property", description: "sponge sales per-capita-property.", tags: metricTags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

@@ -1,11 +1,10 @@
-﻿<Project Sdk="Aspire.AppHost.Sdk/13.1.0">
+<Project Sdk="Aspire.AppHost.Sdk/13.1.1">
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<IsAspireHost>true</IsAspireHost>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Aspire.Hosting.AppHost" Version="13.1.0" />
-		<PackageReference Include="Scalar.Aspire" Version="0.8.45" />
+		<PackageReference Include="Scalar.Aspire" Version="0.8.49" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\SampleApp.APIService\SampleApp.APIService.csproj" />

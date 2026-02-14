@@ -57,37 +57,37 @@ namespace Testing
 
 			PopulateCounterTags(counterTags);
 
-			_counterInstrument = _meter.CreateCounter<int>(name: "testing-meter.counter", unit: null, description: null, tags: counterTags);
+			_counterInstrument = _meter.CreateCounter<int>(name: "test_metrics.counter", unit: null, description: null, tags: counterTags);
 			global::System.Collections.Generic.Dictionary<string, object?> counter2Tags = new();
 
 			PopulateCounter2Tags(counter2Tags);
 
-			_counter2Instrument = _meter.CreateCounter<byte>(name: "testing-meter.counter2", unit: null, description: null, tags: counter2Tags);
+			_counter2Instrument = _meter.CreateCounter<byte>(name: "test_metrics.counter2", unit: null, description: null, tags: counter2Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> counter3Tags = new();
 
 			PopulateCounter3Tags(counter3Tags);
 
-			_counter3Instrument = _meter.CreateCounter<long>(name: "testing-meter.counter3", unit: null, description: null, tags: counter3Tags);
+			_counter3Instrument = _meter.CreateCounter<long>(name: "test_metrics.counter3", unit: null, description: null, tags: counter3Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> counter4Tags = new();
 
 			PopulateCounter4Tags(counter4Tags);
 
-			_counter4Instrument = _meter.CreateCounter<short>(name: "testing-meter.counter4", unit: null, description: null, tags: counter4Tags);
+			_counter4Instrument = _meter.CreateCounter<short>(name: "test_metrics.counter4", unit: null, description: null, tags: counter4Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> counter5Tags = new();
 
 			PopulateCounter5Tags(counter5Tags);
 
-			_counter5Instrument = _meter.CreateCounter<double>(name: "testing-meter.counter5", unit: null, description: null, tags: counter5Tags);
+			_counter5Instrument = _meter.CreateCounter<double>(name: "test_metrics.counter5", unit: null, description: null, tags: counter5Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> counter6Tags = new();
 
 			PopulateCounter6Tags(counter6Tags);
 
-			_counter6Instrument = _meter.CreateCounter<float>(name: "testing-meter.counter6", unit: null, description: null, tags: counter6Tags);
+			_counter6Instrument = _meter.CreateCounter<float>(name: "test_metrics.counter6", unit: null, description: null, tags: counter6Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> counter7Tags = new();
 
 			PopulateCounter7Tags(counter7Tags);
 
-			_counter7Instrument = _meter.CreateCounter<decimal>(name: "testing-meter.counter7", unit: null, description: null, tags: counter7Tags);
+			_counter7Instrument = _meter.CreateCounter<decimal>(name: "test_metrics.counter7", unit: null, description: null, tags: counter7Tags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

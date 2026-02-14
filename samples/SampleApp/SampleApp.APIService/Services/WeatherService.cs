@@ -27,7 +27,8 @@ sealed class WeatherService(IWeatherServiceTelemetry telemetry, Func<int>? rng =
 		CancellationToken cancellationToken = default
 	)
 	{
-		var simulatedWait = RandomNumberGenerator.GetInt32(2, 6) * 1000;
+		// Simulate some variable latency, like a database call or something.
+		var simulatedWait = RandomNumberGenerator.GetInt32(0, 4) * 1000;
 		await Task.Delay(simulatedWait, cancellationToken);
 
 		const int minRequestCount = 5;

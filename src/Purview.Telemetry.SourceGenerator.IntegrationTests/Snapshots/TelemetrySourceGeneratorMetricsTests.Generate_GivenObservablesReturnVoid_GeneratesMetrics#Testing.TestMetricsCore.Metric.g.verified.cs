@@ -63,7 +63,7 @@ namespace Testing
 				return;
 			}
 
-			_counterInstrument = _meter.CreateObservableCounter<int>("testing-meter.counter", counterValue, unit: null, description: null);
+			_counterInstrument = _meter.CreateObservableCounter<int>("test_metrics.counter", counterValue, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -74,7 +74,7 @@ namespace Testing
 				return;
 			}
 
-			_gaugeInstrument = _meter.CreateObservableGauge<int>("testing-meter.gauge", gaugeValue, unit: null, description: null);
+			_gaugeInstrument = _meter.CreateObservableGauge<int>("test_metrics.gauge", gaugeValue, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -85,7 +85,7 @@ namespace Testing
 				return;
 			}
 
-			_upDownInstrument = _meter.CreateObservableUpDownCounter<int>("testing-meter.up_down", upDownValue, unit: null, description: null);
+			_upDownInstrument = _meter.CreateObservableUpDownCounter<int>("test_metrics.up_down", upDownValue, unit: null, description: null);
 		}
 	}
 }

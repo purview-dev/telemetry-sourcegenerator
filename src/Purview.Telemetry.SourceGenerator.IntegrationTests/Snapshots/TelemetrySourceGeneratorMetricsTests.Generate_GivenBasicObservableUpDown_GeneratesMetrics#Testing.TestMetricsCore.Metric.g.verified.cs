@@ -63,7 +63,7 @@ namespace Testing
 				return;
 			}
 
-			_observableUpDownInstrument = _meter.CreateObservableUpDownCounter<int>("testing-observable-meter.observable_up_down", f, unit: null, description: null);
+			_observableUpDownInstrument = _meter.CreateObservableUpDownCounter<int>("test_metrics.observable_up_down", f, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -71,10 +71,10 @@ namespace Testing
 		{
 			if (_observableUpDown2Instrument != null)
 			{
-				throw new global::System.Exception("testing-observable-meter.observable_up_down2 has already been initialized.");
+				throw new global::System.Exception("test_metrics.observable_up_down2 has already been initialized.");
 			}
 
-			_observableUpDown2Instrument = _meter.CreateObservableUpDownCounter<int>("testing-observable-meter.observable_up_down2", f, unit: null, description: null);
+			_observableUpDown2Instrument = _meter.CreateObservableUpDownCounter<int>("test_metrics.observable_up_down2", f, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -85,7 +85,7 @@ namespace Testing
 				return;
 			}
 
-			_observableUpDown3Instrument = _meter.CreateObservableUpDownCounter<int>("testing-observable-meter.observable_up_down3", f, unit: null, description: null);
+			_observableUpDown3Instrument = _meter.CreateObservableUpDownCounter<int>("test_metrics.observable_up_down3", f, unit: null, description: null);
 		}
 	}
 }

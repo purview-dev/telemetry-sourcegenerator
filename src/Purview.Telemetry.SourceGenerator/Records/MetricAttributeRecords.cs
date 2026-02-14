@@ -4,7 +4,9 @@ record MeterGenerationAttributeRecord(
 	AttributeStringValue InstrumentPrefix,
 	AttributeStringValue InstrumentSeparator,
 	AttributeValue<bool> LowercaseInstrumentName,
-	AttributeValue<bool> LowercaseTagKeys
+	AttributeValue<bool> LowercaseTagKeys,
+	AttributeStringValue MeterName,
+	AttributeValue<int> MeterNameGenerationType
 );
 
 record MeterAttributeRecord(

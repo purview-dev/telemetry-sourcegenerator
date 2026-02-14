@@ -5,42 +5,38 @@ using Microsoft.AspNetCore.OpenApi;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 
-#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Microsoft.Extensions.Configuration;
-
-#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 [EditorBrowsable(EditorBrowsableState.Always)]
 static class OpenApiOptionsExtensions
 {
-	public static OpenApiOptions ApplyAPIVersionInfo(
-		this OpenApiOptions options,
-		string title,
-		string description
-	)
+	extension(OpenApiOptions options)
 	{
-		options.AddDocumentTransformer(
-			(document, context, _) =>
-			{
-				var versionedDescriptionProvider =
-					context.ApplicationServices.GetService<IApiVersionDescriptionProvider>();
-				var apiDescription =
-					versionedDescriptionProvider?.ApiVersionDescriptions.SingleOrDefault(
-						description => description.GroupName == context.DocumentName
-					);
-
-				if (apiDescription is not null)
+		public OpenApiOptions ApplyAPIVersionInfo(string title, string description)
+		{
+			options.AddDocumentTransformer(
+				(document, context, _) =>
 				{
-					document.Info.Version = apiDescription.ApiVersion.ToString();
-					document.Info.Title = title;
-					document.Info.Description = BuildDescription(apiDescription, description);
+					var versionedDescriptionProvider =
+						context.ApplicationServices.GetService<IApiVersionDescriptionProvider>();
+					var apiDescription =
+						versionedDescriptionProvider?.ApiVersionDescriptions.SingleOrDefault(
+							description => description.GroupName == context.DocumentName
+						);
+
+					if (apiDescription is not null)
+					{
+						document.Info.Version = apiDescription.ApiVersion.ToString();
+						document.Info.Title = title;
+						document.Info.Description = BuildDescription(apiDescription, description);
+					}
+
+					return Task.CompletedTask;
 				}
+			);
 
-				return Task.CompletedTask;
-			}
-		);
-
-		return options;
+			return options;
+		}
 	}
 
 	static string BuildDescription(ApiVersionDescription api, string description)

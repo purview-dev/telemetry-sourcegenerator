@@ -27,15 +27,36 @@ sealed class MeterGenerationAttribute : global::System.Attribute
 	/// <paramref name="instrumentPrefix"/>, <paramref name="lowercaseInstrumentName"/>
 	/// and/ or <paramref name="lowercaseTagKeys"/>.
 	/// </summary>
+	/// <param name="meterName">Optionally specifies the <see cref="MeterName" />.</param>
+	/// <param name="nameGenerationType">Optionally specifies the <see cref="MeterNameGenerationType" />.</param>
 	/// <param name="instrumentPrefix">Optionally specifies the <see cref="InstrumentPrefix" />.</param>
 	/// <param name="lowercaseInstrumentName">Optionally specifies the <see cref="LowercaseInstrumentName" />.</param>
 	/// <param name="lowercaseTagKeys">Optionally specifies the <see cref="LowercaseTagKeys" />.</param>
-	public MeterGenerationAttribute(string? instrumentPrefix = null, bool lowercaseInstrumentName = true, bool lowercaseTagKeys = true)
+	public MeterGenerationAttribute(string? meterName = null,
+		MeterNameGenerationType nameGenerationType = MeterNameGenerationType.DotNet,
+		string? instrumentPrefix = null,
+		bool lowercaseInstrumentName = true,
+		bool lowercaseTagKeys = true)
 	{
+		MeterName = meterName;
+		MeterNameGenerationType = nameGenerationType;
 		InstrumentPrefix = instrumentPrefix;
 		LowercaseInstrumentName = lowercaseInstrumentName;
 		LowercaseTagKeys = lowercaseTagKeys;
 	}
+
+	/// <summary>
+	/// Optional, gets/ sets the assembly-wide default meter name.
+	/// Used when a <see cref="MeterAttribute"/> does not specify a name.
+	/// If not set, the assembly name is used based on <see cref="MeterNameGenerationType"/>.
+	/// </summary>
+	public string? MeterName { get; set; }
+
+	/// <summary>
+	/// Optional, gets/ sets how meter names are generated when not explicitly specified.
+	/// Defaults to <see cref="MeterNameGenerationType.DotNet"/>.
+	/// </summary>
+	public MeterNameGenerationType MeterNameGenerationType { get; set; } = MeterNameGenerationType.DotNet;
 
 	/// <summary>
 	/// Optional, gets/ sets the prefix used when generating the instrument name.
@@ -50,7 +71,7 @@ sealed class MeterGenerationAttribute : global::System.Attribute
 
 	/// <summary>
 	/// Optional, gets/ sets a value indicating if the
-	/// instrument name is lowercased. Defaults to true. 
+	/// instrument name is lowercased. Defaults to true.
 	/// </summary>
 	public bool LowercaseInstrumentName { get; set; } = true;
 

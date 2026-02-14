@@ -61,7 +61,7 @@ namespace Testing
 				return;
 			}
 
-			_metricInstrument = _meter.CreateObservableCounter<int>("testing-meter.an-observablecounter-name-param", f, unit: "pie-param", description: "pie sales per-capita-param.");
+			_metricInstrument = _meter.CreateObservableCounter<int>("test_metrics.an-observablecounter-name-param", f, unit: "pie-param", description: "pie sales per-capita-param.");
 		}
 	}
 }

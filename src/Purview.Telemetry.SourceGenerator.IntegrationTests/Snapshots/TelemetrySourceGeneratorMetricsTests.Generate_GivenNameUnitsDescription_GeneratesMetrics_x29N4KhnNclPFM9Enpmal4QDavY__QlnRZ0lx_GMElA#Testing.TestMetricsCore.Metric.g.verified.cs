@@ -61,7 +61,7 @@ namespace Testing
 				return;
 			}
 
-			_metricInstrument = _meter.CreateObservableGauge<byte>("testing-meter.an-observablegauge-name-property", f, unit: "biscuits-property", description: "biscuit sales per-capita-property.");
+			_metricInstrument = _meter.CreateObservableGauge<byte>("test_metrics.an-observablegauge-name-property", f, unit: "biscuits-property", description: "biscuit sales per-capita-property.");
 		}
 	}
 }

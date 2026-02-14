@@ -42,7 +42,7 @@ namespace Testing
 
 			PopulateFullTelemetryMethodTags(fullTelemetryMethodTags);
 
-			_fullTelemetryMethodInstrument = _meter.CreateCounter<int>(name: "testing-meter.full_telemetry_method", unit: null, description: null, tags: fullTelemetryMethodTags);
+			_fullTelemetryMethodInstrument = _meter.CreateCounter<int>(name: "multi.full_telemetry_method", unit: null, description: null, tags: fullTelemetryMethodTags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

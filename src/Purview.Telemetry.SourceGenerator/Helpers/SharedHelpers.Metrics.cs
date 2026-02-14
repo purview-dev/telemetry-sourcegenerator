@@ -137,6 +137,8 @@ partial class SharedHelpers
 		AttributeStringValue? instrumentSeparator = null;
 		AttributeValue<bool>? lowercaseInstrumentName = null;
 		AttributeValue<bool>? lowercaseTagKeys = null;
+		AttributeStringValue? meterName = null;
+		AttributeValue<int>? meterNameGenerationType = null;
 
 		if (
 			!AttributeParser(
@@ -179,6 +181,24 @@ partial class SharedHelpers
 					{
 						lowercaseTagKeys = new((bool)value);
 					}
+					else if (
+						name.Equals(
+							nameof(MeterGenerationAttributeRecord.MeterName),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
+					{
+						meterName = new((string)value);
+					}
+					else if (
+						name.Equals(
+							nameof(MeterGenerationAttributeRecord.MeterNameGenerationType),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
+					{
+						meterNameGenerationType = new((int)value);
+					}
 				},
 				semanticModel,
 				logger,
@@ -196,7 +216,9 @@ partial class SharedHelpers
 				?? new(Constants.Metrics.InstrumentSeparatorDefault),
 			LowercaseInstrumentName: lowercaseInstrumentName
 				?? new(Constants.Metrics.LowercaseInstrumentNameDefault),
-			LowercaseTagKeys: lowercaseTagKeys ?? new(Constants.Metrics.LowercaseTagKeysDefault)
+			LowercaseTagKeys: lowercaseTagKeys ?? new(Constants.Metrics.LowercaseTagKeysDefault),
+			MeterName: meterName ?? new(),
+			MeterNameGenerationType: meterNameGenerationType ?? new(1) // Default to DotNet
 		);
 	}
 

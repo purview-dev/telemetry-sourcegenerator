@@ -46,7 +46,7 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 
 		PopulateMeterTags(meterTags);
 
-		_meter = meterFactory.Create(new global::System.Diagnostics.Metrics.MeterOptions("MeterTelemetry")
+		_meter = meterFactory.Create(new global::System.Diagnostics.Metrics.MeterOptions("Purview.Telemetry.SourceGenerator")
 		{
 			Version = null,
 			Tags = meterTags
@@ -56,27 +56,27 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 
 		PopulateAutoCounterMeterTags(autoCounterMeterTags);
 
-		_autoCounterMeterInstrument = _meter.CreateCounter<int>(name: "meter_telemetry.auto_counter_meter", unit: null, description: null, tags: autoCounterMeterTags);
+		_autoCounterMeterInstrument = _meter.CreateCounter<int>(name: "meter.auto_counter_meter", unit: null, description: null, tags: autoCounterMeterTags);
 		global::System.Collections.Generic.Dictionary<string, object?> autoIncrementMeterTags = new();
 
 		PopulateAutoIncrementMeterTags(autoIncrementMeterTags);
 
-		_autoIncrementMeterInstrument = _meter.CreateCounter<int>(name: "meter_telemetry.auto_increment_meter", unit: null, description: null, tags: autoIncrementMeterTags);
+		_autoIncrementMeterInstrument = _meter.CreateCounter<int>(name: "meter.auto_increment_meter", unit: null, description: null, tags: autoIncrementMeterTags);
 		global::System.Collections.Generic.Dictionary<string, object?> counterMeterTags = new();
 
 		PopulateCounterMeterTags(counterMeterTags);
 
-		_counterMeterInstrument = _meter.CreateCounter<int>(name: "meter_telemetry.counter_meter", unit: null, description: null, tags: counterMeterTags);
+		_counterMeterInstrument = _meter.CreateCounter<int>(name: "meter.counter_meter", unit: null, description: null, tags: counterMeterTags);
 		global::System.Collections.Generic.Dictionary<string, object?> histogramMeterTags = new();
 
 		PopulateHistogramMeterTags(histogramMeterTags);
 
-		_histogramMeterInstrument = _meter.CreateHistogram<int>(name: "meter_telemetry.histogram_meter", unit: null, description: null, tags: histogramMeterTags);
+		_histogramMeterInstrument = _meter.CreateHistogram<int>(name: "meter.histogram_meter", unit: null, description: null, tags: histogramMeterTags);
 		global::System.Collections.Generic.Dictionary<string, object?> upDownCounterMeterTags = new();
 
 		PopulateUpDownCounterMeterTags(upDownCounterMeterTags);
 
-		_upDownCounterMeterInstrument = _meter.CreateUpDownCounter<decimal>(name: "meter_telemetry.up_down_counter_meter", unit: null, description: null, tags: upDownCounterMeterTags);
+		_upDownCounterMeterInstrument = _meter.CreateUpDownCounter<decimal>(name: "meter.up_down_counter_meter", unit: null, description: null, tags: upDownCounterMeterTags);
 	}
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
@@ -150,7 +150,7 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 			return;
 		}
 
-		_observableCounterMeterInstrument = _meter.CreateObservableCounter<float>("meter_telemetry.observable_counter_meter", measurement, unit: null, description: null);
+		_observableCounterMeterInstrument = _meter.CreateObservableCounter<float>("meter.observable_counter_meter", measurement, unit: null, description: null);
 	}
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -161,7 +161,7 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 			return;
 		}
 
-		_observableGaugeMeterInstrument = _meter.CreateObservableGauge<float>("meter_telemetry.observable_gauge_meter", measurement, unit: null, description: null);
+		_observableGaugeMeterInstrument = _meter.CreateObservableGauge<float>("meter.observable_gauge_meter", measurement, unit: null, description: null);
 	}
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -172,7 +172,7 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 			return;
 		}
 
-		_observableUpDownCounterInstrument = _meter.CreateObservableUpDownCounter<byte>("meter_telemetry.observable_up_down_counter", measurement, unit: null, description: null);
+		_observableUpDownCounterInstrument = _meter.CreateObservableUpDownCounter<byte>("meter.observable_up_down_counter", measurement, unit: null, description: null);
 	}
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

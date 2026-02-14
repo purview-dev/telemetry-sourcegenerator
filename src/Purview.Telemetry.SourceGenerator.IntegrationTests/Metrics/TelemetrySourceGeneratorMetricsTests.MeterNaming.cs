@@ -217,4 +217,130 @@ interface ITestMetrics
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
+
+	[Test]
+	public async Task Generate_GivenNoMeterName_UsesAssemblyNameWithOpenTelemetryConvention(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		const string basicMetric = """
+
+
+namespace Testing;
+
+[Meter]
+interface ITestMetrics
+{
+	[AutoCounter]
+	void AutoCounterMetric();
+}
+
+""";
+
+		// Act
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			cancellationToken: cancellationToken
+		);
+
+		// Assert
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+	}
+
+	[Test]
+	public async Task Generate_GivenAssemblyMeterName_UsesAssemblyMeterName(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		const string basicMetric = """
+
+
+[assembly: MeterGeneration(MeterName = "my.custom.meter")]
+
+namespace Testing;
+
+[Meter]
+interface ITestMetrics
+{
+	[AutoCounter]
+	void AutoCounterMetric();
+}
+
+""";
+
+		// Act
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			cancellationToken: cancellationToken
+		);
+
+		// Assert
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+	}
+
+	[Test]
+	public async Task Generate_GivenDotNetMeterNameGenerationType_UsesAssemblyNamePreserveCase(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		const string basicMetric = """
+
+
+[assembly: MeterGeneration(MeterNameGenerationType = MeterNameGenerationType.DotNet)]
+
+namespace Testing;
+
+[Meter]
+interface ITestMetrics
+{
+	[AutoCounter]
+	void AutoCounterMetric();
+}
+
+""";
+
+		// Act
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			cancellationToken: cancellationToken
+		);
+
+		// Assert
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+	}
+
+	[Test]
+	public async Task Generate_GivenInterfaceMeterNameOverridesAssemblyDefault(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		const string basicMetric = """
+
+
+[assembly: MeterGeneration(MeterName = "assembly.default")]
+
+namespace Testing;
+
+[Meter("interface.override")]
+interface ITestMetrics
+{
+	[AutoCounter]
+	void AutoCounterMetric();
+}
+
+""";
+
+		// Act
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			cancellationToken: cancellationToken
+		);
+
+		// Assert
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+	}
 }

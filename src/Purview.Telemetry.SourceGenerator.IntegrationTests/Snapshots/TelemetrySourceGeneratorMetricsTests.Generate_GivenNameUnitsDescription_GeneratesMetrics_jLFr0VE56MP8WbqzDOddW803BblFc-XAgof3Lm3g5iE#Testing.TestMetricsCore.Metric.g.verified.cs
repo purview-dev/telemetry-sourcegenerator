@@ -61,7 +61,7 @@ namespace Testing
 				return;
 			}
 
-			_metricInstrument = _meter.CreateObservableUpDownCounter<int>("testing-meter.an-observableupdowncounter-name-param", f, unit: "beer-param", description: "beer sales per-capita-param.");
+			_metricInstrument = _meter.CreateObservableUpDownCounter<int>("test_metrics.an-observableupdowncounter-name-param", f, unit: "beer-param", description: "beer sales per-capita-param.");
 		}
 	}
 }

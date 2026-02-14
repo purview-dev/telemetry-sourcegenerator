@@ -1,13 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<IsAspireSharedProject>true</IsAspireSharedProject>
+		<NoWarn>$(NoWarn);CA1034;IDE0130;</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
-		<PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" Version="10.2.0" />
-		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.2.0" />
-		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="10.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" Version="10.3.0" />
+		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.3.0" />
+		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="10.3.0" />
 		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.0" />
 		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.0" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.0" />
@@ -18,7 +19,7 @@
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.15.0" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Process" Version="1.11.0-beta.2" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.0" />
-		<PackageReference Include="Scalar.AspNetCore" Version="2.12.36" />
+		<PackageReference Include="Scalar.AspNetCore" Version="2.12.40" />
 		<PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.1" />
 		<PackageReference Include="ErrorOr" Version="2.0.1" />
 	</ItemGroup>

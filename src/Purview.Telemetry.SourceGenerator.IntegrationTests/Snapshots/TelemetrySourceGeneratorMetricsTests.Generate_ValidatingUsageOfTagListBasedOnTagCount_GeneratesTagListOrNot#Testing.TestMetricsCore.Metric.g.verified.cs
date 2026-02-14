@@ -57,37 +57,37 @@ namespace Testing
 
 			PopulateNoTagList0Tags(noTagList0Tags);
 
-			_noTagList0Instrument = _meter.CreateCounter<int>(name: "testing-meter.no_tag_list0", unit: null, description: null, tags: noTagList0Tags);
+			_noTagList0Instrument = _meter.CreateCounter<int>(name: "test_metrics.no_tag_list0", unit: null, description: null, tags: noTagList0Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> noTagList1Tags = new();
 
 			PopulateNoTagList1Tags(noTagList1Tags);
 
-			_noTagList1Instrument = _meter.CreateCounter<int>(name: "testing-meter.no_tag_list1", unit: null, description: null, tags: noTagList1Tags);
+			_noTagList1Instrument = _meter.CreateCounter<int>(name: "test_metrics.no_tag_list1", unit: null, description: null, tags: noTagList1Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> noTagList2Tags = new();
 
 			PopulateNoTagList2Tags(noTagList2Tags);
 
-			_noTagList2Instrument = _meter.CreateCounter<int>(name: "testing-meter.no_tag_list2", unit: null, description: null, tags: noTagList2Tags);
+			_noTagList2Instrument = _meter.CreateCounter<int>(name: "test_metrics.no_tag_list2", unit: null, description: null, tags: noTagList2Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> noTagList3Tags = new();
 
 			PopulateNoTagList3Tags(noTagList3Tags);
 
-			_noTagList3Instrument = _meter.CreateCounter<int>(name: "testing-meter.no_tag_list3", unit: null, description: null, tags: noTagList3Tags);
+			_noTagList3Instrument = _meter.CreateCounter<int>(name: "test_metrics.no_tag_list3", unit: null, description: null, tags: noTagList3Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> hasTagList4Tags = new();
 
 			PopulateHasTagList4Tags(hasTagList4Tags);
 
-			_hasTagList4Instrument = _meter.CreateCounter<int>(name: "testing-meter.has_tag_list4", unit: null, description: null, tags: hasTagList4Tags);
+			_hasTagList4Instrument = _meter.CreateCounter<int>(name: "test_metrics.has_tag_list4", unit: null, description: null, tags: hasTagList4Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> hasTagList5Tags = new();
 
 			PopulateHasTagList5Tags(hasTagList5Tags);
 
-			_hasTagList5Instrument = _meter.CreateCounter<int>(name: "testing-meter.has_tag_list5", unit: null, description: null, tags: hasTagList5Tags);
+			_hasTagList5Instrument = _meter.CreateCounter<int>(name: "test_metrics.has_tag_list5", unit: null, description: null, tags: hasTagList5Tags);
 			global::System.Collections.Generic.Dictionary<string, object?> hasTagList10Tags = new();
 
 			PopulateHasTagList10Tags(hasTagList10Tags);
 
-			_hasTagList10Instrument = _meter.CreateCounter<int>(name: "testing-meter.has_tag_list10", unit: null, description: null, tags: hasTagList10Tags);
+			_hasTagList10Instrument = _meter.CreateCounter<int>(name: "test_metrics.has_tag_list10", unit: null, description: null, tags: hasTagList10Tags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

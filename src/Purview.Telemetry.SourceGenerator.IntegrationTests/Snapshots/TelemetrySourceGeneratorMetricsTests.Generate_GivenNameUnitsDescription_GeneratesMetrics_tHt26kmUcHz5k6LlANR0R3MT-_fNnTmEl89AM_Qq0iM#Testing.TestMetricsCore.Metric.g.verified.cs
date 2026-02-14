@@ -51,7 +51,7 @@ namespace Testing
 
 			PopulateMetricTags(metricTags);
 
-			_metricInstrument = _meter.CreateCounter<int>(name: "testing-meter.a-counter-name-param", unit: "cakes-param", description: "cake sales per-capita-param.", tags: metricTags);
+			_metricInstrument = _meter.CreateCounter<int>(name: "test_metrics.a-counter-name-param", unit: "cakes-param", description: "cake sales per-capita-param.", tags: metricTags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

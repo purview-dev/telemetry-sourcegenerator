@@ -25,6 +25,10 @@ partial class Constants
 			"Purview.Telemetry.MeterAttribute"
 		);
 
+		public static readonly TemplateInfo MeterNameGenerationType = TemplateInfo.Create(
+			"Purview.Telemetry.MeterNameGenerationType"
+		);
+
 		public static readonly TemplateInfo InstrumentMeasurementAttribute = TemplateInfo.Create(
 			"Purview.Telemetry.InstrumentMeasurementAttribute"
 		);
@@ -102,6 +106,7 @@ partial class Constants
 			[
 				MeterGenerationAttribute,
 				MeterAttribute,
+				MeterNameGenerationType,
 				InstrumentMeasurementAttribute,
 				AutoCounterAttribute,
 				CounterAttribute,

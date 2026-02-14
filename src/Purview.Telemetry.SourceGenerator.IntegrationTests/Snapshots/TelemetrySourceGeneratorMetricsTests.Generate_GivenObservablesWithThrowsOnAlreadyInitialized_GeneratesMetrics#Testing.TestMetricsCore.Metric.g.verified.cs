@@ -60,10 +60,10 @@ namespace Testing
 		{
 			if (_counterInstrument != null)
 			{
-				throw new global::System.Exception("testing-meter.counter has already been initialized.");
+				throw new global::System.Exception("test_metrics.counter has already been initialized.");
 			}
 
-			_counterInstrument = _meter.CreateObservableCounter<int>("testing-meter.counter", counterValue, unit: null, description: null);
+			_counterInstrument = _meter.CreateObservableCounter<int>("test_metrics.counter", counterValue, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -71,10 +71,10 @@ namespace Testing
 		{
 			if (_gaugeInstrument != null)
 			{
-				throw new global::System.Exception("testing-meter.gauge has already been initialized.");
+				throw new global::System.Exception("test_metrics.gauge has already been initialized.");
 			}
 
-			_gaugeInstrument = _meter.CreateObservableGauge<int>("testing-meter.gauge", gaugeValue, unit: null, description: null);
+			_gaugeInstrument = _meter.CreateObservableGauge<int>("test_metrics.gauge", gaugeValue, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -82,10 +82,10 @@ namespace Testing
 		{
 			if (_upDownInstrument != null)
 			{
-				throw new global::System.Exception("testing-meter.up_down has already been initialized.");
+				throw new global::System.Exception("test_metrics.up_down has already been initialized.");
 			}
 
-			_upDownInstrument = _meter.CreateObservableUpDownCounter<int>("testing-meter.up_down", upDownValue, unit: null, description: null);
+			_upDownInstrument = _meter.CreateObservableUpDownCounter<int>("test_metrics.up_down", upDownValue, unit: null, description: null);
 		}
 	}
 }
