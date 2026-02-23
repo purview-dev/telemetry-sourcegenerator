@@ -21,7 +21,7 @@ Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system
 Add to your `Directory.Build.props` or `.csproj` file:
 
 ```xml
-<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="4.0.0-prerelease.2">
+<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="4.0.0-prerelease.3">
   <PrivateAssets>all</PrivateAssets>
   <IncludeAssets>analyzers</IncludeAssets>
 </PackageReference>

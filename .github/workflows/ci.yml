@@ -29,5 +29,4 @@ jobs:
         run: dotnet build ${{ env.SOLUTION }} --no-restore --configuration ${{ env.CONFIGURATION }}
 
       - name: Run tests
-        run: dotnet test ${{ env.SOLUTION }} --no-build --verbosity normal --configuration ${{ env.CONFIGURATION }}
-      
+        run: dotnet test --solution ${{ env.SOLUTION }} --no-build --verbosity normal --configuration ${{ env.CONFIGURATION }}

@@ -10,8 +10,8 @@ Always reference these instructions first and fallback to search or bash command
 
 Install these exact dependencies in order:
 
-- Install .NET 9.0.200 SDK: `curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s -- --version 9.0.200`
-- Install .NET 9.0 runtime: `curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s -- --runtime dotnet --version 9.0.0`
+- Install .NET 10.0.100 SDK: `curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s -- --version 10.0.100`
+- Install .NET 10.0 runtime: `curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s -- --runtime dotnet --version 10.0.0`
 - Install Bun: `curl -fsSL https://bun.sh/install | bash`
 - Set environment variables: `export PATH=$HOME/.bun/bin:$HOME/.dotnet:$PATH && export DOTNET_ROOT=$HOME/.dotnet`
 
@@ -58,7 +58,7 @@ Test these scenarios when modifying the source generator:
 
 - **Interface to Implementation Generation**: Modify an interface in `samples/SampleApp/SampleApp.Host/APIs/` and verify generated telemetry code appears
 - **Activity Generation**: Test ActivitySource generation by adding methods with activity attributes
-- **Logging Generation**: Test ILogger generation by adding methods with logging attributes  
+- **Logging Generation**: Test ILogger generation by adding methods with logging attributes
 - **Metrics Generation**: Test metrics generation by adding methods with metrics attributes
 - **Integration Test Coverage**: Verify new functionality is covered by tests in `src/Purview.Telemetry.SourceGenerator.IntegrationTests/`
 
@@ -67,7 +67,7 @@ Test these scenarios when modifying the source generator:
 Always run these validation steps before committing:
 
 - `make format` (takes 21 seconds)
-- `make build` (takes 26 seconds)  
+- `make build` (takes 26 seconds)
 - `make test` (takes 42 seconds)
 - Sample app build and test (takes 22 seconds total)
 
@@ -76,6 +76,7 @@ The CI pipeline (`./.github/workflows/ci.yml`) runs the same dotnet restore → 
 ## Common Tasks
 
 ### Project Structure
+
 ```
 src/
 ├── Purview.Telemetry.SourceGenerator/          # Main source generator library
@@ -85,7 +86,7 @@ src/
 
 samples/
 └── SampleApp/                                  # .NET Aspire demo application
-    ├── SampleApp.AppHost/                      # Aspire AppHost  
+    ├── SampleApp.AppHost/                      # Aspire AppHost
     ├── SampleApp.Host/                         # Main web API
     ├── SampleApp.ServiceDefaults/              # Shared service config
     ├── SampleApp.UnitTests/                    # Sample app tests
@@ -102,6 +103,7 @@ package.json                                    # Version 3.2.4, Bun scripts
 ### Key Commands Output
 
 #### make help
+
 ```
 build          Builds the project.
 test           Runs the tests for the project.
@@ -117,11 +119,12 @@ update-version Update related samples and docs to new version.
 ```
 
 #### Repository Root Files
+
 ```
-.build/          .config/         .cspell.json     .git/            
-.gitattributes   .github/         .gitignore       .gitmodules      
-.husky/          .vscode/         .wiki/           CHANGELOG.md     
-LICENSE.md       Makefile         README.md        bun.lock         
+.build/          .config/         .cspell.json     .git/
+.gitattributes   .github/         .gitignore       .gitmodules
+.husky/          .vscode/         .wiki/           CHANGELOG.md
+LICENSE.md       Makefile         README.md        bun.lock
 global.json      package.json     samples/         src/
 ```
 
@@ -157,7 +160,7 @@ When `EmitCompilerGeneratedFiles` is true (as in the sample app), generated file
 
 - **NEVER CANCEL** any build or test command - builds may take up to 60 minutes in some environments
 - **Build timeout**: Set 60+ minutes timeout for `make build` and related commands
-- **Test timeout**: Set 60+ minutes timeout for `make test` and related commands  
+- **Test timeout**: Set 60+ minutes timeout for `make test` and related commands
 - **Format timeout**: Set 30+ minutes timeout for `make format`
 - **Expected times**: Build ~26s, Test ~42s, Format ~21s, Sample build ~19s on typical hardware
 

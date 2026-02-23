@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.0.0-prerelease.3](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.2...v4.0.0-prerelease.3) (2026-02-23)
+
+
+### Features
+
+* add TSG3022 diagnostic for non-nullable Activity return types and fix CS8603 ([2cdef0b](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/2cdef0b60764c94adf03437d45e8114283c4fdee))
+
 ## [4.0.0-prerelease.2](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.1...v4.0.0-prerelease.2) (2026-02-14)
 
 
