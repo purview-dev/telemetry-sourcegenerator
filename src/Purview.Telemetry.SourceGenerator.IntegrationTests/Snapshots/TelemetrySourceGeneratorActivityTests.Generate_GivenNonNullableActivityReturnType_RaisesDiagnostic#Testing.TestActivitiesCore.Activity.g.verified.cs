@@ -42,7 +42,7 @@ namespace Testing
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		public global::System.Diagnostics.Activity Activity(string stringParam, int intParam, bool boolParam)
+		public global::System.Diagnostics.Activity Activity(string stringParam, int intParam)
 		{
 			if (!_activitySource.HasListeners())
 			{
@@ -54,7 +54,6 @@ namespace Testing
 			if (activityActivity != null)
 			{
 				activityActivity.SetTag("int_param", intParam);
-				activityActivity.SetTag("bool_param", boolParam);
 			}
 
 			if (activityActivity != null)
@@ -63,29 +62,6 @@ namespace Testing
 			}
 
 			return activityActivity!;
-		}
-
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		public void Event(global::System.Diagnostics.Activity? activity, string stringParam, int intParam, bool boolParam)
-		{
-			if (!_activitySource.HasListeners())
-			{
-				return;
-			}
-
-			if (activity != null)
-			{
-				global::System.Diagnostics.ActivityTagsCollection tagsCollectionEvent = new();
-				tagsCollectionEvent.Add("int_param", intParam);
-				tagsCollectionEvent.Add("bool_param", boolParam);
-
-				global::System.Diagnostics.ActivityEvent activityEventEvent = new(name: "Event", timestamp: default, tags: tagsCollectionEvent);
-
-				activity.AddEvent(activityEventEvent);
-
-				activity.SetBaggage("string_param", stringParam);
-			}
 		}
 
 	}

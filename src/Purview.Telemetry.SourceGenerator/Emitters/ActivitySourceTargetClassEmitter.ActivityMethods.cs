@@ -192,6 +192,7 @@ partial class ActivitySourceTargetClassEmitter
 				.AppendLine()
 				.Append(indent, "return ", withNewLine: false)
 				.Append(activityVariableName)
+				.Append(methodTarget.ReturnType.IsNullable ? null : "!")
 				.AppendLine(';');
 		}
 

@@ -1,0 +1,24 @@
+﻿{
+  Diagnostics: [
+    {
+      Location: /*
+	[Activity]
+	Activity Activity([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
+          ^^^^^^^^
+
+*/
+ Guid_1: (11,10)-(11,18),
+      Message: Activity can be null when no listeners are active. Consider using 'Activity?' as the return type to make this explicit.,
+      Severity: Warning,
+      WarningLevel: 1,
+      Descriptor: {
+        Id: TSG3022,
+        Title: Activity return type should be nullable,
+        MessageFormat: Activity can be null when no listeners are active. Consider using 'Activity?' as the return type to make this explicit.,
+        Category: Activity.Usage,
+        DefaultSeverity: Warning,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}
