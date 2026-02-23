@@ -70,7 +70,7 @@ namespace Testing
 				activity.SetBaggage("stringparam", stringParam);
 			}
 
-			return activity;
+			return activity!;
 		}
 
 	}

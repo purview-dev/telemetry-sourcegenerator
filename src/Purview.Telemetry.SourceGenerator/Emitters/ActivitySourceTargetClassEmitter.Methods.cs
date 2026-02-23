@@ -271,6 +271,22 @@ partial class ActivitySourceTargetClassEmitter
 		}
 
 		if (
+			Constants.Activities.SystemDiagnostics.Activity.Equals(methodTarget.ReturnType)
+			&& !methodTarget.ReturnType.IsNullable
+		)
+		{
+			logger?.Diagnostic(
+				$"Activity return type is not nullable for {methodTarget.MethodName}."
+			);
+
+			TelemetryDiagnostics.Report(
+				context.ReportDiagnostic,
+				TelemetryDiagnostics.Activities.ActivityReturnTypeShouldBeNullable,
+				methodTarget.Locations
+			);
+		}
+
+		if (
 			target.ActivitySourceGenerationAttribute?.GenerateDiagnosticsForMissingActivity.Value
 			?? true
 		)

@@ -306,7 +306,8 @@ partial class ActivitySourceTargetClassEmitter
 				.AppendLine()
 				.Append(indent, "return ", withNewLine: false)
 				.Append(activityVariableName)
-				.AppendLine(';');
+				.AppendLine(methodTarget.ReturnType.IsNullable ? ";" : "!;");
 		}
 	}
 }
+

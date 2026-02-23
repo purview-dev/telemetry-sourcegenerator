@@ -70,7 +70,7 @@ namespace Testing
 				activityParameter.SetBaggage("stringparam", stringParam);
 			}
 
-			return activityParameter;
+			return activityParameter!;
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

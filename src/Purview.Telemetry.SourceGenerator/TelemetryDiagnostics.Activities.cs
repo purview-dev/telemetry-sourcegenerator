@@ -155,5 +155,13 @@ partial class TelemetryDiagnostics
 				Category: Constants.Diagnostics.Activity.Usage,
 				Severity: DiagnosticSeverity.Error
 			);
+
+		public static readonly TelemetryDiagnosticDescriptor ActivityReturnTypeShouldBeNullable = new(
+			Id: "TSG3018",
+			Title: "Activity return type should be nullable",
+			Description: "The Activity return type should be nullable (Activity?) as the Activity may be null if there are no listeners.",
+			Category: Constants.Diagnostics.Activity.Usage,
+			Severity: DiagnosticSeverity.Warning
+		);
 	}
 }

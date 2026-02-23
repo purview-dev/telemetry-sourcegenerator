@@ -147,7 +147,11 @@ public interface ITestActivities {
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.Verify(
+			generationResult,
+			config: s => s.ScrubInlineGuids(),
+			expectsDiagnostics: true
+		);
 	}
 
 	[Fact]
@@ -175,7 +179,11 @@ public interface ITestActivities {
 		var generationResult = await GenerateAsync(basicActivity);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.Verify(
+			generationResult,
+			config: s => s.ScrubInlineGuids(),
+			expectsDiagnostics: true
+		);
 	}
 
 	[Fact]
