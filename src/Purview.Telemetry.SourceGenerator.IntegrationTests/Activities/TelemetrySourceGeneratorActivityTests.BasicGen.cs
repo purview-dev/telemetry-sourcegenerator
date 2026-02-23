@@ -171,7 +171,13 @@ public interface ITestActivities {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			s => s.ScrubInlineGuids(),
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG3022"],
+			cancellationToken: cancellationToken
+		);
 	}
 
 	[Test]
@@ -204,7 +210,13 @@ public interface ITestActivities {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			s => s.ScrubInlineGuids(),
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG3022"],
+			cancellationToken: cancellationToken
+		);
 	}
 
 	[Test]
@@ -238,5 +250,41 @@ public interface ITestActivities {
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+	}
+
+	[Test]
+	public async Task Generate_GivenNonNullableActivityReturnType_RaisesDiagnostic(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		const string basicActivity = """
+
+using System.Diagnostics;
+
+namespace Testing;
+
+[ActivitySource("testing-activity-source")]
+public interface ITestActivities {
+	[Activity]
+	Activity Activity([Baggage]string stringParam, [Tag]int intParam);
+}
+
+""";
+
+		// Act
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
+
+		// Assert
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			s => s.ScrubInlineGuids(),
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG3022"],
+			cancellationToken: cancellationToken
+		);
 	}
 }

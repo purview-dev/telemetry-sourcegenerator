@@ -363,7 +363,14 @@ partial class ActivitySourceTargetClassEmitter
 		// Return result if applicable
 		if (returnsActivity)
 		{
-			builder.AppendLine().Append(indent, "return activityResult;");
+			builder
+				.AppendLine()
+				.Append(
+					indent,
+					"return activityResult"
+						+ (methodTarget.ReturnType.IsNullable ? null : "!")
+						+ ";"
+				);
 		}
 
 		builder.Append(--indent, '}').AppendLine();
@@ -492,6 +499,18 @@ partial class ActivitySourceTargetClassEmitter
 					TelemetryDiagnostics.Report(
 						context.ReportDiagnostic,
 						TelemetryDiagnostics.Activities.DoesNotReturnActivity,
+						methodTarget.Locations
+					);
+				}
+				else if (!methodTarget.ReturnType.IsNullable)
+				{
+					logger?.Diagnostic(
+						$"Activity return type is not nullable for {methodTarget.MethodName}."
+					);
+
+					TelemetryDiagnostics.Report(
+						context.ReportDiagnostic,
+						TelemetryDiagnostics.Activities.ActivityReturnTypeShouldBeNullable,
 						methodTarget.Locations
 					);
 				}

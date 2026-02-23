@@ -181,6 +181,15 @@ partial class TelemetryDiagnostics
 			Category: Constants.Diagnostics.Activity.Usage
 		);
 
+		public static readonly TelemetryDiagnosticDescriptor ActivityReturnTypeShouldBeNullable =
+			new(
+				Id: "TSG3022",
+				Title: "Activity return type should be nullable",
+				Description: "Activity can be null when no listeners are active. Consider using 'Activity?' as the return type to make this explicit.",
+				Severity: DiagnosticSeverity.Warning,
+				Category: Constants.Diagnostics.Activity.Usage
+			);
+
 		public static readonly TelemetryDiagnosticDescriptor ExceptionEventNotStandardName = new(
 			Id: "TSG3021",
 			Title: "Exception event does not use OpenTelemetry standard name",
