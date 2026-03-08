@@ -20,7 +20,8 @@ sealed record TargetGeneration(
 	bool RaiseMultiGenerationTargetsNotSupported,
 	bool IsMultiTarget = false,
 	GenerationType MethodTargets = GenerationType.None,
-	string? ActivityParameterWithoutTarget = null
+	string? ActivityParameterWithoutTarget = null,
+	bool RaiseMissingInterfaceSource = false
 );
 
 sealed record AttributeValue<T>

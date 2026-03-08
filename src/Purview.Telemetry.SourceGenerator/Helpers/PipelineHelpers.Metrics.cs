@@ -301,6 +301,20 @@ partial class PipelineHelpers
 						)
 					);
 				}
+				else if (targetGenerationState.RaiseMissingInterfaceSource)
+				{
+					logger?.Debug(
+						$"Identified {interfaceSymbol.Name}.{method.Name} as problematic as the interface is missing source attribute(s) for the method's target(s)."
+					);
+
+					methodDiagnosticsList ??= [];
+					methodDiagnosticsList.Add(
+						(
+							TelemetryDiagnostics.General.MethodTargetNotRegisteredOnInterface,
+							method.Locations
+						)
+					);
+				}
 			}
 			else
 			{

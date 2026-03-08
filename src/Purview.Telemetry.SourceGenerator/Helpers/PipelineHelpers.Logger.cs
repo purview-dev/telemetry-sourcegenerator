@@ -330,6 +330,25 @@ partial class PipelineHelpers
 				}
 			}
 
+			var targetGenerationState = Utilities.IsValidGenerationTarget(
+				method,
+				generationType,
+				GenerationType.Logging
+			);
+			if (targetGenerationState.RaiseMissingInterfaceSource)
+			{
+				logger?.Debug(
+					$"Identified {interfaceSymbol.Name}.{method.Name} as problematic as the interface is missing source attribute(s) for the method's target(s)."
+				);
+				telemetryDiagnosticsList ??= [];
+				telemetryDiagnosticsList.Add(
+					(
+						TelemetryDiagnostics.General.MethodTargetNotRegisteredOnInterface,
+						method.Locations
+					)
+				);
+			}
+
 			methodTargets.Add(
 				new(
 					MethodName: method.Name,
@@ -351,11 +370,7 @@ partial class PipelineHelpers
 					HasMultipleExceptions: hasMultipleExceptions,
 					MethodLocation: method.Locations.FirstOrDefault(),
 					InferredErrorLevel: inferredErrorLevel,
-					TargetGenerationState: Utilities.IsValidGenerationTarget(
-						method,
-						generationType,
-						GenerationType.Logging
-					)
+					TargetGenerationState: targetGenerationState
 				)
 			);
 		}

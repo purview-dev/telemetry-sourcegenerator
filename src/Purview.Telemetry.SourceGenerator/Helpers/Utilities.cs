@@ -71,6 +71,7 @@ static partial class Utilities
 
 		var inferenceNotSupportedWithMultiTargeting = false;
 		var multiGenerationTargetsNotSupported = false;
+		var raiseMissingInterfaceSource = false;
 
 		// Check for intra-family conflicts (multiple attributes within same family)
 		// This is always an error - can only have one activity/event/context, one log level, one instrument
@@ -115,9 +116,17 @@ static partial class Utilities
 				inferenceNotSupportedWithMultiTargeting = true;
 		}
 
+		// Check if the method has explicit attributes for a family not registered on the interface.
+		// e.g. method has [AutoCounter] but interface only has [Logger] (missing [Meter]).
+		var missingInterfaceTargets = methodTargets & ~generationType;
+		if (missingInterfaceTargets != GenerationType.None)
+			raiseMissingInterfaceSource = true;
+
 		// Determine if this method is valid for the requested target type
 		var isValid =
-			!multiGenerationTargetsNotSupported && !inferenceNotSupportedWithMultiTargeting;
+			!multiGenerationTargetsNotSupported
+			&& !inferenceNotSupportedWithMultiTargeting
+			&& !raiseMissingInterfaceSource;
 		if (isValid)
 		{
 			// Method is valid for this target if it has an explicit attribute for this target,
@@ -158,7 +167,8 @@ static partial class Utilities
 			RaiseMultiGenerationTargetsNotSupported: multiGenerationTargetsNotSupported,
 			IsMultiTarget: isMultiTarget,
 			MethodTargets: methodTargets,
-			ActivityParameterWithoutTarget: activityParameterWithoutTarget
+			ActivityParameterWithoutTarget: activityParameterWithoutTarget,
+			RaiseMissingInterfaceSource: raiseMissingInterfaceSource
 		);
 	}
 

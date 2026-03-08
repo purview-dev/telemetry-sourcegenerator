@@ -771,4 +771,146 @@ public interface IMultiTelemetry
 			cancellationToken: cancellationToken
 		);
 	}
+
+	[Test]
+	public async Task Generate_GivenLoggerOnlyInterfaceWithMetricsMethod_RaisesMissingInterfaceSourceDiagnostic(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange - interface has [Logger] but method has [AutoCounter], missing [Meter]
+		const string code = """
+
+
+namespace Testing;
+
+[Logger]
+public interface ITelemetry
+{
+	[Warning]
+	void WarnOperation(string message);
+
+	[AutoCounter]
+	void CountOperation();
+}
+
+""";
+
+		// Act
+		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+
+		// Assert
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			config: s => s.ScrubInlineGuids(),
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG1010"],
+			cancellationToken: cancellationToken
+		);
+	}
+
+	[Test]
+	public async Task Generate_GivenMeterOnlyInterfaceWithActivityMethod_RaisesMissingInterfaceSourceDiagnostic(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange - interface has [Meter] but method has [Activity], missing [ActivitySource]
+		const string code = """
+
+
+namespace Testing;
+
+[Meter("testing-meter")]
+public interface ITelemetry
+{
+	[Counter]
+	void IncrementCounter(int value);
+
+	[Activity]
+	System.Diagnostics.Activity? StartOperation(string operationId);
+}
+
+""";
+
+		// Act
+		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+
+		// Assert
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			config: s => s.ScrubInlineGuids(),
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG1010"],
+			cancellationToken: cancellationToken
+		);
+	}
+
+	[Test]
+	public async Task Generate_GivenActivitySourceOnlyInterfaceWithLogMethod_RaisesMissingInterfaceSourceDiagnostic(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange - interface has [ActivitySource] but method has [Warning], missing [Logger]
+		const string code = """
+
+
+namespace Testing;
+
+[ActivitySource("testing-activity-source")]
+public interface ITelemetry
+{
+	[Activity]
+	System.Diagnostics.Activity? StartActivity([Tag]string operationId);
+
+	[Warning]
+	void WarnOperation(string message);
+}
+
+""";
+
+		// Act
+		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+
+		// Assert
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			config: s => s.ScrubInlineGuids(),
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG1010"],
+			cancellationToken: cancellationToken
+		);
+	}
+
+	[Test]
+	public async Task Generate_GivenLoggerOnlyInterfaceWithMethodHavingBothLoggingAndMetricsAttributes_RaisesMissingInterfaceSourceDiagnostic(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange - interface has [Logger] only, method has both [Warning] and [AutoCounter]
+		const string code = """
+
+
+namespace Testing;
+
+[Logger]
+public interface ITelemetry
+{
+	[Warning]
+	[AutoCounter]
+	void WarnAndCount(string message);
+}
+
+""";
+
+		// Act
+		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+
+		// Assert
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			config: s => s.ScrubInlineGuids(),
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG1010"],
+			cancellationToken: cancellationToken
+		);
+	}
 }

@@ -98,5 +98,16 @@ partial class TelemetryDiagnostics
 			Severity: DiagnosticSeverity.Info,
 			Category: Constants.Diagnostics.Usage
 		);
+
+		public static readonly TelemetryDiagnosticDescriptor MethodTargetNotRegisteredOnInterface =
+			new(
+				Id: "TSG1010",
+				Title: "Method target not registered on interface",
+				Description: "Method has attribute(s) for a generation target that is not registered on the interface. "
+					+ $"Add the corresponding source attribute ([{Constants.Activities.ActivitySourceAttribute.Name}], [{Constants.Logging.LoggerAttribute.Name}], or [{Constants.Metrics.MeterAttribute.Name}]) "
+					+ "to the interface to enable generation for the target(s) used by this method.",
+				Severity: DiagnosticSeverity.Error,
+				Category: Constants.Diagnostics.Usage
+			);
 	}
 }
