@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.0.0-prerelease.4](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.3...v4.0.0-prerelease.4) (2026-03-08)
+
+
+### Features
+
+* add TSG1010 diagnostic for missing interface source attribute ([6822ef4](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/6822ef4636dc12dfd8f567ed8c41f9184157d67c))
+
 ## [4.0.0-prerelease.3](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.2...v4.0.0-prerelease.3) (2026-02-23)
 
 
