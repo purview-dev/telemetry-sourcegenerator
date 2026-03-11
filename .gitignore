@@ -195,4 +195,4 @@ nCrunchTemp_*.csproj
 node_modules/
 
 # BenchmarkDotNet output
-BenchmarkDotNet.Artifacts/
+BenchmarkDotNet.Artifacts/!scripts/*

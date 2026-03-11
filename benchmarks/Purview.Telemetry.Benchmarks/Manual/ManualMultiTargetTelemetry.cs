@@ -8,10 +8,36 @@ namespace Purview.Telemetry.Benchmarks.Manual;
 /// Hand-written equivalent of the generated multi-target telemetry.
 /// Combines Activity + ILogger + Metrics to mirror what the source generator produces,
 /// enabling fair performance comparisons.
+/// <para>
+/// Logging uses <c>LoggerMessage.Define&lt;T&gt;</c> static delegates — the same optimised
+/// pattern emitted by the v1 source-generator path — so that no eager string allocation
+/// occurs on the hot path. This keeps the comparison apples-to-apples with generated code.
+/// </para>
 /// </summary>
 public sealed class ManualMultiTargetTelemetry : IDisposable
 {
 	static readonly ActivitySource _activitySource = new("benchmark-manual-multi-target-source");
+
+	static readonly Action<ILogger, string, int, Exception?> _startOperationLog =
+		LoggerMessage.Define<string, int>(
+			LogLevel.Information,
+			new EventId(1, "StartOperation"),
+			"StartOperation: OperationName = {OperationName}, OperationId = {OperationId}"
+		);
+
+	static readonly Action<ILogger, int, long, Exception?> _operationCompletedLog =
+		LoggerMessage.Define<int, long>(
+			LogLevel.Trace,
+			new EventId(2, "OperationCompleted"),
+			"OperationCompleted: ResultCode = {ResultCode}, ElapsedMs = {ElapsedMs}"
+		);
+
+	static readonly Action<ILogger, string, Exception?> _operationFailedLog =
+		LoggerMessage.Define<string>(
+			LogLevel.Error,
+			new EventId(3, "OperationFailed"),
+			"OperationFailed: ErrorMessage = {ErrorMessage}"
+		);
 
 	readonly ILogger _logger;
 	readonly Meter _meter;
@@ -53,15 +79,7 @@ public sealed class ManualMultiTargetTelemetry : IDisposable
 
 		// Logging
 		if (_logger.IsEnabled(LogLevel.Information))
-		{
-			_logger.Log(
-				LogLevel.Information,
-				new EventId(1, "StartOperation"),
-				$"StartOperation: OperationName = {operationName}, OperationId = {operationId}",
-				null,
-				static (s, _) => s
-			);
-		}
+			_startOperationLog(_logger, operationName, operationId, null);
 
 		// Metrics
 		_startOperationCounter.Add(1,
@@ -87,15 +105,7 @@ public sealed class ManualMultiTargetTelemetry : IDisposable
 
 		// Logging
 		if (_logger.IsEnabled(LogLevel.Trace))
-		{
-			_logger.Log(
-				LogLevel.Trace,
-				new EventId(2, "OperationCompleted"),
-				$"OperationCompleted: ResultCode = {resultCode}, ElapsedMs = {elapsedMs}",
-				null,
-				static (s, _) => s
-			);
-		}
+			_operationCompletedLog(_logger, resultCode, elapsedMs, null);
 	}
 
 	public void OperationFailed(Activity? activity, string errorMessage)
@@ -111,15 +121,7 @@ public sealed class ManualMultiTargetTelemetry : IDisposable
 
 		// Logging
 		if (_logger.IsEnabled(LogLevel.Error))
-		{
-			_logger.Log(
-				LogLevel.Error,
-				new EventId(3, "OperationFailed"),
-				$"OperationFailed: ErrorMessage = {errorMessage}",
-				null,
-				static (s, _) => s
-			);
-		}
+			_operationFailedLog(_logger, errorMessage, null);
 
 		// Metrics
 		_operationFailedCounter.Add(1,
@@ -133,3 +135,4 @@ public sealed class ManualMultiTargetTelemetry : IDisposable
 
 	public void Dispose() => _meter.Dispose();
 }
+

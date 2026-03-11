@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>Purview.Telemetry.Benchmarks.Benchmarks.MultiTargetVsSingleTargetBenchmarks-20260311-125509</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.14.0, Windows 11 (10.0.22631.6649/23H2/2023Update/SunValley3)
+Intel Core Ultra 7 155H, 1 CPU, 22 logical and 16 physical cores
+.NET SDK 10.0.200
+  [Host]     : .NET 10.0.4 (10.0.426.12010), X64 RyuJIT AVX2
+  DefaultJob : .NET 10.0.4 (10.0.426.12010), X64 RyuJIT AVX2
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>Method                                                 </th><th>HasListener</th><th>Mean </th><th>Ratio</th><th>Gen0</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>False</td><td>0.5871 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>False</td><td>37.5346 ns</td><td>63.94</td><td>0.0076</td><td>96 B</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>False</td><td>16.1119 ns</td><td>27.45</td><td>0.0019</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>False</td><td>40.1067 ns</td><td>68.32</td><td>0.0076</td><td>96 B</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>False</td><td>15.2997 ns</td><td>26.06</td><td>0.0019</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>True</td><td>264.4486 ns</td><td>1.00</td><td>0.0801</td><td>1008 B</td><td>1.00</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>True</td><td>293.5554 ns</td><td>1.11</td><td>0.0877</td><td>1104 B</td><td>1.10</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>True</td><td>302.9957 ns</td><td>1.15</td><td>0.0820</td><td>1032 B</td><td>1.02</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>True</td><td>302.3526 ns</td><td>1.14</td><td>0.0877</td><td>1104 B</td><td>1.10</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>True</td><td>267.5486 ns</td><td>1.01</td><td>0.0820</td><td>1032 B</td><td>1.02</td>
+</tr></tbody></table>
+</body>
+</html>

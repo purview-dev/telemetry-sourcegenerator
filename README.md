@@ -11,6 +11,45 @@ Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system
 - **Testable** - easy mocking/substitution for unit testing
 - **DI-ready** - automatic dependency injection registration helpers
 
+## Performance
+
+The source generator produces code that matches — or outperforms — handwritten best-practice telemetry. Benchmarks were run with [BenchmarkDotNet](https://benchmarkdotnet.org/) on .NET 10.0.4 (X64 RyuJIT AVX2, Intel Core Ultra 7 155H).
+
+> [!NOTE]
+> All "no listener / no logging" rows represent the fast-path where telemetry is disabled at runtime. The important comparison is the **"active"** rows, which reflect real production behaviour.
+
+### Activities (generated vs. manual)
+
+| Scenario | Manual | Generated | Overhead |
+|---|---|---|---|
+| Start + complete (no listener) | 0.73 ns | 1.00 ns | +0.27 ns |
+| Start + complete (listener active) | 266 ns / 1008 B | 274 ns / 1008 B | **+3%, same allocations** |
+| Start + fail (listener active) | 243 ns / 920 B | 242 ns / 920 B | **identical** |
+
+Generated activities are **within 3% of hand-written code** and allocate identically.
+
+### Logging (generated v1 vs. manual approaches)
+
+| Scenario | `ILogger.Log` (manual) | `LoggerMessage.Define` (manual) | Generated (v1) |
+|---|---|---|---|
+| Single call (logging disabled) | 0.19 ns / 0 B | 0.019 ns / 0 B | 0.061 ns / 0 B |
+| Single call (logging enabled) | 28.8 ns / 152 B | 6.13 ns / 0 B | **6.17 ns / 0 B** |
+| Full lifecycle — 4 calls (logging enabled) | 105.7 ns / 568 B | 24.3 ns / 0 B | **23.9 ns / 0 B** |
+
+Generated logging (v1) is **on par with `LoggerMessage.Define`** — the gold-standard approach — and is **~4.7× faster** and **allocates ~6× less** than a naïve `ILogger.Log` call.
+
+### Multi-target (Activity + Logging + Metrics combined)
+
+| Scenario | Manual | Generated (v1) |
+|---|---|---|
+| Start + complete (no listener) | 18 ns / 24 B | 17 ns / 24 B |
+| Start + complete (listener active) | 316 ns / 1032 B | **304 ns / 1032 B** |
+| Full lifecycle (listener active) | 272 ns / 1032 B | **271 ns / 1032 B** |
+
+Multi-target generation — emitting an Activity, a log entry, and a metric increment from a single method call — is **on par with or faster than equivalent manual code**.
+
+Full benchmark results are in [`BenchmarkDotNet.Artifacts/results/`](BenchmarkDotNet.Artifacts/results/) after running the benchmark project  in [`benchmarks/`](benchmarks/).
+
 ## Supported Frameworks
 
 - .NET Framework 4.8

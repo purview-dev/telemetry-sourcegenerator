@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>Purview.Telemetry.Benchmarks.Benchmarks.ActivityBenchmarks-20260311-154128</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.15.8, Windows 11 (10.0.22631.6649/23H2/2023Update/SunValley3)
+Intel Core Ultra 7 155H 1.40GHz, 1 CPU, 22 logical and 16 physical cores
+.NET SDK 10.0.200
+  [Host]             : .NET 10.0.4 (10.0.4, 10.0.426.12010), X64 RyuJIT x86-64-v3
+  .NET 10.0          : .NET 10.0.4 (10.0.4, 10.0.426.12010), X64 RyuJIT x86-64-v3
+  .NET 8.0           : .NET 8.0.25 (8.0.25, 8.0.2526.11203), X64 RyuJIT x86-64-v3
+  .NET 9.0           : .NET 9.0.14 (9.0.14, 9.0.1426.11910), X64 RyuJIT x86-64-v3
+  .NET Framework 4.7 : .NET Framework 4.8.1 (4.8.9310.0), X64 RyuJIT VectorSize=256
+  .NET Framework 4.8 : .NET Framework 4.8.1 (4.8.9310.0), X64 RyuJIT VectorSize=256
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>Method                 </th><th>Job         </th><th>Runtime     </th><th>HasListener</th><th>Mean </th><th>Ratio</th><th>Gen0</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>&#39;Manual: start + complete&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>0.6949 ns</td><td>1.01</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: start + complete&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>0.7505 ns</td><td>1.09</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: start + fail&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>0.8851 ns</td><td>1.29</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: start + fail&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>0.6064 ns</td><td>0.88</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: start + complete&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>0.8246 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: start + complete&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>1.0101 ns</td><td>1.23</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: start + fail&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>0.8429 ns</td><td>1.02</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: start + fail&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>0.8919 ns</td><td>1.08</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: start + complete&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>0.7966 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: start + complete&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>0.9020 ns</td><td>1.13</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: start + fail&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>0.4331 ns</td><td>0.54</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: start + fail&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>0.7325 ns</td><td>0.92</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: start + complete&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>19.7505 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: start + complete&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>19.0691 ns</td><td>0.97</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: start + fail&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>19.5302 ns</td><td>0.99</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: start + fail&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>19.7788 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: start + complete&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>29.7620 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: start + complete&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>19.9320 ns</td><td>0.67</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: start + fail&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>19.5105 ns</td><td>0.66</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: start + fail&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>19.6746 ns</td><td>0.66</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: start + complete&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>264.6819 ns</td><td>1.00</td><td>0.0801</td><td>1008 B</td><td>1.00</td>
+</tr><tr><td>&#39;Generated: start + complete&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>262.7206 ns</td><td>0.99</td><td>0.0801</td><td>1008 B</td><td>1.00</td>
+</tr><tr><td>&#39;Manual: start + fail&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>245.8103 ns</td><td>0.93</td><td>0.0732</td><td>920 B</td><td>0.91</td>
+</tr><tr><td>&#39;Generated: start + fail&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>246.0237 ns</td><td>0.93</td><td>0.0730</td><td>920 B</td><td>0.91</td>
+</tr><tr><td>&#39;Manual: start + complete&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>307.2059 ns</td><td>1.00</td><td>0.0801</td><td>1008 B</td><td>1.00</td>
+</tr><tr><td>&#39;Generated: start + complete&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>312.2104 ns</td><td>1.02</td><td>0.0801</td><td>1008 B</td><td>1.00</td>
+</tr><tr><td>&#39;Manual: start + fail&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>283.1267 ns</td><td>0.92</td><td>0.0730</td><td>920 B</td><td>0.91</td>
+</tr><tr><td>&#39;Generated: start + fail&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>277.3910 ns</td><td>0.90</td><td>0.0730</td><td>920 B</td><td>0.91</td>
+</tr><tr><td>&#39;Manual: start + complete&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>269.2554 ns</td><td>1.00</td><td>0.0801</td><td>1008 B</td><td>1.00</td>
+</tr><tr><td>&#39;Generated: start + complete&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>270.8638 ns</td><td>1.01</td><td>0.0801</td><td>1008 B</td><td>1.00</td>
+</tr><tr><td>&#39;Manual: start + fail&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>255.9540 ns</td><td>0.95</td><td>0.0730</td><td>920 B</td><td>0.91</td>
+</tr><tr><td>&#39;Generated: start + fail&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>253.5060 ns</td><td>0.94</td><td>0.0730</td><td>920 B</td><td>0.91</td>
+</tr><tr><td>&#39;Manual: start + complete&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>648.3625 ns</td><td>1.00</td><td>0.2012</td><td>1268 B</td><td>1.00</td>
+</tr><tr><td>&#39;Generated: start + complete&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>648.1528 ns</td><td>1.00</td><td>0.2012</td><td>1268 B</td><td>1.00</td>
+</tr><tr><td>&#39;Manual: start + fail&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>610.4529 ns</td><td>0.94</td><td>0.1869</td><td>1179 B</td><td>0.93</td>
+</tr><tr><td>&#39;Generated: start + fail&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>725.5029 ns</td><td>1.12</td><td>0.1869</td><td>1179 B</td><td>0.93</td>
+</tr><tr><td>&#39;Manual: start + complete&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>681.7943 ns</td><td>1.00</td><td>0.2012</td><td>1268 B</td><td>1.00</td>
+</tr><tr><td>&#39;Generated: start + complete&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>660.5009 ns</td><td>0.97</td><td>0.2012</td><td>1268 B</td><td>1.00</td>
+</tr><tr><td>&#39;Manual: start + fail&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>857.9679 ns</td><td>1.26</td><td>0.1869</td><td>1179 B</td><td>0.93</td>
+</tr><tr><td>&#39;Generated: start + fail&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>636.5179 ns</td><td>0.93</td><td>0.1869</td><td>1179 B</td><td>0.93</td>
+</tr></tbody></table>
+</body>
+</html>
