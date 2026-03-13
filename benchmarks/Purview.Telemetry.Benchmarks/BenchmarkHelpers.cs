@@ -66,6 +66,19 @@ static class BenchmarkHelpers
 	}
 
 	/// <summary>
+	/// Creates the source-generator-produced <see cref="IMetricsBenchmarkTelemetry"/> implementation
+	/// alongside the hand-written <see cref="ManualMetricsTelemetry"/>, both backed by the same
+	/// <see cref="SimpleMeterFactory"/> for a fair comparison.
+	/// </summary>
+	public static (IMetricsBenchmarkTelemetry Generated, ManualMetricsTelemetry Manual) CreateMetricsBenchmarkTelemetry()
+	{
+		var meterFactory = new SimpleMeterFactory();
+		var generated = new MetricsBenchmarkTelemetryCore(meterFactory);
+		var manual = new ManualMetricsTelemetry(meterFactory);
+		return (generated, manual);
+	}
+
+	/// <summary>
 	/// Creates the v2 (state-based ThreadLocalState) and v1 (LoggerMessage.Define) generated logger
 	/// implementations alongside the hand-written <see cref="ManualLoggerMessageTelemetry"/> baseline,
 	/// all backed by either an always-enabled no-op logger or <see cref="NullLogger{T}"/> (always disabled).

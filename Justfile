@@ -106,3 +106,20 @@ act:
 benchmark:
     @echo -e "Running benchmarks for {{ BLUE }}{{ benchmark_solution }}{{ NORMAL }} with {{ YELLOW }}{{ configuration }}{{ NORMAL }}..."
     @dotnet run --project "{{ benchmark_solution }}" --configuration "{{ configuration }}"
+
+# Runs benchmarks and reminds you to update performance documentation
+[group('Benchmarking')]
+benchmark-docs: benchmark
+    @echo -e ""
+    @echo -e "{{ GREEN }}Benchmarks complete.{{ NORMAL }} Results are in {{ BLUE }}BenchmarkDotNet.Artifacts/results/{{ NORMAL }}."
+    @echo -e ""
+    @echo -e "{{ YELLOW }}Next steps — update performance documentation:{{ NORMAL }}"
+    @echo -e "  1. Open {{ BLUE }}README.md{{ NORMAL }} and update the {{ YELLOW }}## Performance{{ NORMAL }} section:"
+    @echo -e "     - Activities:   use {{ BLUE }}*ActivityBenchmarks*-report-github.md{{ NORMAL }}"
+    @echo -e "     - Logging:      use {{ BLUE }}*LoggerBenchmarks*-report-github.md{{ NORMAL }}"
+    @echo -e "     - Multi-target: use {{ BLUE }}*MultiTarget*-report-github.md{{ NORMAL }}"
+    @echo -e "     - Metrics:      use {{ BLUE }}*MetricsBenchmarks*-report-github.md{{ NORMAL }}"
+    @echo -e "  2. Regenerate {{ BLUE }}PERFORMANCE.md{{ NORMAL }} from all six *-report-github.md files."
+    @echo -e "  3. Update the environment header (machine / SDK / runtime versions)."
+    @echo -e ""
+    @echo -e "  See {{ BLUE }}.github/copilot-instructions.md{{ NORMAL }} § Benchmarking for full instructions."

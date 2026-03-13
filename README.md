@@ -48,7 +48,21 @@ Generated logging (v1) is **on par with `LoggerMessage.Define`** — the gold-st
 
 Multi-target generation — emitting an Activity, a log entry, and a metric increment from a single method call — is **on par with or faster than equivalent manual code**.
 
-Full benchmark results are in [`BenchmarkDotNet.Artifacts/results/`](BenchmarkDotNet.Artifacts/results/) after running the benchmark project  in [`benchmarks/`](benchmarks/).
+### Metrics (generated vs. manual)
+
+The baseline here is calling the .NET metrics API directly (e.g. `counter.Add(1, tag)`).
+
+| Scenario | Manual (raw API) | Generated | Overhead |
+|---|---|---|---|
+| Auto-counter (0 tags) | 0.19 ns / 0 B | **~0 ns / 0 B** | **none — JIT-eliminated** |
+| Auto-counter (1 tag) | 0.26 ns / 0 B | ~1–3 ns / 0 B | +0.7–2 ns (null-check guard) |
+| UpDownCounter | 0.20 ns / 0 B | **0.18 ns / 0 B** | **identical** |
+| Histogram (0 tags) | 0.23 ns / 0 B | 0.61 ns / 0 B | +0.4 ns |
+| Histogram (1 tag) | ~0.2 ns / 0 B | ~1 ns / 0 B | +0.8 ns |
+
+Generated metrics are **allocation-free** (same as hand-written code). Zero-tag instruments are JIT-eliminated to near-zero, identical to the manual baseline. Instruments with tags add ≤ 3 ns of overhead from a null-check guard on every call — negligible in any realistic workload.
+
+Full benchmark results are in [`BenchmarkDotNet.Artifacts/results/`](BenchmarkDotNet.Artifacts/results/) and [`PERFORMANCE.md`](PERFORMANCE.md).
 
 ## Supported Frameworks
 
