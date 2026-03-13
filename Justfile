@@ -105,7 +105,7 @@ act:
 [group('Benchmarking')]
 benchmark:
     @echo -e "Running benchmarks for {{ BLUE }}{{ benchmark_solution }}{{ NORMAL }} with {{ YELLOW }}{{ configuration }}{{ NORMAL }}..."
-    @dotnet run --project "{{ benchmark_solution }}" --configuration "{{ configuration }}"
+    @dotnet run --project "{{ benchmark_solution }}" --configuration "{{ configuration }}" --framework net10.0
 
 # Runs benchmarks and reminds you to update performance documentation
 [group('Benchmarking')]

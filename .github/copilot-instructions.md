@@ -162,6 +162,8 @@ When `EmitCompilerGeneratedFiles` is true (as in the sample app), generated file
 
 ## Benchmarking and Performance Documentation
 
+> **MANDATORY RULE:** Always run the full benchmark suite before updating `README.md` or `PERFORMANCE.md` with performance numbers. Never copy stale results or estimate values — every performance table must come from a fresh benchmark run. There are no exceptions.
+
 ### Running Benchmarks
 
 Run all benchmarks with:
@@ -170,14 +172,14 @@ Run all benchmarks with:
 just benchmark
 ```
 
-Or directly:
+Or directly (must specify `--framework net10.0` because the project targets multiple frameworks):
 
 ```
-dotnet run --project ./benchmarks/Purview.Telemetry.Benchmarks/Purview.Telemetry.Benchmarks.csproj --configuration Release
+dotnet run --project ./benchmarks/Purview.Telemetry.Benchmarks/Purview.Telemetry.Benchmarks.csproj --configuration Release --framework net10.0
 ```
 
-- **NEVER CANCEL** benchmark runs — they can take 30–60+ minutes for all runtimes (net47, net48, net8.0, net9.0, net10.0)
-- Select the target framework interactively when prompted
+- **NEVER CANCEL** benchmark runs — they take 30–60+ minutes across all runtimes (net47, net48, net8.0, net9.0, net10.0)
+- BenchmarkDotNet spawns child processes for each target runtime automatically — no manual selection needed
 - Results land in `BenchmarkDotNet.Artifacts/results/` as `*-report-github.md`, `*.csv`, and `*.html`
 
 ### Benchmark Classes
