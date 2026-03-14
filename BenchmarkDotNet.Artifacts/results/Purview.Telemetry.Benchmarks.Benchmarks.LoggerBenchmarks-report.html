@@ -2,7 +2,7 @@
 <html lang='en'>
 <head>
 <meta charset='utf-8' />
-<title>Purview.Telemetry.Benchmarks.Benchmarks.LoggerBenchmarks-20260313-145627</title>
+<title>Purview.Telemetry.Benchmarks.Benchmarks.LoggerBenchmarks-20260313-172642</title>
 
 <style type="text/css">
 	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
@@ -14,10 +14,10 @@
 <body>
 <pre><code>
 BenchmarkDotNet v0.15.8, Windows 11 (10.0.26200.8037/25H2/2025Update/HudsonValley2)
-12th Gen Intel Core i9-12900H 2.50GHz, 1 CPU, 14 logical and 14 physical cores
+13th Gen Intel Core i9-13900KF 3.00GHz, 1 CPU, 32 logical and 24 physical cores
 .NET SDK 10.0.200
-  [Host]             : .NET 10.0.4 (10.0.4, 10.0.426.12010), X64 RyuJIT x86-64-v3
-  .NET 10.0          : .NET 10.0.4 (10.0.4, 10.0.426.12010), X64 RyuJIT x86-64-v3
+  [Host]             : .NET 10.0.5 (10.0.5, 10.0.526.15411), X64 RyuJIT x86-64-v3
+  .NET 10.0          : .NET 10.0.5 (10.0.5, 10.0.526.15411), X64 RyuJIT x86-64-v3
   .NET 8.0           : .NET 8.0.25 (8.0.25, 8.0.2526.11203), X64 RyuJIT x86-64-v3
   .NET 9.0           : .NET 9.0.14 (9.0.14, 9.0.1426.11910), X64 RyuJIT x86-64-v3
   .NET Framework 4.7 : .NET Framework 4.8.1 (4.8.9325.0), X64 RyuJIT VectorSize=256
@@ -28,66 +28,66 @@ BenchmarkDotNet v0.15.8, Windows 11 (10.0.26200.8037/25H2/2025Update/HudsonValle
 <table>
 <thead><tr><th>Method                                                    </th><th>Job         </th><th>Runtime     </th><th>HasLogging</th><th>Mean </th><th>Ratio</th><th>Gen0</th><th>Allocated</th><th>Alloc Ratio</th>
 </tr>
-</thead><tbody><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>0.7715 ns</td><td>1.01</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>0.2187 ns</td><td>0.29</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>0.1982 ns</td><td>0.26</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>1.1994 ns</td><td>1.57</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>2.2975 ns</td><td>3.01</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>2.0801 ns</td><td>2.73</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>0.2341 ns</td><td>1.001</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>0.0000 ns</td><td>0.000</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>1.4157 ns</td><td>6.053</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>2.0337 ns</td><td>8.696</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>2.7106 ns</td><td>11.590</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>8.7497 ns</td><td>37.411</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>0.2016 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>0.2031 ns</td><td>1.01</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>1.0428 ns</td><td>5.18</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>1.8417 ns</td><td>9.15</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>3.0679 ns</td><td>15.24</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>6.7245 ns</td><td>33.41</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>5.2671 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>4.2696 ns</td><td>0.81</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>4.6589 ns</td><td>0.88</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>16.2226 ns</td><td>3.08</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>20.0970 ns</td><td>3.82</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>20.0458 ns</td><td>3.81</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>3.8573 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>4.2897 ns</td><td>1.11</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>4.6646 ns</td><td>1.21</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>16.1279 ns</td><td>4.18</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>20.1477 ns</td><td>5.22</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>20.0966 ns</td><td>5.21</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>10.3028 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>9.9389 ns</td><td>0.96</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>27.4102 ns</td><td>2.66</td><td>0.0019</td><td>24 B</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>39.6126 ns</td><td>3.84</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>86.6112 ns</td><td>8.41</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>232.2812 ns</td><td>22.55</td><td>0.0076</td><td>96 B</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>32.9812 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>33.2624 ns</td><td>1.01</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>66.3701 ns</td><td>2.01</td><td>0.0019</td><td>24 B</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>127.5765 ns</td><td>3.87</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>129.4090 ns</td><td>3.93</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>279.2304 ns</td><td>8.47</td><td>0.0076</td><td>96 B</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>12.9622 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>14.5380 ns</td><td>1.12</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>36.7851 ns</td><td>2.84</td><td>0.0019</td><td>24 B</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>54.1419 ns</td><td>4.18</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>55.1882 ns</td><td>4.26</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>143.4742 ns</td><td>11.07</td><td>0.0076</td><td>96 B</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>37.4942 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>38.1463 ns</td><td>1.02</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>89.1042 ns</td><td>2.38</td><td>0.0038</td><td>24 B</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>148.3694 ns</td><td>3.96</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>153.8677 ns</td><td>4.10</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>358.4055 ns</td><td>9.56</td><td>0.0153</td><td>96 B</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>37.3695 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>38.3003 ns</td><td>1.02</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>89.5365 ns</td><td>2.40</td><td>0.0038</td><td>24 B</td><td>NA</td>
-</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>149.2832 ns</td><td>3.99</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>153.7015 ns</td><td>4.11</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>358.3366 ns</td><td>9.59</td><td>0.0153</td><td>96 B</td><td>NA</td>
+</thead><tbody><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>0.1894 ns</td><td>1.02</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>0.1881 ns</td><td>1.02</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>0.1763 ns</td><td>0.95</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>0.3521 ns</td><td>1.90</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>0.7179 ns</td><td>3.88</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>0.6440 ns</td><td>3.48</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>0.1726 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>0.3460 ns</td><td>2.01</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>0.7087 ns</td><td>4.11</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>0.8794 ns</td><td>5.10</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>1.2677 ns</td><td>7.35</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>3.3236 ns</td><td>19.28</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>0.1733 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>0.1750 ns</td><td>1.01</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>0.5362 ns</td><td>3.10</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>0.5240 ns</td><td>3.03</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>1.4125 ns</td><td>8.16</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>2.6294 ns</td><td>15.19</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>1.4322 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>1.5678 ns</td><td>1.10</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>1.7495 ns</td><td>1.22</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>8.0689 ns</td><td>5.64</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>9.8148 ns</td><td>6.86</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>9.7959 ns</td><td>6.84</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>1.4087 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>1.5921 ns</td><td>1.13</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>1.7372 ns</td><td>1.23</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>8.1368 ns</td><td>5.78</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>9.8110 ns</td><td>6.97</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>9.7778 ns</td><td>6.94</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>4.0881 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>4.2286 ns</td><td>1.03</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>11.5980 ns</td><td>2.84</td><td>0.0013</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>16.8506 ns</td><td>4.12</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>16.7257 ns</td><td>4.09</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>51.7753 ns</td><td>12.67</td><td>0.0051</td><td>96 B</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>7.8904 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>7.9261 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>16.2818 ns</td><td>2.06</td><td>0.0013</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>28.7230 ns</td><td>3.64</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>29.8486 ns</td><td>3.78</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>69.5641 ns</td><td>8.82</td><td>0.0050</td><td>96 B</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>6.7171 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>7.2279 ns</td><td>1.08</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>15.4979 ns</td><td>2.31</td><td>0.0013</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>24.6779 ns</td><td>3.67</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>27.3735 ns</td><td>4.08</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>67.6062 ns</td><td>10.07</td><td>0.0050</td><td>96 B</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>16.3008 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>16.6508 ns</td><td>1.02</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>41.2773 ns</td><td>2.53</td><td>0.0038</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>66.3620 ns</td><td>4.07</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>68.2500 ns</td><td>4.19</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>164.5308 ns</td><td>10.09</td><td>0.0153</td><td>96 B</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — single Info call&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>16.2296 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>16.5224 ns</td><td>1.02</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — single Info call&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>40.8608 ns</td><td>2.52</td><td>0.0038</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>66.1739 ns</td><td>4.08</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>68.5483 ns</td><td>4.22</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>164.3724 ns</td><td>10.13</td><td>0.0153</td><td>96 B</td><td>NA</td>
 </tr></tbody></table>
 </body>
 </html>

@@ -2,7 +2,7 @@
 <html lang='en'>
 <head>
 <meta charset='utf-8' />
-<title>Purview.Telemetry.Benchmarks.Benchmarks.MetricsBenchmarks-20260313-085356</title>
+<title>Purview.Telemetry.Benchmarks.Benchmarks.MetricsBenchmarks-20260313-181403</title>
 
 <style type="text/css">
 	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
@@ -14,10 +14,10 @@
 <body>
 <pre><code>
 BenchmarkDotNet v0.15.8, Windows 11 (10.0.26200.8037/25H2/2025Update/HudsonValley2)
-12th Gen Intel Core i9-12900H 2.50GHz, 1 CPU, 14 logical and 14 physical cores
+13th Gen Intel Core i9-13900KF 3.00GHz, 1 CPU, 32 logical and 24 physical cores
 .NET SDK 10.0.200
-  [Host]             : .NET 10.0.4 (10.0.4, 10.0.426.12010), X64 RyuJIT x86-64-v3
-  .NET 10.0          : .NET 10.0.4 (10.0.4, 10.0.426.12010), X64 RyuJIT x86-64-v3
+  [Host]             : .NET 10.0.5 (10.0.5, 10.0.526.15411), X64 RyuJIT x86-64-v3
+  .NET 10.0          : .NET 10.0.5 (10.0.5, 10.0.526.15411), X64 RyuJIT x86-64-v3
   .NET 8.0           : .NET 8.0.25 (8.0.25, 8.0.2526.11203), X64 RyuJIT x86-64-v3
   .NET 9.0           : .NET 9.0.14 (9.0.14, 9.0.1426.11910), X64 RyuJIT x86-64-v3
   .NET Framework 4.7 : .NET Framework 4.8.1 (4.8.9325.0), X64 RyuJIT VectorSize=256
@@ -26,68 +26,58 @@ BenchmarkDotNet v0.15.8, Windows 11 (10.0.26200.8037/25H2/2025Update/HudsonValle
 <pre><code></code></pre>
 
 <table>
-<thead><tr><th>Method                      </th><th>Job         </th><th>Runtime     </th><th>Mean </th><th>Ratio</th><th>Allocated</th><th>Alloc Ratio</th>
+<thead><tr><th>Method                      </th><th>Job         </th><th>Runtime     </th><th>Mean</th><th>Ratio</th><th>Allocated</th><th>Alloc Ratio</th>
 </tr>
-</thead><tbody><tr><td>&#39;Manual: auto-counter (0 tags)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.0000 ns</td><td>?</td><td>-</td><td>?</td>
-</tr><tr><td>&#39;Generated: auto-counter (0 tags)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>5.7670 ns</td><td>?</td><td>-</td><td>?</td>
-</tr><tr><td>&#39;Manual: auto-counter (1 tag)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>1.2463 ns</td><td>?</td><td>-</td><td>?</td>
-</tr><tr><td>&#39;Generated: auto-counter (1 tag)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>1.0129 ns</td><td>?</td><td>-</td><td>?</td>
-</tr><tr><td>&#39;Manual: up-down counter&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>2.4884 ns</td><td>?</td><td>-</td><td>?</td>
-</tr><tr><td>&#39;Generated: up-down counter&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>12.5985 ns</td><td>?</td><td>-</td><td>?</td>
-</tr><tr><td>&#39;Manual: histogram (0 tags)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.6942 ns</td><td>?</td><td>-</td><td>?</td>
-</tr><tr><td>&#39;Generated: histogram (0 tags)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>2.9321 ns</td><td>?</td><td>-</td><td>?</td>
-</tr><tr><td>&#39;Manual: histogram (1 tag)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.2152 ns</td><td>?</td><td>-</td><td>?</td>
-</tr><tr><td>&#39;Generated: histogram (1 tag)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>1.0002 ns</td><td>?</td><td>-</td><td>?</td>
-</tr><tr><td>&#39;Manual: auto-counter (0 tags)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.2005 ns</td><td>1.00</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: auto-counter (0 tags)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>3.3341 ns</td><td>16.64</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: auto-counter (1 tag)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.2490 ns</td><td>1.24</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: auto-counter (1 tag)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>1.0089 ns</td><td>5.04</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: up-down counter&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.2213 ns</td><td>1.10</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: up-down counter&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>3.3945 ns</td><td>16.94</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: histogram (0 tags)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.2024 ns</td><td>1.01</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: histogram (0 tags)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>4.6844 ns</td><td>23.38</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: histogram (1 tag)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.1989 ns</td><td>0.99</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: histogram (1 tag)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>1.0278 ns</td><td>5.13</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: auto-counter (0 tags)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>0.2052 ns</td><td>1.00</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: auto-counter (0 tags)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>4.5278 ns</td><td>22.10</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: auto-counter (1 tag)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>0.6041 ns</td><td>2.95</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: auto-counter (1 tag)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>1.0825 ns</td><td>5.28</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: up-down counter&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>0.1753 ns</td><td>0.86</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: up-down counter&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>5.3643 ns</td><td>26.18</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: histogram (0 tags)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>0.6836 ns</td><td>3.34</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: histogram (0 tags)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>4.5635 ns</td><td>22.27</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: histogram (1 tag)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>1.0090 ns</td><td>4.92</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: histogram (1 tag)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>0.6115 ns</td><td>2.98</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: auto-counter (0 tags)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.6400 ns</td><td>1.00</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: auto-counter (0 tags)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>5.3938 ns</td><td>8.43</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: auto-counter (1 tag)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.6317 ns</td><td>0.99</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: auto-counter (1 tag)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.6392 ns</td><td>1.00</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: up-down counter&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.6316 ns</td><td>0.99</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: up-down counter&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>3.3667 ns</td><td>5.26</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: histogram (0 tags)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.2296 ns</td><td>0.36</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: histogram (0 tags)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>5.7749 ns</td><td>9.03</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: histogram (1 tag)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.6403 ns</td><td>1.00</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: histogram (1 tag)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.2096 ns</td><td>0.33</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: auto-counter (0 tags)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>36.5453 ns</td><td>1.00</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: auto-counter (0 tags)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>58.3213 ns</td><td>1.60</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: auto-counter (1 tag)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>41.6624 ns</td><td>1.14</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: auto-counter (1 tag)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>42.5525 ns</td><td>1.16</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: up-down counter&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>36.8169 ns</td><td>1.01</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: up-down counter&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>58.7831 ns</td><td>1.61</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: histogram (0 tags)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>34.3161 ns</td><td>0.94</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: histogram (0 tags)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>58.7402 ns</td><td>1.61</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: histogram (1 tag)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>41.6366 ns</td><td>1.14</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: histogram (1 tag)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>111.8771 ns</td><td>3.06</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: auto-counter (0 tags)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>88.3332 ns</td><td>1.00</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: auto-counter (0 tags)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>148.4742 ns</td><td>1.68</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: auto-counter (1 tag)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>112.2207 ns</td><td>1.27</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: auto-counter (1 tag)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>113.2573 ns</td><td>1.28</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: up-down counter&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>88.5448 ns</td><td>1.00</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: up-down counter&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>147.9799 ns</td><td>1.68</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: histogram (0 tags)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>86.3522 ns</td><td>0.98</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: histogram (0 tags)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>147.0063 ns</td><td>1.66</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Manual: histogram (1 tag)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>110.5966 ns</td><td>1.25</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Generated: histogram (1 tag)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>115.4011 ns</td><td>1.31</td><td>-</td><td>NA</td>
+</thead><tbody><tr><td>&#39;Manual: auto-counter (0 tags)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.1723 ns</td><td>1.00</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: auto-counter (0 tags)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.3511 ns</td><td>2.04</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: auto-counter (1 tag)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.1731 ns</td><td>1.01</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: auto-counter (1 tag)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.5249 ns</td><td>3.05</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: up-down counter&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.1740 ns</td><td>1.01</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: up-down counter&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.3407 ns</td><td>1.98</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: histogram (0 tags)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.1738 ns</td><td>1.01</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: histogram (0 tags)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.3503 ns</td><td>2.03</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: histogram (1 tag)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.1732 ns</td><td>1.01</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: histogram (1 tag)&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.5224 ns</td><td>3.03</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: auto-counter (0 tags)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>0.1711 ns</td><td>1.00</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: auto-counter (0 tags)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>0.3514 ns</td><td>2.06</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: auto-counter (1 tag)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>0.3588 ns</td><td>2.10</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: auto-counter (1 tag)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>0.5248 ns</td><td>3.07</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: up-down counter&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>0.1730 ns</td><td>1.01</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: up-down counter&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>0.3504 ns</td><td>2.05</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: histogram (0 tags)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>0.3516 ns</td><td>2.06</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: histogram (0 tags)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>0.3464 ns</td><td>2.03</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: histogram (1 tag)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>0.5242 ns</td><td>3.07</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: histogram (1 tag)&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>0.3493 ns</td><td>2.04</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: auto-counter (0 tags)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.1728 ns</td><td>1.00</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: auto-counter (0 tags)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.1825 ns</td><td>1.06</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: auto-counter (1 tag)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.3470 ns</td><td>2.01</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: auto-counter (1 tag)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.1734 ns</td><td>1.00</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: up-down counter&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.1700 ns</td><td>0.99</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: up-down counter&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.1797 ns</td><td>1.04</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: histogram (0 tags)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.3478 ns</td><td>2.02</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: histogram (0 tags)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.1739 ns</td><td>1.01</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: histogram (1 tag)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.3481 ns</td><td>2.02</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: histogram (1 tag)&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.3503 ns</td><td>2.03</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: auto-counter (0 tags)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>14.5226 ns</td><td>1.00</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: auto-counter (0 tags)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>15.0242 ns</td><td>1.03</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: auto-counter (1 tag)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>17.6109 ns</td><td>1.21</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: auto-counter (1 tag)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>17.7414 ns</td><td>1.22</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: up-down counter&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>14.5807 ns</td><td>1.00</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: up-down counter&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>14.9923 ns</td><td>1.03</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: histogram (0 tags)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>14.5807 ns</td><td>1.00</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: histogram (0 tags)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>15.1061 ns</td><td>1.04</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: histogram (1 tag)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>17.9393 ns</td><td>1.24</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: histogram (1 tag)&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>18.1634 ns</td><td>1.25</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: auto-counter (0 tags)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>14.5683 ns</td><td>1.00</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: auto-counter (0 tags)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>15.0969 ns</td><td>1.04</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: auto-counter (1 tag)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>18.3106 ns</td><td>1.26</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: auto-counter (1 tag)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>17.7005 ns</td><td>1.22</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: up-down counter&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>15.5211 ns</td><td>1.07</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: up-down counter&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>15.1828 ns</td><td>1.04</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: histogram (0 tags)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>14.5580 ns</td><td>1.00</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: histogram (0 tags)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>15.0912 ns</td><td>1.04</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Manual: histogram (1 tag)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>17.6257 ns</td><td>1.21</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Generated: histogram (1 tag)&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>18.2136 ns</td><td>1.25</td><td>-</td><td>NA</td>
 </tr></tbody></table>
 </body>
 </html>

@@ -56,11 +56,10 @@ This tests whether the generated code has any overhead compared to equivalent ha
 
 ### `LoggerBenchmarks`
 
-Compares four logging implementations with a parameterised `HasLogging` flag:
+Compares three logging implementations with a parameterised `HasLogging` flag:
 
 | Implementation | Code path |
 |---|---|
-| Manual: `ILogger.Log` | Direct `_logger.Log()` with interpolated string formatter (unoptimised baseline) |
 | Manual: `LoggerMessage.Define` | Hand-written `static readonly LoggerMessage.Define<T>()` delegates (classic optimised approach) |
 | Generated v1 | Source-generator with `DisableMSLoggingTelemetryGeneration = true` — emits `LoggerMessage.Define<T>` (identical pattern to manual above) |
 | Generated v2 | Source-generator default — emits state-based `LoggerMessageHelper.ThreadLocalState` approach, matching the built-in `[LoggerMessage]` attribute generator |
