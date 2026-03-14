@@ -4,6 +4,7 @@ test_solution := solution_file
 configuration := "Release"
 sample_solution_file := "./samples/SampleApp/SampleApp.slnx"
 artifact_folder := "p:/sync-projects/.local-nuget/"
+benchmark_solution := justfile_directory() + "/benchmarks/Purview.Telemetry.Benchmarks/Purview.Telemetry.Benchmarks.csproj"
 
 # Displays the list of available commands
 default:
@@ -20,6 +21,18 @@ build:
 test:
     @echo -e "Running tests for {{ BLUE }}{{ test_solution }}{{ NORMAL }} with {{ YELLOW }}{{ configuration }}{{ NORMAL }}..."
     @dotnet test --solution "{{ test_solution }}" --configuration "{{ configuration }}"
+
+# Builds the sample solution with the specified configuration (default: Release)
+[group('Samples - Build and Test')]
+build-s:
+    @echo -e "Building {{ BLUE }}{{ sample_solution_file }}{{ NORMAL }} with {{ YELLOW }}{{ configuration }}{{ NORMAL }}..."
+    @dotnet build "{{ sample_solution_file }}" --configuration "{{ configuration }}"
+
+# Runs tests for the sample solution with the specified configuration (default: Release)
+[group('Samples - Build and Test')]
+test-s:
+    @echo -e "Running tests for {{ BLUE }}{{ sample_solution_file }}{{ NORMAL }} with {{ YELLOW }}{{ configuration }}{{ NORMAL }}..."
+    @dotnet test --solution "{{ sample_solution_file }}" --configuration "{{ configuration }}"
 
 # Creates a new release (final or prerelease) using bun
 [group('Versioning and Release')]
@@ -84,6 +97,29 @@ build-pack:
     @bun -e "const version = require('./package.json').version; const exec = require('child_process').execSync; const branch = exec('git rev-parse --abbrev-ref HEAD').toString().trim(); const commit = exec('git rev-parse HEAD').toString().trim(); const year = new Date().getFullYear(); const cmd = 'dotnet pack \"{{ root_folder }}Purview.Telemetry.SourceGenerator/Purview.Telemetry.SourceGenerator.csproj\" --configuration \"{{ configuration }}\" --output \"{{ artifact_folder }}\" --include-symbols --property:Version=\"' + version + '\" --property:RepositoryBranch=\"' + branch + '\" --property:RepositoryCommit=\"' + commit + '\" --property:COPYRIGHT_YEAR=\"' + year + '\"'; exec(cmd, {stdio: 'inherit'});"
 
 # Runs GitHub Actions locally using act (requires act to be installed and configured)
+[group('CI/ CD')]
 act:
     @echo -e "Running {{ BLUE }}act{{ NORMAL }}..."
     @act -P ubuntu-latest=-self-hosted
+
+[group('Benchmarking')]
+benchmark:
+    @echo -e "Running benchmarks for {{ BLUE }}{{ benchmark_solution }}{{ NORMAL }} with {{ YELLOW }}{{ configuration }}{{ NORMAL }}..."
+    @dotnet run --project "{{ benchmark_solution }}" --configuration "{{ configuration }}" --framework net10.0
+
+# Runs benchmarks and reminds you to update performance documentation
+[group('Benchmarking')]
+benchmark-docs: benchmark
+    @echo -e ""
+    @echo -e "{{ GREEN }}Benchmarks complete.{{ NORMAL }} Results are in {{ BLUE }}BenchmarkDotNet.Artifacts/results/{{ NORMAL }}."
+    @echo -e ""
+    @echo -e "{{ YELLOW }}Next steps — update performance documentation:{{ NORMAL }}"
+    @echo -e "  1. Open {{ BLUE }}README.md{{ NORMAL }} and update the {{ YELLOW }}## Performance{{ NORMAL }} section:"
+    @echo -e "     - Activities:   use {{ BLUE }}*ActivityBenchmarks*-report-github.md{{ NORMAL }}"
+    @echo -e "     - Logging:      use {{ BLUE }}*LoggerBenchmarks*-report-github.md{{ NORMAL }}"
+    @echo -e "     - Multi-target: use {{ BLUE }}*MultiTarget*-report-github.md{{ NORMAL }}"
+    @echo -e "     - Metrics:      use {{ BLUE }}*MetricsBenchmarks*-report-github.md{{ NORMAL }}"
+    @echo -e "  2. Regenerate {{ BLUE }}PERFORMANCE.md{{ NORMAL }} from all six *-report-github.md files."
+    @echo -e "  3. Update the environment header (machine / SDK / runtime versions)."
+    @echo -e ""
+    @echo -e "  See {{ BLUE }}.github/copilot-instructions.md{{ NORMAL }} § Benchmarking for full instructions."

@@ -320,7 +320,13 @@ partial class MeterTargetClassEmitter
 			.Append('(')
 			.Append(methodTarget.MeasurementParameter?.ParameterName ?? "1");
 
-		if (useDirectTagParams)
+		if (tagCount == 0)
+		{
+			// No tags — use the simple no-tag overload so the JIT can inline the hot path fully.
+			// Passing tagList: default would route through the TagList overload unnecessarily.
+			builder.AppendLine(");");
+		}
+		else if (useDirectTagParams)
 		{
 			// For 1-3 tags without conditionals, pass as direct KeyValuePair parameters
 			foreach (var tag in methodTarget.Tags)
@@ -339,14 +345,14 @@ partial class MeterTargetClassEmitter
 		}
 		else
 		{
-			// For 4+ tags or conditional tags, use TagList
-			builder.Append(", tagList: ");
+			if (tagVariableName != null)
+			{
+				// 4+ tags or conditional tags: use the TagList variable
+				builder.Append(", tagList: ").Append(tagVariableName);
+			}
 
-			if (tagVariableName == null)
-				builder.Append("default");
-			else
-				builder.Append(tagVariableName);
-
+			// 0 tags: close the call with no tag argument, using the simple overload
+			// (e.g. Add(1) or Record(value) rather than Add(1, tagList: default))
 			builder.AppendLine(");");
 		}
 
