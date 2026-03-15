@@ -93,7 +93,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Testing;
 
-[Logger]
+[Logger(GenerationMode = LoggerGenerationMode.V2)]
 public interface ITestLogger
 {
 	[Log(MessageTemplate = "v = {v} Exception = {ex}")]

@@ -4,12 +4,12 @@ record LoggerAttributeRecord(
 	AttributeValue<int> DefaultLevel,
 	AttributeStringValue CustomPrefix,
 	AttributeValue<int> PrefixType,
-	AttributeValue<bool> DisableMSLoggingTelemetryGeneration
+	AttributeValue<int> GenerationMode
 );
 
 record LoggerGenerationAttributeRecord(
 	AttributeValue<int> DefaultLevel,
-	AttributeValue<bool> DisableMSLoggingTelemetryGeneration,
+	AttributeValue<int> GenerationMode,
 	AttributeValue<int> DefaultPrefixType
 );
 
@@ -18,7 +18,7 @@ record LogAttributeRecord(
 	AttributeStringValue MessageTemplate,
 	AttributeValue<int> EventId,
 	AttributeStringValue Name,
-	AttributeValue<bool> DisableMSLoggingTelemetryGeneration
+	AttributeValue<int> GenerationMode
 );
 
 record LogPropertiesAttributeRecord(

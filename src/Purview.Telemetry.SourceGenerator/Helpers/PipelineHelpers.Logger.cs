@@ -89,25 +89,19 @@ partial class PipelineHelpers
 		);
 		var defaultLogLevel =
 			loggerGenerationAttribute?.DefaultLevel?.Value ?? Constants.Logging.DefaultLevel;
-		var disableMSLoggingTelemetryGeneration =
-			loggerAttribute.DisableMSLoggingTelemetryGeneration.Value
-			?? loggerGenerationAttribute?.DisableMSLoggingTelemetryGeneration.Value
-			?? false;
 		var defaultPrefixType =
 			loggerGenerationAttribute?.DefaultPrefixType.IsSet == true
 				? loggerGenerationAttribute.DefaultPrefixType.Value!.Value
 				: 0;
 
-		if (!disableMSLoggingTelemetryGeneration)
-		{
-			// We got to here which means we're trying to use the new generation type,
-			// so let's check if the LogPropertiesAttribute is referenced. If it's not,
-			// we'll disable the new telemetry generation.
-			disableMSLoggingTelemetryGeneration =
-				context.SemanticModel.Compilation.GetTypeByMetadataName(
-					Constants.Logging.MicrosoftExtensions.LogPropertiesAttribute.FullyQualifiedName
-				) == null;
-		}
+		// Resolve the effective generation mode using priority:
+		// interface GenerationMode > assembly GenerationMode > Auto (per-method decision)
+		var interfaceGenerationMode =
+			loggerAttribute.GenerationMode.IsSet
+				? loggerAttribute.GenerationMode.Value!.Value
+				: loggerGenerationAttribute?.GenerationMode.IsSet == true
+					? loggerGenerationAttribute.GenerationMode.Value!.Value
+					: 0; // Auto
 
 		var generationType = SharedHelpers.GetGenerationTypes(interfaceSymbol, token);
 		var fullNamespace = Utilities.GetFullNamespace(interfaceDeclaration, true);
@@ -121,7 +115,7 @@ partial class PipelineHelpers
 			semanticModel,
 			interfaceSymbol,
 			logger,
-			interfaceUsesV1Generation: disableMSLoggingTelemetryGeneration,
+			interfaceGenerationMode: interfaceGenerationMode,
 			token,
 			out var methodDiagnostics
 		);
@@ -139,7 +133,7 @@ partial class PipelineHelpers
 			DefaultLevel: defaultLogLevel,
 			LogMethods: logMethods,
 			DuplicateMethods: BuildDuplicateMethods(interfaceSymbol, semanticModel, token),
-			UseMSLoggingTelemetryBasedGeneration: !disableMSLoggingTelemetryGeneration,
+			UseMSLoggingTelemetryBasedGeneration: interfaceGenerationMode != 1, // false only when V1 forced
 			Failures: methodDiagnostics?.ToImmutableArray()
 		);
 	}
@@ -154,7 +148,7 @@ partial class PipelineHelpers
 		SemanticModel semanticModel,
 		INamedTypeSymbol interfaceSymbol,
 		GenerationLogger? logger,
-		bool interfaceUsesV1Generation,
+		int interfaceGenerationMode,
 		CancellationToken token,
 		out (TelemetryDiagnosticDescriptor, ImmutableArray<Location>)[]? telemetryDiagnostics
 	)
@@ -351,10 +345,39 @@ partial class PipelineHelpers
 				);
 			}
 
-			var useV1Generation =
-				logAttribute?.DisableMSLoggingTelemetryGeneration.IsSet == true
-					? logAttribute.DisableMSLoggingTelemetryGeneration.Value!.Value
-					: interfaceUsesV1Generation;
+			// Resolve per-method generation mode.
+			// Priority: method GenerationMode > interface/assembly GenerationMode > Auto (per-method param analysis).
+			bool useV1Generation;
+			var methodGenMode = logAttribute?.GenerationMode.IsSet == true
+				? logAttribute.GenerationMode.Value!.Value
+				: 0; // Auto at method level - inherit from interface
+
+			if (methodGenMode == 1) // V1 forced at method level
+			{
+				useV1Generation = true;
+			}
+			else if (methodGenMode == 2) // V2 forced at method level
+			{
+				useV1Generation = false;
+			}
+			else if (interfaceGenerationMode == 1) // V1 forced at interface/assembly level
+			{
+				useV1Generation = true;
+			}
+			else if (interfaceGenerationMode == 2) // V2 forced at interface/assembly level
+			{
+				useV1Generation = false;
+			}
+			else
+			{
+				// Auto: choose v1 when the method's parameters allow it (best performance).
+				// v1 requires: ≤6 non-exception parameters, single exception, no [ExpandEnumerable], no [LogProperties].
+				useV1Generation =
+					!hasMultipleExceptions
+					&& methodParameters.Count(p => !p.IsException) <= Constants.Logging.MaxNonExceptionParameters
+					&& !methodParameters.Any(p => p.ExpandEnumerableAttribute != null)
+					&& !methodParameters.Any(p => p.LogPropertiesAttribute != null);
+			}
 
 			methodTargets.Add(
 				new(

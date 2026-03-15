@@ -17,7 +17,6 @@ namespace Testing
 	{
 		readonly global::Microsoft.Extensions.Logging.ILogger<global::Testing.IMultiTelemetry> _logger;
 
-
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public MultiTelemetryCore(global::Microsoft.Extensions.Logging.ILogger<global::Testing.IMultiTelemetry> logger)
 		{

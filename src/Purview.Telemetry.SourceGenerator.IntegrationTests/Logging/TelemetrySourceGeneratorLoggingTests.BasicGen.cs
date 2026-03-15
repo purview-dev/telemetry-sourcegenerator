@@ -131,13 +131,13 @@ public interface ITestLogger {
 		CancellationToken cancellationToken
 	)
 	{
-		// Arrange
+		// Arrange: explicit V1 mode with 9 params — exceeds the 6-param v1 limit, raises TSG2001.
 		const string basicLogger =
 			@"
 
 namespace Testing;
 
-[Logger]
+[Logger(GenerationMode = LoggerGenerationMode.V1)]
 public interface ITestLogger {
 	void Log(string stringParam, int intParam, bool boolParam, string stringParam1, int intParam1, bool boolParam1, string stringParam2, int intParam2, bool boolParam2);
 }

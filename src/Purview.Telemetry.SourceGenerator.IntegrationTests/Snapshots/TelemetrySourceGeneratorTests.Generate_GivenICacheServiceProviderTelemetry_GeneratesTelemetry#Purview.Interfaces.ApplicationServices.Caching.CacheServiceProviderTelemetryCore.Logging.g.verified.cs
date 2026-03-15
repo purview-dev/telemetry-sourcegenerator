@@ -16,7 +16,6 @@ namespace Purview.Interfaces.ApplicationServices.Caching
 	sealed partial class CacheServiceProviderTelemetryCore : global::Purview.Interfaces.ApplicationServices.Caching.ICacheServiceProviderTelemetry
 	{
 		readonly global::Microsoft.Extensions.Logging.ILogger<global::Purview.Interfaces.ApplicationServices.Caching.ICacheServiceProviderTelemetry> _logger;
-
 		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, int, global::System.Exception?> _failedToDeserializePayloadAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<int>(global::Microsoft.Extensions.Logging.LogLevel.Error, new global::Microsoft.Extensions.Logging.EventId(1974069882, "FailedToDeserializePayload"), "FailedToDeserializePayload: DataLength = {DataLength}");
 		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, string, global::System.Exception?> _failedToGetFromCacheAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<string>(global::Microsoft.Extensions.Logging.LogLevel.Error, new global::Microsoft.Extensions.Logging.EventId(747016249, "FailedToGetFromCache"), "FailedToGetFromCache: Key = {Key}");
 		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, string, global::System.Exception?> _failedToRefreshAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<string>(global::Microsoft.Extensions.Logging.LogLevel.Error, new global::Microsoft.Extensions.Logging.EventId(1433994932, "FailedToRefresh"), "FailedToRefresh: CacheKey = {CacheKey}");

@@ -19,7 +19,6 @@ namespace Testing
 	sealed partial class TestLoggerCore : global::Testing.ITestLogger
 	{
 		readonly global::Microsoft.Extensions.Logging.ILogger<global::Testing.ITestLogger> _logger;
-
 		static readonly global::System.Func<global::Microsoft.Extensions.Logging.ILogger, global::System.IDisposable?> _logAction = global::Microsoft.Extensions.Logging.LoggerMessage.DefineScope("Log");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

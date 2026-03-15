@@ -39,12 +39,10 @@ sealed class LoggerAttribute : global::System.Attribute
 	/// <param name="defaultLevel">The default <see cref="global::Microsoft.Extensions.Logging.LogLevel"/> to use
 	/// when one is not specified.</param>
 	/// <param name="customPrefix">If specified, also sets the <see cref="global::Purview.Telemetry.LogPrefixType"/> to <see cref="global::Purview.Telemetry.LogPrefixType.Custom"/>.</param>
-	/// <param name="disableMSLoggingTelemetryGeneration">Disables the generation of the new style of telemetry generation for Microsoft.Extensions.Logging.</param>
-	public LoggerAttribute(global::Microsoft.Extensions.Logging.LogLevel defaultLevel, string? customPrefix = null, bool disableMSLoggingTelemetryGeneration = false)
+	public LoggerAttribute(global::Microsoft.Extensions.Logging.LogLevel defaultLevel, string? customPrefix = null)
 	{
 		DefaultLevel = defaultLevel;
 		CustomPrefix = customPrefix;
-		DisableMSLoggingTelemetryGeneration = disableMSLoggingTelemetryGeneration;
 
 		if (!string.IsNullOrWhiteSpace(CustomPrefix))
 		{
@@ -70,11 +68,13 @@ sealed class LoggerAttribute : global::System.Attribute
 	public global::Purview.Telemetry.LogPrefixType PrefixType { get; set; }
 
 	/// <summary>
-	/// Disables the generation of the new style of telemetry generation for Microsoft.Extensions.Logging.
-	/// 
-	/// Defaults to false.
+	/// Controls which generation mode is used for all log methods on this interface.
+	/// <see cref="global::Purview.Telemetry.LoggerGenerationMode.Auto"/> (the default) inherits from the
+	/// assembly-level <see cref="global::Purview.Telemetry.LoggerGenerationAttribute.GenerationMode"/> setting,
+	/// falling back to automatic per-method selection based on parameters.
+	/// Can be overridden per-method via <see cref="global::Purview.Telemetry.LogAttribute.GenerationMode"/>.
 	/// </summary>
-	public bool DisableMSLoggingTelemetryGeneration { get; set; }
+	public global::Purview.Telemetry.LoggerGenerationMode GenerationMode { get; set; }
 }
 
 #endif

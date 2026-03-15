@@ -13,7 +13,7 @@ partial class TelemetrySourceGeneratorLoggingGen2Tests
 
 namespace Testing;
 
-[Logger]
+[Logger(GenerationMode = LoggerGenerationMode.V2)]
 public interface ITestLogger {
 	void LogEntryWithCustomExceptionType(NullReferenceException nrf);
 }
@@ -41,7 +41,7 @@ public interface ITestLogger {
 
 namespace Testing;
 
-[Logger]
+[Logger(GenerationMode = LoggerGenerationMode.V2)]
 public interface ITestLogger {
 	void LogEntryWithCustomExceptionType(BadLuckException custom);
 }
@@ -87,6 +87,11 @@ public class BadLuckException : Exception { }
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			c => c.ScrubInlineGuids(),
+			expectsDiagnostics: true,
+			cancellationToken: cancellationToken
+		);
 	}
 }

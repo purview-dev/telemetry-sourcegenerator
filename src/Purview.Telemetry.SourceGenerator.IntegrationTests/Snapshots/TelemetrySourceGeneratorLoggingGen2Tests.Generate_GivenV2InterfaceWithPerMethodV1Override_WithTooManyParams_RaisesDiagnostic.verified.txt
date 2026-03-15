@@ -2,7 +2,7 @@
   Diagnostics: [
     {
       Location: /*
-	[Log(DisableMSLoggingTelemetryGeneration = true)]
+	[Log(GenerationMode = LoggerGenerationMode.V1)]
 	void HotPathV1LogEntry(int a, int b, int c, int d, int e, int f, int g);
       ^^^^^^^^^^^^^^^^^
 }

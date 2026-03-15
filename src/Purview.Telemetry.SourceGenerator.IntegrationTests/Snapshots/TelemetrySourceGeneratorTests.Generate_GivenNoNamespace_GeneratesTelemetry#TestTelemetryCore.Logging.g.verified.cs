@@ -14,7 +14,6 @@
 sealed partial class TestTelemetryCore : global::ITestTelemetry
 {
 	readonly global::Microsoft.Extensions.Logging.ILogger<global::ITestTelemetry> _logger;
-
 	static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, int, bool, global::System.Exception?> _logAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<int, bool>(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(1579320335, "Log"), "Log: IntParam = {IntParam}, BoolParam = {BoolParam}");
 	static readonly global::System.Func<global::Microsoft.Extensions.Logging.ILogger, int, bool, global::System.IDisposable?> _logScopeAction = global::Microsoft.Extensions.Logging.LoggerMessage.DefineScope<int, bool>("LogScope: IntParam = {IntParam}, BoolParam = {BoolParam}");
 

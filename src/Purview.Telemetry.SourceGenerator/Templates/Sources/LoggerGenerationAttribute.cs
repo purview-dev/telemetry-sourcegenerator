@@ -35,11 +35,13 @@ sealed class LoggerGenerationAttribute : global::System.Attribute
 	public global::Microsoft.Extensions.Logging.LogLevel DefaultLevel { get; set; } = global::Microsoft.Extensions.Logging.LogLevel.Information;
 
 	/// <summary>
-	/// Disables the generation of the new style of telemetry generation for Microsoft.Extensions.Logging.
-	/// 
-	/// Defaults to false.
+	/// Controls which generation mode is used for all log methods in the assembly.
+	/// <see cref="global::Purview.Telemetry.LoggerGenerationMode.Auto"/> (the default) selects v1 or v2
+	/// per method based on the method's parameters and types, choosing the best option for performance.
+	/// Can be overridden per-interface via <see cref="global::Purview.Telemetry.LoggerAttribute.GenerationMode"/>
+	/// or per-method via <see cref="global::Purview.Telemetry.LogAttribute.GenerationMode"/>.
 	/// </summary>
-	public bool DisableMSLoggingTelemetryGeneration { get; set; }
+	public global::Purview.Telemetry.LoggerGenerationMode GenerationMode { get; set; }
 
 	/// <summary>
 	/// Specifies the default mode used to generate or override the prefix for the log entry.

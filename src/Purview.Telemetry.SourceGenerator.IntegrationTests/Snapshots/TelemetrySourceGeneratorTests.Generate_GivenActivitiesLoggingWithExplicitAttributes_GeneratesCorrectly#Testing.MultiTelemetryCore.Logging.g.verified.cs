@@ -16,7 +16,6 @@ namespace Testing
 	sealed partial class MultiTelemetryCore : global::Testing.IMultiTelemetry
 	{
 		readonly global::Microsoft.Extensions.Logging.ILogger<global::Testing.IMultiTelemetry> _logger;
-
 		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, string, global::System.Exception?> _traceMessageAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<string>(global::Microsoft.Extensions.Logging.LogLevel.Trace, new global::Microsoft.Extensions.Logging.EventId(228342541, "TraceMessage"), "TraceMessage: Message = {Message}");
 		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, string, global::System.Exception?> _debugMessageAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<string>(global::Microsoft.Extensions.Logging.LogLevel.Debug, new global::Microsoft.Extensions.Logging.EventId(1170221009, "DebugMessage"), "DebugMessage: Message = {Message}");
 		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, string, global::System.Exception?> _infoMessageAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<string>(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(1679135524, "InfoMessage"), "InfoMessage: Message = {Message}");

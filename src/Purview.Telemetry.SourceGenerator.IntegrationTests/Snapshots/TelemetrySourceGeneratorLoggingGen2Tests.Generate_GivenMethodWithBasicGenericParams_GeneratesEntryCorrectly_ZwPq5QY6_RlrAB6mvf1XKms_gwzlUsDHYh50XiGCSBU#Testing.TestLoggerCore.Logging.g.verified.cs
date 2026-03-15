@@ -19,6 +19,7 @@ namespace Testing
 	sealed partial class TestLoggerCore : global::Testing.ITestLogger
 	{
 		readonly global::Microsoft.Extensions.Logging.ILogger<global::Testing.ITestLogger> _logger;
+		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, global::System.Collections.Generic.IDictionary<string, int>, global::System.Exception?> _logEntryWithGenericTypeParamAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<global::System.Collections.Generic.IDictionary<string, int>>(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(842060863, "LogEntryWithGenericTypeParam"), "LogEntryWithGenericTypeParam: ParamName = {ParamName}");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestLoggerCore(global::Microsoft.Extensions.Logging.ILogger<global::Testing.ITestLogger> logger)
@@ -35,83 +36,8 @@ namespace Testing
 				return;
 			}
 
-			_logger.Log(
-				global::Microsoft.Extensions.Logging.LogLevel.Information,
-				new (842060863, nameof(LogEntryWithGenericTypeParam)),
-				new LogEntryWithGenericTypeParam_LogState(paramName),
-				null,
-				[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-				static string (s, _) =>
-				{
-#if NET
-					return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"LogEntryWithGenericTypeParam: ParamName = {s._ParamName}");
-#else
-					return global::System.FormattableString.Invariant($"LogEntryWithGenericTypeParam: ParamName = {s._ParamName}");
-#endif
-				}
-			);
-
+			_logEntryWithGenericTypeParamAction(_logger, paramName, null);
 		}
-
-
-	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-	private readonly struct LogEntryWithGenericTypeParam_LogState : global::System.Collections.Generic.IReadOnlyList<global::System.Collections.Generic.KeyValuePair<string, object?>>
-	{
-		static readonly string s_originalFormat = "LogEntryWithGenericTypeParam: ParamName = {ParamName}";
-
-		public readonly global::System.Collections.Generic.IDictionary<string, int> _ParamName;
-
-		public LogEntryWithGenericTypeParam_LogState(global::System.Collections.Generic.IDictionary<string, int> paramName)
-		{
-			_ParamName = paramName;
-		}
-
-
-		public int Count => 2;
-
-		public global::System.Collections.Generic.KeyValuePair<string, object?> this[int index]
-		{
-			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-			get => index switch
-			{
-				0 => new("{OriginalFormat}", s_originalFormat),
-				1 => new("paramName", _ParamName),
-				_ => throw new global::System.IndexOutOfRangeException(nameof(index))
-			};
-		}
-
-
-		public struct Enumerator : global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>>
-		{
-			readonly LogEntryWithGenericTypeParam_LogState _state;
-			int _index;
-
-			public Enumerator(LogEntryWithGenericTypeParam_LogState state)
-			{
-				_state = state;
-				_index = -1;
-			}
-
-			public global::System.Collections.Generic.KeyValuePair<string, object?> Current => _state[_index];
-
-			object? global::System.Collections.IEnumerator.Current => Current;
-
-			public bool MoveNext() => ++_index < _state.Count;
-
-			public void Reset() => _index = -1;
-
-			public void Dispose() { }
-		}
-
-
-		public Enumerator GetEnumerator() => new(this);
-
-
-		global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, object?>>.GetEnumerator() => GetEnumerator();
-
-
-		global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
-	}
 
 	}
 }

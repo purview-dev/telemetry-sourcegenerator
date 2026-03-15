@@ -28,6 +28,9 @@ partial class Constants
 		public static readonly TemplateInfo LogPrefixType = TemplateInfo.Create(
 			"Purview.Telemetry.LogPrefixType"
 		);
+		public static readonly TemplateInfo LoggerGenerationMode = TemplateInfo.Create(
+			"Purview.Telemetry.LoggerGenerationMode"
+		);
 
 		public static readonly TemplateInfo ExpandEnumerableAttribute = TemplateInfo.Create(
 			"Purview.Telemetry.ExpandEnumerableAttribute"
@@ -91,6 +94,7 @@ partial class Constants
 				LoggerAttribute,
 				LogAttribute,
 				LogPrefixType,
+				LoggerGenerationMode,
 				ExpandEnumerableAttribute,
 				TraceAttribute,
 				DebugAttribute,

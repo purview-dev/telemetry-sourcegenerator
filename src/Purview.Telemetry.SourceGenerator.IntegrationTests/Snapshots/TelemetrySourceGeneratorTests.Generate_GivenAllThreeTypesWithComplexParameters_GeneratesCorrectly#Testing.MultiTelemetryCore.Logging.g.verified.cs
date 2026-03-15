@@ -16,7 +16,6 @@ namespace Testing
 	sealed partial class MultiTelemetryCore : global::Testing.IMultiTelemetry
 	{
 		readonly global::Microsoft.Extensions.Logging.ILogger<global::Testing.IMultiTelemetry> _logger;
-
 		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, string, int, global::System.DateTime, string?, global::System.Exception?> _logProcessingAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<string, int, global::System.DateTime, string?>(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(1197388818, "LogProcessing"), "LogProcessing: RequestId = {RequestId}, UserId = {UserId}, Timestamp = {Timestamp}, CorrelationId = {CorrelationId}");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

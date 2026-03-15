@@ -14,6 +14,10 @@
 sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 {
 	readonly global::Microsoft.Extensions.Logging.ILogger<global::IEntityStoreTelemetry> _logger;
+	static readonly global::System.Func<global::Microsoft.Extensions.Logging.ILogger, int, global::System.IDisposable?> _aScopedLogEntryAction = global::Microsoft.Extensions.Logging.LoggerMessage.DefineScope<int>("AScopedLogEntry: ParentEntityId = {ParentEntityId}");
+	static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, int, string, global::System.Exception?> _logMessageAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<int, string>(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(1180592680, "LogMessage"), "LogMessage: EntityId = {EntityId}, UpdateState = {UpdateState}");
+	static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, int, string, global::System.Exception?> _explicitInfoMessageAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<int, string>(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(1861353128, "ExplicitInfoMessage"), "ExplicitInfoMessage: EntityId = {EntityId}, UpdateState = {UpdateState}");
+	static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, int, global::System.Exception?> _explicitErrorMessageAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<int>(global::Microsoft.Extensions.Logging.LogLevel.Error, new global::Microsoft.Extensions.Logging.EventId(1928434156, "ExplicitErrorMessage"), "An explicit error message. The entity Id is {EntityId}, and the error is {Exception}.");
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	public EntityStoreTelemetryCore(global::Microsoft.Extensions.Logging.ILogger<global::IEntityStoreTelemetry> logger, global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
@@ -26,7 +30,7 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public global::System.IDisposable? AScopedLogEntry(int parentEntityId)
 	{
-		return _logger.BeginScope(new AScopedLogEntry_ScopeState(parentEntityId));
+		return _aScopedLogEntryAction(_logger, parentEntityId);
 	}
 
 
@@ -39,22 +43,7 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 			return;
 		}
 
-		_logger.Log(
-			global::Microsoft.Extensions.Logging.LogLevel.Information,
-			new (1180592680, nameof(LogMessage)),
-			new LogMessage_LogState(entityId, updateState),
-			null,
-			[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-			static string (s, _) =>
-			{
-#if NET
-				return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"LogMessage: EntityId = {s._EntityId}, UpdateState = {s._UpdateState}");
-#else
-				return global::System.FormattableString.Invariant($"LogMessage: EntityId = {s._EntityId}, UpdateState = {s._UpdateState}");
-#endif
-			}
-		);
-
+		_logMessageAction(_logger, entityId, updateState, null);
 	}
 
 
@@ -67,22 +56,7 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 			return;
 		}
 
-		_logger.Log(
-			global::Microsoft.Extensions.Logging.LogLevel.Information,
-			new (1861353128, nameof(ExplicitInfoMessage)),
-			new ExplicitInfoMessage_LogState(entityId, updateState),
-			null,
-			[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-			static string (s, _) =>
-			{
-#if NET
-				return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"ExplicitInfoMessage: EntityId = {s._EntityId}, UpdateState = {s._UpdateState}");
-#else
-				return global::System.FormattableString.Invariant($"ExplicitInfoMessage: EntityId = {s._EntityId}, UpdateState = {s._UpdateState}");
-#endif
-			}
-		);
-
+		_explicitInfoMessageAction(_logger, entityId, updateState, null);
 	}
 
 
@@ -95,279 +69,7 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 			return;
 		}
 
-		_logger.Log(
-			global::Microsoft.Extensions.Logging.LogLevel.Error,
-			new (1928434156, nameof(ExplicitErrorMessage)),
-			new ExplicitErrorMessage_LogState(entityId),
-			exception,
-			[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-			static string (s, e) =>
-			{
-#if NET
-				return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"An explicit error message. The entity Id is {s._EntityId}, and the error is {e}.");
-#else
-				return global::System.FormattableString.Invariant($"An explicit error message. The entity Id is {s._EntityId}, and the error is {e}.");
-#endif
-			}
-		);
-
+		_explicitErrorMessageAction(_logger, entityId, exception);
 	}
-
-
-[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-private readonly struct AScopedLogEntry_ScopeState : global::System.Collections.Generic.IReadOnlyList<global::System.Collections.Generic.KeyValuePair<string, object?>>
-{
-	static readonly string s_originalFormat = "AScopedLogEntry: ParentEntityId = {ParentEntityId}";
-
-	public readonly int _ParentEntityId;
-
-	public AScopedLogEntry_ScopeState(int parentEntityId)
-	{
-		_ParentEntityId = parentEntityId;
-	}
-
-
-	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-	public override string ToString()
-	{
-#if NET
-		return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"AScopedLogEntry: ParentEntityId = {_ParentEntityId}");
-#else
-		return global::System.FormattableString.Invariant($"AScopedLogEntry: ParentEntityId = {_ParentEntityId}");
-#endif
-	}
-
-
-	public int Count => 2;
-
-	public global::System.Collections.Generic.KeyValuePair<string, object?> this[int index]
-	{
-		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		get => index switch
-		{
-			0 => new("{OriginalFormat}", s_originalFormat),
-			1 => new("parentEntityId", _ParentEntityId),
-			_ => throw new global::System.IndexOutOfRangeException(nameof(index))
-		};
-	}
-
-
-	public struct Enumerator : global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>>
-	{
-		readonly AScopedLogEntry_ScopeState _state;
-		int _index;
-
-		public Enumerator(AScopedLogEntry_ScopeState state)
-		{
-			_state = state;
-			_index = -1;
-		}
-
-		public global::System.Collections.Generic.KeyValuePair<string, object?> Current => _state[_index];
-
-		object? global::System.Collections.IEnumerator.Current => Current;
-
-		public bool MoveNext() => ++_index < _state.Count;
-
-		public void Reset() => _index = -1;
-
-		public void Dispose() { }
-	}
-
-
-	public Enumerator GetEnumerator() => new(this);
-
-
-	global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, object?>>.GetEnumerator() => GetEnumerator();
-
-
-	global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
-}
-
-
-[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-private readonly struct LogMessage_LogState : global::System.Collections.Generic.IReadOnlyList<global::System.Collections.Generic.KeyValuePair<string, object?>>
-{
-	static readonly string s_originalFormat = "LogMessage: EntityId = {EntityId}, UpdateState = {UpdateState}";
-
-	public readonly int _EntityId;
-	public readonly string _UpdateState;
-
-	public LogMessage_LogState(int entityId, string updateState)
-	{
-		_EntityId = entityId;
-		_UpdateState = updateState;
-	}
-
-
-	public int Count => 3;
-
-	public global::System.Collections.Generic.KeyValuePair<string, object?> this[int index]
-	{
-		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		get => index switch
-		{
-			0 => new("{OriginalFormat}", s_originalFormat),
-			1 => new("entityId", _EntityId),
-			2 => new("updateState", _UpdateState),
-			_ => throw new global::System.IndexOutOfRangeException(nameof(index))
-		};
-	}
-
-
-	public struct Enumerator : global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>>
-	{
-		readonly LogMessage_LogState _state;
-		int _index;
-
-		public Enumerator(LogMessage_LogState state)
-		{
-			_state = state;
-			_index = -1;
-		}
-
-		public global::System.Collections.Generic.KeyValuePair<string, object?> Current => _state[_index];
-
-		object? global::System.Collections.IEnumerator.Current => Current;
-
-		public bool MoveNext() => ++_index < _state.Count;
-
-		public void Reset() => _index = -1;
-
-		public void Dispose() { }
-	}
-
-
-	public Enumerator GetEnumerator() => new(this);
-
-
-	global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, object?>>.GetEnumerator() => GetEnumerator();
-
-
-	global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
-}
-
-
-[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-private readonly struct ExplicitInfoMessage_LogState : global::System.Collections.Generic.IReadOnlyList<global::System.Collections.Generic.KeyValuePair<string, object?>>
-{
-	static readonly string s_originalFormat = "ExplicitInfoMessage: EntityId = {EntityId}, UpdateState = {UpdateState}";
-
-	public readonly int _EntityId;
-	public readonly string _UpdateState;
-
-	public ExplicitInfoMessage_LogState(int entityId, string updateState)
-	{
-		_EntityId = entityId;
-		_UpdateState = updateState;
-	}
-
-
-	public int Count => 3;
-
-	public global::System.Collections.Generic.KeyValuePair<string, object?> this[int index]
-	{
-		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		get => index switch
-		{
-			0 => new("{OriginalFormat}", s_originalFormat),
-			1 => new("entityId", _EntityId),
-			2 => new("updateState", _UpdateState),
-			_ => throw new global::System.IndexOutOfRangeException(nameof(index))
-		};
-	}
-
-
-	public struct Enumerator : global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>>
-	{
-		readonly ExplicitInfoMessage_LogState _state;
-		int _index;
-
-		public Enumerator(ExplicitInfoMessage_LogState state)
-		{
-			_state = state;
-			_index = -1;
-		}
-
-		public global::System.Collections.Generic.KeyValuePair<string, object?> Current => _state[_index];
-
-		object? global::System.Collections.IEnumerator.Current => Current;
-
-		public bool MoveNext() => ++_index < _state.Count;
-
-		public void Reset() => _index = -1;
-
-		public void Dispose() { }
-	}
-
-
-	public Enumerator GetEnumerator() => new(this);
-
-
-	global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, object?>>.GetEnumerator() => GetEnumerator();
-
-
-	global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
-}
-
-
-[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-private readonly struct ExplicitErrorMessage_LogState : global::System.Collections.Generic.IReadOnlyList<global::System.Collections.Generic.KeyValuePair<string, object?>>
-{
-	static readonly string s_originalFormat = "An explicit error message. The entity Id is {EntityId}, and the error is {Exception}.";
-
-	public readonly int _EntityId;
-
-	public ExplicitErrorMessage_LogState(int entityId)
-	{
-		_EntityId = entityId;
-	}
-
-
-	public int Count => 2;
-
-	public global::System.Collections.Generic.KeyValuePair<string, object?> this[int index]
-	{
-		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		get => index switch
-		{
-			0 => new("{OriginalFormat}", s_originalFormat),
-			1 => new("entityId", _EntityId),
-			_ => throw new global::System.IndexOutOfRangeException(nameof(index))
-		};
-	}
-
-
-	public struct Enumerator : global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>>
-	{
-		readonly ExplicitErrorMessage_LogState _state;
-		int _index;
-
-		public Enumerator(ExplicitErrorMessage_LogState state)
-		{
-			_state = state;
-			_index = -1;
-		}
-
-		public global::System.Collections.Generic.KeyValuePair<string, object?> Current => _state[_index];
-
-		object? global::System.Collections.IEnumerator.Current => Current;
-
-		public bool MoveNext() => ++_index < _state.Count;
-
-		public void Reset() => _index = -1;
-
-		public void Dispose() { }
-	}
-
-
-	public Enumerator GetEnumerator() => new(this);
-
-
-	global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, object?>>.GetEnumerator() => GetEnumerator();
-
-
-	global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
-}
 
 }

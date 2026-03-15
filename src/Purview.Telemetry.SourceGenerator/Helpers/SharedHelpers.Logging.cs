@@ -32,7 +32,7 @@ partial class SharedHelpers
 		AttributeStringValue? messageTemplate = null;
 		AttributeValue<int>? eventId = null;
 		AttributeStringValue? nameValue = null;
-		AttributeValue<bool>? disableMSLoggingTelemetryGeneration = null;
+		AttributeValue<int>? generationMode = null;
 
 		if (
 			!AttributeParser(
@@ -77,12 +77,12 @@ partial class SharedHelpers
 					}
 					else if (
 						name.Equals(
-							nameof(LogAttributeRecord.DisableMSLoggingTelemetryGeneration),
+							nameof(LogAttributeRecord.GenerationMode),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
 					{
-						disableMSLoggingTelemetryGeneration = new((bool)value);
+						generationMode = new((int)value);
 					}
 				},
 				semanticModel,
@@ -100,7 +100,7 @@ partial class SharedHelpers
 			MessageTemplate: messageTemplate ?? new(),
 			EventId: eventId ?? new(),
 			Name: nameValue ?? new(),
-			DisableMSLoggingTelemetryGeneration: disableMSLoggingTelemetryGeneration ?? new()
+			GenerationMode: generationMode ?? new()
 		);
 	}
 
@@ -126,7 +126,7 @@ partial class SharedHelpers
 		AttributeValue<int>? defaultLevel = null;
 		AttributeStringValue? customPrefix = null;
 		AttributeValue<int>? prefixType = null;
-		AttributeValue<bool>? disableMSLoggingTelemetryGeneration = null;
+		AttributeValue<int>? generationMode = null;
 
 		if (
 			!AttributeParser(
@@ -162,12 +162,12 @@ partial class SharedHelpers
 					}
 					else if (
 						name.Equals(
-							nameof(LoggerAttributeRecord.DisableMSLoggingTelemetryGeneration),
+							nameof(LoggerAttributeRecord.GenerationMode),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
 					{
-						disableMSLoggingTelemetryGeneration = new((bool)value);
+						generationMode = new((int)value);
 					}
 				},
 				semanticModel,
@@ -184,7 +184,7 @@ partial class SharedHelpers
 			DefaultLevel: defaultLevel ?? new(),
 			CustomPrefix: customPrefix ?? new(),
 			PrefixType: prefixType ?? new(),
-			DisableMSLoggingTelemetryGeneration: disableMSLoggingTelemetryGeneration ?? new()
+			GenerationMode: generationMode ?? new()
 		);
 	}
 
@@ -208,7 +208,7 @@ partial class SharedHelpers
 		}
 
 		AttributeValue<int>? defaultLevel = null;
-		AttributeValue<bool>? disableMSLoggingTelemetryGeneration = null;
+		AttributeValue<int>? generationMode = null;
 		AttributeValue<int>? prefixType = null;
 
 		if (
@@ -227,14 +227,12 @@ partial class SharedHelpers
 					}
 					else if (
 						name.Equals(
-							nameof(
-								LoggerGenerationAttributeRecord.DisableMSLoggingTelemetryGeneration
-							),
+							nameof(LoggerGenerationAttributeRecord.GenerationMode),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
 					{
-						disableMSLoggingTelemetryGeneration = new((bool)value);
+						generationMode = new((int)value);
 					}
 					else if (
 						name.Equals(
@@ -258,7 +256,7 @@ partial class SharedHelpers
 
 		return new(
 			DefaultLevel: defaultLevel ?? new(),
-			DisableMSLoggingTelemetryGeneration: disableMSLoggingTelemetryGeneration ?? new(),
+			GenerationMode: generationMode ?? new(),
 			DefaultPrefixType: prefixType ?? new()
 		);
 	}

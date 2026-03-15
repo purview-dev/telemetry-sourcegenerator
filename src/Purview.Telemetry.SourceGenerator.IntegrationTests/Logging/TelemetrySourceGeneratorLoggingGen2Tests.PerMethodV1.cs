@@ -7,16 +7,16 @@ public partial class TelemetrySourceGeneratorLoggingGen2Tests
 		CancellationToken cancellationToken
 	)
 	{
-		// Arrange: v2 interface (default), one method forces v1 via DisableMSLoggingTelemetryGeneration
+		// Arrange: explicit v2 interface, one method forces v1 via GenerationMode
 		const string source =
 			@"
 namespace Testing;
 
-[Logger]
+[Logger(GenerationMode = LoggerGenerationMode.V2)]
 public interface ITestLogger {
 	void RegularV2LogEntry(int value);
 
-	[Log(DisableMSLoggingTelemetryGeneration = true)]
+	[Log(GenerationMode = LoggerGenerationMode.V1)]
 	void HotPathV1LogEntry(int value);
 }
 ";
@@ -37,16 +37,16 @@ public interface ITestLogger {
 		CancellationToken cancellationToken
 	)
 	{
-		// Arrange: using a specific level attribute with DisableMSLoggingTelemetryGeneration
+		// Arrange: explicit v2 interface, one method forces v1 using a specific level attribute
 		const string source =
 			@"
 namespace Testing;
 
-[Logger]
+[Logger(GenerationMode = LoggerGenerationMode.V2)]
 public interface ITestLogger {
 	void RegularV2LogEntry(string message);
 
-	[Debug(DisableMSLoggingTelemetryGeneration = true)]
+	[Debug(GenerationMode = LoggerGenerationMode.V1)]
 	void HotPathDebugEntry(string message);
 }
 ";
@@ -67,14 +67,14 @@ public interface ITestLogger {
 		CancellationToken cancellationToken
 	)
 	{
-		// Arrange: v1 override on a method with 7 params (v1 limit is 6) — should raise diagnostic
+		// Arrange: explicit v1 override on a method with 7 params (v1 limit is 6) — should raise diagnostic
 		const string source =
 			@"
 namespace Testing;
 
 [Logger]
 public interface ITestLogger {
-	[Log(DisableMSLoggingTelemetryGeneration = true)]
+	[Log(GenerationMode = LoggerGenerationMode.V1)]
 	void HotPathV1LogEntry(int a, int b, int c, int d, int e, int f, int g);
 }
 ";

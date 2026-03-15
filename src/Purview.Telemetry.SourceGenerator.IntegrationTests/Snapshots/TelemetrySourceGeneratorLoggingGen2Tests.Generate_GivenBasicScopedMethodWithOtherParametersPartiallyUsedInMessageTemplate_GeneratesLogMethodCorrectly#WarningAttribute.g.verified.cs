@@ -86,13 +86,11 @@ sealed class WarningAttribute : global::System.Attribute
 	public string? Name { get; set; }
 
 	/// <summary>
-	/// Optional. When <see langword="true" />, disables MS logging telemetry generation for this
-	/// method, using the v1 (<see cref="global::Microsoft.Extensions.Logging.LoggerMessage.Define{T}"/>)
-	/// pattern instead.
-	/// When <see langword="false" />, forces v2 generation for this method.
-	/// When not set, inherits the interface-level <see cref="global::Purview.Telemetry.LoggerAttribute.DisableMSLoggingTelemetryGeneration"/> setting.
+	/// Optional. Controls the generation mode for this log method.
+	/// <see cref="global::Purview.Telemetry.LoggerGenerationMode.Auto"/> (the default) inherits from the
+	/// interface-level <see cref="global::Purview.Telemetry.LoggerAttribute.GenerationMode"/> setting.
 	/// </summary>
-	public bool DisableMSLoggingTelemetryGeneration { get; set; }
+	public global::Purview.Telemetry.LoggerGenerationMode GenerationMode { get; set; }
 }
 
 #endif

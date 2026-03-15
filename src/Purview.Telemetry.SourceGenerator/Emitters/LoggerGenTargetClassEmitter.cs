@@ -119,9 +119,10 @@ static partial class LoggerGenTargetClassEmitter
 		{
 			context.CancellationToken.ThrowIfCancellationRequested();
 
-			if (!methodTarget.TargetGenerationState.IsValid || !methodTarget.UseV1Generation)
+			if (!methodTarget.TargetGenerationState.IsValid)
 				continue;
 
+			// Multiple exceptions is always invalid, regardless of v1 or v2 generation.
 			if (methodTarget.HasMultipleExceptions)
 			{
 				logger?.Diagnostic(
@@ -134,6 +135,9 @@ static partial class LoggerGenTargetClassEmitter
 				);
 				continue;
 			}
+
+			if (!methodTarget.UseV1Generation)
+				continue;
 
 			if (
 				methodTarget.ParameterCountSansException

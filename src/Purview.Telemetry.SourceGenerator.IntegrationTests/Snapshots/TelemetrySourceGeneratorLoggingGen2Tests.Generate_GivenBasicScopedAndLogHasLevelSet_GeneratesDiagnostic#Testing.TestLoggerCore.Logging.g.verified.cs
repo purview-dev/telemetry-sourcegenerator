@@ -19,6 +19,7 @@ namespace Testing
 	sealed partial class TestLoggerCore : global::Testing.ITestLogger
 	{
 		readonly global::Microsoft.Extensions.Logging.ILogger<global::Testing.ITestLogger> _logger;
+		static readonly global::System.Func<global::Microsoft.Extensions.Logging.ILogger, global::System.IDisposable?> _basicScopedAction = global::Microsoft.Extensions.Logging.LoggerMessage.DefineScope("BasicScoped");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestLoggerCore(global::Microsoft.Extensions.Logging.ILogger<global::Testing.ITestLogger> logger)
@@ -30,71 +31,8 @@ namespace Testing
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public global::System.IDisposable? BasicScoped()
 		{
-			return _logger.BeginScope(new BasicScoped_ScopeState());
+			return _basicScopedAction(_logger);
 		}
-
-
-	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-	private readonly struct BasicScoped_ScopeState : global::System.Collections.Generic.IReadOnlyList<global::System.Collections.Generic.KeyValuePair<string, object?>>
-	{
-		static readonly string s_originalFormat = "BasicScoped";
-
-
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-		public override string ToString()
-		{
-#if NET
-			return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"BasicScoped");
-#else
-			return global::System.FormattableString.Invariant($"BasicScoped");
-#endif
-		}
-
-
-		public int Count => 1;
-
-		public global::System.Collections.Generic.KeyValuePair<string, object?> this[int index]
-		{
-			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-			get => index switch
-			{
-				0 => new("{OriginalFormat}", s_originalFormat),
-				_ => throw new global::System.IndexOutOfRangeException(nameof(index))
-			};
-		}
-
-
-		public struct Enumerator : global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>>
-		{
-			readonly BasicScoped_ScopeState _state;
-			int _index;
-
-			public Enumerator(BasicScoped_ScopeState state)
-			{
-				_state = state;
-				_index = -1;
-			}
-
-			public global::System.Collections.Generic.KeyValuePair<string, object?> Current => _state[_index];
-
-			object? global::System.Collections.IEnumerator.Current => Current;
-
-			public bool MoveNext() => ++_index < _state.Count;
-
-			public void Reset() => _index = -1;
-
-			public void Dispose() { }
-		}
-
-
-		public Enumerator GetEnumerator() => new(this);
-
-
-		global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, object?>>.GetEnumerator() => GetEnumerator();
-
-
-		global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
-	}
 
 	}
 }
