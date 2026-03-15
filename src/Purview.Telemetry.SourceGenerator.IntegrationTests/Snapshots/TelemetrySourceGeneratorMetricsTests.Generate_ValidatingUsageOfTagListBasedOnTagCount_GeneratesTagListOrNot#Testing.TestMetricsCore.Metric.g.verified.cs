@@ -18,31 +18,19 @@ namespace Testing
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class TestMetricsCore : global::Testing.ITestMetrics
 	{
-		global::System.Diagnostics.Metrics.Meter _meter = default!;
+		readonly global::System.Diagnostics.Metrics.Meter _meter;
 
-		global::System.Diagnostics.Metrics.Counter<int> _noTagList0Instrument = default!;
-		global::System.Diagnostics.Metrics.Counter<int> _noTagList1Instrument = default!;
-		global::System.Diagnostics.Metrics.Counter<int> _noTagList2Instrument = default!;
-		global::System.Diagnostics.Metrics.Counter<int> _noTagList3Instrument = default!;
-		global::System.Diagnostics.Metrics.Counter<int> _hasTagList4Instrument = default!;
-		global::System.Diagnostics.Metrics.Counter<int> _hasTagList5Instrument = default!;
-		global::System.Diagnostics.Metrics.Counter<int> _hasTagList10Instrument = default!;
+		readonly global::System.Diagnostics.Metrics.Counter<int> _noTagList0Instrument;
+		readonly global::System.Diagnostics.Metrics.Counter<int> _noTagList1Instrument;
+		readonly global::System.Diagnostics.Metrics.Counter<int> _noTagList2Instrument;
+		readonly global::System.Diagnostics.Metrics.Counter<int> _noTagList3Instrument;
+		readonly global::System.Diagnostics.Metrics.Counter<int> _hasTagList4Instrument;
+		readonly global::System.Diagnostics.Metrics.Counter<int> _hasTagList5Instrument;
+		readonly global::System.Diagnostics.Metrics.Counter<int> _hasTagList10Instrument;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestMetricsCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
 		{
-			InitializeMeters(meterFactory);
-		}
-
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		void InitializeMeters(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
-		{
-			if (_meter != null)
-			{
-				throw new global::System.Exception("The meters have already been initialized.");
-			}
-
 			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
 
 			PopulateMeterTags(meterTags);

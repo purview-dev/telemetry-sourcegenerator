@@ -15,12 +15,12 @@ namespace Testing
 {
 	sealed partial class MultiTelemetryCore : global::Testing.IMultiTelemetry
 	{
-		global::System.Diagnostics.Metrics.Meter _meter = default!;
+		readonly global::System.Diagnostics.Metrics.Meter _meter;
 
-		global::System.Diagnostics.Metrics.Counter<int> _incrementCounterInstrument = default!;
-		global::System.Diagnostics.Metrics.Counter<int> _autoIncrementInstrument = default!;
-		global::System.Diagnostics.Metrics.UpDownCounter<int> _updateUpDownCounterInstrument = default!;
-		global::System.Diagnostics.Metrics.Histogram<double> _recordHistogramInstrument = default!;
+		readonly global::System.Diagnostics.Metrics.Counter<int> _incrementCounterInstrument;
+		readonly global::System.Diagnostics.Metrics.Counter<int> _autoIncrementInstrument;
+		readonly global::System.Diagnostics.Metrics.UpDownCounter<int> _updateUpDownCounterInstrument;
+		readonly global::System.Diagnostics.Metrics.Histogram<double> _recordHistogramInstrument;
 		global::System.Diagnostics.Metrics.ObservableCounter<long> _getObservableCounterInstrument = default!;
 		global::System.Diagnostics.Metrics.ObservableGauge<double> _getObservableGaugeInstrument = default!;
 		global::System.Diagnostics.Metrics.ObservableUpDownCounter<int> _getObservableUpDownCounterInstrument = default!;
@@ -28,18 +28,6 @@ namespace Testing
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public MultiTelemetryCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
 		{
-			InitializeMeters(meterFactory);
-		}
-
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		void InitializeMeters(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
-		{
-			if (_meter != null)
-			{
-				throw new global::System.Exception("The meters have already been initialized.");
-			}
-
 			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
 
 			PopulateMeterTags(meterTags);

@@ -107,6 +107,14 @@ benchmark:
     @echo -e "Running benchmarks for {{ BLUE }}{{ benchmark_solution }}{{ NORMAL }} with {{ YELLOW }}{{ configuration }}{{ NORMAL }}..."
     @dotnet run --project "{{ benchmark_solution }}" --configuration "{{ configuration }}" --framework net10.0
 
+# Runs a quick single-runtime (.NET 10.0) benchmark with reduced iterations — for development validation.
+# Uses BenchmarkDotNet's short job (1 launch, 3 warmup, 3 iterations). Typical runtime: 5–15 min.
+# Use `just benchmark` for the full multi-runtime overnight suite.
+[group('Benchmarking')]
+benchmark-quick:
+    @echo -e "Running quick benchmarks (net10.0, short job) for {{ BLUE }}{{ benchmark_solution }}{{ NORMAL }}..."
+    @dotnet run --project "{{ benchmark_solution }}" --configuration "{{ configuration }}" --framework net10.0 -- --job short --runtimes net10.0
+
 # Runs benchmarks and reminds you to update performance documentation
 [group('Benchmarking')]
 benchmark-docs: benchmark

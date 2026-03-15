@@ -57,19 +57,36 @@ static partial class MeterTargetClassEmitter
 			context.CancellationToken
 		);
 
-		indent = EmitFields(target, builder, indent, context, logger);
-		indent = ConstructorEmitter.EmitCtor(
+		// When metrics owns the constructor (no Logging target), emit readonly fields and
+		// inline the initialisation directly into the constructor for JIT-optimisable code.
+		// When Logging owns the constructor, keep the InitializeMeters() helper method path
+		// so the Logging emitter can call it.
+		var metricsOwnsConstructor = SharedHelpers.ShouldEmitConstructor(
 			GenerationType.Metrics,
-			target.GenerationType,
-			target.ClassNameToGenerate,
-			target.InterfaceType,
-			builder,
-			indent,
-			context,
-			logger
+			target.GenerationType
 		);
 
-		indent = EmitInitializationMethod(target, builder, indent, context);
+		indent = EmitFields(target, builder, indent, context, logger, readonlyFields: metricsOwnsConstructor);
+
+		if (metricsOwnsConstructor)
+		{
+			indent = EmitInlineConstructor(target, builder, indent, context);
+		}
+		else
+		{
+			indent = ConstructorEmitter.EmitCtor(
+				GenerationType.Metrics,
+				target.GenerationType,
+				target.ClassNameToGenerate,
+				target.InterfaceType,
+				builder,
+				indent,
+				context,
+				logger
+			);
+
+			indent = EmitInitializationMethod(target, builder, indent, context);
+		}
 		indent = EmitMethods(target, builder, indent, context, logger);
 
 		EmitHelpers.EmitClassEnd(builder, indent);

@@ -18,26 +18,14 @@ namespace Testing
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class TestMetricsCore : global::Testing.ITestMetrics
 	{
-		global::System.Diagnostics.Metrics.Meter _meter = default!;
+		readonly global::System.Diagnostics.Metrics.Meter _meter;
 
-		global::System.Diagnostics.Metrics.Histogram<int> _histogramInstrument = default!;
-		global::System.Diagnostics.Metrics.Histogram<int> _histogram1Instrument = default!;
+		readonly global::System.Diagnostics.Metrics.Histogram<int> _histogramInstrument;
+		readonly global::System.Diagnostics.Metrics.Histogram<int> _histogram1Instrument;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestMetricsCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
 		{
-			InitializeMeters(meterFactory);
-		}
-
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		void InitializeMeters(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
-		{
-			if (_meter != null)
-			{
-				throw new global::System.Exception("The meters have already been initialized.");
-			}
-
 			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
 
 			PopulateMeterTags(meterTags);

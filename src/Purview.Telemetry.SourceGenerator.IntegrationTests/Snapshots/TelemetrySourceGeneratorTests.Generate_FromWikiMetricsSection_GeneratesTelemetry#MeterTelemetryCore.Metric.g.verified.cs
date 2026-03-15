@@ -16,32 +16,20 @@
 [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 {
-	global::System.Diagnostics.Metrics.Meter _meter = default!;
+	readonly global::System.Diagnostics.Metrics.Meter _meter;
 
-	global::System.Diagnostics.Metrics.Counter<int> _autoCounterMeterInstrument = default!;
-	global::System.Diagnostics.Metrics.Counter<int> _autoIncrementMeterInstrument = default!;
-	global::System.Diagnostics.Metrics.Counter<int> _counterMeterInstrument = default!;
-	global::System.Diagnostics.Metrics.Histogram<int> _histogramMeterInstrument = default!;
+	readonly global::System.Diagnostics.Metrics.Counter<int> _autoCounterMeterInstrument;
+	readonly global::System.Diagnostics.Metrics.Counter<int> _autoIncrementMeterInstrument;
+	readonly global::System.Diagnostics.Metrics.Counter<int> _counterMeterInstrument;
+	readonly global::System.Diagnostics.Metrics.Histogram<int> _histogramMeterInstrument;
 	global::System.Diagnostics.Metrics.ObservableCounter<float> _observableCounterMeterInstrument = default!;
 	global::System.Diagnostics.Metrics.ObservableGauge<float> _observableGaugeMeterInstrument = default!;
 	global::System.Diagnostics.Metrics.ObservableUpDownCounter<byte> _observableUpDownCounterInstrument = default!;
-	global::System.Diagnostics.Metrics.UpDownCounter<decimal> _upDownCounterMeterInstrument = default!;
+	readonly global::System.Diagnostics.Metrics.UpDownCounter<decimal> _upDownCounterMeterInstrument;
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	public MeterTelemetryCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
 	{
-		InitializeMeters(meterFactory);
-	}
-
-	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-	void InitializeMeters(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
-	{
-		if (_meter != null)
-		{
-			throw new global::System.Exception("The meters have already been initialized.");
-		}
-
 		global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
 
 		PopulateMeterTags(meterTags);

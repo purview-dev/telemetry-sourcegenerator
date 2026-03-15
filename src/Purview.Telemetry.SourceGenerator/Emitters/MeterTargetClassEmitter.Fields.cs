@@ -12,7 +12,8 @@ partial class MeterTargetClassEmitter
 		StringBuilder builder,
 		int indent,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool readonlyFields = false
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -21,12 +22,27 @@ partial class MeterTargetClassEmitter
 
 		indent++;
 
-		builder
-			.Append(indent, Constants.Metrics.SystemDiagnostics.Meter, withNewLine: false)
-			.Append(' ')
-			.Append(MeterFieldName)
-			.AppendLine(" = default!;")
-			.AppendLine();
+		// When metrics owns the constructor, emit readonly fields so the JIT can treat
+		// them as immutable after construction and eliminate null checks in hot paths.
+		if (readonlyFields)
+		{
+			builder
+				.Append(indent, "readonly ", withNewLine: false)
+				.Append((string)Constants.Metrics.SystemDiagnostics.Meter)
+				.Append(' ')
+				.Append(MeterFieldName)
+				.AppendLine(";")
+				.AppendLine();
+		}
+		else
+		{
+			builder
+				.Append(indent, Constants.Metrics.SystemDiagnostics.Meter, withNewLine: false)
+				.Append(' ')
+				.Append(MeterFieldName)
+				.AppendLine(" = default!;")
+				.AppendLine();
+		}
 
 		foreach (var method in target.InstrumentationMethods)
 		{
@@ -40,11 +56,27 @@ partial class MeterTargetClassEmitter
 				.Metrics.InstrumentTypeMap[method.InstrumentAttribute.InstrumentType]
 				.MakeGeneric(method.InstrumentMeasurementType);
 
-			builder
-				.Append(indent, type, withNewLine: false)
-				.Append(' ')
-				.Append(method.FieldName)
-				.AppendLine(" = default!;");
+			// Observable instruments are registered via callback, not assigned in the constructor,
+			// so they cannot be readonly.
+			var emitReadonly = readonlyFields && !method.IsObservable;
+
+			if (emitReadonly)
+			{
+				builder
+					.Append(indent, "readonly ", withNewLine: false)
+					.Append((string)type)
+					.Append(' ')
+					.Append(method.FieldName)
+					.AppendLine(";");
+			}
+			else
+			{
+				builder
+					.Append(indent, type, withNewLine: false)
+					.Append(' ')
+					.Append(method.FieldName)
+					.AppendLine(" = default!;");
+			}
 		}
 
 		return --indent;

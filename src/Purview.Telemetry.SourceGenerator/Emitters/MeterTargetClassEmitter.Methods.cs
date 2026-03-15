@@ -227,26 +227,6 @@ partial class MeterTargetClassEmitter
 		builder.Append(indent, '}').AppendLine();
 	}
 
-	static void EmitInstrumentBodyTest(StringBuilder builder, int indent, InstrumentTarget method)
-	{
-		indent++;
-
-		builder
-			.Append(indent, "if (", withNewLine: false)
-			.Append(method.FieldName)
-			.AppendLine(" == null)")
-			.Append(indent, '{');
-
-		builder.Append(indent + 1, "return", withNewLine: false);
-
-		if (method.ReturnsBool)
-			builder.AppendLine(" false;");
-		else
-			builder.AppendLine(';');
-
-		builder.Append(indent, '}').AppendLine();
-	}
-
 	static void EmitObservableInstrumentBody(
 		StringBuilder builder,
 		int indent,

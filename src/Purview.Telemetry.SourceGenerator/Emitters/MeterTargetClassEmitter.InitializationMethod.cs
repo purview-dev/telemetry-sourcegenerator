@@ -18,8 +18,6 @@ partial class MeterTargetClassEmitter
 
 		indent++;
 
-		const string meterTagsVariableName = "meterTags";
-
 		builder
 			.AppendLine()
 			.CodeGen(indent)
@@ -35,6 +33,8 @@ partial class MeterTargetClassEmitter
 
 		indent++;
 
+		// Double-init guard: prevents re-initialization when the method path is used
+		// (occurs in Logging+Metrics multi-target where Logging owns the constructor).
 		builder
 			.Append(indent, "if (", withNewLine: false)
 			.Append(MeterFieldName)
@@ -45,6 +45,60 @@ partial class MeterTargetClassEmitter
 			.AppendLine("(\"The meters have already been initialized.\");")
 			.Append(indent, '}')
 			.AppendLine();
+
+		EmitInitializationBodyContent(target, builder, indent);
+
+		indent--;
+
+		builder.Append(indent, '}');
+
+		return --indent;
+	}
+
+	// Emits the inline constructor for the Metrics-only (and Activity+Metrics) case
+	// where Metrics owns the constructor. Instrument fields are readonly, so we
+	// inline the init body directly rather than delegating to InitializeMeters().
+	static int EmitInlineConstructor(
+		MeterTarget target,
+		StringBuilder builder,
+		int indent,
+		SourceProductionContext context
+	)
+	{
+		context.CancellationToken.ThrowIfCancellationRequested();
+
+		indent++;
+
+		builder
+			.AppendLine()
+			.CodeGen(indent)
+			.Append(indent, "public ", withNewLine: false)
+			.Append(target.ClassNameToGenerate)
+			.Append('(')
+			.Append(Constants.Metrics.SystemDiagnostics.IMeterFactory)
+			.Append(' ')
+			.Append(Constants.Metrics.MeterFactoryParameterName)
+			.AppendLine(')')
+			.Append(indent, '{');
+
+		indent++;
+
+		EmitInitializationBodyContent(target, builder, indent);
+
+		indent--;
+
+		builder.Append(indent, '}');
+
+		return --indent;
+	}
+
+	static void EmitInitializationBodyContent(
+		MeterTarget target,
+		StringBuilder builder,
+		int indent
+	)
+	{
+		const string meterTagsVariableName = "meterTags";
 
 		builder
 			.Append(indent, DictionaryStringObjectType, withNewLine: false)
@@ -79,12 +133,6 @@ partial class MeterTargetClassEmitter
 
 		foreach (var method in target.InstrumentationMethods)
 			EmitInitialiseInstrumentVariable(method, builder, indent);
-
-		indent--;
-
-		builder.Append(indent, '}');
-
-		return --indent;
 	}
 
 	static void EmitInitialiseInstrumentVariable(
