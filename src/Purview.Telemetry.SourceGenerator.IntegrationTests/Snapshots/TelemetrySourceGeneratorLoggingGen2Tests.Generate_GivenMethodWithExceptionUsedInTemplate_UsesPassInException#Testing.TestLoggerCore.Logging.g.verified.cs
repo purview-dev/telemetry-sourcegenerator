@@ -35,32 +35,61 @@ namespace Testing
 				return;
 			}
 
-			var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-			state.ReserveTagSpace(2);
-
-			state.TagArray[0] = new("{OriginalFormat}", "v = {v} Exception = {ex}");
-			state.TagArray[1] = new("v", v);
-
 			_logger.Log(
 				global::Microsoft.Extensions.Logging.LogLevel.Error,
 				new (1579320335, nameof(Log)),
-				state,
+				new Log_LogState(v),
 				ex,
 				[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 				static string (s, e) =>
 				{
-					var v0 = s.TagArray[1].Value ?? "(null)";
-
 #if NET
-					return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"v = {v0} Exception = {e}");
+					return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"v = {s._V} Exception = {e}");
 #else
-					return global::System.FormattableString.Invariant($"v = {v0} Exception = {e}");
+					return global::System.FormattableString.Invariant($"v = {s._V} Exception = {e}");
 #endif
 				}
 			);
 
-			state.Clear();
 		}
+
+
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+	private readonly struct Log_LogState : global::System.Collections.Generic.IReadOnlyList<global::System.Collections.Generic.KeyValuePair<string, object?>>
+	{
+		static readonly string s_originalFormat = "v = {v} Exception = {ex}";
+
+		public readonly string _V;
+
+		public Log_LogState(string v)
+		{
+			_V = v;
+		}
+
+
+		public int Count => 2;
+
+		public global::System.Collections.Generic.KeyValuePair<string, object?> this[int index]
+		{
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			get => index switch
+			{
+				0 => new("{OriginalFormat}", s_originalFormat),
+				1 => new("v", _V),
+				_ => throw new global::System.IndexOutOfRangeException(nameof(index))
+			};
+		}
+
+
+		public global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> GetEnumerator()
+		{
+			for (var i = 0; i < Count; i++)
+				yield return this[i];
+		}
+
+
+		global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+	}
 
 	}
 }

@@ -20,9 +20,9 @@ namespace Testing
 	{
 		global::System.Diagnostics.Metrics.Meter _meter = default!;
 
-		global::System.Diagnostics.Metrics.ObservableGauge<int>? _observableGaugeInstrument = null;
-		global::System.Diagnostics.Metrics.ObservableGauge<int>? _observableGauge2Instrument = null;
-		global::System.Diagnostics.Metrics.ObservableGauge<int>? _observableGauge3Instrument = null;
+		global::System.Diagnostics.Metrics.ObservableGauge<int> _observableGaugeInstrument = default!;
+		global::System.Diagnostics.Metrics.ObservableGauge<int> _observableGauge2Instrument = default!;
+		global::System.Diagnostics.Metrics.ObservableGauge<int> _observableGauge3Instrument = default!;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestMetricsCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)

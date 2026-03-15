@@ -113,6 +113,7 @@ partial class LoggerGenTargetClassEmitter
 
 		// Should always be state, because we'll use the messageFormat. And we'll generate one if
 		// one doesn't exist...
+		var useTypedState = !methodTarget.IsScoped && IsSimpleLogMethod(methodTarget);
 		if (!methodTarget.IsScoped)
 		{
 			// First check if the the Log Level is enabled.
@@ -132,15 +133,18 @@ partial class LoggerGenTargetClassEmitter
 		}
 
 		// Output the state here...
-		EmitStateContent(
-			builder,
-			indent,
-			methodTarget,
-			stateVarName,
-			existingParamNames,
-			context,
-			logger
-		);
+		if (!useTypedState)
+		{
+			EmitStateContent(
+				builder,
+				indent,
+				methodTarget,
+				stateVarName,
+				existingParamNames,
+				context,
+				logger
+			);
+		}
 
 		if (methodTarget.IsScoped)
 		{
@@ -207,78 +211,155 @@ partial class LoggerGenTargetClassEmitter
 				methodTarget.ExceptionParameter?.UsedInTemplate == true
 					? FindUniqueName("e", existingParamNames)
 					: null;
-			var (interpolatedMessage, variables) = GenerateInterpolatedFunction(
-				methodTarget.MessageTemplate,
-				expressionStateVarName,
-				expressionExceptionVarName,
-				[.. methodTarget.Parameters],
-				existingParamNames
-			);
 
-			// Call the .Log method.
-			var eventId =
-				methodTarget.EventId
-				?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
-			builder
-				.Append(indent, Constants.Logging.LoggerFieldName, withNewLine: false)
-				.AppendLine(".Log(")
-				// Log level
-				.Append(indent + 1, methodTarget.MSLevel.WithComma(andSpace: false))
-				// Event Id
-				.Append(indent + 1, "new (", withNewLine: false)
-				.Append(eventId)
-				.Append(", nameof(")
-				.Append(methodTarget.LogName)
-				.AppendLine(")),")
-				// State
-				.Append(indent + 1, stateVarName.WithComma(andSpace: false))
-				// Exception
-				.Append(
+			if (useTypedState)
+			{
+				// Typed state struct approach: zero boxing, no ThreadLocalState.
+				var structName = methodTarget.MethodName + "_LogState";
+				var interpolatedMessage = GenerateTypedInterpolatedMessage(
+					methodTarget.MessageTemplate,
+					expressionStateVarName,
+					expressionExceptionVarName,
+					[.. methodTarget.Parameters]
+				);
+
+				var eventId =
+					methodTarget.EventId
+					?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
+
+				var nonExceptionParams = methodTarget.ParametersSansException;
+
+				builder
+					.Append(indent, Constants.Logging.LoggerFieldName, withNewLine: false)
+					.AppendLine(".Log(")
+					.Append(indent + 1, methodTarget.MSLevel.WithComma(andSpace: false))
+					.Append(indent + 1, "new (", withNewLine: false)
+					.Append(eventId)
+					.Append(", nameof(")
+					.Append(methodTarget.LogName)
+					.AppendLine(")),")
+					.Append(indent + 1, "new ", withNewLine: false)
+					.Append(structName)
+					.Append('(');
+
+				for (var i = 0; i < nonExceptionParams.Length; i++)
+				{
+					builder.Append(nonExceptionParams[i].Name);
+					if (i < nonExceptionParams.Length - 1)
+						builder.Append(", ");
+				}
+
+				builder.AppendLine("),");
+				builder.Append(
 					indent + 1,
 					methodTarget.ExceptionParameter.OrNullKeyword().WithComma(andSpace: false)
-				)
-				// Message Template
-				.CodeGen(indent + 1)
-				.Append(indent + 1, "static string (", withNewLine: false)
-				.Append(expressionStateVarName)
-				.Append(", ")
-				.Append(expressionExceptionVarName ?? "_")
-				.AppendLine(") =>")
-				.Append(indent + 1, "{");
+				);
 
-			if (variables.Length > 0)
-			{
-				foreach (var variableDefinition in variables)
-					builder.Append(indent + 2, variableDefinition);
+				builder
+					.CodeGen(indent + 1)
+					.Append(indent + 1, "static string (", withNewLine: false)
+					.Append(expressionStateVarName)
+					.Append(", ")
+					.Append(expressionExceptionVarName ?? "_")
+					.AppendLine(") =>")
+					.Append(indent + 1, "{")
+					.AppendLine("#if NET")
+					.Append(
+						indent + 2,
+						"return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $",
+						withNewLine: false
+					)
+					.Append(interpolatedMessage.Wrap())
+					.AppendLine(");")
+					.AppendLine("#else")
+					.Append(
+						indent + 2,
+						"return global::System.FormattableString.Invariant($",
+						withNewLine: false
+					)
+					.Append(interpolatedMessage.Wrap())
+					.AppendLine(");")
+					.AppendLine("#endif")
+					.Append(indent + 1, '}')
+					.Append(indent, ");");
 
 				builder.AppendLine();
 			}
+			else
+			{
+				var (interpolatedMessage, variables) = GenerateInterpolatedFunction(
+					methodTarget.MessageTemplate,
+					expressionStateVarName,
+					expressionExceptionVarName,
+					[.. methodTarget.Parameters],
+					existingParamNames
+				);
 
-			builder
-				.AppendLine("#if NET")
-				.Append(
-					indent + 2,
-					"return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $",
-					withNewLine: false
-				)
-				.Append(interpolatedMessage.Wrap())
-				.AppendLine(");")
-				.AppendLine("#else")
-				.Append(
-					indent + 2,
-					"return global::System.FormattableString.Invariant($",
-					withNewLine: false
-				)
-				.Append(interpolatedMessage.Wrap())
-				.AppendLine(");")
-				.AppendLine("#endif")
-				.Append(indent + 1, '}')
-				.Append(indent, ");");
+				// Call the .Log method.
+				var eventId =
+					methodTarget.EventId
+					?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
+				builder
+					.Append(indent, Constants.Logging.LoggerFieldName, withNewLine: false)
+					.AppendLine(".Log(")
+					// Log level
+					.Append(indent + 1, methodTarget.MSLevel.WithComma(andSpace: false))
+					// Event Id
+					.Append(indent + 1, "new (", withNewLine: false)
+					.Append(eventId)
+					.Append(", nameof(")
+					.Append(methodTarget.LogName)
+					.AppendLine(")),")
+					// State
+					.Append(indent + 1, stateVarName.WithComma(andSpace: false))
+					// Exception
+					.Append(
+						indent + 1,
+						methodTarget.ExceptionParameter.OrNullKeyword().WithComma(andSpace: false)
+					)
+					// Message Template
+					.CodeGen(indent + 1)
+					.Append(indent + 1, "static string (", withNewLine: false)
+					.Append(expressionStateVarName)
+					.Append(", ")
+					.Append(expressionExceptionVarName ?? "_")
+					.AppendLine(") =>")
+					.Append(indent + 1, "{");
 
-			builder
-				.AppendLine()
-				.Append(indent, stateVarName, withNewLine: false)
-				.AppendLine(".Clear();");
+				if (variables.Length > 0)
+				{
+					foreach (var variableDefinition in variables)
+						builder.Append(indent + 2, variableDefinition);
+
+					builder.AppendLine();
+				}
+
+				builder
+					.AppendLine("#if NET")
+					.Append(
+						indent + 2,
+						"return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $",
+						withNewLine: false
+					)
+					.Append(interpolatedMessage.Wrap())
+					.AppendLine(");")
+					.AppendLine("#else")
+					.Append(
+						indent + 2,
+						"return global::System.FormattableString.Invariant($",
+						withNewLine: false
+					)
+					.Append(interpolatedMessage.Wrap())
+					.AppendLine(");")
+					.AppendLine("#endif")
+					.Append(indent + 1, '}')
+					.Append(indent, ");");
+
+				builder
+					.AppendLine()
+					.Append(indent, stateVarName, withNewLine: false)
+					.AppendLine(".Clear();");
+			}
 		}
 
 		builder.Append(--indent, '}').AppendLine();
@@ -677,6 +758,254 @@ partial class LoggerGenTargetClassEmitter
 		escapedTemplate = escapedTemplate.Replace("\u0001", "{{").Replace("\u0002", "}}");
 
 		return (escapedTemplate, [.. variableDefinitions]);
+	}
+
+	static bool IsSimpleLogMethod(LogMethodTarget methodTarget)
+	{
+		if (methodTarget.IsScoped)
+			return false;
+
+		foreach (var param in methodTarget.Parameters)
+		{
+			if (param.LogPropertiesAttribute != null)
+				return false;
+			if (param.ExpandEnumerableAttribute != null)
+				return false;
+		}
+
+		return true;
+	}
+
+	static string GenerateTypedInterpolatedMessage(
+		string messageTemplate,
+		string expressionStateVarName,
+		string? expressionExceptionVarName,
+		LogParameterTarget[] parameters
+	)
+	{
+		if (parameters.Length == 0)
+			return messageTemplate;
+
+		Dictionary<MessageTemplateHole, string> holeToAccess = [];
+
+		foreach (var param in parameters)
+		{
+			foreach (var hole in param.ReferencedHoles)
+			{
+				if (param.IsException && expressionExceptionVarName != null)
+					holeToAccess[hole] = expressionExceptionVarName;
+				else if (!param.IsException)
+					holeToAccess[hole] = $"{expressionStateVarName}._{param.UpperCasedName}";
+			}
+		}
+
+		if (holeToAccess.Count == 0)
+			return messageTemplate;
+
+		var escapedTemplate = messageTemplate.Replace("{{", "\u0001").Replace("}}", "\u0002");
+
+		foreach (var kvp in holeToAccess)
+		{
+			var hole = kvp.Key;
+			var fieldAccess = kvp.Value;
+			var replacement =
+				$"{{{fieldAccess}"
+				+ (hole.Alignment.HasValue ? $",{hole.Alignment}" : "")
+				+ (hole.Format != null ? $":{hole.Format}" : "")
+				+ "}";
+
+			var placeholder = hole.IsPositional ? $"{{{hole.Ordinal}}}" : $"{{{hole.Name}}}";
+			escapedTemplate = escapedTemplate.Replace(placeholder, replacement);
+		}
+
+		escapedTemplate = escapedTemplate.Replace("\u0001", "{{").Replace("\u0002", "}}");
+
+		return escapedTemplate;
+	}
+
+	static void EmitLogStateStructs(
+		LoggerTarget target,
+		StringBuilder builder,
+		int indent,
+		SourceProductionContext context,
+		GenerationLogger? logger
+	)
+	{
+		foreach (var methodTarget in target.LogMethods)
+		{
+			context.CancellationToken.ThrowIfCancellationRequested();
+
+			if (!methodTarget.TargetGenerationState.IsValid)
+				continue;
+
+			if (!IsSimpleLogMethod(methodTarget))
+				continue;
+
+			EmitLogStateStruct(builder, indent, methodTarget, context);
+		}
+	}
+
+	static void EmitLogStateStruct(
+		StringBuilder builder,
+		int indent,
+		LogMethodTarget methodTarget,
+		SourceProductionContext context
+	)
+	{
+		var nonExceptionParams = methodTarget.ParametersSansException;
+		var structName = methodTarget.MethodName + "_LogState";
+		var count = nonExceptionParams.Length + 1; // +1 for {OriginalFormat}
+
+		const string kvpType =
+			"global::System.Collections.Generic.KeyValuePair<string, object?>";
+		var iReadOnlyListType =
+			$"global::System.Collections.Generic.IReadOnlyList<{kvpType}>";
+		var ienumeratorType =
+			$"global::System.Collections.Generic.IEnumerator<{kvpType}>";
+		const string ienumerableType = "global::System.Collections.IEnumerator";
+
+		builder
+			.AppendLine()
+			.CodeGen(indent)
+			.Append(indent, "private readonly struct ", withNewLine: false)
+			.Append(structName)
+			.AppendLine($" : {iReadOnlyListType}")
+			.Append(indent, '{');
+
+		indent++;
+
+		builder
+			.Append(
+				indent,
+				"static readonly string s_originalFormat = ",
+				withNewLine: false
+			)
+			.Append(methodTarget.MessageTemplate.Wrap())
+			.AppendLine(";");
+
+		if (nonExceptionParams.Length > 0)
+		{
+			builder.AppendLine();
+
+			foreach (var param in nonExceptionParams)
+			{
+				context.CancellationToken.ThrowIfCancellationRequested();
+
+				builder
+					.Append(indent, "public readonly ", withNewLine: false)
+					.Append(param.ParameterType)
+					.Append(" _")
+					.Append(param.UpperCasedName)
+					.AppendLine(";");
+			}
+
+			builder
+				.AppendLine()
+				.Append(indent, "public ", withNewLine: false)
+				.Append(structName)
+				.Append('(');
+
+			for (var i = 0; i < nonExceptionParams.Length; i++)
+			{
+				context.CancellationToken.ThrowIfCancellationRequested();
+
+				builder
+					.Append(nonExceptionParams[i].ParameterType)
+					.Append(' ')
+					.Append(nonExceptionParams[i].Name);
+
+				if (i < nonExceptionParams.Length - 1)
+					builder.Append(", ");
+			}
+
+			builder.AppendLine(")").Append(indent, '{');
+			indent++;
+
+			foreach (var param in nonExceptionParams)
+			{
+				context.CancellationToken.ThrowIfCancellationRequested();
+
+				builder
+					.Append(indent, "_", withNewLine: false)
+					.Append(param.UpperCasedName)
+					.Append(" = ")
+					.Append(param.Name)
+					.AppendLine(";");
+			}
+
+			indent--;
+			builder.Append(indent, '}');
+		}
+
+		builder
+			.AppendLine()
+			.AppendLine()
+			.Append(indent, "public int Count => ", withNewLine: false)
+			.Append(count)
+			.AppendLine(";")
+			.AppendLine()
+			.Append(indent, $"public {kvpType} this[int index]")
+			.Append(indent, '{');
+
+		indent++;
+
+		builder
+			.Append(indent, Constants.System.AggressiveInlining)
+			.Append(indent, "get => index switch", withNewLine: false)
+			.AppendLine()
+			.Append(indent, '{');
+
+		indent++;
+
+		builder.Append(indent, "0 => new(\"{OriginalFormat}\", s_originalFormat),");
+
+		for (var i = 0; i < nonExceptionParams.Length; i++)
+		{
+			context.CancellationToken.ThrowIfCancellationRequested();
+
+			builder
+				.Append(indent, $"{i + 1} => new(", withNewLine: false)
+				.Append(nonExceptionParams[i].Name.Wrap())
+				.Append(", _")
+				.Append(nonExceptionParams[i].UpperCasedName)
+				.AppendLine("),");
+		}
+
+		builder.Append(
+			indent,
+			"_ => throw new global::System.IndexOutOfRangeException(nameof(index))"
+		);
+
+		indent--;
+		builder.Append(indent, "};");
+
+		indent--;
+		builder
+			.Append(indent, '}')
+			.AppendLine()
+			.AppendLine()
+			.Append(indent, $"public {ienumeratorType} GetEnumerator()")
+			.Append(indent, '{');
+
+		indent++;
+
+		builder
+			.Append(indent, "for (var i = 0; i < Count; i++)")
+			.Append(indent + 1, "yield return this[i];");
+
+		indent--;
+
+		builder
+			.Append(indent, '}')
+			.AppendLine()
+			.AppendLine()
+			.Append(
+				indent,
+				$"{ienumerableType} global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();"
+			);
+
+		indent--;
+		builder.Append(indent, '}').AppendLine();
 	}
 
 	static void EmitPublicLoggingDelegatingMethod(

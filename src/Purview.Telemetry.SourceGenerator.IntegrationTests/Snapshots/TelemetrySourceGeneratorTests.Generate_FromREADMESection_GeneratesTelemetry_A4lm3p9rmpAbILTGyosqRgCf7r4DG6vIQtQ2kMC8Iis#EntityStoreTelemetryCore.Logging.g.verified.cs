@@ -57,33 +57,22 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 			return;
 		}
 
-		var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-		state.ReserveTagSpace(3);
-
-		state.TagArray[0] = new("{OriginalFormat}", "LogMessage: EntityId = {EntityId}, UpdateState = {UpdateState}");
-		state.TagArray[1] = new("entityId", entityId);
-		state.TagArray[2] = new("updateState", updateState);
-
 		_logger.Log(
 			global::Microsoft.Extensions.Logging.LogLevel.Information,
 			new (1180592680, nameof(LogMessage)),
-			state,
+			new LogMessage_LogState(entityId, updateState),
 			null,
 			[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 			static string (s, _) =>
 			{
-				var v0 = s.TagArray[1].Value ?? "(null)";
-				var v1 = s.TagArray[2].Value ?? "(null)";
-
 #if NET
-				return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"LogMessage: EntityId = {v0}, UpdateState = {v1}");
+				return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"LogMessage: EntityId = {s._EntityId}, UpdateState = {s._UpdateState}");
 #else
-				return global::System.FormattableString.Invariant($"LogMessage: EntityId = {v0}, UpdateState = {v1}");
+				return global::System.FormattableString.Invariant($"LogMessage: EntityId = {s._EntityId}, UpdateState = {s._UpdateState}");
 #endif
 			}
 		);
 
-		state.Clear();
 	}
 
 
@@ -96,33 +85,22 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 			return;
 		}
 
-		var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-		state.ReserveTagSpace(3);
-
-		state.TagArray[0] = new("{OriginalFormat}", "ExplicitInfoMessage: EntityId = {EntityId}, UpdateState = {UpdateState}");
-		state.TagArray[1] = new("entityId", entityId);
-		state.TagArray[2] = new("updateState", updateState);
-
 		_logger.Log(
 			global::Microsoft.Extensions.Logging.LogLevel.Information,
 			new (1861353128, nameof(ExplicitInfoMessage)),
-			state,
+			new ExplicitInfoMessage_LogState(entityId, updateState),
 			null,
 			[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 			static string (s, _) =>
 			{
-				var v0 = s.TagArray[1].Value ?? "(null)";
-				var v1 = s.TagArray[2].Value ?? "(null)";
-
 #if NET
-				return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"ExplicitInfoMessage: EntityId = {v0}, UpdateState = {v1}");
+				return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"ExplicitInfoMessage: EntityId = {s._EntityId}, UpdateState = {s._UpdateState}");
 #else
-				return global::System.FormattableString.Invariant($"ExplicitInfoMessage: EntityId = {v0}, UpdateState = {v1}");
+				return global::System.FormattableString.Invariant($"ExplicitInfoMessage: EntityId = {s._EntityId}, UpdateState = {s._UpdateState}");
 #endif
 			}
 		);
 
-		state.Clear();
 	}
 
 
@@ -135,31 +113,142 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 			return;
 		}
 
-		var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-		state.ReserveTagSpace(2);
-
-		state.TagArray[0] = new("{OriginalFormat}", "An explicit error message. The entity Id is {EntityId}, and the error is {Exception}.");
-		state.TagArray[1] = new("entityId", entityId);
-
 		_logger.Log(
 			global::Microsoft.Extensions.Logging.LogLevel.Error,
 			new (1928434156, nameof(ExplicitErrorMessage)),
-			state,
+			new ExplicitErrorMessage_LogState(entityId),
 			exception,
 			[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 			static string (s, e) =>
 			{
-				var v0 = s.TagArray[1].Value ?? "(null)";
-
 #if NET
-				return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"An explicit error message. The entity Id is {v0}, and the error is {e}.");
+				return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"An explicit error message. The entity Id is {s._EntityId}, and the error is {e}.");
 #else
-				return global::System.FormattableString.Invariant($"An explicit error message. The entity Id is {v0}, and the error is {e}.");
+				return global::System.FormattableString.Invariant($"An explicit error message. The entity Id is {s._EntityId}, and the error is {e}.");
 #endif
 			}
 		);
 
-		state.Clear();
 	}
+
+
+[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+private readonly struct LogMessage_LogState : global::System.Collections.Generic.IReadOnlyList<global::System.Collections.Generic.KeyValuePair<string, object?>>
+{
+	static readonly string s_originalFormat = "LogMessage: EntityId = {EntityId}, UpdateState = {UpdateState}";
+
+	public readonly int _EntityId;
+	public readonly string _UpdateState;
+
+	public LogMessage_LogState(int entityId, string updateState)
+	{
+		_EntityId = entityId;
+		_UpdateState = updateState;
+	}
+
+
+	public int Count => 3;
+
+	public global::System.Collections.Generic.KeyValuePair<string, object?> this[int index]
+	{
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		get => index switch
+		{
+			0 => new("{OriginalFormat}", s_originalFormat),
+			1 => new("entityId", _EntityId),
+			2 => new("updateState", _UpdateState),
+			_ => throw new global::System.IndexOutOfRangeException(nameof(index))
+		};
+	}
+
+
+	public global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> GetEnumerator()
+	{
+		for (var i = 0; i < Count; i++)
+			yield return this[i];
+	}
+
+
+	global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+}
+
+
+[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+private readonly struct ExplicitInfoMessage_LogState : global::System.Collections.Generic.IReadOnlyList<global::System.Collections.Generic.KeyValuePair<string, object?>>
+{
+	static readonly string s_originalFormat = "ExplicitInfoMessage: EntityId = {EntityId}, UpdateState = {UpdateState}";
+
+	public readonly int _EntityId;
+	public readonly string _UpdateState;
+
+	public ExplicitInfoMessage_LogState(int entityId, string updateState)
+	{
+		_EntityId = entityId;
+		_UpdateState = updateState;
+	}
+
+
+	public int Count => 3;
+
+	public global::System.Collections.Generic.KeyValuePair<string, object?> this[int index]
+	{
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		get => index switch
+		{
+			0 => new("{OriginalFormat}", s_originalFormat),
+			1 => new("entityId", _EntityId),
+			2 => new("updateState", _UpdateState),
+			_ => throw new global::System.IndexOutOfRangeException(nameof(index))
+		};
+	}
+
+
+	public global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> GetEnumerator()
+	{
+		for (var i = 0; i < Count; i++)
+			yield return this[i];
+	}
+
+
+	global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+}
+
+
+[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+private readonly struct ExplicitErrorMessage_LogState : global::System.Collections.Generic.IReadOnlyList<global::System.Collections.Generic.KeyValuePair<string, object?>>
+{
+	static readonly string s_originalFormat = "An explicit error message. The entity Id is {EntityId}, and the error is {Exception}.";
+
+	public readonly int _EntityId;
+
+	public ExplicitErrorMessage_LogState(int entityId)
+	{
+		_EntityId = entityId;
+	}
+
+
+	public int Count => 2;
+
+	public global::System.Collections.Generic.KeyValuePair<string, object?> this[int index]
+	{
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		get => index switch
+		{
+			0 => new("{OriginalFormat}", s_originalFormat),
+			1 => new("entityId", _EntityId),
+			_ => throw new global::System.IndexOutOfRangeException(nameof(index))
+		};
+	}
+
+
+	public global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> GetEnumerator()
+	{
+		for (var i = 0; i < Count; i++)
+			yield return this[i];
+	}
+
+
+	global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+}
 
 }

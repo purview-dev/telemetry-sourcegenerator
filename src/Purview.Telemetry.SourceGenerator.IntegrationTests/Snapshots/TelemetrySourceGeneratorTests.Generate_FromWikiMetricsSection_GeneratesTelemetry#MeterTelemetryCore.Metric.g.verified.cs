@@ -18,14 +18,14 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 {
 	global::System.Diagnostics.Metrics.Meter _meter = default!;
 
-	global::System.Diagnostics.Metrics.Counter<int>? _autoCounterMeterInstrument = null;
-	global::System.Diagnostics.Metrics.Counter<int>? _autoIncrementMeterInstrument = null;
-	global::System.Diagnostics.Metrics.Counter<int>? _counterMeterInstrument = null;
-	global::System.Diagnostics.Metrics.Histogram<int>? _histogramMeterInstrument = null;
-	global::System.Diagnostics.Metrics.ObservableCounter<float>? _observableCounterMeterInstrument = null;
-	global::System.Diagnostics.Metrics.ObservableGauge<float>? _observableGaugeMeterInstrument = null;
-	global::System.Diagnostics.Metrics.ObservableUpDownCounter<byte>? _observableUpDownCounterInstrument = null;
-	global::System.Diagnostics.Metrics.UpDownCounter<decimal>? _upDownCounterMeterInstrument = null;
+	global::System.Diagnostics.Metrics.Counter<int> _autoCounterMeterInstrument = default!;
+	global::System.Diagnostics.Metrics.Counter<int> _autoIncrementMeterInstrument = default!;
+	global::System.Diagnostics.Metrics.Counter<int> _counterMeterInstrument = default!;
+	global::System.Diagnostics.Metrics.Histogram<int> _histogramMeterInstrument = default!;
+	global::System.Diagnostics.Metrics.ObservableCounter<float> _observableCounterMeterInstrument = default!;
+	global::System.Diagnostics.Metrics.ObservableGauge<float> _observableGaugeMeterInstrument = default!;
+	global::System.Diagnostics.Metrics.ObservableUpDownCounter<byte> _observableUpDownCounterInstrument = default!;
+	global::System.Diagnostics.Metrics.UpDownCounter<decimal> _upDownCounterMeterInstrument = default!;
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	public MeterTelemetryCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
@@ -101,44 +101,24 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public void AutoCounterMeter(string someValue)
 	{
-		if (_autoCounterMeterInstrument == null)
-		{
-			return;
-		}
-
 		_autoCounterMeterInstrument.Add(1, new global::System.Collections.Generic.KeyValuePair<string, object?>("some_value", someValue));
 	}
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public void AutoIncrementMeter(string someValue)
 	{
-		if (_autoIncrementMeterInstrument == null)
-		{
-			return;
-		}
-
 		_autoIncrementMeterInstrument.Add(1, new global::System.Collections.Generic.KeyValuePair<string, object?>("some_value", someValue));
 	}
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public void CounterMeter(int measurement, float someValue)
 	{
-		if (_counterMeterInstrument == null)
-		{
-			return;
-		}
-
 		_counterMeterInstrument.Add(measurement, new global::System.Collections.Generic.KeyValuePair<string, object?>("some_value", someValue));
 	}
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public void HistogramMeter(int measurement, int someValue, bool anotherValue)
 	{
-		if (_histogramMeterInstrument == null)
-		{
-			return;
-		}
-
 		_histogramMeterInstrument.Record(measurement, new global::System.Collections.Generic.KeyValuePair<string, object?>("some_value", someValue), new global::System.Collections.Generic.KeyValuePair<string, object?>("another_value", anotherValue));
 	}
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
@@ -178,11 +158,6 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public void UpDownCounterMeter(decimal measurement, byte someValue)
 	{
-		if (_upDownCounterMeterInstrument == null)
-		{
-			return;
-		}
-
 		_upDownCounterMeterInstrument.Add(measurement, new global::System.Collections.Generic.KeyValuePair<string, object?>("some_value", someValue));
 	}
 }

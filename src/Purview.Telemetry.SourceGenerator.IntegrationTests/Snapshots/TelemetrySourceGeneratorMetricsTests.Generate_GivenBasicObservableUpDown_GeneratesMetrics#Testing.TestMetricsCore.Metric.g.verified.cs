@@ -20,9 +20,9 @@ namespace Testing
 	{
 		global::System.Diagnostics.Metrics.Meter _meter = default!;
 
-		global::System.Diagnostics.Metrics.ObservableUpDownCounter<int>? _observableUpDownInstrument = null;
-		global::System.Diagnostics.Metrics.ObservableUpDownCounter<int>? _observableUpDown2Instrument = null;
-		global::System.Diagnostics.Metrics.ObservableUpDownCounter<int>? _observableUpDown3Instrument = null;
+		global::System.Diagnostics.Metrics.ObservableUpDownCounter<int> _observableUpDownInstrument = default!;
+		global::System.Diagnostics.Metrics.ObservableUpDownCounter<int> _observableUpDown2Instrument = default!;
+		global::System.Diagnostics.Metrics.ObservableUpDownCounter<int> _observableUpDown3Instrument = default!;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestMetricsCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)

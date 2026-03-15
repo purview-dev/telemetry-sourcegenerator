@@ -17,7 +17,7 @@ namespace Testing
 	{
 		global::System.Diagnostics.Metrics.Meter _meter = default!;
 
-		global::System.Diagnostics.Metrics.Counter<int>? _fullTelemetryMethodInstrument = null;
+		global::System.Diagnostics.Metrics.Counter<int> _fullTelemetryMethodInstrument = default!;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -55,11 +55,6 @@ namespace Testing
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		private void FullTelemetryMethod_Metrics(int counterValue, string operationId, string message)
 		{
-			if (_fullTelemetryMethodInstrument == null)
-			{
-				return;
-			}
-
 			_fullTelemetryMethodInstrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("operation_id", operationId), new global::System.Collections.Generic.KeyValuePair<string, object?>("message", message));
 		}
 	}

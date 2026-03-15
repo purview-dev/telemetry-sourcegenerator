@@ -180,8 +180,6 @@ partial class MeterTargetClassEmitter
 
 		if (methodTarget.IsObservable)
 			EmitObservableInstrumentBodyTest(builder, indent, methodTarget);
-		else
-			EmitInstrumentBodyTest(builder, indent, methodTarget);
 
 		var tagVariableName = EmitTags(builder, indent, methodTarget);
 

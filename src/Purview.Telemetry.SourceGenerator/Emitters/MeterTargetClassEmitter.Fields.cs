@@ -42,9 +42,9 @@ partial class MeterTargetClassEmitter
 
 			builder
 				.Append(indent, type, withNewLine: false)
-				.Append("? ")
+				.Append(' ')
 				.Append(method.FieldName)
-				.AppendLine(" = null;");
+				.AppendLine(" = default!;");
 		}
 
 		return --indent;

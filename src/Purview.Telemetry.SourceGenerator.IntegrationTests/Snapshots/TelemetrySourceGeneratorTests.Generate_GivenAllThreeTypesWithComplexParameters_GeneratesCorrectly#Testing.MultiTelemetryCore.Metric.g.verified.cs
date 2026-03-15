@@ -17,8 +17,8 @@ namespace Testing
 	{
 		global::System.Diagnostics.Metrics.Meter _meter = default!;
 
-		global::System.Diagnostics.Metrics.Counter<int>? _incrementRequestCountInstrument = null;
-		global::System.Diagnostics.Metrics.Histogram<double>? _recordRequestDurationInstrument = null;
+		global::System.Diagnostics.Metrics.Counter<int> _incrementRequestCountInstrument = default!;
+		global::System.Diagnostics.Metrics.Histogram<double> _recordRequestDurationInstrument = default!;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -64,22 +64,12 @@ namespace Testing
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public void IncrementRequestCount(string endpoint)
 		{
-			if (_incrementRequestCountInstrument == null)
-			{
-				return;
-			}
-
 			_incrementRequestCountInstrument.Add(1, new global::System.Collections.Generic.KeyValuePair<string, object?>("endpoint", endpoint));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public void RecordRequestDuration(double milliseconds, string endpoint)
 		{
-			if (_recordRequestDurationInstrument == null)
-			{
-				return;
-			}
-
 			_recordRequestDurationInstrument.Record(milliseconds, new global::System.Collections.Generic.KeyValuePair<string, object?>("endpoint", endpoint));
 		}
 	}

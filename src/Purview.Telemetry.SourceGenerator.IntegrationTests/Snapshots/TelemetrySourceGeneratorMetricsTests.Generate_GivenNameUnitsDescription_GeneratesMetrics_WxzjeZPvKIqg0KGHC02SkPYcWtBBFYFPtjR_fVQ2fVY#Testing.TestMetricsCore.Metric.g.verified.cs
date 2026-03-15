@@ -20,7 +20,7 @@ namespace Testing
 	{
 		global::System.Diagnostics.Metrics.Meter _meter = default!;
 
-		global::System.Diagnostics.Metrics.ObservableCounter<int>? _metricInstrument = null;
+		global::System.Diagnostics.Metrics.ObservableCounter<int> _metricInstrument = default!;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestMetricsCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)

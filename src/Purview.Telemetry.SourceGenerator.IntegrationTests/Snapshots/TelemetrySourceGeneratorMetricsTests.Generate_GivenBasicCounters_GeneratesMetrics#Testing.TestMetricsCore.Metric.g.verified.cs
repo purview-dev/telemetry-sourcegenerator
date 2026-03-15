@@ -20,13 +20,13 @@ namespace Testing
 	{
 		global::System.Diagnostics.Metrics.Meter _meter = default!;
 
-		global::System.Diagnostics.Metrics.Counter<int>? _counterInstrument = null;
-		global::System.Diagnostics.Metrics.Counter<byte>? _counter2Instrument = null;
-		global::System.Diagnostics.Metrics.Counter<long>? _counter3Instrument = null;
-		global::System.Diagnostics.Metrics.Counter<short>? _counter4Instrument = null;
-		global::System.Diagnostics.Metrics.Counter<double>? _counter5Instrument = null;
-		global::System.Diagnostics.Metrics.Counter<float>? _counter6Instrument = null;
-		global::System.Diagnostics.Metrics.Counter<decimal>? _counter7Instrument = null;
+		global::System.Diagnostics.Metrics.Counter<int> _counterInstrument = default!;
+		global::System.Diagnostics.Metrics.Counter<byte> _counter2Instrument = default!;
+		global::System.Diagnostics.Metrics.Counter<long> _counter3Instrument = default!;
+		global::System.Diagnostics.Metrics.Counter<short> _counter4Instrument = default!;
+		global::System.Diagnostics.Metrics.Counter<double> _counter5Instrument = default!;
+		global::System.Diagnostics.Metrics.Counter<float> _counter6Instrument = default!;
+		global::System.Diagnostics.Metrics.Counter<decimal> _counter7Instrument = default!;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestMetricsCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
@@ -118,77 +118,42 @@ namespace Testing
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public void Counter(int counterValue, int intParam, bool boolParam)
 		{
-			if (_counterInstrument == null)
-			{
-				return;
-			}
-
 			_counterInstrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public void Counter2(byte counterValue, int intParam, bool boolParam)
 		{
-			if (_counter2Instrument == null)
-			{
-				return;
-			}
-
 			_counter2Instrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public void Counter3(long counterValue, int intParam, bool boolParam)
 		{
-			if (_counter3Instrument == null)
-			{
-				return;
-			}
-
 			_counter3Instrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public void Counter4(short counterValue, int intParam, bool boolParam)
 		{
-			if (_counter4Instrument == null)
-			{
-				return;
-			}
-
 			_counter4Instrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public void Counter5(double counterValue, int intParam, bool boolParam)
 		{
-			if (_counter5Instrument == null)
-			{
-				return;
-			}
-
 			_counter5Instrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public void Counter6(float counterValue, int intParam, bool boolParam)
 		{
-			if (_counter6Instrument == null)
-			{
-				return;
-			}
-
 			_counter6Instrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public void Counter7(decimal counterValue, int intParam, bool boolParam)
 		{
-			if (_counter7Instrument == null)
-			{
-				return;
-			}
-
 			_counter7Instrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 	}

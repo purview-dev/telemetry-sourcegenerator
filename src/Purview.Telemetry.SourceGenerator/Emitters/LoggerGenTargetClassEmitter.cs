@@ -63,6 +63,8 @@ static partial class LoggerGenTargetClassEmitter
 
 		indent = EmitMethods(target, builder, indent, context, logger);
 
+		EmitLogStateStructs(target, builder, indent, context, logger);
+
 		EmitHelpers.EmitClassEnd(builder, indent);
 		EmitHelpers.EmitNamespaceEnd(
 			target.ClassNamespace,

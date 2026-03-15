@@ -35,15 +35,10 @@ namespace Testing
 				return;
 			}
 
-			var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-			state.ReserveTagSpace(1);
-
-			state.TagArray[0] = new("{OriginalFormat}", "LogEntryWithCustomExceptionType");
-
 			_logger.Log(
 				global::Microsoft.Extensions.Logging.LogLevel.Error,
 				new (427053149, nameof(LogEntryWithCustomExceptionType)),
-				state,
+				new LogEntryWithCustomExceptionType_LogState(),
 				custom,
 				[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 				static string (s, _) =>
@@ -56,8 +51,37 @@ namespace Testing
 				}
 			);
 
-			state.Clear();
 		}
+
+
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+	private readonly struct LogEntryWithCustomExceptionType_LogState : global::System.Collections.Generic.IReadOnlyList<global::System.Collections.Generic.KeyValuePair<string, object?>>
+	{
+		static readonly string s_originalFormat = "LogEntryWithCustomExceptionType";
+
+
+		public int Count => 1;
+
+		public global::System.Collections.Generic.KeyValuePair<string, object?> this[int index]
+		{
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			get => index switch
+			{
+				0 => new("{OriginalFormat}", s_originalFormat),
+				_ => throw new global::System.IndexOutOfRangeException(nameof(index))
+			};
+		}
+
+
+		public global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> GetEnumerator()
+		{
+			for (var i = 0; i < Count; i++)
+				yield return this[i];
+		}
+
+
+		global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+	}
 
 	}
 }

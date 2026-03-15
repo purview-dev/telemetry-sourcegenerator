@@ -15,7 +15,7 @@ sealed partial class ServiceTelemetryCore : global::IServiceTelemetry
 {
 	global::System.Diagnostics.Metrics.Meter _meter = default!;
 
-	global::System.Diagnostics.Metrics.Counter<int>? _anAutoIncrementInstrument = null;
+	global::System.Diagnostics.Metrics.Counter<int> _anAutoIncrementInstrument = default!;
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -53,11 +53,6 @@ sealed partial class ServiceTelemetryCore : global::IServiceTelemetry
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public void AnAutoIncrement(int value)
 	{
-		if (_anAutoIncrementInstrument == null)
-		{
-			return;
-		}
-
 		_anAutoIncrementInstrument.Add(1, new global::System.Collections.Generic.KeyValuePair<string, object?>("value", value));
 	}
 }

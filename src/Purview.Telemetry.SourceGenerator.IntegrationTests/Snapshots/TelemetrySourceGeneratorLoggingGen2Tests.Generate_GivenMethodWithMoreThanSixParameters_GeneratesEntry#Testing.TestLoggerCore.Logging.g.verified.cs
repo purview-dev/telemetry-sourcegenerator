@@ -35,52 +35,91 @@ namespace Testing
 				return;
 			}
 
-			var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-			state.ReserveTagSpace(12);
-
-			state.TagArray[0] = new("{OriginalFormat}", "LogEntryWithMoreThanSixParams: One = {One}, Two = {Two}, Three = {Three}, Four = {Four}, Five = {Five}, Six = {Six}, Seven = {Seven}, Eight = {Eight}, Nine = {Nine}, Ten = {Ten}, Eleven = {Eleven}");
-			state.TagArray[1] = new("one", one);
-			state.TagArray[2] = new("two", two);
-			state.TagArray[3] = new("three", three);
-			state.TagArray[4] = new("four", four);
-			state.TagArray[5] = new("five", five);
-			state.TagArray[6] = new("six", six);
-			state.TagArray[7] = new("seven", seven);
-			state.TagArray[8] = new("eight", eight);
-			state.TagArray[9] = new("nine", nine);
-			state.TagArray[10] = new("ten", ten);
-			state.TagArray[11] = new("eleven", eleven);
-
 			_logger.Log(
 				global::Microsoft.Extensions.Logging.LogLevel.Information,
 				new (282537637, nameof(LogEntryWithMoreThanSixParams)),
-				state,
+				new LogEntryWithMoreThanSixParams_LogState(one, two, three, four, five, six, seven, eight, nine, ten, eleven),
 				null,
 				[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 				static string (s, _) =>
 				{
-					var v0 = s.TagArray[1].Value ?? "(null)";
-					var v1 = s.TagArray[2].Value ?? "(null)";
-					var v2 = s.TagArray[3].Value ?? "(null)";
-					var v3 = s.TagArray[4].Value ?? "(null)";
-					var v4 = s.TagArray[5].Value ?? "(null)";
-					var v5 = s.TagArray[6].Value ?? "(null)";
-					var v6 = s.TagArray[7].Value ?? "(null)";
-					var v7 = s.TagArray[8].Value ?? "(null)";
-					var v8 = s.TagArray[9].Value ?? "(null)";
-					var v9 = s.TagArray[10].Value ?? "(null)";
-					var v10 = s.TagArray[11].Value ?? "(null)";
-
 #if NET
-					return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"LogEntryWithMoreThanSixParams: One = {v0}, Two = {v1}, Three = {v2}, Four = {v3}, Five = {v4}, Six = {v5}, Seven = {v6}, Eight = {v7}, Nine = {v8}, Ten = {v9}, Eleven = {v10}");
+					return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"LogEntryWithMoreThanSixParams: One = {s._One}, Two = {s._Two}, Three = {s._Three}, Four = {s._Four}, Five = {s._Five}, Six = {s._Six}, Seven = {s._Seven}, Eight = {s._Eight}, Nine = {s._Nine}, Ten = {s._Ten}, Eleven = {s._Eleven}");
 #else
-					return global::System.FormattableString.Invariant($"LogEntryWithMoreThanSixParams: One = {v0}, Two = {v1}, Three = {v2}, Four = {v3}, Five = {v4}, Six = {v5}, Seven = {v6}, Eight = {v7}, Nine = {v8}, Ten = {v9}, Eleven = {v10}");
+					return global::System.FormattableString.Invariant($"LogEntryWithMoreThanSixParams: One = {s._One}, Two = {s._Two}, Three = {s._Three}, Four = {s._Four}, Five = {s._Five}, Six = {s._Six}, Seven = {s._Seven}, Eight = {s._Eight}, Nine = {s._Nine}, Ten = {s._Ten}, Eleven = {s._Eleven}");
 #endif
 				}
 			);
 
-			state.Clear();
 		}
+
+
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+	private readonly struct LogEntryWithMoreThanSixParams_LogState : global::System.Collections.Generic.IReadOnlyList<global::System.Collections.Generic.KeyValuePair<string, object?>>
+	{
+		static readonly string s_originalFormat = "LogEntryWithMoreThanSixParams: One = {One}, Two = {Two}, Three = {Three}, Four = {Four}, Five = {Five}, Six = {Six}, Seven = {Seven}, Eight = {Eight}, Nine = {Nine}, Ten = {Ten}, Eleven = {Eleven}";
+
+		public readonly int _One;
+		public readonly int _Two;
+		public readonly int _Three;
+		public readonly int _Four;
+		public readonly int _Five;
+		public readonly int _Six;
+		public readonly int _Seven;
+		public readonly int _Eight;
+		public readonly int _Nine;
+		public readonly int _Ten;
+		public readonly int _Eleven;
+
+		public LogEntryWithMoreThanSixParams_LogState(int one, int two, int three, int four, int five, int six, int seven, int eight, int nine, int ten, int eleven)
+		{
+			_One = one;
+			_Two = two;
+			_Three = three;
+			_Four = four;
+			_Five = five;
+			_Six = six;
+			_Seven = seven;
+			_Eight = eight;
+			_Nine = nine;
+			_Ten = ten;
+			_Eleven = eleven;
+		}
+
+
+		public int Count => 12;
+
+		public global::System.Collections.Generic.KeyValuePair<string, object?> this[int index]
+		{
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			get => index switch
+			{
+				0 => new("{OriginalFormat}", s_originalFormat),
+				1 => new("one", _One),
+				2 => new("two", _Two),
+				3 => new("three", _Three),
+				4 => new("four", _Four),
+				5 => new("five", _Five),
+				6 => new("six", _Six),
+				7 => new("seven", _Seven),
+				8 => new("eight", _Eight),
+				9 => new("nine", _Nine),
+				10 => new("ten", _Ten),
+				11 => new("eleven", _Eleven),
+				_ => throw new global::System.IndexOutOfRangeException(nameof(index))
+			};
+		}
+
+
+		public global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> GetEnumerator()
+		{
+			for (var i = 0; i < Count; i++)
+				yield return this[i];
+		}
+
+
+		global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+	}
 
 	}
 }

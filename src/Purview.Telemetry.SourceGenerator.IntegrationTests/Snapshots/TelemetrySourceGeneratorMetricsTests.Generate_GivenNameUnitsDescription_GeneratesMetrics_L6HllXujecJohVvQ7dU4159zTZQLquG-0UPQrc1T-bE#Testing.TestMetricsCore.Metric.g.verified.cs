@@ -20,7 +20,7 @@ namespace Testing
 	{
 		global::System.Diagnostics.Metrics.Meter _meter = default!;
 
-		global::System.Diagnostics.Metrics.UpDownCounter<int>? _metricInstrument = null;
+		global::System.Diagnostics.Metrics.UpDownCounter<int> _metricInstrument = default!;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestMetricsCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
@@ -64,11 +64,6 @@ namespace Testing
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public void Metric(int counterValue, int intParam, bool boolParam)
 		{
-			if (_metricInstrument == null)
-			{
-				return;
-			}
-
 			_metricInstrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 	}

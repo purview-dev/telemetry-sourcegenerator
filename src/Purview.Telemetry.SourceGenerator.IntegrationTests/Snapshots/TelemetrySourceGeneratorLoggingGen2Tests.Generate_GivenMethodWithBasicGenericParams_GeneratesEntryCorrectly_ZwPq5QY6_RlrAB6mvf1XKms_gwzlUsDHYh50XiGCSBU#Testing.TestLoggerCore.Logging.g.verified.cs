@@ -35,32 +35,61 @@ namespace Testing
 				return;
 			}
 
-			var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-			state.ReserveTagSpace(2);
-
-			state.TagArray[0] = new("{OriginalFormat}", "LogEntryWithGenericTypeParam: ParamName = {ParamName}");
-			state.TagArray[1] = new("paramName", paramName);
-
 			_logger.Log(
 				global::Microsoft.Extensions.Logging.LogLevel.Information,
 				new (842060863, nameof(LogEntryWithGenericTypeParam)),
-				state,
+				new LogEntryWithGenericTypeParam_LogState(paramName),
 				null,
 				[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 				static string (s, _) =>
 				{
-					var v0 = s.TagArray[1].Value ?? "(null)";
-
 #if NET
-					return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"LogEntryWithGenericTypeParam: ParamName = {v0}");
+					return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"LogEntryWithGenericTypeParam: ParamName = {s._ParamName}");
 #else
-					return global::System.FormattableString.Invariant($"LogEntryWithGenericTypeParam: ParamName = {v0}");
+					return global::System.FormattableString.Invariant($"LogEntryWithGenericTypeParam: ParamName = {s._ParamName}");
 #endif
 				}
 			);
 
-			state.Clear();
 		}
+
+
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+	private readonly struct LogEntryWithGenericTypeParam_LogState : global::System.Collections.Generic.IReadOnlyList<global::System.Collections.Generic.KeyValuePair<string, object?>>
+	{
+		static readonly string s_originalFormat = "LogEntryWithGenericTypeParam: ParamName = {ParamName}";
+
+		public readonly global::System.Collections.Generic.IDictionary<string, int> _ParamName;
+
+		public LogEntryWithGenericTypeParam_LogState(global::System.Collections.Generic.IDictionary<string, int> paramName)
+		{
+			_ParamName = paramName;
+		}
+
+
+		public int Count => 2;
+
+		public global::System.Collections.Generic.KeyValuePair<string, object?> this[int index]
+		{
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			get => index switch
+			{
+				0 => new("{OriginalFormat}", s_originalFormat),
+				1 => new("paramName", _ParamName),
+				_ => throw new global::System.IndexOutOfRangeException(nameof(index))
+			};
+		}
+
+
+		public global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> GetEnumerator()
+		{
+			for (var i = 0; i < Count; i++)
+				yield return this[i];
+		}
+
+
+		global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+	}
 
 	}
 }

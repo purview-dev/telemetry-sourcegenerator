@@ -20,9 +20,9 @@ namespace Testing
 	{
 		global::System.Diagnostics.Metrics.Meter _meter = default!;
 
-		global::System.Diagnostics.Metrics.Counter<int>? _counter1Instrument = null;
-		global::System.Diagnostics.Metrics.Counter<int>? _counter2Instrument = null;
-		global::System.Diagnostics.Metrics.Counter<int>? _counter3Instrument = null;
+		global::System.Diagnostics.Metrics.Counter<int> _counter1Instrument = default!;
+		global::System.Diagnostics.Metrics.Counter<int> _counter2Instrument = default!;
+		global::System.Diagnostics.Metrics.Counter<int> _counter3Instrument = default!;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestMetricsCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
@@ -82,33 +82,18 @@ namespace Testing
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public void Counter1(int intParam, bool boolParam)
 		{
-			if (_counter1Instrument == null)
-			{
-				return;
-			}
-
 			_counter1Instrument.Add(1, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public void Counter2(int intParam, bool boolParam)
 		{
-			if (_counter2Instrument == null)
-			{
-				return;
-			}
-
 			_counter2Instrument.Add(1, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public void Counter3(int intParam, bool boolParam)
 		{
-			if (_counter3Instrument == null)
-			{
-				return;
-			}
-
 			_counter3Instrument.Add(1, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 	}

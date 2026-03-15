@@ -17,7 +17,7 @@ namespace Testing
 	{
 		global::System.Diagnostics.Metrics.Meter _meter = default!;
 
-		global::System.Diagnostics.Metrics.Counter<int>? _traceAndCountMethodInstrument = null;
+		global::System.Diagnostics.Metrics.Counter<int> _traceAndCountMethodInstrument = default!;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public MultiTelemetryCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
@@ -61,11 +61,6 @@ namespace Testing
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		private void TraceAndCountMethod_Metrics(int counterValue, string operationId)
 		{
-			if (_traceAndCountMethodInstrument == null)
-			{
-				return;
-			}
-
 			_traceAndCountMethodInstrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("operation_id", operationId));
 		}
 	}

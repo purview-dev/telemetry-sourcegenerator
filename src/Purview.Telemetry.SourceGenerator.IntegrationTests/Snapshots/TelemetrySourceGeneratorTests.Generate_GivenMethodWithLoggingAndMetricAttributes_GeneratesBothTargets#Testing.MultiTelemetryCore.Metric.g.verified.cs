@@ -17,7 +17,7 @@ namespace Testing
 	{
 		global::System.Diagnostics.Metrics.Meter _meter = default!;
 
-		global::System.Diagnostics.Metrics.Counter<int>? _logAndCountMethodInstrument = null;
+		global::System.Diagnostics.Metrics.Counter<int> _logAndCountMethodInstrument = default!;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -55,11 +55,6 @@ namespace Testing
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		private void LogAndCountMethod_Metrics(int value, string message)
 		{
-			if (_logAndCountMethodInstrument == null)
-			{
-				return;
-			}
-
 			_logAndCountMethodInstrument.Add(value, new global::System.Collections.Generic.KeyValuePair<string, object?>("message", message));
 		}
 	}
