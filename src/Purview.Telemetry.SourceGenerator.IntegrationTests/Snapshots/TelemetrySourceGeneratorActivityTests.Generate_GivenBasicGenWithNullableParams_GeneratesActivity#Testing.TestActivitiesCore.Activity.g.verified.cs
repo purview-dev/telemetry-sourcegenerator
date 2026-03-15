@@ -55,10 +55,6 @@ namespace Testing
 			{
 				activityActivity.SetTag("int_param", intParam);
 				activityActivity.SetTag("bool_param", boolParam);
-			}
-
-			if (activityActivity != null)
-			{
 				activityActivity.SetBaggage("string_param", stringParam);
 			}
 
@@ -80,10 +76,6 @@ namespace Testing
 			{
 				activityActivityWithNullableParams.SetTag("int_param", intParam);
 				activityActivityWithNullableParams.SetTag("bool_param", boolParam);
-			}
-
-			if (activityActivityWithNullableParams != null)
-			{
 				activityActivityWithNullableParams.SetBaggage("string_param", stringParam);
 			}
 

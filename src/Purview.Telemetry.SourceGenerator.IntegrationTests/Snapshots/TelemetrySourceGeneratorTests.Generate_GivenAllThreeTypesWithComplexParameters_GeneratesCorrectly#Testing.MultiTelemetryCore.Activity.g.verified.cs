@@ -55,10 +55,6 @@ namespace Testing
 			{
 				activityProcessRequest.SetTag("request_id", requestId);
 				activityProcessRequest.SetTag("user_id", userId);
-			}
-
-			if (activityProcessRequest != null)
-			{
 				activityProcessRequest.SetBaggage("correlation_id", correlationId);
 			}
 

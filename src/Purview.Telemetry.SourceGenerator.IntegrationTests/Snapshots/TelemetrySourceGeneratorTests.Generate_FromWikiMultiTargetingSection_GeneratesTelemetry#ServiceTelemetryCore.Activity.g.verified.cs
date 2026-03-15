@@ -52,10 +52,6 @@ sealed partial class ServiceTelemetryCore : global::IServiceTelemetry
 		if (activityStartAnActivity != null)
 		{
 			activityStartAnActivity.SetTag("tag_int_param", tagIntParam);
-		}
-
-		if (activityStartAnActivity != null)
-		{
 			activityStartAnActivity.SetBaggage("entity_id", entityId);
 		}
 

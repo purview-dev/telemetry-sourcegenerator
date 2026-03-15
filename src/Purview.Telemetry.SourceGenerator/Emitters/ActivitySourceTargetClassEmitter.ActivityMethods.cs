@@ -163,26 +163,40 @@ partial class ActivitySourceTargetClassEmitter
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		EmitTagsOrBaggageParameters(
-			builder,
-			indent,
-			activityVariableName,
-			true,
-			methodTarget,
-			true,
-			context,
-			logger
-		);
-		EmitTagsOrBaggageParameters(
-			builder,
-			indent,
-			activityVariableName,
-			false,
-			methodTarget,
-			true,
-			context,
-			logger
-		);
+		if (methodTarget.Tags.Length > 0 || methodTarget.Baggage.Length > 0)
+		{
+			builder
+				.AppendLine()
+				.Append(indent, "if (", withNewLine: false)
+				.Append(activityVariableName)
+				.AppendLine(" != null)")
+				.Append(indent, '{');
+
+			indent++;
+
+			EmitTagsOrBaggageParameters(
+				builder,
+				indent,
+				activityVariableName,
+				true,
+				methodTarget,
+				false,
+				context,
+				logger
+			);
+			EmitTagsOrBaggageParameters(
+				builder,
+				indent,
+				activityVariableName,
+				false,
+				methodTarget,
+				false,
+				context,
+				logger
+			);
+
+			builder.Append(--indent, '}');
+		}
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 

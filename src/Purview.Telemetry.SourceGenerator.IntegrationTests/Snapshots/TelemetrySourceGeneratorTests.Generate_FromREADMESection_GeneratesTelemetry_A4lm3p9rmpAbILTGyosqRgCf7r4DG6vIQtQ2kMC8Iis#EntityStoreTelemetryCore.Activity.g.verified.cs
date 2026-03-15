@@ -52,10 +52,6 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 		if (activityGettingEntityFromStore != null)
 		{
 			activityGettingEntityFromStore.SetTag("entity_id", entityId);
-		}
-
-		if (activityGettingEntityFromStore != null)
-		{
 			activityGettingEntityFromStore.SetBaggage("service_url", serviceUrl);
 		}
 

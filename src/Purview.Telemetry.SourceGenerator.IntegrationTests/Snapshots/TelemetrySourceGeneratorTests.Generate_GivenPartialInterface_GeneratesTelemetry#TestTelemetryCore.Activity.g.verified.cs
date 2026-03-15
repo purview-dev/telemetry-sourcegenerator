@@ -53,10 +53,6 @@ sealed partial class TestTelemetryCore : global::ITestTelemetry
 		{
 			activityActivity.SetTag("int_param", intParam);
 			activityActivity.SetTag("bool_param", boolParam);
-		}
-
-		if (activityActivity != null)
-		{
 			activityActivity.SetBaggage("string_param", stringParam);
 		}
 

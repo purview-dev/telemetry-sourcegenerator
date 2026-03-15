@@ -54,10 +54,6 @@ namespace Testing
 			if (activityActivity != null)
 			{
 				activityActivity.SetTag("int_param", intParam);
-			}
-
-			if (activityActivity != null)
-			{
 				activityActivity.SetBaggage("string_param", stringParam);
 			}
 

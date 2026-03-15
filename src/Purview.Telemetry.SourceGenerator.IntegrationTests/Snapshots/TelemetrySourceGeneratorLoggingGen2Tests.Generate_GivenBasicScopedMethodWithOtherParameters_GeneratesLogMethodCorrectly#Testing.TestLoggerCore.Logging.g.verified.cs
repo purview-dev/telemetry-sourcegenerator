@@ -30,30 +30,85 @@ namespace Testing
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public global::System.IDisposable? BasicScoped(int intValue, string? nullableStringValue, uint uintValue)
 		{
-			var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-			state.ReserveTagSpace(4);
-
-			state.TagArray[0] = new("{OriginalFormat}", "BasicScoped: IntValue = {IntValue}, NullableStringValue = {NullableStringValue}, UintValue = {UintValue}");
-			state.TagArray[1] = new("intValue", intValue);
-			state.TagArray[2] = new("nullableStringValue", nullableStringValue);
-			state.TagArray[3] = new("uintValue", uintValue);
-
-			var v0 = state.TagArray[1].Value ?? "(null)";
-			var v1 = state.TagArray[2].Value ?? "(null)";
-			var v2 = state.TagArray[3].Value ?? "(null)";
-
-			var formattedMessage = 
-#if NET
-				string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"BasicScoped: IntValue = {v0}, NullableStringValue = {v1}, UintValue = {v2}");
-#else
-				global::System.FormattableString.Invariant($"BasicScoped: IntValue = {v0}, NullableStringValue = {v1}, UintValue = {v2}");
-#endif
-			;
-
-			state.AddTag("FormattedMessage", formattedMessage);
-
-			return _logger.BeginScope(state);
+			return _logger.BeginScope(new BasicScoped_ScopeState(intValue, nullableStringValue, uintValue));
 		}
+
+
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+	private readonly struct BasicScoped_ScopeState : global::System.Collections.Generic.IReadOnlyList<global::System.Collections.Generic.KeyValuePair<string, object?>>
+	{
+		static readonly string s_originalFormat = "BasicScoped: IntValue = {IntValue}, NullableStringValue = {NullableStringValue}, UintValue = {UintValue}";
+
+		public readonly int _IntValue;
+		public readonly string? _NullableStringValue;
+		public readonly uint _UintValue;
+
+		public BasicScoped_ScopeState(int intValue, string? nullableStringValue, uint uintValue)
+		{
+			_IntValue = intValue;
+			_NullableStringValue = nullableStringValue;
+			_UintValue = uintValue;
+		}
+
+
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+		public override string ToString()
+		{
+#if NET
+			return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"BasicScoped: IntValue = {_IntValue}, NullableStringValue = {_NullableStringValue}, UintValue = {_UintValue}");
+#else
+			return global::System.FormattableString.Invariant($"BasicScoped: IntValue = {_IntValue}, NullableStringValue = {_NullableStringValue}, UintValue = {_UintValue}");
+#endif
+		}
+
+
+		public int Count => 4;
+
+		public global::System.Collections.Generic.KeyValuePair<string, object?> this[int index]
+		{
+			[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+			get => index switch
+			{
+				0 => new("{OriginalFormat}", s_originalFormat),
+				1 => new("intValue", _IntValue),
+				2 => new("nullableStringValue", _NullableStringValue),
+				3 => new("uintValue", _UintValue),
+				_ => throw new global::System.IndexOutOfRangeException(nameof(index))
+			};
+		}
+
+
+		public struct Enumerator : global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>>
+		{
+			readonly BasicScoped_ScopeState _state;
+			int _index;
+
+			public Enumerator(BasicScoped_ScopeState state)
+			{
+				_state = state;
+				_index = -1;
+			}
+
+			public global::System.Collections.Generic.KeyValuePair<string, object?> Current => _state[_index];
+
+			object? global::System.Collections.IEnumerator.Current => Current;
+
+			public bool MoveNext() => ++_index < _state.Count;
+
+			public void Reset() => _index = -1;
+
+			public void Dispose() { }
+		}
+
+
+		public Enumerator GetEnumerator() => new(this);
+
+
+		global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, object?>>.GetEnumerator() => GetEnumerator();
+
+
+		global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+	}
 
 	}
 }

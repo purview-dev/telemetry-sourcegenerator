@@ -114,6 +114,7 @@ partial class LoggerGenTargetClassEmitter
 		// Should always be state, because we'll use the messageFormat. And we'll generate one if
 		// one doesn't exist...
 		var useTypedState = !methodTarget.IsScoped && IsSimpleLogMethod(methodTarget);
+		var useScopedTypedState = methodTarget.IsScoped && IsSimpleLogMethod(methodTarget);
 		if (!methodTarget.IsScoped)
 		{
 			// First check if the the Log Level is enabled.
@@ -133,7 +134,7 @@ partial class LoggerGenTargetClassEmitter
 		}
 
 		// Output the state here...
-		if (!useTypedState)
+		if (!useTypedState && !useScopedTypedState)
 		{
 			EmitStateContent(
 				builder,
@@ -148,61 +149,88 @@ partial class LoggerGenTargetClassEmitter
 
 		if (methodTarget.IsScoped)
 		{
-			var (interpolatedMessage, variables) = GenerateInterpolatedFunction(
-				methodTarget.MessageTemplate,
-				stateVarName,
-				methodTarget.ExceptionParameter?.Name,
-				[.. methodTarget.Parameters],
-				existingParamNames
-			);
-
-			if (variables.Length > 0)
+			if (useScopedTypedState)
 			{
-				foreach (var variableDefinition in variables)
-					builder.Append(indent, variableDefinition);
+				// Zero-allocation: typed _ScopeState struct — no ThreadLocalState, no eager string formatting.
+				var scopeStructName = methodTarget.MethodName + "_ScopeState";
+				var scopeNonExceptionParams = methodTarget.ParametersSansException;
 
-				builder.AppendLine();
+				builder
+					.Append(indent, "return ", withNewLine: false)
+					.Append(Constants.Logging.LoggerFieldName)
+					.Append(".BeginScope(new ")
+					.Append(scopeStructName)
+					.Append('(');
+
+				for (var i = 0; i < scopeNonExceptionParams.Length; i++)
+				{
+					context.CancellationToken.ThrowIfCancellationRequested();
+
+					builder.Append(scopeNonExceptionParams[i].Name);
+					if (i < scopeNonExceptionParams.Length - 1)
+						builder.Append(", ");
+				}
+
+				builder.AppendLine("));");
 			}
+			else
+			{
+				var (interpolatedMessage, variables) = GenerateInterpolatedFunction(
+					methodTarget.MessageTemplate,
+					stateVarName,
+					methodTarget.ExceptionParameter?.Name,
+					[.. methodTarget.Parameters],
+					existingParamNames
+				);
 
-			var formattedMessageVarName = FindUniqueName("formattedMessage", existingParamNames);
-			builder
-				.Append(indent, "var ", withNewLine: false)
-				.AppendLine("formattedMessage = ")
-				.AppendLine("#if NET")
-				.Append(
-					indent + 1,
-					"string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $",
-					withNewLine: false
-				)
-				.Append(interpolatedMessage.Wrap())
-				.AppendLine(");")
-				.AppendLine("#else")
-				.Append(
-					indent + 1,
-					"global::System.FormattableString.Invariant($",
-					withNewLine: false
-				)
-				.Append(interpolatedMessage.Wrap())
-				.AppendLine(");")
-				.AppendLine("#endif")
-				.Append(indent, ';')
-				.AppendLine();
+				if (variables.Length > 0)
+				{
+					foreach (var variableDefinition in variables)
+						builder.Append(indent, variableDefinition);
 
-			OutputState(
-				builder.WithIndent(indent),
-				stateVarName,
-				Utilities.UppercaseFirstChar(formattedMessageVarName).Wrap(),
-				formattedMessageVarName,
-				index: null
-			);
+					builder.AppendLine();
+				}
 
-			builder
-				.AppendLine()
-				.Append(indent, "return ", withNewLine: false)
-				.Append(Constants.Logging.LoggerFieldName)
-				.Append(".BeginScope(")
-				.Append(stateVarName)
-				.AppendLine(");");
+				var formattedMessageVarName = FindUniqueName("formattedMessage", existingParamNames);
+				builder
+					.Append(indent, "var ", withNewLine: false)
+					.AppendLine("formattedMessage = ")
+					.AppendLine("#if NET")
+					.Append(
+						indent + 1,
+						"string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $",
+						withNewLine: false
+					)
+					.Append(interpolatedMessage.Wrap())
+					.AppendLine(");")
+					.AppendLine("#else")
+					.Append(
+						indent + 1,
+						"global::System.FormattableString.Invariant($",
+						withNewLine: false
+					)
+					.Append(interpolatedMessage.Wrap())
+					.AppendLine(");")
+					.AppendLine("#endif")
+					.Append(indent, ';')
+					.AppendLine();
+
+				OutputState(
+					builder.WithIndent(indent),
+					stateVarName,
+					Utilities.UppercaseFirstChar(formattedMessageVarName).Wrap(),
+					formattedMessageVarName,
+					index: null
+				);
+
+				builder
+					.AppendLine()
+					.Append(indent, "return ", withNewLine: false)
+					.Append(Constants.Logging.LoggerFieldName)
+					.Append(".BeginScope(")
+					.Append(stateVarName)
+					.AppendLine(");");
+			}
 		}
 		else
 		{
@@ -387,6 +415,13 @@ partial class LoggerGenTargetClassEmitter
 		var reservationCount = methodTarget.TotalParameterCount + 1;
 		if (methodTarget.ExceptionParameter != null)
 			reservationCount--;
+
+		// Add compile-time-known LogProperties expansion counts to avoid dynamic array resizing.
+		foreach (var param in methodTarget.Parameters)
+		{
+			if (param.LogProperties.HasValue)
+				reservationCount += param.LogProperties.Value.Length;
+		}
 
 		// Create the state variable,
 		// and reserve the required number of variables.
@@ -762,9 +797,6 @@ partial class LoggerGenTargetClassEmitter
 
 	static bool IsSimpleLogMethod(LogMethodTarget methodTarget)
 	{
-		if (methodTarget.IsScoped)
-			return false;
-
 		foreach (var param in methodTarget.Parameters)
 		{
 			if (param.LogPropertiesAttribute != null)
@@ -778,7 +810,7 @@ partial class LoggerGenTargetClassEmitter
 
 	static string GenerateTypedInterpolatedMessage(
 		string messageTemplate,
-		string expressionStateVarName,
+		string? expressionStateVarName,
 		string? expressionExceptionVarName,
 		LogParameterTarget[] parameters
 	)
@@ -795,7 +827,9 @@ partial class LoggerGenTargetClassEmitter
 				if (param.IsException && expressionExceptionVarName != null)
 					holeToAccess[hole] = expressionExceptionVarName;
 				else if (!param.IsException)
-					holeToAccess[hole] = $"{expressionStateVarName}._{param.UpperCasedName}";
+					holeToAccess[hole] = expressionStateVarName != null
+						? $"{expressionStateVarName}._{param.UpperCasedName}"
+						: $"_{param.UpperCasedName}";
 			}
 		}
 
@@ -841,7 +875,10 @@ partial class LoggerGenTargetClassEmitter
 			if (!IsSimpleLogMethod(methodTarget))
 				continue;
 
-			EmitLogStateStruct(builder, indent, methodTarget, context);
+			if (methodTarget.IsScoped)
+				EmitScopeStateStruct(builder, indent, methodTarget, context);
+			else
+				EmitLogStateStruct(builder, indent, methodTarget, context);
 		}
 	}
 
@@ -862,6 +899,8 @@ partial class LoggerGenTargetClassEmitter
 			$"global::System.Collections.Generic.IReadOnlyList<{kvpType}>";
 		var ienumeratorType =
 			$"global::System.Collections.Generic.IEnumerator<{kvpType}>";
+		var ienumerableKvpType =
+			$"global::System.Collections.Generic.IEnumerable<{kvpType}>";
 		const string ienumerableType = "global::System.Collections.IEnumerator";
 
 		builder
@@ -982,16 +1021,58 @@ partial class LoggerGenTargetClassEmitter
 		indent--;
 		builder
 			.Append(indent, '}')
+			.AppendLine();
+
+		EmitStructEnumerator(builder, ref indent, structName, kvpType, ienumeratorType, ienumerableType, ienumerableKvpType);
+
+		indent--;
+		builder.Append(indent, '}').AppendLine();
+	}
+
+	static void EmitStructEnumerator(
+		StringBuilder builder,
+		ref int indent,
+		string structName,
+		string kvpType,
+		string ienumeratorType,
+		string ienumerableType,
+		string ienumerableKvpType
+	)
+	{
+		builder
 			.AppendLine()
-			.AppendLine()
-			.Append(indent, $"public {ienumeratorType} GetEnumerator()")
+			.Append(indent, "public struct Enumerator : ", withNewLine: false)
+			.AppendLine(ienumeratorType)
 			.Append(indent, '{');
 
 		indent++;
 
 		builder
-			.Append(indent, "for (var i = 0; i < Count; i++)")
-			.Append(indent + 1, "yield return this[i];");
+			.Append(indent, "readonly ", withNewLine: false)
+			.Append(structName)
+			.AppendLine(" _state;")
+			.Append(indent, "int _index;")
+			.AppendLine()
+			.Append(indent, "public Enumerator(", withNewLine: false)
+			.Append(structName)
+			.AppendLine(" state)")
+			.Append(indent, '{')
+			.Append(indent + 1, "_state = state;")
+			.Append(indent + 1, "_index = -1;")
+			.Append(indent, '}')
+			.AppendLine()
+			.Append(indent, $"public {kvpType} Current => _state[_index];")
+			.AppendLine()
+			.Append(
+				indent,
+				"object? global::System.Collections.IEnumerator.Current => Current;"
+			)
+			.AppendLine()
+			.Append(indent, "public bool MoveNext() => ++_index < _state.Count;")
+			.AppendLine()
+			.Append(indent, "public void Reset() => _index = -1;")
+			.AppendLine()
+			.Append(indent, "public void Dispose() { }");
 
 		indent--;
 
@@ -999,10 +1080,194 @@ partial class LoggerGenTargetClassEmitter
 			.Append(indent, '}')
 			.AppendLine()
 			.AppendLine()
+			.Append(indent, "public Enumerator GetEnumerator() => new(this);")
+			.AppendLine()
+			.AppendLine()
+			.Append(
+				indent,
+				$"{ienumeratorType} {ienumerableKvpType}.GetEnumerator() => GetEnumerator();"
+			)
+			.AppendLine()
+			.AppendLine()
 			.Append(
 				indent,
 				$"{ienumerableType} global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();"
 			);
+	}
+
+	static void EmitScopeStateStruct(
+		StringBuilder builder,
+		int indent,
+		LogMethodTarget methodTarget,
+		SourceProductionContext context
+	)
+	{
+		var nonExceptionParams = methodTarget.ParametersSansException;
+		var structName = methodTarget.MethodName + "_ScopeState";
+		var count = nonExceptionParams.Length + 1; // +1 for {OriginalFormat}
+
+		const string kvpType =
+			"global::System.Collections.Generic.KeyValuePair<string, object?>";
+		var iReadOnlyListType =
+			$"global::System.Collections.Generic.IReadOnlyList<{kvpType}>";
+		var ienumeratorType =
+			$"global::System.Collections.Generic.IEnumerator<{kvpType}>";
+		var ienumerableKvpType =
+			$"global::System.Collections.Generic.IEnumerable<{kvpType}>";
+		const string ienumerableType = "global::System.Collections.IEnumerator";
+
+		builder
+			.AppendLine()
+			.CodeGen(indent)
+			.Append(indent, "private readonly struct ", withNewLine: false)
+			.Append(structName)
+			.AppendLine($" : {iReadOnlyListType}")
+			.Append(indent, '{');
+
+		indent++;
+
+		builder
+			.Append(
+				indent,
+				"static readonly string s_originalFormat = ",
+				withNewLine: false
+			)
+			.Append(methodTarget.MessageTemplate.Wrap())
+			.AppendLine(";");
+
+		if (nonExceptionParams.Length > 0)
+		{
+			builder.AppendLine();
+
+			foreach (var param in nonExceptionParams)
+			{
+				context.CancellationToken.ThrowIfCancellationRequested();
+
+				builder
+					.Append(indent, "public readonly ", withNewLine: false)
+					.Append(param.ParameterType)
+					.Append(" _")
+					.Append(param.UpperCasedName)
+					.AppendLine(";");
+			}
+
+			builder
+				.AppendLine()
+				.Append(indent, "public ", withNewLine: false)
+				.Append(structName)
+				.Append('(');
+
+			for (var i = 0; i < nonExceptionParams.Length; i++)
+			{
+				context.CancellationToken.ThrowIfCancellationRequested();
+
+				builder
+					.Append(nonExceptionParams[i].ParameterType)
+					.Append(' ')
+					.Append(nonExceptionParams[i].Name);
+
+				if (i < nonExceptionParams.Length - 1)
+					builder.Append(", ");
+			}
+
+			builder.AppendLine(")").Append(indent, '{');
+			indent++;
+
+			foreach (var param in nonExceptionParams)
+			{
+				context.CancellationToken.ThrowIfCancellationRequested();
+
+				builder
+					.Append(indent, "_", withNewLine: false)
+					.Append(param.UpperCasedName)
+					.Append(" = ")
+					.Append(param.Name)
+					.AppendLine(";");
+			}
+
+			indent--;
+			builder.Append(indent, '}');
+		}
+
+		// Lazy ToString() — format is deferred until a provider actually needs the string.
+		var interpolatedMessage = GenerateTypedInterpolatedMessage(
+			methodTarget.MessageTemplate,
+			null, // null = direct field access (_FieldName instead of s._FieldName)
+			null, // scoped methods have no exception parameter
+			[.. methodTarget.Parameters]
+		);
+
+		builder
+			.AppendLine()
+			.AppendLine()
+			.CodeGen(indent)
+			.Append(indent, "public override string ToString()")
+			.Append(indent, '{')
+			.AppendLine("#if NET")
+			.Append(
+				indent + 1,
+				"return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $",
+				withNewLine: false
+			)
+			.Append(interpolatedMessage.Wrap())
+			.AppendLine(");")
+			.AppendLine("#else")
+			.Append(
+				indent + 1,
+				"return global::System.FormattableString.Invariant($",
+				withNewLine: false
+			)
+			.Append(interpolatedMessage.Wrap())
+			.AppendLine(");")
+			.AppendLine("#endif")
+			.Append(indent, '}')
+			.AppendLine()
+			.AppendLine()
+			.Append(indent, "public int Count => ", withNewLine: false)
+			.Append(count)
+			.AppendLine(";")
+			.AppendLine()
+			.Append(indent, $"public {kvpType} this[int index]")
+			.Append(indent, '{');
+
+		indent++;
+
+		builder
+			.Append(indent, Constants.System.AggressiveInlining)
+			.Append(indent, "get => index switch", withNewLine: false)
+			.AppendLine()
+			.Append(indent, '{');
+
+		indent++;
+
+		builder.Append(indent, "0 => new(\"{OriginalFormat}\", s_originalFormat),");
+
+		for (var i = 0; i < nonExceptionParams.Length; i++)
+		{
+			context.CancellationToken.ThrowIfCancellationRequested();
+
+			builder
+				.Append(indent, $"{i + 1} => new(", withNewLine: false)
+				.Append(nonExceptionParams[i].Name.Wrap())
+				.Append(", _")
+				.Append(nonExceptionParams[i].UpperCasedName)
+				.AppendLine("),");
+		}
+
+		builder.Append(
+			indent,
+			"_ => throw new global::System.IndexOutOfRangeException(nameof(index))"
+		);
+
+		indent--;
+		builder.Append(indent, "};");
+
+		indent--;
+		builder
+			.Append(indent, '}')
+			.AppendLine();
+
+		EmitStructEnumerator(builder, ref indent, structName, kvpType, ienumeratorType, ienumerableType, ienumerableKvpType);
 
 		indent--;
 		builder.Append(indent, '}').AppendLine();

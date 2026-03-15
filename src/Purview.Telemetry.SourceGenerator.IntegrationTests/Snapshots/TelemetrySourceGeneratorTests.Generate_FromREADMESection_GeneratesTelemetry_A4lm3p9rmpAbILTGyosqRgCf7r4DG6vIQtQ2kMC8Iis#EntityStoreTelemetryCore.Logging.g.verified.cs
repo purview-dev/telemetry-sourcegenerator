@@ -26,25 +26,7 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public global::System.IDisposable? AScopedLogEntry(int parentEntityId)
 	{
-		var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-		state.ReserveTagSpace(2);
-
-		state.TagArray[0] = new("{OriginalFormat}", "AScopedLogEntry: ParentEntityId = {ParentEntityId}");
-		state.TagArray[1] = new("parentEntityId", parentEntityId);
-
-		var v0 = state.TagArray[1].Value ?? "(null)";
-
-		var formattedMessage = 
-#if NET
-			string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"AScopedLogEntry: ParentEntityId = {v0}");
-#else
-			global::System.FormattableString.Invariant($"AScopedLogEntry: ParentEntityId = {v0}");
-#endif
-		;
-
-		state.AddTag("FormattedMessage", formattedMessage);
-
-		return _logger.BeginScope(state);
+		return _logger.BeginScope(new AScopedLogEntry_ScopeState(parentEntityId));
 	}
 
 
@@ -133,6 +115,77 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 
 
 [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+private readonly struct AScopedLogEntry_ScopeState : global::System.Collections.Generic.IReadOnlyList<global::System.Collections.Generic.KeyValuePair<string, object?>>
+{
+	static readonly string s_originalFormat = "AScopedLogEntry: ParentEntityId = {ParentEntityId}";
+
+	public readonly int _ParentEntityId;
+
+	public AScopedLogEntry_ScopeState(int parentEntityId)
+	{
+		_ParentEntityId = parentEntityId;
+	}
+
+
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+	public override string ToString()
+	{
+#if NET
+		return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"AScopedLogEntry: ParentEntityId = {_ParentEntityId}");
+#else
+		return global::System.FormattableString.Invariant($"AScopedLogEntry: ParentEntityId = {_ParentEntityId}");
+#endif
+	}
+
+
+	public int Count => 2;
+
+	public global::System.Collections.Generic.KeyValuePair<string, object?> this[int index]
+	{
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		get => index switch
+		{
+			0 => new("{OriginalFormat}", s_originalFormat),
+			1 => new("parentEntityId", _ParentEntityId),
+			_ => throw new global::System.IndexOutOfRangeException(nameof(index))
+		};
+	}
+
+
+	public struct Enumerator : global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>>
+	{
+		readonly AScopedLogEntry_ScopeState _state;
+		int _index;
+
+		public Enumerator(AScopedLogEntry_ScopeState state)
+		{
+			_state = state;
+			_index = -1;
+		}
+
+		public global::System.Collections.Generic.KeyValuePair<string, object?> Current => _state[_index];
+
+		object? global::System.Collections.IEnumerator.Current => Current;
+
+		public bool MoveNext() => ++_index < _state.Count;
+
+		public void Reset() => _index = -1;
+
+		public void Dispose() { }
+	}
+
+
+	public Enumerator GetEnumerator() => new(this);
+
+
+	global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, object?>>.GetEnumerator() => GetEnumerator();
+
+
+	global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+}
+
+
+[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 private readonly struct LogMessage_LogState : global::System.Collections.Generic.IReadOnlyList<global::System.Collections.Generic.KeyValuePair<string, object?>>
 {
 	static readonly string s_originalFormat = "LogMessage: EntityId = {EntityId}, UpdateState = {UpdateState}";
@@ -162,11 +215,33 @@ private readonly struct LogMessage_LogState : global::System.Collections.Generic
 	}
 
 
-	public global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> GetEnumerator()
+	public struct Enumerator : global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>>
 	{
-		for (var i = 0; i < Count; i++)
-			yield return this[i];
+		readonly LogMessage_LogState _state;
+		int _index;
+
+		public Enumerator(LogMessage_LogState state)
+		{
+			_state = state;
+			_index = -1;
+		}
+
+		public global::System.Collections.Generic.KeyValuePair<string, object?> Current => _state[_index];
+
+		object? global::System.Collections.IEnumerator.Current => Current;
+
+		public bool MoveNext() => ++_index < _state.Count;
+
+		public void Reset() => _index = -1;
+
+		public void Dispose() { }
 	}
+
+
+	public Enumerator GetEnumerator() => new(this);
+
+
+	global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, object?>>.GetEnumerator() => GetEnumerator();
 
 
 	global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
@@ -203,11 +278,33 @@ private readonly struct ExplicitInfoMessage_LogState : global::System.Collection
 	}
 
 
-	public global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> GetEnumerator()
+	public struct Enumerator : global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>>
 	{
-		for (var i = 0; i < Count; i++)
-			yield return this[i];
+		readonly ExplicitInfoMessage_LogState _state;
+		int _index;
+
+		public Enumerator(ExplicitInfoMessage_LogState state)
+		{
+			_state = state;
+			_index = -1;
+		}
+
+		public global::System.Collections.Generic.KeyValuePair<string, object?> Current => _state[_index];
+
+		object? global::System.Collections.IEnumerator.Current => Current;
+
+		public bool MoveNext() => ++_index < _state.Count;
+
+		public void Reset() => _index = -1;
+
+		public void Dispose() { }
 	}
+
+
+	public Enumerator GetEnumerator() => new(this);
+
+
+	global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, object?>>.GetEnumerator() => GetEnumerator();
 
 
 	global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
@@ -241,11 +338,33 @@ private readonly struct ExplicitErrorMessage_LogState : global::System.Collectio
 	}
 
 
-	public global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> GetEnumerator()
+	public struct Enumerator : global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>>
 	{
-		for (var i = 0; i < Count; i++)
-			yield return this[i];
+		readonly ExplicitErrorMessage_LogState _state;
+		int _index;
+
+		public Enumerator(ExplicitErrorMessage_LogState state)
+		{
+			_state = state;
+			_index = -1;
+		}
+
+		public global::System.Collections.Generic.KeyValuePair<string, object?> Current => _state[_index];
+
+		object? global::System.Collections.IEnumerator.Current => Current;
+
+		public bool MoveNext() => ++_index < _state.Count;
+
+		public void Reset() => _index = -1;
+
+		public void Dispose() { }
 	}
+
+
+	public Enumerator GetEnumerator() => new(this);
+
+
+	global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, object?>>.GetEnumerator() => GetEnumerator();
 
 
 	global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();

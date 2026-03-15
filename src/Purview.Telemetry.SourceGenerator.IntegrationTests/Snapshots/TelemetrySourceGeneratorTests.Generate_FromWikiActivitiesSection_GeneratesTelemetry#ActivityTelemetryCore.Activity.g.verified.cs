@@ -52,10 +52,6 @@ sealed partial class ActivityTelemetryCore : global::IActivityTelemetry
 		if (activityGettingItemFromCache != null)
 		{
 			activityGettingItemFromCache.SetTag("item_type", itemType);
-		}
-
-		if (activityGettingItemFromCache != null)
-		{
 			activityGettingItemFromCache.SetBaggage("key", key);
 		}
 

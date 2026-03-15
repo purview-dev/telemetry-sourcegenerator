@@ -81,11 +81,33 @@ namespace Testing
 		}
 
 
-		public global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> GetEnumerator()
+		public struct Enumerator : global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>>
 		{
-			for (var i = 0; i < Count; i++)
-				yield return this[i];
+			readonly LogEntryWithGenericTypeParam_LogState _state;
+			int _index;
+
+			public Enumerator(LogEntryWithGenericTypeParam_LogState state)
+			{
+				_state = state;
+				_index = -1;
+			}
+
+			public global::System.Collections.Generic.KeyValuePair<string, object?> Current => _state[_index];
+
+			object? global::System.Collections.IEnumerator.Current => Current;
+
+			public bool MoveNext() => ++_index < _state.Count;
+
+			public void Reset() => _index = -1;
+
+			public void Dispose() { }
 		}
+
+
+		public Enumerator GetEnumerator() => new(this);
+
+
+		global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, object?>>.GetEnumerator() => GetEnumerator();
 
 
 		global::System.Collections.IEnumerator global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
