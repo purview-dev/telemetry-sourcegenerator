@@ -32,6 +32,7 @@ partial class SharedHelpers
 		AttributeStringValue? messageTemplate = null;
 		AttributeValue<int>? eventId = null;
 		AttributeStringValue? nameValue = null;
+		AttributeValue<bool>? disableMSLoggingTelemetryGeneration = null;
 
 		if (
 			!AttributeParser(
@@ -74,6 +75,15 @@ partial class SharedHelpers
 					{
 						nameValue = new((string)value);
 					}
+					else if (
+						name.Equals(
+							nameof(LogAttributeRecord.DisableMSLoggingTelemetryGeneration),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
+					{
+						disableMSLoggingTelemetryGeneration = new((bool)value);
+					}
 				},
 				semanticModel,
 				logger,
@@ -89,7 +99,8 @@ partial class SharedHelpers
 			Level: level ?? new(),
 			MessageTemplate: messageTemplate ?? new(),
 			EventId: eventId ?? new(),
-			Name: nameValue ?? new()
+			Name: nameValue ?? new(),
+			DisableMSLoggingTelemetryGeneration: disableMSLoggingTelemetryGeneration ?? new()
 		);
 	}
 

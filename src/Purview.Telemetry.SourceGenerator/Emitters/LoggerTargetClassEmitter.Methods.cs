@@ -41,7 +41,7 @@ partial class LoggerTargetClassEmitter
 		return --indent;
 	}
 
-	static void EmitLogActionMethod(
+	internal static void EmitLogActionMethod(
 		StringBuilder builder,
 		int indent,
 		LogMethodTarget methodTarget,

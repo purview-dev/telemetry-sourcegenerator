@@ -61,7 +61,8 @@ record LogMethodTarget(
 	bool HasMultipleExceptions,
 	Location? MethodLocation,
 	bool InferredErrorLevel,
-	TargetGeneration TargetGenerationState
+	TargetGeneration TargetGenerationState,
+	bool UseV1Generation
 )
 {
 	public int TotalParameterCount => Parameters.Length;

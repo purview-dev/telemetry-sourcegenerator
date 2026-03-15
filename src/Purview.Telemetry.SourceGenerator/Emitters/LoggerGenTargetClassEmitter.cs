@@ -48,7 +48,7 @@ static partial class LoggerGenTargetClassEmitter
 			context.CancellationToken
 		);
 
-		EmitFields(target, builder, indent, context);
+		EmitFields(target, builder, indent, context, logger);
 
 		indent = ConstructorEmitter.EmitCtor(
 			GenerationType.Logging,
@@ -98,7 +98,8 @@ static partial class LoggerGenTargetClassEmitter
 		LoggerTarget target,
 		StringBuilder builder,
 		int indent,
-		SourceProductionContext context
+		SourceProductionContext context,
+		GenerationLogger? logger
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -113,5 +114,52 @@ static partial class LoggerGenTargetClassEmitter
 			.Append(Constants.Logging.LoggerFieldName)
 			.Append(';')
 			.AppendLine();
+
+		foreach (var methodTarget in target.LogMethods)
+		{
+			context.CancellationToken.ThrowIfCancellationRequested();
+
+			if (!methodTarget.TargetGenerationState.IsValid || !methodTarget.UseV1Generation)
+				continue;
+
+			if (methodTarget.HasMultipleExceptions)
+			{
+				logger?.Diagnostic(
+					"Method has multiple exception parameters, only a single one is permitted."
+				);
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Logging.MultipleExceptionsDefined,
+					methodTarget.MethodLocation
+				);
+				continue;
+			}
+
+			if (
+				methodTarget.ParameterCountSansException
+				> Constants.Logging.MaxNonExceptionParameters
+			)
+			{
+				logger?.Diagnostic("Method has more than 6 parameters.");
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Logging.MaximumLogEntryParametersExceeded,
+					methodTarget.MethodLocation
+				);
+				continue;
+			}
+
+			if (methodTarget.InferredErrorLevel)
+			{
+				logger?.Diagnostic("Inferring error log level.");
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Logging.InferringErrorLogLevel,
+					methodTarget.MethodLocation
+				);
+			}
+
+			LoggerTargetClassEmitter.EmitLogActionField(builder, indent + 1, methodTarget);
+		}
 	}
 }

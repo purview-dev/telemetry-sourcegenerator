@@ -121,6 +121,7 @@ partial class PipelineHelpers
 			semanticModel,
 			interfaceSymbol,
 			logger,
+			interfaceUsesV1Generation: disableMSLoggingTelemetryGeneration,
 			token,
 			out var methodDiagnostics
 		);
@@ -153,6 +154,7 @@ partial class PipelineHelpers
 		SemanticModel semanticModel,
 		INamedTypeSymbol interfaceSymbol,
 		GenerationLogger? logger,
+		bool interfaceUsesV1Generation,
 		CancellationToken token,
 		out (TelemetryDiagnosticDescriptor, ImmutableArray<Location>)[]? telemetryDiagnostics
 	)
@@ -349,6 +351,11 @@ partial class PipelineHelpers
 				);
 			}
 
+			var useV1Generation =
+				logAttribute?.DisableMSLoggingTelemetryGeneration.IsSet == true
+					? logAttribute.DisableMSLoggingTelemetryGeneration.Value!.Value
+					: interfaceUsesV1Generation;
+
 			methodTargets.Add(
 				new(
 					MethodName: method.Name,
@@ -370,7 +377,8 @@ partial class PipelineHelpers
 					HasMultipleExceptions: hasMultipleExceptions,
 					MethodLocation: method.Locations.FirstOrDefault(),
 					InferredErrorLevel: inferredErrorLevel,
-					TargetGenerationState: targetGenerationState
+					TargetGenerationState: targetGenerationState,
+					UseV1Generation: useV1Generation
 				)
 			);
 		}

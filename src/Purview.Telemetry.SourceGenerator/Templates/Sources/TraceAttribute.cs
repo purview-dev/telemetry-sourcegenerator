@@ -1,4 +1,4 @@
-﻿#if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
+#if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
 
 namespace Purview.Telemetry;
 
@@ -71,6 +71,15 @@ sealed class TraceAttribute : global::System.Attribute
 	/// Optional. Gets/ set the name of the log entry. If one is not specified, the method name is used.
 	/// </summary>
 	public string? Name { get; set; }
+
+	/// <summary>
+	/// Optional. When <see langword="true" />, disables MS logging telemetry generation for this
+	/// method, using the v1 (<see cref="global::Microsoft.Extensions.Logging.LoggerMessage.Define{T}"/>)
+	/// pattern instead.
+	/// When <see langword="false" />, forces v2 generation for this method.
+	/// When not set, inherits the interface-level <see cref="global::Purview.Telemetry.LoggerAttribute.DisableMSLoggingTelemetryGeneration"/> setting.
+	/// </summary>
+	public bool DisableMSLoggingTelemetryGeneration { get; set; }
 }
 
 #endif

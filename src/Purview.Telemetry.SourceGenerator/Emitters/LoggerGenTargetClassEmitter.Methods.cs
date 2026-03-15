@@ -56,6 +56,26 @@ partial class LoggerGenTargetClassEmitter
 
 		logger?.Debug($"Building logging method: {methodTarget.MethodName}");
 
+		if (methodTarget.UseV1Generation)
+		{
+			// Only use v1 if within param limits; otherwise fall through to v2 (diagnostic already emitted in EmitFields)
+			if (
+				!methodTarget.HasMultipleExceptions
+				&& methodTarget.ParameterCountSansException
+					<= Constants.Logging.MaxNonExceptionParameters
+			)
+			{
+				LoggerTargetClassEmitter.EmitLogActionMethod(
+					builder,
+					indent,
+					methodTarget,
+					context,
+					logger
+				);
+				return;
+			}
+		}
+
 		var isMultiTarget = methodTarget.TargetGenerationState.IsMultiTarget;
 		var methodTargets = methodTarget.TargetGenerationState.MethodTargets;
 
@@ -870,6 +890,14 @@ partial class LoggerGenTargetClassEmitter
 			context.CancellationToken.ThrowIfCancellationRequested();
 
 			if (!methodTarget.TargetGenerationState.IsValid)
+				continue;
+
+			if (
+				methodTarget.UseV1Generation
+				&& !methodTarget.HasMultipleExceptions
+				&& methodTarget.ParameterCountSansException
+					<= Constants.Logging.MaxNonExceptionParameters
+			)
 				continue;
 
 			if (!IsSimpleLogMethod(methodTarget))

@@ -17,7 +17,8 @@ record LogAttributeRecord(
 	AttributeValue<int> Level,
 	AttributeStringValue MessageTemplate,
 	AttributeValue<int> EventId,
-	AttributeStringValue Name
+	AttributeStringValue Name,
+	AttributeValue<bool> DisableMSLoggingTelemetryGeneration
 );
 
 record LogPropertiesAttributeRecord(
