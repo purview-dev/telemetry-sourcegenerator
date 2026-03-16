@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.0.0-prerelease.5](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.4...v4.0.0-prerelease.5) (2026-03-16)
+
+
+### Features
+
+* add per-method logging v1/v2 selection via DisableMSLoggingTelemetryGeneration ([f718ea5](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/f718ea53faa8e9de56e21131aec0958641feae89))
+* **logging:** replace DisableMSLoggingTelemetryGeneration with LoggerGenerationMode enum ([a1db589](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/a1db5895ea4c6134e38f3651f839942b96faee67))
+
+
+### Bug Fixes
+
+* **metrics:** use correct zero-tag overload in generated instrument calls ([37e1f80](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/37e1f80aa1fa856e853377e7647506609755f6dd))
+* update-version script references .ts extension not .js ([c2dd5af](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/c2dd5afc326308cc5c20dfdd76ba34d66269c41d))
+* use git reset --hard instead of pull --ff-only in pullWiki ([240e423](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/240e4230e4ebd20dbfbf480ffe42af58d331d9e3))
+
 ## [4.0.0-prerelease.4](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.3...v4.0.0-prerelease.4) (2026-03-08)
 
 
