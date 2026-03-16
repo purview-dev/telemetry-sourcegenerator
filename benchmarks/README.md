@@ -61,7 +61,7 @@ Compares three logging implementations with a parameterised `HasLogging` flag:
 | Implementation | Code path |
 |---|---|
 | Manual: `LoggerMessage.Define` | Hand-written `static readonly LoggerMessage.Define<T>()` delegates (classic optimised approach) |
-| Generated v1 | Source-generator with `DisableMSLoggingTelemetryGeneration = true` — emits `LoggerMessage.Define<T>` (identical pattern to manual above) |
+| Generated v1 | Source-generator with `GenerationMode = LoggerGenerationMode.V1` — emits `LoggerMessage.Define<T>` (identical pattern to manual above) |
 | Generated v2 | Source-generator default — emits state-based `LoggerMessageHelper.ThreadLocalState` approach, matching the built-in `[LoggerMessage]` attribute generator |
 
 - `HasLogging = true` — an always-enabled no-op logger is used; the full code path (including `IsEnabled` check and message formatting) is exercised.
@@ -117,7 +117,7 @@ benchmarks/
     ├── Telemetry/
     │   ├── IActivityOnlyTelemetry.cs                # [ActivitySource] interface
     │   ├── ILoggerOnlyTelemetry.cs                  # [Logger] interface (v2 state-based)
-    │   ├── ILoggerV1OnlyTelemetry.cs                # [Logger(DisableMSLoggingTelemetryGeneration=true)] (v1 LoggerMessage.Define)
+    │   ├── ILoggerV1OnlyTelemetry.cs                # [Logger(GenerationMode = V1)] (v1 LoggerMessage.Define)
     │   ├── IMetricsFewTagsTelemetry.cs              # [Meter] interface, 0–3 tags per method
     │   ├── IMetricsManyTagsTelemetry.cs             # [Meter] interface, 4–6 tags per method
     │   ├── IMultiTargetTelemetry.cs                 # [ActivitySource][Logger v2][Meter] interface
@@ -133,6 +133,6 @@ The source generator produces two distinct logging implementations depending on 
 
 | Mode | Condition | Generated pattern |
 |---|---|---|
-| **v2 (state-based)** | `LogPropertiesAttribute` available AND `DisableMSLoggingTelemetryGeneration = false` | `LoggerMessageHelper.ThreadLocalState` filled with key-value pairs, passed to `_logger.Log()` |
-| **v1 (LoggerMessage.Define)** | `LogPropertiesAttribute` absent OR `DisableMSLoggingTelemetryGeneration = true` | `static readonly Action<ILogger, T...> _action = LoggerMessage.Define<T...>(...)` called per-invocation |
+| **v2 (state-based)** | `LogPropertiesAttribute` available AND `GenerationMode != V1` | `LoggerMessageHelper.ThreadLocalState` filled with key-value pairs, passed to `_logger.Log()` |
+| **v1 (LoggerMessage.Define)** | `LogPropertiesAttribute` absent OR `GenerationMode = V1` | `static readonly Action<ILogger, T...> _action = LoggerMessage.Define<T...>(...)` called per-invocation |
 

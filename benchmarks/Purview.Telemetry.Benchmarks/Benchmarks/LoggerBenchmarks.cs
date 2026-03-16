@@ -10,7 +10,7 @@ namespace Purview.Telemetry.Benchmarks.Benchmarks;
 /// <list type="bullet">
 ///   <item>Manual (baseline): hand-written <c>LoggerMessage.Define&lt;T&gt;</c> static delegates —
 ///   the optimal approach that the source generator replicates.</item>
-///   <item>Generated v1: source-generator with <c>DisableMSLoggingTelemetryGeneration = true</c>
+///   <item>Generated v1: source-generator with <c>GenerationMode = LoggerGenerationMode.V1</c>
 ///   — emits the same <c>static readonly LoggerMessage.Define&lt;T&gt;</c> delegates as the manual baseline.
 ///   Any ratio deviation from 1.0× measures generator overhead.</item>
 ///   <item>Generated v2: source-generator default — emits the state-based

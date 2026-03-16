@@ -5,7 +5,7 @@ namespace Purview.Telemetry.Benchmarks.Manual;
 /// <summary>
 /// Hand-written logging using <c>LoggerMessage.Define&lt;T&gt;</c> static pre-compiled delegates —
 /// the same pattern that the source generator emits for v1 logging
-/// (<c>DisableMSLoggingTelemetryGeneration = true</c>).
+/// (<c>GenerationMode = LoggerGenerationMode.V1</c>).
 /// This baseline demonstrates the ceiling performance of the pattern and verifies
 /// that the source generator adds no measurable overhead over a hand-written equivalent.
 /// </summary>

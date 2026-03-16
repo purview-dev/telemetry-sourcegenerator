@@ -12,74 +12,74 @@ BenchmarkDotNet v0.15.8, Windows 11 (10.0.26200.8037/25H2/2025Update/HudsonValle
 
 
 ```
-| Method                                                           | Job                | Runtime            | HasLogging | Mean        | Ratio | Gen0   | Allocated | Alloc Ratio |
-|----------------------------------------------------------------- |------------------- |------------------- |----------- |------------:|------:|-------:|----------:|------------:|
-| **&#39;Manual (LoggerMessage.Define) — single Info call&#39;**               | **.NET 10.0**          | **.NET 10.0**          | **False**      |   **0.1894 ns** |  **1.02** |      **-** |         **-** |          **NA** |
-| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET 10.0          | .NET 10.0          | False      |   0.1881 ns |  1.02 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET 10.0          | .NET 10.0          | False      |   0.1763 ns |  0.95 |      - |         - |          NA |
-| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET 10.0          | .NET 10.0          | False      |   0.3521 ns |  1.90 |      - |         - |          NA |
-| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET 10.0          | .NET 10.0          | False      |   0.7179 ns |  3.88 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET 10.0          | .NET 10.0          | False      |   0.6440 ns |  3.48 |      - |         - |          NA |
-|                                                                  |                    |                    |            |             |       |        |           |             |
-| &#39;Manual (LoggerMessage.Define) — single Info call&#39;               | .NET 8.0           | .NET 8.0           | False      |   0.1726 ns |  1.00 |      - |         - |          NA |
-| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET 8.0           | .NET 8.0           | False      |   0.3460 ns |  2.01 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET 8.0           | .NET 8.0           | False      |   0.7087 ns |  4.11 |      - |         - |          NA |
-| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET 8.0           | .NET 8.0           | False      |   0.8794 ns |  5.10 |      - |         - |          NA |
-| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET 8.0           | .NET 8.0           | False      |   1.2677 ns |  7.35 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET 8.0           | .NET 8.0           | False      |   3.3236 ns | 19.28 |      - |         - |          NA |
-|                                                                  |                    |                    |            |             |       |        |           |             |
-| &#39;Manual (LoggerMessage.Define) — single Info call&#39;               | .NET 9.0           | .NET 9.0           | False      |   0.1733 ns |  1.00 |      - |         - |          NA |
-| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET 9.0           | .NET 9.0           | False      |   0.1750 ns |  1.01 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET 9.0           | .NET 9.0           | False      |   0.5362 ns |  3.10 |      - |         - |          NA |
-| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET 9.0           | .NET 9.0           | False      |   0.5240 ns |  3.03 |      - |         - |          NA |
-| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET 9.0           | .NET 9.0           | False      |   1.4125 ns |  8.16 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET 9.0           | .NET 9.0           | False      |   2.6294 ns | 15.19 |      - |         - |          NA |
-|                                                                  |                    |                    |            |             |       |        |           |             |
-| &#39;Manual (LoggerMessage.Define) — single Info call&#39;               | .NET Framework 4.7 | .NET Framework 4.7 | False      |   1.4322 ns |  1.00 |      - |         - |          NA |
-| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET Framework 4.7 | .NET Framework 4.7 | False      |   1.5678 ns |  1.10 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET Framework 4.7 | .NET Framework 4.7 | False      |   1.7495 ns |  1.22 |      - |         - |          NA |
-| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET Framework 4.7 | .NET Framework 4.7 | False      |   8.0689 ns |  5.64 |      - |         - |          NA |
-| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET Framework 4.7 | .NET Framework 4.7 | False      |   9.8148 ns |  6.86 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET Framework 4.7 | .NET Framework 4.7 | False      |   9.7959 ns |  6.84 |      - |         - |          NA |
-|                                                                  |                    |                    |            |             |       |        |           |             |
-| &#39;Manual (LoggerMessage.Define) — single Info call&#39;               | .NET Framework 4.8 | .NET Framework 4.8 | False      |   1.4087 ns |  1.00 |      - |         - |          NA |
-| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET Framework 4.8 | .NET Framework 4.8 | False      |   1.5921 ns |  1.13 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET Framework 4.8 | .NET Framework 4.8 | False      |   1.7372 ns |  1.23 |      - |         - |          NA |
-| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET Framework 4.8 | .NET Framework 4.8 | False      |   8.1368 ns |  5.78 |      - |         - |          NA |
-| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET Framework 4.8 | .NET Framework 4.8 | False      |   9.8110 ns |  6.97 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET Framework 4.8 | .NET Framework 4.8 | False      |   9.7778 ns |  6.94 |      - |         - |          NA |
-|                                                                  |                    |                    |            |             |       |        |           |             |
-| **&#39;Manual (LoggerMessage.Define) — single Info call&#39;**               | **.NET 10.0**          | **.NET 10.0**          | **True**       |   **4.0881 ns** |  **1.00** |      **-** |         **-** |          **NA** |
-| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET 10.0          | .NET 10.0          | True       |   4.2286 ns |  1.03 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET 10.0          | .NET 10.0          | True       |  11.5980 ns |  2.84 | 0.0013 |      24 B |          NA |
-| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET 10.0          | .NET 10.0          | True       |  16.8506 ns |  4.12 |      - |         - |          NA |
-| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET 10.0          | .NET 10.0          | True       |  16.7257 ns |  4.09 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET 10.0          | .NET 10.0          | True       |  51.7753 ns | 12.67 | 0.0051 |      96 B |          NA |
-|                                                                  |                    |                    |            |             |       |        |           |             |
-| &#39;Manual (LoggerMessage.Define) — single Info call&#39;               | .NET 8.0           | .NET 8.0           | True       |   7.8904 ns |  1.00 |      - |         - |          NA |
-| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET 8.0           | .NET 8.0           | True       |   7.9261 ns |  1.00 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET 8.0           | .NET 8.0           | True       |  16.2818 ns |  2.06 | 0.0013 |      24 B |          NA |
-| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET 8.0           | .NET 8.0           | True       |  28.7230 ns |  3.64 |      - |         - |          NA |
-| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET 8.0           | .NET 8.0           | True       |  29.8486 ns |  3.78 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET 8.0           | .NET 8.0           | True       |  69.5641 ns |  8.82 | 0.0050 |      96 B |          NA |
-|                                                                  |                    |                    |            |             |       |        |           |             |
-| &#39;Manual (LoggerMessage.Define) — single Info call&#39;               | .NET 9.0           | .NET 9.0           | True       |   6.7171 ns |  1.00 |      - |         - |          NA |
-| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET 9.0           | .NET 9.0           | True       |   7.2279 ns |  1.08 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET 9.0           | .NET 9.0           | True       |  15.4979 ns |  2.31 | 0.0013 |      24 B |          NA |
-| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET 9.0           | .NET 9.0           | True       |  24.6779 ns |  3.67 |      - |         - |          NA |
-| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET 9.0           | .NET 9.0           | True       |  27.3735 ns |  4.08 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET 9.0           | .NET 9.0           | True       |  67.6062 ns | 10.07 | 0.0050 |      96 B |          NA |
-|                                                                  |                    |                    |            |             |       |        |           |             |
-| &#39;Manual (LoggerMessage.Define) — single Info call&#39;               | .NET Framework 4.7 | .NET Framework 4.7 | True       |  16.3008 ns |  1.00 |      - |         - |          NA |
-| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET Framework 4.7 | .NET Framework 4.7 | True       |  16.6508 ns |  1.02 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET Framework 4.7 | .NET Framework 4.7 | True       |  41.2773 ns |  2.53 | 0.0038 |      24 B |          NA |
-| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET Framework 4.7 | .NET Framework 4.7 | True       |  66.3620 ns |  4.07 |      - |         - |          NA |
-| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET Framework 4.7 | .NET Framework 4.7 | True       |  68.2500 ns |  4.19 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET Framework 4.7 | .NET Framework 4.7 | True       | 164.5308 ns | 10.09 | 0.0153 |      96 B |          NA |
-|                                                                  |                    |                    |            |             |       |        |           |             |
-| &#39;Manual (LoggerMessage.Define) — single Info call&#39;               | .NET Framework 4.8 | .NET Framework 4.8 | True       |  16.2296 ns |  1.00 |      - |         - |          NA |
-| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET Framework 4.8 | .NET Framework 4.8 | True       |  16.5224 ns |  1.02 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET Framework 4.8 | .NET Framework 4.8 | True       |  40.8608 ns |  2.52 | 0.0038 |      24 B |          NA |
-| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET Framework 4.8 | .NET Framework 4.8 | True       |  66.1739 ns |  4.08 |      - |         - |          NA |
-| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET Framework 4.8 | .NET Framework 4.8 | True       |  68.5483 ns |  4.22 |      - |         - |          NA |
-| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET Framework 4.8 | .NET Framework 4.8 | True       | 164.3724 ns | 10.13 | 0.0153 |      96 B |          NA |
+| Method                                                           | Job                | Runtime            | HasLogging | Mean       | Ratio | Allocated | Alloc Ratio |
+|----------------------------------------------------------------- |------------------- |------------------- |----------- |-----------:|------:|----------:|------------:|
+| **&#39;Manual (LoggerMessage.Define) — single Info call&#39;**               | **.NET 10.0**          | **.NET 10.0**          | **False**      |  **0.1709 ns** |  **1.00** |         **-** |          **NA** |
+| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET 10.0          | .NET 10.0          | False      |  0.1925 ns |  1.13 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET 10.0          | .NET 10.0          | False      |  0.1974 ns |  1.16 |         - |          NA |
+| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET 10.0          | .NET 10.0          | False      |  0.3366 ns |  1.97 |         - |          NA |
+| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET 10.0          | .NET 10.0          | False      |  0.7852 ns |  4.60 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET 10.0          | .NET 10.0          | False      |  0.7722 ns |  4.52 |         - |          NA |
+|                                                                  |                    |                    |            |            |       |           |             |
+| &#39;Manual (LoggerMessage.Define) — single Info call&#39;               | .NET 8.0           | .NET 8.0           | False      |  0.1795 ns |  1.00 |         - |          NA |
+| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET 8.0           | .NET 8.0           | False      |  0.3441 ns |  1.92 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET 8.0           | .NET 8.0           | False      |  0.3797 ns |  2.12 |         - |          NA |
+| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET 8.0           | .NET 8.0           | False      |  0.9708 ns |  5.43 |         - |          NA |
+| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET 8.0           | .NET 8.0           | False      |  1.3025 ns |  7.28 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET 8.0           | .NET 8.0           | False      |  1.4316 ns |  8.01 |         - |          NA |
+|                                                                  |                    |                    |            |            |       |           |             |
+| &#39;Manual (LoggerMessage.Define) — single Info call&#39;               | .NET 9.0           | .NET 9.0           | False      |  0.1733 ns |  1.00 |         - |          NA |
+| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET 9.0           | .NET 9.0           | False      |  0.1705 ns |  0.98 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET 9.0           | .NET 9.0           | False      |  0.1934 ns |  1.12 |         - |          NA |
+| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET 9.0           | .NET 9.0           | False      |  0.6721 ns |  3.88 |         - |          NA |
+| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET 9.0           | .NET 9.0           | False      |  1.0975 ns |  6.34 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET 9.0           | .NET 9.0           | False      |  1.4155 ns |  8.18 |         - |          NA |
+|                                                                  |                    |                    |            |            |       |           |             |
+| &#39;Manual (LoggerMessage.Define) — single Info call&#39;               | .NET Framework 4.7 | .NET Framework 4.7 | False      |  1.5203 ns |  1.00 |         - |          NA |
+| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET Framework 4.7 | .NET Framework 4.7 | False      |  1.7568 ns |  1.16 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET Framework 4.7 | .NET Framework 4.7 | False      |  1.8118 ns |  1.19 |         - |          NA |
+| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET Framework 4.7 | .NET Framework 4.7 | False      |  8.4475 ns |  5.56 |         - |          NA |
+| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET Framework 4.7 | .NET Framework 4.7 | False      | 10.2276 ns |  6.73 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET Framework 4.7 | .NET Framework 4.7 | False      | 10.6178 ns |  6.99 |         - |          NA |
+|                                                                  |                    |                    |            |            |       |           |             |
+| &#39;Manual (LoggerMessage.Define) — single Info call&#39;               | .NET Framework 4.8 | .NET Framework 4.8 | False      |  1.5137 ns |  1.00 |         - |          NA |
+| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET Framework 4.8 | .NET Framework 4.8 | False      |  1.8478 ns |  1.22 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET Framework 4.8 | .NET Framework 4.8 | False      |  1.7834 ns |  1.18 |         - |          NA |
+| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET Framework 4.8 | .NET Framework 4.8 | False      |  8.9035 ns |  5.90 |         - |          NA |
+| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET Framework 4.8 | .NET Framework 4.8 | False      | 10.2581 ns |  6.79 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET Framework 4.8 | .NET Framework 4.8 | False      | 10.3777 ns |  6.87 |         - |          NA |
+|                                                                  |                    |                    |            |            |       |           |             |
+| **&#39;Manual (LoggerMessage.Define) — single Info call&#39;**               | **.NET 10.0**          | **.NET 10.0**          | **True**       |  **4.3921 ns** |  **1.00** |         **-** |          **NA** |
+| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET 10.0          | .NET 10.0          | True       |  4.4712 ns |  1.02 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET 10.0          | .NET 10.0          | True       |  4.1579 ns |  0.95 |         - |          NA |
+| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET 10.0          | .NET 10.0          | True       | 17.2970 ns |  3.94 |         - |          NA |
+| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET 10.0          | .NET 10.0          | True       | 17.7772 ns |  4.05 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET 10.0          | .NET 10.0          | True       | 19.1010 ns |  4.35 |         - |          NA |
+|                                                                  |                    |                    |            |            |       |           |             |
+| &#39;Manual (LoggerMessage.Define) — single Info call&#39;               | .NET 8.0           | .NET 8.0           | True       |  8.3116 ns |  1.00 |         - |          NA |
+| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET 8.0           | .NET 8.0           | True       |  8.3427 ns |  1.00 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET 8.0           | .NET 8.0           | True       |  7.9456 ns |  0.96 |         - |          NA |
+| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET 8.0           | .NET 8.0           | True       | 30.3376 ns |  3.65 |         - |          NA |
+| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET 8.0           | .NET 8.0           | True       | 30.2259 ns |  3.64 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET 8.0           | .NET 8.0           | True       | 31.4344 ns |  3.78 |         - |          NA |
+|                                                                  |                    |                    |            |            |       |           |             |
+| &#39;Manual (LoggerMessage.Define) — single Info call&#39;               | .NET 9.0           | .NET 9.0           | True       |  6.8289 ns |  1.00 |         - |          NA |
+| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET 9.0           | .NET 9.0           | True       |  7.5779 ns |  1.11 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET 9.0           | .NET 9.0           | True       |  7.3687 ns |  1.08 |         - |          NA |
+| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET 9.0           | .NET 9.0           | True       | 26.0813 ns |  3.82 |         - |          NA |
+| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET 9.0           | .NET 9.0           | True       | 27.3537 ns |  4.01 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET 9.0           | .NET 9.0           | True       | 27.3429 ns |  4.01 |         - |          NA |
+|                                                                  |                    |                    |            |            |       |           |             |
+| &#39;Manual (LoggerMessage.Define) — single Info call&#39;               | .NET Framework 4.7 | .NET Framework 4.7 | True       | 17.6071 ns |  1.00 |         - |          NA |
+| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET Framework 4.7 | .NET Framework 4.7 | True       | 16.6134 ns |  0.94 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET Framework 4.7 | .NET Framework 4.7 | True       | 17.7473 ns |  1.01 |         - |          NA |
+| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET Framework 4.7 | .NET Framework 4.7 | True       | 69.9885 ns |  3.98 |         - |          NA |
+| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET Framework 4.7 | .NET Framework 4.7 | True       | 70.2332 ns |  3.99 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET Framework 4.7 | .NET Framework 4.7 | True       | 71.3750 ns |  4.06 |         - |          NA |
+|                                                                  |                    |                    |            |            |       |           |             |
+| &#39;Manual (LoggerMessage.Define) — single Info call&#39;               | .NET Framework 4.8 | .NET Framework 4.8 | True       | 17.2275 ns |  1.00 |         - |          NA |
+| &#39;Generated v1 (LoggerMessage.Define) — single Info call&#39;         | .NET Framework 4.8 | .NET Framework 4.8 | True       | 17.1368 ns |  0.99 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — single Info call&#39;             | .NET Framework 4.8 | .NET Framework 4.8 | True       | 16.9819 ns |  0.99 |         - |          NA |
+| &#39;Manual (LoggerMessage.Define) — full lifecycle (4 calls)&#39;       | .NET Framework 4.8 | .NET Framework 4.8 | True       | 70.1832 ns |  4.07 |         - |          NA |
+| &#39;Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)&#39; | .NET Framework 4.8 | .NET Framework 4.8 | True       | 70.4340 ns |  4.09 |         - |          NA |
+| &#39;Generated v2 (ThreadLocalState) — full lifecycle (4 calls)&#39;     | .NET Framework 4.8 | .NET Framework 4.8 | True       | 69.9433 ns |  4.06 |         - |          NA |

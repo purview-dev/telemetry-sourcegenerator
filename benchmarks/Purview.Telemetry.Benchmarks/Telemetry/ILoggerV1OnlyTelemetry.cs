@@ -5,12 +5,12 @@ namespace Purview.Telemetry.Benchmarks.Telemetry;
 
 /// <summary>
 /// Logger-only interface using the v1 (classic) code path:
-/// <see cref="LoggerAttribute.DisableMSLoggingTelemetryGeneration"/> is <c>true</c>, so
+/// <see cref="LoggerAttribute.GenerationMode"/> is <see cref="LoggerGenerationMode.V1"/>, so
 /// the source generator emits <c>static readonly LoggerMessage.Define&lt;T&gt;</c> fields
 /// and invokes them via pre-compiled delegates — the classic approach equivalent to
 /// hand-writing <c>LoggerMessage.Define&lt;T1, T2&gt;(...)</c>.
 /// </summary>
-[Logger(DisableMSLoggingTelemetryGeneration = true)]
+[Logger(GenerationMode = LoggerGenerationMode.V1)]
 public interface ILoggerV1OnlyTelemetry
 {
 	[Info]

@@ -14,37 +14,37 @@ BenchmarkDotNet v0.15.8, Windows 11 (10.0.26200.8037/25H2/2025Update/HudsonValle
 ```
 | Method                                  | Job                | Runtime            | Mean       | Ratio | Allocated | Alloc Ratio |
 |---------------------------------------- |------------------- |------------------- |-----------:|------:|----------:|------------:|
-| &#39;0 tags (no TagList): histogram record&#39; | .NET 10.0          | .NET 10.0          |  0.3490 ns |  1.00 |         - |          NA |
-| &#39;1 tag (no TagList): auto-counter add&#39;  | .NET 10.0          | .NET 10.0          |  0.5210 ns |  1.49 |         - |          NA |
-| &#39;3 tags (no TagList): histogram record&#39; | .NET 10.0          | .NET 10.0          |  0.8236 ns |  2.36 |         - |          NA |
-| &#39;4 tags (TagList): auto-counter add&#39;    | .NET 10.0          | .NET 10.0          |  4.1999 ns | 12.04 |         - |          NA |
-| &#39;5 tags (TagList): auto-counter add&#39;    | .NET 10.0          | .NET 10.0          |  5.3628 ns | 15.37 |         - |          NA |
-| &#39;6 tags (TagList): histogram record&#39;    | .NET 10.0          | .NET 10.0          |  5.8919 ns | 16.89 |         - |          NA |
+| &#39;0 tags (no TagList): histogram record&#39; | .NET 10.0          | .NET 10.0          |  0.3622 ns |  1.00 |         - |          NA |
+| &#39;1 tag (no TagList): auto-counter add&#39;  | .NET 10.0          | .NET 10.0          |  0.3525 ns |  0.97 |         - |          NA |
+| &#39;3 tags (no TagList): histogram record&#39; | .NET 10.0          | .NET 10.0          |  0.7345 ns |  2.03 |         - |          NA |
+| &#39;4 tags (TagList): auto-counter add&#39;    | .NET 10.0          | .NET 10.0          |  4.1003 ns | 11.33 |         - |          NA |
+| &#39;5 tags (TagList): auto-counter add&#39;    | .NET 10.0          | .NET 10.0          |  5.2885 ns | 14.62 |         - |          NA |
+| &#39;6 tags (TagList): histogram record&#39;    | .NET 10.0          | .NET 10.0          |  5.9376 ns | 16.41 |         - |          NA |
 |                                         |                    |                    |            |       |           |             |
-| &#39;0 tags (no TagList): histogram record&#39; | .NET 8.0           | .NET 8.0           |  0.3503 ns |  1.00 |         - |          NA |
-| &#39;1 tag (no TagList): auto-counter add&#39;  | .NET 8.0           | .NET 8.0           |  0.3497 ns |  1.00 |         - |          NA |
-| &#39;3 tags (no TagList): histogram record&#39; | .NET 8.0           | .NET 8.0           |  0.7031 ns |  2.01 |         - |          NA |
-| &#39;4 tags (TagList): auto-counter add&#39;    | .NET 8.0           | .NET 8.0           |  3.6129 ns | 10.32 |         - |          NA |
-| &#39;5 tags (TagList): auto-counter add&#39;    | .NET 8.0           | .NET 8.0           |  4.0323 ns | 11.52 |         - |          NA |
-| &#39;6 tags (TagList): histogram record&#39;    | .NET 8.0           | .NET 8.0           |  4.5053 ns | 12.87 |         - |          NA |
+| &#39;0 tags (no TagList): histogram record&#39; | .NET 8.0           | .NET 8.0           |  0.5407 ns |  1.00 |         - |          NA |
+| &#39;1 tag (no TagList): auto-counter add&#39;  | .NET 8.0           | .NET 8.0           |  0.3574 ns |  0.66 |         - |          NA |
+| &#39;3 tags (no TagList): histogram record&#39; | .NET 8.0           | .NET 8.0           |  0.7202 ns |  1.33 |         - |          NA |
+| &#39;4 tags (TagList): auto-counter add&#39;    | .NET 8.0           | .NET 8.0           |  3.6848 ns |  6.82 |         - |          NA |
+| &#39;5 tags (TagList): auto-counter add&#39;    | .NET 8.0           | .NET 8.0           |  4.4160 ns |  8.17 |         - |          NA |
+| &#39;6 tags (TagList): histogram record&#39;    | .NET 8.0           | .NET 8.0           |  4.3526 ns |  8.06 |         - |          NA |
 |                                         |                    |                    |            |       |           |             |
-| &#39;0 tags (no TagList): histogram record&#39; | .NET 9.0           | .NET 9.0           |  0.1715 ns |  1.00 |         - |          NA |
-| &#39;1 tag (no TagList): auto-counter add&#39;  | .NET 9.0           | .NET 9.0           |  0.3537 ns |  2.06 |         - |          NA |
-| &#39;3 tags (no TagList): histogram record&#39; | .NET 9.0           | .NET 9.0           |  0.6664 ns |  3.89 |         - |          NA |
-| &#39;4 tags (TagList): auto-counter add&#39;    | .NET 9.0           | .NET 9.0           |  3.3120 ns | 19.32 |         - |          NA |
-| &#39;5 tags (TagList): auto-counter add&#39;    | .NET 9.0           | .NET 9.0           |  3.8826 ns | 22.65 |         - |          NA |
-| &#39;6 tags (TagList): histogram record&#39;    | .NET 9.0           | .NET 9.0           |  4.1868 ns | 24.43 |         - |          NA |
+| &#39;0 tags (no TagList): histogram record&#39; | .NET 9.0           | .NET 9.0           |  0.1674 ns |  1.01 |         - |          NA |
+| &#39;1 tag (no TagList): auto-counter add&#39;  | .NET 9.0           | .NET 9.0           |  0.3702 ns |  2.22 |         - |          NA |
+| &#39;3 tags (no TagList): histogram record&#39; | .NET 9.0           | .NET 9.0           |  0.4979 ns |  2.99 |         - |          NA |
+| &#39;4 tags (TagList): auto-counter add&#39;    | .NET 9.0           | .NET 9.0           |  3.6140 ns | 21.72 |         - |          NA |
+| &#39;5 tags (TagList): auto-counter add&#39;    | .NET 9.0           | .NET 9.0           |  4.0370 ns | 24.26 |         - |          NA |
+| &#39;6 tags (TagList): histogram record&#39;    | .NET 9.0           | .NET 9.0           |  3.9937 ns | 24.00 |         - |          NA |
 |                                         |                    |                    |            |       |           |             |
-| &#39;0 tags (no TagList): histogram record&#39; | .NET Framework 4.7 | .NET Framework 4.7 | 14.7722 ns |  1.00 |         - |          NA |
-| &#39;1 tag (no TagList): auto-counter add&#39;  | .NET Framework 4.7 | .NET Framework 4.7 | 18.0124 ns |  1.22 |         - |          NA |
-| &#39;3 tags (no TagList): histogram record&#39; | .NET Framework 4.7 | .NET Framework 4.7 | 28.4549 ns |  1.93 |         - |          NA |
-| &#39;4 tags (TagList): auto-counter add&#39;    | .NET Framework 4.7 | .NET Framework 4.7 | 48.4072 ns |  3.28 |         - |          NA |
-| &#39;5 tags (TagList): auto-counter add&#39;    | .NET Framework 4.7 | .NET Framework 4.7 | 56.4414 ns |  3.82 |         - |          NA |
-| &#39;6 tags (TagList): histogram record&#39;    | .NET Framework 4.7 | .NET Framework 4.7 | 56.1476 ns |  3.80 |         - |          NA |
+| &#39;0 tags (no TagList): histogram record&#39; | .NET Framework 4.7 | .NET Framework 4.7 | 15.1750 ns |  1.00 |         - |          NA |
+| &#39;1 tag (no TagList): auto-counter add&#39;  | .NET Framework 4.7 | .NET Framework 4.7 | 18.7807 ns |  1.24 |         - |          NA |
+| &#39;3 tags (no TagList): histogram record&#39; | .NET Framework 4.7 | .NET Framework 4.7 | 29.7604 ns |  1.96 |         - |          NA |
+| &#39;4 tags (TagList): auto-counter add&#39;    | .NET Framework 4.7 | .NET Framework 4.7 | 52.3936 ns |  3.45 |         - |          NA |
+| &#39;5 tags (TagList): auto-counter add&#39;    | .NET Framework 4.7 | .NET Framework 4.7 | 60.0563 ns |  3.96 |         - |          NA |
+| &#39;6 tags (TagList): histogram record&#39;    | .NET Framework 4.7 | .NET Framework 4.7 | 58.2202 ns |  3.84 |         - |          NA |
 |                                         |                    |                    |            |       |           |             |
-| &#39;0 tags (no TagList): histogram record&#39; | .NET Framework 4.8 | .NET Framework 4.8 | 14.8460 ns |  1.00 |         - |          NA |
-| &#39;1 tag (no TagList): auto-counter add&#39;  | .NET Framework 4.8 | .NET Framework 4.8 | 18.0325 ns |  1.21 |         - |          NA |
-| &#39;3 tags (no TagList): histogram record&#39; | .NET Framework 4.8 | .NET Framework 4.8 | 28.4483 ns |  1.92 |         - |          NA |
-| &#39;4 tags (TagList): auto-counter add&#39;    | .NET Framework 4.8 | .NET Framework 4.8 | 48.4274 ns |  3.26 |         - |          NA |
-| &#39;5 tags (TagList): auto-counter add&#39;    | .NET Framework 4.8 | .NET Framework 4.8 | 56.4846 ns |  3.80 |         - |          NA |
-| &#39;6 tags (TagList): histogram record&#39;    | .NET Framework 4.8 | .NET Framework 4.8 | 55.5627 ns |  3.74 |         - |          NA |
+| &#39;0 tags (no TagList): histogram record&#39; | .NET Framework 4.8 | .NET Framework 4.8 | 15.3467 ns |  1.00 |         - |          NA |
+| &#39;1 tag (no TagList): auto-counter add&#39;  | .NET Framework 4.8 | .NET Framework 4.8 | 18.7864 ns |  1.22 |         - |          NA |
+| &#39;3 tags (no TagList): histogram record&#39; | .NET Framework 4.8 | .NET Framework 4.8 | 29.3580 ns |  1.91 |         - |          NA |
+| &#39;4 tags (TagList): auto-counter add&#39;    | .NET Framework 4.8 | .NET Framework 4.8 | 49.5865 ns |  3.23 |         - |          NA |
+| &#39;5 tags (TagList): auto-counter add&#39;    | .NET Framework 4.8 | .NET Framework 4.8 | 60.5989 ns |  3.95 |         - |          NA |
+| &#39;6 tags (TagList): histogram record&#39;    | .NET Framework 4.8 | .NET Framework 4.8 | 59.1921 ns |  3.86 |         - |          NA |

@@ -140,6 +140,50 @@ The [.NET Aspire Sample](https://github.com/kjldev/purview-telemetry-sourcegener
 > [!TIP]
 > The sample project has [`EmitCompilerGeneratedFiles`](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration-generator#enable-the-configuration-source-generator) enabled so you can inspect the generated output.
 
+## Performance
+
+Benchmarked on 13th Gen Intel Core i9-13900KF, .NET SDK 10.0.200. See [PERFORMANCE.md](PERFORMANCE.md) for full cross-runtime results.
+
+### Activities (.NET 10.0)
+
+| Scenario | HasListener | Manual | Generated | Ratio |
+|---|---|---|---|---|
+| start + complete | False | 0.58 ns | 0.54 ns | 0.93× |
+| start + complete | True | 220 ns / 1008 B | 222 ns / 1008 B | 1.01× |
+| start + fail | True | 210 ns / 920 B | 196 ns / 920 B | 0.89× |
+
+Generated activities are within ±2% of hand-written code with identical allocations.
+
+### Logging (.NET 10.0)
+
+| Scenario | HasLogging | LoggerMessage.Define | Generated v1 | Generated v2 |
+|---|---|---|---|---|
+| single Info call | False | 0.17 ns | 0.19 ns | 0.20 ns |
+| single Info call | True | 4.39 ns | 4.47 ns (1.02×) | 4.16 ns (0.95×) |
+| full lifecycle (4 calls) | True | 17.30 ns | 17.78 ns (1.02×) | 19.10 ns (1.10×) |
+
+Both v1 and v2 allocate **0 bytes** per call on all runtimes. v2 (ThreadLocalState pattern) matches v1 in allocation and is within ~10% in CPU time.
+
+### Multi-Target (.NET 10.0, Activity + Logging + Metrics)
+
+| Scenario | HasListener | Single-target | Multi-target generated | Multi-target manual |
+|---|---|---|---|---|
+| start + complete | True | 219 ns / 1008 B | 234 ns / 1032 B (1.07×) | 229 ns / 1032 B (1.05×) |
+
+Adding full Activity+Logging+Metrics multi-target generation costs ~7% over Activity-only — matching hand-written multi-target code within 2%.
+
+### Metrics (.NET 10.0)
+
+| Scenario | Generated | Notes |
+|---|---|---|
+| auto-counter (0 tags) | 0.37 ns | - |
+| auto-counter (1 tag) | 0.36 ns | - |
+| histogram (0 tags) | 0.37 ns | - |
+| histogram (1 tag) | 0.37 ns | - |
+| 4+ tags (TagList) | 4–6 ns | Stack-allocated `TagList` |
+
+All instruments are **0 allocations**. Manual baselines are JIT-eliminated on .NET 10.0 (no active listener), so absolute times are shown. On .NET 8/9 and .NET Framework, generated and manual are within ±25%.
+
 ## v4 Breaking Changes
 
 ### Namespace Consolidation

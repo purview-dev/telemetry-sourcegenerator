@@ -2,7 +2,7 @@
 <html lang='en'>
 <head>
 <meta charset='utf-8' />
-<title>Purview.Telemetry.Benchmarks.Benchmarks.MultiTargetVsSingleTargetBenchmarks-20260313-183806</title>
+<title>Purview.Telemetry.Benchmarks.Benchmarks.MultiTargetVsSingleTargetBenchmarks-20260316-163538</title>
 
 <style type="text/css">
 	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
@@ -28,56 +28,56 @@ BenchmarkDotNet v0.15.8, Windows 11 (10.0.26200.8037/25H2/2025Update/HudsonValle
 <table>
 <thead><tr><th>Method                                                 </th><th>Job         </th><th>Runtime     </th><th>HasListener</th><th>Mean </th><th>Ratio</th><th>Gen0</th><th>Allocated</th><th>Alloc Ratio</th>
 </tr>
-</thead><tbody><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>0.5278 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>32.4139 ns</td><td>61.46</td><td>0.0051</td><td>96 B</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>11.1402 ns</td><td>21.12</td><td>0.0013</td><td>24 B</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>31.1795 ns</td><td>59.12</td><td>0.0051</td><td>96 B</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>11.7568 ns</td><td>22.29</td><td>0.0013</td><td>24 B</td><td>NA</td>
-</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>0.6965 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>40.7226 ns</td><td>58.47</td><td>0.0051</td><td>96 B</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>16.3603 ns</td><td>23.49</td><td>0.0013</td><td>24 B</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>41.3527 ns</td><td>59.37</td><td>0.0051</td><td>96 B</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>16.5292 ns</td><td>23.73</td><td>0.0013</td><td>24 B</td><td>NA</td>
-</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>0.5241 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>39.6487 ns</td><td>75.67</td><td>0.0051</td><td>96 B</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>15.1125 ns</td><td>28.84</td><td>0.0013</td><td>24 B</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>37.8235 ns</td><td>72.19</td><td>0.0051</td><td>96 B</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>16.0761 ns</td><td>30.68</td><td>0.0013</td><td>24 B</td><td>NA</td>
-</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>14.5993 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>117.0178 ns</td><td>8.02</td><td>0.0153</td><td>96 B</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>67.6556 ns</td><td>4.63</td><td>0.0038</td><td>24 B</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>131.8141 ns</td><td>9.03</td><td>0.0153</td><td>96 B</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>85.5416 ns</td><td>5.86</td><td>0.0038</td><td>24 B</td><td>NA</td>
-</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>15.1056 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>116.8985 ns</td><td>7.74</td><td>0.0153</td><td>96 B</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>67.8095 ns</td><td>4.49</td><td>0.0038</td><td>24 B</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>131.6717 ns</td><td>8.72</td><td>0.0153</td><td>96 B</td><td>NA</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>85.7925 ns</td><td>5.68</td><td>0.0038</td><td>24 B</td><td>NA</td>
-</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>195.7798 ns</td><td>1.00</td><td>0.0534</td><td>1008 B</td><td>1.00</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>224.8798 ns</td><td>1.15</td><td>0.0587</td><td>1104 B</td><td>1.10</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>221.2457 ns</td><td>1.13</td><td>0.0548</td><td>1032 B</td><td>1.02</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>249.7377 ns</td><td>1.28</td><td>0.0587</td><td>1104 B</td><td>1.10</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>207.7807 ns</td><td>1.06</td><td>0.0548</td><td>1032 B</td><td>1.02</td>
-</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>232.6755 ns</td><td>1.00</td><td>0.0534</td><td>1008 B</td><td>1.00</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>268.5589 ns</td><td>1.15</td><td>0.0587</td><td>1104 B</td><td>1.10</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>246.4678 ns</td><td>1.06</td><td>0.0548</td><td>1032 B</td><td>1.02</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>267.8886 ns</td><td>1.15</td><td>0.0587</td><td>1104 B</td><td>1.10</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>250.7895 ns</td><td>1.08</td><td>0.0548</td><td>1032 B</td><td>1.02</td>
-</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>210.9063 ns</td><td>1.00</td><td>0.0534</td><td>1008 B</td><td>1.00</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>256.2940 ns</td><td>1.22</td><td>0.0587</td><td>1104 B</td><td>1.10</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>232.5587 ns</td><td>1.10</td><td>0.0548</td><td>1032 B</td><td>1.02</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>250.5832 ns</td><td>1.19</td><td>0.0587</td><td>1104 B</td><td>1.10</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>224.5278 ns</td><td>1.06</td><td>0.0548</td><td>1032 B</td><td>1.02</td>
-</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>504.2353 ns</td><td>1.00</td><td>0.2012</td><td>1268 B</td><td>1.00</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>632.6156 ns</td><td>1.25</td><td>0.2165</td><td>1364 B</td><td>1.08</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>571.5370 ns</td><td>1.13</td><td>0.2050</td><td>1292 B</td><td>1.02</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>650.8462 ns</td><td>1.29</td><td>0.2165</td><td>1364 B</td><td>1.08</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>589.8619 ns</td><td>1.17</td><td>0.2031</td><td>1284 B</td><td>1.01</td>
-</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>504.0475 ns</td><td>1.00</td><td>0.2012</td><td>1268 B</td><td>1.00</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>651.3672 ns</td><td>1.29</td><td>0.2174</td><td>1372 B</td><td>1.08</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>575.2488 ns</td><td>1.14</td><td>0.2050</td><td>1292 B</td><td>1.02</td>
-</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>646.4075 ns</td><td>1.28</td><td>0.2165</td><td>1364 B</td><td>1.08</td>
-</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>588.5810 ns</td><td>1.17</td><td>0.2050</td><td>1292 B</td><td>1.02</td>
+</thead><tbody><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>0.5433 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>12.4401 ns</td><td>22.91</td><td>0.0013</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>12.2775 ns</td><td>22.61</td><td>0.0013</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>12.2252 ns</td><td>22.51</td><td>0.0013</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>False</td><td>12.1977 ns</td><td>22.46</td><td>0.0013</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>0.7434 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>18.3970 ns</td><td>24.75</td><td>0.0013</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>18.1918 ns</td><td>24.48</td><td>0.0013</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>19.7234 ns</td><td>26.54</td><td>0.0013</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>False</td><td>18.4687 ns</td><td>24.85</td><td>0.0013</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>0.4970 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>17.4147 ns</td><td>35.10</td><td>0.0013</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>16.2279 ns</td><td>32.70</td><td>0.0013</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>16.1905 ns</td><td>32.63</td><td>0.0013</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>False</td><td>16.1901 ns</td><td>32.63</td><td>0.0013</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>16.0388 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>73.7333 ns</td><td>4.60</td><td>0.0038</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>70.8653 ns</td><td>4.42</td><td>0.0038</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>91.6982 ns</td><td>5.72</td><td>0.0038</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>False</td><td>91.4040 ns</td><td>5.70</td><td>0.0038</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>15.8304 ns</td><td>1.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>73.4440 ns</td><td>4.64</td><td>0.0038</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>71.3912 ns</td><td>4.51</td><td>0.0038</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>93.1193 ns</td><td>5.88</td><td>0.0038</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>False</td><td>90.7108 ns</td><td>5.73</td><td>0.0038</td><td>24 B</td><td>NA</td>
+</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>218.7470 ns</td><td>1.00</td><td>0.0534</td><td>1008 B</td><td>1.00</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>233.6130 ns</td><td>1.07</td><td>0.0548</td><td>1032 B</td><td>1.02</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>229.2740 ns</td><td>1.05</td><td>0.0548</td><td>1032 B</td><td>1.02</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>219.6107 ns</td><td>1.01</td><td>0.0548</td><td>1032 B</td><td>1.02</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET 10.0</td><td>.NET 10.0</td><td>True</td><td>220.0209 ns</td><td>1.01</td><td>0.0548</td><td>1032 B</td><td>1.02</td>
+</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>245.6270 ns</td><td>1.00</td><td>0.0534</td><td>1008 B</td><td>1.00</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>254.7508 ns</td><td>1.04</td><td>0.0548</td><td>1032 B</td><td>1.02</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>270.8041 ns</td><td>1.10</td><td>0.0548</td><td>1032 B</td><td>1.02</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>267.0294 ns</td><td>1.09</td><td>0.0548</td><td>1032 B</td><td>1.02</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET 8.0</td><td>.NET 8.0</td><td>True</td><td>282.4102 ns</td><td>1.15</td><td>0.0548</td><td>1032 B</td><td>1.02</td>
+</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>226.7737 ns</td><td>1.00</td><td>0.0534</td><td>1008 B</td><td>1.00</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>272.3747 ns</td><td>1.20</td><td>0.0548</td><td>1032 B</td><td>1.02</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>251.6312 ns</td><td>1.11</td><td>0.0548</td><td>1032 B</td><td>1.02</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>251.5435 ns</td><td>1.11</td><td>0.0548</td><td>1032 B</td><td>1.02</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET 9.0</td><td>.NET 9.0</td><td>True</td><td>231.8545 ns</td><td>1.02</td><td>0.0548</td><td>1032 B</td><td>1.02</td>
+</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>523.7702 ns</td><td>1.00</td><td>0.2012</td><td>1268 B</td><td>1.00</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>620.0768 ns</td><td>1.18</td><td>0.2050</td><td>1292 B</td><td>1.02</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>635.6409 ns</td><td>1.21</td><td>0.2050</td><td>1292 B</td><td>1.02</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>653.9821 ns</td><td>1.25</td><td>0.2050</td><td>1292 B</td><td>1.02</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET Framework 4.7</td><td>.NET Framework 4.7</td><td>True</td><td>639.3929 ns</td><td>1.22</td><td>0.2050</td><td>1292 B</td><td>1.02</td>
+</tr><tr><td>&#39;Single-target (generated): start + complete&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>535.0704 ns</td><td>1.00</td><td>0.2012</td><td>1268 B</td><td>1.00</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>606.5414 ns</td><td>1.13</td><td>0.2050</td><td>1292 B</td><td>1.02</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>631.6500 ns</td><td>1.18</td><td>0.2050</td><td>1292 B</td><td>1.02</td>
+</tr><tr><td>&#39;Multi-target (generated): start + complete + record latency&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>626.5998 ns</td><td>1.17</td><td>0.2050</td><td>1292 B</td><td>1.02</td>
+</tr><tr><td>&#39;Multi-target (manual): start + complete + record latency&#39;</td><td>.NET Framework 4.8</td><td>.NET Framework 4.8</td><td>True</td><td>649.2190 ns</td><td>1.21</td><td>0.2050</td><td>1292 B</td><td>1.02</td>
 </tr></tbody></table>
 </body>
 </html>

@@ -31,46 +31,46 @@ Compares the source-generator-produced `ActivityOnlyTelemetryCore` against a han
 
 | Method | Runtime | HasListener | Mean | Ratio | Allocated | Alloc Ratio |
 |---|---|---|---|---|---|---|
-| Manual: start + complete | .NET 10.0 | False | 0.51 ns | 1.01 | - | NA |
-| Generated: start + complete | .NET 10.0 | False | 0.55 ns | 1.09 | - | NA |
-| Manual: start + fail | .NET 10.0 | False | 0.73 ns | 1.45 | - | NA |
-| Generated: start + fail | .NET 10.0 | False | 0.48 ns | 0.95 | - | NA |
-| Manual: start + complete | .NET 8.0 | False | 0.70 ns | 1.00 | - | NA |
-| Generated: start + complete | .NET 8.0 | False | 0.67 ns | 0.97 | - | NA |
-| Manual: start + fail | .NET 8.0 | False | 0.96 ns | 1.37 | - | NA |
-| Generated: start + fail | .NET 8.0 | False | 0.94 ns | 1.34 | - | NA |
-| Manual: start + complete | .NET 9.0 | False | 0.53 ns | 1.00 | - | NA |
-| Generated: start + complete | .NET 9.0 | False | 0.54 ns | 1.02 | - | NA |
-| Manual: start + fail | .NET 9.0 | False | 0.70 ns | 1.33 | - | NA |
-| Generated: start + fail | .NET 9.0 | False | 0.68 ns | 1.29 | - | NA |
-| Manual: start + complete | .NET FW 4.7 | False | 15.40 ns | 1.00 | - | NA |
-| Generated: start + complete | .NET FW 4.7 | False | 22.12 ns | 1.44 | - | NA |
-| Manual: start + fail | .NET FW 4.7 | False | 15.26 ns | 0.99 | - | NA |
-| Generated: start + fail | .NET FW 4.7 | False | 15.05 ns | 0.98 | - | NA |
-| Manual: start + complete | .NET FW 4.8 | False | 22.85 ns | 1.00 | - | NA |
-| Generated: start + complete | .NET FW 4.8 | False | 15.78 ns | 0.69 | - | NA |
-| Manual: start + fail | .NET FW 4.8 | False | 15.28 ns | 0.67 | - | NA |
-| Generated: start + fail | .NET FW 4.8 | False | 15.55 ns | 0.68 | - | NA |
-| **Manual: start + complete** | **.NET 10.0** | **True** | **192.38 ns** | **1.00** | **1008 B** | **1.00** |
-| Generated: start + complete | .NET 10.0 | True | 195.98 ns | 1.02 | 1008 B | 1.00 |
-| Manual: start + fail | .NET 10.0 | True | 185.85 ns | 0.97 | 920 B | 0.91 |
-| Generated: start + fail | .NET 10.0 | True | 186.85 ns | 0.97 | 920 B | 0.91 |
-| Manual: start + complete | .NET 8.0 | True | 230.48 ns | 1.00 | 1008 B | 1.00 |
-| Generated: start + complete | .NET 8.0 | True | 232.48 ns | 1.01 | 1008 B | 1.00 |
-| Manual: start + fail | .NET 8.0 | True | 228.71 ns | 0.99 | 920 B | 0.91 |
-| Generated: start + fail | .NET 8.0 | True | 225.53 ns | 0.98 | 920 B | 0.91 |
-| Manual: start + complete | .NET 9.0 | True | 204.75 ns | 1.00 | 1008 B | 1.00 |
-| Generated: start + complete | .NET 9.0 | True | 208.44 ns | 1.02 | 1008 B | 1.00 |
-| Manual: start + fail | .NET 9.0 | True | 210.56 ns | 1.03 | 920 B | 0.91 |
-| Generated: start + fail | .NET 9.0 | True | 205.12 ns | 1.00 | 920 B | 0.91 |
-| Manual: start + complete | .NET FW 4.7 | True | 520.99 ns | 1.00 | 1268 B | 1.00 |
-| Generated: start + complete | .NET FW 4.7 | True | 520.62 ns | 1.00 | 1268 B | 1.00 |
-| Manual: start + fail | .NET FW 4.7 | True | 502.76 ns | 0.97 | 1179 B | 0.93 |
-| Generated: start + fail | .NET FW 4.7 | True | 491.62 ns | 0.94 | 1179 B | 0.93 |
-| Manual: start + complete | .NET FW 4.8 | True | 520.40 ns | 1.00 | 1268 B | 1.00 |
-| Generated: start + complete | .NET FW 4.8 | True | 512.76 ns | 0.99 | 1268 B | 1.00 |
-| Manual: start + fail | .NET FW 4.8 | True | 500.63 ns | 0.96 | 1179 B | 0.93 |
-| Generated: start + fail | .NET FW 4.8 | True | 489.91 ns | 0.94 | 1179 B | 0.93 |
+| Manual: start + complete | .NET 10.0 | False | 0.58 ns | 1.00 | - | NA |
+| Generated: start + complete | .NET 10.0 | False | 0.54 ns | 0.93 | - | NA |
+| Manual: start + fail | .NET 10.0 | False | 0.74 ns | 1.29 | - | NA |
+| Generated: start + fail | .NET 10.0 | False | 0.56 ns | 0.97 | - | NA |
+| Manual: start + complete | .NET 8.0 | False | 0.77 ns | 1.00 | - | NA |
+| Generated: start + complete | .NET 8.0 | False | 0.92 ns | 1.20 | - | NA |
+| Manual: start + fail | .NET 8.0 | False | 0.91 ns | 1.19 | - | NA |
+| Generated: start + fail | .NET 8.0 | False | 0.93 ns | 1.21 | - | NA |
+| Manual: start + complete | .NET 9.0 | False | 0.57 ns | 1.00 | - | NA |
+| Generated: start + complete | .NET 9.0 | False | 0.55 ns | 0.97 | - | NA |
+| Manual: start + fail | .NET 9.0 | False | 0.74 ns | 1.30 | - | NA |
+| Generated: start + fail | .NET 9.0 | False | 0.73 ns | 1.28 | - | NA |
+| Manual: start + complete | .NET FW 4.7 | False | 15.44 ns | 1.00 | - | NA |
+| Generated: start + complete | .NET FW 4.7 | False | 15.84 ns | 1.03 | - | NA |
+| Manual: start + fail | .NET FW 4.7 | False | 15.86 ns | 1.03 | - | NA |
+| Generated: start + fail | .NET FW 4.7 | False | 15.83 ns | 1.03 | - | NA |
+| Manual: start + complete | .NET FW 4.8 | False | 15.91 ns | 1.00 | - | NA |
+| Generated: start + complete | .NET FW 4.8 | False | 16.12 ns | 1.01 | - | NA |
+| Manual: start + fail | .NET FW 4.8 | False | 16.00 ns | 1.01 | - | NA |
+| Generated: start + fail | .NET FW 4.8 | False | 15.84 ns | 1.00 | - | NA |
+| **Manual: start + complete** | **.NET 10.0** | **True** | **220.29 ns** | **1.00** | **1008 B** | **1.00** |
+| Generated: start + complete | .NET 10.0 | True | 221.85 ns | 1.01 | 1008 B | 1.00 |
+| Manual: start + fail | .NET 10.0 | True | 209.87 ns | 0.95 | 920 B | 0.91 |
+| Generated: start + fail | .NET 10.0 | True | 196.21 ns | 0.89 | 920 B | 0.91 |
+| Manual: start + complete | .NET 8.0 | True | 246.06 ns | 1.00 | 1008 B | 1.00 |
+| Generated: start + complete | .NET 8.0 | True | 245.10 ns | 1.00 | 1008 B | 1.00 |
+| Manual: start + fail | .NET 8.0 | True | 236.06 ns | 0.96 | 920 B | 0.91 |
+| Generated: start + fail | .NET 8.0 | True | 232.77 ns | 0.95 | 920 B | 0.91 |
+| Manual: start + complete | .NET 9.0 | True | 233.44 ns | 1.00 | 1008 B | 1.00 |
+| Generated: start + complete | .NET 9.0 | True | 223.25 ns | 0.96 | 1008 B | 1.00 |
+| Manual: start + fail | .NET 9.0 | True | 213.29 ns | 0.91 | 920 B | 0.91 |
+| Generated: start + fail | .NET 9.0 | True | 210.81 ns | 0.90 | 920 B | 0.91 |
+| Manual: start + complete | .NET FW 4.7 | True | 553.14 ns | 1.00 | 1268 B | 1.00 |
+| Generated: start + complete | .NET FW 4.7 | True | 557.33 ns | 1.01 | 1268 B | 1.00 |
+| Manual: start + fail | .NET FW 4.7 | True | 513.81 ns | 0.93 | 1179 B | 0.93 |
+| Generated: start + fail | .NET FW 4.7 | True | 507.10 ns | 0.92 | 1179 B | 0.93 |
+| Manual: start + complete | .NET FW 4.8 | True | 559.93 ns | 1.00 | 1268 B | 1.00 |
+| Generated: start + complete | .NET FW 4.8 | True | 546.71 ns | 0.98 | 1268 B | 1.00 |
+| Manual: start + fail | .NET FW 4.8 | True | 514.79 ns | 0.92 | 1179 B | 0.93 |
+| Generated: start + fail | .NET FW 4.8 | True | 508.83 ns | 0.91 | 1179 B | 0.93 |
 
 **Interpretation:** Generated activities are within ±2% of hand-written code and allocate identically across all supported runtimes.
 
@@ -84,68 +84,68 @@ Compares three logging approaches: hand-written `LoggerMessage.Define` (gold-sta
 
 | Method | Runtime | HasLogging | Mean | Ratio | Allocated |
 |---|---|---|---|---|---|
-| Manual: LoggerMessage.Define — single Info | .NET 10.0 | False | 0.189 ns | 1.02 | - |
-| Generated v1 — single Info | .NET 10.0 | False | 0.188 ns | 1.02 | - |
-| Generated v2 — single Info | .NET 10.0 | False | 0.176 ns | 0.95 | - |
-| Manual: LoggerMessage.Define — full lifecycle | .NET 10.0 | False | 0.352 ns | 1.90 | - |
-| Generated v1 — full lifecycle | .NET 10.0 | False | 0.718 ns | 3.88 | - |
-| Generated v2 — full lifecycle | .NET 10.0 | False | 0.644 ns | 3.48 | - |
-| Manual: LoggerMessage.Define — single Info | .NET 8.0 | False | 0.173 ns | 1.00 | - |
-| Generated v1 — single Info | .NET 8.0 | False | 0.346 ns | 2.01 | - |
-| Generated v2 — single Info | .NET 8.0 | False | 0.709 ns | 4.11 | - |
-| Manual: LoggerMessage.Define — full lifecycle | .NET 8.0 | False | 0.879 ns | 5.10 | - |
-| Generated v1 — full lifecycle | .NET 8.0 | False | 1.268 ns | 7.35 | - |
-| Generated v2 — full lifecycle | .NET 8.0 | False | 3.324 ns | 19.28 | - |
+| Manual: LoggerMessage.Define — single Info | .NET 10.0 | False | 0.171 ns | 1.00 | - |
+| Generated v1 — single Info | .NET 10.0 | False | 0.193 ns | 1.13 | - |
+| Generated v2 — single Info | .NET 10.0 | False | 0.197 ns | 1.16 | - |
+| Manual: LoggerMessage.Define — full lifecycle | .NET 10.0 | False | 0.337 ns | 1.97 | - |
+| Generated v1 — full lifecycle | .NET 10.0 | False | 0.785 ns | 4.60 | - |
+| Generated v2 — full lifecycle | .NET 10.0 | False | 0.772 ns | 4.52 | - |
+| Manual: LoggerMessage.Define — single Info | .NET 8.0 | False | 0.180 ns | 1.00 | - |
+| Generated v1 — single Info | .NET 8.0 | False | 0.344 ns | 1.92 | - |
+| Generated v2 — single Info | .NET 8.0 | False | 0.380 ns | 2.12 | - |
+| Manual: LoggerMessage.Define — full lifecycle | .NET 8.0 | False | 0.971 ns | 5.43 | - |
+| Generated v1 — full lifecycle | .NET 8.0 | False | 1.303 ns | 7.28 | - |
+| Generated v2 — full lifecycle | .NET 8.0 | False | 1.432 ns | 8.01 | - |
 | Manual: LoggerMessage.Define — single Info | .NET 9.0 | False | 0.173 ns | 1.00 | - |
-| Generated v1 — single Info | .NET 9.0 | False | 0.175 ns | 1.01 | - |
-| Generated v2 — single Info | .NET 9.0 | False | 0.536 ns | 3.10 | - |
-| Manual: LoggerMessage.Define — full lifecycle | .NET 9.0 | False | 0.524 ns | 3.03 | - |
-| Generated v1 — full lifecycle | .NET 9.0 | False | 1.413 ns | 8.16 | - |
-| Generated v2 — full lifecycle | .NET 9.0 | False | 2.629 ns | 15.19 | - |
-| Manual: LoggerMessage.Define — single Info | .NET FW 4.7 | False | 1.432 ns | 1.00 | - |
-| Generated v1 — single Info | .NET FW 4.7 | False | 1.568 ns | 1.10 | - |
-| Generated v2 — single Info | .NET FW 4.7 | False | 1.750 ns | 1.22 | - |
-| Manual: LoggerMessage.Define — full lifecycle | .NET FW 4.7 | False | 8.069 ns | 5.64 | - |
-| Generated v1 — full lifecycle | .NET FW 4.7 | False | 9.815 ns | 6.86 | - |
-| Generated v2 — full lifecycle | .NET FW 4.7 | False | 9.796 ns | 6.84 | - |
-| Manual: LoggerMessage.Define — single Info | .NET FW 4.8 | False | 1.409 ns | 1.00 | - |
-| Generated v1 — single Info | .NET FW 4.8 | False | 1.592 ns | 1.13 | - |
-| Generated v2 — single Info | .NET FW 4.8 | False | 1.737 ns | 1.23 | - |
-| Manual: LoggerMessage.Define — full lifecycle | .NET FW 4.8 | False | 8.137 ns | 5.78 | - |
-| Generated v1 — full lifecycle | .NET FW 4.8 | False | 9.811 ns | 6.97 | - |
-| Generated v2 — full lifecycle | .NET FW 4.8 | False | 9.778 ns | 6.94 | - |
-| **Manual: LoggerMessage.Define — single Info** | **.NET 10.0** | **True** | **4.09 ns** | **1.00** | **-** |
-| Generated v1 — single Info | .NET 10.0 | True | 4.23 ns | 1.03 | - |
-| Generated v2 — single Info | .NET 10.0 | True | 11.60 ns | 2.84 | 24 B |
-| Manual: LoggerMessage.Define — full lifecycle | .NET 10.0 | True | 16.85 ns | 4.12 | - |
-| Generated v1 — full lifecycle | .NET 10.0 | True | 16.73 ns | 4.09 | - |
-| Generated v2 — full lifecycle | .NET 10.0 | True | 51.78 ns | 12.67 | 96 B |
-| Manual: LoggerMessage.Define — single Info | .NET 8.0 | True | 7.89 ns | 1.00 | - |
-| Generated v1 — single Info | .NET 8.0 | True | 7.93 ns | 1.00 | - |
-| Generated v2 — single Info | .NET 8.0 | True | 16.28 ns | 2.06 | 24 B |
-| Manual: LoggerMessage.Define — full lifecycle | .NET 8.0 | True | 28.72 ns | 3.64 | - |
-| Generated v1 — full lifecycle | .NET 8.0 | True | 29.85 ns | 3.78 | - |
-| Generated v2 — full lifecycle | .NET 8.0 | True | 69.56 ns | 8.82 | 96 B |
-| Manual: LoggerMessage.Define — single Info | .NET 9.0 | True | 6.72 ns | 1.00 | - |
-| Generated v1 — single Info | .NET 9.0 | True | 7.23 ns | 1.08 | - |
-| Generated v2 — single Info | .NET 9.0 | True | 15.50 ns | 2.31 | 24 B |
-| Manual: LoggerMessage.Define — full lifecycle | .NET 9.0 | True | 24.68 ns | 3.67 | - |
-| Generated v1 — full lifecycle | .NET 9.0 | True | 27.37 ns | 4.08 | - |
-| Generated v2 — full lifecycle | .NET 9.0 | True | 67.61 ns | 10.07 | 96 B |
-| Manual: LoggerMessage.Define — single Info | .NET FW 4.7 | True | 16.30 ns | 1.00 | - |
-| Generated v1 — single Info | .NET FW 4.7 | True | 16.65 ns | 1.02 | - |
-| Generated v2 — single Info | .NET FW 4.7 | True | 41.28 ns | 2.53 | 24 B |
-| Manual: LoggerMessage.Define — full lifecycle | .NET FW 4.7 | True | 66.36 ns | 4.07 | - |
-| Generated v1 — full lifecycle | .NET FW 4.7 | True | 68.25 ns | 4.19 | - |
-| Generated v2 — full lifecycle | .NET FW 4.7 | True | 164.53 ns | 10.09 | 96 B |
-| Manual: LoggerMessage.Define — single Info | .NET FW 4.8 | True | 16.23 ns | 1.00 | - |
-| Generated v1 — single Info | .NET FW 4.8 | True | 16.52 ns | 1.02 | - |
-| Generated v2 — single Info | .NET FW 4.8 | True | 40.86 ns | 2.52 | 24 B |
-| Manual: LoggerMessage.Define — full lifecycle | .NET FW 4.8 | True | 66.17 ns | 4.08 | - |
-| Generated v1 — full lifecycle | .NET FW 4.8 | True | 68.55 ns | 4.22 | - |
-| Generated v2 — full lifecycle | .NET FW 4.8 | True | 164.37 ns | 10.13 | 96 B |
+| Generated v1 — single Info | .NET 9.0 | False | 0.171 ns | 0.98 | - |
+| Generated v2 — single Info | .NET 9.0 | False | 0.193 ns | 1.12 | - |
+| Manual: LoggerMessage.Define — full lifecycle | .NET 9.0 | False | 0.672 ns | 3.88 | - |
+| Generated v1 — full lifecycle | .NET 9.0 | False | 1.098 ns | 6.34 | - |
+| Generated v2 — full lifecycle | .NET 9.0 | False | 1.416 ns | 8.18 | - |
+| Manual: LoggerMessage.Define — single Info | .NET FW 4.7 | False | 1.520 ns | 1.00 | - |
+| Generated v1 — single Info | .NET FW 4.7 | False | 1.757 ns | 1.16 | - |
+| Generated v2 — single Info | .NET FW 4.7 | False | 1.812 ns | 1.19 | - |
+| Manual: LoggerMessage.Define — full lifecycle | .NET FW 4.7 | False | 8.448 ns | 5.56 | - |
+| Generated v1 — full lifecycle | .NET FW 4.7 | False | 10.228 ns | 6.73 | - |
+| Generated v2 — full lifecycle | .NET FW 4.7 | False | 10.618 ns | 6.99 | - |
+| Manual: LoggerMessage.Define — single Info | .NET FW 4.8 | False | 1.514 ns | 1.00 | - |
+| Generated v1 — single Info | .NET FW 4.8 | False | 1.848 ns | 1.22 | - |
+| Generated v2 — single Info | .NET FW 4.8 | False | 1.783 ns | 1.18 | - |
+| Manual: LoggerMessage.Define — full lifecycle | .NET FW 4.8 | False | 8.904 ns | 5.90 | - |
+| Generated v1 — full lifecycle | .NET FW 4.8 | False | 10.258 ns | 6.79 | - |
+| Generated v2 — full lifecycle | .NET FW 4.8 | False | 10.378 ns | 6.87 | - |
+| **Manual: LoggerMessage.Define — single Info** | **.NET 10.0** | **True** | **4.39 ns** | **1.00** | **-** |
+| Generated v1 — single Info | .NET 10.0 | True | 4.47 ns | 1.02 | - |
+| Generated v2 — single Info | .NET 10.0 | True | 4.16 ns | 0.95 | - |
+| Manual: LoggerMessage.Define — full lifecycle | .NET 10.0 | True | 17.30 ns | 3.94 | - |
+| Generated v1 — full lifecycle | .NET 10.0 | True | 17.78 ns | 4.05 | - |
+| Generated v2 — full lifecycle | .NET 10.0 | True | 19.10 ns | 4.35 | - |
+| Manual: LoggerMessage.Define — single Info | .NET 8.0 | True | 8.31 ns | 1.00 | - |
+| Generated v1 — single Info | .NET 8.0 | True | 8.34 ns | 1.00 | - |
+| Generated v2 — single Info | .NET 8.0 | True | 7.95 ns | 0.96 | - |
+| Manual: LoggerMessage.Define — full lifecycle | .NET 8.0 | True | 30.34 ns | 3.65 | - |
+| Generated v1 — full lifecycle | .NET 8.0 | True | 30.23 ns | 3.64 | - |
+| Generated v2 — full lifecycle | .NET 8.0 | True | 31.43 ns | 3.78 | - |
+| Manual: LoggerMessage.Define — single Info | .NET 9.0 | True | 6.83 ns | 1.00 | - |
+| Generated v1 — single Info | .NET 9.0 | True | 7.58 ns | 1.11 | - |
+| Generated v2 — single Info | .NET 9.0 | True | 7.37 ns | 1.08 | - |
+| Manual: LoggerMessage.Define — full lifecycle | .NET 9.0 | True | 26.08 ns | 3.82 | - |
+| Generated v1 — full lifecycle | .NET 9.0 | True | 27.35 ns | 4.01 | - |
+| Generated v2 — full lifecycle | .NET 9.0 | True | 27.34 ns | 4.01 | - |
+| Manual: LoggerMessage.Define — single Info | .NET FW 4.7 | True | 17.61 ns | 1.00 | - |
+| Generated v1 — single Info | .NET FW 4.7 | True | 16.61 ns | 0.94 | - |
+| Generated v2 — single Info | .NET FW 4.7 | True | 17.75 ns | 1.01 | - |
+| Manual: LoggerMessage.Define — full lifecycle | .NET FW 4.7 | True | 69.99 ns | 3.98 | - |
+| Generated v1 — full lifecycle | .NET FW 4.7 | True | 70.23 ns | 3.99 | - |
+| Generated v2 — full lifecycle | .NET FW 4.7 | True | 71.38 ns | 4.06 | - |
+| Manual: LoggerMessage.Define — single Info | .NET FW 4.8 | True | 17.23 ns | 1.00 | - |
+| Generated v1 — single Info | .NET FW 4.8 | True | 17.14 ns | 0.99 | - |
+| Generated v2 — single Info | .NET FW 4.8 | True | 16.98 ns | 0.99 | - |
+| Manual: LoggerMessage.Define — full lifecycle | .NET FW 4.8 | True | 70.18 ns | 4.07 | - |
+| Generated v1 — full lifecycle | .NET FW 4.8 | True | 70.43 ns | 4.09 | - |
+| Generated v2 — full lifecycle | .NET FW 4.8 | True | 69.94 ns | 4.06 | - |
 
-**Interpretation:** Generated v1 is on par with `LoggerMessage.Define` across all runtimes, allocating zero bytes. Generated v2 uses a state-based approach with ~2.8× single-call overhead on .NET 10.0, trading CPU time for the `ThreadLocalState` pattern that matches the built-in `[LoggerMessage]` attribute generator.
+**Interpretation:** Generated v1 and v2 now both allocate zero bytes across all runtimes. On .NET 10.0 with logging active, v1 (4.47 ns) and v2 (4.16 ns) are both within ~2–5% of the manual `LoggerMessage.Define` baseline (4.39 ns). On .NET 8.0 and later, generated code is indistinguishable from hand-written code. On .NET Framework, all three approaches converge to the same ~70 ns for a 4-call lifecycle.
 
 ---
 
@@ -157,88 +157,88 @@ Compares single-target logging-only vs. multi-target (Activity + Logging + Metri
 
 | Method | Runtime | HasListener | Mean | Ratio | Allocated | Alloc Ratio |
 |---|---|---|---|---|---|---|
-| Multi-target (manual): start + complete | .NET 10.0 | False | 11.90 ns | 1.00 | 24 B | 1.00 |
-| Multi-target (generated v1): start + complete | .NET 10.0 | False | 11.34 ns | 0.95 | 24 B | 1.00 |
-| Multi-target (generated v2): start + complete | .NET 10.0 | False | 31.26 ns | 2.63 | 96 B | 4.00 |
-| Multi-target (manual): full lifecycle | .NET 10.0 | False | 11.35 ns | 0.95 | 24 B | 1.00 |
-| Multi-target (generated v1): full lifecycle | .NET 10.0 | False | 11.49 ns | 0.97 | 24 B | 1.00 |
-| Multi-target (generated v2): full lifecycle | .NET 10.0 | False | 30.38 ns | 2.55 | 96 B | 4.00 |
-| Single-target (generated v1): full lifecycle | .NET 10.0 | False | 16.79 ns | 1.41 | - | 0.00 |
-| Single-target (generated v2): full lifecycle | .NET 10.0 | False | 58.73 ns | 4.94 | 96 B | 4.00 |
-| Multi-target (manual): start + complete | .NET 8.0 | False | 16.33 ns | 1.00 | 24 B | 1.00 |
-| Multi-target (generated v1): start + complete | .NET 8.0 | False | 16.70 ns | 1.02 | 24 B | 1.00 |
-| Multi-target (generated v2): start + complete | .NET 8.0 | False | 40.56 ns | 2.48 | 96 B | 4.00 |
-| Multi-target (manual): full lifecycle | .NET 8.0 | False | 16.31 ns | 1.00 | 24 B | 1.00 |
-| Multi-target (generated v1): full lifecycle | .NET 8.0 | False | 17.29 ns | 1.06 | 24 B | 1.00 |
-| Multi-target (generated v2): full lifecycle | .NET 8.0 | False | 39.97 ns | 2.45 | 96 B | 4.00 |
-| Single-target (generated v1): full lifecycle | .NET 8.0 | False | 30.24 ns | 1.85 | - | 0.00 |
-| Single-target (generated v2): full lifecycle | .NET 8.0 | False | 71.83 ns | 4.40 | 96 B | 4.00 |
-| Multi-target (manual): start + complete | .NET 9.0 | False | 15.77 ns | 1.00 | 24 B | 1.00 |
-| Multi-target (generated v1): start + complete | .NET 9.0 | False | 15.15 ns | 0.96 | 24 B | 1.00 |
-| Multi-target (generated v2): start + complete | .NET 9.0 | False | 37.60 ns | 2.38 | 96 B | 4.00 |
-| Multi-target (manual): full lifecycle | .NET 9.0 | False | 15.75 ns | 1.00 | 24 B | 1.00 |
-| Multi-target (generated v1): full lifecycle | .NET 9.0 | False | 16.37 ns | 1.04 | 24 B | 1.00 |
-| Multi-target (generated v2): full lifecycle | .NET 9.0 | False | 40.89 ns | 2.59 | 96 B | 4.00 |
-| Single-target (generated v1): full lifecycle | .NET 9.0 | False | 26.09 ns | 1.65 | - | 0.00 |
-| Single-target (generated v2): full lifecycle | .NET 9.0 | False | 63.93 ns | 4.05 | 96 B | 4.00 |
-| Multi-target (manual): start + complete | .NET FW 4.7 | False | 67.53 ns | 1.00 | 24 B | 1.00 |
-| Multi-target (generated v1): start + complete | .NET FW 4.7 | False | 68.77 ns | 1.02 | 24 B | 1.00 |
-| Multi-target (generated v2): start + complete | .NET FW 4.7 | False | 115.80 ns | 1.71 | 96 B | 4.00 |
-| Multi-target (manual): full lifecycle | .NET FW 4.7 | False | 86.11 ns | 1.28 | 24 B | 1.00 |
-| Multi-target (generated v1): full lifecycle | .NET FW 4.7 | False | 89.68 ns | 1.33 | 24 B | 1.00 |
-| Multi-target (generated v2): full lifecycle | .NET FW 4.7 | False | 133.62 ns | 1.98 | 96 B | 4.00 |
-| Single-target (generated v1): full lifecycle | .NET FW 4.7 | False | 69.22 ns | 1.03 | - | 0.00 |
-| Single-target (generated v2): full lifecycle | .NET FW 4.7 | False | 162.15 ns | 2.40 | 96 B | 4.00 |
-| Multi-target (manual): start + complete | .NET FW 4.8 | False | 67.25 ns | 1.00 | 24 B | 1.00 |
-| Multi-target (generated v1): start + complete | .NET FW 4.8 | False | 68.86 ns | 1.02 | 24 B | 1.00 |
-| Multi-target (generated v2): start + complete | .NET FW 4.8 | False | 115.96 ns | 1.72 | 96 B | 4.00 |
-| Multi-target (manual): full lifecycle | .NET FW 4.8 | False | 86.75 ns | 1.29 | 24 B | 1.00 |
-| Multi-target (generated v1): full lifecycle | .NET FW 4.8 | False | 88.84 ns | 1.32 | 24 B | 1.00 |
-| Multi-target (generated v2): full lifecycle | .NET FW 4.8 | False | 129.49 ns | 1.93 | 96 B | 4.00 |
-| Single-target (generated v1): full lifecycle | .NET FW 4.8 | False | 69.23 ns | 1.03 | - | 0.00 |
-| Single-target (generated v2): full lifecycle | .NET FW 4.8 | False | 162.75 ns | 2.42 | 96 B | 4.00 |
-| **Multi-target (manual): start + complete** | **.NET 10.0** | **True** | **224.02 ns** | **1.00** | **1032 B** | **1.00** |
-| Multi-target (generated v1): start + complete | .NET 10.0 | True | 218.92 ns | 0.98 | 1032 B | 1.00 |
-| Multi-target (generated v2): start + complete | .NET 10.0 | True | 230.76 ns | 1.03 | 1104 B | 1.07 |
-| Multi-target (manual): full lifecycle | .NET 10.0 | True | 210.00 ns | 0.94 | 1032 B | 1.00 |
-| Multi-target (generated v1): full lifecycle | .NET 10.0 | True | 210.11 ns | 0.94 | 1032 B | 1.00 |
-| Multi-target (generated v2): full lifecycle | .NET 10.0 | True | 233.01 ns | 1.04 | 1104 B | 1.07 |
-| Single-target (generated v1): full lifecycle | .NET 10.0 | True | 17.09 ns | 0.08 | - | 0.00 |
-| Single-target (generated v2): full lifecycle | .NET 10.0 | True | 54.83 ns | 0.24 | 96 B | 0.09 |
-| Multi-target (manual): start + complete | .NET 8.0 | True | 246.40 ns | 1.00 | 1032 B | 1.00 |
-| Multi-target (generated v1): start + complete | .NET 8.0 | True | 248.91 ns | 1.01 | 1032 B | 1.00 |
-| Multi-target (generated v2): start + complete | .NET 8.0 | True | 258.13 ns | 1.05 | 1104 B | 1.07 |
-| Multi-target (manual): full lifecycle | .NET 8.0 | True | 247.34 ns | 1.00 | 1032 B | 1.00 |
-| Multi-target (generated v1): full lifecycle | .NET 8.0 | True | 243.67 ns | 0.99 | 1032 B | 1.00 |
-| Multi-target (generated v2): full lifecycle | .NET 8.0 | True | 265.45 ns | 1.08 | 1104 B | 1.07 |
-| Single-target (generated v1): full lifecycle | .NET 8.0 | True | 29.23 ns | 0.12 | - | 0.00 |
-| Single-target (generated v2): full lifecycle | .NET 8.0 | True | 69.77 ns | 0.28 | 96 B | 0.09 |
-| Multi-target (manual): start + complete | .NET 9.0 | True | 228.31 ns | 1.00 | 1032 B | 1.00 |
-| Multi-target (generated v1): start + complete | .NET 9.0 | True | 237.96 ns | 1.04 | 1032 B | 1.00 |
-| Multi-target (generated v2): start + complete | .NET 9.0 | True | 262.22 ns | 1.15 | 1104 B | 1.07 |
-| Multi-target (manual): full lifecycle | .NET 9.0 | True | 220.39 ns | 0.97 | 1032 B | 1.00 |
-| Multi-target (generated v1): full lifecycle | .NET 9.0 | True | 223.93 ns | 0.98 | 1032 B | 1.00 |
-| Multi-target (generated v2): full lifecycle | .NET 9.0 | True | 249.86 ns | 1.09 | 1104 B | 1.07 |
-| Single-target (generated v1): full lifecycle | .NET 9.0 | True | 25.08 ns | 0.11 | - | 0.00 |
-| Single-target (generated v2): full lifecycle | .NET 9.0 | True | 66.60 ns | 0.29 | 96 B | 0.09 |
-| Multi-target (manual): start + complete | .NET FW 4.7 | True | 575.16 ns | 1.00 | 1292 B | 1.00 |
-| Multi-target (generated v1): start + complete | .NET FW 4.7 | True | 582.01 ns | 1.01 | 1292 B | 1.00 |
-| Multi-target (generated v2): start + complete | .NET FW 4.7 | True | 632.07 ns | 1.10 | 1364 B | 1.06 |
-| Multi-target (manual): full lifecycle | .NET FW 4.7 | True | 592.29 ns | 1.03 | 1292 B | 1.00 |
-| Multi-target (generated v1): full lifecycle | .NET FW 4.7 | True | 601.43 ns | 1.05 | 1292 B | 1.00 |
-| Multi-target (generated v2): full lifecycle | .NET FW 4.7 | True | 652.87 ns | 1.14 | 1364 B | 1.06 |
-| Single-target (generated v1): full lifecycle | .NET FW 4.7 | True | 69.08 ns | 0.12 | - | 0.00 |
-| Single-target (generated v2): full lifecycle | .NET FW 4.7 | True | 165.54 ns | 0.29 | 96 B | 0.07 |
-| Multi-target (manual): start + complete | .NET FW 4.8 | True | 576.89 ns | 1.00 | 1292 B | 1.00 |
-| Multi-target (generated v1): start + complete | .NET FW 4.8 | True | 580.12 ns | 1.01 | 1292 B | 1.00 |
-| Multi-target (generated v2): start + complete | .NET FW 4.8 | True | 633.34 ns | 1.10 | 1364 B | 1.06 |
-| Multi-target (manual): full lifecycle | .NET FW 4.8 | True | 591.68 ns | 1.03 | 1292 B | 1.00 |
-| Multi-target (generated v1): full lifecycle | .NET FW 4.8 | True | 595.25 ns | 1.03 | 1292 B | 1.00 |
-| Multi-target (generated v2): full lifecycle | .NET FW 4.8 | True | 651.82 ns | 1.13 | 1364 B | 1.06 |
-| Single-target (generated v1): full lifecycle | .NET FW 4.8 | True | 68.91 ns | 0.12 | - | 0.00 |
-| Single-target (generated v2): full lifecycle | .NET FW 4.8 | True | 165.59 ns | 0.29 | 96 B | 0.07 |
+| **Multi-target (manual): start + complete** | **.NET 10.0** | **False** | **11.27 ns** | **1.00** | **24 B** | **1.00** |
+| Multi-target (generated v1): start + complete | .NET 10.0 | False | 11.03 ns | 0.98 | 24 B | 1.00 |
+| Multi-target (generated v2): start + complete | .NET 10.0 | False | 11.64 ns | 1.03 | 24 B | 1.00 |
+| Multi-target (manual): full lifecycle | .NET 10.0 | False | 12.48 ns | 1.11 | 24 B | 1.00 |
+| Multi-target (generated v1): full lifecycle | .NET 10.0 | False | 12.10 ns | 1.07 | 24 B | 1.00 |
+| Multi-target (generated v2): full lifecycle | .NET 10.0 | False | 12.99 ns | 1.15 | 24 B | 1.00 |
+| Single-target (generated v1): full lifecycle | .NET 10.0 | False | 17.96 ns | 1.59 | - | 0.00 |
+| Single-target (generated v2): full lifecycle | .NET 10.0 | False | 17.80 ns | 1.58 | - | 0.00 |
+| Multi-target (manual): start + complete | .NET 8.0 | False | 18.09 ns | 1.00 | 24 B | 1.00 |
+| Multi-target (generated v1): start + complete | .NET 8.0 | False | 18.87 ns | 1.04 | 24 B | 1.00 |
+| Multi-target (generated v2): start + complete | .NET 8.0 | False | 19.10 ns | 1.06 | 24 B | 1.00 |
+| Multi-target (manual): full lifecycle | .NET 8.0 | False | 18.88 ns | 1.04 | 24 B | 1.00 |
+| Multi-target (generated v1): full lifecycle | .NET 8.0 | False | 19.43 ns | 1.07 | 24 B | 1.00 |
+| Multi-target (generated v2): full lifecycle | .NET 8.0 | False | 19.36 ns | 1.07 | 24 B | 1.00 |
+| Single-target (generated v1): full lifecycle | .NET 8.0 | False | 31.61 ns | 1.75 | - | 0.00 |
+| Single-target (generated v2): full lifecycle | .NET 8.0 | False | 32.10 ns | 1.77 | - | 0.00 |
+| Multi-target (manual): start + complete | .NET 9.0 | False | 16.15 ns | 1.00 | 24 B | 1.00 |
+| Multi-target (generated v1): start + complete | .NET 9.0 | False | 17.38 ns | 1.08 | 24 B | 1.00 |
+| Multi-target (generated v2): start + complete | .NET 9.0 | False | 16.50 ns | 1.02 | 24 B | 1.00 |
+| Multi-target (manual): full lifecycle | .NET 9.0 | False | 17.26 ns | 1.07 | 24 B | 1.00 |
+| Multi-target (generated v1): full lifecycle | .NET 9.0 | False | 16.51 ns | 1.02 | 24 B | 1.00 |
+| Multi-target (generated v2): full lifecycle | .NET 9.0 | False | 16.13 ns | 1.00 | 24 B | 1.00 |
+| Single-target (generated v1): full lifecycle | .NET 9.0 | False | 27.20 ns | 1.68 | - | 0.00 |
+| Single-target (generated v2): full lifecycle | .NET 9.0 | False | 26.75 ns | 1.66 | - | 0.00 |
+| Multi-target (manual): start + complete | .NET FW 4.7 | False | 73.46 ns | 1.00 | 24 B | 1.00 |
+| Multi-target (generated v1): start + complete | .NET FW 4.7 | False | 73.69 ns | 1.00 | 24 B | 1.00 |
+| Multi-target (generated v2): start + complete | .NET FW 4.7 | False | 75.84 ns | 1.03 | 24 B | 1.00 |
+| Multi-target (manual): full lifecycle | .NET FW 4.7 | False | 94.32 ns | 1.28 | 24 B | 1.00 |
+| Multi-target (generated v1): full lifecycle | .NET FW 4.7 | False | 93.37 ns | 1.27 | 24 B | 1.00 |
+| Multi-target (generated v2): full lifecycle | .NET FW 4.7 | False | 94.21 ns | 1.28 | 24 B | 1.00 |
+| Single-target (generated v1): full lifecycle | .NET FW 4.7 | False | 72.47 ns | 0.99 | - | 0.00 |
+| Single-target (generated v2): full lifecycle | .NET FW 4.7 | False | 72.13 ns | 0.98 | - | 0.00 |
+| Multi-target (manual): start + complete | .NET FW 4.8 | False | 72.37 ns | 1.00 | 24 B | 1.00 |
+| Multi-target (generated v1): start + complete | .NET FW 4.8 | False | 73.25 ns | 1.01 | 24 B | 1.00 |
+| Multi-target (generated v2): start + complete | .NET FW 4.8 | False | 73.74 ns | 1.02 | 24 B | 1.00 |
+| Multi-target (manual): full lifecycle | .NET FW 4.8 | False | 90.78 ns | 1.25 | 24 B | 1.00 |
+| Multi-target (generated v1): full lifecycle | .NET FW 4.8 | False | 98.78 ns | 1.37 | 24 B | 1.00 |
+| Multi-target (generated v2): full lifecycle | .NET FW 4.8 | False | 95.74 ns | 1.32 | 24 B | 1.00 |
+| Single-target (generated v1): full lifecycle | .NET FW 4.8 | False | 72.89 ns | 1.01 | - | 0.00 |
+| Single-target (generated v2): full lifecycle | .NET FW 4.8 | False | 72.45 ns | 1.00 | - | 0.00 |
+| **Multi-target (manual): start + complete** | **.NET 10.0** | **True** | **237.26 ns** | **1.00** | **1032 B** | **1.00** |
+| Multi-target (generated v1): start + complete | .NET 10.0 | True | 229.61 ns | 0.97 | 1032 B | 1.00 |
+| Multi-target (generated v2): start + complete | .NET 10.0 | True | 235.24 ns | 0.99 | 1032 B | 1.00 |
+| Multi-target (manual): full lifecycle | .NET 10.0 | True | 220.70 ns | 0.93 | 1032 B | 1.00 |
+| Multi-target (generated v1): full lifecycle | .NET 10.0 | True | 229.56 ns | 0.97 | 1032 B | 1.00 |
+| Multi-target (generated v2): full lifecycle | .NET 10.0 | True | 230.89 ns | 0.97 | 1032 B | 1.00 |
+| Single-target (generated v1): full lifecycle | .NET 10.0 | True | 17.83 ns | 0.08 | - | 0.00 |
+| Single-target (generated v2): full lifecycle | .NET 10.0 | True | 17.77 ns | 0.07 | - | 0.00 |
+| Multi-target (manual): start + complete | .NET 8.0 | True | 274.42 ns | 1.00 | 1032 B | 1.00 |
+| Multi-target (generated v1): start + complete | .NET 8.0 | True | 274.83 ns | 1.00 | 1032 B | 1.00 |
+| Multi-target (generated v2): start + complete | .NET 8.0 | True | 267.53 ns | 0.98 | 1032 B | 1.00 |
+| Multi-target (manual): full lifecycle | .NET 8.0 | True | 266.80 ns | 0.97 | 1032 B | 1.00 |
+| Multi-target (generated v1): full lifecycle | .NET 8.0 | True | 271.30 ns | 0.99 | 1032 B | 1.00 |
+| Multi-target (generated v2): full lifecycle | .NET 8.0 | True | 271.51 ns | 0.99 | 1032 B | 1.00 |
+| Single-target (generated v1): full lifecycle | .NET 8.0 | True | 30.73 ns | 0.11 | - | 0.00 |
+| Single-target (generated v2): full lifecycle | .NET 8.0 | True | 30.96 ns | 0.11 | - | 0.00 |
+| Multi-target (manual): start + complete | .NET 9.0 | True | 254.49 ns | 1.00 | 1032 B | 1.00 |
+| Multi-target (generated v1): start + complete | .NET 9.0 | True | 255.51 ns | 1.00 | 1032 B | 1.00 |
+| Multi-target (generated v2): start + complete | .NET 9.0 | True | 242.20 ns | 0.95 | 1032 B | 1.00 |
+| Multi-target (manual): full lifecycle | .NET 9.0 | True | 243.63 ns | 0.96 | 1032 B | 1.00 |
+| Multi-target (generated v1): full lifecycle | .NET 9.0 | True | 255.47 ns | 1.00 | 1032 B | 1.00 |
+| Multi-target (generated v2): full lifecycle | .NET 9.0 | True | 260.15 ns | 1.02 | 1032 B | 1.00 |
+| Single-target (generated v1): full lifecycle | .NET 9.0 | True | 28.71 ns | 0.11 | - | 0.00 |
+| Single-target (generated v2): full lifecycle | .NET 9.0 | True | 26.95 ns | 0.11 | - | 0.00 |
+| Multi-target (manual): start + complete | .NET FW 4.7 | True | 634.23 ns | 1.00 | 1292 B | 1.00 |
+| Multi-target (generated v1): start + complete | .NET FW 4.7 | True | 605.31 ns | 0.95 | 1292 B | 1.00 |
+| Multi-target (generated v2): start + complete | .NET FW 4.7 | True | 624.15 ns | 0.98 | 1292 B | 1.00 |
+| Multi-target (manual): full lifecycle | .NET FW 4.7 | True | 636.16 ns | 1.00 | 1292 B | 1.00 |
+| Multi-target (generated v1): full lifecycle | .NET FW 4.7 | True | 643.34 ns | 1.01 | 1292 B | 1.00 |
+| Multi-target (generated v2): full lifecycle | .NET FW 4.7 | True | 645.00 ns | 1.02 | 1292 B | 1.00 |
+| Single-target (generated v1): full lifecycle | .NET FW 4.7 | True | 73.52 ns | 0.12 | - | 0.00 |
+| Single-target (generated v2): full lifecycle | .NET FW 4.7 | True | 73.02 ns | 0.12 | - | 0.00 |
+| Multi-target (manual): start + complete | .NET FW 4.8 | True | 631.25 ns | 1.00 | 1292 B | 1.00 |
+| Multi-target (generated v1): start + complete | .NET FW 4.8 | True | 638.79 ns | 1.01 | 1292 B | 1.00 |
+| Multi-target (generated v2): start + complete | .NET FW 4.8 | True | 621.33 ns | 0.98 | 1292 B | 1.00 |
+| Multi-target (manual): full lifecycle | .NET FW 4.8 | True | 665.51 ns | 1.05 | 1292 B | 1.00 |
+| Multi-target (generated v1): full lifecycle | .NET FW 4.8 | True | 656.73 ns | 1.04 | 1292 B | 1.00 |
+| Multi-target (generated v2): full lifecycle | .NET FW 4.8 | True | 649.40 ns | 1.03 | 1292 B | 1.00 |
+| Single-target (generated v1): full lifecycle | .NET FW 4.8 | True | 72.64 ns | 0.12 | - | 0.00 |
+| Single-target (generated v2): full lifecycle | .NET FW 4.8 | True | 72.41 ns | 0.11 | - | 0.00 |
 
-**Interpretation:** Generated v1 matches hand-written multi-target within ~2% when the listener is active; both are ~1% faster than single-target logging-only when listener is active. The Activity-creation cost dominates when a listener is active — single-target logging-only (~17 ns) accounts for only a small fraction of the total multi-target cost (~210 ns).
+**Interpretation:** Generated v1 and v2 now both allocate identically to hand-written multi-target code (24 B no-listener, 1032 B with-listener active). When a listener is active, all three multi-target implementations are within ~3% of each other. The Activity-creation cost dominates when a listener is active — single-target logging-only (~18 ns) accounts for only a small fraction of the total multi-target cost (~230 ns).
 
 ---
 
@@ -250,58 +250,58 @@ Measures the overhead of emitting Activity + Logging + Metrics from a single met
 
 | Method | Runtime | HasListener | Mean | Ratio | Allocated | Alloc Ratio |
 |---|---|---|---|---|---|---|
-| **Single-target (generated): start + complete** | **.NET 10.0** | **False** | **0.53 ns** | **1.00** | **-** | **NA** |
-| Multi-target (generated): start + complete | .NET 10.0 | False | 32.41 ns | 61.46 | 96 B | NA |
-| Multi-target (manual): start + complete | .NET 10.0 | False | 11.14 ns | 21.12 | 24 B | NA |
-| Multi-target (generated): start + complete + latency | .NET 10.0 | False | 31.18 ns | 59.12 | 96 B | NA |
-| Multi-target (manual): start + complete + latency | .NET 10.0 | False | 11.76 ns | 22.29 | 24 B | NA |
-| Single-target (generated): start + complete | .NET 8.0 | False | 0.70 ns | 1.00 | - | NA |
-| Multi-target (generated): start + complete | .NET 8.0 | False | 40.72 ns | 58.47 | 96 B | NA |
-| Multi-target (manual): start + complete | .NET 8.0 | False | 16.36 ns | 23.49 | 24 B | NA |
-| Multi-target (generated): start + complete + latency | .NET 8.0 | False | 41.35 ns | 59.37 | 96 B | NA |
-| Multi-target (manual): start + complete + latency | .NET 8.0 | False | 16.53 ns | 23.73 | 24 B | NA |
-| Single-target (generated): start + complete | .NET 9.0 | False | 0.52 ns | 1.00 | - | NA |
-| Multi-target (generated): start + complete | .NET 9.0 | False | 39.65 ns | 75.67 | 96 B | NA |
-| Multi-target (manual): start + complete | .NET 9.0 | False | 15.11 ns | 28.84 | 24 B | NA |
-| Multi-target (generated): start + complete + latency | .NET 9.0 | False | 37.82 ns | 72.19 | 96 B | NA |
-| Multi-target (manual): start + complete + latency | .NET 9.0 | False | 16.08 ns | 30.68 | 24 B | NA |
-| Single-target (generated): start + complete | .NET FW 4.7 | False | 14.60 ns | 1.00 | - | NA |
-| Multi-target (generated): start + complete | .NET FW 4.7 | False | 117.02 ns | 8.02 | 96 B | NA |
-| Multi-target (manual): start + complete | .NET FW 4.7 | False | 67.66 ns | 4.63 | 24 B | NA |
-| Multi-target (generated): start + complete + latency | .NET FW 4.7 | False | 131.81 ns | 9.03 | 96 B | NA |
-| Multi-target (manual): start + complete + latency | .NET FW 4.7 | False | 85.54 ns | 5.86 | 24 B | NA |
-| Single-target (generated): start + complete | .NET FW 4.8 | False | 15.11 ns | 1.00 | - | NA |
-| Multi-target (generated): start + complete | .NET FW 4.8 | False | 116.90 ns | 7.74 | 96 B | NA |
-| Multi-target (manual): start + complete | .NET FW 4.8 | False | 67.81 ns | 4.49 | 24 B | NA |
-| Multi-target (generated): start + complete + latency | .NET FW 4.8 | False | 131.67 ns | 8.72 | 96 B | NA |
-| Multi-target (manual): start + complete + latency | .NET FW 4.8 | False | 85.79 ns | 5.68 | 24 B | NA |
-| **Single-target (generated): start + complete** | **.NET 10.0** | **True** | **195.78 ns** | **1.00** | **1008 B** | **1.00** |
-| Multi-target (generated): start + complete | .NET 10.0 | True | 224.88 ns | 1.15 | 1104 B | 1.10 |
-| Multi-target (manual): start + complete | .NET 10.0 | True | 221.25 ns | 1.13 | 1032 B | 1.02 |
-| Multi-target (generated): start + complete + latency | .NET 10.0 | True | 249.74 ns | 1.28 | 1104 B | 1.10 |
-| Multi-target (manual): start + complete + latency | .NET 10.0 | True | 207.78 ns | 1.06 | 1032 B | 1.02 |
-| Single-target (generated): start + complete | .NET 8.0 | True | 232.68 ns | 1.00 | 1008 B | 1.00 |
-| Multi-target (generated): start + complete | .NET 8.0 | True | 268.56 ns | 1.15 | 1104 B | 1.10 |
-| Multi-target (manual): start + complete | .NET 8.0 | True | 246.47 ns | 1.06 | 1032 B | 1.02 |
-| Multi-target (generated): start + complete + latency | .NET 8.0 | True | 267.89 ns | 1.15 | 1104 B | 1.10 |
-| Multi-target (manual): start + complete + latency | .NET 8.0 | True | 250.79 ns | 1.08 | 1032 B | 1.02 |
-| Single-target (generated): start + complete | .NET 9.0 | True | 210.91 ns | 1.00 | 1008 B | 1.00 |
-| Multi-target (generated): start + complete | .NET 9.0 | True | 256.29 ns | 1.22 | 1104 B | 1.10 |
-| Multi-target (manual): start + complete | .NET 9.0 | True | 232.56 ns | 1.10 | 1032 B | 1.02 |
-| Multi-target (generated): start + complete + latency | .NET 9.0 | True | 250.58 ns | 1.19 | 1104 B | 1.10 |
-| Multi-target (manual): start + complete + latency | .NET 9.0 | True | 224.53 ns | 1.06 | 1032 B | 1.02 |
-| Single-target (generated): start + complete | .NET FW 4.7 | True | 504.24 ns | 1.00 | 1268 B | 1.00 |
-| Multi-target (generated): start + complete | .NET FW 4.7 | True | 632.62 ns | 1.25 | 1364 B | 1.08 |
-| Multi-target (manual): start + complete | .NET FW 4.7 | True | 571.54 ns | 1.13 | 1292 B | 1.02 |
-| Multi-target (generated): start + complete + latency | .NET FW 4.7 | True | 650.85 ns | 1.29 | 1364 B | 1.08 |
-| Multi-target (manual): start + complete + latency | .NET FW 4.7 | True | 589.86 ns | 1.17 | 1284 B | 1.01 |
-| Single-target (generated): start + complete | .NET FW 4.8 | True | 504.05 ns | 1.00 | 1268 B | 1.00 |
-| Multi-target (generated): start + complete | .NET FW 4.8 | True | 651.37 ns | 1.29 | 1372 B | 1.08 |
-| Multi-target (manual): start + complete | .NET FW 4.8 | True | 575.25 ns | 1.14 | 1292 B | 1.02 |
-| Multi-target (generated): start + complete + latency | .NET FW 4.8 | True | 646.41 ns | 1.28 | 1364 B | 1.08 |
-| Multi-target (manual): start + complete + latency | .NET FW 4.8 | True | 588.58 ns | 1.17 | 1292 B | 1.02 |
+| **Single-target (generated): start + complete** | **.NET 10.0** | **False** | **0.54 ns** | **1.00** | **-** | **NA** |
+| Multi-target (generated): start + complete | .NET 10.0 | False | 12.44 ns | 22.91 | 24 B | NA |
+| Multi-target (manual): start + complete | .NET 10.0 | False | 12.28 ns | 22.61 | 24 B | NA |
+| Multi-target (generated): start + complete + record latency | .NET 10.0 | False | 12.23 ns | 22.51 | 24 B | NA |
+| Multi-target (manual): start + complete + record latency | .NET 10.0 | False | 12.20 ns | 22.46 | 24 B | NA |
+| Single-target (generated): start + complete | .NET 8.0 | False | 0.74 ns | 1.00 | - | NA |
+| Multi-target (generated): start + complete | .NET 8.0 | False | 18.40 ns | 24.75 | 24 B | NA |
+| Multi-target (manual): start + complete | .NET 8.0 | False | 18.19 ns | 24.48 | 24 B | NA |
+| Multi-target (generated): start + complete + record latency | .NET 8.0 | False | 19.72 ns | 26.54 | 24 B | NA |
+| Multi-target (manual): start + complete + record latency | .NET 8.0 | False | 18.47 ns | 24.85 | 24 B | NA |
+| Single-target (generated): start + complete | .NET 9.0 | False | 0.50 ns | 1.00 | - | NA |
+| Multi-target (generated): start + complete | .NET 9.0 | False | 17.41 ns | 35.10 | 24 B | NA |
+| Multi-target (manual): start + complete | .NET 9.0 | False | 16.23 ns | 32.70 | 24 B | NA |
+| Multi-target (generated): start + complete + record latency | .NET 9.0 | False | 16.19 ns | 32.63 | 24 B | NA |
+| Multi-target (manual): start + complete + record latency | .NET 9.0 | False | 16.19 ns | 32.63 | 24 B | NA |
+| Single-target (generated): start + complete | .NET FW 4.7 | False | 16.04 ns | 1.00 | - | NA |
+| Multi-target (generated): start + complete | .NET FW 4.7 | False | 73.73 ns | 4.60 | 24 B | NA |
+| Multi-target (manual): start + complete | .NET FW 4.7 | False | 70.87 ns | 4.42 | 24 B | NA |
+| Multi-target (generated): start + complete + record latency | .NET FW 4.7 | False | 91.70 ns | 5.72 | 24 B | NA |
+| Multi-target (manual): start + complete + record latency | .NET FW 4.7 | False | 91.40 ns | 5.70 | 24 B | NA |
+| Single-target (generated): start + complete | .NET FW 4.8 | False | 15.83 ns | 1.00 | - | NA |
+| Multi-target (generated): start + complete | .NET FW 4.8 | False | 73.44 ns | 4.64 | 24 B | NA |
+| Multi-target (manual): start + complete | .NET FW 4.8 | False | 71.39 ns | 4.51 | 24 B | NA |
+| Multi-target (generated): start + complete + record latency | .NET FW 4.8 | False | 93.12 ns | 5.88 | 24 B | NA |
+| Multi-target (manual): start + complete + record latency | .NET FW 4.8 | False | 90.71 ns | 5.73 | 24 B | NA |
+| **Single-target (generated): start + complete** | **.NET 10.0** | **True** | **218.75 ns** | **1.00** | **1008 B** | **1.00** |
+| Multi-target (generated): start + complete | .NET 10.0 | True | 233.61 ns | 1.07 | 1032 B | 1.02 |
+| Multi-target (manual): start + complete | .NET 10.0 | True | 229.27 ns | 1.05 | 1032 B | 1.02 |
+| Multi-target (generated): start + complete + record latency | .NET 10.0 | True | 219.61 ns | 1.01 | 1032 B | 1.02 |
+| Multi-target (manual): start + complete + record latency | .NET 10.0 | True | 220.02 ns | 1.01 | 1032 B | 1.02 |
+| Single-target (generated): start + complete | .NET 8.0 | True | 245.63 ns | 1.00 | 1008 B | 1.00 |
+| Multi-target (generated): start + complete | .NET 8.0 | True | 254.75 ns | 1.04 | 1032 B | 1.02 |
+| Multi-target (manual): start + complete | .NET 8.0 | True | 270.80 ns | 1.10 | 1032 B | 1.02 |
+| Multi-target (generated): start + complete + record latency | .NET 8.0 | True | 267.03 ns | 1.09 | 1032 B | 1.02 |
+| Multi-target (manual): start + complete + record latency | .NET 8.0 | True | 282.41 ns | 1.15 | 1032 B | 1.02 |
+| Single-target (generated): start + complete | .NET 9.0 | True | 226.77 ns | 1.00 | 1008 B | 1.00 |
+| Multi-target (generated): start + complete | .NET 9.0 | True | 272.37 ns | 1.20 | 1032 B | 1.02 |
+| Multi-target (manual): start + complete | .NET 9.0 | True | 251.63 ns | 1.11 | 1032 B | 1.02 |
+| Multi-target (generated): start + complete + record latency | .NET 9.0 | True | 251.54 ns | 1.11 | 1032 B | 1.02 |
+| Multi-target (manual): start + complete + record latency | .NET 9.0 | True | 231.85 ns | 1.02 | 1032 B | 1.02 |
+| Single-target (generated): start + complete | .NET FW 4.7 | True | 523.77 ns | 1.00 | 1268 B | 1.00 |
+| Multi-target (generated): start + complete | .NET FW 4.7 | True | 620.08 ns | 1.18 | 1292 B | 1.02 |
+| Multi-target (manual): start + complete | .NET FW 4.7 | True | 635.64 ns | 1.21 | 1292 B | 1.02 |
+| Multi-target (generated): start + complete + record latency | .NET FW 4.7 | True | 653.98 ns | 1.25 | 1292 B | 1.02 |
+| Multi-target (manual): start + complete + record latency | .NET FW 4.7 | True | 639.39 ns | 1.22 | 1292 B | 1.02 |
+| Single-target (generated): start + complete | .NET FW 4.8 | True | 535.07 ns | 1.00 | 1268 B | 1.00 |
+| Multi-target (generated): start + complete | .NET FW 4.8 | True | 606.54 ns | 1.13 | 1292 B | 1.02 |
+| Multi-target (manual): start + complete | .NET FW 4.8 | True | 631.65 ns | 1.18 | 1292 B | 1.02 |
+| Multi-target (generated): start + complete + record latency | .NET FW 4.8 | True | 626.60 ns | 1.17 | 1292 B | 1.02 |
+| Multi-target (manual): start + complete + record latency | .NET FW 4.8 | True | 649.22 ns | 1.21 | 1292 B | 1.02 |
 
-**Interpretation:** When an Activity listener is active (production path), multi-target generation adds ~15% overhead over single-target Activity-only, reflecting the real cost of the extra log call and metric increment, not generated-code overhead. The generated multi-target code matches hand-written multi-target code closely across all runtimes.
+**Interpretation:** When an Activity listener is active (production path), multi-target generation adds ~7% overhead over single-target Activity-only on .NET 10.0, reflecting the real cost of the extra log call and metric increment — not generated-code overhead. The generated multi-target code matches hand-written multi-target code closely across all runtimes.
 
 ---
 
@@ -313,38 +313,38 @@ Demonstrates the source generator's tag-count optimization: methods with fewer t
 
 | Method | Runtime | Mean | Ratio | Allocated |
 |---|---|---|---|---|
-| **0 tags: histogram record** | **.NET 10.0** | **0.349 ns** | **1.00** | **-** |
-| 1 tag: auto-counter add | .NET 10.0 | 0.521 ns | 1.49 | - |
-| 3 tags: histogram record | .NET 10.0 | 0.824 ns | 2.36 | - |
-| 4 tags (TagList): auto-counter add | .NET 10.0 | 4.200 ns | 12.04 | - |
-| 5 tags (TagList): auto-counter add | .NET 10.0 | 5.363 ns | 15.37 | - |
-| 6 tags (TagList): histogram record | .NET 10.0 | 5.892 ns | 16.89 | - |
-| 0 tags: histogram record | .NET 8.0 | 0.350 ns | 1.00 | - |
-| 1 tag: auto-counter add | .NET 8.0 | 0.350 ns | 1.00 | - |
-| 3 tags: histogram record | .NET 8.0 | 0.703 ns | 2.01 | - |
-| 4 tags (TagList): auto-counter add | .NET 8.0 | 3.613 ns | 10.32 | - |
-| 5 tags (TagList): auto-counter add | .NET 8.0 | 4.032 ns | 11.52 | - |
-| 6 tags (TagList): histogram record | .NET 8.0 | 4.505 ns | 12.87 | - |
-| 0 tags: histogram record | .NET 9.0 | 0.172 ns | 1.00 | - |
-| 1 tag: auto-counter add | .NET 9.0 | 0.354 ns | 2.06 | - |
-| 3 tags: histogram record | .NET 9.0 | 0.666 ns | 3.89 | - |
-| 4 tags (TagList): auto-counter add | .NET 9.0 | 3.312 ns | 19.32 | - |
-| 5 tags (TagList): auto-counter add | .NET 9.0 | 3.883 ns | 22.65 | - |
-| 6 tags (TagList): histogram record | .NET 9.0 | 4.187 ns | 24.43 | - |
-| 0 tags: histogram record | .NET FW 4.7 | 14.772 ns | 1.00 | - |
-| 1 tag: auto-counter add | .NET FW 4.7 | 18.012 ns | 1.22 | - |
-| 3 tags: histogram record | .NET FW 4.7 | 28.455 ns | 1.93 | - |
-| 4 tags (TagList): auto-counter add | .NET FW 4.7 | 48.407 ns | 3.28 | - |
-| 5 tags (TagList): auto-counter add | .NET FW 4.7 | 56.441 ns | 3.82 | - |
-| 6 tags (TagList): histogram record | .NET FW 4.7 | 56.148 ns | 3.80 | - |
-| 0 tags: histogram record | .NET FW 4.8 | 14.846 ns | 1.00 | - |
-| 1 tag: auto-counter add | .NET FW 4.8 | 18.033 ns | 1.21 | - |
-| 3 tags: histogram record | .NET FW 4.8 | 28.448 ns | 1.92 | - |
-| 4 tags (TagList): auto-counter add | .NET FW 4.8 | 48.427 ns | 3.26 | - |
-| 5 tags (TagList): auto-counter add | .NET FW 4.8 | 56.485 ns | 3.80 | - |
-| 6 tags (TagList): histogram record | .NET FW 4.8 | 55.563 ns | 3.74 | - |
+| **0 tags: histogram record** | **.NET 10.0** | **0.362 ns** | **1.00** | **-** |
+| 1 tag: auto-counter add | .NET 10.0 | 0.353 ns | 0.97 | - |
+| 3 tags: histogram record | .NET 10.0 | 0.735 ns | 2.03 | - |
+| 4 tags (TagList): auto-counter add | .NET 10.0 | 4.100 ns | 11.33 | - |
+| 5 tags (TagList): auto-counter add | .NET 10.0 | 5.289 ns | 14.62 | - |
+| 6 tags (TagList): histogram record | .NET 10.0 | 5.938 ns | 16.41 | - |
+| 0 tags: histogram record | .NET 8.0 | 0.541 ns | 1.00 | - |
+| 1 tag: auto-counter add | .NET 8.0 | 0.357 ns | 0.66 | - |
+| 3 tags: histogram record | .NET 8.0 | 0.720 ns | 1.33 | - |
+| 4 tags (TagList): auto-counter add | .NET 8.0 | 3.685 ns | 6.82 | - |
+| 5 tags (TagList): auto-counter add | .NET 8.0 | 4.416 ns | 8.17 | - |
+| 6 tags (TagList): histogram record | .NET 8.0 | 4.353 ns | 8.06 | - |
+| 0 tags: histogram record | .NET 9.0 | 0.167 ns | 1.01 | - |
+| 1 tag: auto-counter add | .NET 9.0 | 0.370 ns | 2.22 | - |
+| 3 tags: histogram record | .NET 9.0 | 0.498 ns | 2.99 | - |
+| 4 tags (TagList): auto-counter add | .NET 9.0 | 3.614 ns | 21.72 | - |
+| 5 tags (TagList): auto-counter add | .NET 9.0 | 4.037 ns | 24.26 | - |
+| 6 tags (TagList): histogram record | .NET 9.0 | 3.994 ns | 24.00 | - |
+| 0 tags: histogram record | .NET FW 4.7 | 15.175 ns | 1.00 | - |
+| 1 tag: auto-counter add | .NET FW 4.7 | 18.781 ns | 1.24 | - |
+| 3 tags: histogram record | .NET FW 4.7 | 29.760 ns | 1.96 | - |
+| 4 tags (TagList): auto-counter add | .NET FW 4.7 | 52.394 ns | 3.45 | - |
+| 5 tags (TagList): auto-counter add | .NET FW 4.7 | 60.056 ns | 3.96 | - |
+| 6 tags (TagList): histogram record | .NET FW 4.7 | 58.220 ns | 3.84 | - |
+| 0 tags: histogram record | .NET FW 4.8 | 15.347 ns | 1.00 | - |
+| 1 tag: auto-counter add | .NET FW 4.8 | 18.786 ns | 1.22 | - |
+| 3 tags: histogram record | .NET FW 4.8 | 29.358 ns | 1.91 | - |
+| 4 tags (TagList): auto-counter add | .NET FW 4.8 | 49.587 ns | 3.23 | - |
+| 5 tags (TagList): auto-counter add | .NET FW 4.8 | 60.599 ns | 3.95 | - |
+| 6 tags (TagList): histogram record | .NET FW 4.8 | 59.192 ns | 3.86 | - |
 
-**Interpretation:** All metrics recording is allocation-free regardless of tag count. The TagList path (≥4 tags) costs 12–17× more in CPU time than the inline path on .NET 10.0; both remain in single-digit-nanosecond range.
+**Interpretation:** All metrics recording is allocation-free regardless of tag count. The TagList path (≥4 tags) costs 11–17× more in CPU time than the inline path on .NET 10.0; both remain in single-digit-nanosecond range.
 
 ---
 
@@ -354,62 +354,62 @@ Demonstrates the source generator's tag-count optimization: methods with fewer t
 
 Compares the source-generator-produced implementation against hand-written raw .NET metrics API calls for `Counter`, `UpDownCounter`, and `Histogram`.
 
-> **Note:** the zero-tag `Add(T)` overload fix was previously applied. The emitter now generates `_instrument.Add(T)` rather than `_instrument.Add(T, tagList: default)` for zero-tag instruments. The remaining ~2–3× overhead on .NET 10.0 reflects the nullable field null-check guard (`if (_field == null) return;`) present on every call; all instruments allocate 0 B.
+> **Note:** On .NET 10.0, the JIT can eliminate unobserved metric calls (no active `MeterListener`) almost entirely, reducing manual baselines to sub-picosecond noise. Because these near-zero baselines are statistically unreliable, BenchmarkDotNet reports `?` for all `.NET 10.0` ratios in this section. The absolute nanosecond values remain meaningful — generated instruments cost ~0.17–0.40 ns each regardless of runtime. On .NET 8.0, .NET 9.0, and .NET Framework, all calls are in the same sub-nanosecond to ~20 ns range with no allocations.
 
 | Method | Runtime | Mean | Ratio | Allocated |
 |---|---|---|---|---|
-| **Manual: auto-counter (0 tags)** | **.NET 10.0** | **0.172 ns** | **1.00** | **-** |
-| Generated: auto-counter (0 tags) | .NET 10.0 | 0.351 ns | 2.04 | - |
-| Manual: auto-counter (1 tag) | .NET 10.0 | 0.173 ns | 1.01 | - |
-| Generated: auto-counter (1 tag) | .NET 10.0 | 0.525 ns | 3.05 | - |
-| Manual: up-down counter | .NET 10.0 | 0.174 ns | 1.01 | - |
-| Generated: up-down counter | .NET 10.0 | 0.341 ns | 1.98 | - |
-| Manual: histogram (0 tags) | .NET 10.0 | 0.174 ns | 1.01 | - |
-| Generated: histogram (0 tags) | .NET 10.0 | 0.350 ns | 2.03 | - |
-| Manual: histogram (1 tag) | .NET 10.0 | 0.173 ns | 1.01 | - |
-| Generated: histogram (1 tag) | .NET 10.0 | 0.522 ns | 3.03 | - |
-| Manual: auto-counter (0 tags) | .NET 8.0 | 0.171 ns | 1.00 | - |
-| Generated: auto-counter (0 tags) | .NET 8.0 | 0.351 ns | 2.06 | - |
-| Manual: auto-counter (1 tag) | .NET 8.0 | 0.359 ns | 2.10 | - |
-| Generated: auto-counter (1 tag) | .NET 8.0 | 0.525 ns | 3.07 | - |
-| Manual: up-down counter | .NET 8.0 | 0.173 ns | 1.01 | - |
-| Generated: up-down counter | .NET 8.0 | 0.350 ns | 2.05 | - |
-| Manual: histogram (0 tags) | .NET 8.0 | 0.352 ns | 2.06 | - |
-| Generated: histogram (0 tags) | .NET 8.0 | 0.346 ns | 2.03 | - |
-| Manual: histogram (1 tag) | .NET 8.0 | 0.524 ns | 3.07 | - |
-| Generated: histogram (1 tag) | .NET 8.0 | 0.349 ns | 2.04 | - |
-| Manual: auto-counter (0 tags) | .NET 9.0 | 0.173 ns | 1.00 | - |
-| Generated: auto-counter (0 tags) | .NET 9.0 | 0.183 ns | 1.06 | - |
-| Manual: auto-counter (1 tag) | .NET 9.0 | 0.347 ns | 2.01 | - |
-| Generated: auto-counter (1 tag) | .NET 9.0 | 0.173 ns | 1.00 | - |
-| Manual: up-down counter | .NET 9.0 | 0.170 ns | 0.99 | - |
-| Generated: up-down counter | .NET 9.0 | 0.180 ns | 1.04 | - |
-| Manual: histogram (0 tags) | .NET 9.0 | 0.348 ns | 2.02 | - |
-| Generated: histogram (0 tags) | .NET 9.0 | 0.174 ns | 1.01 | - |
-| Manual: histogram (1 tag) | .NET 9.0 | 0.348 ns | 2.02 | - |
-| Generated: histogram (1 tag) | .NET 9.0 | 0.350 ns | 2.03 | - |
-| Manual: auto-counter (0 tags) | .NET FW 4.7 | 14.523 ns | 1.00 | - |
-| Generated: auto-counter (0 tags) | .NET FW 4.7 | 15.024 ns | 1.03 | - |
-| Manual: auto-counter (1 tag) | .NET FW 4.7 | 17.611 ns | 1.21 | - |
-| Generated: auto-counter (1 tag) | .NET FW 4.7 | 17.741 ns | 1.22 | - |
-| Manual: up-down counter | .NET FW 4.7 | 14.581 ns | 1.00 | - |
-| Generated: up-down counter | .NET FW 4.7 | 14.992 ns | 1.03 | - |
-| Manual: histogram (0 tags) | .NET FW 4.7 | 14.581 ns | 1.00 | - |
-| Generated: histogram (0 tags) | .NET FW 4.7 | 15.106 ns | 1.04 | - |
-| Manual: histogram (1 tag) | .NET FW 4.7 | 17.939 ns | 1.24 | - |
-| Generated: histogram (1 tag) | .NET FW 4.7 | 18.163 ns | 1.25 | - |
-| Manual: auto-counter (0 tags) | .NET FW 4.8 | 14.568 ns | 1.00 | - |
-| Generated: auto-counter (0 tags) | .NET FW 4.8 | 15.097 ns | 1.04 | - |
-| Manual: auto-counter (1 tag) | .NET FW 4.8 | 18.311 ns | 1.26 | - |
-| Generated: auto-counter (1 tag) | .NET FW 4.8 | 17.701 ns | 1.22 | - |
-| Manual: up-down counter | .NET FW 4.8 | 15.521 ns | 1.07 | - |
-| Generated: up-down counter | .NET FW 4.8 | 15.183 ns | 1.04 | - |
-| Manual: histogram (0 tags) | .NET FW 4.8 | 14.558 ns | 1.00 | - |
-| Generated: histogram (0 tags) | .NET FW 4.8 | 15.091 ns | 1.04 | - |
-| Manual: histogram (1 tag) | .NET FW 4.8 | 17.626 ns | 1.21 | - |
-| Generated: histogram (1 tag) | .NET FW 4.8 | 18.214 ns | 1.25 | - |
+| Manual: auto-counter (0 tags) | .NET 10.0 | 0.016 ns | ? | - |
+| Generated: auto-counter (0 tags) | .NET 10.0 | 0.369 ns | ? | - |
+| Manual: auto-counter (1 tag) | .NET 10.0 | 0.213 ns | ? | - |
+| Generated: auto-counter (1 tag) | .NET 10.0 | 0.363 ns | ? | - |
+| Manual: up-down counter | .NET 10.0 | 0.002 ns | ? | - |
+| Generated: up-down counter | .NET 10.0 | 0.401 ns | ? | - |
+| Manual: histogram (0 tags) | .NET 10.0 | 0.000 ns | ? | - |
+| Generated: histogram (0 tags) | .NET 10.0 | 0.372 ns | ? | - |
+| Manual: histogram (1 tag) | .NET 10.0 | 0.184 ns | ? | - |
+| Generated: histogram (1 tag) | .NET 10.0 | 0.367 ns | ? | - |
+| Manual: auto-counter (0 tags) | .NET 8.0 | 0.487 ns | 1.02 | - |
+| Generated: auto-counter (0 tags) | .NET 8.0 | 0.391 ns | 0.82 | - |
+| Manual: auto-counter (1 tag) | .NET 8.0 | 0.344 ns | 0.72 | - |
+| Generated: auto-counter (1 tag) | .NET 8.0 | 0.380 ns | 0.79 | - |
+| Manual: up-down counter | .NET 8.0 | 0.415 ns | 0.87 | - |
+| Generated: up-down counter | .NET 8.0 | 0.551 ns | 1.15 | - |
+| Manual: histogram (0 tags) | .NET 8.0 | 0.361 ns | 0.75 | - |
+| Generated: histogram (0 tags) | .NET 8.0 | 0.327 ns | 0.68 | - |
+| Manual: histogram (1 tag) | .NET 8.0 | 0.366 ns | 0.76 | - |
+| Generated: histogram (1 tag) | .NET 8.0 | 0.598 ns | 1.25 | - |
+| Manual: auto-counter (0 tags) | .NET 9.0 | 0.429 ns | 1.01 | - |
+| Generated: auto-counter (0 tags) | .NET 9.0 | 0.183 ns | 0.43 | - |
+| Manual: auto-counter (1 tag) | .NET 9.0 | 0.385 ns | 0.90 | - |
+| Generated: auto-counter (1 tag) | .NET 9.0 | 0.394 ns | 0.92 | - |
+| Manual: up-down counter | .NET 9.0 | 0.339 ns | 0.79 | - |
+| Generated: up-down counter | .NET 9.0 | 0.195 ns | 0.46 | - |
+| Manual: histogram (0 tags) | .NET 9.0 | 0.189 ns | 0.44 | - |
+| Generated: histogram (0 tags) | .NET 9.0 | 0.171 ns | 0.40 | - |
+| Manual: histogram (1 tag) | .NET 9.0 | 0.377 ns | 0.88 | - |
+| Generated: histogram (1 tag) | .NET 9.0 | 0.188 ns | 0.44 | - |
+| **Manual: auto-counter (0 tags)** | **.NET FW 4.7** | **20.66 ns** | **1.00** | **-** |
+| Generated: auto-counter (0 tags) | .NET FW 4.7 | 15.63 ns | 0.76 | - |
+| Manual: auto-counter (1 tag) | .NET FW 4.7 | 19.27 ns | 0.93 | - |
+| Generated: auto-counter (1 tag) | .NET FW 4.7 | 18.66 ns | 0.90 | - |
+| Manual: up-down counter | .NET FW 4.7 | 19.15 ns | 0.93 | - |
+| Generated: up-down counter | .NET FW 4.7 | 16.11 ns | 0.78 | - |
+| Manual: histogram (0 tags) | .NET FW 4.7 | 15.45 ns | 0.75 | - |
+| Generated: histogram (0 tags) | .NET FW 4.7 | 16.15 ns | 0.78 | - |
+| Manual: histogram (1 tag) | .NET FW 4.7 | 19.08 ns | 0.92 | - |
+| Generated: histogram (1 tag) | .NET FW 4.7 | 19.70 ns | 0.95 | - |
+| Manual: auto-counter (0 tags) | .NET FW 4.8 | 15.55 ns | 1.00 | - |
+| Generated: auto-counter (0 tags) | .NET FW 4.8 | 15.42 ns | 0.99 | - |
+| Manual: auto-counter (1 tag) | .NET FW 4.8 | 18.32 ns | 1.18 | - |
+| Generated: auto-counter (1 tag) | .NET FW 4.8 | 18.28 ns | 1.18 | - |
+| Manual: up-down counter | .NET FW 4.8 | 15.16 ns | 0.98 | - |
+| Generated: up-down counter | .NET FW 4.8 | 15.55 ns | 1.00 | - |
+| Manual: histogram (0 tags) | .NET FW 4.8 | 14.90 ns | 0.96 | - |
+| Generated: histogram (0 tags) | .NET FW 4.8 | 15.61 ns | 1.00 | - |
+| Manual: histogram (1 tag) | .NET FW 4.8 | 18.64 ns | 1.20 | - |
+| Generated: histogram (1 tag) | .NET FW 4.8 | 19.45 ns | 1.25 | - |
 
-**Interpretation:** Generated instruments show ~2–3× overhead vs. manual on .NET 10.0 — both in the sub-nanosecond range with 0 allocations across all runtimes and instrument types. On .NET Framework and .NET 8/9 the overhead is proportionally smaller due to higher per-call baselines. The nullable null-check guard on every instrument field is the primary remaining overhead source.
+**Interpretation:** On .NET 10.0, generated instruments measure ~0.17–0.40 ns per call — the manual baselines are near-zero noise because the JIT eliminates unlistened calls, so no meaningful ratio can be computed. On .NET 8.0/9.0 and .NET Framework, generated and manual instruments are within ±25% of each other, with 0 allocations across all runtimes and instrument types.
 
 ---
 
