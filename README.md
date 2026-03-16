@@ -142,7 +142,7 @@ The [.NET Aspire Sample](https://github.com/kjldev/purview-telemetry-sourcegener
 
 ## Performance
 
-Benchmarked on 13th Gen Intel Core i9-13900KF, .NET SDK 10.0.200. See [PERFORMANCE.md](PERFORMANCE.md) for full cross-runtime results.
+Benchmarked on 13th Gen Intel Core i9-13900KF, .NET SDK 10.0.200. See the [Performance](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Performance) wiki page for full cross-runtime results.
 
 ### Activities (.NET 10.0)
 

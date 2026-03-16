@@ -27,6 +27,18 @@ const regexPatterns: { pattern: RegExp; replacement: string }[] = [
 			/"Purview\.Telemetry\.SourceGenerator", "([\d]+\.[\d]+\.[\d]+(\.[\d])?(?:-[a-zA-Z0-9.]+)?(?:\+[a-zA-Z0-9.]+)?)"/g,
 		replacement: `"Purview.Telemetry.SourceGenerator", "${version}"`,
 	},
+	{
+		// Match dotnet add package Purview.Telemetry.SourceGenerator --version 3.0.0
+		pattern:
+			/Purview\.Telemetry\.SourceGenerator --version ([\d]+\.[\d]+\.[\d]+(?:-[a-zA-Z0-9.]+)?(?:\+[a-zA-Z0-9.]+)?)/g,
+		replacement: `Purview.Telemetry.SourceGenerator --version ${version}`,
+	},
+	{
+		// Match Install-Package Purview.Telemetry.SourceGenerator -Version 3.0.0
+		pattern:
+			/Purview\.Telemetry\.SourceGenerator -Version ([\d]+\.[\d]+\.[\d]+(?:-[a-zA-Z0-9.]+)?(?:\+[a-zA-Z0-9.]+)?)/g,
+		replacement: `Purview.Telemetry.SourceGenerator -Version ${version}`,
+	},
 ];
 
 // Define the list of files to update
@@ -34,7 +46,12 @@ const filesToUpdate: string[] = [
 	'README.md',
 	`${WIKI_DIR}/Home.md`,
 	`${WIKI_DIR}/Generated-Output.md`,
-	//'samples/SampleApp/SampleApp.Host/SampleApp.Host.csproj'
+	`${WIKI_DIR}/Getting-Started.md`,
+	`${WIKI_DIR}/Quick-Start.md`,
+	`${WIKI_DIR}/Installation.md`,
+	`${WIKI_DIR}/FAQ.md`,
+	`${WIKI_DIR}/Breaking-Changes.md`,
+	`${WIKI_DIR}/Performance.md`,
 ];
 
 function run(cmd: string, cwd?: string): string {
