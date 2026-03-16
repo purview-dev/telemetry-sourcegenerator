@@ -10,6 +10,12 @@ const WIKI_DIR = '.wiki';
 // Define regex patterns for updating versions
 const regexPatterns: { pattern: RegExp; replacement: string }[] = [
 	{
+		// Match **Current Version:** 3.0.0
+		pattern:
+			/\*\*Current Version:\*\* ([\d]+\.[\d]+\.[\d]+(?:-[a-zA-Z0-9.]+)?(?:\+[a-zA-Z0-9.]+)?)/g,
+		replacement: `**Current Version:** ${version}`,
+	},
+	{
 		// Match Name="Purview.Telemetry.SourceGenerator" Version="3.0.0"
 		pattern:
 			/Include="Purview\.Telemetry\.SourceGenerator" Version="([\d]+\.[\d]+\.[\d]+(?:-[a-zA-Z0-9.]+)?(?:\+[a-zA-Z0-9.]+)?)"/g,
@@ -81,23 +87,21 @@ function updateFilesVersion(): boolean {
 
 	filesToUpdate.forEach((file) => {
 		if (fs.existsSync(file)) {
-			let content = fs.readFileSync(file, 'utf8');
-			let updated = false;
+			const originalContent = fs.readFileSync(file, 'utf8');
+			let content = originalContent;
 
 			regexPatterns.forEach(({ pattern, replacement }) => {
 				// Reset lastIndex since patterns use the /g flag
 				pattern.lastIndex = 0;
-				if (pattern.test(content)) {
-					pattern.lastIndex = 0;
-					content = content.replace(pattern, replacement);
-					updated = true;
-				}
+				content = content.replace(pattern, replacement);
 			});
 
-			if (updated) {
+			if (content !== originalContent) {
 				fs.writeFileSync(file, content, 'utf8');
 				console.log(`✅ Updated version in: ${file}`);
 				anyUpdated = true;
+			} else if (regexPatterns.some(({ pattern }) => { pattern.lastIndex = 0; return pattern.test(originalContent); })) {
+				console.log(`ℹ️ Version already up to date in: ${file}`);
 			} else {
 				console.log(`ℹ️ No matching version string found in: ${file}`);
 			}
