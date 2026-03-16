@@ -83,7 +83,7 @@ version:
 update-version:
     @bun -e "console.log('Update related samples and docs to new version: {{ GREEN }}' + require('./package.json').version + '{{ NORMAL }}')"
     @git submodule update --init --recursive
-    @bun .build/update-version.js
+    @bun .build/update-version.ts
 
 # Packs the source generator into a NuGet package and outputs it to the specified folder, including version, branch, commit, and copyright year information in the package metadata
 [group('Build and Test')]
