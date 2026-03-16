@@ -38,7 +38,7 @@ public sealed class WeatherAPIClient(HttpClient httpClient, IWeatherAPIClientTel
 					cancellationToken: cancellationToken
 				) ?? [];
 
-			if (forecasts.Length > 0)
+			if (forecasts.Length == 0)
 				telemetry.NoForecastsRecieved(activity);
 			else
 				telemetry.ForecastsRecieved(activity, forecasts.Length, forecasts);
