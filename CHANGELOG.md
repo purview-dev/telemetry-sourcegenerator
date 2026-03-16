@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.0.0-prerelease.6](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.5...v4.0.0-prerelease.6) (2026-03-16)
+
 ## [4.0.0-prerelease.5](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.4...v4.0.0-prerelease.5) (2026-03-16)
 
 
