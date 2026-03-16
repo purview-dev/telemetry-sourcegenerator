@@ -68,7 +68,9 @@ function pullWiki() {
 		console.log(`   Checking out branch '${branch}'...`);
 		run(`git checkout ${branch}`, WIKI_DIR);
 	}
-	run('git pull --ff-only', WIKI_DIR);
+	// Reset to remote state rather than ff-only pull, so diverged local branches
+	// don't block the release. The script is about to overwrite these files anyway.
+	run(`git reset --hard origin/${branch}`, WIKI_DIR);
 
 	console.log(`✅ Wiki is up to date.`);
 }
