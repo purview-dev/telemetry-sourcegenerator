@@ -21,6 +21,5 @@ sealed record LogCallInfo(
 sealed record LogParameterInfo(
 	string Name,
 	string TypeDisplayString,
-	ExpressionSyntax ArgumentExpression,
-	ITypeSymbol? TypeSymbol
+	ExpressionSyntax ArgumentExpression
 );

@@ -9,19 +9,22 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Purview.Telemetry.SourceGenerator.Refactorings;
 
-[ExportCodeRefactoringProvider(LanguageNames.CSharp, Name = nameof(ConvertILoggerToTelemetryRefactoringProvider))]
+[ExportCodeRefactoringProvider(
+	LanguageNames.CSharp,
+	Name = nameof(ConvertILoggerToTelemetryRefactoringProvider)
+)]
 [Shared]
 public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactoringProvider
 {
 	// Matches structured-logging template placeholders: {Name}, {@Name} (destructure), {$Name} (stringify).
 	// The @/$ prefixes follow Serilog conventions and are also used in Microsoft.Extensions.Logging
 	// structured logging. Alignment and format specifiers are recognised but stripped.
-	static readonly Regex _templatePlaceholderRegex = new(
+	static readonly Regex TemplatePlaceholderRegex = new(
 		@"\{(?:@|\$)?(?<name>[A-Za-z_]\w*)(?:,[-\d]+)?(?::[^}]+)?\}",
 		RegexOptions.Compiled | RegexOptions.ExplicitCapture
 	);
 
-	static readonly Dictionary<string, string> _methodToAttribute = new(StringComparer.Ordinal)
+	static readonly Dictionary<string, string> MethodToAttribute = new(StringComparer.Ordinal)
 	{
 		["LogTrace"] = "Trace",
 		["LogDebug"] = "Debug",
@@ -33,15 +36,15 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 	// Uses keyword aliases (string, int, bool) and short type names without global:: prefix.
 	// Suitable for generated interface code that lives in the same file as the class.
-	static readonly SymbolDisplayFormat _paramTypeFormat = new(
+	static readonly SymbolDisplayFormat ParamTypeFormat = new(
 		typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
 		miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes
 	);
 
 	public override async Task ComputeRefactoringsAsync(CodeRefactoringContext context)
 	{
-		var root = await context.Document
-			.GetSyntaxRootAsync(context.CancellationToken)
+		var root = await context
+			.Document.GetSyntaxRootAsync(context.CancellationToken)
 			.ConfigureAwait(false);
 		if (root is null)
 			return;
@@ -51,8 +54,8 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		if (classDecl is null)
 			return;
 
-		var semanticModel = await context.Document
-			.GetSemanticModelAsync(context.CancellationToken)
+		var semanticModel = await context
+			.Document.GetSemanticModelAsync(context.CancellationToken)
 			.ConfigureAwait(false);
 		if (semanticModel is null)
 			return;
@@ -61,7 +64,12 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		if (loggerFields.Count == 0)
 			return;
 
-		var logCalls = FindLogCalls(classDecl, loggerFields, semanticModel, context.CancellationToken);
+		var logCalls = FindLogCalls(
+			classDecl,
+			loggerFields,
+			semanticModel,
+			context.CancellationToken
+		);
 		if (logCalls.Count == 0)
 			return;
 
@@ -141,10 +149,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	)
 	{
 		var iLoggerOpen = semanticModel.Compilation.GetTypeByMetadataName(
-			"Microsoft.Extensions.Logging.ILogger`1"
+			Constants.Logging.MicrosoftExtensions.ILoggerOfTMetadataName
 		);
 		var iLoggerNonGeneric = semanticModel.Compilation.GetTypeByMetadataName(
-			"Microsoft.Extensions.Logging.ILogger"
+			Constants.Logging.MicrosoftExtensions.ILogger.FullyQualifiedName
 		);
 
 		var result = new List<ILoggerFieldInfo>();
@@ -215,9 +223,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 		var result = new List<LogCallInfo>();
 
-		foreach (
-			var invocation in classDecl.DescendantNodes().OfType<InvocationExpressionSyntax>()
-		)
+		foreach (var invocation in classDecl.DescendantNodes().OfType<InvocationExpressionSyntax>())
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 
@@ -230,7 +236,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 				continue;
 
 			var methodName = memberAccess.Name.Identifier.Text;
-			if (methodName != "Log" && !_methodToAttribute.ContainsKey(methodName))
+			if (methodName != "Log" && !MethodToAttribute.ContainsKey(methodName))
 				continue;
 
 			var call = AnalyzeLogCall(invocation, methodName, semanticModel, cancellationToken);
@@ -245,7 +251,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		expression switch
 		{
 			IdentifierNameSyntax id => id.Identifier.Text,
-			MemberAccessExpressionSyntax ma => null, // chained access – not a field reference
+			MemberAccessExpressionSyntax _ => null, // chained access – not a field reference
 			_ => null,
 		};
 
@@ -312,40 +318,35 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 		if (exceptionExpression is not null)
 		{
-			var exType = semanticModel
-				.Compilation
-				.GetTypeByMetadataName("System.Exception");
-			var exTypeStr = exType?.ToDisplayString(_paramTypeFormat) ?? "System.Exception";
-			parameters.Add(
-				new LogParameterInfo(
-					"exception",
-					exTypeStr,
-					exceptionExpression,
-					exType
-				)
+			var exType = semanticModel.Compilation.GetTypeByMetadataName(
+				Constants.System.Exception.FullyQualifiedName
 			);
+			var exTypeStr =
+				exType?.ToDisplayString(ParamTypeFormat)
+				?? Constants.System.Exception.FullyQualifiedName;
+			parameters.Add(new LogParameterInfo("exception", exTypeStr, exceptionExpression));
 		}
 
 		for (var i = 0; i < Math.Min(placeholders.Count, templateArgs.Count); i++)
 		{
-			var (type, typeStr) = GetNaturalType(semanticModel.GetTypeInfo(templateArgs[i], cancellationToken));
+			var (_, typeStr) = GetNaturalType(
+				semanticModel.GetTypeInfo(templateArgs[i], cancellationToken)
+			);
 
 			var rawName = placeholders[i];
 			var paramName = ToCamelCase(rawName);
 
-			parameters.Add(
-				new LogParameterInfo(paramName, typeStr, templateArgs[i], type)
-			);
+			parameters.Add(new LogParameterInfo(paramName, typeStr, templateArgs[i]));
 		}
 
 		// If there are extra args without template placeholders, include them
 		for (var i = placeholders.Count; i < templateArgs.Count; i++)
 		{
-			var (type, typeStr) = GetNaturalType(semanticModel.GetTypeInfo(templateArgs[i], cancellationToken));
-
-			parameters.Add(
-				new LogParameterInfo($"arg{i}", typeStr, templateArgs[i], type)
+			var (_, typeStr) = GetNaturalType(
+				semanticModel.GetTypeInfo(templateArgs[i], cancellationToken)
 			);
+
+			parameters.Add(new LogParameterInfo($"arg{i}", typeStr, templateArgs[i]));
 		}
 
 		return new LogCallInfo(
@@ -362,11 +363,11 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	{
 		var typeInfo = semanticModel.GetTypeInfo(arg.Expression);
 		var type = typeInfo.ConvertedType ?? typeInfo.Type;
-		if (type is null)
-			return false;
-
-		return type.ToDisplayString() == "Microsoft.Extensions.Logging.EventId"
-			|| type.SpecialType == SpecialType.System_Int32;
+		return type is not null
+			&& (
+				type.ToDisplayString() == Constants.Logging.MicrosoftExtensions.EventId.FullyQualifiedName
+				|| type.SpecialType == SpecialType.System_Int32
+			);
 	}
 
 	static bool IsExceptionType(ArgumentSyntax arg, SemanticModel semanticModel)
@@ -376,11 +377,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		if (type is null)
 			return false;
 
-		var exType = semanticModel.Compilation.GetTypeByMetadataName("System.Exception");
-		if (exType is null)
-			return false;
-
-		return IsOrDerivesFrom(type, exType);
+		var exType = semanticModel.Compilation.GetTypeByMetadataName(
+			Constants.System.Exception.FullyQualifiedName
+		);
+		return exType is not null && IsOrDerivesFrom(type, exType);
 	}
 
 	static bool IsOrDerivesFrom(ITypeSymbol type, INamedTypeSymbol baseType)
@@ -441,10 +441,9 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 	static string GetBaseMethodName(LogCallInfo call)
 	{
-		if (call.ILoggerMethodName == "Log" && call.ExplicitLogLevel is not null)
-			return "Log" + call.ExplicitLogLevel;
-
-		return call.ILoggerMethodName;
+		return call.ILoggerMethodName == "Log" && call.ExplicitLogLevel is not null
+			? "Log" + call.ExplicitLogLevel
+			: call.ILoggerMethodName;
 	}
 
 	// -------------------------------------------------------------------------
@@ -497,32 +496,30 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 	static string GetAttributeFor(LogCallInfo call)
 	{
-		if (call.ILoggerMethodName == "Log")
-		{
-			if (call.ExplicitLogLevel is null)
-				return "Log";
-
-			return call.ExplicitLogLevel switch
-			{
-				"Trace" => "Trace",
-				"Debug" => "Debug",
-				"Information" => "Info",
-				"Warning" => "Warning",
-				"Error" => "Error",
-				"Critical" => "Critical",
-				_ => $"Log(global::Microsoft.Extensions.Logging.LogLevel.{call.ExplicitLogLevel})",
-			};
-		}
-
-		return _methodToAttribute.TryGetValue(call.ILoggerMethodName, out var attr) ? attr : "Log";
+		return call.ILoggerMethodName == "Log"
+			? call.ExplicitLogLevel is null
+				? "Log"
+				: call.ExplicitLogLevel switch
+				{
+					"Trace" => "Trace",
+					"Debug" => "Debug",
+					"Information" => "Info",
+					"Warning" => "Warning",
+					"Error" => "Error",
+					"Critical" => "Critical",
+					_ =>
+						$"Log({Constants.Logging.MicrosoftExtensions.LogLevel.ToString(includeGlobal: true)}.{call.ExplicitLogLevel})",
+				}
+			: MethodToAttribute.TryGetValue(call.ILoggerMethodName, out var attr)
+				? attr
+				: "Log";
 	}
 
 	static string BuildParamList(IReadOnlyList<LogParameterInfo> parameters)
 	{
-		if (parameters.Count == 0)
-			return string.Empty;
-
-		return string.Join(", ", parameters.Select(p => $"{p.TypeDisplayString} {p.Name}"));
+		return parameters.Count == 0
+			? string.Empty
+			: string.Join(", ", parameters.Select(p => $"{p.TypeDisplayString} {p.Name}"));
 	}
 
 	static InterfaceDeclarationSyntax ParseInterfaceNode(string code)
@@ -532,10 +529,8 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 		// Try to find the interface inside a namespace or at top-level
 		var interfaceDecl =
-			root.DescendantNodes().OfType<InterfaceDeclarationSyntax>().FirstOrDefault();
-
-		if (interfaceDecl is null)
-			throw new InvalidOperationException(
+			root.DescendantNodes().OfType<InterfaceDeclarationSyntax>().FirstOrDefault()
+			?? throw new InvalidOperationException(
 				"Could not parse generated interface from: " + code
 			);
 
@@ -591,18 +586,16 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 				.Concat(fieldMap.Keys.Cast<SyntaxNode>())
 				.Concat(ctorParamMap.Keys.Cast<SyntaxNode>()),
 			(original, _) =>
-			{
-				if (original is InvocationExpressionSyntax inv && invocationMap.TryGetValue(inv, out var newInv))
-					return newInv;
-
-				if (original is FieldDeclarationSyntax fld && fieldMap.TryGetValue(fld, out var newFld))
-					return newFld;
-
-				if (original is ParameterSyntax param && ctorParamMap.TryGetValue(param, out var newParam))
-					return newParam;
-
-				return original;
-			}
+				original is InvocationExpressionSyntax inv
+				&& invocationMap.TryGetValue(inv, out var newInv)
+					? newInv
+				: original is FieldDeclarationSyntax fld
+				&& fieldMap.TryGetValue(fld, out var newFld)
+					? newFld
+				: original is ParameterSyntax param
+				&& ctorParamMap.TryGetValue(param, out var newParam)
+					? newParam
+				: original
 		);
 	}
 
@@ -617,12 +610,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 		var memberAccess = (MemberAccessExpressionSyntax)call.Invocation.Expression;
 
-		var newMemberAccess = memberAccess.WithName(
-			SyntaxFactory.IdentifierName(newMethodName)
-		);
+		var newMemberAccess = memberAccess.WithName(SyntaxFactory.IdentifierName(newMethodName));
 
-		return call.Invocation
-			.WithExpression(newMemberAccess)
+		return call
+			.Invocation.WithExpression(newMemberAccess)
 			.WithArgumentList(
 				SyntaxFactory.ArgumentList(newArgs).WithTriviaFrom(call.Invocation.ArgumentList)
 			);
@@ -651,11 +642,11 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 			SyntaxNodeReferenceComparer<ParameterSyntax>.Instance
 		);
 
-		var iLoggerOpen = semanticModel.Compilation.GetTypeByMetadataName(
-			"Microsoft.Extensions.Logging.ILogger`1"
-		);
-		var iLoggerNonGeneric = semanticModel.Compilation.GetTypeByMetadataName(
-			"Microsoft.Extensions.Logging.ILogger"
+		// Match constructor parameters by the exact types of the identified logger fields.
+		// This is more precise than re-detecting all ILogger variants from scratch.
+		var loggerFieldTypes = new HashSet<ITypeSymbol>(
+			loggerFields.Select(f => f.FieldSymbol.Type),
+			SymbolEqualityComparer.Default
 		);
 
 		foreach (var ctor in classDecl.Members.OfType<ConstructorDeclarationSyntax>())
@@ -667,31 +658,12 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 				var typeInfo = semanticModel.GetTypeInfo(param.Type);
 				var type = typeInfo.Type;
-				if (type is not INamedTypeSymbol namedType)
+				if (type is null || !loggerFieldTypes.Contains(type))
 					continue;
 
-				bool isLogger =
-					(
-						namedType.IsGenericType
-						&& iLoggerOpen is not null
-						&& SymbolEqualityComparer.Default.Equals(
-							namedType.ConstructedFrom,
-							iLoggerOpen
-						)
-					)
-					|| (
-						iLoggerNonGeneric is not null
-						&& SymbolEqualityComparer.Default.Equals(namedType, iLoggerNonGeneric)
-					);
-
-				if (!isLogger)
-					continue;
-
-				var newParam = param.WithType(
+				result[param] = param.WithType(
 					SyntaxFactory.IdentifierName(interfaceName).WithTriviaFrom(param.Type)
 				);
-
-				result[param] = newParam;
 			}
 		}
 
@@ -708,7 +680,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 			return [];
 
 		var result = new List<string>();
-		foreach (Match match in _templatePlaceholderRegex.Matches(template))
+		foreach (Match match in TemplatePlaceholderRegex.Matches(template))
 		{
 			var name = match.Groups["name"].Value;
 			if (!string.IsNullOrEmpty(name))
@@ -720,10 +692,9 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 	static string ToCamelCase(string name)
 	{
-		if (string.IsNullOrEmpty(name))
-			return name;
-
-		return char.ToLowerInvariant(name[0]) + name.Substring(1);
+		return string.IsNullOrEmpty(name)
+			? name
+			: char.ToLowerInvariant(name[0]) + name.Substring(1);
 	}
 
 	/// <summary>
@@ -735,7 +706,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	static (ITypeSymbol? Type, string TypeStr) GetNaturalType(TypeInfo typeInfo)
 	{
 		var type = typeInfo.Type ?? typeInfo.ConvertedType;
-		var typeStr = type?.ToDisplayString(_paramTypeFormat) ?? "object";
+		var typeStr = type?.ToDisplayString(ParamTypeFormat) ?? "object";
 		return (type, typeStr);
 	}
 

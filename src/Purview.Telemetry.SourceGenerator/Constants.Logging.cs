@@ -108,6 +108,12 @@ partial class Constants
 		{
 			public const string Namespace = "Microsoft.Extensions.Logging";
 
+			/// <summary>
+			/// Metadata name for <c>ILogger&lt;T&gt;</c> as required by
+			/// <see cref="Microsoft.CodeAnalysis.Compilation.GetTypeByMetadataName"/>.
+			/// </summary>
+			public const string ILoggerOfTMetadataName = Namespace + ".ILogger`1";
+
 			public static readonly PurviewTypeInfo ILogger = PurviewTypeFactory.Create(
 				Namespace + '.' + nameof(ILogger)
 			);

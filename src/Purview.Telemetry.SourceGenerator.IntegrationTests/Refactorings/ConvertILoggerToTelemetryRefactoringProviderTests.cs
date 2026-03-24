@@ -450,4 +450,397 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		await Assert.That(result).Contains("page");
 		await Assert.That(result).Contains("isCached");
 	}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// EventId handling
+	// ─────────────────────────────────────────────────────────────────────────
+
+	[Test]
+	public async Task ApplyRefactoring_GivenLogCallWithEventId_SkipsEventIdArgument(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$OrderService
+			{
+				readonly ILogger<OrderService> _logger;
+
+				public OrderService(ILogger<OrderService> logger) => _logger = logger;
+
+				public void ProcessOrder(int orderId)
+				{
+					_logger.LogInformation(new EventId(1, "OrderProcessed"), "Processing order {OrderId}", orderId);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("[Info]");
+		await Assert.That(result).Contains("void LogInformation(int orderId)");
+		await Assert.That(result).DoesNotContain("EventId");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenLogCallWithEventIdAndException_SkipsEventIdKeepsException(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using System;
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$ShippingService
+			{
+				readonly ILogger<ShippingService> _logger;
+
+				public ShippingService(ILogger<ShippingService> logger) => _logger = logger;
+
+				public void Ship(string trackingId)
+				{
+					try { }
+					catch (Exception ex)
+					{
+						_logger.LogError(new EventId(2), ex, "Shipping failed for {TrackingId}", trackingId);
+					}
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("[Error]");
+		await Assert.That(result).Contains("exception");
+		await Assert.That(result).Contains("trackingId");
+		await Assert.That(result).DoesNotContain("EventId");
+	}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// Log(LogLevel, …) level mapping
+	// ─────────────────────────────────────────────────────────────────────────
+
+	[Test]
+	public async Task ApplyRefactoring_GivenLogLevelInformation_MapsToInfoAttribute(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$CacheService
+			{
+				readonly ILogger<CacheService> _logger;
+
+				public CacheService(ILogger<CacheService> logger) => _logger = logger;
+
+				public void Refresh(string key)
+				{
+					_logger.Log(LogLevel.Information, "Refreshing cache for {Key}", key);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("[Info]");
+		await Assert.That(result).Contains("void LogInformation(string key)");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenLogLevelNone_EmitsFallbackLogAttribute(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$DiagService
+			{
+				readonly ILogger<DiagService> _logger;
+
+				public DiagService(ILogger<DiagService> logger) => _logger = logger;
+
+				public void Diag(string info)
+				{
+					_logger.Log(LogLevel.None, "Diag: {Info}", info);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("[Log(");
+		await Assert.That(result).Contains("LogLevel.None");
+	}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// Template placeholder edge cases
+	// ─────────────────────────────────────────────────────────────────────────
+
+	[Test]
+	public async Task ApplyRefactoring_GivenTemplateWithDestructuringPrefix_ExtractsParameterName(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$UserService
+			{
+				readonly ILogger<UserService> _logger;
+
+				public UserService(ILogger<UserService> logger) => _logger = logger;
+
+				public void Login(object user)
+				{
+					_logger.LogInformation("User logged in: {@User}", user);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("void LogInformation(object user)");
+		await Assert.That(result).DoesNotContain("@User");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenTemplateWithStringifyPrefix_ExtractsParameterName(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$ProductService
+			{
+				readonly ILogger<ProductService> _logger;
+
+				public ProductService(ILogger<ProductService> logger) => _logger = logger;
+
+				public void Created(object product)
+				{
+					_logger.LogDebug("Product created: {$Product}", product);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("void LogDebug(object product)");
+		await Assert.That(result).DoesNotContain("$Product");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenTemplateWithFormatSpecifier_ExtractsParameterName(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$MetricsService
+			{
+				readonly ILogger<MetricsService> _logger;
+
+				public MetricsService(ILogger<MetricsService> logger) => _logger = logger;
+
+				public void Record(double value)
+				{
+					_logger.LogInformation("Metric value: {Value:0.00}", value);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("void LogInformation(double value)");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenTemplateWithAlignmentSpecifier_ExtractsParameterName(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$ReportService
+			{
+				readonly ILogger<ReportService> _logger;
+
+				public ReportService(ILogger<ReportService> logger) => _logger = logger;
+
+				public void Report(int count)
+				{
+					_logger.LogWarning("Item count: {Count,-10}", count);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("void LogWarning(int count)");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenExtraArgsWithNoPlaceholders_GeneratesArgParameters(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$DebugService
+			{
+				readonly ILogger<DebugService> _logger;
+
+				public DebugService(ILogger<DebugService> logger) => _logger = logger;
+
+				public void Dump(string label, int a, int b)
+				{
+					_logger.LogDebug("Values: {Label}", label, a, b);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("label");
+		await Assert.That(result).Contains("arg1");
+		await Assert.That(result).Contains("arg2");
+	}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// Namespace / class structure
+	// ─────────────────────────────────────────────────────────────────────────
+
+	[Test]
+	public async Task ApplyRefactoring_GivenClassWithNoNamespace_GeneratesInterfaceWithoutNamespace(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			public class $$GlobalService
+			{
+				readonly ILogger<GlobalService> _logger;
+
+				public GlobalService(ILogger<GlobalService> logger) => _logger = logger;
+
+				public void Run()
+				{
+					_logger.LogInformation("Running");
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("[Logger]");
+		await Assert.That(result).Contains("IGlobalServiceLogger");
+		await Assert.That(result).DoesNotContain("namespace");
+	}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// Multiple logger fields
+	// ─────────────────────────────────────────────────────────────────────────
+
+	[Test]
+	public async Task ComputeRefactorings_GivenClassWithMultipleILoggerFields_ReturnsAction(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$CompositeService
+			{
+				readonly ILogger<CompositeService> _logger;
+				readonly ILogger _genericLogger;
+
+				public CompositeService(
+					ILogger<CompositeService> logger,
+					ILogger genericLogger)
+				{
+					_logger = logger;
+					_genericLogger = genericLogger;
+				}
+
+				public void Work(string name)
+				{
+					_logger.LogInformation("Working on {Name}", name);
+					_genericLogger.LogDebug("Debug: {Name}", name);
+				}
+			}
+			""";
+
+		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(actions).IsNotEmpty();
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenConstructorWithMatchingLoggerParam_ReplacesOnlyMatchingParam(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$FilterService
+			{
+				readonly ILogger<FilterService> _logger;
+
+				public FilterService(ILogger<FilterService> logger, string config) => _logger = logger;
+
+				public void Filter(string input)
+				{
+					_logger.LogInformation("Filtering {Input}", input);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("IFilterServiceLogger logger");
+		// non-logger param must be untouched
+		await Assert.That(result).Contains("string config");
+	}
 }
