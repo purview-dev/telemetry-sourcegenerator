@@ -5,8 +5,9 @@ namespace Purview.Telemetry.SourceGenerator.Refactorings;
 
 sealed record ILoggerFieldInfo(
 	string FieldName,
-	FieldDeclarationSyntax FieldDeclaration,
-	IFieldSymbol FieldSymbol
+	FieldDeclarationSyntax? FieldDeclaration,
+	PropertyDeclarationSyntax? PropertyDeclaration,
+	ITypeSymbol TypeSymbol
 );
 
 sealed record LogCallInfo(

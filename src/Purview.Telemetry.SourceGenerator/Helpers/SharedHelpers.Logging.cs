@@ -380,7 +380,10 @@ partial class SharedHelpers
 			return null;
 		}
 
-		return new(MaximumValueCount: maximumValueCount ?? new(5));
+		return new(
+			MaximumValueCount: maximumValueCount ?? new(5),
+			ParamLocation: symbol.Locations.FirstOrDefault()
+		);
 	}
 
 	public static LoggerGenerationAttributeRecord? GetLoggerGenerationAttribute(

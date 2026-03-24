@@ -710,7 +710,8 @@ partial class LoggerGenTargetClassEmitter
 			);
 			TelemetryDiagnostics.Report(
 				context.ReportDiagnostic,
-				TelemetryDiagnostics.Logging.UnboundedIEnumerableMaxCount
+				TelemetryDiagnostics.Logging.UnboundedIEnumerableMaxCount,
+				parameter.ExpandEnumerableAttribute!.ParamLocation
 			);
 		}
 

@@ -1,6 +1,13 @@
 ﻿{
   Diagnostics: [
     {
+      Location: /*
+{
+		void Log([ExpandEnumerable(maximumValueCount: 12)]string[] paramValue);
+                                                             ^^^^^^^^^^
+
+*/
+ Guid_1: (11,61)-(11,71),
       Message: The limit on unbounded enumeration is higher than the recommended default (5). This may cause performance issues, make sure you understand the consequences and test thoroughly.,
       Severity: Warning,
       WarningLevel: 1,
@@ -14,6 +21,13 @@
       }
     },
     {
+      Location: /*
+
+		void Log2([ExpandEnumerable(MaximumValueCount = 12)]string[] paramValue2);
+                                                               ^^^^^^^^^^^
+}
+*/
+ Guid_1: (13,63)-(13,74),
       Message: The limit on unbounded enumeration is higher than the recommended default (5). This may cause performance issues, make sure you understand the consequences and test thoroughly.,
       Severity: Warning,
       WarningLevel: 1,

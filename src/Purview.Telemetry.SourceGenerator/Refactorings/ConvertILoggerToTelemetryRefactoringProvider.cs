@@ -34,6 +34,12 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		["LogCritical"] = "Critical",
 	};
 
+	// Matches words for template-based method name extraction (starts with letter, may have digits).
+	static readonly Regex TemplateWordRegex = new(
+		@"\b[A-Za-z][A-Za-z0-9]*",
+		RegexOptions.Compiled
+	);
+
 	// Uses keyword aliases (string, int, bool) and short type names without global:: prefix.
 	// Suitable for generated interface code that lives in the same file as the class.
 	static readonly SymbolDisplayFormat ParamTypeFormat = new(
@@ -108,11 +114,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		if (root is null)
 			return document;
 
-		var interfaceCode = BuildInterfaceCode(
-			interfaceName,
-			callsWithMethods,
-			GetNamespaceOf(classDecl)
-		);
+		var interfaceCode = BuildInterfaceCode(interfaceName, callsWithMethods);
 		var interfaceSyntax = ParseInterfaceNode(interfaceCode);
 
 		var newClassDecl = RewriteClass(
@@ -134,6 +136,16 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 			replacedClass,
 			[interfaceSyntax.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed)]
 		);
+
+		// Add using Purview.Telemetry; to the file if not already present.
+		var compilationRoot = (CompilationUnitSyntax)newRoot;
+		if (!compilationRoot.Usings.Any(u => u.Name?.ToString() == "Purview.Telemetry"))
+		{
+			var newUsing = SyntaxFactory
+				.UsingDirective(SyntaxFactory.ParseName("Purview.Telemetry"))
+				.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+			newRoot = compilationRoot.AddUsings(newUsing);
+		}
 
 		return document.WithSyntaxRoot(newRoot);
 	}
@@ -175,28 +187,102 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 				if (fieldSymbol.Type is not INamedTypeSymbol namedType)
 					continue;
 
-				bool isLogger =
-					(
-						namedType.IsGenericType
-						&& iLoggerOpen is not null
-						&& SymbolEqualityComparer.Default.Equals(
-							namedType.ConstructedFrom,
-							iLoggerOpen
-						)
-					)
-					|| (
-						iLoggerNonGeneric is not null
-						&& SymbolEqualityComparer.Default.Equals(namedType, iLoggerNonGeneric)
-					);
-
-				if (!isLogger)
+				if (!IsILoggerType(namedType, iLoggerOpen, iLoggerNonGeneric))
 					continue;
 
 				result.Add(
 					new ILoggerFieldInfo(
 						FieldName: fieldSymbol.Name,
 						FieldDeclaration: fieldDecl,
-						FieldSymbol: fieldSymbol
+						PropertyDeclaration: null,
+						TypeSymbol: namedType
+					)
+				);
+			}
+		}
+
+		// Also check primary constructor parameters (C# 12+).
+		if (classDecl.ParameterList is { } primaryCtorParams)
+		{
+			foreach (var param in primaryCtorParams.Parameters)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+
+				if (
+					semanticModel.GetDeclaredSymbol(param, cancellationToken)
+					is not IParameterSymbol paramSymbol
+				)
+					continue;
+
+				if (paramSymbol.Type is not INamedTypeSymbol namedType)
+					continue;
+
+				if (!IsILoggerType(namedType, iLoggerOpen, iLoggerNonGeneric))
+					continue;
+
+				result.Add(
+					new ILoggerFieldInfo(
+						FieldName: param.Identifier.Text,
+						FieldDeclaration: null,
+						PropertyDeclaration: null,
+						TypeSymbol: namedType
+					)
+				);
+			}
+		}
+
+		// Scan properties.
+		foreach (var member in classDecl.Members.OfType<PropertyDeclarationSyntax>())
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+
+			if (
+				semanticModel.GetDeclaredSymbol(member, cancellationToken)
+				is not IPropertySymbol propSymbol
+			)
+				continue;
+
+			if (propSymbol.Type is not INamedTypeSymbol namedType)
+				continue;
+
+			if (!IsILoggerType(namedType, iLoggerOpen, iLoggerNonGeneric))
+				continue;
+
+			result.Add(
+				new ILoggerFieldInfo(
+					FieldName: propSymbol.Name,
+					FieldDeclaration: null,
+					PropertyDeclaration: member,
+					TypeSymbol: namedType
+				)
+			);
+		}
+
+		// Scan regular method parameters.
+		foreach (var method in classDecl.Members.OfType<MethodDeclarationSyntax>())
+		{
+			foreach (var param in method.ParameterList.Parameters)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+
+				if (
+					semanticModel.GetDeclaredSymbol(param, cancellationToken)
+					is not IParameterSymbol paramSymbol
+				)
+					continue;
+
+				if (paramSymbol.Type is not INamedTypeSymbol namedType)
+					continue;
+
+				if (!IsILoggerType(namedType, iLoggerOpen, iLoggerNonGeneric))
+					continue;
+
+				result.Add(
+					new ILoggerFieldInfo(
+						FieldName: param.Identifier.Text,
+						FieldDeclaration: null,
+						PropertyDeclaration: null,
+						TypeSymbol: namedType
 					)
 				);
 			}
@@ -422,16 +508,26 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 	static List<(LogCallInfo Call, string MethodName)> AssignMethodNames(List<LogCallInfo> calls)
 	{
+		// Group calls that represent the same logical log operation (same attribute, template, params).
+		// Identical calls share one interface method; distinct calls that happen to produce the same
+		// base name from the template get a numeric suffix.
+		var signatureToName = new Dictionary<string, string>(StringComparer.Ordinal);
 		var usedNames = new HashSet<string>(StringComparer.Ordinal);
 		var result = new List<(LogCallInfo, string)>(calls.Count);
 
 		foreach (var call in calls)
 		{
-			var baseName = GetBaseMethodName(call);
-			var name = baseName;
-			var counter = 2;
-			while (!usedNames.Add(name))
-				name = baseName + counter++;
+			var sigKey = GetCallSignatureKey(call);
+			if (!signatureToName.TryGetValue(sigKey, out var name))
+			{
+				var baseName = GetBaseMethodName(call);
+				name = baseName;
+				var counter = 2;
+				while (!usedNames.Add(name))
+					name = baseName + counter++;
+
+				signatureToName[sigKey] = name;
+			}
 
 			result.Add((call, name));
 		}
@@ -439,8 +535,30 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		return result;
 	}
 
+	static string GetCallSignatureKey(LogCallInfo call)
+	{
+		var attribute = GetAttributeFor(call);
+		var paramTypes = string.Join(",", call.Parameters.Select(p => p.TypeDisplayString));
+		return $"{attribute}|{call.MessageTemplate ?? ""}|{paramTypes}";
+	}
+
 	static string GetBaseMethodName(LogCallInfo call)
 	{
+		if (!string.IsNullOrEmpty(call.MessageTemplate))
+		{
+			// Strip ALL {…} placeholder tokens, then extract words.
+			var plainText = TemplatePlaceholderRegex.Replace(call.MessageTemplate, " ");
+			var words = TemplateWordRegex
+				.Matches(plainText)
+				.Cast<Match>()
+				.Select(m => ToPascalCaseWord(m.Value))
+				.ToArray();
+
+			if (words.Length > 0)
+				return string.Join(string.Empty, words);
+		}
+
+		// Fall back: for Log(LogLevel.X, …) use the level name, else use the ILogger method name.
 		return call.ILoggerMethodName == "Log" && call.ExplicitLogLevel is not null
 			? "Log" + call.ExplicitLogLevel
 			: call.ILoggerMethodName;
@@ -452,22 +570,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 	static string BuildInterfaceCode(
 		string interfaceName,
-		List<(LogCallInfo Call, string MethodName)> callsWithMethods,
-		string? ns
+		List<(LogCallInfo Call, string MethodName)> callsWithMethods
 	)
 	{
 		var sb = new StringBuilder();
-
-		sb.AppendLine("using Purview.Telemetry;");
-		sb.AppendLine("using Purview.Telemetry.Logging;");
-		sb.AppendLine();
-
-		bool hasNs = !string.IsNullOrEmpty(ns);
-		if (hasNs)
-		{
-			sb.AppendLine($"namespace {ns};");
-			sb.AppendLine();
-		}
 
 		sb.AppendLine("[Logger]");
 		sb.AppendLine($"public interface {interfaceName}");
@@ -550,6 +656,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		SemanticModel semanticModel
 	)
 	{
+		// Map non-canonical ctor logger param names → canonical name so duplicate injections
+		// can be consolidated: e.g. (ILogger logger, ILogger logger2) → (IServicesLogger logger).
+		var loggerVariableRemap = BuildLoggerVariableRemap(classDecl, loggerFields);
+
 		// Build a map from invocation → new invocation
 		var invocationMap = new Dictionary<InvocationExpressionSyntax, InvocationExpressionSyntax>(
 			SyntaxNodeReferenceComparer<InvocationExpressionSyntax>.Instance
@@ -557,7 +667,16 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 		foreach (var (call, methodName) in callsWithMethods)
 		{
-			var newInvocation = RewriteInvocation(call, methodName);
+			var receiverName =
+				call.Invocation.Expression is MemberAccessExpressionSyntax ma
+					? GetSimpleIdentifier(ma.Expression)
+					: null;
+			var canonicalReceiver =
+				receiverName is not null
+				&& loggerVariableRemap.TryGetValue(receiverName, out var mapped)
+					? mapped
+					: null;
+			var newInvocation = RewriteInvocation(call, methodName, canonicalReceiver);
 			invocationMap[call.Invocation] = newInvocation;
 		}
 
@@ -567,12 +686,28 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		);
 		foreach (var field in loggerFields)
 		{
+			if (field.FieldDeclaration is null)
+				continue;
+
 			var newField = RewriteFieldDeclaration(field.FieldDeclaration, interfaceName);
 			fieldMap[field.FieldDeclaration] = newField;
 		}
 
-		// Also find constructor parameters that take ILogger<T>
-		var ctorParamMap = BuildConstructorParamMap(
+		// Build a map from property declarations → new property declarations
+		var propertyMap = new Dictionary<PropertyDeclarationSyntax, PropertyDeclarationSyntax>(
+			SyntaxNodeReferenceComparer<PropertyDeclarationSyntax>.Instance
+		);
+		foreach (var field in loggerFields)
+		{
+			if (field.PropertyDeclaration is null)
+				continue;
+
+			var newProp = RewritePropertyDeclaration(field.PropertyDeclaration, interfaceName);
+			propertyMap[field.PropertyDeclaration] = newProp;
+		}
+
+		// Find all constructor and method parameters that take an ILogger type
+		var paramMap = BuildParamRewriteMap(
 			classDecl,
 			loggerFields,
 			interfaceName,
@@ -580,11 +715,12 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		);
 
 		// Replace all nodes
-		return classDecl.ReplaceNodes(
+		var newClassDecl = classDecl.ReplaceNodes(
 			invocationMap
 				.Keys.Cast<SyntaxNode>()
 				.Concat(fieldMap.Keys.Cast<SyntaxNode>())
-				.Concat(ctorParamMap.Keys.Cast<SyntaxNode>()),
+				.Concat(propertyMap.Keys.Cast<SyntaxNode>())
+				.Concat(paramMap.Keys.Cast<SyntaxNode>()),
 			(original, _) =>
 				original is InvocationExpressionSyntax inv
 				&& invocationMap.TryGetValue(inv, out var newInv)
@@ -592,14 +728,57 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 				: original is FieldDeclarationSyntax fld
 				&& fieldMap.TryGetValue(fld, out var newFld)
 					? newFld
+				: original is PropertyDeclarationSyntax prop
+				&& propertyMap.TryGetValue(prop, out var newProp)
+					? newProp
 				: original is ParameterSyntax param
-				&& ctorParamMap.TryGetValue(param, out var newParam)
+				&& paramMap.TryGetValue(param, out var newParam)
 					? newParam
 				: original
 		);
+
+		// Remove non-canonical logger parameters from constructor parameter lists.
+		var paramsToRemove = new HashSet<string>(loggerVariableRemap.Keys, StringComparer.Ordinal);
+		if (paramsToRemove.Count > 0)
+		{
+			// Primary constructor (C# 12+)
+			if (newClassDecl.ParameterList is { } primaryCtorParams)
+			{
+				var filtered = primaryCtorParams.Parameters.Where(
+					p => !paramsToRemove.Contains(p.Identifier.Text)
+				);
+				newClassDecl = newClassDecl.WithParameterList(
+					primaryCtorParams.WithParameters(SyntaxFactory.SeparatedList(filtered))
+				);
+			}
+
+			// Regular constructors
+			var ctors = newClassDecl.Members.OfType<ConstructorDeclarationSyntax>().ToList();
+			if (ctors.Count > 0)
+			{
+				newClassDecl = newClassDecl.ReplaceNodes(
+					ctors,
+					(ctor, _) =>
+					{
+						var filtered = ctor.ParameterList.Parameters.Where(
+							p => !paramsToRemove.Contains(p.Identifier.Text)
+						);
+						return ctor.WithParameterList(
+							ctor.ParameterList.WithParameters(SyntaxFactory.SeparatedList(filtered))
+						);
+					}
+				);
+			}
+		}
+
+		return newClassDecl;
 	}
 
-	static InvocationExpressionSyntax RewriteInvocation(LogCallInfo call, string newMethodName)
+	static InvocationExpressionSyntax RewriteInvocation(
+		LogCallInfo call,
+		string newMethodName,
+		string? canonicalReceiverName = null
+	)
 	{
 		// Build new argument list: only the template parameter args (no template string, no EventId)
 		var newArgs = SyntaxFactory.SeparatedList(
@@ -611,6 +790,14 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		var memberAccess = (MemberAccessExpressionSyntax)call.Invocation.Expression;
 
 		var newMemberAccess = memberAccess.WithName(SyntaxFactory.IdentifierName(newMethodName));
+
+		// If this invocation's receiver was a non-canonical logger, reroute to the canonical one.
+		if (canonicalReceiverName is not null)
+			newMemberAccess = newMemberAccess.WithExpression(
+				SyntaxFactory
+					.IdentifierName(canonicalReceiverName)
+					.WithTriviaFrom(memberAccess.Expression)
+			);
 
 		return call
 			.Invocation.WithExpression(newMemberAccess)
@@ -631,7 +818,16 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		return fieldDecl.WithDeclaration(fieldDecl.Declaration.WithType(newType));
 	}
 
-	static Dictionary<ParameterSyntax, ParameterSyntax> BuildConstructorParamMap(
+	static PropertyDeclarationSyntax RewritePropertyDeclaration(
+		PropertyDeclarationSyntax propDecl,
+		string interfaceName
+	)
+	{
+		var newType = SyntaxFactory.IdentifierName(interfaceName).WithTriviaFrom(propDecl.Type);
+		return propDecl.WithType(newType);
+	}
+
+	static Dictionary<ParameterSyntax, ParameterSyntax> BuildParamRewriteMap(
 		ClassDeclarationSyntax classDecl,
 		List<ILoggerFieldInfo> loggerFields,
 		string interfaceName,
@@ -642,37 +838,116 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 			SyntaxNodeReferenceComparer<ParameterSyntax>.Instance
 		);
 
-		// Match constructor parameters by the exact types of the identified logger fields.
+		// Match parameters by the exact types of the identified logger fields.
 		// This is more precise than re-detecting all ILogger variants from scratch.
 		var loggerFieldTypes = new HashSet<ITypeSymbol>(
-			loggerFields.Select(f => f.FieldSymbol.Type),
+			loggerFields.Select(f => f.TypeSymbol),
 			SymbolEqualityComparer.Default
 		);
 
+		// Explicit constructors
 		foreach (var ctor in classDecl.Members.OfType<ConstructorDeclarationSyntax>())
-		{
-			foreach (var param in ctor.ParameterList.Parameters)
-			{
-				if (param.Type is null)
-					continue;
+			RewriteMatchingParams(ctor.ParameterList.Parameters, loggerFieldTypes, interfaceName, semanticModel, result);
 
-				var typeInfo = semanticModel.GetTypeInfo(param.Type);
-				var type = typeInfo.Type;
-				if (type is null || !loggerFieldTypes.Contains(type))
-					continue;
+		// Primary constructor (C# 12+)
+		if (classDecl.ParameterList is { } primaryCtorParams)
+			RewriteMatchingParams(primaryCtorParams.Parameters, loggerFieldTypes, interfaceName, semanticModel, result);
 
-				result[param] = param.WithType(
-					SyntaxFactory.IdentifierName(interfaceName).WithTriviaFrom(param.Type)
-				);
-			}
-		}
+		// Regular methods
+		foreach (var method in classDecl.Members.OfType<MethodDeclarationSyntax>())
+			RewriteMatchingParams(method.ParameterList.Parameters, loggerFieldTypes, interfaceName, semanticModel, result);
 
 		return result;
+	}
+
+	static void RewriteMatchingParams(
+		SeparatedSyntaxList<ParameterSyntax> parameters,
+		HashSet<ITypeSymbol> loggerFieldTypes,
+		string interfaceName,
+		SemanticModel semanticModel,
+		Dictionary<ParameterSyntax, ParameterSyntax> result
+	)
+	{
+		foreach (var param in parameters)
+		{
+			if (param.Type is null)
+				continue;
+
+			var typeInfo = semanticModel.GetTypeInfo(param.Type);
+			var type = typeInfo.Type;
+			if (type is null || !loggerFieldTypes.Contains(type))
+				continue;
+
+			result[param] = param.WithType(
+				SyntaxFactory.IdentifierName(interfaceName).WithTriviaFrom(param.Type)
+			);
+		}
 	}
 
 	// -------------------------------------------------------------------------
 	// Helpers
 	// -------------------------------------------------------------------------
+
+	/// <summary>
+	/// Returns a map from non-canonical logger parameter name to the canonical name for each
+	/// constructor parameter list that contains more than one ILogger parameter.
+	/// E.g. given <c>(ILogger logger, ILogger logger2)</c>, returns <c>{logger2 → logger}</c>.
+	/// Only primary constructors and regular constructors are considered; method parameters are
+	/// intentionally excluded because deduplicating those would change the public API surface.
+	/// </summary>
+	static Dictionary<string, string> BuildLoggerVariableRemap(
+		ClassDeclarationSyntax classDecl,
+		List<ILoggerFieldInfo> loggerFields
+	)
+	{
+		var loggerFieldNames = new HashSet<string>(
+			loggerFields.Select(f => f.FieldName),
+			StringComparer.Ordinal
+		);
+		var remap = new Dictionary<string, string>(StringComparer.Ordinal);
+
+		if (classDecl.ParameterList is { } primaryCtorParams)
+			AddParamListRemap(primaryCtorParams.Parameters, loggerFieldNames, remap);
+
+		foreach (var ctor in classDecl.Members.OfType<ConstructorDeclarationSyntax>())
+			AddParamListRemap(ctor.ParameterList.Parameters, loggerFieldNames, remap);
+
+		return remap;
+	}
+
+	static void AddParamListRemap(
+		SeparatedSyntaxList<ParameterSyntax> parameters,
+		HashSet<string> loggerFieldNames,
+		Dictionary<string, string> remap
+	)
+	{
+		string? canonicalName = null;
+		foreach (var param in parameters)
+		{
+			if (!loggerFieldNames.Contains(param.Identifier.Text))
+				continue;
+
+			if (canonicalName is null)
+				canonicalName = param.Identifier.Text;
+			else
+				remap[param.Identifier.Text] = canonicalName;
+		}
+	}
+
+	static bool IsILoggerType(
+		INamedTypeSymbol type,
+		INamedTypeSymbol? iLoggerOpen,
+		INamedTypeSymbol? iLoggerNonGeneric
+	) =>
+		(
+			type.IsGenericType
+			&& iLoggerOpen is not null
+			&& SymbolEqualityComparer.Default.Equals(type.ConstructedFrom, iLoggerOpen)
+		)
+		|| (
+			iLoggerNonGeneric is not null
+			&& SymbolEqualityComparer.Default.Equals(type, iLoggerNonGeneric)
+		);
 
 	static List<string> ExtractPlaceholders(string? template)
 	{
@@ -697,6 +972,21 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 			: char.ToLowerInvariant(name[0]) + name.Substring(1);
 	}
 
+	static string ToPascalCaseWord(string word)
+	{
+		if (string.IsNullOrEmpty(word))
+			return word;
+
+		// ALL_CAPS (e.g. "HELLO", "HTTP") → only capitalise the first letter.
+		if (word.Length > 1 && word.All(char.IsUpper))
+#pragma warning disable CA1308
+			return char.ToUpperInvariant(word[0]) + word.Substring(1).ToLowerInvariant();
+#pragma warning restore CA1308
+
+		// Mixed / lowercase: just ensure the first character is uppercase.
+		return char.ToUpperInvariant(word[0]) + word.Substring(1);
+	}
+
 	/// <summary>
 	/// Returns the natural (pre-conversion) type of an expression and its display string.
 	/// Uses <see cref="TypeInfo.Type"/> (the declared type) rather than
@@ -710,19 +1000,6 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		return (type, typeStr);
 	}
 
-	static string? GetNamespaceOf(ClassDeclarationSyntax classDecl)
-	{
-		foreach (var ancestor in classDecl.Ancestors())
-		{
-			if (ancestor is NamespaceDeclarationSyntax ns)
-				return ns.Name.ToString();
-
-			if (ancestor is FileScopedNamespaceDeclarationSyntax fns)
-				return fns.Name.ToString();
-		}
-
-		return null;
-	}
 }
 
 /// <summary>

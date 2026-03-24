@@ -1,4 +1,6 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Records;
+﻿using Microsoft.CodeAnalysis;
+
+namespace Purview.Telemetry.SourceGenerator.Records;
 
 record LoggerAttributeRecord(
 	AttributeValue<int> DefaultLevel,
@@ -27,4 +29,4 @@ record LogPropertiesAttributeRecord(
 	AttributeValue<bool> Transitive
 );
 
-record ExpandEnumerableAttributeRecord(AttributeValue<int> MaximumValueCount);
+record ExpandEnumerableAttributeRecord(AttributeValue<int> MaximumValueCount, Location? ParamLocation = null);

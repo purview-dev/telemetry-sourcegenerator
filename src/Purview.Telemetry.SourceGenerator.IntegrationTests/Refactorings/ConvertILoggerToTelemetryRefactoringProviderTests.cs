@@ -125,7 +125,8 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("IWeatherServiceLogger");
 		await Assert.That(result).Contains("[Info]");
-		await Assert.That(result).Contains("void LogInformation(string city)");
+		await Assert.That(result).Contains("void GettingWeatherFor(string city)");
+		await Assert.That(result).Contains("using Purview.Telemetry;");
 	}
 
 	[Test]
@@ -231,9 +232,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
-		// Both methods should appear, with second one being deduplicated
-		await Assert.That(result).Contains("void LogInformation(");
-		await Assert.That(result).Contains("void LogInformation2(");
+		// "User {UserId} logged in"       → UserLoggedIn
+		// "User {UserId} logged in from {Ip}" → UserLoggedInFrom
+		await Assert.That(result).Contains("void UserLoggedIn(");
+		await Assert.That(result).Contains("void UserLoggedInFrom(");
 	}
 
 	[Test]
@@ -295,7 +297,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
-		await Assert.That(result).Contains("void LogInformation()");
+		await Assert.That(result).Contains("void HealthCheckStarted()");
 	}
 
 	[Test]
@@ -327,7 +329,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("ISimpleServiceLogger");
 		await Assert.That(result).Contains("[Warning]");
-		await Assert.That(result).Contains("void LogWarning(string name)");
+		await Assert.That(result).Contains("void Running(string name)");
 	}
 
 	[Test]
@@ -356,8 +358,8 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
-		// The invocation should now be _logger.LogDebug(key, value) — no template string
-		await Assert.That(result).Contains("_logger.LogDebug(key, value)");
+		// The invocation should now be _logger.Saving(key, value) — no template string
+		await Assert.That(result).Contains("_logger.Saving(key, value)");
 	}
 
 	[Test]
@@ -387,7 +389,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Warning]");
-		await Assert.That(result).Contains("void LogWarning(string action)");
+		await Assert.That(result).Contains("void Audit(string action)");
 	}
 
 	[Test]
@@ -482,7 +484,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Info]");
-		await Assert.That(result).Contains("void LogInformation(int orderId)");
+		await Assert.That(result).Contains("void ProcessingOrder(int orderId)");
 		await Assert.That(result).DoesNotContain("EventId");
 	}
 
@@ -554,7 +556,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Info]");
-		await Assert.That(result).Contains("void LogInformation(string key)");
+		await Assert.That(result).Contains("void RefreshingCacheFor(string key)");
 	}
 
 	[Test]
@@ -617,7 +619,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
-		await Assert.That(result).Contains("void LogInformation(object user)");
+		await Assert.That(result).Contains("void UserLoggedIn(object user)");
 		await Assert.That(result).DoesNotContain("@User");
 	}
 
@@ -647,7 +649,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
-		await Assert.That(result).Contains("void LogDebug(object product)");
+		await Assert.That(result).Contains("void ProductCreated(object product)");
 		await Assert.That(result).DoesNotContain("$Product");
 	}
 
@@ -677,7 +679,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
-		await Assert.That(result).Contains("void LogInformation(double value)");
+		await Assert.That(result).Contains("void MetricValue(double value)");
 	}
 
 	[Test]
@@ -706,7 +708,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
-		await Assert.That(result).Contains("void LogWarning(int count)");
+		await Assert.That(result).Contains("void ItemCount(int count)");
 	}
 
 	[Test]
@@ -842,5 +844,343 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		await Assert.That(result).Contains("IFilterServiceLogger logger");
 		// non-logger param must be untouched
 		await Assert.That(result).Contains("string config");
+	}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// Primary constructor support
+	// ─────────────────────────────────────────────────────────────────────────
+
+	[Test]
+	public async Task ComputeRefactorings_GivenPrimaryConstructorWithILogger_ReturnsAction(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$WeatherService(ILogger<WeatherService> logger)
+			{
+				public void GetWeather(string city)
+				{
+					logger.LogInformation("Getting weather for {City}", city);
+				}
+			}
+			""";
+
+		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(actions).IsNotEmpty();
+		await Assert.That(actions[0].Title).IsEqualTo("Convert ILogger usage to Purview Telemetry interface");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenPrimaryConstructorWithGenericILogger_GeneratesInterface(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$WeatherService(ILogger<WeatherService> logger)
+			{
+				public void GetWeather(string city)
+				{
+					logger.LogInformation("Getting weather for {City}", city);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("[Logger]");
+		await Assert.That(result).Contains("IWeatherServiceLogger");
+		await Assert.That(result).Contains("[Info]");
+		await Assert.That(result).Contains("void GettingWeatherFor(string city)");
+		// Primary constructor param type should be replaced
+		await Assert.That(result).Contains("IWeatherServiceLogger logger");
+		await Assert.That(result).DoesNotContain("ILogger<WeatherService>");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenPrimaryConstructorWithNonGenericILogger_GeneratesInterface(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$SimpleService(ILogger logger)
+			{
+				public void Run(string name)
+				{
+					logger.LogWarning("Running {Name}", name);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("[Logger]");
+		await Assert.That(result).Contains("ISimpleServiceLogger");
+		await Assert.That(result).Contains("[Warning]");
+		await Assert.That(result).Contains("ISimpleServiceLogger logger");
+		await Assert.That(result).DoesNotContain("ILogger logger");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenPrimaryConstructorWithMultipleLoggers_ConsolidatesToSingleInjection(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace SampleApp.Web;
+
+			sealed class $$Services(ILogger<Services> logger, ILogger logger2)
+			{
+				public void THING()
+				{
+					logger.LogInformation("HELLO: {Thing}", "WORLD");
+					logger2.LogWarning("HELLO: {Thing}", "WORLD");
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("[Logger]");
+		await Assert.That(result).Contains("IServicesLogger");
+		await Assert.That(result).Contains("[Info]");
+		await Assert.That(result).Contains("[Warning]");
+		// Both loggers consolidated into a single canonical parameter
+		await Assert.That(result).Contains("IServicesLogger logger");
+		await Assert.That(result).DoesNotContain("IServicesLogger logger2");
+		await Assert.That(result).DoesNotContain("ILogger<Services>");
+		await Assert.That(result).DoesNotContain("ILogger logger2");
+		// All calls now go through the canonical 'logger' variable
+		await Assert.That(result).Contains("logger.Hello(");
+		await Assert.That(result).Contains("logger.Hello2(");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenPrimaryConstructorWithMixedParams_OnlyReplacesLoggers(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$OrderService(ILogger<OrderService> logger, string connectionString)
+			{
+				public void ProcessOrder(int orderId)
+				{
+					logger.LogInformation("Processing order {OrderId}", orderId);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("IOrderServiceLogger logger");
+		// Non-logger param must be untouched
+		await Assert.That(result).Contains("string connectionString");
+	}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// Property injection support
+	// ─────────────────────────────────────────────────────────────────────────
+
+	[Test]
+	public async Task ComputeRefactorings_GivenClassWithILoggerProperty_ReturnsAction(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$WeatherService
+			{
+				public ILogger<WeatherService> Logger { get; set; }
+
+				public void GetWeather(string city)
+				{
+					Logger.LogInformation("Getting weather for {City}", city);
+				}
+			}
+			""";
+
+		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(actions).IsNotEmpty();
+		await Assert.That(actions[0].Title).IsEqualTo("Convert ILogger usage to Purview Telemetry interface");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenILoggerProperty_ReplacesPropertyType(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$ReportService
+			{
+				public ILogger<ReportService> Logger { get; set; }
+
+				public void Generate(string reportName)
+				{
+					Logger.LogInformation("Generating {ReportName}", reportName);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("[Logger]");
+		await Assert.That(result).Contains("IReportServiceLogger");
+		await Assert.That(result).Contains("[Info]");
+		await Assert.That(result).Contains("IReportServiceLogger Logger");
+		await Assert.That(result).DoesNotContain("ILogger<ReportService>");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenInitOnlyILoggerProperty_ReplacesPropertyType(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$AuditService
+			{
+				public ILogger<AuditService> Logger { get; init; }
+
+				public void Audit(string action)
+				{
+					Logger.LogWarning("Audit: {Action}", action);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("IAuditServiceLogger Logger");
+		await Assert.That(result).DoesNotContain("ILogger<AuditService>");
+	}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// Method parameter support
+	// ─────────────────────────────────────────────────────────────────────────
+
+	[Test]
+	public async Task ComputeRefactorings_GivenClassWithILoggerMethodParam_ReturnsAction(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$WeatherService
+			{
+				public void GetWeather(ILogger<WeatherService> logger, string city)
+				{
+					logger.LogInformation("Getting weather for {City}", city);
+				}
+			}
+			""";
+
+		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(actions).IsNotEmpty();
+		await Assert.That(actions[0].Title).IsEqualTo("Convert ILogger usage to Purview Telemetry interface");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenILoggerMethodParam_ReplacesParamType(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$DataService
+			{
+				public void Save(ILogger<DataService> logger, string key, int value)
+				{
+					logger.LogDebug("Saving {Key}={Value}", key, value);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("[Logger]");
+		await Assert.That(result).Contains("IDataServiceLogger");
+		await Assert.That(result).Contains("[Debug]");
+		await Assert.That(result).Contains("IDataServiceLogger logger");
+		// Non-logger params must be untouched
+		await Assert.That(result).Contains("string key");
+		await Assert.That(result).Contains("int value");
+		await Assert.That(result).DoesNotContain("ILogger<DataService>");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenILoggerMethodParamAcrossMultipleMethods_ReplacesAll(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$WorkerService
+			{
+				public void DoWork(ILogger<WorkerService> logger, string task)
+				{
+					logger.LogInformation("Starting {Task}", task);
+				}
+
+				public void FailWork(ILogger<WorkerService> logger, string task)
+				{
+					logger.LogError("Failed {Task}", task);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("[Info]");
+		await Assert.That(result).Contains("[Error]");
+		// Both method params should be rewritten
+		await Assert.That(result).DoesNotContain("ILogger<WorkerService>");
+		await Assert.That(result).Contains("IWorkerServiceLogger");
 	}
 }
