@@ -9,39 +9,44 @@ namespace Purview.Telemetry.SourceGenerator;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 {
-	static readonly DiagnosticDescriptor _genericInterfacesNotSupported = ToDescriptor(
+	static readonly DiagnosticDescriptor GenericInterfacesNotSupported = ToDescriptor(
 		TelemetryDiagnostics.General.GenericInterfacesNotSupported
 	);
-	static readonly DiagnosticDescriptor _genericMethodsNotSupported = ToDescriptor(
+	static readonly DiagnosticDescriptor GenericMethodsNotSupported = ToDescriptor(
 		TelemetryDiagnostics.General.GenericMethodsNotSupported
 	);
-	static readonly DiagnosticDescriptor _duplicateMethodNames = ToDescriptor(
+	static readonly DiagnosticDescriptor DuplicateMethodNames = ToDescriptor(
 		TelemetryDiagnostics.General.DuplicateMethodNamesAreNotSupported
 	);
-	static readonly DiagnosticDescriptor _inferenceNotSupportedWithMultiTargeting = ToDescriptor(
+	static readonly DiagnosticDescriptor InferenceNotSupportedWithMultiTargeting = ToDescriptor(
 		TelemetryDiagnostics.General.InferenceNotSupportedWithMultiTargeting
 	);
-	static readonly DiagnosticDescriptor _multiGenerationTargetsNotSupported = ToDescriptor(
+	static readonly DiagnosticDescriptor MultiGenerationTargetsNotSupported = ToDescriptor(
 		TelemetryDiagnostics.General.MultiGenerationTargetsNotSupported
 	);
-	static readonly DiagnosticDescriptor _methodTargetNotRegisteredOnInterface = ToDescriptor(
+	static readonly DiagnosticDescriptor MethodTargetNotRegisteredOnInterface = ToDescriptor(
 		TelemetryDiagnostics.General.MethodTargetNotRegisteredOnInterface
 	);
-	static readonly DiagnosticDescriptor _msLoggingNotReferenced = ToDescriptor(
+	static readonly DiagnosticDescriptor MsLoggingNotReferenced = ToDescriptor(
 		TelemetryDiagnostics.Logging.MSLoggingNotReferenced
 	);
 
 	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-		[
-			_genericInterfacesNotSupported,
-			_genericMethodsNotSupported,
-			_duplicateMethodNames,
-			_inferenceNotSupportedWithMultiTargeting,
-			_multiGenerationTargetsNotSupported,
-			_methodTargetNotRegisteredOnInterface,
-			_msLoggingNotReferenced,
-		];
+	[
+		GenericInterfacesNotSupported,
+		GenericMethodsNotSupported,
+		DuplicateMethodNames,
+		InferenceNotSupportedWithMultiTargeting,
+		MultiGenerationTargetsNotSupported,
+		MethodTargetNotRegisteredOnInterface,
+		MsLoggingNotReferenced,
+	];
 
+	[System.Diagnostics.CodeAnalysis.SuppressMessage(
+		"Design",
+		"CA1062:Validate arguments of public methods",
+		Justification = "Contract states `context` is never null"
+	)]
 	public override void Initialize(AnalysisContext context)
 	{
 		context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
@@ -80,7 +85,9 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 		if (interfaceSymbol.Arity > 0)
 		{
 			foreach (var location in interfaceSymbol.Locations)
-				context.ReportDiagnostic(Diagnostic.Create(_genericInterfacesNotSupported, location));
+				context.ReportDiagnostic(
+					Diagnostic.Create(GenericInterfacesNotSupported, location)
+				);
 			return;
 		}
 
@@ -113,7 +120,7 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 			var additional = allLocations.Length > 1 ? allLocations.Skip(1).ToArray() : [];
 
 			context.ReportDiagnostic(
-				Diagnostic.Create(_duplicateMethodNames, primary, additional, kvp.Key)
+				Diagnostic.Create(DuplicateMethodNames, primary, additional, kvp.Key)
 			);
 		}
 
@@ -127,7 +134,7 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 			if (iLoggerSymbol is null)
 			{
 				foreach (var location in interfaceSymbol.Locations)
-					context.ReportDiagnostic(Diagnostic.Create(_msLoggingNotReferenced, location));
+					context.ReportDiagnostic(Diagnostic.Create(MsLoggingNotReferenced, location));
 			}
 		}
 
@@ -154,18 +161,24 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 			if (method.Arity > 0)
 			{
 				foreach (var location in method.Locations)
-					context.ReportDiagnostic(Diagnostic.Create(_genericMethodsNotSupported, location));
+					context.ReportDiagnostic(
+						Diagnostic.Create(GenericMethodsNotSupported, location)
+					);
 				continue;
 			}
 
 			// Multi-target validation (TSG1001, TSG1002, TSG1010)
-			var targetState = Utilities.IsValidGenerationTarget(method, generationType, generationType);
+			var targetState = Utilities.IsValidGenerationTarget(
+				method,
+				generationType,
+				generationType
+			);
 
 			if (targetState.RaiseInferenceNotSupportedWithMultiTargeting)
 			{
 				foreach (var location in method.Locations)
 					context.ReportDiagnostic(
-						Diagnostic.Create(_inferenceNotSupportedWithMultiTargeting, location)
+						Diagnostic.Create(InferenceNotSupportedWithMultiTargeting, location)
 					);
 			}
 
@@ -173,7 +186,7 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 			{
 				foreach (var location in method.Locations)
 					context.ReportDiagnostic(
-						Diagnostic.Create(_multiGenerationTargetsNotSupported, location)
+						Diagnostic.Create(MultiGenerationTargetsNotSupported, location)
 					);
 			}
 
@@ -181,7 +194,7 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 			{
 				foreach (var location in method.Locations)
 					context.ReportDiagnostic(
-						Diagnostic.Create(_methodTargetNotRegisteredOnInterface, location)
+						Diagnostic.Create(MethodTargetNotRegisteredOnInterface, location)
 					);
 			}
 		}
