@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
-using Purview.Telemetry.SourceGenerator.Templates;
+﻿using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator.Records;
 
@@ -9,39 +7,15 @@ record LoggerTarget(
 	GenerationType GenerationType,
 	string ClassNameToGenerate,
 	string? ClassNamespace,
-	string[] ParentClasses,
+	EquatableArray<string> ParentClasses,
 	string? FullNamespace,
 	string FullyQualifiedName,
 	PurviewTypeInfo InterfaceType,
 	LoggerAttributeRecord LoggerAttribute,
 	int DefaultLevel,
-	ImmutableArray<LogMethodTarget> LogMethods,
-	ImmutableDictionary<string, Location[]> DuplicateMethods,
-	bool UseMSLoggingTelemetryBasedGeneration,
-	ImmutableArray<(TelemetryDiagnosticDescriptor, ImmutableArray<Location>)>? Failures
-)
-{
-	public static LoggerTarget Failed(
-		TelemetryDiagnosticDescriptor diagnostic,
-		ImmutableArray<Location> locations
-	) =>
-		new(
-			null!,
-			GenerationType.None,
-			null!,
-			null,
-			null!,
-			null,
-			null!,
-			Constants.Empty,
-			null!,
-			0,
-			[],
-			null!,
-			false,
-			[(diagnostic, locations)]
-		);
-}
+	EquatableArray<LogMethodTarget> LogMethods,
+	bool UseMSLoggingTelemetryBasedGeneration
+);
 
 record LogMethodTarget(
 	string MethodName,
@@ -51,15 +25,14 @@ record LogMethodTarget(
 	string LogName,
 	int? EventId,
 	string MessageTemplate,
-	ImmutableArray<MessageTemplateHole> TemplateProperties,
+	EquatableArray<MessageTemplateHole> TemplateProperties,
 	bool TemplateIsOrdinalBased,
 	bool TemplateIsNamedBased,
 	string MSLevel,
-	ImmutableArray<LogParameterTarget> Parameters,
-	ImmutableArray<LogParameterTarget> ParametersSansException,
+	EquatableArray<LogParameterTarget> Parameters,
+	EquatableArray<LogParameterTarget> ParametersSansException,
 	LogParameterTarget? ExceptionParameter,
 	bool HasMultipleExceptions,
-	Location? MethodLocation,
 	bool InferredErrorLevel,
 	TargetGeneration TargetGenerationState,
 	bool UseV1Generation
@@ -79,16 +52,14 @@ record LogParameterTarget(
 	bool IsIEnumerable,
 	bool IsArray,
 	bool IsComplexType,
-	ImmutableArray<Location> Locations,
 	LogPropertiesAttributeRecord? LogPropertiesAttribute,
-	ImmutableArray<LogPropertiesParameterDetails>? LogProperties,
+	EquatableArray<LogPropertiesParameterDetails>? LogProperties,
 	ExpandEnumerableAttributeRecord? ExpandEnumerableAttribute,
-	GenerationType ExcludedTargets
+	GenerationType ExcludedTargets,
+	EquatableArray<MessageTemplateHole> ReferencedHoles = default
 )
 {
-	public bool UsedInTemplate => ReferencedHoles.Count > 0;
-
-	public List<MessageTemplateHole> ReferencedHoles { get; } = [];
+	public bool UsedInTemplate => !ReferencedHoles.IsEmpty;
 }
 
 record LogPropertiesParameterDetails(string PropertyName, bool IsNullable);

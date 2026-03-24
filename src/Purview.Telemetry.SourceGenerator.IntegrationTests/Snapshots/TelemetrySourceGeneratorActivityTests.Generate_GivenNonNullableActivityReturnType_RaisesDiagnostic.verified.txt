@@ -1,13 +1,6 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-	[Activity]
-	Activity Activity([Baggage]string stringParam, [Tag]int intParam);
-          ^^^^^^^^
-}
-*/
- Guid_1: (12,10)-(12,18),
       Message: Activity can be null when no listeners are active. Consider using 'Activity?' as the return type to make this explicit.,
       Severity: Warning,
       WarningLevel: 1,

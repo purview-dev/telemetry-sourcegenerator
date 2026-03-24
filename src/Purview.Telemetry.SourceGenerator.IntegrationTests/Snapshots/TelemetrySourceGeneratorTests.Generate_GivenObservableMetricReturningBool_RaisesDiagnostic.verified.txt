@@ -1,7 +1,6 @@
 ﻿{
   Diagnostics: [
     {
-      Location: ,
       Message: Observable metrics can only return void or Activity? (when combined with Activity attribute). Boolean returns are not supported for observables.,
       Severity: Error,
       Descriptor: {

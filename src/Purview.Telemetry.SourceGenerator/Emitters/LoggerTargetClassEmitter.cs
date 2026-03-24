@@ -18,20 +18,6 @@ static partial class LoggerTargetClassEmitter
 
 		logger?.Debug($"Generating logging class for: {target.FullyQualifiedName}");
 
-		if (
-			EmitHelpers.GenerateDuplicateMethodDiagnostics(
-				GenerationType.Logging,
-				target.GenerationType,
-				target.DuplicateMethods,
-				context,
-				logger
-			)
-		)
-		{
-			logger?.Debug("Found duplicate methods while generating logger, exiting.");
-			return;
-		}
-
 		var indent = EmitHelpers.EmitNamespaceStart(
 			target.ClassNamespace,
 			target.ParentClasses,

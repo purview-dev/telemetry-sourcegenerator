@@ -10,46 +10,13 @@ partial class TelemetrySourceGenerator
 {
 	static void RegisterMetricsGeneration(
 		IncrementalGeneratorInitializationContext context,
+		IncrementalValuesProvider<MeterTarget?> meterTargets,
 		GenerationLogger? logger
 	)
 	{
-		// Transform
-		Func<
-			GeneratorAttributeSyntaxContext,
-			CancellationToken,
-			MeterTarget?
-		> meterTargetTransform =
-			logger == null
-				? static (context, cancellationToken) =>
-					PipelineHelpers.BuildMeterTransform(context, null, cancellationToken)
-				: (context, cancellationToken) =>
-					PipelineHelpers.BuildMeterTransform(context, logger, cancellationToken);
-
-		// Register
-		var meterTargetsPredicate = context
-			.SyntaxProvider.ForAttributeWithMetadataName(
-				Constants.Metrics.MeterAttribute.TypeInfo.FullyQualifiedName,
-				static (node, token) => PipelineHelpers.HasMeterTargetAttribute(node, token),
-				meterTargetTransform
-			)
-			.WhereNotNull()
-			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_Meters");
-
-		// Build generation (static vs. non-static is for the logger).
-		Action<
-			SourceProductionContext,
-			(Compilation Compilation, ImmutableArray<MeterTarget?> Targets)
-		> generationMeterAction =
-			logger == null
-				? static (spc, source) => GenerateMeterTargets(source.Targets, spc, null)
-				: (spc, source) => GenerateMeterTargets(source.Targets, spc, logger);
-
-		// Register with the source generator.
-		var meterTargets = context.CompilationProvider.Combine(meterTargetsPredicate.Collect());
-
 		context.RegisterImplementationSourceOutput(
-			source: meterTargets,
-			action: generationMeterAction
+			source: meterTargets.Collect(),
+			action: (spc, source) => GenerateMeterTargets(source, spc, logger)
 		);
 	}
 
@@ -62,48 +29,11 @@ partial class TelemetrySourceGenerator
 		if (targets.Length == 0)
 			return;
 
-		var failures = targets
-			.Where(m => m!.Failures?.Length > 0)
-			.SelectMany(m => m!.Failures!.Value)
-			.ToArray();
-		if (failures.Length > 0)
+		foreach (var target in targets)
 		{
-			foreach (var failure in failures)
-				TelemetryDiagnostics.Report(spc.ReportDiagnostic, failure.Item1, failure.Item2);
-		}
+			logger?.Debug($"Meter generation target: {target!.FullyQualifiedName}");
 
-		try
-		{
-			foreach (var target in targets)
-			{
-				if (
-					target!.Failures?.Length > 0
-					&& target.Failures.Value.Any(m => m.Item1.Severity == DiagnosticSeverity.Error)
-				)
-				{
-					logger?.Debug(
-						$"Skipping meter generation target due to error diagnostic: {target.FullyQualifiedName}"
-					);
-
-					continue;
-				}
-
-				logger?.Debug($"Meter generation target: {target!.FullyQualifiedName}");
-
-				MeterTargetClassEmitter.GenerateImplementation(target!, spc, logger);
-			}
-		}
-		catch (Exception ex)
-		{
-			logger?.Error(
-				$"A fatal error occurred while executing the source generation stage: {ex}"
-			);
-
-			TelemetryDiagnostics.Report(
-				spc.ReportDiagnostic,
-				TelemetryDiagnostics.General.FatalExecutionDuringExecution,
-				ex
-			);
+			MeterTargetClassEmitter.GenerateImplementation(target!, spc, logger);
 		}
 	}
 }

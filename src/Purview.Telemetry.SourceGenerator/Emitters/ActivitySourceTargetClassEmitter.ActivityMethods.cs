@@ -42,13 +42,6 @@ partial class ActivitySourceTargetClassEmitter
 				"Activity parameter not allowed on Activity start/ create method, only event."
 			);
 
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.ActivityParameterNotAllowed,
-				activityParam.Locations,
-				activityParam.ParameterName
-			);
-
 			return;
 		}
 
@@ -56,13 +49,6 @@ partial class ActivitySourceTargetClassEmitter
 		{
 			logger?.Diagnostic(
 				"Timestamp parameter not allowed on Activity start/ create method, only events."
-			);
-
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.TimestampParameterNotAllowed,
-				timestampParam.Locations,
-				timestampParam.ParameterName
 			);
 
 			return;
@@ -90,13 +76,6 @@ partial class ActivitySourceTargetClassEmitter
 		if (createOnly && startTimeParam != null)
 		{
 			logger?.Diagnostic("StartTime parameter not allowed on Activity create method.");
-
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.StartTimeParameterNotAllowed,
-				startTimeParam.Locations,
-				startTimeParam.ParameterName
-			);
 
 			return;
 		}

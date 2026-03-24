@@ -37,10 +37,7 @@ partial class PipelineHelpers
 			logger?.Diagnostic(
 				$"Cannot generate a Meter target for a generic interface '{interfaceDeclaration.Flatten()}'."
 			);
-			return MeterTarget.Failed(
-				TelemetryDiagnostics.General.GenericInterfacesNotSupported,
-				interfaceSymbol.Locations
-			);
+			return null;
 		}
 
 		var semanticModel = context.SemanticModel;
@@ -109,8 +106,7 @@ partial class PipelineHelpers
 			semanticModel,
 			interfaceSymbol,
 			logger,
-			token,
-			out var methodDiagnostics
+			token
 		);
 
 		return new(
@@ -124,9 +120,7 @@ partial class PipelineHelpers
 			InterfaceType: PurviewTypeFactory.Create(interfaceSymbol),
 			MeterName: meterName,
 			MeterGeneration: meterGenerationAttribute,
-			InstrumentationMethods: instrumentMethods,
-			DuplicateMethods: BuildDuplicateMethods(interfaceSymbol, semanticModel, token),
-			Failures: methodDiagnostics?.ToImmutableArray()
+			InstrumentationMethods: instrumentMethods
 		);
 	}
 
@@ -139,8 +133,7 @@ partial class PipelineHelpers
 		SemanticModel semanticModel,
 		INamedTypeSymbol interfaceSymbol,
 		GenerationLogger? logger,
-		CancellationToken token,
-		out (TelemetryDiagnosticDescriptor, ImmutableArray<Location>)[]? methodDiagnostics
+		CancellationToken token
 	)
 	{
 		token.ThrowIfCancellationRequested();
@@ -148,8 +141,6 @@ partial class PipelineHelpers
 		// Get naming convention from TelemetryGenerationAttribute (default to OpenTelemetry = 1)
 		var namingConvention = telemetryGeneration?.NamingConvention.Value ?? 1;
 
-		List<(TelemetryDiagnosticDescriptor, ImmutableArray<Location>)>? methodDiagnosticsList =
-			null;
 		var lowercaseInstrumentName = meterAttribute.LowercaseInstrumentName.IsSet
 			? meterAttribute.LowercaseInstrumentName.Value!.Value
 			: (meterGenerationAttribute?.LowercaseInstrumentName?.IsSet) != true
@@ -182,11 +173,6 @@ partial class PipelineHelpers
 
 			if (method.Arity > 0)
 			{
-				methodDiagnosticsList ??= [];
-				methodDiagnosticsList.Add(
-					(TelemetryDiagnostics.General.GenericMethodsNotSupported, method.Locations)
-				);
-
 				continue;
 			}
 
@@ -278,41 +264,17 @@ partial class PipelineHelpers
 					logger?.Debug(
 						$"Identified {interfaceSymbol.Name}.{method.Name} as problematic as it has another target types."
 					);
-
-					methodDiagnosticsList ??= [];
-					methodDiagnosticsList.Add(
-						(
-							TelemetryDiagnostics.General.MultiGenerationTargetsNotSupported,
-							method.Locations
-						)
-					);
 				}
 				else if (targetGenerationState.RaiseInferenceNotSupportedWithMultiTargeting)
 				{
 					logger?.Debug(
 						$"Identified {interfaceSymbol.Name}.{method.Name} as problematic as it is inferred."
 					);
-
-					methodDiagnosticsList ??= [];
-					methodDiagnosticsList.Add(
-						(
-							TelemetryDiagnostics.General.InferenceNotSupportedWithMultiTargeting,
-							method.Locations
-						)
-					);
 				}
 				else if (targetGenerationState.RaiseMissingInterfaceSource)
 				{
 					logger?.Debug(
 						$"Identified {interfaceSymbol.Name}.{method.Name} as problematic as the interface is missing source attribute(s) for the method's target(s)."
-					);
-
-					methodDiagnosticsList ??= [];
-					methodDiagnosticsList.Add(
-						(
-							TelemetryDiagnostics.General.MethodTargetNotRegisteredOnInterface,
-							method.Locations
-						)
 					);
 				}
 			}
@@ -321,138 +283,39 @@ partial class PipelineHelpers
 				if (instrumentAttribute == null)
 				{
 					logger?.Warning("Missing instrument attribute.");
-
-					methodDiagnosticsList ??= [];
-					methodDiagnosticsList.Add(
-						(TelemetryDiagnostics.Metrics.NoInstrumentDefined, method.Locations)
-					);
 				}
 				else if (!validAutoCounter && measurementParameter == null)
 				{
-					methodDiagnosticsList ??= [];
-					methodDiagnosticsList.Add(
-						(TelemetryDiagnostics.Metrics.NoMeasurementValueDefined, method.Locations)
-					);
+					// No measurement value defined
 				}
 				else
 				{
-					if (validAutoCounter)
-					{
-						if (measurementParameters.Length > 0)
-						{
-							methodDiagnosticsList ??= [];
-							methodDiagnosticsList.Add(
-								(
-									TelemetryDiagnostics
-										.Metrics
-										.AutoIncrementCountAndMeasurementParam,
-									measurementParameters
-										.SelectMany(m => m.Locations)
-										.ToImmutableArray()
-								)
-							);
-						}
-					}
-					else
+					if (!validAutoCounter)
 					{
 						// Validate the parameters and type.
-						if (instrumentAttribute.IsObservable)
+						if (!instrumentAttribute.IsObservable)
 						{
-							if (!measurementParameter!.IsFunc)
-							{
-								methodDiagnosticsList ??= [];
-								methodDiagnosticsList.Add(
-									(
-										TelemetryDiagnostics.Metrics.ObservableRequiredFunc,
-										measurementParameter.Locations
-									)
-								);
-							}
-						}
-						else
-						{
-							if (measurementParameters.Length != 1)
-							{
-								methodDiagnosticsList ??= [];
-								methodDiagnosticsList.Add(
-									(
-										TelemetryDiagnostics
-											.Metrics
-											.MoreThanOneMeasurementValueDefined,
-										measurementParameters
-											.SelectMany(m => m.Locations)
-											.ToImmutableArray()
-									)
-								);
-							}
+							// Multiple measurement parameters or other issues are informational only
 						}
 					}
-				}
 
-				if (instrumentAttribute != null)
-				{
-					// Check if this is multi-target with Activity (Activity return type is allowed)
-					var isMultiTargetWithActivity =
-						targetGenerationState.IsMultiTarget
-						&& targetGenerationState.MethodTargets.HasFlag(GenerationType.Activities);
-					var returnsActivity = Constants.Activities.SystemDiagnostics.Activity.Equals(
-						method.ReturnType
-					);
-
-					// Validate return types for observable and auto-counter
-					if (instrumentAttribute.IsObservable && returnsBool)
+					if (instrumentAttribute != null)
 					{
-						methodDiagnosticsList ??= [];
-						methodDiagnosticsList.Add(
-							(
-								TelemetryDiagnostics.Metrics.ObservableCannotReturnBool,
-								method.ReturnType.Locations
-							)
+						// Check if this is multi-target with Activity (Activity return type is allowed)
+						var isMultiTargetWithActivity =
+							targetGenerationState.IsMultiTarget
+							&& targetGenerationState.MethodTargets.HasFlag(GenerationType.Activities);
+						var returnsActivity = Constants.Activities.SystemDiagnostics.Activity.Equals(
+							method.ReturnType
 						);
-					}
-					else if (validAutoCounter && !method.ReturnsVoid)
-					{
-						// For multi-target with Activity, Activity? return is valid
-						if (!(isMultiTargetWithActivity && returnsActivity))
-						{
-							methodDiagnosticsList ??= [];
-							methodDiagnosticsList.Add(
-								(
-									TelemetryDiagnostics.Metrics.AutoCounterMustReturnVoid,
-									method.ReturnType.Locations
-								)
-							);
-						}
-					}
-					else if (!method.ReturnsVoid && !returnsBool)
-					{
-						// For multi-target with Activity, Activity? return is valid
-						if (!(isMultiTargetWithActivity && returnsActivity))
-						{
-							methodDiagnosticsList ??= [];
-							methodDiagnosticsList.Add(
-								(
-									TelemetryDiagnostics.Metrics.DoesNotReturnVoid,
-									method.ReturnType.Locations
-								)
-							);
-						}
+						_ = isMultiTargetWithActivity;
+						_ = returnsActivity;
 					}
 				}
 			}
 
 			var instrumentMeasurementType =
 				measurementParameter?.InstrumentType ?? Constants.System.BuiltInTypes.Int32;
-			if (measurementParameter?.IsValidInstrumentType == false)
-			{
-				methodDiagnosticsList ??= [];
-				methodDiagnosticsList.Add(
-					(
-						TelemetryDiagnostics.Metrics.InvalidMeasurementType,
-						measurementParameter.Locations
-					)
-				);
-			}
 
 			methodTargets.Add(
 				new(
@@ -465,7 +328,6 @@ partial class PipelineHelpers
 					InstrumentMeasurementType: instrumentMeasurementType,
 					IsObservable: instrumentAttribute?.IsObservable == true,
 					MetricName: prefix + instrumentName!,
-					Locations: method.Locations,
 					InstrumentAttribute: instrumentAttribute,
 					Parameters: parameters,
 					Tags: tagParameters,
@@ -474,8 +336,6 @@ partial class PipelineHelpers
 				)
 			);
 		}
-
-		methodDiagnostics = methodDiagnosticsList?.ToArray();
 
 		return [.. methodTargets];
 	}
@@ -706,7 +566,6 @@ partial class PipelineHelpers
 					GeneratedName: generatedName,
 					ParamDestination: destination,
 					SkipOnNullOrEmpty: GetSkipOnNullOrEmptyValue(tagAttribute),
-					Locations: parameter.Locations,
 					ExcludedTargets: excludeTargets?.ExcludedTargets ?? GenerationType.None
 				)
 			);

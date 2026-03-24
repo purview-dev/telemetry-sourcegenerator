@@ -1,39 +1,6 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-
-[ActivitySource("testing-activity-source")]
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-[Meter("testing-meter")]
-^^^^^^^^^^^^^^^^^^^^^^^^
-public interface IMultiTelemetry
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-{
-^
-	// No [Activity] method, only Event and Context
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	[Event]
-^^^^^^^^
-	void RecordEvent(System.Diagnostics.Activity? activity, [Tag]string eventName);
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-	[Context]
-^^^^^^^^^^
-	void SetContext(System.Diagnostics.Activity? activity, [Tag]string key);
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-	[Counter]
-^^^^^^^^^^
-	void IncrementCounter(int value);
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-}
-^
-
-*/
- Guid_1: (8,0)-(21,1),
       Message: As Event and/ or Context methods are defined, it's best practice to create a specific Activity otherwise the Activity will belong to another operation.,
       Severity: Info,
       WarningLevel: 1,

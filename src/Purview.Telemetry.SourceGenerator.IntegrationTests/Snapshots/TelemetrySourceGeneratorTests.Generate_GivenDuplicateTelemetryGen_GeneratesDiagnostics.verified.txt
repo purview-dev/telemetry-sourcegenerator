@@ -1,13 +1,6 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-	[Log]
-	void Activity([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
-      ^^^^^^^^
-
-*/
- Guid_1: (15,6)-(15,14),
       Message: It's best practice to return the created Activity so you can dispose of it, and use it for Event or Context methods.,
       Severity: Warning,
       WarningLevel: 1,
@@ -21,52 +14,6 @@
       }
     },
     {
-      Location: /*
-	[Counter]
-	void Event([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
-      ^^^^^
-
-*/
- Guid_1: (19,6)-(19,11),
-      Message: It's best practice to accept an Activity parameter to ensure the Event, Tags and/ or Baggage are applied to the Activity you intended.,
-      Severity: Warning,
-      WarningLevel: 1,
-      Descriptor: {
-        Id: TSG3014,
-        Title: Should accept an Activity to apply the Event/ Tags/ Baggage too,
-        MessageFormat: It's best practice to accept an Activity parameter to ensure the Event, Tags and/ or Baggage are applied to the Activity you intended.,
-        Category: Activity.Usage,
-        DefaultSeverity: Warning,
-        IsEnabledByDefault: true
-      }
-    },
-    {
-      Location: /*
-	[Activity]
-	void Context([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
-      ^^^^^^^
-
-*/
- Guid_1: (23,6)-(23,13),
-      Message: Only a single attribute per target family (Activities, Logs, or Metrics) is allowed on each method. For Activities: use one of ActivityAttribute, EventAttribute, or ContextAttribute. For Logging: use one of LogAttribute or a semantic level attribute (TraceAttribute, DebugAttribute, etc.). For Metrics: use one instrument attribute (CounterAttribute, HistogramAttribute, etc.).,
-      Severity: Error,
-      Descriptor: {
-        Id: TSG1002,
-        Title: Multiple attributes from the same target family are not supported,
-        MessageFormat: Only a single attribute per target family (Activities, Logs, or Metrics) is allowed on each method. For Activities: use one of ActivityAttribute, EventAttribute, or ContextAttribute. For Logging: use one of LogAttribute or a semantic level attribute (TraceAttribute, DebugAttribute, etc.). For Metrics: use one instrument attribute (CounterAttribute, HistogramAttribute, etc.).,
-        Category: Usage,
-        DefaultSeverity: Error,
-        IsEnabledByDefault: true
-      }
-    },
-    {
-      Location: /*
-	[Activity]
-	IDisposable? LogScope([Tag]int intParam, bool boolParam);
-              ^^^^^^^^
-
-*/
- Guid_1: (31,14)-(31,22),
       Message: An activity or event must return either void or an System.Diagnostics.Activity.,
       Severity: Error,
       Descriptor: {
@@ -74,83 +21,6 @@
         Title: Invalid return type,
         MessageFormat: An activity or event must return either void or an System.Diagnostics.Activity.,
         Category: Activity.Usage,
-        DefaultSeverity: Error,
-        IsEnabledByDefault: true
-      }
-    },
-    {
-      Location: /*
-	[Log]
-	void Counter(int counterValue, [Tag]int intParam, bool boolParam);
-      ^^^^^^^
-}
-*/
- Guid_1: (36,6)-(36,13),
-      Message: It's best practice to accept an Activity parameter to ensure the Event, Tags and/ or Baggage are applied to the Activity you intended.,
-      Severity: Warning,
-      WarningLevel: 1,
-      Descriptor: {
-        Id: TSG3014,
-        Title: Should accept an Activity to apply the Event/ Tags/ Baggage too,
-        MessageFormat: It's best practice to accept an Activity parameter to ensure the Event, Tags and/ or Baggage are applied to the Activity you intended.,
-        Category: Activity.Usage,
-        DefaultSeverity: Warning,
-        IsEnabledByDefault: true
-      }
-    },
-    {
-      Location: /*
-	[Counter]
-	void Event([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
-      ^^^^^
-
-*/
- Guid_1: (19,6)-(19,11),
-      Message: Either define a measurement parameter, or provide a supported type parameter that is not a tag to enable inferring.,
-      Severity: Error,
-      Descriptor: {
-        Id: TSG4004,
-        Title: No measurement value defined,
-        MessageFormat: Either define a measurement parameter, or provide a supported type parameter that is not a tag to enable inferring.,
-        Category: Metrics.Usage,
-        DefaultSeverity: Error,
-        IsEnabledByDefault: true
-      }
-    },
-    {
-      Location: /*
-	[Activity]
-	void Context([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
-      ^^^^^^^
-
-*/
- Guid_1: (23,6)-(23,13),
-      Message: Only a single attribute per target family (Activities, Logs, or Metrics) is allowed on each method. For Activities: use one of ActivityAttribute, EventAttribute, or ContextAttribute. For Logging: use one of LogAttribute or a semantic level attribute (TraceAttribute, DebugAttribute, etc.). For Metrics: use one instrument attribute (CounterAttribute, HistogramAttribute, etc.).,
-      Severity: Error,
-      Descriptor: {
-        Id: TSG1002,
-        Title: Multiple attributes from the same target family are not supported,
-        MessageFormat: Only a single attribute per target family (Activities, Logs, or Metrics) is allowed on each method. For Activities: use one of ActivityAttribute, EventAttribute, or ContextAttribute. For Logging: use one of LogAttribute or a semantic level attribute (TraceAttribute, DebugAttribute, etc.). For Metrics: use one instrument attribute (CounterAttribute, HistogramAttribute, etc.).,
-        Category: Usage,
-        DefaultSeverity: Error,
-        IsEnabledByDefault: true
-      }
-    },
-    {
-      Location: /*
-	[Counter]
-	void Log([Tag]int intParam, bool boolParam);
-      ^^^
-
-*/
- Guid_1: (27,6)-(27,9),
-      Message: Either define a measurement parameter, or provide a supported type parameter that is not a tag to enable inferring.,
-      Severity: Error,
-      Descriptor: {
-        Id: TSG4004,
-        Title: No measurement value defined,
-        MessageFormat: Either define a measurement parameter, or provide a supported type parameter that is not a tag to enable inferring.,
-        Category: Metrics.Usage,
         DefaultSeverity: Error,
         IsEnabledByDefault: true
       }

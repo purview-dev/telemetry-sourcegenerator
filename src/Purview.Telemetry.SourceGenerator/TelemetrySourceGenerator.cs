@@ -25,10 +25,32 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator, IL
 			_logger?.Debug("--- Finished adding templates.");
 		});
 
-		RegisterActivitiesGeneration(context, _logger);
+		// Create shared providers so Activities/Metrics pipelines are registered once
+		// and reused by TelemetryNames instead of running ForAttributeWithMetadataName twice.
+		var activityProvider = context
+			.SyntaxProvider.ForAttributeWithMetadataName(
+				Constants.Activities.ActivitySourceAttribute.TypeInfo.FullyQualifiedName,
+				static (node, token) => PipelineHelpers.HasActivityTargetAttribute(node, token),
+				(ctx, cancellationToken) =>
+					PipelineHelpers.BuildActivityTransform(ctx, _logger, cancellationToken)
+			)
+			.WhereNotNull()
+			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_Activities");
+
+		var meterProvider = context
+			.SyntaxProvider.ForAttributeWithMetadataName(
+				Constants.Metrics.MeterAttribute.TypeInfo.FullyQualifiedName,
+				static (node, token) => PipelineHelpers.HasMeterTargetAttribute(node, token),
+				(ctx, cancellationToken) =>
+					PipelineHelpers.BuildMeterTransform(ctx, _logger, cancellationToken)
+			)
+			.WhereNotNull()
+			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_Meters");
+
+		RegisterActivitiesGeneration(context, activityProvider, _logger);
 		RegisterLoggerGeneration(context, _logger);
-		RegisterMetricsGeneration(context, _logger);
-		RegisterTelemetryNamesGeneration(context, _logger);
+		RegisterMetricsGeneration(context, meterProvider, _logger);
+		RegisterTelemetryNamesGeneration(context, activityProvider, meterProvider, _logger);
 	}
 
 	void ILogSupport.SetLogOutput(Action<string, OutputType> action) =>

@@ -24,6 +24,9 @@ partial class LoggerTargetClassEmitter
 			if (!methodTarget.TargetGenerationState.IsValid)
 				continue;
 
+			if (methodTarget.UnknownReturnType)
+				continue; // Diagnostic already reported in EmitFields
+
 			if (methodTarget.HasMultipleExceptions)
 				continue;
 

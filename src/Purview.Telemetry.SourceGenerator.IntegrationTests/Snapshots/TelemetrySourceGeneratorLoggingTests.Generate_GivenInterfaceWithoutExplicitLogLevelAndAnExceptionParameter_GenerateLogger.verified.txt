@@ -1,13 +1,6 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-public interface ITestLogger {
-	void Log(string stringParam, int intParam, bool boolParam, Exception exception);
-      ^^^
-}
-*/
- Guid_1: (10,6)-(10,9),
       Message: Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.,
       Severity: Info,
       WarningLevel: 1,

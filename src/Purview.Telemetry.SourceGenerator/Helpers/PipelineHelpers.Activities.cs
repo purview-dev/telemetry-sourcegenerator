@@ -37,10 +37,7 @@ partial class PipelineHelpers
 			logger?.Diagnostic(
 				$"Cannot generate a Activity target for a generic interface '{interfaceDeclaration.Flatten()}'."
 			);
-			return ActivitySourceTarget.Failed(
-				TelemetryDiagnostics.General.GenericInterfacesNotSupported,
-				interfaceSymbol.Locations
-			);
+			return null;
 		}
 
 		var semanticModel = context.SemanticModel;
@@ -106,8 +103,7 @@ partial class PipelineHelpers
 			semanticModel,
 			interfaceSymbol,
 			logger,
-			token,
-			out var methodDiagnostics
+			token
 		);
 
 		return new(
@@ -122,10 +118,7 @@ partial class PipelineHelpers
 			ActivitySourceGenerationAttribute: activitySourceGenerationAttribute,
 			ActivitySourceName: activitySourceName,
 			ActivityMethods: activityMethods,
-			ActivityTargetAttributeRecord: activitySourceAttribute,
-			InterfaceLocation: interfaceDeclaration.GetLocation(),
-			DuplicateMethods: BuildDuplicateMethods(interfaceSymbol, semanticModel, token),
-			Failures: methodDiagnostics?.ToImmutableArray()
+			ActivityTargetAttributeRecord: activitySourceAttribute
 		);
 	}
 
@@ -137,8 +130,7 @@ partial class PipelineHelpers
 		SemanticModel semanticModel,
 		INamedTypeSymbol interfaceSymbol,
 		GenerationLogger? logger,
-		CancellationToken token,
-		out (TelemetryDiagnosticDescriptor, ImmutableArray<Location>)[]? methodDiagnostics
+		CancellationToken token
 	)
 	{
 		token.ThrowIfCancellationRequested();
@@ -161,8 +153,6 @@ partial class PipelineHelpers
 			activitySourceAttribute.LowercaseBaggageAndTagKeys?.IsSet != true
 			|| activitySourceAttribute.LowercaseBaggageAndTagKeys.Value!.Value; // Default value
 
-		List<(TelemetryDiagnosticDescriptor, ImmutableArray<Location>)>? methodDiagnosticsList =
-			null;
 		List<ActivityBasedGenerationTarget> methodTargets = [];
 		foreach (
 			var method in GetAllInterfaceMethods(interfaceSymbol, semanticModel.Compilation, token)
@@ -172,10 +162,6 @@ partial class PipelineHelpers
 
 			if (method.Arity > 0)
 			{
-				methodDiagnosticsList ??= [];
-				methodDiagnosticsList.Add(
-					(TelemetryDiagnostics.General.GenericMethodsNotSupported, method.Locations)
-				);
 				continue;
 			}
 
@@ -232,13 +218,6 @@ partial class PipelineHelpers
 				logger?.Debug(
 					$"Identified {interfaceSymbol.Name}.{method.Name} as problematic as the interface is missing source attribute(s) for the method's target(s)."
 				);
-				methodDiagnosticsList ??= [];
-				methodDiagnosticsList.Add(
-					(
-						TelemetryDiagnostics.General.MethodTargetNotRegisteredOnInterface,
-						method.Locations
-					)
-				);
 			}
 
 			methodTargets.Add(
@@ -249,7 +228,6 @@ partial class PipelineHelpers
 					HasActivityParameter: parameters.Any(m =>
 						Constants.Activities.SystemDiagnostics.Activity.Equals(m.ParameterType)
 					),
-					Locations: method.Locations,
 					ActivityAttribute: activityAttribute,
 					EventAttribute: eventAttribute,
 					MethodType: methodType,
@@ -260,8 +238,6 @@ partial class PipelineHelpers
 				)
 			);
 		}
-
-		methodDiagnostics = methodDiagnosticsList?.ToArray();
 
 		return [.. methodTargets];
 	}
@@ -418,7 +394,6 @@ partial class PipelineHelpers
 					ParamDestination: destination,
 					SkipOnNullOrEmpty: GetSkipOnNullOrEmptyValue(tagOrBaggageAttribute),
 					IsException: parameter.Type.IsExceptionType(),
-					Locations: parameter.Locations,
 					ExcludedTargets: excludeTargets?.ExcludedTargets ?? GenerationType.None
 				)
 			);

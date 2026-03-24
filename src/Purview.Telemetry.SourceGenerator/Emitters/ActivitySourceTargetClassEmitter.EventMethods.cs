@@ -43,26 +43,12 @@ partial class ActivitySourceTargetClassEmitter
 		{
 			logger?.Diagnostic("Parent context/ Id not allowed on event method, only activities.");
 
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.ParentContextOrIdParameterNotAllowed,
-				parentContextOrId.Locations,
-				parentContextOrId.ParameterName
-			);
-
 			return;
 		}
 
 		if (linksParam != null)
 		{
 			logger?.Diagnostic("Links parameter not allowed on event method, only activities.");
-
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.LinksParameterNotAllowed,
-				linksParam.Locations,
-				linksParam.ParameterName
-			);
 
 			return;
 		}
@@ -71,13 +57,6 @@ partial class ActivitySourceTargetClassEmitter
 		{
 			logger?.Diagnostic(
 				"Start time parameter not allowed on event method, only activities."
-			);
-
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.StartTimeParameterNotAllowed,
-				startTimeParam.Locations,
-				startTimeParam.ParameterName
 			);
 
 			return;
