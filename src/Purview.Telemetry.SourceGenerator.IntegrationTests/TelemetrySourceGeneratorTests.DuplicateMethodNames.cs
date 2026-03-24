@@ -167,6 +167,7 @@ public interface ITestTelemetry
 		// Arrange
 		const string basicTelemetry = """
 
+#nullable enable
 
 [ActivitySource("activity-source")]
 [Logger]

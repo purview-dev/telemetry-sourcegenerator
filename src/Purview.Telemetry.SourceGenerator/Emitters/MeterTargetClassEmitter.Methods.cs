@@ -7,6 +7,32 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 partial class MeterTargetClassEmitter
 {
+	static void EmitThrowStub(
+		StringBuilder builder,
+		int indent,
+		InstrumentTarget methodTarget
+	)
+	{
+		builder
+			.AppendLine()
+			.Append(indent, "public ", withNewLine: false)
+			.Append(methodTarget.ReturnType);
+
+		builder.Append(' ').Append(methodTarget.MethodName).Append('(');
+
+		for (var i = 0; i < methodTarget.Parameters.Length; i++)
+		{
+			if (i > 0)
+				builder.Append(", ");
+			builder
+				.Append(methodTarget.Parameters[i].ParameterType)
+				.Append(' ')
+				.Append(methodTarget.Parameters[i].ParameterName);
+		}
+
+		builder.AppendLine(") => throw new global::System.NotSupportedException();").AppendLine();
+	}
+
 	static int EmitMethods(
 		MeterTarget target,
 		StringBuilder builder,
@@ -24,7 +50,17 @@ partial class MeterTargetClassEmitter
 			context.CancellationToken.ThrowIfCancellationRequested();
 
 			if (!methodTarget.TargetGenerationState.IsValid)
+			{
+				if (EmitterHelpers.ShouldEmitThrowStub(
+					methodTarget.TargetGenerationState,
+					GenerationType.Metrics,
+					target.GenerationType
+				))
+				{
+					EmitThrowStub(builder, indent, methodTarget);
+				}
 				continue;
+			}
 
 			// Report warning for Activity parameter without Activity target
 			if (methodTarget.TargetGenerationState.ActivityParameterWithoutTarget != null)

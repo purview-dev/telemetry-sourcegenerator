@@ -198,9 +198,57 @@ partial class PipelineHelpers
 				out var hasParameterError
 			);
 			if (hasParameterError)
+			{
+				// LogProperties + ExpandEnumerable conflict: add invalid stub so emitter can report TSG2006
+				var stubParams = ImmutableArray.CreateRange(
+					method.Parameters,
+					p => new LogParameterTarget(
+						Name: p.Name,
+						UpperCasedName: Utilities.UppercaseFirstChar(p.Name),
+						ParameterType: PurviewTypeFactory.Create(p.Type),
+						IsException: false,
+						IsFirstException: false,
+						IsIEnumerable: false,
+						IsArray: false,
+						IsComplexType: false,
+						LogPropertiesAttribute: null,
+						LogProperties: null,
+						ExpandEnumerableAttribute: null,
+						ExcludedTargets: GenerationType.None
+					)
+				);
+				methodTargets.Add(
+					new(
+						MethodName: method.Name,
+						IsScoped: isScoped,
+						LoggerActionFieldName: $"_{Utilities.LowercaseFirstChar(method.Name)}Action",
+						UnknownReturnType: invalidReturnType,
+						LogName: method.Name,
+						EventId: null,
+						MessageTemplate: string.Empty,
+						TemplateProperties: ImmutableArray<MessageTemplateHole>.Empty,
+						TemplateIsOrdinalBased: false,
+						TemplateIsNamedBased: false,
+						MSLevel: Constants.Logging.LogLevelTypeMap[defaultLogLevel],
+						Parameters: stubParams,
+						ParametersSansException: stubParams,
+						ExceptionParameter: null,
+						HasMultipleExceptions: false,
+						InferredErrorLevel: false,
+						TargetGenerationState: new TargetGeneration(
+							IsValid: false,
+							RaiseInferenceNotSupportedWithMultiTargeting: false,
+							RaiseMultiGenerationTargetsNotSupported: false
+						),
+						UseV1Generation: false,
+						HasLogPropertiesAndExpandEnumerable: true
+					)
+				);
 				continue;
+			}
 
 			var logAttribute = SharedHelpers.GetLogAttribute(method, semanticModel, logger, token);
+			var hasExplicitLevel = logAttribute?.Level.IsSet ?? false;
 
 			var isKnownReturnType = !invalidReturnType;
 			var loggerActionFieldName = $"_{Utilities.LowercaseFirstChar(method.Name)}Action";
@@ -280,6 +328,10 @@ partial class PipelineHelpers
 				}
 
 				methodParameters = paramsBuilder.MoveToImmutable();
+
+				// Re-acquire exceptionParam from rebuilt methodParameters so ReferencedHoles are up-to-date
+				if (exceptionParam != null)
+					exceptionParam = methodParameters.FirstOrDefault(m => m.IsException);
 			}
 
 			var targetGenerationState = Utilities.IsValidGenerationTarget(
@@ -349,9 +401,19 @@ partial class PipelineHelpers
 					HasMultipleExceptions: hasMultipleExceptions,
 					InferredErrorLevel: inferredErrorLevel,
 					TargetGenerationState: targetGenerationState,
-					UseV1Generation: useV1Generation
+					UseV1Generation: useV1Generation,
+					HasExplicitLevel: hasExplicitLevel
 				)
 			);
+		}
+
+		// Post-pass: mark duplicate method names as invalid (emitter generates throw stubs; TSG1003 raised by analyzer)
+		var seenNames = new HashSet<string>(StringComparer.Ordinal);
+		for (var i = 0; i < methodTargets.Count; i++)
+		{
+			var t = methodTargets[i];
+			if (!seenNames.Add(t.MethodName))
+				methodTargets[i] = t with { TargetGenerationState = t.TargetGenerationState with { IsValid = false } };
 		}
 
 		return [.. methodTargets];

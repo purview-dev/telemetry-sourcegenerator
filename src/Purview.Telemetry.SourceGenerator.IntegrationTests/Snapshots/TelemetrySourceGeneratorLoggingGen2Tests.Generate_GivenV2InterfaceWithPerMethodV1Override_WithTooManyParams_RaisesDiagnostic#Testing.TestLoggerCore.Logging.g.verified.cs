@@ -26,6 +26,34 @@ namespace Testing
 			_logger = logger;
 		}
 
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		public void HotPathV1LogEntry(int a, int b, int c, int d, int e, int f, int g)
+		{
+			if (!_logger.IsEnabled(global::Microsoft.Extensions.Logging.LogLevel.Information))
+			{
+				return;
+			}
+
+			_logger.Log(
+				global::Microsoft.Extensions.Logging.LogLevel.Information,
+				new (704618972, nameof(HotPathV1LogEntry)),
+				new HotPathV1LogEntry_LogState(a, b, c, d, e, f, g),
+				null,
+				[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+				static string (s, _) =>
+				{
+#if NET
+					return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"HotPathV1LogEntry: A = {s._A}, B = {s._B}, C = {s._C}, D = {s._D}, E = {s._E}, F = {s._F}, G = {s._G}");
+#else
+					return global::System.FormattableString.Invariant($"HotPathV1LogEntry: A = {s._A}, B = {s._B}, C = {s._C}, D = {s._D}, E = {s._E}, F = {s._F}, G = {s._G}");
+#endif
+				}
+			);
+
+		}
+
+
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	private readonly struct HotPathV1LogEntry_LogState : global::System.Collections.Generic.IReadOnlyList<global::System.Collections.Generic.KeyValuePair<string, object?>>
 	{

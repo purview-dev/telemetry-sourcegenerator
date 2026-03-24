@@ -276,6 +276,7 @@ public interface IMultiTelemetry
 		// Arrange
 		const string multiGen = """
 
+#nullable enable
 
 namespace Testing;
 

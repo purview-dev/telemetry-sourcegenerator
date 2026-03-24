@@ -41,12 +41,12 @@ namespace Testing
 				new Log_LogState(v),
 				ex,
 				[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-				static string (s, _) =>
+				static string (s, e) =>
 				{
 #if NET
-					return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"v = {s._V} Exception = {ex}");
+					return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"v = {s._V} Exception = {e}");
 #else
-					return global::System.FormattableString.Invariant($"v = {s._V} Exception = {ex}");
+					return global::System.FormattableString.Invariant($"v = {s._V} Exception = {e}");
 #endif
 				}
 			);

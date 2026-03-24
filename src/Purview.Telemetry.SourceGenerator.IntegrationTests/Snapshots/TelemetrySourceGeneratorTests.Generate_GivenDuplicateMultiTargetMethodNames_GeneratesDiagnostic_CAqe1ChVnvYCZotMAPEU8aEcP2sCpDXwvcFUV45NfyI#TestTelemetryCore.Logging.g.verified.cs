@@ -15,7 +15,6 @@ sealed partial class TestTelemetryCore : global::ITestTelemetry
 {
 	readonly global::Microsoft.Extensions.Logging.ILogger<global::ITestTelemetry> _logger;
 	static readonly global::System.Func<global::Microsoft.Extensions.Logging.ILogger, string, int, object, global::System.IDisposable?> _duplicateMethodNameAction = global::Microsoft.Extensions.Logging.LoggerMessage.DefineScope<string, int, object>("DuplicateMethodName: StringParam = {StringParam}, IntParam = {IntParam}, ObjectParam = {ObjectParam}");
-	static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, global::System.Exception?> _duplicateMethodNameAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(2063509536, "DuplicateMethodName"), "DuplicateMethodName");
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	public TestTelemetryCore(global::Microsoft.Extensions.Logging.ILogger<global::ITestTelemetry> logger, global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
@@ -32,16 +31,6 @@ sealed partial class TestTelemetryCore : global::ITestTelemetry
 	}
 
 
-	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-	public void DuplicateMethodName()
-	{
-		if (!_logger.IsEnabled(global::Microsoft.Extensions.Logging.LogLevel.Information))
-		{
-			return;
-		}
-
-		_duplicateMethodNameAction(_logger, null);
-	}
+	public void DuplicateMethodName() => throw new global::System.NotSupportedException();
 
 }

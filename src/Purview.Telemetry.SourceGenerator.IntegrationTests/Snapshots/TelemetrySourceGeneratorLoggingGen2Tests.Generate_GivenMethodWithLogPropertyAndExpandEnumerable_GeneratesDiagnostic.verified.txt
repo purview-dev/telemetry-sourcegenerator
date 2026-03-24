@@ -1,0 +1,16 @@
+﻿{
+  Diagnostics: [
+    {
+      Message: Expanding an array/ IEnumerable, and the expanding the complex type of the items in the array are not supported.,
+      Severity: Error,
+      Descriptor: {
+        Id: TSG2006,
+        Title: Using LogPropertiesAttribute and ExpandEnumerableAttribute on the same parameter is not supported,
+        MessageFormat: Expanding an array/ IEnumerable, and the expanding the complex type of the items in the array are not supported.,
+        Category: Logging.Usage,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}

@@ -28,7 +28,8 @@ record ActivityBasedGenerationTarget(
 	EquatableArray<ActivityBasedParameterTarget> Parameters,
 	EquatableArray<ActivityBasedParameterTarget> Baggage,
 	EquatableArray<ActivityBasedParameterTarget> Tags,
-	TargetGeneration TargetGenerationState
+	TargetGeneration TargetGenerationState,
+	EquatableArray<string> TypeParameters = default
 );
 
 record ActivityBasedParameterTarget(

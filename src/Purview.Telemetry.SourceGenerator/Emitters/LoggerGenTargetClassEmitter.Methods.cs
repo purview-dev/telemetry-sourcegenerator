@@ -22,16 +22,50 @@ partial class LoggerGenTargetClassEmitter
 			context.CancellationToken.ThrowIfCancellationRequested();
 
 			if (!methodTarget.TargetGenerationState.IsValid)
+			{
+				// HasLogPropertiesAndExpandEnumerable stubs have IsValid=false; report TSG2006 here.
+				if (methodTarget.HasLogPropertiesAndExpandEnumerable)
+				{
+					TelemetryDiagnostics.Report(
+						context.ReportDiagnostic,
+						TelemetryDiagnostics.Logging.ExpandEnumerableAndLogPropertiesNotSupported
+					);
+					LoggerTargetClassEmitter.EmitThrowStub(builder, indent, methodTarget);
+					continue;
+				}
+
+				if (EmitterHelpers.ShouldEmitThrowStub(
+					methodTarget.TargetGenerationState,
+					GenerationType.Logging,
+					target.GenerationType
+				))
+				{
+					LoggerTargetClassEmitter.EmitThrowStub(builder, indent, methodTarget);
+				}
 				continue;
+			}
 
 			if (methodTarget.UnknownReturnType)
+			{
+				LoggerTargetClassEmitter.EmitThrowStub(builder, indent, methodTarget);
 				continue; // Diagnostic already reported in EmitFields
+			}
 
 			// Report warning for Activity parameter without Activity target
 			if (methodTarget.TargetGenerationState.ActivityParameterWithoutTarget != null)
 			{
 				logger?.Debug(
 					$"Activity parameter '{methodTarget.TargetGenerationState.ActivityParameterWithoutTarget}' on {methodTarget.MethodName} has no Activity target."
+				);
+			}
+
+			// Report TSG2007: scoped method must not have an explicit log level set.
+			// Must be checked before V1/V2 dispatch since V1 returns early.
+			if (methodTarget.IsScoped && methodTarget.HasExplicitLevel)
+			{
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Logging.ScopedMethodShouldNotHaveLevel
 				);
 			}
 
@@ -72,9 +106,7 @@ partial class LoggerGenTargetClassEmitter
 				return;
 			}
 
-			// HasMultipleExceptions or too many params - diagnostic reported in EmitFields, skip
-			if (methodTarget.HasMultipleExceptions || methodTarget.ParameterCountSansException > Constants.Logging.MaxNonExceptionParameters)
-				return;
+			// HasMultipleExceptions or too many params - fall through to v2 generation (diagnostic reported in EmitFields)
 		}
 
 		var isMultiTarget = methodTarget.TargetGenerationState.IsMultiTarget;
@@ -675,6 +707,10 @@ partial class LoggerGenTargetClassEmitter
 		{
 			logger?.Diagnostic(
 				$"Identified {parameter.Name} that has a large unbounded ienumerable max."
+			);
+			TelemetryDiagnostics.Report(
+				context.ReportDiagnostic,
+				TelemetryDiagnostics.Logging.UnboundedIEnumerableMaxCount
 			);
 		}
 

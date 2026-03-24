@@ -166,6 +166,46 @@ partial class ActivitySourceTargetClassEmitter
 			.AppendLine(".StackTrace);");
 	}
 
+	static void EmitThrowStub(
+		StringBuilder builder,
+		int indent,
+		ActivityBasedGenerationTarget methodTarget
+	)
+	{
+		builder
+			.AppendLine()
+			.Append(indent, "public ", withNewLine: false)
+			.Append(methodTarget.ReturnType);
+
+		builder.Append(' ').Append(methodTarget.MethodName);
+
+		if (methodTarget.TypeParameters.Length > 0)
+		{
+			builder.Append('<');
+			for (var i = 0; i < methodTarget.TypeParameters.Length; i++)
+			{
+				if (i > 0)
+					builder.Append(", ");
+				builder.Append(methodTarget.TypeParameters[i]);
+			}
+			builder.Append('>');
+		}
+
+		builder.Append('(');
+
+		for (var i = 0; i < methodTarget.Parameters.Length; i++)
+		{
+			if (i > 0)
+				builder.Append(", ");
+			builder
+				.Append(methodTarget.Parameters[i].ParameterType)
+				.Append(' ')
+				.Append(methodTarget.Parameters[i].ParameterName);
+		}
+
+		builder.AppendLine(") => throw new global::System.NotSupportedException();").AppendLine();
+	}
+
 	static void EmitMethod(
 		StringBuilder builder,
 		int indent,
@@ -176,6 +216,19 @@ partial class ActivitySourceTargetClassEmitter
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
+
+		if (!methodTarget.TargetGenerationState.IsValid)
+		{
+			if (EmitterHelpers.ShouldEmitThrowStub(
+				methodTarget.TargetGenerationState,
+				GenerationType.Activities,
+				target.GenerationType
+			))
+			{
+				EmitThrowStub(builder, indent, methodTarget);
+			}
+			return;
+		}
 
 		if (!GuardMethod(methodTarget, target, context, logger))
 			return;

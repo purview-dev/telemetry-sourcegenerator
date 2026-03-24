@@ -225,7 +225,7 @@ partial class PipelineHelpers
 					if (!string.IsNullOrEmpty(prefix))
 					{
 						// Convert prefix components while preserving separator structure
-						// This handles both explicitly-set prefixes (e.g., "This.Is.A.Prefix") 
+						// This handles both explicitly-set prefixes (e.g., "This.Is.A.Prefix")
 						// and auto-generated prefixes (already in snake_case, won't be affected)
 						prefix = Utilities.ConvertToSeparatedLowercase(prefix!, '_');
 					}
@@ -299,18 +299,15 @@ partial class PipelineHelpers
 						}
 					}
 
-					if (instrumentAttribute != null)
-					{
-						// Check if this is multi-target with Activity (Activity return type is allowed)
-						var isMultiTargetWithActivity =
-							targetGenerationState.IsMultiTarget
-							&& targetGenerationState.MethodTargets.HasFlag(GenerationType.Activities);
-						var returnsActivity = Constants.Activities.SystemDiagnostics.Activity.Equals(
-							method.ReturnType
-						);
-						_ = isMultiTargetWithActivity;
-						_ = returnsActivity;
-					}
+					// Check if this is multi-target with Activity (Activity return type is allowed)
+					var isMultiTargetWithActivity =
+						targetGenerationState.IsMultiTarget
+						&& targetGenerationState.MethodTargets.HasFlag(GenerationType.Activities);
+					var returnsActivity = Constants.Activities.SystemDiagnostics.Activity.Equals(
+						method.ReturnType
+					);
+					_ = isMultiTargetWithActivity;
+					_ = returnsActivity;
 				}
 			}
 
@@ -335,6 +332,15 @@ partial class PipelineHelpers
 					TargetGenerationState: targetGenerationState
 				)
 			);
+		}
+
+		// Post-pass: mark duplicate method names as invalid (emitter generates throw stubs; TSG1003 raised by analyzer)
+		var seenNames = new HashSet<string>(StringComparer.Ordinal);
+		for (var i = 0; i < methodTargets.Count; i++)
+		{
+			var t = methodTargets[i];
+			if (!seenNames.Add(t.MethodName))
+				methodTargets[i] = t with { TargetGenerationState = t.TargetGenerationState with { IsValid = false } };
 		}
 
 		return [.. methodTargets];

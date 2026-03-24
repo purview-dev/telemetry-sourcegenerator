@@ -15,8 +15,6 @@ sealed partial class TestTelemetryCore : global::ITestTelemetry
 {
 	global::System.Diagnostics.Metrics.Meter _meter = default!;
 
-	global::System.Diagnostics.Metrics.Counter<int> _duplicateMethodNameInstrument = default!;
-	global::System.Diagnostics.Metrics.Counter<int> _duplicateMethodNameInstrument = default!;
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -37,37 +35,15 @@ sealed partial class TestTelemetryCore : global::ITestTelemetry
 			Tags = meterTags
 		});
 
-		global::System.Collections.Generic.Dictionary<string, object?> duplicateMethodNameTags = new();
-
-		PopulateDuplicateMethodNameTags(duplicateMethodNameTags);
-
-		_duplicateMethodNameInstrument = _meter.CreateCounter<int>(name: "test.duplicate_method_name", unit: null, description: null, tags: duplicateMethodNameTags);
-		global::System.Collections.Generic.Dictionary<string, object?> duplicateMethodNameTags = new();
-
-		PopulateDuplicateMethodNameTags(duplicateMethodNameTags);
-
-		_duplicateMethodNameInstrument = _meter.CreateCounter<int>(name: "test.duplicate_method_name", unit: null, description: null, tags: duplicateMethodNameTags);
 	}
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	partial void PopulateMeterTags(global::System.Collections.Generic.Dictionary<string, object?> meterTags);
 
-	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-	partial void PopulateDuplicateMethodNameTags(global::System.Collections.Generic.Dictionary<string, object?> instrumentTags);
 
-	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-	partial void PopulateDuplicateMethodNameTags(global::System.Collections.Generic.Dictionary<string, object?> instrumentTags);
+	public void DuplicateMethodName(string stringParam, int intParam, uint uintParam) => throw new global::System.NotSupportedException();
 
-	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-	public void DuplicateMethodName(string stringParam, int intParam, uint uintParam)
-	{
-		_duplicateMethodNameInstrument.Add(1, new global::System.Collections.Generic.KeyValuePair<string, object?>("string_param", stringParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("uint_param", uintParam));
-	}
-	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-	public void DuplicateMethodName(int measurementValue)
-	{
-		_duplicateMethodNameInstrument.Add(measurementValue);
-	}
+
+	public void DuplicateMethodName(int measurementValue) => throw new global::System.NotSupportedException();
+
 }

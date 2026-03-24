@@ -59,5 +59,8 @@ namespace Testing
 			return activityStartActivity;
 		}
 
+
+		public void WarnOperation(string message) => throw new global::System.NotSupportedException();
+
 	}
 }

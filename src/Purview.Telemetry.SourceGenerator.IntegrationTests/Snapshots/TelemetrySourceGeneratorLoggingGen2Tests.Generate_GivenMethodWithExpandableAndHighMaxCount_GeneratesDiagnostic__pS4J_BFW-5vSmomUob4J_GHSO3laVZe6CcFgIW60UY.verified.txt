@@ -1,0 +1,30 @@
+﻿{
+  Diagnostics: [
+    {
+      Message: The limit on unbounded enumeration is higher than the recommended default (5). This may cause performance issues, make sure you understand the consequences and test thoroughly.,
+      Severity: Warning,
+      WarningLevel: 1,
+      Descriptor: {
+        Id: TSG2008,
+        Title: Unbounded enumeration possible,
+        MessageFormat: The limit on unbounded enumeration is higher than the recommended default (5). This may cause performance issues, make sure you understand the consequences and test thoroughly.,
+        Category: Logging.Performance,
+        DefaultSeverity: Warning,
+        IsEnabledByDefault: true
+      }
+    },
+    {
+      Message: The limit on unbounded enumeration is higher than the recommended default (5). This may cause performance issues, make sure you understand the consequences and test thoroughly.,
+      Severity: Warning,
+      WarningLevel: 1,
+      Descriptor: {
+        Id: TSG2008,
+        Title: Unbounded enumeration possible,
+        MessageFormat: The limit on unbounded enumeration is higher than the recommended default (5). This may cause performance issues, make sure you understand the consequences and test thoroughly.,
+        Category: Logging.Performance,
+        DefaultSeverity: Warning,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}
