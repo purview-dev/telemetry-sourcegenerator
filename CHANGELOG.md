@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.0.0-prerelease.7](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.6...v4.0.0-prerelease.7) (2026-03-24)
+
+
+### Features
+
+* add ILogger-to-Purview-Telemetry code refactoring provider with tests ([24ac577](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/24ac57792242b01bbf1c762558419e15c396aee2))
+* implement multi-target telemetry methods and apply Roslyn incremental generator best practices ([f98b0f1](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/f98b0f1db399590327c9f8ec97844e55c2bf1882))
+* improve ILogger-to-Telemetry refactoring provider ([1fcbbb9](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/1fcbbb983a96b9cb5921156f11186c7e120373a1))
+
+
+### Bug Fixes
+
+* add missing CurrentVersion pattern to update-version script ([7ef7c19](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/7ef7c1914d1be7eb5b90c5b6f84c181b5dac6346))
+* correct inverted NoForecastsRecieved/ForecastsRecieved condition in WeatherAPIClient ([02a6612](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/02a6612b0bbf93aa364841d34f39b93df3428bc5))
+* resolve all 22 WIP test failures for multi-target telemetry ([8cf6e93](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/8cf6e937250b17aed588388b98794ab38a929429))
+
 ## [4.0.0-prerelease.6](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.5...v4.0.0-prerelease.6) (2026-03-16)
 
 ## [4.0.0-prerelease.5](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.4...v4.0.0-prerelease.5) (2026-03-16)
