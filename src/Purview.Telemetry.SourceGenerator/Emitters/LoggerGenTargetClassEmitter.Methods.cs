@@ -24,17 +24,14 @@ partial class LoggerGenTargetClassEmitter
 			if (!methodTarget.TargetGenerationState.IsValid)
 				continue;
 
+			if (methodTarget.UnknownReturnType)
+				continue; // Diagnostic already reported in EmitFields
+
 			// Report warning for Activity parameter without Activity target
 			if (methodTarget.TargetGenerationState.ActivityParameterWithoutTarget != null)
 			{
 				logger?.Debug(
 					$"Activity parameter '{methodTarget.TargetGenerationState.ActivityParameterWithoutTarget}' on {methodTarget.MethodName} has no Activity target."
-				);
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.General.ActivityParameterWithoutActivityTarget,
-					methodTarget.MethodLocation,
-					methodTarget.TargetGenerationState.ActivityParameterWithoutTarget
 				);
 			}
 
@@ -74,6 +71,10 @@ partial class LoggerGenTargetClassEmitter
 				);
 				return;
 			}
+
+			// HasMultipleExceptions or too many params - diagnostic reported in EmitFields, skip
+			if (methodTarget.HasMultipleExceptions || methodTarget.ParameterCountSansException > Constants.Logging.MaxNonExceptionParameters)
+				return;
 		}
 
 		var isMultiTarget = methodTarget.TargetGenerationState.IsMultiTarget;
@@ -674,11 +675,6 @@ partial class LoggerGenTargetClassEmitter
 		{
 			logger?.Diagnostic(
 				$"Identified {parameter.Name} that has a large unbounded ienumerable max."
-			);
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Logging.UnboundedIEnumerableMaxCount,
-				parameter.Locations
 			);
 		}
 

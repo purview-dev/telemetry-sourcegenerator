@@ -18,20 +18,6 @@ static partial class LoggerGenTargetClassEmitter
 
 		logger?.Debug($"Generating MS Gen-based logging class for: {target.FullyQualifiedName}");
 
-		if (
-			EmitHelpers.GenerateDuplicateMethodDiagnostics(
-				GenerationType.Logging,
-				target.GenerationType,
-				target.DuplicateMethods,
-				context,
-				logger
-			)
-		)
-		{
-			logger?.Debug("Found duplicate methods while generating logger, exiting.");
-			return;
-		}
-
 		var indent = EmitHelpers.EmitNamespaceStart(
 			target.ClassNamespace,
 			target.ParentClasses,
@@ -122,17 +108,19 @@ static partial class LoggerGenTargetClassEmitter
 			if (!methodTarget.TargetGenerationState.IsValid)
 				continue;
 
+			if (methodTarget.UnknownReturnType)
+			{
+				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Logging.LogMustReturnVoidOrAsync);
+				continue;
+			}
+
 			// Multiple exceptions is always invalid, regardless of v1 or v2 generation.
 			if (methodTarget.HasMultipleExceptions)
 			{
 				logger?.Diagnostic(
 					"Method has multiple exception parameters, only a single one is permitted."
 				);
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.Logging.MultipleExceptionsDefined,
-					methodTarget.MethodLocation
-				);
+				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Logging.MultipleExceptionsDefined);
 				continue;
 			}
 
@@ -145,22 +133,14 @@ static partial class LoggerGenTargetClassEmitter
 			)
 			{
 				logger?.Diagnostic("Method has more than 6 parameters.");
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.Logging.MaximumLogEntryParametersExceeded,
-					methodTarget.MethodLocation
-				);
+				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Logging.MaximumLogEntryParametersExceeded);
 				continue;
 			}
 
 			if (methodTarget.InferredErrorLevel)
 			{
 				logger?.Diagnostic("Inferring error log level.");
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.Logging.InferringErrorLogLevel,
-					methodTarget.MethodLocation
-				);
+				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Logging.InferringErrorLogLevel);
 			}
 
 			LoggerTargetClassEmitter.EmitLogActionField(builder, indent + 1, methodTarget);

@@ -1,13 +1,6 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-public interface ITestLogger {
-	void LogEntryWithMoreThanSixParams(int one, int two, int three, int four, int five, BadLuckException six, InvalidOperationException seven, ArgumentException eight, Exception nine, Exception? ten, Exception eleven);
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-}
-*/
- Guid_1: (10,6)-(10,35),
       Message: Only a single exceptions parameter is permitted.,
       Severity: Error,
       Descriptor: {

@@ -188,7 +188,7 @@ using Purview.Telemetry;
 
 		config?.Invoke(verifierTask);
 
-		//verifierTask = verifierTask.AutoVerify();
+		verifierTask = verifierTask.AutoVerify();
 
 		// Check if snapshot verification should be skipped
 		var ignoreVerify = Environment.GetEnvironmentVariable("PURVIEW_IGNORE_VERIFY");

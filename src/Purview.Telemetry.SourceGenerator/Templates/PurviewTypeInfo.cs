@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Purview.Telemetry.SourceGenerator.Records;
 
 namespace Purview.Telemetry.SourceGenerator.Templates;
 
@@ -10,7 +11,7 @@ sealed record PurviewTypeInfo(
 	string? SystemAlias,
 	bool IsNullable,
 	SpecialType SpecialType,
-	ImmutableArray<PurviewTypeInfo> GenericTypeArguments
+	EquatableArray<PurviewTypeInfo> GenericTypeArguments
 ) : IEquatable<PurviewTypeInfo>, IEquatable<ITypeSymbol>, IEquatable<string>
 {
 	public bool Equals(PurviewTypeInfo? other) =>
@@ -57,7 +58,7 @@ sealed record PurviewTypeInfo(
 			SystemAlias,
 			IsNullable,
 			SpecialType,
-			[.. types]
+			types.ToImmutableArray()
 		);
 
 	public string MakeGeneric(bool includeGlobal, params string[] types) =>

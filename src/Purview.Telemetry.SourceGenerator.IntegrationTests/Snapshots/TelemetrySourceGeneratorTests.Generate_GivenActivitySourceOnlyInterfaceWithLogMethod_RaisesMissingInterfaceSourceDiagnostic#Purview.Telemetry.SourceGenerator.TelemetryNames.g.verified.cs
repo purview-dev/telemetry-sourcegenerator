@@ -20,6 +20,9 @@ namespace Purview.Telemetry.SourceGenerator
 	{
 		public static readonly string[] MeterNames = global::System.Array.Empty<string>();
 
-		public static readonly string[] ActivitySourceNames = global::System.Array.Empty<string>();
+		public static readonly string[] ActivitySourceNames = new string[]
+		{
+			"testing-activity-source"
+		};
 	}
 }

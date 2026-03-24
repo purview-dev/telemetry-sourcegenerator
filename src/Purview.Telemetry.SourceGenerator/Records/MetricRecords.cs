@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
-using Purview.Telemetry.SourceGenerator.Templates;
+﻿using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator.Records;
 
@@ -9,37 +7,14 @@ record MeterTarget(
 	GenerationType GenerationType,
 	string ClassNameToGenerate,
 	string? ClassNamespace,
-	string[] ParentClasses,
+	EquatableArray<string> ParentClasses,
 	string? FullNamespace,
 	string? FullyQualifiedName,
 	PurviewTypeInfo InterfaceType,
 	string? MeterName,
 	MeterGenerationAttributeRecord? MeterGeneration,
-	ImmutableArray<InstrumentTarget> InstrumentationMethods,
-	ImmutableDictionary<string, Location[]> DuplicateMethods,
-	ImmutableArray<(TelemetryDiagnosticDescriptor, ImmutableArray<Location>)>? Failures
-)
-{
-	public static MeterTarget Failed(
-		TelemetryDiagnosticDescriptor diagnostic,
-		ImmutableArray<Location> locations
-	) =>
-		new(
-			null!,
-			GenerationType.None,
-			null!,
-			null,
-			null!,
-			null,
-			null,
-			Constants.Empty,
-			null,
-			null,
-			[],
-			null!,
-			[(diagnostic, locations)]
-		);
-}
+	EquatableArray<InstrumentTarget> InstrumentationMethods
+);
 
 record InstrumentTarget(
 	string MethodName,
@@ -50,10 +25,9 @@ record InstrumentTarget(
 	PurviewTypeInfo InstrumentMeasurementType,
 	bool IsObservable,
 	string MetricName,
-	ImmutableArray<Location> Locations,
 	InstrumentAttributeRecord? InstrumentAttribute,
-	ImmutableArray<InstrumentParameterTarget> Parameters,
-	ImmutableArray<InstrumentParameterTarget> Tags,
+	EquatableArray<InstrumentParameterTarget> Parameters,
+	EquatableArray<InstrumentParameterTarget> Tags,
 	InstrumentParameterTarget? MeasurementParameter,
 	TargetGeneration TargetGenerationState
 )
@@ -72,7 +46,6 @@ record InstrumentParameterTarget(
 	string GeneratedName,
 	InstrumentParameterDestination ParamDestination,
 	bool SkipOnNullOrEmpty,
-	ImmutableArray<Location> Locations,
 	GenerationType ExcludedTargets
 );
 

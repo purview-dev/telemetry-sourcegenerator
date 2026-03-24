@@ -1,13 +1,6 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-public interface ITestLogger {
-	void Log(string stringParam, Exception exception1, Exception exception2);
-      ^^^
-}
-*/
- Guid_1: (10,6)-(10,9),
       Message: Only a single exceptions parameter is permitted.,
       Severity: Error,
       Descriptor: {

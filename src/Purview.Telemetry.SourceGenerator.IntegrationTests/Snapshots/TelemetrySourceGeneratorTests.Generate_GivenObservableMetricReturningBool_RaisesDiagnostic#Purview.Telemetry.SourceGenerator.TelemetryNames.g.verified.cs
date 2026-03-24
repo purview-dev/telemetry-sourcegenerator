@@ -18,7 +18,10 @@ namespace Purview.Telemetry.SourceGenerator
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	static class TelemetryNames
 	{
-		public static readonly string[] MeterNames = global::System.Array.Empty<string>();
+		public static readonly string[] MeterNames = new string[]
+		{
+			"testing-meter"
+		};
 
 		public static readonly string[] ActivitySourceNames = global::System.Array.Empty<string>();
 	}

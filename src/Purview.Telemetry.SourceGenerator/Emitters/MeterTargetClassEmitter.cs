@@ -27,20 +27,6 @@ static partial class MeterTargetClassEmitter
 
 		logger?.Debug($"Generating metric class for: {target.FullyQualifiedName}");
 
-		if (
-			EmitHelpers.GenerateDuplicateMethodDiagnostics(
-				GenerationType.Metrics,
-				target.GenerationType,
-				target.DuplicateMethods,
-				context,
-				logger
-			)
-		)
-		{
-			logger?.Debug("Found duplicate methods while generating metrics, exiting.");
-			return;
-		}
-
 		var indent = EmitHelpers.EmitNamespaceStart(
 			target.ClassNamespace,
 			target.ParentClasses,

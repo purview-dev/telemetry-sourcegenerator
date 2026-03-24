@@ -1,13 +1,6 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-	[Activity]
-	Task<System.Diagnostics.Activity?> InvalidAsyncActivity(string operationId);
-                                    ^^^^^^^^^^^^^^^^^^^^
-}
-*/
- Guid_1: (13,36)-(13,56),
       Message: An activity or event must return either void or an System.Diagnostics.Activity.,
       Severity: Error,
       Descriptor: {

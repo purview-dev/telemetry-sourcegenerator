@@ -88,7 +88,7 @@ public record struct MessageTemplateHole(
 			throw new Exception("Destructure and Stringify cannot both be true.");
 	}
 
-	public static ImmutableArray<MessageTemplateHole> FromMatches(MatchCollection matches)
+	public static EquatableArray<MessageTemplateHole> FromMatches(MatchCollection matches)
 	{
 		List<MessageTemplateHole>? holes = null;
 		if (matches != null)
@@ -101,7 +101,7 @@ public record struct MessageTemplateHole(
 			}
 		}
 
-		return holes?.ToImmutableArray() ?? [];
+		return holes?.ToImmutableArray() ?? new EquatableArray<MessageTemplateHole>([]);
 	}
 
 	static MessageTemplateHole FromMatch(Match match)

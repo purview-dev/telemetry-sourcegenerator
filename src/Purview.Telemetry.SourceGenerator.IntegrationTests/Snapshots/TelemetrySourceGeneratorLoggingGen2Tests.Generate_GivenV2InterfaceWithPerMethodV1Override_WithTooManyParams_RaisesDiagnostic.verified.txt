@@ -1,13 +1,6 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-	[Log(GenerationMode = LoggerGenerationMode.V1)]
-	void HotPathV1LogEntry(int a, int b, int c, int d, int e, int f, int g);
-      ^^^^^^^^^^^^^^^^^
-}
-*/
- Guid_1: (10,6)-(10,23),
       Message: The maximum number of parameters (excluding optional Exception) is 6,
       Severity: Error,
       Descriptor: {

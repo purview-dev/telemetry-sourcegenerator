@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Collections.Immutable;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -177,7 +178,7 @@ static partial class Utilities
 
 	public static string Wrap(this string value, char c = '"') => c + value + c;
 
-	public static string[] GetParentClasses(TypeDeclarationSyntax classDeclaration)
+	public static EquatableArray<string> GetParentClasses(TypeDeclarationSyntax classDeclaration)
 	{
 		var parentClass = classDeclaration.Parent as ClassDeclarationSyntax;
 
@@ -189,7 +190,9 @@ static partial class Utilities
 			parentClass = parentClass.Parent as ClassDeclarationSyntax;
 		}
 
-		return [.. parentClassList];
+		return parentClassList.Count == 0
+			? new EquatableArray<string>([])
+			: parentClassList.ToImmutableArray();
 	}
 
 	public static string? GetParentClassesAsNamespace(TypeDeclarationSyntax classDeclaration)

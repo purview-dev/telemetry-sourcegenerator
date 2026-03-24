@@ -1,13 +1,6 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-	[Context]
-	bool InvalidContextReturn(
-      ^^^^^^^^^^^^^^^^^^^^
-		System.Diagnostics.Activity? activity,
-*/
- Guid_1: (15,6)-(15,26),
       Message: An activity or event must return either void or an System.Diagnostics.Activity.,
       Severity: Error,
       Descriptor: {

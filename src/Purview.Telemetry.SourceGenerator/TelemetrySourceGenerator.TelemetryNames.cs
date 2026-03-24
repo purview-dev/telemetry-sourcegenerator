@@ -10,87 +10,35 @@ partial class TelemetrySourceGenerator
 {
 	static void RegisterTelemetryNamesGeneration(
 		IncrementalGeneratorInitializationContext context,
+		IncrementalValuesProvider<ActivitySourceTarget?> activityTargets,
+		IncrementalValuesProvider<MeterTarget?> meterTargets,
 		GenerationLogger? logger
 	)
 	{
-		// Get meter targets
-		Func<
-			GeneratorAttributeSyntaxContext,
-			CancellationToken,
-			MeterTarget?
-		> meterTargetTransform =
-			logger == null
-				? static (context, cancellationToken) =>
-					PipelineHelpers.BuildMeterTransform(context, null, cancellationToken)
-				: (context, cancellationToken) =>
-					PipelineHelpers.BuildMeterTransform(context, logger, cancellationToken);
+		// Extract only AssemblyName from Compilation — a stable string that rarely changes —
+		// so we don't re-run TelemetryNames generation on every compilation change.
+		var assemblyNameProvider = context.CompilationProvider
+			.Select(static (c, _) => c.AssemblyName ?? string.Empty);
 
-		var meterTargetsPredicate = context
-			.SyntaxProvider.ForAttributeWithMetadataName(
-				Constants.Metrics.MeterAttribute.TypeInfo.FullyQualifiedName,
-				static (node, token) => PipelineHelpers.HasMeterTargetAttribute(node, token),
-				meterTargetTransform
-			)
-			.WhereNotNull()
-			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_TelemetryNames_Meters");
+		var combined = assemblyNameProvider
+			.Combine(meterTargets.Collect())
+			.Combine(activityTargets.Collect());
 
-		// Get activity targets
-		Func<
-			GeneratorAttributeSyntaxContext,
-			CancellationToken,
-			ActivitySourceTarget?
-		> activityTargetTransform =
-			logger == null
-				? static (context, cancellationToken) =>
-					PipelineHelpers.BuildActivityTransform(context, null, cancellationToken)
-				: (context, cancellationToken) =>
-					PipelineHelpers.BuildActivityTransform(context, logger, cancellationToken);
-
-		var activityTargetsPredicate = context
-			.SyntaxProvider.ForAttributeWithMetadataName(
-				Constants.Activities.ActivitySourceAttribute.TypeInfo.FullyQualifiedName,
-				static (node, token) => PipelineHelpers.HasActivityTargetAttribute(node, token),
-				activityTargetTransform
-			)
-			.WhereNotNull()
-			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_TelemetryNames_Activities");
-
-		// Combine compilation with both target types
-		var combined = context
-			.CompilationProvider.Combine(meterTargetsPredicate.Collect())
-			.Combine(activityTargetsPredicate.Collect());
-
-		// Register generation
-		Action<
-			SourceProductionContext,
-			(
-				(Compilation Compilation, ImmutableArray<MeterTarget?> MeterTargets) Left,
-				ImmutableArray<ActivitySourceTarget?> ActivityTargets
-			)
-		> generationAction =
-			logger == null
-				? static (spc, source) =>
-					GenerateTelemetryNames(
-						source.Left.Compilation,
-						source.Left.MeterTargets,
-						source.ActivityTargets,
-						spc,
-						null
-					)
-				: (spc, source) =>
-					GenerateTelemetryNames(
-						source.Left.Compilation,
-						source.Left.MeterTargets,
-						source.ActivityTargets,
-						spc,
-						logger
-					);
-
-		context.RegisterImplementationSourceOutput(source: combined, action: generationAction);
+		context.RegisterImplementationSourceOutput(
+			source: combined,
+			action: (spc, source) =>
+				GenerateTelemetryNames(
+					source.Left.Left,
+					source.Left.Right,
+					source.Right,
+					spc,
+					logger
+				)
+		);
 	}
 
 	static void GenerateTelemetryNames(
-		Compilation compilation,
+		string assemblyName,
 		ImmutableArray<MeterTarget?> meterTargets,
 		ImmutableArray<ActivitySourceTarget?> activityTargets,
 		SourceProductionContext spc,
@@ -150,11 +98,7 @@ partial class TelemetrySourceGenerator
 
 		// Collect unique meter names
 		var meterNames = meterTargets
-			.Where(t =>
-				t != null
-				&& (t.Failures == null || t.Failures.Value.Length == 0)
-				&& !string.IsNullOrEmpty(t.MeterName)
-			)
+			.Where(t => t != null && !string.IsNullOrEmpty(t.MeterName))
 			.Select(t => t!.MeterName!)
 			.Distinct(StringComparer.Ordinal)
 			.OrderBy(n => n, StringComparer.Ordinal)
@@ -162,18 +106,11 @@ partial class TelemetrySourceGenerator
 
 		// Collect unique activity source names
 		var activitySourceNames = activityTargets
-			.Where(t =>
-				t != null
-				&& (t.Failures == null || t.Failures.Value.Length == 0)
-				&& !string.IsNullOrEmpty(t.ActivitySourceName)
-			)
+			.Where(t => t != null && !string.IsNullOrEmpty(t.ActivitySourceName))
 			.Select(t => t!.ActivitySourceName!)
 			.Distinct(StringComparer.Ordinal)
 			.OrderBy(n => n, StringComparer.Ordinal)
 			.ToImmutableArray();
-
-		// Use assembly name as namespace (no RootNamespace available in source generators)
-		string? rootNamespace = compilation.AssemblyName;
 
 		// Use custom class name if provided, otherwise default to "TelemetryNames"
 		var className = string.IsNullOrWhiteSpace(customClassName)
@@ -184,7 +121,7 @@ partial class TelemetrySourceGenerator
 			meterNames,
 			activitySourceNames,
 			className!,
-			rootNamespace,
+			assemblyName,
 			spc,
 			logger
 		);

@@ -46,26 +46,12 @@ partial class ActivitySourceTargetClassEmitter
 				"Tags parameter not allowed on context method, only activities or events."
 			);
 
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.TagsParameterNotAllowed,
-				tagsParam.Locations,
-				tagsParam.ParameterName
-			);
-
 			return;
 		}
 
 		if (linksParam != null)
 		{
 			logger?.Diagnostic("Links parameter not allowed on context method, only activities.");
-
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.LinksParameterNotAllowed,
-				linksParam.Locations,
-				linksParam.ParameterName
-			);
 
 			return;
 		}

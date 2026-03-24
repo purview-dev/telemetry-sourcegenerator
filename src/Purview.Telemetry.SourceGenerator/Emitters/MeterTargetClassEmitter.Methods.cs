@@ -32,12 +32,6 @@ partial class MeterTargetClassEmitter
 				logger?.Debug(
 					$"Activity parameter '{methodTarget.TargetGenerationState.ActivityParameterWithoutTarget}' on {methodTarget.MethodName} has no Activity target."
 				);
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.General.ActivityParameterWithoutActivityTarget,
-					methodTarget.Locations,
-					methodTarget.TargetGenerationState.ActivityParameterWithoutTarget
-				);
 			}
 
 			EmitMethod(builder, indent, methodTarget, context, logger);
@@ -100,6 +94,42 @@ partial class MeterTargetClassEmitter
 		if (methodTarget.InstrumentAttribute == null)
 			return;
 
+		var isMultiTarget = methodTarget.TargetGenerationState.IsMultiTarget;
+		var methodTargets = methodTarget.TargetGenerationState.MethodTargets;
+		var activityOwnsPublicMethod = methodTargets.HasFlag(GenerationType.Activities);
+		var loggingOwnsPublicMethod =
+			!activityOwnsPublicMethod && methodTargets.HasFlag(GenerationType.Logging);
+		var metricsOwnsPublicMethod = !activityOwnsPublicMethod && !loggingOwnsPublicMethod;
+
+		// Validate return type: must be void or bool (for metrics-owned public methods)
+		var isVoidReturn = methodTarget.ReturnType.SpecialType == SpecialType.System_Void;
+		if (metricsOwnsPublicMethod && !isVoidReturn && !methodTarget.ReturnsBool)
+		{
+			TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Metrics.DoesNotReturnVoid);
+			return;
+		}
+
+		// Observable instruments cannot return bool
+		if (methodTarget.IsObservable && methodTarget.ReturnsBool)
+		{
+			TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Metrics.ObservableCannotReturnBool);
+			return;
+		}
+
+		// Auto-counter instruments must return void (not bool)
+		if (methodTarget.InstrumentAttribute.IsAutoIncrement && methodTarget.ReturnsBool)
+		{
+			TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Metrics.AutoCounterMustReturnVoid);
+			return;
+		}
+
+		// Auto-counter cannot also have a measurement parameter
+		if (methodTarget.InstrumentAttribute.IsAutoIncrement && methodTarget.MeasurementParameter != null)
+		{
+			TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Metrics.AutoIncrementCountAndMeasurementParam);
+			return;
+		}
+
 		if (
 			!methodTarget.InstrumentAttribute!.IsAutoIncrement
 			&& methodTarget.MeasurementParameter == null
@@ -109,15 +139,6 @@ partial class MeterTargetClassEmitter
 		}
 
 		logger?.Debug($"Emitting instrument method: {methodTarget.MethodName}.");
-
-		var isMultiTarget = methodTarget.TargetGenerationState.IsMultiTarget;
-		var methodTargets = methodTarget.TargetGenerationState.MethodTargets;
-
-		// Determine if Activity or Logging target owns the public method
-		var activityOwnsPublicMethod = methodTargets.HasFlag(GenerationType.Activities);
-		var loggingOwnsPublicMethod =
-			!activityOwnsPublicMethod && methodTargets.HasFlag(GenerationType.Logging);
-		var metricsOwnsPublicMethod = !activityOwnsPublicMethod && !loggingOwnsPublicMethod;
 
 		// For multi-target where Activity or Logging owns public method, generate private method
 		var accessModifier = isMultiTarget && !metricsOwnsPublicMethod ? "private" : "public";

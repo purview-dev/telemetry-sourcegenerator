@@ -42,11 +42,6 @@ partial class LoggerTargetClassEmitter
 					logger?.Debug(
 						$"Identified {target.InterfaceType.TypeName}.{methodTarget.MethodName} as problematic as it has another target types."
 					);
-					TelemetryDiagnostics.Report(
-						context.ReportDiagnostic,
-						TelemetryDiagnostics.General.MultiGenerationTargetsNotSupported,
-						methodTarget.MethodLocation
-					);
 				}
 				else if (
 					methodTarget.TargetGenerationState.RaiseInferenceNotSupportedWithMultiTargeting
@@ -54,11 +49,6 @@ partial class LoggerTargetClassEmitter
 				{
 					logger?.Debug(
 						$"Identified {target.InterfaceType.TypeName}.{methodTarget.MethodName} as problematic as it is inferred."
-					);
-					TelemetryDiagnostics.Report(
-						context.ReportDiagnostic,
-						TelemetryDiagnostics.General.InferenceNotSupportedWithMultiTargeting,
-						methodTarget.MethodLocation
 					);
 				}
 
@@ -71,12 +61,12 @@ partial class LoggerTargetClassEmitter
 				logger?.Debug(
 					$"Activity parameter '{methodTarget.TargetGenerationState.ActivityParameterWithoutTarget}' on {methodTarget.MethodName} has no Activity target."
 				);
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.General.ActivityParameterWithoutActivityTarget,
-					methodTarget.MethodLocation,
-					methodTarget.TargetGenerationState.ActivityParameterWithoutTarget
-				);
+			}
+
+			if (methodTarget.UnknownReturnType)
+			{
+				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Logging.LogMustReturnVoidOrAsync);
+				continue;
 			}
 
 			if (methodTarget.HasMultipleExceptions)
@@ -84,11 +74,7 @@ partial class LoggerTargetClassEmitter
 				logger?.Diagnostic(
 					"Method has multiple exception parameters, only a single one is permitted."
 				);
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.Logging.MultipleExceptionsDefined,
-					methodTarget.MethodLocation
-				);
+				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Logging.MultipleExceptionsDefined);
 
 				continue;
 			}
@@ -99,11 +85,7 @@ partial class LoggerTargetClassEmitter
 			)
 			{
 				logger?.Diagnostic("Method has more than 6 parameters.");
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.Logging.MaximumLogEntryParametersExceeded,
-					methodTarget.MethodLocation
-				);
+				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Logging.MaximumLogEntryParametersExceeded);
 
 				continue;
 			}
@@ -111,11 +93,7 @@ partial class LoggerTargetClassEmitter
 			if (methodTarget.InferredErrorLevel)
 			{
 				logger?.Diagnostic("Inferring error log level.");
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.Logging.InferringErrorLogLevel,
-					methodTarget.MethodLocation
-				);
+				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Logging.InferringErrorLogLevel);
 			}
 
 			EmitLogActionField(builder, indent, methodTarget);

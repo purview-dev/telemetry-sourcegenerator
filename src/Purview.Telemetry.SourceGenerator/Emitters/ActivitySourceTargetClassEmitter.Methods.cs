@@ -33,12 +33,7 @@ partial class ActivitySourceTargetClassEmitter
 				logger?.Diagnostic(
 					"There are no Activity methods defined, however there are Events/ Context methods."
 				);
-
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.Activities.NoActivityMethodsDefined,
-					target.InterfaceLocation
-				);
+				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Activities.NoActivityMethodsDefined);
 			}
 		}
 
@@ -433,12 +428,6 @@ partial class ActivitySourceTargetClassEmitter
 				logger?.Debug(
 					$"Identified {target.InterfaceType.TypeName}.{methodTarget.MethodName} as problematic as it has another target types."
 				);
-
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.General.MultiGenerationTargetsNotSupported,
-					methodTarget.Locations
-				);
 			}
 			else if (
 				methodTarget.TargetGenerationState.RaiseInferenceNotSupportedWithMultiTargeting
@@ -446,12 +435,6 @@ partial class ActivitySourceTargetClassEmitter
 			{
 				logger?.Debug(
 					$"Identified {target.InterfaceType.TypeName}.{methodTarget.MethodName} as problematic as it is inferred."
-				);
-
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.General.InferenceNotSupportedWithMultiTargeting,
-					methodTarget.Locations
 				);
 			}
 
@@ -473,11 +456,7 @@ partial class ActivitySourceTargetClassEmitter
 				$"The return type {methodTarget.ReturnType} isn't valid for an activity, event, or context method."
 			);
 
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.InvalidReturnType,
-				methodTarget.Locations
-			);
+			TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Activities.InvalidReturnType);
 
 			return false;
 		}
@@ -495,24 +474,14 @@ partial class ActivitySourceTargetClassEmitter
 				)
 				{
 					logger?.Diagnostic($"No Activity returned for {methodTarget.MethodName}.");
-
-					TelemetryDiagnostics.Report(
-						context.ReportDiagnostic,
-						TelemetryDiagnostics.Activities.DoesNotReturnActivity,
-						methodTarget.Locations
-					);
+					TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Activities.DoesNotReturnActivity);
 				}
 				else if (!methodTarget.ReturnType.IsNullable)
 				{
 					logger?.Diagnostic(
 						$"Activity return type is not nullable for {methodTarget.MethodName}."
 					);
-
-					TelemetryDiagnostics.Report(
-						context.ReportDiagnostic,
-						TelemetryDiagnostics.Activities.ActivityReturnTypeShouldBeNullable,
-						methodTarget.Locations
-					);
+					TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Activities.ActivityReturnTypeShouldBeNullable);
 				}
 			}
 			else
@@ -521,12 +490,6 @@ partial class ActivitySourceTargetClassEmitter
 				{
 					logger?.Diagnostic(
 						$"No Activity parameter is defined on {methodTarget.MethodName}."
-					);
-
-					TelemetryDiagnostics.Report(
-						context.ReportDiagnostic,
-						TelemetryDiagnostics.Activities.DoesNotAcceptActivityParameter,
-						methodTarget.Locations
 					);
 				}
 				else if (
@@ -537,12 +500,6 @@ partial class ActivitySourceTargetClassEmitter
 				{
 					logger?.Diagnostic(
 						$"Activity parameter is defined, but it's not the first on {methodTarget.MethodName}."
-					);
-
-					TelemetryDiagnostics.Report(
-						context.ReportDiagnostic,
-						TelemetryDiagnostics.Activities.ActivityShouldBeTheFirstParameter,
-						methodTarget.Locations
 					);
 				}
 			}

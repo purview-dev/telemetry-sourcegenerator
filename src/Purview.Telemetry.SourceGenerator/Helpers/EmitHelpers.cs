@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Text;
+﻿using System.Text;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Records;
 
@@ -9,7 +8,7 @@ static class EmitHelpers
 {
 	public static int EmitNamespaceStart(
 		string? classNamespace,
-		string[] parentClasses,
+		EquatableArray<string> parentClasses,
 		StringBuilder builder,
 		CancellationToken token
 	)
@@ -44,7 +43,7 @@ static class EmitHelpers
 
 	public static void EmitNamespaceEnd(
 		string? classNamespace,
-		string[] parentClasses,
+		EquatableArray<string> parentClasses,
 		int indent,
 		StringBuilder builder,
 		CancellationToken token
@@ -95,45 +94,4 @@ static class EmitHelpers
 
 	public static void EmitClassEnd(StringBuilder builder, int indent) =>
 		builder.Append(indent, '}');
-
-	public static bool GenerateDuplicateMethodDiagnostics(
-		GenerationType requestedType,
-		GenerationType generationType,
-		ImmutableDictionary<string, Location[]> duplicateMethods,
-		SourceProductionContext context,
-		GenerationLogger? logger
-	)
-	{
-		if (duplicateMethods.IsEmpty)
-		{
-			// No duplicate methods found.
-			return false;
-		}
-
-		if (!SharedHelpers.ShouldEmit(requestedType, generationType))
-		{
-			// We're not generating this type of method, so we don't need to emit diagnostics for it
-			// but we do need to stop processing.
-			return true;
-		}
-
-		logger?.Debug($"Found {duplicateMethods.Count} duplicate method(s).");
-
-		foreach (var methodName in duplicateMethods.Keys)
-		{
-			context.CancellationToken.ThrowIfCancellationRequested();
-
-			var locations = duplicateMethods[methodName];
-			logger?.Diagnostic($"Method '{methodName}' is defined in multiple locations:");
-
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.General.DuplicateMethodNamesAreNotSupported,
-				locations,
-				methodName
-			);
-		}
-
-		return true;
-	}
 }

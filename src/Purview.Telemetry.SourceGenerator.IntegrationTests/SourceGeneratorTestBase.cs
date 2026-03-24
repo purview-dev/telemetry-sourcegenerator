@@ -278,11 +278,15 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 
 		var runResult = result.GetRunResult();
 
+		// Run the analyzer on outputCompilation (which includes generated attribute source files).
+		var analyzerDiagnostics = await RunAnalyzerAsync(outputCompilation, cancellationToken);
+		var allDiagnostics = diagnostics.AddRange(analyzerDiagnostics);
+
 		await Assert
 			.That(runResult.Results.Where(m => m.Exception != null).Select(m => m.Exception))
 			.IsEmpty();
 
-		return new(runResult, diagnostics, outputCompilation);
+		return new(runResult, allDiagnostics, outputCompilation);
 	}
 
 	static void GuardGenerator(object generator)
@@ -403,6 +407,18 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 	}
 
 	protected virtual Project SetupProject(Project project) => project;
+
+	static async Task<ImmutableArray<Diagnostic>> RunAnalyzerAsync(
+		Compilation compilation,
+		CancellationToken cancellationToken
+	)
+	{
+		var compilationWithAnalyzers = compilation.WithAnalyzers(
+			ImmutableArray.Create<DiagnosticAnalyzer>(new TelemetryDiagnosticAnalyzer())
+		);
+
+		return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync(cancellationToken);
+	}
 }
 
 public record GenerationResult(
