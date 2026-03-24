@@ -39,5 +39,8 @@ namespace Testing
 			_warnOperationAction(_logger, message, null);
 		}
 
+
+		public void CountOperation() => throw new global::System.NotSupportedException();
+
 	}
 }

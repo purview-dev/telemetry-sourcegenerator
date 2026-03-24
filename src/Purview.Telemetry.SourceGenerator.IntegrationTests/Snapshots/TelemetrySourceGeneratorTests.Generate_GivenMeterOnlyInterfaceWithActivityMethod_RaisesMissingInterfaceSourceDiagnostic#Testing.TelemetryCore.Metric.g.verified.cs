@@ -54,5 +54,8 @@ namespace Testing
 		{
 			_incrementCounterInstrument.Add(value);
 		}
+
+		public global::System.Diagnostics.Activity? StartOperation(string operationId) => throw new global::System.NotSupportedException();
+
 	}
 }

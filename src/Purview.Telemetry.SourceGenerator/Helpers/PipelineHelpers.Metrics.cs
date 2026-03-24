@@ -337,6 +337,15 @@ partial class PipelineHelpers
 			);
 		}
 
+		// Post-pass: mark duplicate method names as invalid (emitter generates throw stubs; TSG1003 raised by analyzer)
+		var seenNames = new HashSet<string>(StringComparer.Ordinal);
+		for (var i = 0; i < methodTargets.Count; i++)
+		{
+			var t = methodTargets[i];
+			if (!seenNames.Add(t.MethodName))
+				methodTargets[i] = t with { TargetGenerationState = t.TargetGenerationState with { IsValid = false } };
+		}
+
 		return [.. methodTargets];
 	}
 

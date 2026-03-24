@@ -22,5 +22,11 @@ namespace Testing
 		{
 			_logger = logger;
 		}
+
+		public void LogOperationAsync(string operationId, string message) => throw new global::System.NotSupportedException();
+
+
+		public void InfoAsync(string message) => throw new global::System.NotSupportedException();
+
 	}
 }

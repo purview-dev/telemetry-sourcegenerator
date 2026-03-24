@@ -162,6 +162,26 @@ partial class PipelineHelpers
 
 			if (method.Arity > 0)
 			{
+				methodTargets.Add(
+					new(
+						MethodName: method.Name,
+						ReturnType: PurviewTypeFactory.Create(method.ReturnType),
+						ActivityOrEventName: method.Name,
+						HasActivityParameter: false,
+						ActivityAttribute: null,
+						EventAttribute: null,
+						MethodType: ActivityMethodType.Activity,
+						Parameters: ImmutableArray<ActivityBasedParameterTarget>.Empty,
+						Baggage: ImmutableArray<ActivityBasedParameterTarget>.Empty,
+						Tags: ImmutableArray<ActivityBasedParameterTarget>.Empty,
+						TargetGenerationState: new TargetGeneration(
+							IsValid: false,
+							RaiseInferenceNotSupportedWithMultiTargeting: false,
+							RaiseMultiGenerationTargetsNotSupported: false
+						),
+						TypeParameters: ImmutableArray.CreateRange(method.TypeParameters, tp => tp.Name)
+					)
+				);
 				continue;
 			}
 

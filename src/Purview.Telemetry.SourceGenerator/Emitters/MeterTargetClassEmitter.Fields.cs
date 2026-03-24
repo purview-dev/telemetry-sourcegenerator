@@ -46,6 +46,12 @@ partial class MeterTargetClassEmitter
 
 		foreach (var method in target.InstrumentationMethods)
 		{
+			if (!method.TargetGenerationState.IsValid)
+			{
+				// Skip invalid methods (e.g. post-pass duplicates); no field needed.
+				continue;
+			}
+
 			if (method.InstrumentAttribute == null)
 			{
 				// We've already 'reported' this error, so we can skip it.

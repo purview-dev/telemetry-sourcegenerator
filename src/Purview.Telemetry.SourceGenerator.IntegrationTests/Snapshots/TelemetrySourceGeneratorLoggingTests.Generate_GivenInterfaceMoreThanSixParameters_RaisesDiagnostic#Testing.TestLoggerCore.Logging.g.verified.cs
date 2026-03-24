@@ -26,5 +26,8 @@ namespace Testing
 		{
 			_logger = logger;
 		}
+
+		public void Log(string stringParam, int intParam, bool boolParam, string stringParam1, int intParam1, bool boolParam1, string stringParam2, int intParam2, bool boolParam2) => throw new global::System.NotSupportedException();
+
 	}
 }

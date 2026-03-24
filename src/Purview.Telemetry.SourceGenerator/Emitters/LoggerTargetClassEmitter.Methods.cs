@@ -7,6 +7,36 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 partial class LoggerTargetClassEmitter
 {
+	internal static void EmitThrowStub(
+		StringBuilder builder,
+		int indent,
+		LogMethodTarget methodTarget
+	)
+	{
+		builder
+			.AppendLine()
+			.Append(indent, "public ", withNewLine: false);
+
+		if (methodTarget.IsScoped)
+			builder.Append(Constants.System.IDisposable.WithNullable());
+		else
+			builder.Append(Constants.System.VoidKeyword);
+
+		builder.Append(' ').Append(methodTarget.MethodName).Append('(');
+
+		for (var i = 0; i < methodTarget.Parameters.Length; i++)
+		{
+			if (i > 0)
+				builder.Append(", ");
+			builder
+				.Append(methodTarget.Parameters[i].ParameterType)
+				.Append(' ')
+				.Append(methodTarget.Parameters[i].Name);
+		}
+
+		builder.AppendLine(") => throw new global::System.NotSupportedException();").AppendLine();
+	}
+
 	static int EmitMethods(
 		LoggerTarget target,
 		StringBuilder builder,
@@ -22,19 +52,36 @@ partial class LoggerTargetClassEmitter
 			context.CancellationToken.ThrowIfCancellationRequested();
 
 			if (!methodTarget.TargetGenerationState.IsValid)
+			{
+				if (EmitterHelpers.ShouldEmitThrowStub(
+					methodTarget.TargetGenerationState,
+					GenerationType.Logging,
+					target.GenerationType
+				))
+				{
+					EmitThrowStub(builder, indent, methodTarget);
+				}
 				continue;
+			}
 
 			if (methodTarget.UnknownReturnType)
+			{
+				EmitThrowStub(builder, indent, methodTarget);
 				continue; // Diagnostic already reported in EmitFields
+			}
 
 			if (methodTarget.HasMultipleExceptions)
+			{
+				EmitThrowStub(builder, indent, methodTarget);
 				continue;
+			}
 
 			if (
 				methodTarget.ParameterCountSansException
 				> Constants.Logging.MaxNonExceptionParameters
 			)
 			{
+				EmitThrowStub(builder, indent, methodTarget);
 				continue;
 			}
 

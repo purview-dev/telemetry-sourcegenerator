@@ -25,5 +25,8 @@ namespace Testing
 		{
 			_logger = logger;
 		}
+
+		public void InvalidTaskReturn(string message) => throw new global::System.NotSupportedException();
+
 	}
 }

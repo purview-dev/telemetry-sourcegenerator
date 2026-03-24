@@ -40,5 +40,8 @@ namespace Testing
 			activity.AddEvent(recordExceptionEvent);
 		}
 
+
+		public global::System.Diagnostics.Activity? Activity<T0>() => throw new global::System.NotSupportedException();
+
 	}
 }

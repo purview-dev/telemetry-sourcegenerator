@@ -25,5 +25,8 @@ namespace Testing
 		{
 			_logger = logger;
 		}
+
+		public void LogWeather(global::Testing.WeatherForecast[] weather) => throw new global::System.NotSupportedException();
+
 	}
 }

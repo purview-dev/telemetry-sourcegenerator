@@ -35,7 +35,9 @@ record LogMethodTarget(
 	bool HasMultipleExceptions,
 	bool InferredErrorLevel,
 	TargetGeneration TargetGenerationState,
-	bool UseV1Generation
+	bool UseV1Generation,
+	bool HasExplicitLevel = false,
+	bool HasLogPropertiesAndExpandEnumerable = false
 )
 {
 	public int TotalParameterCount => Parameters.Length;
