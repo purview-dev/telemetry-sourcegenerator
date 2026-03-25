@@ -23,7 +23,7 @@ sealed partial class TestTelemetryCore : global::ITestTelemetry
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	public TestTelemetryCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
 	{
-		global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+		global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 		PopulateMeterTags(meterTags);
 
@@ -33,7 +33,7 @@ sealed partial class TestTelemetryCore : global::ITestTelemetry
 			Tags = meterTags
 		});
 
-		global::System.Collections.Generic.Dictionary<string, object?> duplicateMethodNameTags = new();
+		global::System.Collections.Generic.Dictionary<string, object?> duplicateMethodNameTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 		PopulateDuplicateMethodNameTags(duplicateMethodNameTags);
 

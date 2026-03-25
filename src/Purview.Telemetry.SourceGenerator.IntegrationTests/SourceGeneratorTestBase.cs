@@ -161,6 +161,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 		bool disableDependencyInjection = true,
 		bool autoIncludeUsings = true,
 		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
+		LanguageVersion languageVersion = LanguageVersion.Default,
 		CancellationToken cancellationToken = default
 	)
 	{
@@ -171,6 +172,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 			projectModifier,
 			disableDependencyInjection,
 			includeLoggerTypes,
+			languageVersion: languageVersion,
 			cancellationToken: cancellationToken
 		);
 	}
@@ -182,6 +184,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 		Func<Project, Project>? projectModifier = null,
 		bool disableDependencyInjection = true,
 		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
+		LanguageVersion languageVersion = LanguageVersion.Default,
 		CancellationToken cancellationToken = default
 	)
 	{
@@ -192,6 +195,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 			projectModifier,
 			disableDependencyInjection,
 			includeLoggerTypes,
+			languageVersion: languageVersion,
 			cancellationToken: cancellationToken
 		);
 	}
@@ -203,6 +207,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 		Func<Project, Project>? projectModifier = null,
 		bool disableDependencyInjection = true,
 		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
+		LanguageVersion languageVersion = LanguageVersion.Default,
 		CancellationToken cancellationToken = default
 	)
 	{
@@ -211,6 +216,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 			preprocessorSymbols.Add("EXCLUDE_PURVIEW_TELEMETRY_LOGGING");
 
 		CSharpParseOptions parseOptions = new(
+			languageVersion: languageVersion,
 			documentationMode: DocumentationMode.Parse,
 			kind: SourceCodeKind.Regular,
 			preprocessorSymbols: preprocessorSymbols
@@ -256,6 +262,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 			projectModifier,
 			csharpDocuments,
 			includeLoggerTypes,
+			languageVersion,
 			cancellationToken
 		);
 
@@ -310,6 +317,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 		Func<Project, Project>? projectModifier = null,
 		AdditionalText[]? csharpDocuments = null,
 		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
+		LanguageVersion languageVersion = LanguageVersion.Default,
 		CancellationToken cancellationToken = default
 	)
 	{
@@ -322,8 +330,12 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 		project = project
 			.WithCompilationOptions(
 				project.CompilationOptions!.WithOutputKind(OutputKind.DynamicallyLinkedLibrary)
-			)
-			.AddMetadataReference(
+			);
+
+		if (languageVersion != LanguageVersion.Default)
+			project = project.WithParseOptions(new CSharpParseOptions(languageVersion: languageVersion));
+
+		project = project.AddMetadataReference(
 				MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location)
 			);
 

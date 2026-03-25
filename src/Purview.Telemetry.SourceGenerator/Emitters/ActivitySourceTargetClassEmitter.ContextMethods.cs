@@ -12,7 +12,8 @@ partial class ActivitySourceTargetClassEmitter
 		int indent,
 		ActivityBasedGenerationTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -56,7 +57,7 @@ partial class ActivitySourceTargetClassEmitter
 			return;
 		}
 
-		EmitHasListenersTest(builder, indent, methodTarget);
+		EmitHasListenersTest(builder, indent, methodTarget, emitNullable);
 
 		builder
 			.Append(indent, "if (", withNewLine: false)

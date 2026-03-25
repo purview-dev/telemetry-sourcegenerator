@@ -26,7 +26,7 @@ namespace Testing
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestMetricsCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
 		{
-			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateMeterTags(meterTags);
 
@@ -36,12 +36,12 @@ namespace Testing
 				Tags = meterTags
 			});
 
-			global::System.Collections.Generic.Dictionary<string, object?> histogramTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> histogramTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateHistogramTags(histogramTags);
 
 			_histogramInstrument = _meter.CreateHistogram<int>(name: "test_metrics.histogram", unit: null, description: null, tags: histogramTags);
-			global::System.Collections.Generic.Dictionary<string, object?> histogram1Tags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> histogram1Tags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateHistogram1Tags(histogram1Tags);
 

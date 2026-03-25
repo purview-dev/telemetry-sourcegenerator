@@ -13,7 +13,8 @@ partial class MeterTargetClassEmitter
 		int indent,
 		SourceProductionContext context,
 		GenerationLogger? logger,
-		bool readonlyFields = false
+		bool readonlyFields = false,
+		bool emitNullable = true
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -40,7 +41,7 @@ partial class MeterTargetClassEmitter
 				.Append(indent, Constants.Metrics.SystemDiagnostics.Meter, withNewLine: false)
 				.Append(' ')
 				.Append(MeterFieldName)
-				.AppendLine(" = default!;")
+				.AppendLine(emitNullable ? " = default!;" : " = default;")
 				.AppendLine();
 		}
 
@@ -81,7 +82,7 @@ partial class MeterTargetClassEmitter
 					.Append(indent, type, withNewLine: false)
 					.Append(' ')
 					.Append(method.FieldName)
-					.AppendLine(" = default!;");
+					.AppendLine(emitNullable ? " = default!;" : " = default;");
 			}
 		}
 

@@ -1,4 +1,5 @@
-﻿namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Used during <see cref="global::System.Diagnostics.ActivityEvent"/> generation
@@ -11,4 +12,5 @@
 [global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
 sealed class EscapeAttribute : global::System.Attribute
 {
+}
 }

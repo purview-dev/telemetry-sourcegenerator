@@ -25,7 +25,7 @@ namespace Testing
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public InvalidTelemetryCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
 		{
-			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateMeterTags(meterTags);
 
@@ -35,7 +35,7 @@ namespace Testing
 				Tags = meterTags
 			});
 
-			global::System.Collections.Generic.Dictionary<string, object?> invalidAsyncCounterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> invalidAsyncCounterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateInvalidAsyncCounterTags(invalidAsyncCounterTags);
 

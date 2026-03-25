@@ -9,9 +9,8 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
-#nullable enable
-
-namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Marker attribute used to control the generation
@@ -26,4 +25,5 @@ namespace Purview.Telemetry;
 [global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
 sealed class StatusDescriptionAttribute : global::System.Attribute
 {
+}
 }

@@ -1,4 +1,5 @@
-﻿namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Specifies the meter type generated corresponds to a <see cref="global::System.Diagnostics.Metrics.Counter{T}"/>.
@@ -35,7 +36,7 @@ sealed class CounterAttribute : global::System.Attribute
 	/// <param name="unit">Optionally specifies the <see cref="Unit"/>.</param>
 	/// <param name="description">Optionally specifies the <see cref="Description"/>.</param>
 	/// <param name="autoIncrement">Optionally specifies if the counter is <see cref="AutoIncrement">auto incremented</see>.</param>
-	public CounterAttribute(string name, string? unit = null, string? description = null, bool autoIncrement = false)
+	public CounterAttribute(string name, string unit = null, string description = null, bool autoIncrement = false)
 	{
 		Name = name;
 		Unit = unit;
@@ -55,15 +56,16 @@ sealed class CounterAttribute : global::System.Attribute
 	/// of the method is used.
 	/// </summary>
 
-	public string? Name { get; set; }
+	public string Name { get; set; }
 
 	/// <summary>
 	/// Optionally specifies the unit of the meter.
 	/// </summary>
-	public string? Unit { get; set; }
+	public string Unit { get; set; }
 
 	/// <summary>
 	/// Optionally specifies the description of the meter.
 	/// </summary>
-	public string? Description { get; set; }
+	public string Description { get; set; }
+}
 }

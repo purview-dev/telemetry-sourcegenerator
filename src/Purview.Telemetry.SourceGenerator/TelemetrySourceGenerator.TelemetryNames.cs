@@ -12,6 +12,7 @@ partial class TelemetrySourceGenerator
 		IncrementalGeneratorInitializationContext context,
 		IncrementalValuesProvider<ActivitySourceTarget?> activityTargets,
 		IncrementalValuesProvider<MeterTarget?> meterTargets,
+		IncrementalValueProvider<bool> supportsNullableAnnotations,
 		GenerationLogger? logger
 	)
 	{
@@ -22,13 +23,15 @@ partial class TelemetrySourceGenerator
 
 		var combined = assemblyNameProvider
 			.Combine(meterTargets.Collect())
-			.Combine(activityTargets.Collect());
+			.Combine(activityTargets.Collect())
+			.Combine(supportsNullableAnnotations);
 
 		context.RegisterImplementationSourceOutput(
 			source: combined,
 			action: (spc, source) =>
 				GenerateTelemetryNames(
-					source.Left.Left,
+					source.Left.Left.Left,
+					source.Left.Left.Right,
 					source.Left.Right,
 					source.Right,
 					spc,
@@ -41,6 +44,7 @@ partial class TelemetrySourceGenerator
 		string assemblyName,
 		ImmutableArray<MeterTarget?> meterTargets,
 		ImmutableArray<ActivitySourceTarget?> activityTargets,
+		bool emitNullable,
 		SourceProductionContext spc,
 		GenerationLogger? logger
 	)
@@ -122,6 +126,7 @@ partial class TelemetrySourceGenerator
 			activitySourceNames,
 			className!,
 			assemblyName,
+			emitNullable,
 			spc,
 			logger
 		);

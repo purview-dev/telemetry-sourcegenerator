@@ -1,6 +1,7 @@
 #if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
 
-namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Controls which generation mode is used for <see cref="global::Microsoft.Extensions.Logging.ILogger"/>-based log methods.
@@ -33,4 +34,5 @@ enum LoggerGenerationMode
 	V2 = 2
 }
 
+}
 #endif

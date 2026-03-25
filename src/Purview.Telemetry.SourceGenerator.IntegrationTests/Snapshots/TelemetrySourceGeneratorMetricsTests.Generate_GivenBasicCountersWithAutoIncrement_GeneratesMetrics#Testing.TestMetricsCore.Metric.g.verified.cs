@@ -27,7 +27,7 @@ namespace Testing
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestMetricsCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
 		{
-			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateMeterTags(meterTags);
 
@@ -37,17 +37,17 @@ namespace Testing
 				Tags = meterTags
 			});
 
-			global::System.Collections.Generic.Dictionary<string, object?> counter1Tags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> counter1Tags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateCounter1Tags(counter1Tags);
 
 			_counter1Instrument = _meter.CreateCounter<int>(name: "test_metrics.counter1", unit: null, description: null, tags: counter1Tags);
-			global::System.Collections.Generic.Dictionary<string, object?> counter2Tags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> counter2Tags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateCounter2Tags(counter2Tags);
 
 			_counter2Instrument = _meter.CreateCounter<int>(name: "test_metrics.counter2", unit: null, description: null, tags: counter2Tags);
-			global::System.Collections.Generic.Dictionary<string, object?> counter3Tags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> counter3Tags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateCounter3Tags(counter3Tags);
 

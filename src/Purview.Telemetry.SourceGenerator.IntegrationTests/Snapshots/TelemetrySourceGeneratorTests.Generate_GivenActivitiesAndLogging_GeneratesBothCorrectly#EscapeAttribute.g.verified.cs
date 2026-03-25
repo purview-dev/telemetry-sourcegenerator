@@ -9,9 +9,8 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
-#nullable enable
-
-namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Used during <see cref="global::System.Diagnostics.ActivityEvent"/> generation
@@ -24,4 +23,5 @@ namespace Purview.Telemetry;
 [global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
 sealed class EscapeAttribute : global::System.Attribute
 {
+}
 }

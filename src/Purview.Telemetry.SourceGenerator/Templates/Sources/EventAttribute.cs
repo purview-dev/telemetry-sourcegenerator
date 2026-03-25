@@ -1,4 +1,5 @@
-﻿namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Marker attribute used to control the generation
@@ -34,7 +35,7 @@ sealed class EventAttribute : global::System.Attribute
     /// Optional. Gets/ sets the name of the event. If null, empty or whitespace
     /// then the name of the method is used.
     /// </summary>
-    public string? Name { get; set; }
+    public string Name { get; set; }
 
     /// <summary>
     /// Determines if the event should use OpenTelemetry exception recording rules.
@@ -67,5 +68,6 @@ sealed class EventAttribute : global::System.Attribute
 	/// Optionally provides a description for the <see cref="StatusCode"/> when 
 	/// set to <see cref="global::System.Diagnostics.ActivityStatusCode.Error"/>.
 	/// </summary>
-	public string? StatusDescription { get; set; }
+	public string StatusDescription { get; set; }
+}
 }

@@ -11,7 +11,8 @@ static partial class LoggerTargetClassEmitter
 	public static void GenerateImplementation(
 		LoggerTarget target,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true
 	)
 	{
 		StringBuilder builder = new();
@@ -34,7 +35,7 @@ static partial class LoggerTargetClassEmitter
 			context.CancellationToken
 		);
 
-		indent = EmitFields(target, builder, indent, context, logger);
+		indent = EmitFields(target, builder, indent, context, logger, emitNullable);
 
 		indent = ConstructorEmitter.EmitCtor(
 			GenerationType.Logging,
@@ -47,7 +48,7 @@ static partial class LoggerTargetClassEmitter
 			logger
 		);
 
-		indent = EmitMethods(target, builder, indent, context, logger);
+		indent = EmitMethods(target, builder, indent, context, logger, emitNullable);
 
 		EmitHelpers.EmitClassEnd(builder, indent);
 		EmitHelpers.EmitNamespaceEnd(
@@ -58,7 +59,7 @@ static partial class LoggerTargetClassEmitter
 			context.CancellationToken
 		);
 
-		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString());
+		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString(), emitNullable);
 		var hintName = $"{target.FullyQualifiedName}.Logging.g.cs";
 
 		context.AddSource(
@@ -74,7 +75,8 @@ static partial class LoggerTargetClassEmitter
 			target.InterfaceType.TypeName,
 			target.FullNamespace,
 			context,
-			logger
+			logger,
+			emitNullable
 		);
 	}
 }

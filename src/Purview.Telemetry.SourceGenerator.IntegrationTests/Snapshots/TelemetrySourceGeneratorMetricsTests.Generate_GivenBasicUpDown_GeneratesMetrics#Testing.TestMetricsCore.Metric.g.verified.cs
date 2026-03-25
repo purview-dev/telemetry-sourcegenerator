@@ -26,7 +26,7 @@ namespace Testing
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestMetricsCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
 		{
-			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateMeterTags(meterTags);
 
@@ -36,12 +36,12 @@ namespace Testing
 				Tags = meterTags
 			});
 
-			global::System.Collections.Generic.Dictionary<string, object?> upDownTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> upDownTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateUpDownTags(upDownTags);
 
 			_upDownInstrument = _meter.CreateUpDownCounter<int>(name: "test_metrics.up_down", unit: null, description: null, tags: upDownTags);
-			global::System.Collections.Generic.Dictionary<string, object?> upDown2Tags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> upDown2Tags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateUpDown2Tags(upDown2Tags);
 

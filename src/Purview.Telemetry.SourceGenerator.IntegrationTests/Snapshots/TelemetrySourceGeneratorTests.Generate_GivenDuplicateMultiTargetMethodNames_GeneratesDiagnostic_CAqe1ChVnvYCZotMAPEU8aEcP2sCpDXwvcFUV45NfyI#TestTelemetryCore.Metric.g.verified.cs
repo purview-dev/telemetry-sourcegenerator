@@ -25,7 +25,7 @@ sealed partial class TestTelemetryCore : global::ITestTelemetry
 			throw new global::System.Exception("The meters have already been initialized.");
 		}
 
-		global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+		global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 		PopulateMeterTags(meterTags);
 

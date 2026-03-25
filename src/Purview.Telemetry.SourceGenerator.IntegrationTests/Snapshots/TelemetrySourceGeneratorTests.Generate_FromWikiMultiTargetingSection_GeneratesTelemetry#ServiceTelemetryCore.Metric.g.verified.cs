@@ -26,7 +26,7 @@ sealed partial class ServiceTelemetryCore : global::IServiceTelemetry
 			throw new global::System.Exception("The meters have already been initialized.");
 		}
 
-		global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+		global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 		PopulateMeterTags(meterTags);
 
@@ -36,7 +36,7 @@ sealed partial class ServiceTelemetryCore : global::IServiceTelemetry
 			Tags = meterTags
 		});
 
-		global::System.Collections.Generic.Dictionary<string, object?> anAutoIncrementTags = new();
+		global::System.Collections.Generic.Dictionary<string, object?> anAutoIncrementTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 		PopulateAnAutoIncrementTags(anAutoIncrementTags);
 

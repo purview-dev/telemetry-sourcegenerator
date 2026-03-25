@@ -12,7 +12,8 @@ partial class ActivitySourceTargetClassEmitter
 		int indent,
 		ActivityBasedGenerationTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -62,7 +63,7 @@ partial class ActivitySourceTargetClassEmitter
 			return;
 		}
 
-		EmitHasListenersTest(builder, indent, methodTarget);
+		EmitHasListenersTest(builder, indent, methodTarget, emitNullable);
 
 		builder
 			.Append(indent, "if (", withNewLine: false)
@@ -87,7 +88,11 @@ partial class ActivitySourceTargetClassEmitter
 				)
 				.Append(' ')
 				.Append(tagsListVariableName)
-				.Append(" = new(");
+				.Append(
+					emitNullable
+						? " = new("
+						: $" = new {Constants.Activities.SystemDiagnostics.ActivityTagsCollection}("
+				);
 
 			if (tagsParam != null)
 				builder.Append(tagsParam.ParameterName);
@@ -213,8 +218,9 @@ partial class ActivitySourceTargetClassEmitter
 			)
 			.Append(' ')
 			.Append(eventVariableName)
-			.Append(" = new")
-			// name:
+			.Append(" = new ")
+			// Use explicit type for C# 7.3 compatibility (target-typed new() requires C# 9+)
+			.Append(Constants.Activities.SystemDiagnostics.ActivityEvent)
 			.Append("(name: ")
 			.Append(methodTarget.ActivityOrEventName.Wrap())
 			// timestamp:

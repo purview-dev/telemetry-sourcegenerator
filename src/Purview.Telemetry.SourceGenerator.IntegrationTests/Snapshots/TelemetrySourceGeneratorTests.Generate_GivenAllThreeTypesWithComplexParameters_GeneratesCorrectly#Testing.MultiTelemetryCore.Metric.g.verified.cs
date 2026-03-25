@@ -29,7 +29,7 @@ namespace Testing
 				throw new global::System.Exception("The meters have already been initialized.");
 			}
 
-			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateMeterTags(meterTags);
 
@@ -39,12 +39,12 @@ namespace Testing
 				Tags = meterTags
 			});
 
-			global::System.Collections.Generic.Dictionary<string, object?> incrementRequestCountTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> incrementRequestCountTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateIncrementRequestCountTags(incrementRequestCountTags);
 
 			_incrementRequestCountInstrument = _meter.CreateCounter<int>(name: "multi.increment_request_count", unit: null, description: null, tags: incrementRequestCountTags);
-			global::System.Collections.Generic.Dictionary<string, object?> recordRequestDurationTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> recordRequestDurationTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateRecordRequestDurationTags(recordRequestDurationTags);
 

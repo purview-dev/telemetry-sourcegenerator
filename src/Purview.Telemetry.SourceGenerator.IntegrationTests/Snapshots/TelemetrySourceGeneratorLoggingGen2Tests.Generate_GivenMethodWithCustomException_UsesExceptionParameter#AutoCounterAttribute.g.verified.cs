@@ -9,9 +9,8 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
-#nullable enable
-
-namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Specifies the meter type generated corresponds to a 
@@ -40,7 +39,7 @@ sealed class AutoCounterAttribute : global::System.Attribute
 	/// <param name="name">Specifies the <see cref="Name"/>.</param>
 	/// <param name="unit">Optionally specifies the <see cref="Unit"/>.</param>
 	/// <param name="description">Optionally specifies the <see cref="Description"/>.</param>
-	public AutoCounterAttribute(string name, string? unit = null, string? description = null)
+	public AutoCounterAttribute(string name, string unit = null, string description = null)
 	{
 		Name = name;
 		Unit = unit;
@@ -52,15 +51,16 @@ sealed class AutoCounterAttribute : global::System.Attribute
 	/// of the method is used.
 	/// </summary>
 
-	public string? Name { get; set; }
+	public string Name { get; set; }
 
 	/// <summary>
 	/// Optionally specifies the unit of the meter.
 	/// </summary>
-	public string? Unit { get; set; }
+	public string Unit { get; set; }
 
 	/// <summary>
 	/// Optionally specifies the description of the meter.
 	/// </summary>
-	public string? Description { get; set; }
+	public string Description { get; set; }
+}
 }

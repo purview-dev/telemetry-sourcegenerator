@@ -1,4 +1,5 @@
-namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Determines how meter names are generated when not explicitly specified.
@@ -18,4 +19,5 @@ enum MeterNameGenerationType
 	/// Example: "MyCompany.MyApp" remains "MyCompany.MyApp".
 	/// </summary>
 	DotNet = 1
+}
 }

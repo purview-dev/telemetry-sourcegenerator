@@ -9,9 +9,8 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
-#nullable enable
-
-namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Specifies the telemetry generation target families.
@@ -45,4 +44,5 @@ enum Targets
 	/// All telemetry generation targets.
 	/// </summary>
 	All = Activities | Logging | Metrics
+}
 }

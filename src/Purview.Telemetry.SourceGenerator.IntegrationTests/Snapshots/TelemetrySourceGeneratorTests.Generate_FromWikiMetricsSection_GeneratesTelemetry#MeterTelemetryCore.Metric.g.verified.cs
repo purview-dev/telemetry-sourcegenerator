@@ -30,7 +30,7 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	public MeterTelemetryCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
 	{
-		global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+		global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 		PopulateMeterTags(meterTags);
 
@@ -40,27 +40,27 @@ sealed partial class MeterTelemetryCore : global::IMeterTelemetry
 			Tags = meterTags
 		});
 
-		global::System.Collections.Generic.Dictionary<string, object?> autoCounterMeterTags = new();
+		global::System.Collections.Generic.Dictionary<string, object?> autoCounterMeterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 		PopulateAutoCounterMeterTags(autoCounterMeterTags);
 
 		_autoCounterMeterInstrument = _meter.CreateCounter<int>(name: "meter.auto_counter_meter", unit: null, description: null, tags: autoCounterMeterTags);
-		global::System.Collections.Generic.Dictionary<string, object?> autoIncrementMeterTags = new();
+		global::System.Collections.Generic.Dictionary<string, object?> autoIncrementMeterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 		PopulateAutoIncrementMeterTags(autoIncrementMeterTags);
 
 		_autoIncrementMeterInstrument = _meter.CreateCounter<int>(name: "meter.auto_increment_meter", unit: null, description: null, tags: autoIncrementMeterTags);
-		global::System.Collections.Generic.Dictionary<string, object?> counterMeterTags = new();
+		global::System.Collections.Generic.Dictionary<string, object?> counterMeterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 		PopulateCounterMeterTags(counterMeterTags);
 
 		_counterMeterInstrument = _meter.CreateCounter<int>(name: "meter.counter_meter", unit: null, description: null, tags: counterMeterTags);
-		global::System.Collections.Generic.Dictionary<string, object?> histogramMeterTags = new();
+		global::System.Collections.Generic.Dictionary<string, object?> histogramMeterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 		PopulateHistogramMeterTags(histogramMeterTags);
 
 		_histogramMeterInstrument = _meter.CreateHistogram<int>(name: "meter.histogram_meter", unit: null, description: null, tags: histogramMeterTags);
-		global::System.Collections.Generic.Dictionary<string, object?> upDownCounterMeterTags = new();
+		global::System.Collections.Generic.Dictionary<string, object?> upDownCounterMeterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 		PopulateUpDownCounterMeterTags(upDownCounterMeterTags);
 

@@ -28,7 +28,7 @@ namespace Testing
 				throw new global::System.Exception("The meters have already been initialized.");
 			}
 
-			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateMeterTags(meterTags);
 
@@ -38,7 +38,7 @@ namespace Testing
 				Tags = meterTags
 			});
 
-			global::System.Collections.Generic.Dictionary<string, object?> incrementCounterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> incrementCounterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateIncrementCounterTags(incrementCounterTags);
 

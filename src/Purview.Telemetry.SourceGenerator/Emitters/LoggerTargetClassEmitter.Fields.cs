@@ -12,7 +12,8 @@ partial class LoggerTargetClassEmitter
 		StringBuilder builder,
 		int indent,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -96,13 +97,13 @@ partial class LoggerTargetClassEmitter
 				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Logging.InferringErrorLogLevel);
 			}
 
-			EmitLogActionField(builder, indent, methodTarget);
+			EmitLogActionField(builder, indent, methodTarget, emitNullable);
 		}
 
 		return --indent;
 	}
 
-	internal static void EmitLogActionField(StringBuilder builder, int indent, LogMethodTarget methodTarget)
+	internal static void EmitLogActionField(StringBuilder builder, int indent, LogMethodTarget methodTarget, bool emitNullable = true)
 	{
 		builder
 			.Append(indent, "static readonly ", withNewLine: false)
@@ -115,9 +116,19 @@ partial class LoggerTargetClassEmitter
 			builder.Append(parameter.ParameterType).Append(", ");
 
 		if (methodTarget.IsScoped)
-			builder.Append(Constants.System.IDisposable).Append("?> ");
+		{
+			builder.Append(Constants.System.IDisposable);
+			if (emitNullable)
+				builder.Append('?');
+			builder.Append("> ");
+		}
 		else
-			builder.Append(Constants.System.Exception).Append("?> ");
+		{
+			builder.Append(Constants.System.Exception);
+			if (emitNullable)
+				builder.Append('?');
+			builder.Append("> ");
+		}
 
 		builder
 			.Append(methodTarget.LoggerActionFieldName)

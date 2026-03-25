@@ -9,11 +9,10 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
-#nullable enable
-
 #if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
 
-namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Sets defaults for the generation of loggers and log entries.
@@ -66,4 +65,5 @@ sealed class LoggerGenerationAttribute : global::System.Attribute
 	public global::Purview.Telemetry.LogPrefixType DefaultPrefixType { get; set; }
 }
 
+}
 #endif

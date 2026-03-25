@@ -10,7 +10,8 @@ partial class LoggerTargetClassEmitter
 	internal static void EmitThrowStub(
 		StringBuilder builder,
 		int indent,
-		LogMethodTarget methodTarget
+		LogMethodTarget methodTarget,
+		bool emitNullable = true
 	)
 	{
 		builder
@@ -18,7 +19,9 @@ partial class LoggerTargetClassEmitter
 			.Append(indent, "public ", withNewLine: false);
 
 		if (methodTarget.IsScoped)
-			builder.Append(Constants.System.IDisposable.WithNullable());
+			builder.Append(emitNullable
+				? Constants.System.IDisposable.WithNullable()
+				: (string)Constants.System.IDisposable);
 		else
 			builder.Append(Constants.System.VoidKeyword);
 
@@ -42,7 +45,8 @@ partial class LoggerTargetClassEmitter
 		StringBuilder builder,
 		int indent,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable
 	)
 	{
 		indent++;
@@ -59,20 +63,20 @@ partial class LoggerTargetClassEmitter
 					target.GenerationType
 				))
 				{
-					EmitThrowStub(builder, indent, methodTarget);
+					EmitThrowStub(builder, indent, methodTarget, emitNullable);
 				}
 				continue;
 			}
 
 			if (methodTarget.UnknownReturnType)
 			{
-				EmitThrowStub(builder, indent, methodTarget);
+				EmitThrowStub(builder, indent, methodTarget, emitNullable);
 				continue; // Diagnostic already reported in EmitFields
 			}
 
 			if (methodTarget.HasMultipleExceptions)
 			{
-				EmitThrowStub(builder, indent, methodTarget);
+				EmitThrowStub(builder, indent, methodTarget, emitNullable);
 				continue;
 			}
 
@@ -81,11 +85,11 @@ partial class LoggerTargetClassEmitter
 				> Constants.Logging.MaxNonExceptionParameters
 			)
 			{
-				EmitThrowStub(builder, indent, methodTarget);
+				EmitThrowStub(builder, indent, methodTarget, emitNullable);
 				continue;
 			}
 
-			EmitLogActionMethod(builder, indent, methodTarget, context, logger);
+			EmitLogActionMethod(builder, indent, methodTarget, context, logger, emitNullable);
 		}
 
 		return --indent;
@@ -96,7 +100,8 @@ partial class LoggerTargetClassEmitter
 		int indent,
 		LogMethodTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -139,7 +144,9 @@ partial class LoggerTargetClassEmitter
 		}
 		else if (methodTarget.IsScoped)
 		{
-			builder.Append(Constants.System.IDisposable).Append('?');
+			builder.Append(Constants.System.IDisposable);
+			if (emitNullable)
+				builder.Append('?');
 		}
 		else
 		{
@@ -200,7 +207,7 @@ partial class LoggerTargetClassEmitter
 		// Generate public delegating method if Logging owns it
 		if (generatePublicDelegator)
 		{
-			EmitPublicLoggingDelegatingMethod(builder, indent, methodTarget, context, logger);
+			EmitPublicLoggingDelegatingMethod(builder, indent, methodTarget, context, logger, emitNullable);
 		}
 	}
 
@@ -209,7 +216,8 @@ partial class LoggerTargetClassEmitter
 		int indent,
 		LogMethodTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true
 	)
 	{
 		logger?.Debug($"Building public delegating logging method: {methodTarget.MethodName}");
@@ -224,7 +232,9 @@ partial class LoggerTargetClassEmitter
 		// (Logging without Activity means the return type is void or IDisposable for scoped)
 		if (methodTarget.IsScoped)
 		{
-			builder.Append(Constants.System.IDisposable).Append('?');
+			builder.Append(Constants.System.IDisposable);
+			if (emitNullable)
+				builder.Append('?');
 		}
 		else
 		{

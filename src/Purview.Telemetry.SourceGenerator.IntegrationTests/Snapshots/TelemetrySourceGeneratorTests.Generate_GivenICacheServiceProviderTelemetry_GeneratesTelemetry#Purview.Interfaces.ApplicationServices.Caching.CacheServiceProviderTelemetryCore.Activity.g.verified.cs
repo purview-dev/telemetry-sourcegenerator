@@ -18,7 +18,7 @@ namespace Purview.Interfaces.ApplicationServices.Caching
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class CacheServiceProviderTelemetryCore : global::Purview.Interfaces.ApplicationServices.Caching.ICacheServiceProviderTelemetry
 	{
-		readonly static global::System.Diagnostics.ActivitySource _activitySource = new("Purview.Telemetry.SourceGenerator");
+		readonly static global::System.Diagnostics.ActivitySource _activitySource = new global::System.Diagnostics.ActivitySource("Purview.Telemetry.SourceGenerator");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -29,13 +29,13 @@ namespace Purview.Interfaces.ApplicationServices.Caching
 				return;
 			}
 
-			global::System.Diagnostics.ActivityTagsCollection tagsCollection = new();
+			global::System.Diagnostics.ActivityTagsCollection tagsCollection = new global::System.Diagnostics.ActivityTagsCollection();
 			tagsCollection.Add("exception.escaped", escape);
 			tagsCollection.Add("exception.message", exception.Message);
 			tagsCollection.Add("exception.type", exception.GetType().FullName);
 			tagsCollection.Add("exception.stacktrace", exception.StackTrace);
 
-			global::System.Diagnostics.ActivityEvent recordExceptionEvent = new(name: "exception", timestamp: default, tags: tagsCollection);
+			global::System.Diagnostics.ActivityEvent recordExceptionEvent = new global::System.Diagnostics.ActivityEvent(name: "exception", timestamp: default, tags: tagsCollection);
 
 			activity.AddEvent(recordExceptionEvent);
 		}
@@ -66,7 +66,7 @@ namespace Purview.Interfaces.ApplicationServices.Caching
 			if (global::System.Diagnostics.Activity.Current != null)
 			{
 
-				global::System.Diagnostics.ActivityEvent activityEventNoValueProvided = new(name: "NoValueProvided", timestamp: default, tags: default);
+				global::System.Diagnostics.ActivityEvent activityEventNoValueProvided = new global::System.Diagnostics.ActivityEvent(name: "NoValueProvided", timestamp: default, tags: default);
 
 				global::System.Diagnostics.Activity.Current.AddEvent(activityEventNoValueProvided);
 			}
@@ -144,7 +144,7 @@ namespace Purview.Interfaces.ApplicationServices.Caching
 			if (global::System.Diagnostics.Activity.Current != null)
 			{
 
-				global::System.Diagnostics.ActivityEvent activityEventValueCached = new(name: "ValueCached", timestamp: default, tags: default);
+				global::System.Diagnostics.ActivityEvent activityEventValueCached = new global::System.Diagnostics.ActivityEvent(name: "ValueCached", timestamp: default, tags: default);
 
 				global::System.Diagnostics.Activity.Current.AddEvent(activityEventValueCached);
 			}
@@ -162,7 +162,7 @@ namespace Purview.Interfaces.ApplicationServices.Caching
 			if (global::System.Diagnostics.Activity.Current != null)
 			{
 
-				global::System.Diagnostics.ActivityEvent activityEventRequestingValueFromCache = new(name: "RequestingValueFromCache", timestamp: default, tags: default);
+				global::System.Diagnostics.ActivityEvent activityEventRequestingValueFromCache = new global::System.Diagnostics.ActivityEvent(name: "RequestingValueFromCache", timestamp: default, tags: default);
 
 				global::System.Diagnostics.Activity.Current.AddEvent(activityEventRequestingValueFromCache);
 			}
@@ -182,7 +182,7 @@ namespace Purview.Interfaces.ApplicationServices.Caching
 				global::System.Diagnostics.ActivityTagsCollection tagsCollectionCacheHit = new();
 				tagsCollectionCacheHit.Add("data_length", dataLength);
 
-				global::System.Diagnostics.ActivityEvent activityEventCacheHit = new(name: "CacheHit", timestamp: default, tags: tagsCollectionCacheHit);
+				global::System.Diagnostics.ActivityEvent activityEventCacheHit = new global::System.Diagnostics.ActivityEvent(name: "CacheHit", timestamp: default, tags: tagsCollectionCacheHit);
 
 				global::System.Diagnostics.Activity.Current.AddEvent(activityEventCacheHit);
 			}
@@ -200,7 +200,7 @@ namespace Purview.Interfaces.ApplicationServices.Caching
 			if (global::System.Diagnostics.Activity.Current != null)
 			{
 
-				global::System.Diagnostics.ActivityEvent activityEventCacheMiss = new(name: "CacheMiss", timestamp: default, tags: default);
+				global::System.Diagnostics.ActivityEvent activityEventCacheMiss = new global::System.Diagnostics.ActivityEvent(name: "CacheMiss", timestamp: default, tags: default);
 
 				global::System.Diagnostics.Activity.Current.AddEvent(activityEventCacheMiss);
 			}

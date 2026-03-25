@@ -12,12 +12,13 @@ partial class ActivitySourceTargetClassEmitter
 		StringBuilder builder,
 		int indent,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable
 	)
 	{
 		indent++;
 
-		EmitRecordExceptionEvent(builder, indent, context, logger);
+		EmitRecordExceptionEvent(builder, indent, context, logger, emitNullable);
 
 		// Filter to only methods that are valid for Activities target
 		// (have explicit Activity/Event/Context attributes, or valid inference in single-target)
@@ -41,7 +42,7 @@ partial class ActivitySourceTargetClassEmitter
 		{
 			context.CancellationToken.ThrowIfCancellationRequested();
 
-			EmitMethod(builder, indent, methodTarget, target, context, logger);
+			EmitMethod(builder, indent, methodTarget, target, context, logger, emitNullable);
 		}
 
 		return --indent;
@@ -51,7 +52,8 @@ partial class ActivitySourceTargetClassEmitter
 		StringBuilder builder,
 		int indent,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -65,9 +67,9 @@ partial class ActivitySourceTargetClassEmitter
 			.Append(Constants.Activities.RecordExceptionMethodName)
 			.Append('(')
 			.Append(Constants.Activities.SystemDiagnostics.Activity)
-			.Append("? activity, ")
+			.Append(emitNullable ? "? activity, " : " activity, ")
 			.Append(Constants.System.Exception)
-			.Append("? exception, ")
+			.Append(emitNullable ? "? exception, " : " exception, ")
 			.Append(Constants.System.BuiltInTypes.BoolKeyword)
 			.AppendLine(" escape)")
 			.Append(indent, '{');
@@ -90,7 +92,9 @@ partial class ActivitySourceTargetClassEmitter
 			)
 			.Append(' ')
 			.Append(tagsListVariableName)
-			.AppendLine(" = new();");
+			.Append(" = new ")
+			.Append(Constants.Activities.SystemDiagnostics.ActivityTagsCollection)
+			.AppendLine("();");
 
 		EmitExceptionParam(builder, indent, tagsListVariableName, "escape", "exception");
 
@@ -105,7 +109,8 @@ partial class ActivitySourceTargetClassEmitter
 			)
 			.Append(' ')
 			.Append(eventVariableName)
-			.Append(" = new")
+			.Append(" = new ")
+			.Append(Constants.Activities.SystemDiagnostics.ActivityEvent)
 			// name:
 			.Append("(name: ")
 			.Append(Constants.Activities.Tag_ExceptionEventName.Wrap())
@@ -212,7 +217,8 @@ partial class ActivitySourceTargetClassEmitter
 		ActivityBasedGenerationTarget methodTarget,
 		ActivitySourceTarget target,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -241,7 +247,7 @@ partial class ActivitySourceTargetClassEmitter
 		if (isMultiTarget)
 		{
 			// Generate private activity implementation method
-			EmitPrivateActivityMethod(builder, indent, methodTarget, target, context, logger);
+			EmitPrivateActivityMethod(builder, indent, methodTarget, target, context, logger, emitNullable);
 
 			// Generate public delegating method (Activity emitter owns this for multi-target)
 			EmitPublicDelegatingMethod(
@@ -250,13 +256,14 @@ partial class ActivitySourceTargetClassEmitter
 				methodTarget,
 				methodTargets,
 				context,
-				logger
+				logger,
+				emitNullable
 			);
 		}
 		else
 		{
 			// Single-target: generate public method as before
-			EmitPublicActivityMethod(builder, indent, methodTarget, context, logger);
+			EmitPublicActivityMethod(builder, indent, methodTarget, context, logger, emitNullable);
 		}
 	}
 
@@ -266,7 +273,8 @@ partial class ActivitySourceTargetClassEmitter
 		ActivityBasedGenerationTarget methodTarget,
 		ActivitySourceTarget _, // target
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable
 	)
 	{
 		var privateMethodName = methodTarget.MethodName + "_Activity";
@@ -297,11 +305,11 @@ partial class ActivitySourceTargetClassEmitter
 		indent++;
 
 		if (methodTarget.MethodType == ActivityMethodType.Activity)
-			EmitActivityMethodBody(builder, indent, methodTarget, context, logger);
+			EmitActivityMethodBody(builder, indent, methodTarget, context, logger, emitNullable);
 		else if (methodTarget.MethodType == ActivityMethodType.Event)
-			EmitEventMethodBody(builder, indent, methodTarget, context, logger);
+			EmitEventMethodBody(builder, indent, methodTarget, context, logger, emitNullable);
 		else if (methodTarget.MethodType == ActivityMethodType.Context)
-			EmitContextMethodBody(builder, indent, methodTarget, context, logger);
+			EmitContextMethodBody(builder, indent, methodTarget, context, logger, emitNullable);
 
 		builder.Append(--indent, '}').AppendLine();
 	}
@@ -312,7 +320,8 @@ partial class ActivitySourceTargetClassEmitter
 		ActivityBasedGenerationTarget methodTarget,
 		GenerationType methodTargets,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable
 	)
 	{
 		logger?.Debug($"Building public delegating method for {methodTarget.MethodName}.");
@@ -416,7 +425,7 @@ partial class ActivitySourceTargetClassEmitter
 				.Append(
 					indent,
 					"return activityResult"
-						+ (methodTarget.ReturnType.IsNullable ? null : "!")
+						+ (!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
 						+ ";"
 				);
 		}
@@ -429,7 +438,8 @@ partial class ActivitySourceTargetClassEmitter
 		int indent,
 		ActivityBasedGenerationTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable
 	)
 	{
 		builder
@@ -458,11 +468,11 @@ partial class ActivitySourceTargetClassEmitter
 		indent++;
 
 		if (methodTarget.MethodType == ActivityMethodType.Activity)
-			EmitActivityMethodBody(builder, indent, methodTarget, context, logger);
+			EmitActivityMethodBody(builder, indent, methodTarget, context, logger, emitNullable);
 		else if (methodTarget.MethodType == ActivityMethodType.Event)
-			EmitEventMethodBody(builder, indent, methodTarget, context, logger);
+			EmitEventMethodBody(builder, indent, methodTarget, context, logger, emitNullable);
 		else if (methodTarget.MethodType == ActivityMethodType.Context)
-			EmitContextMethodBody(builder, indent, methodTarget, context, logger);
+			EmitContextMethodBody(builder, indent, methodTarget, context, logger, emitNullable);
 
 		builder.Append(--indent, '}').AppendLine();
 	}

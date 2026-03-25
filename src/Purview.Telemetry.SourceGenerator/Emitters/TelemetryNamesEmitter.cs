@@ -13,6 +13,7 @@ static class TelemetryNamesEmitter
 		ImmutableArray<string> activitySourceNames,
 		string className,
 		string? rootNamespace,
+		bool emitNullable,
 		SourceProductionContext spc,
 		GenerationLogger? logger
 	)
@@ -104,7 +105,7 @@ static class TelemetryNamesEmitter
 		if (hasNamespace)
 			hintName = $"{rootNamespace}.{hintName}";
 
-		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString());
+		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString(), emitNullable);
 		spc.AddSource(
 			hintName,
 			Microsoft.CodeAnalysis.Text.SourceText.From(sourceText, Encoding.UTF8)

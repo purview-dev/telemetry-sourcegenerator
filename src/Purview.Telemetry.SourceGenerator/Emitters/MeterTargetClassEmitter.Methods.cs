@@ -38,12 +38,13 @@ partial class MeterTargetClassEmitter
 		StringBuilder builder,
 		int indent,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable
 	)
 	{
 		indent++;
 
-		EmitPartialMethods(builder, indent, target, context, logger);
+		EmitPartialMethods(builder, indent, target, context, logger, emitNullable);
 
 		foreach (var methodTarget in target.InstrumentationMethods)
 		{
@@ -70,7 +71,7 @@ partial class MeterTargetClassEmitter
 				);
 			}
 
-			EmitMethod(builder, indent, methodTarget, context, logger);
+			EmitMethod(builder, indent, methodTarget, context, logger, emitNullable);
 		}
 
 		return --indent;
@@ -81,20 +82,22 @@ partial class MeterTargetClassEmitter
 		int indent,
 		MeterTarget target,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
 
 		logger?.Debug($"Emitting partial method for populating tags: {PartialMeterTagsMethod}.");
 
+		var dictType = GetDictionaryType(emitNullable);
 		builder
 			.AppendLine()
 			.CodeGen(indent)
 			.Append(indent, "partial void ", withNewLine: false)
 			.Append(PartialMeterTagsMethod)
 			.Append('(')
-			.Append(DictionaryStringObjectType)
+			.Append(dictType)
 			.AppendLine(" meterTags);")
 			.AppendLine();
 
@@ -111,7 +114,7 @@ partial class MeterTargetClassEmitter
 				.Append(indent, "partial void ", withNewLine: false)
 				.Append(instrument.TagPopulateMethodName)
 				.Append('(')
-				.Append(DictionaryStringObjectType)
+				.Append(dictType)
 				.AppendLine(" instrumentTags);")
 				.AppendLine();
 		}
@@ -122,7 +125,8 @@ partial class MeterTargetClassEmitter
 		int indent,
 		InstrumentTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -243,7 +247,7 @@ partial class MeterTargetClassEmitter
 		if (methodTarget.IsObservable)
 			EmitObservableInstrumentBody(builder, indent, methodTarget, tagVariableName);
 		else
-			EmitInstrumentBody(builder, indent, methodTarget, tagVariableName);
+			EmitInstrumentBody(builder, indent, methodTarget, tagVariableName, emitNullable);
 
 		builder.Append(indent, '}');
 	}
@@ -334,7 +338,8 @@ partial class MeterTargetClassEmitter
 		StringBuilder builder,
 		int indent,
 		InstrumentTarget methodTarget,
-		string? tagVariableName
+		string? tagVariableName,
+		bool emitNullable = true
 	)
 	{
 		indent++;
@@ -364,12 +369,14 @@ partial class MeterTargetClassEmitter
 		else if (useDirectTagParams)
 		{
 			// For 1-3 tags without conditionals, pass as direct KeyValuePair parameters
+			var kvpType = emitNullable
+				? "global::System.Collections.Generic.KeyValuePair<string, object?>("
+				: "global::System.Collections.Generic.KeyValuePair<string, object>(";
 			foreach (var tag in methodTarget.Tags)
 			{
 				builder
-					.Append(
-						", new global::System.Collections.Generic.KeyValuePair<string, object?>("
-					)
+					.Append(", new ")
+					.Append(kvpType)
 					.Append(tag.GeneratedName.Wrap())
 					.Append(", ")
 					.Append(tag.ParameterName)

@@ -12,7 +12,8 @@ partial class ActivitySourceTargetClassEmitter
 		int indent,
 		ActivityBasedGenerationTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -54,13 +55,13 @@ partial class ActivitySourceTargetClassEmitter
 			return;
 		}
 
-		EmitHasListenersTest(builder, indent, methodTarget);
+		EmitHasListenersTest(builder, indent, methodTarget, emitNullable);
 
 		var activityVariableName = "activity" + methodTarget.MethodName;
 
 		builder
 			.Append(indent, Constants.Activities.SystemDiagnostics.Activity, withNewLine: false)
-			.Append("? ")
+			.Append(emitNullable ? "? " : " ")
 			.Append(activityVariableName)
 			.Append(" = ")
 			.Append(Constants.Activities.ActivitySourceFieldName)
@@ -185,7 +186,7 @@ partial class ActivitySourceTargetClassEmitter
 				.AppendLine()
 				.Append(indent, "return ", withNewLine: false)
 				.Append(activityVariableName)
-				.Append(methodTarget.ReturnType.IsNullable ? null : "!")
+				.Append(!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
 				.AppendLine(';');
 		}
 
@@ -205,7 +206,8 @@ partial class ActivitySourceTargetClassEmitter
 	static void EmitHasListenersTest(
 		StringBuilder builder,
 		int indent,
-		ActivityBasedGenerationTarget methodTarget
+		ActivityBasedGenerationTarget methodTarget,
+		bool emitNullable
 	)
 	{
 		var returnsVoid = methodTarget.ReturnType.SpecialType == SpecialType.System_Void;
@@ -220,7 +222,7 @@ partial class ActivitySourceTargetClassEmitter
 					+ (
 						returnsVoid
 							? null
-							: " null" + (methodTarget.ReturnType.IsNullable ? null : "!")
+							: " null" + (!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
 					)
 					+ ";"
 			)

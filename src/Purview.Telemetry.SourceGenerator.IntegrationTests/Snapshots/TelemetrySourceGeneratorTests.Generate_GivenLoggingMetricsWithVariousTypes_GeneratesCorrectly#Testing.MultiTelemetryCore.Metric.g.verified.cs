@@ -30,7 +30,7 @@ namespace Testing
 				throw new global::System.Exception("The meters have already been initialized.");
 			}
 
-			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateMeterTags(meterTags);
 
@@ -40,17 +40,17 @@ namespace Testing
 				Tags = meterTags
 			});
 
-			global::System.Collections.Generic.Dictionary<string, object?> incrementOperationCounterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> incrementOperationCounterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateIncrementOperationCounterTags(incrementOperationCounterTags);
 
 			_incrementOperationCounterInstrument = _meter.CreateCounter<int>(name: "multi.increment_operation_counter", unit: null, description: null, tags: incrementOperationCounterTags);
-			global::System.Collections.Generic.Dictionary<string, object?> recordOperationDurationTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> recordOperationDurationTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateRecordOperationDurationTags(recordOperationDurationTags);
 
 			_recordOperationDurationInstrument = _meter.CreateHistogram<double>(name: "multi.record_operation_duration", unit: null, description: null, tags: recordOperationDurationTags);
-			global::System.Collections.Generic.Dictionary<string, object?> updateActiveConnectionsTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> updateActiveConnectionsTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateUpdateActiveConnectionsTags(updateActiveConnectionsTags);
 

@@ -9,9 +9,8 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
-#nullable enable
-
-namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Marker attribute to specify that a parameter should be included as a tag.
@@ -47,7 +46,7 @@ sealed class TagAttribute : global::System.Attribute
 	/// </summary>
 	/// <param name="name">Specifies the key/ name of the tag.</param>
 	/// <param name="skipOnNullOrEmpty">Optionally specifies the <see cref="SkipOnNullOrEmpty" />.</param>
-	public TagAttribute(string? name, bool skipOnNullOrEmpty = false)
+	public TagAttribute(string name, bool skipOnNullOrEmpty = false)
 	{
 		Name = name;
 		SkipOnNullOrEmpty = skipOnNullOrEmpty;
@@ -57,11 +56,12 @@ sealed class TagAttribute : global::System.Attribute
 	/// Optionally specifies the key/ name of the tag. If one is not specified,
 	/// the of the parameter is used.
 	/// </summary>
-	public string? Name { get; set; }
+	public string Name { get; set; }
 
 	/// <summary>
 	/// Determines if the tag is skipped if it equals it's default value.
 	/// Defaults to false.
 	/// </summary>
 	public bool SkipOnNullOrEmpty { get; set; }
+}
 }

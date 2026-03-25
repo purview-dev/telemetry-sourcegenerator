@@ -9,9 +9,8 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
-#nullable enable
-
-namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Determines if the parameter is an instrument measurement.
@@ -21,4 +20,5 @@ namespace Purview.Telemetry;
 [global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
 sealed class InstrumentMeasurementAttribute : global::System.Attribute
 {
+}
 }

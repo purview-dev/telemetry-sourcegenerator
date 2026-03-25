@@ -1,4 +1,5 @@
-﻿namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Marker attribute, used to indicating a meter, or group of instruments.
@@ -29,12 +30,12 @@ sealed class MeterAttribute : global::System.Attribute
 	/// Optional. Gets/ sets the name of the meter, used for creating
 	/// a named grouped of instruments.
 	/// </summary>
-	public string? Name { get; set; }
+	public string Name { get; set; }
 
 	/// <summary>
 	/// Optional, gets/ sets the prefix used when generating the instrument name.
 	/// </summary>
-	public string? InstrumentPrefix { get; set; }
+	public string InstrumentPrefix { get; set; }
 
 	/// <summary>
 	/// Optional, determines if <see cref="MeterGenerationAttribute.InstrumentPrefix" /> is
@@ -55,4 +56,5 @@ sealed class MeterAttribute : global::System.Attribute
 	/// any prefixes) are lowercased.
 	/// </summary>
 	public bool LowercaseTagKeys { get; set; } = true;
+}
 }

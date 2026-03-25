@@ -30,7 +30,7 @@ namespace Testing
 				throw new global::System.Exception("The meters have already been initialized.");
 			}
 
-			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateMeterTags(meterTags);
 
@@ -40,17 +40,17 @@ namespace Testing
 				Tags = meterTags
 			});
 
-			global::System.Collections.Generic.Dictionary<string, object?> eventTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> eventTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateEventTags(eventTags);
 
 			_eventInstrument = _meter.CreateCounter<int>(name: "test.event", unit: null, description: null, tags: eventTags);
-			global::System.Collections.Generic.Dictionary<string, object?> logTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> logTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateLogTags(logTags);
 
 			_logInstrument = _meter.CreateCounter<int>(name: "test.log", unit: null, description: null, tags: logTags);
-			global::System.Collections.Generic.Dictionary<string, object?> counterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> counterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateCounterTags(counterTags);
 

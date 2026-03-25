@@ -11,17 +11,19 @@ partial class TelemetrySourceGenerator
 	static void RegisterMetricsGeneration(
 		IncrementalGeneratorInitializationContext context,
 		IncrementalValuesProvider<MeterTarget?> meterTargets,
+		IncrementalValueProvider<bool> supportsNullableAnnotations,
 		GenerationLogger? logger
 	)
 	{
 		context.RegisterImplementationSourceOutput(
-			source: meterTargets.Collect(),
-			action: (spc, source) => GenerateMeterTargets(source, spc, logger)
+			source: meterTargets.Collect().Combine(supportsNullableAnnotations),
+			action: (spc, pair) => GenerateMeterTargets(pair.Left, pair.Right, spc, logger)
 		);
 	}
 
 	static void GenerateMeterTargets(
 		ImmutableArray<MeterTarget?> targets,
+		bool emitNullable,
 		SourceProductionContext spc,
 		GenerationLogger? logger
 	)
@@ -33,7 +35,7 @@ partial class TelemetrySourceGenerator
 		{
 			logger?.Debug($"Meter generation target: {target!.FullyQualifiedName}");
 
-			MeterTargetClassEmitter.GenerateImplementation(target!, spc, logger);
+			MeterTargetClassEmitter.GenerateImplementation(target!, spc, logger, emitNullable);
 		}
 	}
 }

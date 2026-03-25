@@ -8,10 +8,12 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 static partial class MeterTargetClassEmitter
 {
-	static readonly PurviewTypeInfo DictionaryStringObjectType =
+	static PurviewTypeInfo GetDictionaryType(bool emitNullable) =>
 		Constants.System.Dictionary.MakeGeneric(
 			Constants.System.BuiltInTypes.String,
-			Constants.System.BuiltInTypes.Object.WithNullable()
+			emitNullable
+				? Constants.System.BuiltInTypes.Object.WithNullable()
+				: Constants.System.BuiltInTypes.Object
 		);
 
 	const string MeterFieldName = "_meter";
@@ -20,7 +22,8 @@ static partial class MeterTargetClassEmitter
 	public static void GenerateImplementation(
 		MeterTarget target,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true
 	)
 	{
 		StringBuilder builder = new();
@@ -52,11 +55,11 @@ static partial class MeterTargetClassEmitter
 			target.GenerationType
 		);
 
-		indent = EmitFields(target, builder, indent, context, logger, readonlyFields: metricsOwnsConstructor);
+		indent = EmitFields(target, builder, indent, context, logger, readonlyFields: metricsOwnsConstructor, emitNullable: emitNullable);
 
 		if (metricsOwnsConstructor)
 		{
-			indent = EmitInlineConstructor(target, builder, indent, context);
+			indent = EmitInlineConstructor(target, builder, indent, context, emitNullable);
 		}
 		else
 		{
@@ -71,9 +74,9 @@ static partial class MeterTargetClassEmitter
 				logger
 			);
 
-			indent = EmitInitializationMethod(target, builder, indent, context);
+			indent = EmitInitializationMethod(target, builder, indent, context, emitNullable);
 		}
-		indent = EmitMethods(target, builder, indent, context, logger);
+		indent = EmitMethods(target, builder, indent, context, logger, emitNullable);
 
 		EmitHelpers.EmitClassEnd(builder, indent);
 		EmitHelpers.EmitNamespaceEnd(
@@ -84,7 +87,7 @@ static partial class MeterTargetClassEmitter
 			context.CancellationToken
 		);
 
-		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString());
+		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString(), emitNullable);
 		var hintName = $"{target.FullyQualifiedName}.Metric.g.cs";
 
 		context.AddSource(
@@ -100,7 +103,8 @@ static partial class MeterTargetClassEmitter
 			target.InterfaceType.TypeName,
 			target.FullNamespace,
 			context,
-			logger
+			logger,
+			emitNullable
 		);
 	}
 }

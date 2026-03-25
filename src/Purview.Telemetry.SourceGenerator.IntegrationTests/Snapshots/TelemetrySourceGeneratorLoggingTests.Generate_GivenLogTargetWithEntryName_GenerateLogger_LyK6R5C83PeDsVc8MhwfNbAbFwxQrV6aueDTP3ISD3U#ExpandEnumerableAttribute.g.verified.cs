@@ -9,11 +9,10 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
-#nullable enable
-
 #if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
 
-namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Determines if an array/ enumerable property should be expanded into
@@ -45,4 +44,5 @@ sealed class ExpandEnumerableAttribute : global::System.Attribute
 	public int MaximumValueCount { get; set; }
 }
 
+}
 #endif

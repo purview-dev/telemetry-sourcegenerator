@@ -9,11 +9,10 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
-#nullable enable
-
 #if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
 
-namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Marker attribute required for Log generation.
@@ -39,7 +38,7 @@ sealed class LoggerAttribute : global::System.Attribute
 	/// <param name="defaultLevel">The default <see cref="global::Microsoft.Extensions.Logging.LogLevel"/> to use
 	/// when one is not specified.</param>
 	/// <param name="customPrefix">If specified, also sets the <see cref="global::Purview.Telemetry.LogPrefixType"/> to <see cref="global::Purview.Telemetry.LogPrefixType.Custom"/>.</param>
-	public LoggerAttribute(global::Microsoft.Extensions.Logging.LogLevel defaultLevel, string? customPrefix = null)
+	public LoggerAttribute(global::Microsoft.Extensions.Logging.LogLevel defaultLevel, string customPrefix = null)
 	{
 		DefaultLevel = defaultLevel;
 		CustomPrefix = customPrefix;
@@ -60,7 +59,7 @@ sealed class LoggerAttribute : global::System.Attribute
 	/// <summary>
 	/// Optional. The prefix used to when generating the log entry name.
 	/// </summary>
-	public string? CustomPrefix { get; set; }
+	public string CustomPrefix { get; set; }
 
 	/// <summary>
 	/// Specifies the mode used to generate or override the prefix for the log entry.
@@ -77,4 +76,5 @@ sealed class LoggerAttribute : global::System.Attribute
 	public global::Purview.Telemetry.LoggerGenerationMode GenerationMode { get; set; }
 }
 
+}
 #endif

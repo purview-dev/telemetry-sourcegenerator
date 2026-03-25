@@ -1,4 +1,5 @@
-namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Excludes a parameter from specific telemetry generation targets.
@@ -35,4 +36,5 @@ sealed class ExcludeTargetsAttribute : global::System.Attribute
 	/// Gets the targets this parameter should be excluded from.
 	/// </summary>
 	public global::Purview.Telemetry.Targets ExcludedTargets { get; }
+}
 }

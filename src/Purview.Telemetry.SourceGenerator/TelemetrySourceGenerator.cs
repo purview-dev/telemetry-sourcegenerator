@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Purview.Telemetry.SourceGenerator.Helpers;
 
 namespace Purview.Telemetry.SourceGenerator;
@@ -47,10 +48,18 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator, IL
 			.WhereNotNull()
 			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_Meters");
 
-		RegisterActivitiesGeneration(context, activityProvider, _logger);
-		RegisterLoggerGeneration(context, _logger);
-		RegisterMetricsGeneration(context, meterProvider, _logger);
-		RegisterTelemetryNamesGeneration(context, activityProvider, meterProvider, _logger);
+		// Detect the C# language version so emitters can omit C# 8+ features (nullable
+		// annotations, null-forgiving operator) when targeting C# 7.3 or earlier.
+		var supportsNullableAnnotations = context.ParseOptionsProvider.Select(
+			static (opts, _) => opts is CSharpParseOptions csOpts
+				? csOpts.LanguageVersion >= LanguageVersion.CSharp8
+				: true
+		);
+
+		RegisterActivitiesGeneration(context, activityProvider, supportsNullableAnnotations, _logger);
+		RegisterLoggerGeneration(context, supportsNullableAnnotations, _logger);
+		RegisterMetricsGeneration(context, meterProvider, supportsNullableAnnotations, _logger);
+		RegisterTelemetryNamesGeneration(context, activityProvider, meterProvider, supportsNullableAnnotations, _logger);
 	}
 
 	void ILogSupport.SetLogOutput(Action<string, OutputType> action) =>

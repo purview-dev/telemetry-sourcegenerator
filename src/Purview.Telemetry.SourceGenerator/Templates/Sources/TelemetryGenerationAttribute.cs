@@ -1,4 +1,5 @@
-﻿namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Marker attribute to control the generation of telemetry-based classes.
@@ -30,8 +31,8 @@ sealed class TelemetryGenerationAttribute : global::System.Attribute
 	/// <param name="dependencyInjectionClassName">Optionally specifies the <see cref="DependencyInjectionClassName"/>.</param>
 	public TelemetryGenerationAttribute(
 		bool generateDependencyExtension,
-		string? className = null,
-		string? dependencyInjectionClassName = null
+		string className = null,
+		string dependencyInjectionClassName = null
 	)
 	{
 		GenerateDependencyExtension = generateDependencyExtension;
@@ -47,7 +48,7 @@ sealed class TelemetryGenerationAttribute : global::System.Attribute
 	/// <param name="dependencyInjectionClassName">Optionally specifies the <see cref="DependencyInjectionClassName"/>.</param>
 	public TelemetryGenerationAttribute(
 		string className,
-		string? dependencyInjectionClassName = null
+		string dependencyInjectionClassName = null
 	)
 	{
 		ClassName = className;
@@ -66,12 +67,12 @@ sealed class TelemetryGenerationAttribute : global::System.Attribute
 	/// Defaults to null. When null, uses the source interface name minus any starting 'I',
 	/// and appends 'Core' to the end.
 	/// </summary>
-	public string? ClassName { get; set; }
+	public string ClassName { get; set; }
 
 	/// <summary>
 	/// Optionally specifies the name of the dependency injection class to generation.
 	/// </summary>
-	public string? DependencyInjectionClassName { get; set; }
+	public string DependencyInjectionClassName { get; set; }
 
 	/// <summary>
 	/// Determines if the generated dependency injection class is generated as public. Defaults to false (internal).
@@ -94,5 +95,6 @@ sealed class TelemetryGenerationAttribute : global::System.Attribute
 	/// Optionally specifies the name of the TelemetryNames class to generate.
 	/// Defaults to "TelemetryNames" when null or empty.
 	/// </summary>
-	public string? TelemetryNamesClassName { get; set; }
+	public string TelemetryNamesClassName { get; set; }
+}
 }

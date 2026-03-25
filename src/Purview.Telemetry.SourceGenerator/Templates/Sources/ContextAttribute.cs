@@ -1,4 +1,5 @@
-﻿namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Determines if the methods parameters should be
@@ -11,4 +12,5 @@
 [global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
 sealed class ContextAttribute : global::System.Attribute
 {
+}
 }

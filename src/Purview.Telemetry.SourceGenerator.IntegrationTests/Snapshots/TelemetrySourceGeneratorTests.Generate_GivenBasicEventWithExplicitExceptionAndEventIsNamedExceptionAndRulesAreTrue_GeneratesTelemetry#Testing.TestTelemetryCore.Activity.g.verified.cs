@@ -18,7 +18,7 @@ namespace Testing
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class TestTelemetryCore : global::Testing.ITestTelemetry
 	{
-		readonly static global::System.Diagnostics.ActivitySource _activitySource = new("activity-source");
+		readonly static global::System.Diagnostics.ActivitySource _activitySource = new global::System.Diagnostics.ActivitySource("activity-source");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -29,13 +29,13 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.ActivityTagsCollection tagsCollection = new();
+			global::System.Diagnostics.ActivityTagsCollection tagsCollection = new global::System.Diagnostics.ActivityTagsCollection();
 			tagsCollection.Add("exception.escaped", escape);
 			tagsCollection.Add("exception.message", exception.Message);
 			tagsCollection.Add("exception.type", exception.GetType().FullName);
 			tagsCollection.Add("exception.stacktrace", exception.StackTrace);
 
-			global::System.Diagnostics.ActivityEvent recordExceptionEvent = new(name: "exception", timestamp: default, tags: tagsCollection);
+			global::System.Diagnostics.ActivityEvent recordExceptionEvent = new global::System.Diagnostics.ActivityEvent(name: "exception", timestamp: default, tags: tagsCollection);
 
 			activity.AddEvent(recordExceptionEvent);
 		}
@@ -76,7 +76,7 @@ namespace Testing
 					tagsCollectionEventMethod.Add("exception.stacktrace", anException.StackTrace);
 				}
 
-				global::System.Diagnostics.ActivityEvent activityEventEventMethod = new(name: "exception", timestamp: default, tags: tagsCollectionEventMethod);
+				global::System.Diagnostics.ActivityEvent activityEventEventMethod = new global::System.Diagnostics.ActivityEvent(name: "exception", timestamp: default, tags: tagsCollectionEventMethod);
 
 				activity.AddEvent(activityEventEventMethod);
 

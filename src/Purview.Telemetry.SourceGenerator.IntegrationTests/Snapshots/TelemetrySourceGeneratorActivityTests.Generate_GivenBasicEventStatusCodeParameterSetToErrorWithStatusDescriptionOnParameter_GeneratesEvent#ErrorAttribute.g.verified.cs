@@ -9,11 +9,10 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
-#nullable enable
-
 #if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
 
-namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Marker attribute used as an alternative to <see cref="global::Purview.Telemetry.LogAttribute"/>, where the <see cref="global::Purview.Telemetry.LogAttribute.Level"/>
@@ -49,7 +48,7 @@ sealed class ErrorAttribute : global::System.Attribute
 	/// </summary>
 	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
 	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
-	public ErrorAttribute(string? messageTemplate = null, string? name = null)
+	public ErrorAttribute(string messageTemplate = null, string name = null)
 	{
 		MessageTemplate = messageTemplate;
 		Name = name;
@@ -62,7 +61,7 @@ sealed class ErrorAttribute : global::System.Attribute
 	/// <param name="eventId">Specifies the <see cref="EventId"/>.</param>
 	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
 	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
-	public ErrorAttribute(int eventId, string? messageTemplate = null, string? name = null)
+	public ErrorAttribute(int eventId, string messageTemplate = null, string name = null)
 	{
 		MessageTemplate = messageTemplate;
 		EventId = eventId;
@@ -73,7 +72,7 @@ sealed class ErrorAttribute : global::System.Attribute
 	/// Optional. The message template used for the log entry, otherwise one is
 	/// generated based on the parameters.
 	/// </summary>
-	public string? MessageTemplate { get; set; }
+	public string MessageTemplate { get; set; }
 
 	/// <summary>
 	/// Optional. The event Id for this log entry. If one is not specified, one is automatically generated.
@@ -83,7 +82,7 @@ sealed class ErrorAttribute : global::System.Attribute
 	/// <summary>
 	/// Optional. Gets/ set the name of the log entry. If one is not specified, the method name is used.
 	/// </summary>
-	public string? Name { get; set; }
+	public string Name { get; set; }
 
 	/// <summary>
 	/// Optional. Controls the generation mode for this log method.
@@ -93,4 +92,5 @@ sealed class ErrorAttribute : global::System.Attribute
 	public global::Purview.Telemetry.LoggerGenerationMode GenerationMode { get; set; }
 }
 
+}
 #endif

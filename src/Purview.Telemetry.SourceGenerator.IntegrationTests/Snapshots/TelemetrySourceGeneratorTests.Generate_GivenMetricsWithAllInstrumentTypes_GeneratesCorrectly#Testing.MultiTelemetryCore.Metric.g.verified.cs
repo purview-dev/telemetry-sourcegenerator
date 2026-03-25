@@ -28,7 +28,7 @@ namespace Testing
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public MultiTelemetryCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
 		{
-			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateMeterTags(meterTags);
 
@@ -38,22 +38,22 @@ namespace Testing
 				Tags = meterTags
 			});
 
-			global::System.Collections.Generic.Dictionary<string, object?> incrementCounterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> incrementCounterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateIncrementCounterTags(incrementCounterTags);
 
 			_incrementCounterInstrument = _meter.CreateCounter<int>(name: "multi.increment_counter", unit: null, description: null, tags: incrementCounterTags);
-			global::System.Collections.Generic.Dictionary<string, object?> autoIncrementTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> autoIncrementTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateAutoIncrementTags(autoIncrementTags);
 
 			_autoIncrementInstrument = _meter.CreateCounter<int>(name: "multi.auto_increment", unit: null, description: null, tags: autoIncrementTags);
-			global::System.Collections.Generic.Dictionary<string, object?> updateUpDownCounterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> updateUpDownCounterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateUpdateUpDownCounterTags(updateUpDownCounterTags);
 
 			_updateUpDownCounterInstrument = _meter.CreateUpDownCounter<int>(name: "multi.update_up_down_counter", unit: null, description: null, tags: updateUpDownCounterTags);
-			global::System.Collections.Generic.Dictionary<string, object?> recordHistogramTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> recordHistogramTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateRecordHistogramTags(recordHistogramTags);
 

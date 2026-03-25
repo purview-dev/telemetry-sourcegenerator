@@ -11,7 +11,8 @@ partial class MeterTargetClassEmitter
 		MeterTarget target,
 		StringBuilder builder,
 		int indent,
-		SourceProductionContext context
+		SourceProductionContext context,
+		bool emitNullable
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -46,7 +47,7 @@ partial class MeterTargetClassEmitter
 			.Append(indent, '}')
 			.AppendLine();
 
-		EmitInitializationBodyContent(target, builder, indent);
+		EmitInitializationBodyContent(target, builder, indent, emitNullable);
 
 		indent--;
 
@@ -62,7 +63,8 @@ partial class MeterTargetClassEmitter
 		MeterTarget target,
 		StringBuilder builder,
 		int indent,
-		SourceProductionContext context
+		SourceProductionContext context,
+		bool emitNullable
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -83,7 +85,7 @@ partial class MeterTargetClassEmitter
 
 		indent++;
 
-		EmitInitializationBodyContent(target, builder, indent);
+		EmitInitializationBodyContent(target, builder, indent, emitNullable);
 
 		indent--;
 
@@ -95,16 +97,20 @@ partial class MeterTargetClassEmitter
 	static void EmitInitializationBodyContent(
 		MeterTarget target,
 		StringBuilder builder,
-		int indent
+		int indent,
+		bool emitNullable
 	)
 	{
 		const string meterTagsVariableName = "meterTags";
 
+		var dictType = GetDictionaryType(emitNullable);
 		builder
-			.Append(indent, DictionaryStringObjectType, withNewLine: false)
+			.Append(indent, (string)dictType, withNewLine: false)
 			.Append(' ')
 			.Append(meterTagsVariableName)
-			.AppendLine(" = new();")
+			.Append(" = new ")
+			.Append((string)dictType)
+			.AppendLine("();")
 			.AppendLine();
 
 		builder
@@ -132,13 +138,14 @@ partial class MeterTargetClassEmitter
 			.AppendLine();
 
 		foreach (var method in target.InstrumentationMethods)
-			EmitInitialiseInstrumentVariable(method, builder, indent);
+			EmitInitialiseInstrumentVariable(method, builder, indent, emitNullable);
 	}
 
 	static void EmitInitialiseInstrumentVariable(
 		InstrumentTarget method,
 		StringBuilder builder,
-		int indent
+		int indent,
+		bool emitNullable
 	)
 	{
 		if (!method.TargetGenerationState.IsValid)
@@ -153,11 +160,13 @@ partial class MeterTargetClassEmitter
 				?? Constants.System.NullKeyword;
 			var tagVariableName = Utilities.LowercaseFirstChar(method.MethodName) + "Tags";
 
+			var dictType = GetDictionaryType(emitNullable);
 			builder
-				.Append(indent, DictionaryStringObjectType, withNewLine: false)
+				.Append(indent, (string)dictType, withNewLine: false)
 				.Append(' ')
 				.Append(tagVariableName)
-				.Append(" = new")
+				.Append(" = new ")
+				.Append((string)dictType)
 				.AppendLine("();")
 				.AppendLine()
 				.Append(indent, method.TagPopulateMethodName, withNewLine: false)

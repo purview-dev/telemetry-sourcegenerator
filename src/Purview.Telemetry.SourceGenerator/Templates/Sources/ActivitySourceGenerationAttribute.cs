@@ -1,4 +1,5 @@
-﻿namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Determines the default <see cref="global::System.Diagnostics.ActivitySource.Name" /> for generated
@@ -46,7 +47,7 @@ sealed class ActivitySourceGenerationAttribute : global::System.Attribute
 	/// <see cref="global::Purview.Telemetry.BaggageAttribute.Name"/>, unless
 	/// explicitly marked. Overridden when specifying <see cref="global::Purview.Telemetry.ActivitySourceAttribute.BaggageAndTagPrefix"/>.
 	/// </summary>
-	public string? BaggageAndTagPrefix { get; set; }
+	public string BaggageAndTagPrefix { get; set; }
 
 	/// <summary>
 	/// Determines the separator used between the <see cref="global::System.Diagnostics.ActivitySource.Name"/> and
@@ -67,4 +68,5 @@ sealed class ActivitySourceGenerationAttribute : global::System.Attribute
 	/// when an Event or Context method does not include and Activity as a parameter.
 	/// </summary>
 	public bool GenerateDiagnosticsForMissingActivity { get; set; } = true;
+}
 }

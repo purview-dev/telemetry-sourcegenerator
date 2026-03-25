@@ -11,7 +11,8 @@ static partial class LoggerGenTargetClassEmitter
 	public static void GenerateImplementation(
 		LoggerTarget target,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true
 	)
 	{
 		StringBuilder builder = new();
@@ -34,7 +35,7 @@ static partial class LoggerGenTargetClassEmitter
 			context.CancellationToken
 		);
 
-		EmitFields(target, builder, indent, context, logger);
+		EmitFields(target, builder, indent, context, logger, emitNullable);
 
 		indent = ConstructorEmitter.EmitCtor(
 			GenerationType.Logging,
@@ -47,9 +48,9 @@ static partial class LoggerGenTargetClassEmitter
 			logger
 		);
 
-		indent = EmitMethods(target, builder, indent, context, logger);
+		indent = EmitMethods(target, builder, indent, context, logger, emitNullable);
 
-		EmitLogStateStructs(target, builder, indent, context, logger);
+		EmitLogStateStructs(target, builder, indent, context, logger, emitNullable);
 
 		EmitHelpers.EmitClassEnd(builder, indent);
 		EmitHelpers.EmitNamespaceEnd(
@@ -60,7 +61,7 @@ static partial class LoggerGenTargetClassEmitter
 			context.CancellationToken
 		);
 
-		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString());
+		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString(), emitNullable);
 		var hintName = $"{target.FullyQualifiedName}.Logging.g.cs";
 
 		context.AddSource(
@@ -76,7 +77,8 @@ static partial class LoggerGenTargetClassEmitter
 			target.InterfaceType.TypeName,
 			target.FullNamespace,
 			context,
-			logger
+			logger,
+			emitNullable
 		);
 	}
 
@@ -85,7 +87,8 @@ static partial class LoggerGenTargetClassEmitter
 		StringBuilder builder,
 		int indent,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -143,7 +146,7 @@ static partial class LoggerGenTargetClassEmitter
 				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Logging.InferringErrorLogLevel);
 			}
 
-			LoggerTargetClassEmitter.EmitLogActionField(builder, indent + 1, methodTarget);
+			LoggerTargetClassEmitter.EmitLogActionField(builder, indent + 1, methodTarget, emitNullable);
 		}
 	}
 }

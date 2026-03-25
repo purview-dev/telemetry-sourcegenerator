@@ -16,7 +16,8 @@ static class DependencyInjectionClassEmitter
 		string sourceInterfaceName,
 		string? fullyQualifiedNamespace,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -79,7 +80,7 @@ static class DependencyInjectionClassEmitter
 
 		builder.AppendLine('}');
 
-		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString());
+		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString(), emitNullable);
 		var hintName = $"{fullyQualifiedNamespace}{classNameToGenerate}.DependencyInjection.g.cs";
 
 		context.AddSource(

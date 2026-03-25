@@ -1,4 +1,5 @@
-﻿namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Marker attribute required for <see cref="global::System.Diagnostics.Activity"/>
@@ -30,7 +31,7 @@ sealed class ActivitySourceAttribute : global::System.Attribute
 	/// Sets the name for the generated <see cref="global::System.Diagnostics.ActivitySource.Name"/>,
 	/// overriding the <see cref="global::Purview.Telemetry.ActivitySourceGenerationAttribute.Name"/>.
 	/// </summary>
-	public string? Name { get; set; }
+	public string Name { get; set; }
 
 	/// <summary>
 	/// Specifies the default when inferring between
@@ -45,7 +46,7 @@ sealed class ActivitySourceAttribute : global::System.Attribute
 	/// before the <see cref="global::Purview.Telemetry.TagAttribute.Name"/> or
 	/// <see cref="global::Purview.Telemetry.BaggageAttribute.Name"/>.
 	/// </summary>
-	public string? BaggageAndTagPrefix { get; set; }
+	public string BaggageAndTagPrefix { get; set; }
 
 	/// <summary>
 	/// Determines if the <see cref="Name"/> (or <see cref="global::Purview.Telemetry.ActivitySourceGenerationAttribute.BaggageAndTagPrefix"/>)
@@ -59,4 +60,5 @@ sealed class ActivitySourceAttribute : global::System.Attribute
 	/// any prefixes) are lowercased.
 	/// </summary>
 	public bool LowercaseBaggageAndTagKeys { get; set; } = true;
+}
 }

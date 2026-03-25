@@ -9,9 +9,8 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
-#nullable enable
-
-namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Marker attribute, used to indicate a meter (or group of instruments) and how they should be generated.
@@ -32,9 +31,9 @@ sealed class MeterGenerationAttribute : global::System.Attribute
 	/// <param name="instrumentPrefix">Optionally specifies the <see cref="InstrumentPrefix" />.</param>
 	/// <param name="lowercaseInstrumentName">Optionally specifies the <see cref="LowercaseInstrumentName" />.</param>
 	/// <param name="lowercaseTagKeys">Optionally specifies the <see cref="LowercaseTagKeys" />.</param>
-	public MeterGenerationAttribute(string? meterName = null,
+	public MeterGenerationAttribute(string meterName = null,
 		MeterNameGenerationType nameGenerationType = MeterNameGenerationType.DotNet,
-		string? instrumentPrefix = null,
+		string instrumentPrefix = null,
 		bool lowercaseInstrumentName = true,
 		bool lowercaseTagKeys = true)
 	{
@@ -50,7 +49,7 @@ sealed class MeterGenerationAttribute : global::System.Attribute
 	/// Used when a <see cref="MeterAttribute"/> does not specify a name.
 	/// If not set, the assembly name is used based on <see cref="MeterNameGenerationType"/>.
 	/// </summary>
-	public string? MeterName { get; set; }
+	public string MeterName { get; set; }
 
 	/// <summary>
 	/// Optional, gets/ sets how meter names are generated when not explicitly specified.
@@ -61,7 +60,7 @@ sealed class MeterGenerationAttribute : global::System.Attribute
 	/// <summary>
 	/// Optional, gets/ sets the prefix used when generating the instrument name.
 	/// </summary>
-	public string? InstrumentPrefix { get; set; }
+	public string InstrumentPrefix { get; set; }
 
 	/// <summary>
 	/// Optional, gets/ sets the separator used when
@@ -80,4 +79,5 @@ sealed class MeterGenerationAttribute : global::System.Attribute
 	/// keys/ names are lowercased. Defaults to true.
 	/// </summary>
 	public bool LowercaseTagKeys { get; set; } = true;
+}
 }

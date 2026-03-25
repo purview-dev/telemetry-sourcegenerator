@@ -16,7 +16,7 @@
 [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 sealed partial class TestTelemetryCore : global::ITestTelemetry
 {
-	readonly static global::System.Diagnostics.ActivitySource _activitySource = new("activity-source");
+	readonly static global::System.Diagnostics.ActivitySource _activitySource = new global::System.Diagnostics.ActivitySource("activity-source");
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -27,13 +27,13 @@ sealed partial class TestTelemetryCore : global::ITestTelemetry
 			return;
 		}
 
-		global::System.Diagnostics.ActivityTagsCollection tagsCollection = new();
+		global::System.Diagnostics.ActivityTagsCollection tagsCollection = new global::System.Diagnostics.ActivityTagsCollection();
 		tagsCollection.Add("exception.escaped", escape);
 		tagsCollection.Add("exception.message", exception.Message);
 		tagsCollection.Add("exception.type", exception.GetType().FullName);
 		tagsCollection.Add("exception.stacktrace", exception.StackTrace);
 
-		global::System.Diagnostics.ActivityEvent recordExceptionEvent = new(name: "exception", timestamp: default, tags: tagsCollection);
+		global::System.Diagnostics.ActivityEvent recordExceptionEvent = new global::System.Diagnostics.ActivityEvent(name: "exception", timestamp: default, tags: tagsCollection);
 
 		activity.AddEvent(recordExceptionEvent);
 	}
@@ -73,7 +73,7 @@ sealed partial class TestTelemetryCore : global::ITestTelemetry
 			global::System.Diagnostics.ActivityTagsCollection tagsCollectionDuplicateMethodName = new();
 			tagsCollectionDuplicateMethodName.Add("string_param", stringParam);
 
-			global::System.Diagnostics.ActivityEvent activityEventDuplicateMethodName = new(name: "DuplicateMethodName", timestamp: default, tags: tagsCollectionDuplicateMethodName);
+			global::System.Diagnostics.ActivityEvent activityEventDuplicateMethodName = new global::System.Diagnostics.ActivityEvent(name: "DuplicateMethodName", timestamp: default, tags: tagsCollectionDuplicateMethodName);
 
 			activity.AddEvent(activityEventDuplicateMethodName);
 		}

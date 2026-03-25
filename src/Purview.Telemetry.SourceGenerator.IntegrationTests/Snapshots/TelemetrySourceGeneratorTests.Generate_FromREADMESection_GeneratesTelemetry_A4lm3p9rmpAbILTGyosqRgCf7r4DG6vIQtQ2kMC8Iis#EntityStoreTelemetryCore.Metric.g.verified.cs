@@ -26,7 +26,7 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 			throw new global::System.Exception("The meters have already been initialized.");
 		}
 
-		global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+		global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 		PopulateMeterTags(meterTags);
 
@@ -36,7 +36,7 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 			Tags = meterTags
 		});
 
-		global::System.Collections.Generic.Dictionary<string, object?> retrievingEntityTags = new();
+		global::System.Collections.Generic.Dictionary<string, object?> retrievingEntityTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 		PopulateRetrievingEntityTags(retrievingEntityTags);
 

@@ -1,4 +1,5 @@
-﻿namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Marker attribute used to control the generation
@@ -53,7 +54,7 @@ sealed class ActivityAttribute : global::System.Attribute
 	/// Optional. Gets/ sets the name of the <see cref="global::System.Diagnostics.Activity"/>.
 	/// If this is not specified, the name of the method is used.
 	/// </summary>
-	public string? Name { get; set; }
+	public string Name { get; set; }
 
 	/// <summary>
 	/// Optional. Gets/ sets the <see cref="global::System.Diagnostics.ActivityKind">kind</see> of the
@@ -63,8 +64,9 @@ sealed class ActivityAttribute : global::System.Attribute
 
 	/// <summary>
 	/// If true, the <see cref="global::System.Diagnostics.Activity"/> is created using
-	/// <see cref="global::System.Diagnostics.ActivitySource.CreateActivity(string, global::System.Diagnostics.ActivityKind, string?, global::System.Collections.Generic.IEnumerable{global::System.Collections.Generic.KeyValuePair{string, object?}}?, global::System.Collections.Generic.IEnumerable{global::System.Diagnostics.ActivityLink}?, global::System.Diagnostics.ActivityIdFormat)" />, meaning it is not started by default. Otherwise
-	/// <see cref="global::System.Diagnostics.ActivitySource.StartActivity(string, global::System.Diagnostics.ActivityKind, string?, global::System.Collections.Generic.IEnumerable{global::System.Collections.Generic.KeyValuePair{string, object?}}?, global::System.Collections.Generic.IEnumerable{global::System.Diagnostics.ActivityLink}?, global::System.DateTimeOffset)" />is used. The default is false.
+	/// <see cref="global::System.Diagnostics.ActivitySource.CreateActivity(string, global::System.Diagnostics.ActivityKind, string, global::System.Collections.Generic.IEnumerable{global::System.Collections.Generic.KeyValuePair{string, object?}}?, global::System.Collections.Generic.IEnumerable{global::System.Diagnostics.ActivityLink}?, global::System.Diagnostics.ActivityIdFormat)" />, meaning it is not started by default. Otherwise
+	/// <see cref="global::System.Diagnostics.ActivitySource.StartActivity(string, global::System.Diagnostics.ActivityKind, string, global::System.Collections.Generic.IEnumerable{global::System.Collections.Generic.KeyValuePair{string, object?}}?, global::System.Collections.Generic.IEnumerable{global::System.Diagnostics.ActivityLink}?, global::System.DateTimeOffset)" />is used. The default is false.
 	/// </summary>
 	public bool CreateOnly { get; set; }
+}
 }

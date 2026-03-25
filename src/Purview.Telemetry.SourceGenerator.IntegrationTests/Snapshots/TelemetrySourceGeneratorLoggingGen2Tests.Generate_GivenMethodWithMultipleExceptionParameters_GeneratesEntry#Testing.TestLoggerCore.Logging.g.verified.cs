@@ -116,7 +116,7 @@ namespace Testing
 		}
 
 
-		public Enumerator GetEnumerator() => new(this);
+		public Enumerator GetEnumerator() => new Enumerator(this);
 
 
 		global::System.Collections.Generic.IEnumerator<global::System.Collections.Generic.KeyValuePair<string, object?>> global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, object?>>.GetEnumerator() => GetEnumerator();

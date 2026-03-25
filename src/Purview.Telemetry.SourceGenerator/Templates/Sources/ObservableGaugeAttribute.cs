@@ -1,4 +1,5 @@
-﻿namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Specifies the meter type generated corresponds to a <see cref="global::System.Diagnostics.Metrics.ObservableGauge{T}"/>.
@@ -25,7 +26,7 @@ sealed class ObservableGaugeAttribute : global::System.Attribute
 	/// <param name="unit">Optionally specifies the <see cref="Unit"/>.</param>
 	/// <param name="description">Optionally specifies the <see cref="Description"/>.</param>
 	/// <param name="throwOnAlreadyInitialized">Optionally specifies if the observable counter throws an exception if it is already initialised. <see cref="ThrowOnAlreadyInitialized" />.</param>
-	public ObservableGaugeAttribute(string name, string? unit = null, string? description = null, bool throwOnAlreadyInitialized = false)
+	public ObservableGaugeAttribute(string name, string unit = null, string description = null, bool throwOnAlreadyInitialized = false)
 	{
 		Name = name;
 		Unit = unit;
@@ -37,21 +38,22 @@ sealed class ObservableGaugeAttribute : global::System.Attribute
 	/// Optionally specifies the name of the instrument. If
 	/// one is not specified, the method is used.
 	/// </summary>
-	public string? Name { get; set; }
+	public string Name { get; set; }
 
 	/// <summary>
 	/// Optionally specifies the unit of the meter.
 	/// </summary>
-	public string? Unit { get; set; }
+	public string Unit { get; set; }
 
 	/// <summary>
 	/// Optionally specifies the description of the meter.
 	/// </summary>
-	public string? Description { get; set; }
+	public string Description { get; set; }
 
 	/// <summary>
 	/// Optional, determines if the instrument method throws
 	/// if it's already initialised. Defaults to false.
 	/// </summary>
 	public bool ThrowOnAlreadyInitialized { get; set; }
+}
 }

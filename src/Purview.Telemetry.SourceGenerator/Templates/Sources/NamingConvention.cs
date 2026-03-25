@@ -1,4 +1,5 @@
-namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Naming convention strategies for generated telemetry names.
@@ -18,4 +19,5 @@ enum NamingConvention
 	/// Recommended for new projects and OpenTelemetry compatibility.
 	/// </summary>
 	OpenTelemetry = 1
+}
 }

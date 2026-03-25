@@ -33,7 +33,9 @@ partial class ActivitySourceTargetClassEmitter
 			.Append(Constants.Activities.SystemDiagnostics.ActivitySource)
 			.Append(' ')
 			.Append(Constants.Activities.ActivitySourceFieldName)
-			.Append(" = new(")
+			.Append(" = new ")
+			.Append(Constants.Activities.SystemDiagnostics.ActivitySource)
+			.Append('(')
 			.Append(activitySourceName!.Wrap())
 			.AppendLine(");")
 			.AppendLine();

@@ -1,4 +1,5 @@
-﻿namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Determines if the parameter is an instrument measurement.
@@ -9,4 +10,4 @@
 sealed class InstrumentMeasurementAttribute : global::System.Attribute
 {
 }
-
+}

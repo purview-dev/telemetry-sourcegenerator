@@ -9,11 +9,10 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
-#nullable enable
-
 #if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
 
-namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// The types of prefixes that can be used for the log entry name generation.
@@ -51,4 +50,5 @@ enum LogPrefixType
 	TrimmedClassName = 4
 }
 
+}
 #endif
