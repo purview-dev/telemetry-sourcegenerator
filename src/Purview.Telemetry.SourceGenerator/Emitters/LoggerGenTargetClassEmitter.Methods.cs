@@ -31,17 +31,29 @@ partial class LoggerGenTargetClassEmitter
 						context.ReportDiagnostic,
 						TelemetryDiagnostics.Logging.ExpandEnumerableAndLogPropertiesNotSupported
 					);
-					LoggerTargetClassEmitter.EmitThrowStub(builder, indent, methodTarget, emitNullable);
+					LoggerTargetClassEmitter.EmitThrowStub(
+						builder,
+						indent,
+						methodTarget,
+						emitNullable
+					);
 					continue;
 				}
 
-				if (EmitterHelpers.ShouldEmitThrowStub(
-					methodTarget.TargetGenerationState,
-					GenerationType.Logging,
-					target.GenerationType
-				))
+				if (
+					EmitterHelpers.ShouldEmitThrowStub(
+						methodTarget.TargetGenerationState,
+						GenerationType.Logging,
+						target.GenerationType
+					)
+				)
 				{
-					LoggerTargetClassEmitter.EmitThrowStub(builder, indent, methodTarget, emitNullable);
+					LoggerTargetClassEmitter.EmitThrowStub(
+						builder,
+						indent,
+						methodTarget,
+						emitNullable
+					);
 				}
 				continue;
 			}
@@ -252,7 +264,10 @@ partial class LoggerGenTargetClassEmitter
 					builder.AppendLine();
 				}
 
-				var formattedMessageVarName = FindUniqueName("formattedMessage", existingParamNames);
+				var formattedMessageVarName = FindUniqueName(
+					"formattedMessage",
+					existingParamNames
+				);
 				builder
 					.Append(indent, "var ", withNewLine: false)
 					.AppendLine("formattedMessage = ")
@@ -471,7 +486,14 @@ partial class LoggerGenTargetClassEmitter
 		// Generate public delegating method if Logging owns it
 		if (generatePublicDelegator)
 		{
-			EmitPublicLoggingDelegatingMethod(builder, indent, methodTarget, context, logger, emitNullable);
+			EmitPublicLoggingDelegatingMethod(
+				builder,
+				indent,
+				methodTarget,
+				context,
+				logger,
+				emitNullable
+			);
 		}
 	}
 
@@ -915,9 +937,10 @@ partial class LoggerGenTargetClassEmitter
 				if (param.IsException && expressionExceptionVarName != null)
 					holeToAccess[hole] = expressionExceptionVarName;
 				else if (!param.IsException)
-					holeToAccess[hole] = expressionStateVarName != null
-						? $"{expressionStateVarName}._{param.UpperCasedName}"
-						: $"_{param.UpperCasedName}";
+					holeToAccess[hole] =
+						expressionStateVarName != null
+							? $"{expressionStateVarName}._{param.UpperCasedName}"
+							: $"_{param.UpperCasedName}";
 			}
 		}
 
@@ -994,12 +1017,9 @@ partial class LoggerGenTargetClassEmitter
 		var kvpType = emitNullable
 			? "global::System.Collections.Generic.KeyValuePair<string, object?>"
 			: "global::System.Collections.Generic.KeyValuePair<string, object>";
-		var iReadOnlyListType =
-			$"global::System.Collections.Generic.IReadOnlyList<{kvpType}>";
-		var ienumeratorType =
-			$"global::System.Collections.Generic.IEnumerator<{kvpType}>";
-		var ienumerableKvpType =
-			$"global::System.Collections.Generic.IEnumerable<{kvpType}>";
+		var iReadOnlyListType = $"global::System.Collections.Generic.IReadOnlyList<{kvpType}>";
+		var ienumeratorType = $"global::System.Collections.Generic.IEnumerator<{kvpType}>";
+		var ienumerableKvpType = $"global::System.Collections.Generic.IEnumerable<{kvpType}>";
 		const string ienumerableType = "global::System.Collections.IEnumerator";
 
 		builder
@@ -1013,11 +1033,7 @@ partial class LoggerGenTargetClassEmitter
 		indent++;
 
 		builder
-			.Append(
-				indent,
-				"static readonly string s_originalFormat = ",
-				withNewLine: false
-			)
+			.Append(indent, "static readonly string s_originalFormat = ", withNewLine: false)
 			.Append(methodTarget.MessageTemplate.Wrap())
 			.AppendLine(";");
 
@@ -1087,8 +1103,7 @@ partial class LoggerGenTargetClassEmitter
 
 		indent++;
 
-		builder
-			.Append(indent, Constants.System.AggressiveInlining);
+		builder.Append(indent, Constants.System.AggressiveInlining);
 
 		if (emitNullable)
 		{
@@ -1122,32 +1137,33 @@ partial class LoggerGenTargetClassEmitter
 			builder.Append(indent, "};");
 
 			indent--;
-			builder
-				.Append(indent, '}')
-				.AppendLine();
+			builder.Append(indent, '}').AppendLine();
 		}
 		else
 		{
-			builder
-				.Append(indent, "get")
-				.Append(indent, '{');
+			builder.Append(indent, "get").Append(indent, '{');
 
 			indent++;
 
-			builder
-				.Append(indent, "switch (index)")
-				.Append(indent, '{');
+			builder.Append(indent, "switch (index)").Append(indent, '{');
 
 			indent++;
 
-			builder.Append(indent, "case 0: return new " + kvpType + "(\"{OriginalFormat}\", s_originalFormat);");
+			builder.Append(
+				indent,
+				"case 0: return new " + kvpType + "(\"{OriginalFormat}\", s_originalFormat);"
+			);
 
 			for (var i = 0; i < nonExceptionParams.Length; i++)
 			{
 				context.CancellationToken.ThrowIfCancellationRequested();
 
 				builder
-					.Append(indent, $"case {i + 1}: return new " + kvpType + "(", withNewLine: false)
+					.Append(
+						indent,
+						$"case {i + 1}: return new " + kvpType + "(",
+						withNewLine: false
+					)
 					.Append(nonExceptionParams[i].Name.Wrap())
 					.Append(", _")
 					.Append(nonExceptionParams[i].UpperCasedName)
@@ -1163,17 +1179,22 @@ partial class LoggerGenTargetClassEmitter
 			builder.Append(indent, '}');
 
 			indent--;
-			builder
-				.Append(indent, '}')
-				.AppendLine();
+			builder.Append(indent, '}').AppendLine();
 
 			indent--;
-			builder
-				.Append(indent, '}')
-				.AppendLine();
+			builder.Append(indent, '}').AppendLine();
 		}
 
-		EmitStructEnumerator(builder, ref indent, structName, kvpType, ienumeratorType, ienumerableType, ienumerableKvpType, emitNullable);
+		EmitStructEnumerator(
+			builder,
+			ref indent,
+			structName,
+			kvpType,
+			ienumeratorType,
+			ienumerableType,
+			ienumerableKvpType,
+			emitNullable
+		);
 
 		indent--;
 		builder.Append(indent, '}').AppendLine();
@@ -1217,10 +1238,7 @@ partial class LoggerGenTargetClassEmitter
 			.AppendLine()
 			.Append(indent, $"public {kvpType} Current => _state[_index];")
 			.AppendLine()
-			.Append(
-				indent,
-				currentPropertyType
-			)
+			.Append(indent, currentPropertyType)
 			.AppendLine()
 			.Append(indent, "public bool MoveNext() => ++_index < _state.Count;")
 			.AppendLine()
@@ -1264,12 +1282,9 @@ partial class LoggerGenTargetClassEmitter
 		var kvpType = emitNullable
 			? "global::System.Collections.Generic.KeyValuePair<string, object?>"
 			: "global::System.Collections.Generic.KeyValuePair<string, object>";
-		var iReadOnlyListType =
-			$"global::System.Collections.Generic.IReadOnlyList<{kvpType}>";
-		var ienumeratorType =
-			$"global::System.Collections.Generic.IEnumerator<{kvpType}>";
-		var ienumerableKvpType =
-			$"global::System.Collections.Generic.IEnumerable<{kvpType}>";
+		var iReadOnlyListType = $"global::System.Collections.Generic.IReadOnlyList<{kvpType}>";
+		var ienumeratorType = $"global::System.Collections.Generic.IEnumerator<{kvpType}>";
+		var ienumerableKvpType = $"global::System.Collections.Generic.IEnumerable<{kvpType}>";
 		const string ienumerableType = "global::System.Collections.IEnumerator";
 
 		builder
@@ -1283,11 +1298,7 @@ partial class LoggerGenTargetClassEmitter
 		indent++;
 
 		builder
-			.Append(
-				indent,
-				"static readonly string s_originalFormat = ",
-				withNewLine: false
-			)
+			.Append(indent, "static readonly string s_originalFormat = ", withNewLine: false)
 			.Append(methodTarget.MessageTemplate.Wrap())
 			.AppendLine(";");
 
@@ -1388,8 +1399,7 @@ partial class LoggerGenTargetClassEmitter
 
 		indent++;
 
-		builder
-			.Append(indent, Constants.System.AggressiveInlining);
+		builder.Append(indent, Constants.System.AggressiveInlining);
 
 		if (emitNullable)
 		{
@@ -1423,32 +1433,33 @@ partial class LoggerGenTargetClassEmitter
 			builder.Append(indent, "};");
 
 			indent--;
-			builder
-				.Append(indent, '}')
-				.AppendLine();
+			builder.Append(indent, '}').AppendLine();
 		}
 		else
 		{
-			builder
-				.Append(indent, "get")
-				.Append(indent, '{');
+			builder.Append(indent, "get").Append(indent, '{');
 
 			indent++;
 
-			builder
-				.Append(indent, "switch (index)")
-				.Append(indent, '{');
+			builder.Append(indent, "switch (index)").Append(indent, '{');
 
 			indent++;
 
-			builder.Append(indent, "case 0: return new " + kvpType + "(\"{OriginalFormat}\", s_originalFormat);");
+			builder.Append(
+				indent,
+				"case 0: return new " + kvpType + "(\"{OriginalFormat}\", s_originalFormat);"
+			);
 
 			for (var i = 0; i < nonExceptionParams.Length; i++)
 			{
 				context.CancellationToken.ThrowIfCancellationRequested();
 
 				builder
-					.Append(indent, $"case {i + 1}: return new " + kvpType + "(", withNewLine: false)
+					.Append(
+						indent,
+						$"case {i + 1}: return new " + kvpType + "(",
+						withNewLine: false
+					)
 					.Append(nonExceptionParams[i].Name.Wrap())
 					.Append(", _")
 					.Append(nonExceptionParams[i].UpperCasedName)
@@ -1464,17 +1475,22 @@ partial class LoggerGenTargetClassEmitter
 			builder.Append(indent, '}');
 
 			indent--;
-			builder
-				.Append(indent, '}')
-				.AppendLine();
+			builder.Append(indent, '}').AppendLine();
 
 			indent--;
-			builder
-				.Append(indent, '}')
-				.AppendLine();
+			builder.Append(indent, '}').AppendLine();
 		}
 
-		EmitStructEnumerator(builder, ref indent, structName, kvpType, ienumeratorType, ienumerableType, ienumerableKvpType, emitNullable);
+		EmitStructEnumerator(
+			builder,
+			ref indent,
+			structName,
+			kvpType,
+			ienumeratorType,
+			ienumerableType,
+			ienumerableKvpType,
+			emitNullable
+		);
 
 		indent--;
 		builder.Append(indent, '}').AppendLine();

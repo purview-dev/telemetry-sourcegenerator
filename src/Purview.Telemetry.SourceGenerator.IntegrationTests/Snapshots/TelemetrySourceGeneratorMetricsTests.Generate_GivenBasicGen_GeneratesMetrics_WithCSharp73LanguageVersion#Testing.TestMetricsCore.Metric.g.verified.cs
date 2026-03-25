@@ -24,17 +24,13 @@ namespace Testing
 		readonly global::System.Diagnostics.Metrics.UpDownCounter<int> _upDownCounterInstrument;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-		public TestMetricsCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
+		public TestMetricsCore()
 		{
 			global::System.Collections.Generic.Dictionary<string, object> meterTags = new global::System.Collections.Generic.Dictionary<string, object>();
 
 			PopulateMeterTags(meterTags);
 
-			_meter = meterFactory.Create(new global::System.Diagnostics.Metrics.MeterOptions("testing-meter")
-			{
-				Version = null,
-				Tags = meterTags
-			});
+			_meter = new global::System.Diagnostics.Metrics.Meter("testing-meter");
 
 			global::System.Collections.Generic.Dictionary<string, object> autoCounterTags = new global::System.Collections.Generic.Dictionary<string, object>();
 

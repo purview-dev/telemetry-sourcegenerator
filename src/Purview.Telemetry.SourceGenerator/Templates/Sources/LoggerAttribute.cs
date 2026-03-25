@@ -1,4 +1,4 @@
-#if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
+﻿#if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
 
 namespace Purview.Telemetry
 {
@@ -27,7 +27,11 @@ sealed class LoggerAttribute : global::System.Attribute
 	/// <param name="defaultLevel">The default <see cref="global::Microsoft.Extensions.Logging.LogLevel"/> to use
 	/// when one is not specified.</param>
 	/// <param name="customPrefix">If specified, also sets the <see cref="global::Purview.Telemetry.LogPrefixType"/> to <see cref="global::Purview.Telemetry.LogPrefixType.Custom"/>.</param>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public LoggerAttribute(global::Microsoft.Extensions.Logging.LogLevel defaultLevel, string customPrefix = null)
+#else
+	public LoggerAttribute(global::Microsoft.Extensions.Logging.LogLevel defaultLevel, string? customPrefix = null)
+#endif
 	{
 		DefaultLevel = defaultLevel;
 		CustomPrefix = customPrefix;
@@ -48,7 +52,11 @@ sealed class LoggerAttribute : global::System.Attribute
 	/// <summary>
 	/// Optional. The prefix used to when generating the log entry name.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string CustomPrefix { get; set; }
+#else
+	public string? CustomPrefix { get; set; }
+#endif
 
 	/// <summary>
 	/// Specifies the mode used to generate or override the prefix for the log entry.

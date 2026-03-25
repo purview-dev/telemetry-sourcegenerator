@@ -9,6 +9,10 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
+#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE
+#nullable enable
+#endif
+
 namespace Purview.Telemetry
 {
 
@@ -41,12 +45,20 @@ sealed class MeterAttribute : global::System.Attribute
 	/// Optional. Gets/ sets the name of the meter, used for creating
 	/// a named grouped of instruments.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string Name { get; set; }
+#else
+	public string? Name { get; set; }
+#endif
 
 	/// <summary>
 	/// Optional, gets/ sets the prefix used when generating the instrument name.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string InstrumentPrefix { get; set; }
+#else
+	public string? InstrumentPrefix { get; set; }
+#endif
 
 	/// <summary>
 	/// Optional, determines if <see cref="MeterGenerationAttribute.InstrumentPrefix" /> is

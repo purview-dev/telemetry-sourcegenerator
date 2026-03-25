@@ -211,7 +211,10 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 		CancellationToken cancellationToken = default
 	)
 	{
-		List<string> preprocessorSymbols = [];
+		List<string> preprocessorSymbols =
+		[
+			languageVersion == LanguageVersion.CSharp7_3 ? "NET48_OR_GREATER" : "NET8_0_OR_GREATER",
+		];
 		if (includeLoggerTypes == IncludeLoggerTypes.None)
 			preprocessorSymbols.Add("EXCLUDE_PURVIEW_TELEMETRY_LOGGING");
 
@@ -327,17 +330,24 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 			LanguageNames.CSharp
 		);
 
-		project = project
-			.WithCompilationOptions(
-				project.CompilationOptions!.WithOutputKind(OutputKind.DynamicallyLinkedLibrary)
-			);
+		project = project.WithCompilationOptions(
+			project.CompilationOptions!.WithOutputKind(OutputKind.DynamicallyLinkedLibrary)
+		);
 
-		if (languageVersion != LanguageVersion.Default)
-			project = project.WithParseOptions(new CSharpParseOptions(languageVersion: languageVersion));
+		var compilationFrameworkSymbol =
+			languageVersion == LanguageVersion.CSharp7_3 ? "NET48_OR_GREATER" : "NET8_0_OR_GREATER";
+		var compilationParseOptions =
+			languageVersion != LanguageVersion.Default
+				? new CSharpParseOptions(
+					languageVersion: languageVersion,
+					preprocessorSymbols: [compilationFrameworkSymbol]
+				)
+				: new CSharpParseOptions(preprocessorSymbols: [compilationFrameworkSymbol]);
+		project = project.WithParseOptions(compilationParseOptions);
 
 		project = project.AddMetadataReference(
-				MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location)
-			);
+			MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location)
+		);
 
 		if (csharpDocuments?.Length > 0)
 		{

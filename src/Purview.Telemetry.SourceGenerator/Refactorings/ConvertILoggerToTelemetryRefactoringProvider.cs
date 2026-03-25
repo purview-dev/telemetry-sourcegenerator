@@ -35,10 +35,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	};
 
 	// Matches words for template-based method name extraction (starts with letter, may have digits).
-	static readonly Regex TemplateWordRegex = new(
-		@"\b[A-Za-z][A-Za-z0-9]*",
-		RegexOptions.Compiled
-	);
+	static readonly Regex TemplateWordRegex = new(@"\b[A-Za-z][A-Za-z0-9]*", RegexOptions.Compiled);
 
 	// Uses keyword aliases (string, int, bool) and short type names without global:: prefix.
 	// Suitable for generated interface code that lives in the same file as the class.
@@ -451,7 +448,8 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		var type = typeInfo.ConvertedType ?? typeInfo.Type;
 		return type is not null
 			&& (
-				type.ToDisplayString() == Constants.Logging.MicrosoftExtensions.EventId.FullyQualifiedName
+				type.ToDisplayString()
+					== Constants.Logging.MicrosoftExtensions.EventId.FullyQualifiedName
 				|| type.SpecialType == SpecialType.System_Int32
 			);
 	}
@@ -667,10 +665,9 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 		foreach (var (call, methodName) in callsWithMethods)
 		{
-			var receiverName =
-				call.Invocation.Expression is MemberAccessExpressionSyntax ma
-					? GetSimpleIdentifier(ma.Expression)
-					: null;
+			var receiverName = call.Invocation.Expression is MemberAccessExpressionSyntax ma
+				? GetSimpleIdentifier(ma.Expression)
+				: null;
 			var canonicalReceiver =
 				receiverName is not null
 				&& loggerVariableRemap.TryGetValue(receiverName, out var mapped)
@@ -707,12 +704,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		}
 
 		// Find all constructor and method parameters that take an ILogger type
-		var paramMap = BuildParamRewriteMap(
-			classDecl,
-			loggerFields,
-			interfaceName,
-			semanticModel
-		);
+		var paramMap = BuildParamRewriteMap(classDecl, loggerFields, interfaceName, semanticModel);
 
 		// Replace all nodes
 		var newClassDecl = classDecl.ReplaceNodes(
@@ -731,8 +723,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 				: original is PropertyDeclarationSyntax prop
 				&& propertyMap.TryGetValue(prop, out var newProp)
 					? newProp
-				: original is ParameterSyntax param
-				&& paramMap.TryGetValue(param, out var newParam)
+				: original is ParameterSyntax param && paramMap.TryGetValue(param, out var newParam)
 					? newParam
 				: original
 		);
@@ -744,8 +735,8 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 			// Primary constructor (C# 12+)
 			if (newClassDecl.ParameterList is { } primaryCtorParams)
 			{
-				var filtered = primaryCtorParams.Parameters.Where(
-					p => !paramsToRemove.Contains(p.Identifier.Text)
+				var filtered = primaryCtorParams.Parameters.Where(p =>
+					!paramsToRemove.Contains(p.Identifier.Text)
 				);
 				newClassDecl = newClassDecl.WithParameterList(
 					primaryCtorParams.WithParameters(SyntaxFactory.SeparatedList(filtered))
@@ -760,8 +751,8 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 					ctors,
 					(ctor, _) =>
 					{
-						var filtered = ctor.ParameterList.Parameters.Where(
-							p => !paramsToRemove.Contains(p.Identifier.Text)
+						var filtered = ctor.ParameterList.Parameters.Where(p =>
+							!paramsToRemove.Contains(p.Identifier.Text)
 						);
 						return ctor.WithParameterList(
 							ctor.ParameterList.WithParameters(SyntaxFactory.SeparatedList(filtered))
@@ -847,15 +838,33 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 		// Explicit constructors
 		foreach (var ctor in classDecl.Members.OfType<ConstructorDeclarationSyntax>())
-			RewriteMatchingParams(ctor.ParameterList.Parameters, loggerFieldTypes, interfaceName, semanticModel, result);
+			RewriteMatchingParams(
+				ctor.ParameterList.Parameters,
+				loggerFieldTypes,
+				interfaceName,
+				semanticModel,
+				result
+			);
 
 		// Primary constructor (C# 12+)
 		if (classDecl.ParameterList is { } primaryCtorParams)
-			RewriteMatchingParams(primaryCtorParams.Parameters, loggerFieldTypes, interfaceName, semanticModel, result);
+			RewriteMatchingParams(
+				primaryCtorParams.Parameters,
+				loggerFieldTypes,
+				interfaceName,
+				semanticModel,
+				result
+			);
 
 		// Regular methods
 		foreach (var method in classDecl.Members.OfType<MethodDeclarationSyntax>())
-			RewriteMatchingParams(method.ParameterList.Parameters, loggerFieldTypes, interfaceName, semanticModel, result);
+			RewriteMatchingParams(
+				method.ParameterList.Parameters,
+				loggerFieldTypes,
+				interfaceName,
+				semanticModel,
+				result
+			);
 
 		return result;
 	}
@@ -999,7 +1008,6 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		var typeStr = type?.ToDisplayString(ParamTypeFormat) ?? "object";
 		return (type, typeStr);
 	}
-
 }
 
 /// <summary>

@@ -1,4 +1,4 @@
-namespace Purview.Telemetry
+﻿namespace Purview.Telemetry
 {
 
 /// <summary>
@@ -36,7 +36,11 @@ sealed class CounterAttribute : global::System.Attribute
 	/// <param name="unit">Optionally specifies the <see cref="Unit"/>.</param>
 	/// <param name="description">Optionally specifies the <see cref="Description"/>.</param>
 	/// <param name="autoIncrement">Optionally specifies if the counter is <see cref="AutoIncrement">auto incremented</see>.</param>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public CounterAttribute(string name, string unit = null, string description = null, bool autoIncrement = false)
+#else
+	public CounterAttribute(string name, string? unit = null, string? description = null, bool autoIncrement = false)
+#endif
 	{
 		Name = name;
 		Unit = unit;
@@ -56,16 +60,28 @@ sealed class CounterAttribute : global::System.Attribute
 	/// of the method is used.
 	/// </summary>
 
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string Name { get; set; }
+#else
+	public string? Name { get; set; }
+#endif
 
 	/// <summary>
 	/// Optionally specifies the unit of the meter.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string Unit { get; set; }
+#else
+	public string? Unit { get; set; }
+#endif
 
 	/// <summary>
 	/// Optionally specifies the description of the meter.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string Description { get; set; }
+#else
+	public string? Description { get; set; }
+#endif
 }
 }

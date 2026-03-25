@@ -9,6 +9,10 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
+#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE
+#nullable enable
+#endif
+
 namespace Purview.Telemetry
 {
 

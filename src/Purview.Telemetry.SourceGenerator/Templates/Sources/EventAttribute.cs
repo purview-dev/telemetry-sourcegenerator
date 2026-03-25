@@ -1,4 +1,4 @@
-namespace Purview.Telemetry
+﻿namespace Purview.Telemetry
 {
 
 /// <summary>
@@ -35,7 +35,11 @@ sealed class EventAttribute : global::System.Attribute
     /// Optional. Gets/ sets the name of the event. If null, empty or whitespace
     /// then the name of the method is used.
     /// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
     public string Name { get; set; }
+#else
+    public string? Name { get; set; }
+#endif
 
     /// <summary>
     /// Determines if the event should use OpenTelemetry exception recording rules.
@@ -68,6 +72,10 @@ sealed class EventAttribute : global::System.Attribute
 	/// Optionally provides a description for the <see cref="StatusCode"/> when 
 	/// set to <see cref="global::System.Diagnostics.ActivityStatusCode.Error"/>.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string StatusDescription { get; set; }
+#else
+	public string? StatusDescription { get; set; }
+#endif
 }
 }

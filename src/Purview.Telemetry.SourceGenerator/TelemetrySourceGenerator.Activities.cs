@@ -35,7 +35,12 @@ partial class TelemetrySourceGenerator
 		{
 			logger?.Debug($"Activity generation target: {target!.FullyQualifiedName}");
 
-			ActivitySourceTargetClassEmitter.GenerateImplementation(target!, spc, logger, emitNullable);
+			ActivitySourceTargetClassEmitter.GenerateImplementation(
+				target!,
+				spc,
+				logger,
+				emitNullable
+			);
 		}
 	}
 }

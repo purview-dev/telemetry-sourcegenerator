@@ -14,14 +14,14 @@ partial class LoggerTargetClassEmitter
 		bool emitNullable = true
 	)
 	{
-		builder
-			.AppendLine()
-			.Append(indent, "public ", withNewLine: false);
+		builder.AppendLine().Append(indent, "public ", withNewLine: false);
 
 		if (methodTarget.IsScoped)
-			builder.Append(emitNullable
-				? Constants.System.IDisposable.WithNullable()
-				: (string)Constants.System.IDisposable);
+			builder.Append(
+				emitNullable
+					? Constants.System.IDisposable.WithNullable()
+					: (string)Constants.System.IDisposable
+			);
 		else
 			builder.Append(Constants.System.VoidKeyword);
 
@@ -57,11 +57,13 @@ partial class LoggerTargetClassEmitter
 
 			if (!methodTarget.TargetGenerationState.IsValid)
 			{
-				if (EmitterHelpers.ShouldEmitThrowStub(
-					methodTarget.TargetGenerationState,
-					GenerationType.Logging,
-					target.GenerationType
-				))
+				if (
+					EmitterHelpers.ShouldEmitThrowStub(
+						methodTarget.TargetGenerationState,
+						GenerationType.Logging,
+						target.GenerationType
+					)
+				)
 				{
 					EmitThrowStub(builder, indent, methodTarget, emitNullable);
 				}
@@ -207,7 +209,14 @@ partial class LoggerTargetClassEmitter
 		// Generate public delegating method if Logging owns it
 		if (generatePublicDelegator)
 		{
-			EmitPublicLoggingDelegatingMethod(builder, indent, methodTarget, context, logger, emitNullable);
+			EmitPublicLoggingDelegatingMethod(
+				builder,
+				indent,
+				methodTarget,
+				context,
+				logger,
+				emitNullable
+			);
 		}
 	}
 

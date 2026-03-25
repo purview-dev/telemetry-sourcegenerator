@@ -34,8 +34,7 @@ public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnume
 		return true;
 	}
 
-	public override bool Equals(object? obj) =>
-		obj is EquatableArray<T> other && Equals(other);
+	public override bool Equals(object? obj) => obj is EquatableArray<T> other && Equals(other);
 
 	public override int GetHashCode()
 	{
@@ -56,8 +55,7 @@ public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnume
 
 	public ImmutableArray<T> AsImmutableArray() => _array.IsDefault ? [] : _array;
 
-	public IEnumerator<T> GetEnumerator() =>
-		((IEnumerable<T>)AsImmutableArray()).GetEnumerator();
+	public IEnumerator<T> GetEnumerator() => ((IEnumerable<T>)AsImmutableArray()).GetEnumerator();
 
 	IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 

@@ -1,4 +1,4 @@
-#if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
+﻿#if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
 
 namespace Purview.Telemetry
 {
@@ -45,7 +45,11 @@ sealed class LogAttribute : global::System.Attribute
 	/// <param name="level">Specifies the <see cref="Level"/>.</param>
 	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
 	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public LogAttribute(global::Microsoft.Extensions.Logging.LogLevel level, string messageTemplate = null, string name = null)
+#else
+	public LogAttribute(global::Microsoft.Extensions.Logging.LogLevel level, string? messageTemplate = null, string? name = null)
+#endif
 	{
 		Level = level;
 		MessageTemplate = messageTemplate;
@@ -60,7 +64,11 @@ sealed class LogAttribute : global::System.Attribute
 	/// <param name="level">Specifies the <see cref="Level"/>.</param>
 	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
 	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public LogAttribute(int eventId, global::Microsoft.Extensions.Logging.LogLevel level, string messageTemplate = null, string name = null)
+#else
+	public LogAttribute(int eventId, global::Microsoft.Extensions.Logging.LogLevel level, string? messageTemplate = null, string? name = null)
+#endif
 	{
 		Level = level;
 		MessageTemplate = messageTemplate;
@@ -79,7 +87,11 @@ sealed class LogAttribute : global::System.Attribute
 	/// Optional. The message template used for the log entry, otherwise one is
 	/// generated based on the parameters.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string MessageTemplate { get; set; }
+#else
+	public string? MessageTemplate { get; set; }
+#endif
 
 	/// <summary>
 	/// Optional. The event Id for this log entry. If one is not specified, one is automatically generated.
@@ -89,7 +101,11 @@ sealed class LogAttribute : global::System.Attribute
 	/// <summary>
 	/// Optional. Gets/ set the name of the log entry. If one is not specified, the method name is used.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string Name { get; set; }
+#else
+	public string? Name { get; set; }
+#endif
 
 	/// <summary>
 	/// Optional. Controls the generation mode for this log method.

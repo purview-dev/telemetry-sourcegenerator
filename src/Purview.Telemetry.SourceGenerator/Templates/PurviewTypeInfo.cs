@@ -74,7 +74,8 @@ sealed record PurviewTypeInfo(
 
 	public override string ToString() => ToString(includeGlobal: true);
 
-	public string ToString(bool includeGlobal) => ToString(includeGlobal, emitNullableAnnotations: true);
+	public string ToString(bool includeGlobal) =>
+		ToString(includeGlobal, emitNullableAnnotations: true);
 
 	public string ToString(bool includeGlobal, bool emitNullableAnnotations)
 	{
@@ -88,7 +89,9 @@ sealed record PurviewTypeInfo(
 				"<"
 				+ string.Join(
 					", ",
-					GenericTypeArguments.Select(m => m.ToString(includeGlobal, emitNullableAnnotations))
+					GenericTypeArguments.Select(m =>
+						m.ToString(includeGlobal, emitNullableAnnotations)
+					)
 				)
 				+ ">";
 		}

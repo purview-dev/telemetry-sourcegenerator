@@ -7,11 +7,7 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 partial class MeterTargetClassEmitter
 {
-	static void EmitThrowStub(
-		StringBuilder builder,
-		int indent,
-		InstrumentTarget methodTarget
-	)
+	static void EmitThrowStub(StringBuilder builder, int indent, InstrumentTarget methodTarget)
 	{
 		builder
 			.AppendLine()
@@ -52,11 +48,13 @@ partial class MeterTargetClassEmitter
 
 			if (!methodTarget.TargetGenerationState.IsValid)
 			{
-				if (EmitterHelpers.ShouldEmitThrowStub(
-					methodTarget.TargetGenerationState,
-					GenerationType.Metrics,
-					target.GenerationType
-				))
+				if (
+					EmitterHelpers.ShouldEmitThrowStub(
+						methodTarget.TargetGenerationState,
+						GenerationType.Metrics,
+						target.GenerationType
+					)
+				)
 				{
 					EmitThrowStub(builder, indent, methodTarget);
 				}
@@ -145,28 +143,43 @@ partial class MeterTargetClassEmitter
 		var isVoidReturn = methodTarget.ReturnType.SpecialType == SpecialType.System_Void;
 		if (metricsOwnsPublicMethod && !isVoidReturn && !methodTarget.ReturnsBool)
 		{
-			TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Metrics.DoesNotReturnVoid);
+			TelemetryDiagnostics.Report(
+				context.ReportDiagnostic,
+				TelemetryDiagnostics.Metrics.DoesNotReturnVoid
+			);
 			return;
 		}
 
 		// Observable instruments cannot return bool
 		if (methodTarget.IsObservable && methodTarget.ReturnsBool)
 		{
-			TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Metrics.ObservableCannotReturnBool);
+			TelemetryDiagnostics.Report(
+				context.ReportDiagnostic,
+				TelemetryDiagnostics.Metrics.ObservableCannotReturnBool
+			);
 			return;
 		}
 
 		// Auto-counter instruments must return void (not bool)
 		if (methodTarget.InstrumentAttribute.IsAutoIncrement && methodTarget.ReturnsBool)
 		{
-			TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Metrics.AutoCounterMustReturnVoid);
+			TelemetryDiagnostics.Report(
+				context.ReportDiagnostic,
+				TelemetryDiagnostics.Metrics.AutoCounterMustReturnVoid
+			);
 			return;
 		}
 
 		// Auto-counter cannot also have a measurement parameter
-		if (methodTarget.InstrumentAttribute.IsAutoIncrement && methodTarget.MeasurementParameter != null)
+		if (
+			methodTarget.InstrumentAttribute.IsAutoIncrement
+			&& methodTarget.MeasurementParameter != null
+		)
 		{
-			TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Metrics.AutoIncrementCountAndMeasurementParam);
+			TelemetryDiagnostics.Report(
+				context.ReportDiagnostic,
+				TelemetryDiagnostics.Metrics.AutoIncrementCountAndMeasurementParam
+			);
 			return;
 		}
 

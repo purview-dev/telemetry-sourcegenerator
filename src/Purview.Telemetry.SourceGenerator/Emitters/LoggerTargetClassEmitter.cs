@@ -12,7 +12,8 @@ static partial class LoggerTargetClassEmitter
 		LoggerTarget target,
 		SourceProductionContext context,
 		GenerationLogger? logger,
-		bool emitNullable = true
+		bool emitNullable = true,
+		bool supportsIMeterFactory = true
 	)
 	{
 		StringBuilder builder = new();
@@ -45,7 +46,8 @@ static partial class LoggerTargetClassEmitter
 			builder,
 			indent,
 			context,
-			logger
+			logger,
+			supportsIMeterFactory
 		);
 
 		indent = EmitMethods(target, builder, indent, context, logger, emitNullable);

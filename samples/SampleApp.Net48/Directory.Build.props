@@ -1,0 +1,20 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <!--
+			CA1303: Console app — no resource table needed for literal strings.
+			CA1515: Console app — public types are fine (no assembly boundary concerns).
+			CA1812: WeatherService is instantiated via DI, not directly.
+			CA5394: Random is fine for simulation / demo purposes.
+			CS1574: cref resolution differences in net48 XML doc comments (in generated code).
+			TSG3022: Activity? vs Activity — net48 disables nullable, so Activity is used here.
+		-->
+    <NoWarn>$(NoWarn);CA1031;CA1303;CA1515;CA1812;CA2007;CA2201;CA5394;CS1574;TSG3022;</NoWarn>
+  </PropertyGroup>
+</Project>

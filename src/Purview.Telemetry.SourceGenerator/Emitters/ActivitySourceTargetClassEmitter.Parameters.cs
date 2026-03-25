@@ -67,7 +67,10 @@ partial class ActivitySourceTargetClassEmitter
 			if (!populateTags && param.ParameterType.SpecialType != SpecialType.System_String)
 			{
 				logger?.Diagnostic("Found a baggage parameter type that is not a string.");
-				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Activities.BaggageParameterShouldBeString);
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Activities.BaggageParameterShouldBeString
+				);
 
 				if (param.ParameterType.IsNullable)
 					builder.Append('?');

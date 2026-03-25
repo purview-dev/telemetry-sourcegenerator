@@ -47,7 +47,16 @@ static class PurviewTypeFactory
 		var @namespace = fullName.Substring(0, lastDotIndex);
 		var isNullable = typeName[typeName.Length - 1] == '?';
 
-		return new(typeName, fullName, @namespace, null, isNullable, IsValueType: false, SpecialType.None, []);
+		return new(
+			typeName,
+			fullName,
+			@namespace,
+			null,
+			isNullable,
+			IsValueType: false,
+			SpecialType.None,
+			[]
+		);
 	}
 
 	public static PurviewTypeInfo Create(ITypeSymbol typeSymbol)

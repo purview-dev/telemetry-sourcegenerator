@@ -11,7 +11,8 @@ partial class TelemetrySourceGeneratorActivityTests
 	{
 		// Arrange: C# 7.3-compatible interface — no nullable reference annotations,
 		// no file-scoped namespace.
-		const string basicActivity = @"
+		const string basicActivity =
+			@"
 
 namespace Testing {
 

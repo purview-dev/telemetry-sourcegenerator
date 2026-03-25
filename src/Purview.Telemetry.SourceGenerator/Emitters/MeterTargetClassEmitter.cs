@@ -23,7 +23,8 @@ static partial class MeterTargetClassEmitter
 		MeterTarget target,
 		SourceProductionContext context,
 		GenerationLogger? logger,
-		bool emitNullable = true
+		bool emitNullable = true,
+		bool supportsIMeterFactory = true
 	)
 	{
 		StringBuilder builder = new();
@@ -55,11 +56,26 @@ static partial class MeterTargetClassEmitter
 			target.GenerationType
 		);
 
-		indent = EmitFields(target, builder, indent, context, logger, readonlyFields: metricsOwnsConstructor, emitNullable: emitNullable);
+		indent = EmitFields(
+			target,
+			builder,
+			indent,
+			context,
+			logger,
+			readonlyFields: metricsOwnsConstructor,
+			emitNullable: emitNullable
+		);
 
 		if (metricsOwnsConstructor)
 		{
-			indent = EmitInlineConstructor(target, builder, indent, context, emitNullable);
+			indent = EmitInlineConstructor(
+				target,
+				builder,
+				indent,
+				context,
+				emitNullable,
+				supportsIMeterFactory
+			);
 		}
 		else
 		{
@@ -71,10 +87,18 @@ static partial class MeterTargetClassEmitter
 				builder,
 				indent,
 				context,
-				logger
+				logger,
+				supportsIMeterFactory
 			);
 
-			indent = EmitInitializationMethod(target, builder, indent, context, emitNullable);
+			indent = EmitInitializationMethod(
+				target,
+				builder,
+				indent,
+				context,
+				emitNullable,
+				supportsIMeterFactory
+			);
 		}
 		indent = EmitMethods(target, builder, indent, context, logger, emitNullable);
 

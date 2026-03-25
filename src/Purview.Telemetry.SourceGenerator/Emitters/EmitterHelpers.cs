@@ -37,9 +37,9 @@ static class EmitterHelpers
 		var isCanonical =
 			interfaceGenerationType.HasFlag(GenerationType.Activities)
 				? currentEmitterType == GenerationType.Activities
-				: interfaceGenerationType.HasFlag(GenerationType.Logging)
-					? currentEmitterType == GenerationType.Logging
-					: currentEmitterType == GenerationType.Metrics;
+			: interfaceGenerationType.HasFlag(GenerationType.Logging)
+				? currentEmitterType == GenerationType.Logging
+			: currentEmitterType == GenerationType.Metrics;
 
 		// Case 2: Method has no telemetry attributes at all — only canonical emitter stubs.
 		if (methodTargets == GenerationType.None)

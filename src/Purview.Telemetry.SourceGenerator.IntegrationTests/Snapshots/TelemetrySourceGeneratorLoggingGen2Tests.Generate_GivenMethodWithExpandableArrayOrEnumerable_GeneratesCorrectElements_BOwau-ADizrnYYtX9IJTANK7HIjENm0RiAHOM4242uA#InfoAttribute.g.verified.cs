@@ -9,6 +9,10 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
+#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE
+#nullable enable
+#endif
+
 #if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
 
 namespace Purview.Telemetry
@@ -48,7 +52,11 @@ sealed class InfoAttribute : global::System.Attribute
 	/// </summary>
 	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
 	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public InfoAttribute(string messageTemplate = null, string name = null)
+#else
+	public InfoAttribute(string? messageTemplate = null, string? name = null)
+#endif
 	{
 		MessageTemplate = messageTemplate;
 		Name = name;
@@ -61,7 +69,11 @@ sealed class InfoAttribute : global::System.Attribute
 	/// <param name="eventId">Specifies the <see cref="EventId"/>.</param>
 	/// <param name="messageTemplate">Optionally specifies the <see cref="MessageTemplate"/>.</param>
 	/// <param name="name">Optionally specifies the <see cref="Name"/>.</param>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public InfoAttribute(int eventId, string messageTemplate = null, string name = null)
+#else
+	public InfoAttribute(int eventId, string? messageTemplate = null, string? name = null)
+#endif
 	{
 		MessageTemplate = messageTemplate;
 		EventId = eventId;
@@ -72,7 +84,11 @@ sealed class InfoAttribute : global::System.Attribute
 	/// Optional. The message template used for the log entry, otherwise one is
 	/// generated based on the parameters.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string MessageTemplate { get; set; }
+#else
+	public string? MessageTemplate { get; set; }
+#endif
 
 	/// <summary>
 	/// Optional. The event Id for this log entry. If one is not specified, one is automatically generated.
@@ -82,7 +98,11 @@ sealed class InfoAttribute : global::System.Attribute
 	/// <summary>
 	/// Optional. Gets/ set the name of the log entry. If one is not specified, the method name is used.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string Name { get; set; }
+#else
+	public string? Name { get; set; }
+#endif
 
 	/// <summary>
 	/// Optional. Controls the generation mode for this log method.

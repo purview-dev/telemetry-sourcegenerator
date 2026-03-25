@@ -9,6 +9,10 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
+#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE
+#nullable enable
+#endif
+
 namespace Purview.Telemetry
 {
 
@@ -42,7 +46,11 @@ sealed class ActivitySourceAttribute : global::System.Attribute
 	/// Sets the name for the generated <see cref="global::System.Diagnostics.ActivitySource.Name"/>,
 	/// overriding the <see cref="global::Purview.Telemetry.ActivitySourceGenerationAttribute.Name"/>.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string Name { get; set; }
+#else
+	public string? Name { get; set; }
+#endif
 
 	/// <summary>
 	/// Specifies the default when inferring between
@@ -57,7 +65,11 @@ sealed class ActivitySourceAttribute : global::System.Attribute
 	/// before the <see cref="global::Purview.Telemetry.TagAttribute.Name"/> or
 	/// <see cref="global::Purview.Telemetry.BaggageAttribute.Name"/>.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string BaggageAndTagPrefix { get; set; }
+#else
+	public string? BaggageAndTagPrefix { get; set; }
+#endif
 
 	/// <summary>
 	/// Determines if the <see cref="Name"/> (or <see cref="global::Purview.Telemetry.ActivitySourceGenerationAttribute.BaggageAndTagPrefix"/>)

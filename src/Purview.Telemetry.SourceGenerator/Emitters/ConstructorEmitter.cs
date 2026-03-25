@@ -17,7 +17,8 @@ static class ConstructorEmitter
 		StringBuilder builder,
 		int indent,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool supportsIMeterFactory = true
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -39,11 +40,11 @@ static class ConstructorEmitter
 			.Append(classNameToGenerate)
 			.Append('(');
 
-		EmitParameters(generationType, fullyQualifiedInterfaceName, builder);
+		EmitParameters(generationType, fullyQualifiedInterfaceName, builder, supportsIMeterFactory);
 
 		builder.AppendLine(')').Append(indent, '{');
 
-		EmitBody(generationType, indent, builder);
+		EmitBody(generationType, indent, builder, supportsIMeterFactory);
 
 		builder.Append(indent, '}');
 
@@ -53,7 +54,8 @@ static class ConstructorEmitter
 	static void EmitParameters(
 		GenerationType generationType,
 		string? loggerFullyQualifiedInterfaceName,
-		StringBuilder builder
+		StringBuilder builder,
+		bool supportsIMeterFactory
 	)
 	{
 		if (generationType.HasFlag(GenerationType.Logging))
@@ -66,7 +68,7 @@ static class ConstructorEmitter
 				.Append(LoggerParameterName);
 		}
 
-		if (generationType.HasFlag(GenerationType.Metrics))
+		if (generationType.HasFlag(GenerationType.Metrics) && supportsIMeterFactory)
 		{
 			if (generationType.HasFlag(GenerationType.Logging))
 				builder.Append(", ");
@@ -78,7 +80,12 @@ static class ConstructorEmitter
 		}
 	}
 
-	static void EmitBody(GenerationType generationType, int indent, StringBuilder builder)
+	static void EmitBody(
+		GenerationType generationType,
+		int indent,
+		StringBuilder builder,
+		bool supportsIMeterFactory
+	)
 	{
 		if (generationType.HasFlag(GenerationType.Logging))
 		{
@@ -93,9 +100,12 @@ static class ConstructorEmitter
 		{
 			builder
 				.Append(indent + 1, Constants.Metrics.MeterInitializationMethod, withNewLine: false)
-				.Append('(')
-				.Append(Constants.Metrics.MeterFactoryParameterName)
-				.AppendLine(");");
+				.Append('(');
+
+			if (supportsIMeterFactory)
+				builder.Append(Constants.Metrics.MeterFactoryParameterName);
+
+			builder.AppendLine(");");
 		}
 	}
 }

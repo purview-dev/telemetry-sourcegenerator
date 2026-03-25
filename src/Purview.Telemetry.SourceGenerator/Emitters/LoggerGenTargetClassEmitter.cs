@@ -12,7 +12,8 @@ static partial class LoggerGenTargetClassEmitter
 		LoggerTarget target,
 		SourceProductionContext context,
 		GenerationLogger? logger,
-		bool emitNullable = true
+		bool emitNullable = true,
+		bool supportsIMeterFactory = true
 	)
 	{
 		StringBuilder builder = new();
@@ -45,7 +46,8 @@ static partial class LoggerGenTargetClassEmitter
 			builder,
 			indent,
 			context,
-			logger
+			logger,
+			supportsIMeterFactory
 		);
 
 		indent = EmitMethods(target, builder, indent, context, logger, emitNullable);
@@ -113,7 +115,10 @@ static partial class LoggerGenTargetClassEmitter
 
 			if (methodTarget.UnknownReturnType)
 			{
-				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Logging.LogMustReturnVoidOrAsync);
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Logging.LogMustReturnVoidOrAsync
+				);
 				continue;
 			}
 
@@ -123,7 +128,10 @@ static partial class LoggerGenTargetClassEmitter
 				logger?.Diagnostic(
 					"Method has multiple exception parameters, only a single one is permitted."
 				);
-				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Logging.MultipleExceptionsDefined);
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Logging.MultipleExceptionsDefined
+				);
 				continue;
 			}
 
@@ -136,17 +144,28 @@ static partial class LoggerGenTargetClassEmitter
 			)
 			{
 				logger?.Diagnostic("Method has more than 6 parameters.");
-				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Logging.MaximumLogEntryParametersExceeded);
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Logging.MaximumLogEntryParametersExceeded
+				);
 				continue;
 			}
 
 			if (methodTarget.InferredErrorLevel)
 			{
 				logger?.Diagnostic("Inferring error log level.");
-				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Logging.InferringErrorLogLevel);
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Logging.InferringErrorLogLevel
+				);
 			}
 
-			LoggerTargetClassEmitter.EmitLogActionField(builder, indent + 1, methodTarget, emitNullable);
+			LoggerTargetClassEmitter.EmitLogActionField(
+				builder,
+				indent + 1,
+				methodTarget,
+				emitNullable
+			);
 		}
 	}
 }

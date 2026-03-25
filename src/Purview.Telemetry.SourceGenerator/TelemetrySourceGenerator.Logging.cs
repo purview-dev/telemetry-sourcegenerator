@@ -11,6 +11,7 @@ partial class TelemetrySourceGenerator
 	static void RegisterLoggerGeneration(
 		IncrementalGeneratorInitializationContext context,
 		IncrementalValueProvider<bool> supportsNullableAnnotations,
+		IncrementalValueProvider<bool> supportsIMeterFactory,
 		GenerationLogger? logger
 	)
 	{
@@ -27,14 +28,18 @@ partial class TelemetrySourceGenerator
 
 		// Register with the source generator.
 		context.RegisterImplementationSourceOutput(
-			source: loggerTargetsPredicate.Collect().Combine(supportsNullableAnnotations),
-			action: (spc, pair) => GenerateLoggerTargets(pair.Left, pair.Right, spc, logger)
+			source: loggerTargetsPredicate
+				.Collect()
+				.Combine(supportsNullableAnnotations.Combine(supportsIMeterFactory)),
+			action: (spc, pair) =>
+				GenerateLoggerTargets(pair.Left, pair.Right.Left, pair.Right.Right, spc, logger)
 		);
 	}
 
 	static void GenerateLoggerTargets(
 		ImmutableArray<LoggerTarget?> targets,
 		bool emitNullable,
+		bool supportsIMeterFactory,
 		SourceProductionContext spc,
 		GenerationLogger? logger
 	)
@@ -47,9 +52,21 @@ partial class TelemetrySourceGenerator
 			logger?.Debug($"Logger generation target: {target!.FullyQualifiedName}");
 
 			if (target!.UseMSLoggingTelemetryBasedGeneration)
-				LoggerGenTargetClassEmitter.GenerateImplementation(target, spc, logger, emitNullable);
+				LoggerGenTargetClassEmitter.GenerateImplementation(
+					target,
+					spc,
+					logger,
+					emitNullable,
+					supportsIMeterFactory
+				);
 			else
-				LoggerTargetClassEmitter.GenerateImplementation(target, spc, logger, emitNullable);
+				LoggerTargetClassEmitter.GenerateImplementation(
+					target,
+					spc,
+					logger,
+					emitNullable,
+					supportsIMeterFactory
+				);
 		}
 	}
 }

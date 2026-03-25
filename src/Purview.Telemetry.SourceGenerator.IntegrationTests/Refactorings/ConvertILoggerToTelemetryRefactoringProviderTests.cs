@@ -90,7 +90,9 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(actions).IsNotEmpty();
-		await Assert.That(actions[0].Title).IsEqualTo("Convert ILogger usage to Purview Telemetry interface");
+		await Assert
+			.That(actions[0].Title)
+			.IsEqualTo("Convert ILogger usage to Purview Telemetry interface");
 	}
 
 	[Test]
@@ -872,7 +874,9 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(actions).IsNotEmpty();
-		await Assert.That(actions[0].Title).IsEqualTo("Convert ILogger usage to Purview Telemetry interface");
+		await Assert
+			.That(actions[0].Title)
+			.IsEqualTo("Convert ILogger usage to Purview Telemetry interface");
 	}
 
 	[Test]
@@ -1027,7 +1031,9 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(actions).IsNotEmpty();
-		await Assert.That(actions[0].Title).IsEqualTo("Convert ILogger usage to Purview Telemetry interface");
+		await Assert
+			.That(actions[0].Title)
+			.IsEqualTo("Convert ILogger usage to Purview Telemetry interface");
 	}
 
 	[Test]
@@ -1115,7 +1121,9 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(actions).IsNotEmpty();
-		await Assert.That(actions[0].Title).IsEqualTo("Convert ILogger usage to Purview Telemetry interface");
+		await Assert
+			.That(actions[0].Title)
+			.IsEqualTo("Convert ILogger usage to Purview Telemetry interface");
 	}
 
 	[Test]

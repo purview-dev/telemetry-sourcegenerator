@@ -222,7 +222,8 @@ partial class ActivitySourceTargetClassEmitter
 					+ (
 						returnsVoid
 							? null
-							: " null" + (!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
+							: " null"
+								+ (!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
 					)
 					+ ";"
 			)

@@ -14,7 +14,8 @@ partial class TelemetrySourceGeneratorMetricsTests
 		// Exercises Counter, Histogram, and AutoCounter instruments whose emitted bodies
 		// contain KeyValuePair<string, object?> which must become KeyValuePair<string, object>
 		// under C# 7.3, and initialization with = default! which must become = default.
-		const string basicMetrics = @"
+		const string basicMetrics =
+			@"
 
 namespace Testing {
 

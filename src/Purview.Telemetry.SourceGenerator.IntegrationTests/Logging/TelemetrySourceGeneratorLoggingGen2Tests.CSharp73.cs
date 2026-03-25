@@ -14,7 +14,8 @@ partial class TelemetrySourceGeneratorLoggingGen2Tests
 		// Uses LoggerGenerationMode.V2 to exercise the LoggerGenTargetClassEmitter which
 		// emits KeyValuePair<string, object?> structs that must become KeyValuePair<string, object>
 		// under C# 7.3.
-		const string source = @"
+		const string source =
+			@"
 namespace Testing {
 
 [Logger(GenerationMode = LoggerGenerationMode.V2)]

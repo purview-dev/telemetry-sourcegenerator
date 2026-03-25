@@ -179,7 +179,10 @@ partial class PipelineHelpers
 							RaiseInferenceNotSupportedWithMultiTargeting: false,
 							RaiseMultiGenerationTargetsNotSupported: false
 						),
-						TypeParameters: ImmutableArray.CreateRange(method.TypeParameters, tp => tp.Name)
+						TypeParameters: ImmutableArray.CreateRange(
+							method.TypeParameters,
+							tp => tp.Name
+						)
 					)
 				);
 				continue;

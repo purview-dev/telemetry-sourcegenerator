@@ -34,7 +34,10 @@ partial class ActivitySourceTargetClassEmitter
 				logger?.Diagnostic(
 					"There are no Activity methods defined, however there are Events/ Context methods."
 				);
-				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Activities.NoActivityMethodsDefined);
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Activities.NoActivityMethodsDefined
+				);
 			}
 		}
 
@@ -225,11 +228,13 @@ partial class ActivitySourceTargetClassEmitter
 
 		if (!methodTarget.TargetGenerationState.IsValid)
 		{
-			if (EmitterHelpers.ShouldEmitThrowStub(
-				methodTarget.TargetGenerationState,
-				GenerationType.Activities,
-				target.GenerationType
-			))
+			if (
+				EmitterHelpers.ShouldEmitThrowStub(
+					methodTarget.TargetGenerationState,
+					GenerationType.Activities,
+					target.GenerationType
+				)
+			)
 			{
 				EmitThrowStub(builder, indent, methodTarget);
 			}
@@ -247,7 +252,15 @@ partial class ActivitySourceTargetClassEmitter
 		if (isMultiTarget)
 		{
 			// Generate private activity implementation method
-			EmitPrivateActivityMethod(builder, indent, methodTarget, target, context, logger, emitNullable);
+			EmitPrivateActivityMethod(
+				builder,
+				indent,
+				methodTarget,
+				target,
+				context,
+				logger,
+				emitNullable
+			);
 
 			// Generate public delegating method (Activity emitter owns this for multi-target)
 			EmitPublicDelegatingMethod(
@@ -519,7 +532,10 @@ partial class ActivitySourceTargetClassEmitter
 				$"The return type {methodTarget.ReturnType} isn't valid for an activity, event, or context method."
 			);
 
-			TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Activities.InvalidReturnType);
+			TelemetryDiagnostics.Report(
+				context.ReportDiagnostic,
+				TelemetryDiagnostics.Activities.InvalidReturnType
+			);
 
 			return false;
 		}
@@ -537,14 +553,20 @@ partial class ActivitySourceTargetClassEmitter
 				)
 				{
 					logger?.Diagnostic($"No Activity returned for {methodTarget.MethodName}.");
-					TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Activities.DoesNotReturnActivity);
+					TelemetryDiagnostics.Report(
+						context.ReportDiagnostic,
+						TelemetryDiagnostics.Activities.DoesNotReturnActivity
+					);
 				}
 				else if (!methodTarget.ReturnType.IsNullable)
 				{
 					logger?.Diagnostic(
 						$"Activity return type is not nullable for {methodTarget.MethodName}."
 					);
-					TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Activities.ActivityReturnTypeShouldBeNullable);
+					TelemetryDiagnostics.Report(
+						context.ReportDiagnostic,
+						TelemetryDiagnostics.Activities.ActivityReturnTypeShouldBeNullable
+					);
 				}
 			}
 			else

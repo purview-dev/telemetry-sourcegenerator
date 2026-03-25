@@ -234,7 +234,8 @@ partial class PipelineHelpers
 					// Check if we're using OpenTelemetry meter name generation (lowercase assembly name)
 					// e.g., meter "myapp.products" + instrument "pricing_page_requests"
 					//       -> "myapp_products.pricing_page_requests"
-					var meterNameGenType = meterGenerationAttribute?.MeterNameGenerationType.Value ?? 1; // Default to DotNet
+					var meterNameGenType =
+						meterGenerationAttribute?.MeterNameGenerationType.Value ?? 1; // Default to DotNet
 					if (meterNameGenType == 0 && !string.IsNullOrWhiteSpace(meterName)) // OpenTelemetry only
 					{
 						var meterPrefix = Utilities.ConvertToSeparatedLowercase(meterName, '_');
@@ -340,7 +341,10 @@ partial class PipelineHelpers
 		{
 			var t = methodTargets[i];
 			if (!seenNames.Add(t.MethodName))
-				methodTargets[i] = t with { TargetGenerationState = t.TargetGenerationState with { IsValid = false } };
+				methodTargets[i] = t with
+				{
+					TargetGenerationState = t.TargetGenerationState with { IsValid = false },
+				};
 		}
 
 		return [.. methodTargets];
@@ -590,9 +594,10 @@ partial class PipelineHelpers
 		token.ThrowIfCancellationRequested();
 
 		string? prefix = null;
-		var separator = meterGenerationAttribute?.InstrumentSeparator.Or(
-			Constants.Metrics.InstrumentSeparatorDefault
-		) ?? Constants.Metrics.InstrumentSeparatorDefault;
+		var separator =
+			meterGenerationAttribute?.InstrumentSeparator.Or(
+				Constants.Metrics.InstrumentSeparatorDefault
+			) ?? Constants.Metrics.InstrumentSeparatorDefault;
 
 		if (meterAttribute.IncludeAssemblyInstrumentPrefix.Value == true)
 		{

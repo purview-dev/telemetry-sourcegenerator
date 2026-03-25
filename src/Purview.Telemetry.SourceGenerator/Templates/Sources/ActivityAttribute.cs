@@ -1,4 +1,4 @@
-namespace Purview.Telemetry
+﻿namespace Purview.Telemetry
 {
 
 /// <summary>
@@ -54,7 +54,11 @@ sealed class ActivityAttribute : global::System.Attribute
 	/// Optional. Gets/ sets the name of the <see cref="global::System.Diagnostics.Activity"/>.
 	/// If this is not specified, the name of the method is used.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string Name { get; set; }
+#else
+	public string? Name { get; set; }
+#endif
 
 	/// <summary>
 	/// Optional. Gets/ sets the <see cref="global::System.Diagnostics.ActivityKind">kind</see> of the

@@ -12,18 +12,23 @@ partial class TelemetrySourceGenerator
 		IncrementalGeneratorInitializationContext context,
 		IncrementalValuesProvider<MeterTarget?> meterTargets,
 		IncrementalValueProvider<bool> supportsNullableAnnotations,
+		IncrementalValueProvider<bool> supportsIMeterFactory,
 		GenerationLogger? logger
 	)
 	{
 		context.RegisterImplementationSourceOutput(
-			source: meterTargets.Collect().Combine(supportsNullableAnnotations),
-			action: (spc, pair) => GenerateMeterTargets(pair.Left, pair.Right, spc, logger)
+			source: meterTargets
+				.Collect()
+				.Combine(supportsNullableAnnotations.Combine(supportsIMeterFactory)),
+			action: (spc, pair) =>
+				GenerateMeterTargets(pair.Left, pair.Right.Left, pair.Right.Right, spc, logger)
 		);
 	}
 
 	static void GenerateMeterTargets(
 		ImmutableArray<MeterTarget?> targets,
 		bool emitNullable,
+		bool supportsIMeterFactory,
 		SourceProductionContext spc,
 		GenerationLogger? logger
 	)
@@ -35,7 +40,13 @@ partial class TelemetrySourceGenerator
 		{
 			logger?.Debug($"Meter generation target: {target!.FullyQualifiedName}");
 
-			MeterTargetClassEmitter.GenerateImplementation(target!, spc, logger, emitNullable);
+			MeterTargetClassEmitter.GenerateImplementation(
+				target!,
+				spc,
+				logger,
+				emitNullable,
+				supportsIMeterFactory
+			);
 		}
 	}
 }

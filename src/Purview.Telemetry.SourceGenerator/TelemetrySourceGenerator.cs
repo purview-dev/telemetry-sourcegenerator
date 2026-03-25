@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Purview.Telemetry.SourceGenerator.Helpers;
+using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator;
 
@@ -11,7 +12,46 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator, IL
 
 	public void Initialize(IncrementalGeneratorInitializationContext context)
 	{
-		// Register all of the shared attributes we need.
+		// C# 8+ feature detection: controls nullable annotations and null-forgiving operators.
+		var supportsNullableAnnotations = context.ParseOptionsProvider.Select(
+			static (opts, _) =>
+				opts is not CSharpParseOptions csOpts
+				|| csOpts.LanguageVersion >= LanguageVersion.CSharp8
+		);
+
+		// IMeterFactory is .NET 8+ only — never available on .NET Framework 4.8.
+		var supportsIMeterFactory = context.ParseOptionsProvider.Select(
+			static (opts, _) =>
+				opts is not CSharpParseOptions csOpts
+				|| !csOpts.PreprocessorSymbolNames.Contains("NET48_OR_GREATER")
+		);
+
+		// Only .NET 8+ and .NET Framework 4.8+ are supported; fail fast for anything else.
+		var frameworkSupported = context.ParseOptionsProvider.Select(
+			static (opts, _) =>
+			{
+				if (opts is not CSharpParseOptions csOpts)
+					return true;
+
+				var symbols = csOpts.PreprocessorSymbolNames;
+				return symbols.Contains("NET8_0_OR_GREATER")
+					|| symbols.Contains("NET48_OR_GREATER");
+			}
+		);
+		context.RegisterSourceOutput(
+			frameworkSupported,
+			static (ctx, supported) =>
+			{
+				if (!supported)
+					TelemetryDiagnostics.Report(
+						ctx.ReportDiagnostic,
+						TelemetryDiagnostics.General.UnsupportedTargetFramework
+					);
+			}
+		);
+
+		// RegisterPostInitializationOutput (not RegisterSourceOutput) ensures ForAttributeWithMetadataName
+		// can resolve attribute types before it runs.
 		context.RegisterPostInitializationOutput(ctx =>
 		{
 			_logger?.Debug("--- Adding templates.");
@@ -26,8 +66,7 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator, IL
 			_logger?.Debug("--- Finished adding templates.");
 		});
 
-		// Create shared providers so Activities/Metrics pipelines are registered once
-		// and reused by TelemetryNames instead of running ForAttributeWithMetadataName twice.
+		// Create shared providers so Activities/Metrics pipelines aren't registered twice.
 		var activityProvider = context
 			.SyntaxProvider.ForAttributeWithMetadataName(
 				Constants.Activities.ActivitySourceAttribute.TypeInfo.FullyQualifiedName,
@@ -48,18 +87,21 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator, IL
 			.WhereNotNull()
 			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_Meters");
 
-		// Detect the C# language version so emitters can omit C# 8+ features (nullable
-		// annotations, null-forgiving operator) when targeting C# 7.3 or earlier.
-		var supportsNullableAnnotations = context.ParseOptionsProvider.Select(
-			static (opts, _) => opts is CSharpParseOptions csOpts
-				? csOpts.LanguageVersion >= LanguageVersion.CSharp8
-				: true
+		RegisterActivitiesGeneration(
+			context,
+			activityProvider,
+			supportsNullableAnnotations,
+			_logger
 		);
-
-		RegisterActivitiesGeneration(context, activityProvider, supportsNullableAnnotations, _logger);
-		RegisterLoggerGeneration(context, supportsNullableAnnotations, _logger);
-		RegisterMetricsGeneration(context, meterProvider, supportsNullableAnnotations, _logger);
-		RegisterTelemetryNamesGeneration(context, activityProvider, meterProvider, supportsNullableAnnotations, _logger);
+		RegisterLoggerGeneration(context, supportsNullableAnnotations, supportsIMeterFactory, _logger);
+		RegisterMetricsGeneration(context, meterProvider, supportsNullableAnnotations, supportsIMeterFactory, _logger);
+		RegisterTelemetryNamesGeneration(
+			context,
+			activityProvider,
+			meterProvider,
+			supportsNullableAnnotations,
+			_logger
+		);
 	}
 
 	void ILogSupport.SetLogOutput(Action<string, OutputType> action) =>

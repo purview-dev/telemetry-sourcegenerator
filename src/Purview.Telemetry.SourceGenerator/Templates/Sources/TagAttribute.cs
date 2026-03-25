@@ -1,4 +1,4 @@
-namespace Purview.Telemetry
+﻿namespace Purview.Telemetry
 {
 
 /// <summary>
@@ -45,7 +45,11 @@ sealed class TagAttribute : global::System.Attribute
 	/// Optionally specifies the key/ name of the tag. If one is not specified,
 	/// the of the parameter is used.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string Name { get; set; }
+#else
+	public string? Name { get; set; }
+#endif
 
 	/// <summary>
 	/// Determines if the tag is skipped if it equals it's default value.

@@ -94,11 +94,10 @@ partial class PipelineHelpers
 		// Resolve the effective generation mode using priority:
 		// interface GenerationMode > assembly GenerationMode > Auto (per-method decision)
 		var interfaceGenerationMode =
-			loggerAttribute.GenerationMode.IsSet
-				? loggerAttribute.GenerationMode.Value!.Value
-				: loggerGenerationAttribute?.GenerationMode.IsSet == true
-					? loggerGenerationAttribute.GenerationMode.Value!.Value
-					: 0; // Auto
+			loggerAttribute.GenerationMode.IsSet ? loggerAttribute.GenerationMode.Value!.Value
+			: loggerGenerationAttribute?.GenerationMode.IsSet == true
+				? loggerGenerationAttribute.GenerationMode.Value!.Value
+			: 0; // Auto
 
 		var generationType = SharedHelpers.GetGenerationTypes(interfaceSymbol, token);
 		var fullNamespace = Utilities.GetFullNamespace(interfaceDeclaration, true);
@@ -187,7 +186,12 @@ partial class PipelineHelpers
 			logger?.Debug($"Found method {interfaceSymbol.Name}.{method.Name}.");
 
 			// Validate return type - don't skip; let through with UnknownReturnType flag so the emitter can report the diagnostic
-			var invalidReturnType = ValidateLogReturnType(method, semanticModel, logger, token).HasValue;
+			var invalidReturnType = ValidateLogReturnType(
+				method,
+				semanticModel,
+				logger,
+				token
+			).HasValue;
 
 			var isScoped = Constants.System.IDisposable.Equals(method.ReturnType);
 			var methodParameters = GetLogMethodParameters(
@@ -306,7 +310,9 @@ partial class PipelineHelpers
 					continue;
 				}
 
-				var paramsBuilder = ImmutableArray.CreateBuilder<LogParameterTarget>(methodParameters.Length);
+				var paramsBuilder = ImmutableArray.CreateBuilder<LogParameterTarget>(
+					methodParameters.Length
+				);
 				for (var i = 0; i < methodParameters.Length; i++)
 				{
 					var param = methodParameters[i];
@@ -324,7 +330,9 @@ partial class PipelineHelpers
 						)
 						.ToImmutableArray();
 
-					paramsBuilder.Add(holes.Length > 0 ? param with { ReferencedHoles = holes } : param);
+					paramsBuilder.Add(
+						holes.Length > 0 ? param with { ReferencedHoles = holes } : param
+					);
 				}
 
 				methodParameters = paramsBuilder.MoveToImmutable();
@@ -349,9 +357,10 @@ partial class PipelineHelpers
 			// Resolve per-method generation mode.
 			// Priority: method GenerationMode > interface/assembly GenerationMode > Auto (per-method param analysis).
 			bool useV1Generation;
-			var methodGenMode = logAttribute?.GenerationMode.IsSet == true
-				? logAttribute.GenerationMode.Value!.Value
-				: 0; // Auto at method level - inherit from interface
+			var methodGenMode =
+				logAttribute?.GenerationMode.IsSet == true
+					? logAttribute.GenerationMode.Value!.Value
+					: 0; // Auto at method level - inherit from interface
 
 			if (methodGenMode == 1) // V1 forced at method level
 			{
@@ -375,7 +384,8 @@ partial class PipelineHelpers
 				// v1 requires: ≤6 non-exception parameters, single exception, no [ExpandEnumerable], no [LogProperties].
 				useV1Generation =
 					!hasMultipleExceptions
-					&& methodParameters.Count(p => !p.IsException) <= Constants.Logging.MaxNonExceptionParameters
+					&& methodParameters.Count(p => !p.IsException)
+						<= Constants.Logging.MaxNonExceptionParameters
 					&& !methodParameters.Any(p => p.ExpandEnumerableAttribute != null)
 					&& !methodParameters.Any(p => p.LogPropertiesAttribute != null);
 			}
@@ -413,7 +423,10 @@ partial class PipelineHelpers
 		{
 			var t = methodTargets[i];
 			if (!seenNames.Add(t.MethodName))
-				methodTargets[i] = t with { TargetGenerationState = t.TargetGenerationState with { IsValid = false } };
+				methodTargets[i] = t with
+				{
+					TargetGenerationState = t.TargetGenerationState with { IsValid = false },
+				};
 		}
 
 		return [.. methodTargets];
@@ -619,7 +632,9 @@ partial class PipelineHelpers
 					IsComplexType: parameter.Type.IsComplexType(),
 					LogPropertiesAttribute: logPropertiesAttribute,
 					LogProperties: logProperties != null
-						? new EquatableArray<LogPropertiesParameterDetails>(logProperties.ToImmutableArray())
+						? new EquatableArray<LogPropertiesParameterDetails>(
+							logProperties.ToImmutableArray()
+						)
 						: null,
 					ExpandEnumerableAttribute: expandEnumerableAttribute,
 					ExcludedTargets: SharedHelpers

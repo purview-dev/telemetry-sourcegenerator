@@ -66,7 +66,10 @@ partial class LoggerTargetClassEmitter
 
 			if (methodTarget.UnknownReturnType)
 			{
-				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Logging.LogMustReturnVoidOrAsync);
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Logging.LogMustReturnVoidOrAsync
+				);
 				continue;
 			}
 
@@ -75,7 +78,10 @@ partial class LoggerTargetClassEmitter
 				logger?.Diagnostic(
 					"Method has multiple exception parameters, only a single one is permitted."
 				);
-				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Logging.MultipleExceptionsDefined);
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Logging.MultipleExceptionsDefined
+				);
 
 				continue;
 			}
@@ -86,7 +92,10 @@ partial class LoggerTargetClassEmitter
 			)
 			{
 				logger?.Diagnostic("Method has more than 6 parameters.");
-				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Logging.MaximumLogEntryParametersExceeded);
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Logging.MaximumLogEntryParametersExceeded
+				);
 
 				continue;
 			}
@@ -94,7 +103,10 @@ partial class LoggerTargetClassEmitter
 			if (methodTarget.InferredErrorLevel)
 			{
 				logger?.Diagnostic("Inferring error log level.");
-				TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Logging.InferringErrorLogLevel);
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Logging.InferringErrorLogLevel
+				);
 			}
 
 			EmitLogActionField(builder, indent, methodTarget, emitNullable);
@@ -103,7 +115,12 @@ partial class LoggerTargetClassEmitter
 		return --indent;
 	}
 
-	internal static void EmitLogActionField(StringBuilder builder, int indent, LogMethodTarget methodTarget, bool emitNullable = true)
+	internal static void EmitLogActionField(
+		StringBuilder builder,
+		int indent,
+		LogMethodTarget methodTarget,
+		bool emitNullable = true
+	)
 	{
 		builder
 			.Append(indent, "static readonly ", withNewLine: false)

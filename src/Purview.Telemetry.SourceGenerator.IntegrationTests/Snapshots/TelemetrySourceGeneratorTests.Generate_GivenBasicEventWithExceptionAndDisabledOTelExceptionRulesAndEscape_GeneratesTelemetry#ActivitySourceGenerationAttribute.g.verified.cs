@@ -9,6 +9,10 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
+#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE
+#nullable enable
+#endif
+
 namespace Purview.Telemetry
 {
 
@@ -42,7 +46,11 @@ sealed class ActivitySourceGenerationAttribute : global::System.Attribute
 	/// <summary>
 	/// Specifies the default <see cref="global::System.Diagnostics.ActivitySource.Name"/> to use.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string Name { get; }
+#else
+	public string? Name { get; }
+#endif
 
 	/// <summary>
 	/// Specifies the default used when inferring between
@@ -58,7 +66,11 @@ sealed class ActivitySourceGenerationAttribute : global::System.Attribute
 	/// <see cref="global::Purview.Telemetry.BaggageAttribute.Name"/>, unless
 	/// explicitly marked. Overridden when specifying <see cref="global::Purview.Telemetry.ActivitySourceAttribute.BaggageAndTagPrefix"/>.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string BaggageAndTagPrefix { get; set; }
+#else
+	public string? BaggageAndTagPrefix { get; set; }
+#endif
 
 	/// <summary>
 	/// Determines the separator used between the <see cref="global::System.Diagnostics.ActivitySource.Name"/> and

@@ -9,6 +9,10 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
+#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE
+#nullable enable
+#endif
+
 namespace Purview.Telemetry
 {
 
@@ -42,8 +46,16 @@ sealed class TelemetryGenerationAttribute : global::System.Attribute
 	/// <param name="dependencyInjectionClassName">Optionally specifies the <see cref="DependencyInjectionClassName"/>.</param>
 	public TelemetryGenerationAttribute(
 		bool generateDependencyExtension,
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 		string className = null,
+#else
+		string? className = null,
+#endif
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 		string dependencyInjectionClassName = null
+#else
+		string? dependencyInjectionClassName = null
+#endif
 	)
 	{
 		GenerateDependencyExtension = generateDependencyExtension;
@@ -59,7 +71,11 @@ sealed class TelemetryGenerationAttribute : global::System.Attribute
 	/// <param name="dependencyInjectionClassName">Optionally specifies the <see cref="DependencyInjectionClassName"/>.</param>
 	public TelemetryGenerationAttribute(
 		string className,
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 		string dependencyInjectionClassName = null
+#else
+		string? dependencyInjectionClassName = null
+#endif
 	)
 	{
 		ClassName = className;
@@ -78,12 +94,20 @@ sealed class TelemetryGenerationAttribute : global::System.Attribute
 	/// Defaults to null. When null, uses the source interface name minus any starting 'I',
 	/// and appends 'Core' to the end.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string ClassName { get; set; }
+#else
+	public string? ClassName { get; set; }
+#endif
 
 	/// <summary>
 	/// Optionally specifies the name of the dependency injection class to generation.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string DependencyInjectionClassName { get; set; }
+#else
+	public string? DependencyInjectionClassName { get; set; }
+#endif
 
 	/// <summary>
 	/// Determines if the generated dependency injection class is generated as public. Defaults to false (internal).
@@ -106,6 +130,10 @@ sealed class TelemetryGenerationAttribute : global::System.Attribute
 	/// Optionally specifies the name of the TelemetryNames class to generate.
 	/// Defaults to "TelemetryNames" when null or empty.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
 	public string TelemetryNamesClassName { get; set; }
+#else
+	public string? TelemetryNamesClassName { get; set; }
+#endif
 }
 }

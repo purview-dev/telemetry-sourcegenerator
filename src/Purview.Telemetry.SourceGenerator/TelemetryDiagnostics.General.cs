@@ -109,5 +109,14 @@ partial class TelemetryDiagnostics
 				Severity: DiagnosticSeverity.Error,
 				Category: Constants.Diagnostics.Usage
 			);
+		public static readonly TelemetryDiagnosticDescriptor UnsupportedTargetFramework = new(
+			Id: "TSG1011",
+			Title: "Unsupported target framework",
+			Description: "Purview Telemetry Source Generator requires .NET 8.0 or higher, or .NET Framework 4.8 or higher. "
+				+ "The current target framework is not supported. "
+				+ "If this is incorrect, define PURVIEW_TELEMETRY_NON_NULLABLE to suppress this error and opt out of nullable reference type annotations.",
+			Severity: DiagnosticSeverity.Error,
+			Category: Constants.Diagnostics.Usage
+		);
 	}
 }
