@@ -1,10 +1,10 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using SampleApp.Net48.ConsoleApp.Services;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using SampleApp.Net48.ConsoleApp.Services;
 
 namespace SampleApp.Net48.ConsoleApp
 {

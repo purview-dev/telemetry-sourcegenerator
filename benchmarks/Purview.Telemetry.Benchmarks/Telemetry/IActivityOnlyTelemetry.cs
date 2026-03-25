@@ -10,12 +10,12 @@ namespace Purview.Telemetry.Benchmarks.Telemetry;
 [ActivitySource("benchmark-activity-source")]
 public interface IActivityOnlyTelemetry
 {
-	[Activity]
-	Activity? StartOperation(string operationName, int operationId);
+    [Activity]
+    Activity? StartOperation(string operationName, int operationId);
 
-	[Event]
-	void OperationCompleted(Activity? activity, int resultCode, long elapsedMs);
+    [Event]
+    void OperationCompleted(Activity? activity, int resultCode, long elapsedMs);
 
-	[Event]
-	void OperationFailed(Activity? activity, string errorMessage);
+    [Event]
+    void OperationFailed(Activity? activity, string errorMessage);
 }

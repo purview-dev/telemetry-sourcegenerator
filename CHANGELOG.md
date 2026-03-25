@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.0.0-prerelease.8](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.7...v4.0.0-prerelease.8) (2026-03-25)
+
+
+### Features
+
+* emit C# 7.3-compatible code when language version < 8 ([153dd49](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/153dd4936dbf74f5fc08c5f35799d91c9d35b0de))
+* omit IMeterFactory for net48 targets; thread supportsIMeterFactory through logging pipeline ([64c2944](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/64c2944fc24ea6ee84419a3d217c7f9ff5de1eed))
+
 ## [4.0.0-prerelease.7](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.6...v4.0.0-prerelease.7) (2026-03-24)
 
 

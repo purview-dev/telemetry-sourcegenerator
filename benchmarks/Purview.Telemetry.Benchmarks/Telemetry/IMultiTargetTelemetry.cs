@@ -12,24 +12,24 @@ namespace Purview.Telemetry.Benchmarks.Telemetry;
 [Meter]
 public interface IMultiTargetTelemetry
 {
-	// MULTI-TARGET: Activity + Info log + AutoCounter
-	[Activity]
-	[Info]
-	[AutoCounter]
-	Activity? StartOperation(string operationName, int operationId);
+    // MULTI-TARGET: Activity + Info log + AutoCounter
+    [Activity]
+    [Info]
+    [AutoCounter]
+    Activity? StartOperation(string operationName, int operationId);
 
-	// MULTI-TARGET: ActivityEvent + Trace log
-	[Event]
-	[Trace]
-	void OperationCompleted(Activity? activity, int resultCode, long elapsedMs);
+    // MULTI-TARGET: ActivityEvent + Trace log
+    [Event]
+    [Trace]
+    void OperationCompleted(Activity? activity, int resultCode, long elapsedMs);
 
-	// MULTI-TARGET: ActivityEvent + Error log + AutoCounter
-	[Event(ActivityStatusCode.Error)]
-	[Error]
-	[AutoCounter]
-	void OperationFailed(Activity? activity, string errorMessage);
+    // MULTI-TARGET: ActivityEvent + Error log + AutoCounter
+    [Event(ActivityStatusCode.Error)]
+    [Error]
+    [AutoCounter]
+    void OperationFailed(Activity? activity, string errorMessage);
 
-	// SINGLE-TARGET: Histogram only
-	[Histogram]
-	void RecordLatency(long latencyMs);
+    // SINGLE-TARGET: Histogram only
+    [Histogram]
+    void RecordLatency(long latencyMs);
 }

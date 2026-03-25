@@ -31,66 +31,62 @@ namespace Purview.Telemetry.Benchmarks.Benchmarks;
 [SimpleJob(RuntimeMoniker.Net10_0)]
 public class LoggerBenchmarks
 {
-	ILoggerOnlyTelemetry _generatedV2 = default!;
-	ILoggerV1OnlyTelemetry _generatedV1 = default!;
-	ManualLoggerMessageTelemetry _manual = default!;
+    ILoggerOnlyTelemetry _generatedV2 = default!;
+    ILoggerV1OnlyTelemetry _generatedV1 = default!;
+    ManualLoggerMessageTelemetry _manual = default!;
 
-	/// <summary>
-	/// When <c>true</c>, an always-enabled no-op logger is used so the full logging code path
-	/// (<c>IsEnabled</c> check, state population, and <c>ILogger.Log</c> dispatch) is exercised.
-	/// When <c>false</c>, <see cref="Microsoft.Extensions.Logging.Abstractions.NullLogger{T}"/>
-	/// is used so the <c>IsEnabled</c> guard short-circuits immediately.
-	/// </summary>
-	[Params(true, false)]
-	public bool HasLogging { get; set; }
+    /// <summary>
+    /// When <c>true</c>, an always-enabled no-op logger is used so the full logging code path
+    /// (<c>IsEnabled</c> check, state population, and <c>ILogger.Log</c> dispatch) is exercised.
+    /// When <c>false</c>, <see cref="Microsoft.Extensions.Logging.Abstractions.NullLogger{T}"/>
+    /// is used so the <c>IsEnabled</c> guard short-circuits immediately.
+    /// </summary>
+    [Params(true, false)]
+    public bool HasLogging { get; set; }
 
-	[GlobalSetup]
-	public void Setup()
-	{
-		(_generatedV2, _generatedV1, _manual) =
-			BenchmarkHelpers.CreateLoggerTelemetry(HasLogging);
-	}
+    [GlobalSetup]
+    public void Setup()
+    {
+        (_generatedV2, _generatedV1, _manual) = BenchmarkHelpers.CreateLoggerTelemetry(HasLogging);
+    }
 
-	// ---- Single call: Info level ----
+    // ---- Single call: Info level ----
 
-	[Benchmark(Baseline = true, Description = "Manual (LoggerMessage.Define) — single Info call")]
-	public void Manual_Info()
-		=> _manual.OperationStarted("benchmark-op", 42);
+    [Benchmark(Baseline = true, Description = "Manual (LoggerMessage.Define) — single Info call")]
+    public void Manual_Info() => _manual.OperationStarted("benchmark-op", 42);
 
-	[Benchmark(Description = "Generated v1 (LoggerMessage.Define) — single Info call")]
-	public void Generated_V1_Info()
-		=> _generatedV1.OperationStarted("benchmark-op", 42);
+    [Benchmark(Description = "Generated v1 (LoggerMessage.Define) — single Info call")]
+    public void Generated_V1_Info() => _generatedV1.OperationStarted("benchmark-op", 42);
 
-	[Benchmark(Description = "Generated v2 (ThreadLocalState) — single Info call")]
-	public void Generated_V2_Info()
-		=> _generatedV2.OperationStarted("benchmark-op", 42);
+    [Benchmark(Description = "Generated v2 (ThreadLocalState) — single Info call")]
+    public void Generated_V2_Info() => _generatedV2.OperationStarted("benchmark-op", 42);
 
-	// ---- Full lifecycle: Info + Trace + Warning + Error ----
+    // ---- Full lifecycle: Info + Trace + Warning + Error ----
 
-	[Benchmark(Description = "Manual (LoggerMessage.Define) — full lifecycle (4 calls)")]
-	public void Manual_FullLifecycle()
-	{
-		_manual.OperationStarted("benchmark-op", 42);
-		_manual.OperationCompleted(resultCode: 200, elapsedMs: 15);
-		_manual.HighLatencyDetected("benchmark-op", latencyMs: 500);
-		_manual.OperationFailed("something went wrong");
-	}
+    [Benchmark(Description = "Manual (LoggerMessage.Define) — full lifecycle (4 calls)")]
+    public void Manual_FullLifecycle()
+    {
+        _manual.OperationStarted("benchmark-op", 42);
+        _manual.OperationCompleted(resultCode: 200, elapsedMs: 15);
+        _manual.HighLatencyDetected("benchmark-op", latencyMs: 500);
+        _manual.OperationFailed("something went wrong");
+    }
 
-	[Benchmark(Description = "Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)")]
-	public void Generated_V1_FullLifecycle()
-	{
-		_generatedV1.OperationStarted("benchmark-op", 42);
-		_generatedV1.OperationCompleted(resultCode: 200, elapsedMs: 15);
-		_generatedV1.HighLatencyDetected("benchmark-op", latencyMs: 500);
-		_generatedV1.OperationFailed("something went wrong");
-	}
+    [Benchmark(Description = "Generated v1 (LoggerMessage.Define) — full lifecycle (4 calls)")]
+    public void Generated_V1_FullLifecycle()
+    {
+        _generatedV1.OperationStarted("benchmark-op", 42);
+        _generatedV1.OperationCompleted(resultCode: 200, elapsedMs: 15);
+        _generatedV1.HighLatencyDetected("benchmark-op", latencyMs: 500);
+        _generatedV1.OperationFailed("something went wrong");
+    }
 
-	[Benchmark(Description = "Generated v2 (ThreadLocalState) — full lifecycle (4 calls)")]
-	public void Generated_V2_FullLifecycle()
-	{
-		_generatedV2.OperationStarted("benchmark-op", 42);
-		_generatedV2.OperationCompleted(resultCode: 200, elapsedMs: 15);
-		_generatedV2.HighLatencyDetected("benchmark-op", latencyMs: 500);
-		_generatedV2.OperationFailed("something went wrong");
-	}
+    [Benchmark(Description = "Generated v2 (ThreadLocalState) — full lifecycle (4 calls)")]
+    public void Generated_V2_FullLifecycle()
+    {
+        _generatedV2.OperationStarted("benchmark-op", 42);
+        _generatedV2.OperationCompleted(resultCode: 200, elapsedMs: 15);
+        _generatedV2.HighLatencyDetected("benchmark-op", latencyMs: 500);
+        _generatedV2.OperationFailed("something went wrong");
+    }
 }

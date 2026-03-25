@@ -151,7 +151,16 @@ Generated code includes:
 When `EmitCompilerGeneratedFiles` is true (as in the sample app), generated files appear in:
 
 - `obj/Debug|Release/generated/` directories
-- Integration test snapshots in `src/Purview.Telemetry.SourceGenerator.IntegrationTests/Snapshots/`
+
+### Integration Test Snapshots
+
+Snapshot files in `src/Purview.Telemetry.SourceGenerator.IntegrationTests/Snapshots/` are **entirely machine-generated** by the [Verify](https://github.com/VerifyTests/Verify) library. **Never manually edit snapshot files.** They are only updated by:
+
+1. Running `just test` (or `dotnet test`)
+2. Reviewing the `*.received.*` diff output
+3. Accepting changes — copy `*.received.*` → `*.verified.*`, or use the Verify CLI/IDE extension
+
+Any manual edits to `.verified.*` files will be silently overwritten the next time tests run and snapshots are accepted.
 
 ### Version Management
 
@@ -258,4 +267,4 @@ just benchmark-docs
 - Integration tests target net9.0
 - Sample application is a .NET Aspire application demonstrating telemetry integration
 - Always test changes against the sample application to ensure end-to-end functionality
-- The integration tests use Verify for snapshot testing of generated code
+- The integration tests use Verify for snapshot testing of generated code — snapshots are machine-generated only, never hand-edited

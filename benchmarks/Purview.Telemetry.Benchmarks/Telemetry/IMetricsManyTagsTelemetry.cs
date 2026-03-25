@@ -11,28 +11,28 @@ namespace Purview.Telemetry.Benchmarks.Telemetry;
 [Meter]
 public interface IMetricsManyTagsTelemetry
 {
-	// 4 tags – exactly at the TagList threshold
-	[AutoCounter]
-	void CountOperationWithFourTags(string endpoint, string method, string status, string region);
+    // 4 tags – exactly at the TagList threshold
+    [AutoCounter]
+    void CountOperationWithFourTags(string endpoint, string method, string status, string region);
 
-	// 5 tags – above the TagList threshold
-	[AutoCounter]
-	void CountOperationWithFiveTags(
-		string endpoint,
-		string method,
-		string status,
-		string region,
-		string environment
-	);
+    // 5 tags – above the TagList threshold
+    [AutoCounter]
+    void CountOperationWithFiveTags(
+        string endpoint,
+        string method,
+        string status,
+        string region,
+        string environment
+    );
 
-	// 6 tags – well above the TagList threshold (measurement + 5 tag parameters)
-	[Histogram]
-	void RecordRequestDuration(
-		long durationMs,
-		string endpoint,
-		string method,
-		string status,
-		string region,
-		string environment
-	);
+    // 6 tags – well above the TagList threshold (measurement + 5 tag parameters)
+    [Histogram]
+    void RecordRequestDuration(
+        long durationMs,
+        string endpoint,
+        string method,
+        string status,
+        string region,
+        string environment
+    );
 }

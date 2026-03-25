@@ -13,15 +13,15 @@ namespace Purview.Telemetry.Benchmarks.Telemetry;
 [Logger(GenerationMode = LoggerGenerationMode.V1)]
 public interface ILoggerV1OnlyTelemetry
 {
-	[Info]
-	void OperationStarted(string operationName, int operationId);
+    [Info]
+    void OperationStarted(string operationName, int operationId);
 
-	[Trace]
-	void OperationCompleted(int resultCode, long elapsedMs);
+    [Trace]
+    void OperationCompleted(int resultCode, long elapsedMs);
 
-	[Error]
-	void OperationFailed(string errorMessage);
+    [Error]
+    void OperationFailed(string errorMessage);
 
-	[Warning]
-	void HighLatencyDetected(string operationName, long latencyMs);
+    [Warning]
+    void HighLatencyDetected(string operationName, long latencyMs);
 }

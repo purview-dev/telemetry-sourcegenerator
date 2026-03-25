@@ -93,8 +93,19 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator, IL
 			supportsNullableAnnotations,
 			_logger
 		);
-		RegisterLoggerGeneration(context, supportsNullableAnnotations, supportsIMeterFactory, _logger);
-		RegisterMetricsGeneration(context, meterProvider, supportsNullableAnnotations, supportsIMeterFactory, _logger);
+		RegisterLoggerGeneration(
+			context,
+			supportsNullableAnnotations,
+			supportsIMeterFactory,
+			_logger
+		);
+		RegisterMetricsGeneration(
+			context,
+			meterProvider,
+			supportsNullableAnnotations,
+			supportsIMeterFactory,
+			_logger
+		);
 		RegisterTelemetryNamesGeneration(
 			context,
 			activityProvider,

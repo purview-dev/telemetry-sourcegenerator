@@ -29,75 +29,75 @@ namespace Purview.Telemetry.Benchmarks.Benchmarks;
 [SimpleJob(RuntimeMoniker.Net10_0)]
 public class TagListBenchmarks
 {
-	IMetricsFewTagsTelemetry _fewTags = default!;
-	IMetricsManyTagsTelemetry _manyTags = default!;
+    IMetricsFewTagsTelemetry _fewTags = default!;
+    IMetricsManyTagsTelemetry _manyTags = default!;
 
-	[GlobalSetup]
-	public void Setup()
-	{
-		(_fewTags, _manyTags) = BenchmarkHelpers.CreateMetricsTelemetry();
-	}
+    [GlobalSetup]
+    public void Setup()
+    {
+        (_fewTags, _manyTags) = BenchmarkHelpers.CreateMetricsTelemetry();
+    }
 
-	// --- Few tags (no TagList, direct KeyValuePair parameters) ---
+    // --- Few tags (no TagList, direct KeyValuePair parameters) ---
 
-	[Benchmark(Baseline = true, Description = "0 tags (no TagList): histogram record")]
-	public void FewTags_Histogram_ZeroTags()
-	{
-		_fewTags.RecordOperationLatency(latencyMs: 42);
-	}
+    [Benchmark(Baseline = true, Description = "0 tags (no TagList): histogram record")]
+    public void FewTags_Histogram_ZeroTags()
+    {
+        _fewTags.RecordOperationLatency(latencyMs: 42);
+    }
 
-	[Benchmark(Description = "1 tag (no TagList): auto-counter add")]
-	public void FewTags_AutoCounter_OneTag()
-	{
-		_fewTags.CountOperationByType(operationType: "read");
-	}
+    [Benchmark(Description = "1 tag (no TagList): auto-counter add")]
+    public void FewTags_AutoCounter_OneTag()
+    {
+        _fewTags.CountOperationByType(operationType: "read");
+    }
 
-	[Benchmark(Description = "3 tags (no TagList): histogram record")]
-	public void FewTags_Histogram_ThreeTags()
-	{
-		_fewTags.RecordRequestSize(
-			sizeBytes: 1024,
-			endpoint: "/api/data",
-			method: "GET",
-			statusCode: "200"
-		);
-	}
+    [Benchmark(Description = "3 tags (no TagList): histogram record")]
+    public void FewTags_Histogram_ThreeTags()
+    {
+        _fewTags.RecordRequestSize(
+            sizeBytes: 1024,
+            endpoint: "/api/data",
+            method: "GET",
+            statusCode: "200"
+        );
+    }
 
-	// --- Many tags (TagList path) ---
+    // --- Many tags (TagList path) ---
 
-	[Benchmark(Description = "4 tags (TagList): auto-counter add")]
-	public void ManyTags_AutoCounter_FourTags()
-	{
-		_manyTags.CountOperationWithFourTags(
-			endpoint: "/api/data",
-			method: "GET",
-			status: "200",
-			region: "us-east-1"
-		);
-	}
+    [Benchmark(Description = "4 tags (TagList): auto-counter add")]
+    public void ManyTags_AutoCounter_FourTags()
+    {
+        _manyTags.CountOperationWithFourTags(
+            endpoint: "/api/data",
+            method: "GET",
+            status: "200",
+            region: "us-east-1"
+        );
+    }
 
-	[Benchmark(Description = "5 tags (TagList): auto-counter add")]
-	public void ManyTags_AutoCounter_FiveTags()
-	{
-		_manyTags.CountOperationWithFiveTags(
-			endpoint: "/api/data",
-			method: "GET",
-			status: "200",
-			region: "us-east-1",
-			environment: "production"
-		);
-	}
+    [Benchmark(Description = "5 tags (TagList): auto-counter add")]
+    public void ManyTags_AutoCounter_FiveTags()
+    {
+        _manyTags.CountOperationWithFiveTags(
+            endpoint: "/api/data",
+            method: "GET",
+            status: "200",
+            region: "us-east-1",
+            environment: "production"
+        );
+    }
 
-	[Benchmark(Description = "6 tags (TagList): histogram record")]
-	public void ManyTags_Histogram_SixTags()
-	{
-		_manyTags.RecordRequestDuration(
-			durationMs: 42,
-			endpoint: "/api/data",
-			method: "GET",
-			status: "200",
-			region: "us-east-1",
-			environment: "production"
-		);
-	}
+    [Benchmark(Description = "6 tags (TagList): histogram record")]
+    public void ManyTags_Histogram_SixTags()
+    {
+        _manyTags.RecordRequestDuration(
+            durationMs: 42,
+            endpoint: "/api/data",
+            method: "GET",
+            status: "200",
+            region: "us-east-1",
+            environment: "production"
+        );
+    }
 }

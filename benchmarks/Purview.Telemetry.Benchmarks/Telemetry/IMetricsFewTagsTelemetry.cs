@@ -10,15 +10,15 @@ namespace Purview.Telemetry.Benchmarks.Telemetry;
 [Meter]
 public interface IMetricsFewTagsTelemetry
 {
-	// 0 tags – no TagList; instrument.Add/Record called with tagList: default
-	[Histogram]
-	void RecordOperationLatency(long latencyMs);
+    // 0 tags – no TagList; instrument.Add/Record called with tagList: default
+    [Histogram]
+    void RecordOperationLatency(long latencyMs);
 
-	// 1 tag – no TagList; passed as a single KeyValuePair
-	[AutoCounter]
-	void CountOperationByType(string operationType);
+    // 1 tag – no TagList; passed as a single KeyValuePair
+    [AutoCounter]
+    void CountOperationByType(string operationType);
 
-	// 3 tags – no TagList; passed as three inline KeyValuePair parameters (one below threshold)
-	[Histogram]
-	void RecordRequestSize(long sizeBytes, string endpoint, string method, string statusCode);
+    // 3 tags – no TagList; passed as three inline KeyValuePair parameters (one below threshold)
+    [Histogram]
+    void RecordRequestSize(long sizeBytes, string endpoint, string method, string statusCode);
 }
