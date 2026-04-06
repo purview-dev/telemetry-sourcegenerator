@@ -1,3 +1,6 @@
+set quiet := true
+set windows-shell := ["pwsh", "-NoProfile", "-Command"]
+
 root_folder := "./src/"
 solution_file := root_folder + "Purview.Telemetry.SourceGenerator.slnx"
 test_solution := solution_file
@@ -109,6 +112,7 @@ benchmark:
 
 # Runs a quick single-runtime (.NET 10.0) benchmark with reduced iterations — for development validation.
 # Uses BenchmarkDotNet's short job (1 launch, 3 warmup, 3 iterations). Typical runtime: 5–15 min.
+
 # Use `just benchmark` for the full multi-runtime overnight suite.
 [group('Benchmarking')]
 benchmark-quick:
