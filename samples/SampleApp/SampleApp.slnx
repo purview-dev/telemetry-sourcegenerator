@@ -1,7 +1,6 @@
 <Solution>
 	<Folder Name="/Solution Items/">
 		<File Path="../../global.json" />
-		<File Path=".editorconfig" />
 		<File Path="Directory.Build.props" />
 	</Folder>
 	<Project Path="SampleApp.APIService.UnitTests/SampleApp.APIService.UnitTests.csproj" />
