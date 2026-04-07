@@ -21,15 +21,11 @@ public class SymbolHelpersTests
 		);
 	}
 
-	static ITypeSymbol GetTypeSymbol(Compilation compilation, string typeName)
-	{
-		return compilation.GetTypeByMetadataName(typeName)!;
-	}
+	static ITypeSymbol GetTypeSymbol(Compilation compilation, string typeName) =>
+		compilation.GetTypeByMetadataName(typeName)!;
 
 	[Test]
-	public async Task GetTypeName_GivenSimpleType_ReturnsTypeName(
-		CancellationToken cancellationToken
-	)
+	public async Task GetTypeName_GivenSimpleType_ReturnsTypeName()
 	{
 		// Arrange
 		const string source =
@@ -49,9 +45,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetTypeName_GivenGenericType_ReturnsBaseTypeName(
-		CancellationToken cancellationToken
-	)
+	public async Task GetTypeName_GivenGenericType_ReturnsBaseTypeName()
 	{
 		// Arrange
 		const string source =
@@ -71,9 +65,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetTypeName_GivenNullableType_ReturnsBaseTypeName(
-		CancellationToken cancellationToken
-	)
+	public async Task GetTypeName_GivenNullableType_ReturnsBaseTypeName()
 	{
 		// Arrange
 		const string source =
@@ -95,9 +87,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetNamespace_GivenTypeInNamespace_ReturnsNamespace(
-		CancellationToken cancellationToken
-	)
+	public async Task GetNamespace_GivenTypeInNamespace_ReturnsNamespace()
 	{
 		// Arrange
 		const string source =
@@ -117,9 +107,7 @@ namespace Test.Services {
 	}
 
 	[Test]
-	public async Task GetNamespace_GivenTypeInGlobalNamespace_ReturnsNull(
-		CancellationToken cancellationToken
-	)
+	public async Task GetNamespace_GivenTypeInGlobalNamespace_ReturnsNull()
 	{
 		// Arrange
 		const string source =
@@ -137,9 +125,7 @@ public class GlobalClass {
 	}
 
 	[Test]
-	public async Task GetNamespace_GivenGenericType_ReturnsNamespace(
-		CancellationToken cancellationToken
-	)
+	public async Task GetNamespace_GivenGenericType_ReturnsNamespace()
 	{
 		// Arrange
 		const string source =
@@ -159,9 +145,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetFullyQualifiedName_GivenSimpleType_ReturnsFullyQualifiedName(
-		CancellationToken cancellationToken
-	)
+	public async Task GetFullyQualifiedName_GivenSimpleType_ReturnsFullyQualifiedName()
 	{
 		// Arrange
 		const string source =
@@ -181,9 +165,7 @@ namespace Test.Services {
 	}
 
 	[Test]
-	public async Task GetFullyQualifiedName_GivenGenericType_ReturnsFullyQualifiedNameWithoutTypeArgs(
-		CancellationToken cancellationToken
-	)
+	public async Task GetFullyQualifiedName_GivenGenericType_ReturnsFullyQualifiedNameWithoutTypeArgs()
 	{
 		// Arrange
 		const string source =
@@ -204,9 +186,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetFullyQualifiedName_GivenNullableType_ReturnsFullyQualifiedNameWithoutNullable(
-		CancellationToken cancellationToken
-	)
+	public async Task GetFullyQualifiedName_GivenNullableType_ReturnsFullyQualifiedNameWithoutNullable()
 	{
 		// Arrange
 		const string source =
@@ -228,9 +208,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetFullyQualifiedName_GivenNestedGenericType_ReturnsCorrectFormat(
-		CancellationToken cancellationToken
-	)
+	public async Task GetFullyQualifiedName_GivenNestedGenericType_ReturnsCorrectFormat()
 	{
 		// Arrange
 		const string source =
@@ -254,9 +232,7 @@ namespace Test {
 	}
 
 	[Test]
-	public async Task GetFullyQualifiedName_GivenReferenceTypeWithNullableAnnotation_StripsnullableAnnotation(
-		CancellationToken cancellationToken
-	)
+	public async Task GetFullyQualifiedName_GivenReferenceTypeWithNullableAnnotation_StripsnullableAnnotation()
 	{
 		// Arrange
 		const string source =

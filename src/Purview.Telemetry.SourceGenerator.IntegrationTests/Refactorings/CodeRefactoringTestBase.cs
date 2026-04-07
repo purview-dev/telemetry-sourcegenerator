@@ -1,8 +1,6 @@
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeRefactorings;
 using Microsoft.CodeAnalysis.CSharp;
-using Purview.Telemetry.SourceGenerator.Refactorings;
 
 namespace Purview.Telemetry.SourceGenerator.Refactorings;
 
@@ -81,7 +79,7 @@ public abstract class CodeRefactoringTestBase
 		var context = new CodeRefactoringContext(
 			document,
 			new Microsoft.CodeAnalysis.Text.TextSpan(cursorIndex, 0),
-			action => actions.Add(action),
+			actions.Add,
 			cancellationToken
 		);
 

@@ -46,14 +46,14 @@ sealed class EmbeddedResources
 	/// </param>
 	public string AddHeader(string text, bool? emitNullable = true)
 	{
-		const string NullableGuard =
+		const string nullableGuard =
 			"#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE\n#nullable enable\n#endif";
 
 		string nullableSection = emitNullable switch
 		{
 			true => "#nullable enable\n\n",
 			false => string.Empty,
-			null => NullableGuard + "\n\n",
+			null => nullableGuard + "\n\n",
 		};
 
 		var result =

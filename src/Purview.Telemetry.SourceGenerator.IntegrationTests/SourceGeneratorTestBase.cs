@@ -435,9 +435,9 @@ public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnEr
 		CancellationToken cancellationToken
 	)
 	{
-		var compilationWithAnalyzers = compilation.WithAnalyzers(
-			ImmutableArray.Create<DiagnosticAnalyzer>(new TelemetryDiagnosticAnalyzer())
-		);
+		var compilationWithAnalyzers = compilation.WithAnalyzers([
+			new TelemetryDiagnosticAnalyzer(),
+		]);
 
 		return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync(cancellationToken);
 	}
