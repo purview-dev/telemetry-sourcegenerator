@@ -25,76 +25,76 @@ namespace Purview.Telemetry.Benchmarks.Benchmarks;
 [SimpleJob(RuntimeMoniker.Net10_0)]
 public class MultiTargetVsSingleTargetBenchmarks
 {
-    ActivityListener? _listener;
+	ActivityListener? _listener;
 
-    IActivityOnlyTelemetry _singleTarget = default!;
-    IMultiTargetTelemetry _multiTargetGenerated = default!;
-    ManualMultiTargetTelemetry _multiTargetManual = default!;
+	IActivityOnlyTelemetry _singleTarget = default!;
+	IMultiTargetTelemetry _multiTargetGenerated = default!;
+	ManualMultiTargetTelemetry _multiTargetManual = default!;
 
-    [Params(true, false)]
-    public bool HasListener { get; set; }
+	[Params(true, false)]
+	public bool HasListener { get; set; }
 
-    [GlobalSetup]
-    public void Setup()
-    {
-        _singleTarget = BenchmarkHelpers.CreateGeneratedActivityTelemetry();
-        (_multiTargetGenerated, _multiTargetManual) = BenchmarkHelpers.CreateMultiTargetTelemetry();
+	[GlobalSetup]
+	public void Setup()
+	{
+		_singleTarget = BenchmarkHelpers.CreateGeneratedActivityTelemetry();
+		(_multiTargetGenerated, _multiTargetManual) = BenchmarkHelpers.CreateMultiTargetTelemetry();
 
-        if (HasListener)
-        {
-            _listener = BenchmarkHelpers.CreateAllSamplingListener();
-            ActivitySource.AddActivityListener(_listener);
-        }
-    }
+		if (HasListener)
+		{
+			_listener = BenchmarkHelpers.CreateAllSamplingListener();
+			ActivitySource.AddActivityListener(_listener);
+		}
+	}
 
-    [GlobalCleanup]
-    public void Cleanup()
-    {
-        _multiTargetManual.Dispose();
-        _listener?.Dispose();
-        _listener = null;
-    }
+	[GlobalCleanup]
+	public void Cleanup()
+	{
+		_multiTargetManual.Dispose();
+		_listener?.Dispose();
+		_listener = null;
+	}
 
-    // ---- Start + complete (no extra metric recording) ----
+	// ---- Start + complete (no extra metric recording) ----
 
-    [Benchmark(Baseline = true, Description = "Single-target (generated): start + complete")]
-    public void SingleTarget_Generated()
-    {
-        using var activity = _singleTarget.StartOperation("op", 1);
-        _singleTarget.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
-    }
+	[Benchmark(Baseline = true, Description = "Single-target (generated): start + complete")]
+	public void SingleTarget_Generated()
+	{
+		using var activity = _singleTarget.StartOperation("op", 1);
+		_singleTarget.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
+	}
 
-    [Benchmark(Description = "Multi-target (generated): start + complete")]
-    public void MultiTarget_Generated()
-    {
-        using var activity = _multiTargetGenerated.StartOperation("op", 1);
-        _multiTargetGenerated.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
-    }
+	[Benchmark(Description = "Multi-target (generated): start + complete")]
+	public void MultiTarget_Generated()
+	{
+		using var activity = _multiTargetGenerated.StartOperation("op", 1);
+		_multiTargetGenerated.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
+	}
 
-    [Benchmark(Description = "Multi-target (manual): start + complete")]
-    public void MultiTarget_Manual()
-    {
-        using var activity = _multiTargetManual.StartOperation("op", 1);
-        _multiTargetManual.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
-    }
+	[Benchmark(Description = "Multi-target (manual): start + complete")]
+	public void MultiTarget_Manual()
+	{
+		using var activity = _multiTargetManual.StartOperation("op", 1);
+		_multiTargetManual.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
+	}
 
-    // ---- Full lifecycle (start + complete + record latency metric) ----
-    // Single-target does not expose a latency metric; only multi-target does.
-    // These benchmarks show the true cost of the combined telemetry pattern.
+	// ---- Full lifecycle (start + complete + record latency metric) ----
+	// Single-target does not expose a latency metric; only multi-target does.
+	// These benchmarks show the true cost of the combined telemetry pattern.
 
-    [Benchmark(Description = "Multi-target (generated): start + complete + record latency")]
-    public void MultiTarget_Generated_FullLifecycle()
-    {
-        using var activity = _multiTargetGenerated.StartOperation("op", 1);
-        _multiTargetGenerated.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
-        _multiTargetGenerated.RecordLatency(10);
-    }
+	[Benchmark(Description = "Multi-target (generated): start + complete + record latency")]
+	public void MultiTarget_Generated_FullLifecycle()
+	{
+		using var activity = _multiTargetGenerated.StartOperation("op", 1);
+		_multiTargetGenerated.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
+		_multiTargetGenerated.RecordLatency(10);
+	}
 
-    [Benchmark(Description = "Multi-target (manual): start + complete + record latency")]
-    public void MultiTarget_Manual_FullLifecycle()
-    {
-        using var activity = _multiTargetManual.StartOperation("op", 1);
-        _multiTargetManual.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
-        _multiTargetManual.RecordLatency(10);
-    }
+	[Benchmark(Description = "Multi-target (manual): start + complete + record latency")]
+	public void MultiTarget_Manual_FullLifecycle()
+	{
+		using var activity = _multiTargetManual.StartOperation("op", 1);
+		_multiTargetManual.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
+		_multiTargetManual.RecordLatency(10);
+	}
 }

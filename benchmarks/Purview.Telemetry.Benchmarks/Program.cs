@@ -7,10 +7,10 @@ var switcher = BenchmarkSwitcher.FromAssembly(typeof(ActivityBenchmarks).Assembl
 
 if (args.Length == 0)
 {
-    // Run all benchmarks when launched without arguments.
-    switcher.RunAll();
+	// Run all benchmarks when launched without arguments.
+	switcher.RunAll();
 }
 else
 {
-    switcher.Run(args);
+	switcher.Run(args);
 }

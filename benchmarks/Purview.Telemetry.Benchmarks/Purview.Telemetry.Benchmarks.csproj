@@ -1,29 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFrameworks>net47;net48;net8.0;net9.0;net10.0</TargetFrameworks>
-    <LangVersion>14.0</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-    <Optimize>true</Optimize>
-    <!-- Suppress warning about packages lacking explicit net47 support; net462 assets used -->
-    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFrameworks>net47;net48;net8.0;net9.0;net10.0</TargetFrameworks>
+		<LangVersion>14.0</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<Optimize>true</Optimize>
+		<!-- Suppress warning about packages lacking explicit net47 support; net462 assets used -->
+		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference
-      Include="..\..\src\Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.csproj"
-      OutputItemType="Analyzer"
-      ReferenceOutputAssembly="false"
-    />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference
+			Include="..\..\src\Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.csproj"
+			OutputItemType="Analyzer"
+			ReferenceOutputAssembly="false"
+		/>
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.4" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.4" />
-    <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" Version="10.4.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.4" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" Version="10.4.0" />
+	</ItemGroup>
 </Project>

@@ -27,88 +27,88 @@ namespace Purview.Telemetry.Benchmarks.Benchmarks;
 [SimpleJob(RuntimeMoniker.Net10_0)]
 public class MetricsBenchmarks
 {
-    IMetricsBenchmarkTelemetry _generated = default!;
-    ManualMetricsTelemetry _manual = default!;
+	IMetricsBenchmarkTelemetry _generated = default!;
+	ManualMetricsTelemetry _manual = default!;
 
-    [GlobalSetup]
-    public void Setup()
-    {
-        (_generated, _manual) = BenchmarkHelpers.CreateMetricsBenchmarkTelemetry();
-    }
+	[GlobalSetup]
+	public void Setup()
+	{
+		(_generated, _manual) = BenchmarkHelpers.CreateMetricsBenchmarkTelemetry();
+	}
 
-    [GlobalCleanup]
-    public void Cleanup()
-    {
-        _manual.Dispose();
-    }
+	[GlobalCleanup]
+	public void Cleanup()
+	{
+		_manual.Dispose();
+	}
 
-    // --- AutoCounter: 0 tags ---
+	// --- AutoCounter: 0 tags ---
 
-    [Benchmark(Baseline = true, Description = "Manual: auto-counter (0 tags)")]
-    public void Manual_AutoCounter_NoTags()
-    {
-        _manual.IncrementRequestCount();
-    }
+	[Benchmark(Baseline = true, Description = "Manual: auto-counter (0 tags)")]
+	public void Manual_AutoCounter_NoTags()
+	{
+		_manual.IncrementRequestCount();
+	}
 
-    [Benchmark(Description = "Generated: auto-counter (0 tags)")]
-    public void Generated_AutoCounter_NoTags()
-    {
-        _generated.IncrementRequestCount();
-    }
+	[Benchmark(Description = "Generated: auto-counter (0 tags)")]
+	public void Generated_AutoCounter_NoTags()
+	{
+		_generated.IncrementRequestCount();
+	}
 
-    // --- AutoCounter: 1 tag ---
+	// --- AutoCounter: 1 tag ---
 
-    [Benchmark(Description = "Manual: auto-counter (1 tag)")]
-    public void Manual_AutoCounter_OneTag()
-    {
-        _manual.CountRequestByType("read");
-    }
+	[Benchmark(Description = "Manual: auto-counter (1 tag)")]
+	public void Manual_AutoCounter_OneTag()
+	{
+		_manual.CountRequestByType("read");
+	}
 
-    [Benchmark(Description = "Generated: auto-counter (1 tag)")]
-    public void Generated_AutoCounter_OneTag()
-    {
-        _generated.CountRequestByType("read");
-    }
+	[Benchmark(Description = "Generated: auto-counter (1 tag)")]
+	public void Generated_AutoCounter_OneTag()
+	{
+		_generated.CountRequestByType("read");
+	}
 
-    // --- UpDownCounter ---
+	// --- UpDownCounter ---
 
-    [Benchmark(Description = "Manual: up-down counter")]
-    public void Manual_UpDownCounter()
-    {
-        _manual.AdjustActiveConnections(1);
-    }
+	[Benchmark(Description = "Manual: up-down counter")]
+	public void Manual_UpDownCounter()
+	{
+		_manual.AdjustActiveConnections(1);
+	}
 
-    [Benchmark(Description = "Generated: up-down counter")]
-    public void Generated_UpDownCounter()
-    {
-        _generated.AdjustActiveConnections(1);
-    }
+	[Benchmark(Description = "Generated: up-down counter")]
+	public void Generated_UpDownCounter()
+	{
+		_generated.AdjustActiveConnections(1);
+	}
 
-    // --- Histogram: 0 tags ---
+	// --- Histogram: 0 tags ---
 
-    [Benchmark(Description = "Manual: histogram (0 tags)")]
-    public void Manual_Histogram_NoTags()
-    {
-        _manual.RecordDuration(42.0);
-    }
+	[Benchmark(Description = "Manual: histogram (0 tags)")]
+	public void Manual_Histogram_NoTags()
+	{
+		_manual.RecordDuration(42.0);
+	}
 
-    [Benchmark(Description = "Generated: histogram (0 tags)")]
-    public void Generated_Histogram_NoTags()
-    {
-        _generated.RecordDuration(42.0);
-    }
+	[Benchmark(Description = "Generated: histogram (0 tags)")]
+	public void Generated_Histogram_NoTags()
+	{
+		_generated.RecordDuration(42.0);
+	}
 
-    // --- Histogram: 1 tag ---
+	// --- Histogram: 1 tag ---
 
-    [Benchmark(Description = "Manual: histogram (1 tag)")]
-    public void Manual_Histogram_OneTag()
-    {
-        _manual.RecordDurationByEndpoint(42.0, "/api/data");
-    }
+	[Benchmark(Description = "Manual: histogram (1 tag)")]
+	public void Manual_Histogram_OneTag()
+	{
+		_manual.RecordDurationByEndpoint(42.0, "/api/data");
+	}
 
-    [Benchmark(Description = "Generated: histogram (1 tag)")]
-    public void Generated_Histogram_OneTag()
-    {
-        _generated.RecordDurationByEndpoint(42.0, "/api/data");
-    }
+	[Benchmark(Description = "Generated: histogram (1 tag)")]
+	public void Generated_Histogram_OneTag()
+	{
+		_generated.RecordDurationByEndpoint(42.0, "/api/data");
+	}
 }

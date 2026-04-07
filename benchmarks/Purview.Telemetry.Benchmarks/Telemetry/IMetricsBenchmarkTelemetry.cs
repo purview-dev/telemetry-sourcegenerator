@@ -16,23 +16,23 @@ namespace Purview.Telemetry.Benchmarks.Telemetry;
 [Meter]
 public interface IMetricsBenchmarkTelemetry
 {
-    /// <summary>Auto-incrementing counter — no tags.</summary>
-    [AutoCounter]
-    void IncrementRequestCount();
+	/// <summary>Auto-incrementing counter — no tags.</summary>
+	[AutoCounter]
+	void IncrementRequestCount();
 
-    /// <summary>Auto-incrementing counter — 1 tag.</summary>
-    [AutoCounter]
-    void CountRequestByType(string requestType);
+	/// <summary>Auto-incrementing counter — 1 tag.</summary>
+	[AutoCounter]
+	void CountRequestByType(string requestType);
 
-    /// <summary>UpDownCounter — accepts a signed delta, no tags.</summary>
-    [UpDownCounter]
-    void AdjustActiveConnections(int delta);
+	/// <summary>UpDownCounter — accepts a signed delta, no tags.</summary>
+	[UpDownCounter]
+	void AdjustActiveConnections(int delta);
 
-    /// <summary>Histogram — records a duration measurement, no tags.</summary>
-    [Histogram]
-    void RecordDuration(double durationMs);
+	/// <summary>Histogram — records a duration measurement, no tags.</summary>
+	[Histogram]
+	void RecordDuration(double durationMs);
 
-    /// <summary>Histogram — records a duration measurement with 1 tag.</summary>
-    [Histogram]
-    void RecordDurationByEndpoint(double durationMs, string endpoint);
+	/// <summary>Histogram — records a duration measurement with 1 tag.</summary>
+	[Histogram]
+	void RecordDurationByEndpoint(double durationMs, string endpoint);
 }

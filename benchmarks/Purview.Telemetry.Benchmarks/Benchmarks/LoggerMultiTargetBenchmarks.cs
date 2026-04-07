@@ -31,114 +31,114 @@ namespace Purview.Telemetry.Benchmarks.Benchmarks;
 [SimpleJob(RuntimeMoniker.Net10_0)]
 public class LoggerMultiTargetBenchmarks
 {
-    ActivityListener? _listener;
+	ActivityListener? _listener;
 
-    ILoggerOnlyTelemetry _singleTargetV2 = default!;
-    ILoggerV1OnlyTelemetry _singleTargetV1 = default!;
-    IMultiTargetTelemetry _multiTargetV2 = default!;
-    IMultiTargetV1Telemetry _multiTargetV1 = default!;
-    ManualMultiTargetTelemetry _multiTargetManual = default!;
+	ILoggerOnlyTelemetry _singleTargetV2 = default!;
+	ILoggerV1OnlyTelemetry _singleTargetV1 = default!;
+	IMultiTargetTelemetry _multiTargetV2 = default!;
+	IMultiTargetV1Telemetry _multiTargetV1 = default!;
+	ManualMultiTargetTelemetry _multiTargetManual = default!;
 
-    /// <summary>
-    /// When <c>true</c>, an <see cref="ActivityListener"/> sampling all activities is
-    /// registered, so the Activity creation and event recording code paths are fully exercised.
-    /// When <c>false</c>, no listener is present and the <c>HasListeners()</c> guard
-    /// short-circuits Activity creation immediately.
-    /// </summary>
-    [Params(true, false)]
-    public bool HasListener { get; set; }
+	/// <summary>
+	/// When <c>true</c>, an <see cref="ActivityListener"/> sampling all activities is
+	/// registered, so the Activity creation and event recording code paths are fully exercised.
+	/// When <c>false</c>, no listener is present and the <c>HasListeners()</c> guard
+	/// short-circuits Activity creation immediately.
+	/// </summary>
+	[Params(true, false)]
+	public bool HasListener { get; set; }
 
-    [GlobalSetup]
-    public void Setup()
-    {
-        (_singleTargetV2, _singleTargetV1, _) = BenchmarkHelpers.CreateLoggerTelemetry(
-            loggingEnabled: true
-        );
+	[GlobalSetup]
+	public void Setup()
+	{
+		(_singleTargetV2, _singleTargetV1, _) = BenchmarkHelpers.CreateLoggerTelemetry(
+			loggingEnabled: true
+		);
 
-        (_multiTargetV2, _multiTargetV1, _multiTargetManual) =
-            BenchmarkHelpers.CreateMultiTargetTelemetryAll();
+		(_multiTargetV2, _multiTargetV1, _multiTargetManual) =
+			BenchmarkHelpers.CreateMultiTargetTelemetryAll();
 
-        if (HasListener)
-        {
-            _listener = BenchmarkHelpers.CreateAllSamplingListener();
-            ActivitySource.AddActivityListener(_listener);
-        }
-    }
+		if (HasListener)
+		{
+			_listener = BenchmarkHelpers.CreateAllSamplingListener();
+			ActivitySource.AddActivityListener(_listener);
+		}
+	}
 
-    [GlobalCleanup]
-    public void Cleanup()
-    {
-        _multiTargetManual.Dispose();
-        _listener?.Dispose();
-        _listener = null;
-    }
+	[GlobalCleanup]
+	public void Cleanup()
+	{
+		_multiTargetManual.Dispose();
+		_listener?.Dispose();
+		_listener = null;
+	}
 
-    // ---- Multi-target: start + complete ----
+	// ---- Multi-target: start + complete ----
 
-    [Benchmark(Baseline = true, Description = "Multi-target (manual): start + complete")]
-    public void Manual_StartAndComplete()
-    {
-        using var activity = _multiTargetManual.StartOperation("op", 1);
-        _multiTargetManual.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
-    }
+	[Benchmark(Baseline = true, Description = "Multi-target (manual): start + complete")]
+	public void Manual_StartAndComplete()
+	{
+		using var activity = _multiTargetManual.StartOperation("op", 1);
+		_multiTargetManual.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
+	}
 
-    [Benchmark(Description = "Multi-target (generated v1): start + complete")]
-    public void Generated_V1_StartAndComplete()
-    {
-        using var activity = _multiTargetV1.StartOperation("op", 1);
-        _multiTargetV1.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
-    }
+	[Benchmark(Description = "Multi-target (generated v1): start + complete")]
+	public void Generated_V1_StartAndComplete()
+	{
+		using var activity = _multiTargetV1.StartOperation("op", 1);
+		_multiTargetV1.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
+	}
 
-    [Benchmark(Description = "Multi-target (generated v2): start + complete")]
-    public void Generated_V2_StartAndComplete()
-    {
-        using var activity = _multiTargetV2.StartOperation("op", 1);
-        _multiTargetV2.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
-    }
+	[Benchmark(Description = "Multi-target (generated v2): start + complete")]
+	public void Generated_V2_StartAndComplete()
+	{
+		using var activity = _multiTargetV2.StartOperation("op", 1);
+		_multiTargetV2.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
+	}
 
-    // ---- Multi-target: full lifecycle (start + complete + record latency) ----
+	// ---- Multi-target: full lifecycle (start + complete + record latency) ----
 
-    [Benchmark(Description = "Multi-target (manual): full lifecycle")]
-    public void Manual_FullLifecycle()
-    {
-        using var activity = _multiTargetManual.StartOperation("op", 1);
-        _multiTargetManual.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
-        _multiTargetManual.RecordLatency(10);
-    }
+	[Benchmark(Description = "Multi-target (manual): full lifecycle")]
+	public void Manual_FullLifecycle()
+	{
+		using var activity = _multiTargetManual.StartOperation("op", 1);
+		_multiTargetManual.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
+		_multiTargetManual.RecordLatency(10);
+	}
 
-    [Benchmark(Description = "Multi-target (generated v1): full lifecycle")]
-    public void Generated_V1_FullLifecycle()
-    {
-        using var activity = _multiTargetV1.StartOperation("op", 1);
-        _multiTargetV1.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
-        _multiTargetV1.RecordLatency(10);
-    }
+	[Benchmark(Description = "Multi-target (generated v1): full lifecycle")]
+	public void Generated_V1_FullLifecycle()
+	{
+		using var activity = _multiTargetV1.StartOperation("op", 1);
+		_multiTargetV1.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
+		_multiTargetV1.RecordLatency(10);
+	}
 
-    [Benchmark(Description = "Multi-target (generated v2): full lifecycle")]
-    public void Generated_V2_FullLifecycle()
-    {
-        using var activity = _multiTargetV2.StartOperation("op", 1);
-        _multiTargetV2.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
-        _multiTargetV2.RecordLatency(10);
-    }
+	[Benchmark(Description = "Multi-target (generated v2): full lifecycle")]
+	public void Generated_V2_FullLifecycle()
+	{
+		using var activity = _multiTargetV2.StartOperation("op", 1);
+		_multiTargetV2.OperationCompleted(activity, resultCode: 0, elapsedMs: 10);
+		_multiTargetV2.RecordLatency(10);
+	}
 
-    // ---- Single-target (logger only): reference for the marginal cost of Activity + Metrics ----
+	// ---- Single-target (logger only): reference for the marginal cost of Activity + Metrics ----
 
-    [Benchmark(Description = "Single-target (generated v1): full lifecycle")]
-    public void Generated_V1_SingleTarget_FullLifecycle()
-    {
-        _singleTargetV1.OperationStarted("op", 1);
-        _singleTargetV1.OperationCompleted(resultCode: 200, elapsedMs: 10);
-        _singleTargetV1.HighLatencyDetected("op", latencyMs: 100);
-        _singleTargetV1.OperationFailed("err");
-    }
+	[Benchmark(Description = "Single-target (generated v1): full lifecycle")]
+	public void Generated_V1_SingleTarget_FullLifecycle()
+	{
+		_singleTargetV1.OperationStarted("op", 1);
+		_singleTargetV1.OperationCompleted(resultCode: 200, elapsedMs: 10);
+		_singleTargetV1.HighLatencyDetected("op", latencyMs: 100);
+		_singleTargetV1.OperationFailed("err");
+	}
 
-    [Benchmark(Description = "Single-target (generated v2): full lifecycle")]
-    public void Generated_V2_SingleTarget_FullLifecycle()
-    {
-        _singleTargetV2.OperationStarted("op", 1);
-        _singleTargetV2.OperationCompleted(resultCode: 200, elapsedMs: 10);
-        _singleTargetV2.HighLatencyDetected("op", latencyMs: 100);
-        _singleTargetV2.OperationFailed("err");
-    }
+	[Benchmark(Description = "Single-target (generated v2): full lifecycle")]
+	public void Generated_V2_SingleTarget_FullLifecycle()
+	{
+		_singleTargetV2.OperationStarted("op", 1);
+		_singleTargetV2.OperationCompleted(resultCode: 200, elapsedMs: 10);
+		_singleTargetV2.HighLatencyDetected("op", latencyMs: 100);
+		_singleTargetV2.OperationFailed("err");
+	}
 }

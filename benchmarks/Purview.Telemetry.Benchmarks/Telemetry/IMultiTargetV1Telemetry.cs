@@ -14,20 +14,20 @@ namespace Purview.Telemetry.Benchmarks.Telemetry;
 [Meter]
 public interface IMultiTargetV1Telemetry
 {
-    [Activity]
-    [Info]
-    [AutoCounter]
-    Activity? StartOperation(string operationName, int operationId);
+	[Activity]
+	[Info]
+	[AutoCounter]
+	Activity? StartOperation(string operationName, int operationId);
 
-    [Event]
-    [Trace]
-    void OperationCompleted(Activity? activity, int resultCode, long elapsedMs);
+	[Event]
+	[Trace]
+	void OperationCompleted(Activity? activity, int resultCode, long elapsedMs);
 
-    [Event(ActivityStatusCode.Error)]
-    [Error]
-    [AutoCounter]
-    void OperationFailed(Activity? activity, string errorMessage);
+	[Event(ActivityStatusCode.Error)]
+	[Error]
+	[AutoCounter]
+	void OperationFailed(Activity? activity, string errorMessage);
 
-    [Histogram]
-    void RecordLatency(long latencyMs);
+	[Histogram]
+	void RecordLatency(long latencyMs);
 }
