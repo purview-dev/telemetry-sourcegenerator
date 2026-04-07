@@ -9,9 +9,12 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
+#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE
 #nullable enable
+#endif
 
-namespace Purview.Telemetry.Metrics;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Marker attribute, used to indicate a meter (or group of instruments) and how they should be generated.
@@ -27,20 +30,57 @@ sealed class MeterGenerationAttribute : global::System.Attribute
 	/// <paramref name="instrumentPrefix"/>, <paramref name="lowercaseInstrumentName"/>
 	/// and/ or <paramref name="lowercaseTagKeys"/>.
 	/// </summary>
+	/// <param name="meterName">Optionally specifies the <see cref="MeterName" />.</param>
+	/// <param name="nameGenerationType">Optionally specifies the <see cref="MeterNameGenerationType" />.</param>
 	/// <param name="instrumentPrefix">Optionally specifies the <see cref="InstrumentPrefix" />.</param>
 	/// <param name="lowercaseInstrumentName">Optionally specifies the <see cref="LowercaseInstrumentName" />.</param>
 	/// <param name="lowercaseTagKeys">Optionally specifies the <see cref="LowercaseTagKeys" />.</param>
-	public MeterGenerationAttribute(string? instrumentPrefix = null, bool lowercaseInstrumentName = true, bool lowercaseTagKeys = true)
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public MeterGenerationAttribute(string meterName = null,
+#else
+	public MeterGenerationAttribute(string? meterName = null,
+#endif
+		MeterNameGenerationType nameGenerationType = MeterNameGenerationType.DotNet,
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+		string instrumentPrefix = null,
+#else
+		string? instrumentPrefix = null,
+#endif
+		bool lowercaseInstrumentName = true,
+		bool lowercaseTagKeys = true)
 	{
+		MeterName = meterName;
+		MeterNameGenerationType = nameGenerationType;
 		InstrumentPrefix = instrumentPrefix;
 		LowercaseInstrumentName = lowercaseInstrumentName;
 		LowercaseTagKeys = lowercaseTagKeys;
 	}
 
 	/// <summary>
+	/// Optional, gets/ sets the assembly-wide default meter name.
+	/// Used when a <see cref="MeterAttribute"/> does not specify a name.
+	/// If not set, the assembly name is used based on <see cref="MeterNameGenerationType"/>.
+	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public string MeterName { get; set; }
+#else
+	public string? MeterName { get; set; }
+#endif
+
+	/// <summary>
+	/// Optional, gets/ sets how meter names are generated when not explicitly specified.
+	/// Defaults to <see cref="MeterNameGenerationType.DotNet"/>.
+	/// </summary>
+	public MeterNameGenerationType MeterNameGenerationType { get; set; } = MeterNameGenerationType.DotNet;
+
+	/// <summary>
 	/// Optional, gets/ sets the prefix used when generating the instrument name.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public string InstrumentPrefix { get; set; }
+#else
 	public string? InstrumentPrefix { get; set; }
+#endif
 
 	/// <summary>
 	/// Optional, gets/ sets the separator used when
@@ -50,7 +90,7 @@ sealed class MeterGenerationAttribute : global::System.Attribute
 
 	/// <summary>
 	/// Optional, gets/ sets a value indicating if the
-	/// instrument name is lowercased. Defaults to true. 
+	/// instrument name is lowercased. Defaults to true.
 	/// </summary>
 	public bool LowercaseInstrumentName { get; set; } = true;
 
@@ -59,4 +99,5 @@ sealed class MeterGenerationAttribute : global::System.Attribute
 	/// keys/ names are lowercased. Defaults to true.
 	/// </summary>
 	public bool LowercaseTagKeys { get; set; } = true;
+}
 }

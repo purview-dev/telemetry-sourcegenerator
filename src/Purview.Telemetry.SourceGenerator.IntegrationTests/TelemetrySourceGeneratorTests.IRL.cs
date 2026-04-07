@@ -1,23 +1,23 @@
-﻿namespace Purview.Telemetry.SourceGenerator;
+namespace Purview.Telemetry.SourceGenerator;
 
 partial class TelemetrySourceGeneratorTests
 {
-	[Fact]
-	public async Task Generate_GivenICacheServiceProviderTelemetry_GeneratesTelemetry()
+	[Test]
+	public async Task Generate_GivenICacheServiceProviderTelemetry_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			@"
+		const string basicTelemetry = """
+
 using System.Diagnostics;
-using Purview.Telemetry.Activities;
-using Purview.Telemetry.Logging;
 
 namespace Purview.Interfaces.ApplicationServices.Caching;
 
 [ActivitySource]
 [Logger]
-[System.Diagnostics.CodeAnalysis.SuppressMessage(""Design"", ""CA1024:Use properties where appropriate"")]
-public interface ICacheServiceProviderTelemetry 
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1024:Use properties where appropriate")]
+public interface ICacheServiceProviderTelemetry
 {
 	[Log]
 	void FailedToDeserializePayload(int dataLength, Exception ex);
@@ -79,19 +79,22 @@ public interface ICacheServiceProviderTelemetry
 	[Activity(ActivityKind.Client)]
 	Activity? Remove();
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			s => s.ScrubInlineGuids(),
-			whenValidatingDiagnosticsIgnoreNonErrors: true
+			whenValidatingDiagnosticsIgnoreNonErrors: true,
+			cancellationToken: cancellationToken
 		);
 	}
 }

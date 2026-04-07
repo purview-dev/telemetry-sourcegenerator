@@ -12,7 +12,8 @@ partial class ActivitySourceTargetClassEmitter
 		int indent,
 		ActivityBasedGenerationTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -42,13 +43,6 @@ partial class ActivitySourceTargetClassEmitter
 				"Activity parameter not allowed on Activity start/ create method, only event."
 			);
 
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.ActivityParameterNotAllowed,
-				activityParam.Locations,
-				activityParam.ParameterName
-			);
-
 			return;
 		}
 
@@ -58,23 +52,16 @@ partial class ActivitySourceTargetClassEmitter
 				"Timestamp parameter not allowed on Activity start/ create method, only events."
 			);
 
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.TimestampParameterNotAllowed,
-				timestampParam.Locations,
-				timestampParam.ParameterName
-			);
-
 			return;
 		}
 
-		EmitHasListenersTest(builder, indent, methodTarget);
+		EmitHasListenersTest(builder, indent, methodTarget, emitNullable);
 
 		var activityVariableName = "activity" + methodTarget.MethodName;
 
 		builder
 			.Append(indent, Constants.Activities.SystemDiagnostics.Activity, withNewLine: false)
-			.Append("? ")
+			.Append(emitNullable ? "? " : " ")
 			.Append(activityVariableName)
 			.Append(" = ")
 			.Append(Constants.Activities.ActivitySourceFieldName)
@@ -91,19 +78,12 @@ partial class ActivitySourceTargetClassEmitter
 		{
 			logger?.Diagnostic("StartTime parameter not allowed on Activity create method.");
 
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.StartTimeParameterNotAllowed,
-				startTimeParam.Locations,
-				startTimeParam.ParameterName
-			);
-
 			return;
 		}
 
 		var kind =
 			methodTarget.ActivityAttribute?.Kind.IsSet == true
-				? methodTarget.ActivityAttribute.Value.Kind.Value!.Value
+				? methodTarget.ActivityAttribute.Value.Kind.Value.GetValueOrDefault()
 				: Constants.Activities.DefaultActivityKind;
 
 		var parentContextOrIdParameterValue = parentContextOrId?.ParameterName ?? "default";
@@ -127,7 +107,6 @@ partial class ActivitySourceTargetClassEmitter
 			AddActivityNameParameter(builder, methodTarget, false);
 			builder.Append(", ");
 		}
-		;
 
 		builder
 			// kind: (un-named)
@@ -164,26 +143,40 @@ partial class ActivitySourceTargetClassEmitter
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		EmitTagsOrBaggageParameters(
-			builder,
-			indent,
-			activityVariableName,
-			true,
-			methodTarget,
-			true,
-			context,
-			logger
-		);
-		EmitTagsOrBaggageParameters(
-			builder,
-			indent,
-			activityVariableName,
-			false,
-			methodTarget,
-			true,
-			context,
-			logger
-		);
+		if (methodTarget.Tags.Length > 0 || methodTarget.Baggage.Length > 0)
+		{
+			builder
+				.AppendLine()
+				.Append(indent, "if (", withNewLine: false)
+				.Append(activityVariableName)
+				.AppendLine(" != null)")
+				.Append(indent, '{');
+
+			indent++;
+
+			EmitTagsOrBaggageParameters(
+				builder,
+				indent,
+				activityVariableName,
+				true,
+				methodTarget,
+				false,
+				context,
+				logger
+			);
+			EmitTagsOrBaggageParameters(
+				builder,
+				indent,
+				activityVariableName,
+				false,
+				methodTarget,
+				false,
+				context,
+				logger
+			);
+
+			builder.Append(--indent, '}');
+		}
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
@@ -193,6 +186,7 @@ partial class ActivitySourceTargetClassEmitter
 				.AppendLine()
 				.Append(indent, "return ", withNewLine: false)
 				.Append(activityVariableName)
+				.Append(!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
 				.AppendLine(';');
 		}
 
@@ -212,15 +206,15 @@ partial class ActivitySourceTargetClassEmitter
 	static void EmitHasListenersTest(
 		StringBuilder builder,
 		int indent,
-		ActivityBasedGenerationTarget methodTarget
+		ActivityBasedGenerationTarget methodTarget,
+		bool emitNullable
 	)
 	{
 		var returnsVoid = methodTarget.ReturnType.SpecialType == SpecialType.System_Void;
 		builder
 			.Append(indent, "if (!", withNewLine: false)
 			.Append(Constants.Activities.ActivitySourceFieldName)
-			.Append(".HasListeners())")
-			.AppendLine()
+			.AppendLine(".HasListeners())")
 			.Append(indent, '{')
 			.Append(
 				indent + 1,
@@ -228,7 +222,8 @@ partial class ActivitySourceTargetClassEmitter
 					+ (
 						returnsVoid
 							? null
-							: " null" + (methodTarget.ReturnType.IsNullable ? null : "!")
+							: " null"
+								+ (!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
 					)
 					+ ";"
 			)

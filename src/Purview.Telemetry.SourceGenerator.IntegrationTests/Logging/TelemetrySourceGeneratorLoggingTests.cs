@@ -1,21 +1,20 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Logging;
+namespace Purview.Telemetry.SourceGenerator.Logging;
 
-public partial class TelemetrySourceGeneratorLoggingTests(ITestOutputHelper testOutputHelper)
-	: IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>(testOutputHelper)
+public partial class TelemetrySourceGeneratorLoggingTests
+	: IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>
 {
-	[Theory]
-	[MemberData(
-		nameof(TelemetrySourceGeneratorTests.BasicGenericParameters),
-		MemberType = typeof(TelemetrySourceGeneratorTests)
+	[Test]
+	[MethodDataSource<TelemetrySourceGeneratorTests>(
+		nameof(TelemetrySourceGeneratorTests.BasicGenericParameters)
 	)]
 	public async Task Generate_GivenMethodWithBasicGenericParams_GeneratesEntryCorrectly(
-		string parameterType
+		string parameterType,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
 		var basicLogger =
 			@$"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -26,22 +25,28 @@ public interface ITestLogger {{
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
+			cancellationToken: cancellationToken,
 			parameters: parameterType
 		);
 	}
 
-	[Theory]
-	[MemberData(
-		nameof(TelemetrySourceGeneratorTests.GetGenericTypeDefCount),
-		MemberType = typeof(TelemetrySourceGeneratorTests)
+	[Test]
+	[MethodDataSource<TelemetrySourceGeneratorTests>(
+		nameof(TelemetrySourceGeneratorTests.GetGenericTypeDefCount)
 	)]
-	public async Task Generate_GivenInterfaceWithGenerics_RaisesDiagnostics(int genericTypeCount)
+	public async Task Generate_GivenInterfaceWithGenerics_RaisesDiagnostics(
+		int genericTypeCount,
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		var genericTypeDef = string.Join(
@@ -50,7 +55,6 @@ public interface ITestLogger {{
 		);
 		var basicLogger =
 			@$"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -61,23 +65,29 @@ public interface ITestLogger<{genericTypeDef}> {{
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
+			cancellationToken: cancellationToken,
 			parameters: genericTypeCount
 		);
 	}
 
-	[Theory]
-	[MemberData(
-		nameof(TelemetrySourceGeneratorTests.GetGenericTypeDefCount),
-		MemberType = typeof(TelemetrySourceGeneratorTests)
+	[Test]
+	[MethodDataSource<TelemetrySourceGeneratorTests>(
+		nameof(TelemetrySourceGeneratorTests.GetGenericTypeDefCount)
 	)]
-	public async Task Generate_GivenMethodWithGenerics_RaisesDiagnostics(int genericTypeCount)
+	public async Task Generate_GivenMethodWithGenerics_RaisesDiagnostics(
+		int genericTypeCount,
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		var genericTypeDef = string.Join(
@@ -86,7 +96,6 @@ public interface ITestLogger<{genericTypeDef}> {{
 		);
 		var basicLogger =
 			@$"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -97,13 +106,17 @@ public interface ITestLogger<{genericTypeDef}> {{
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
+			cancellationToken: cancellationToken,
 			parameters: genericTypeCount
 		);
 	}

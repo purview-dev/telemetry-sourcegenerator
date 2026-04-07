@@ -9,13 +9,22 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
+#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE
 #nullable enable
+#endif
 
-namespace Purview.Telemetry;
+namespace Purview.Telemetry
+{
 
 /// <summary>
-/// Excludes the method from any activity, logging or meter generation.
+/// Excludes the method from any activity, logging, or meter generation.
+/// <para>
+/// <em>Note:</em> You must implement the method yourself when using this attribute through
+/// the use of partial classes.
+/// </para>
 /// </summary>
+[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 [global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false)]
 [global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
 sealed class ExcludeAttribute : global::System.Attribute { }
+}

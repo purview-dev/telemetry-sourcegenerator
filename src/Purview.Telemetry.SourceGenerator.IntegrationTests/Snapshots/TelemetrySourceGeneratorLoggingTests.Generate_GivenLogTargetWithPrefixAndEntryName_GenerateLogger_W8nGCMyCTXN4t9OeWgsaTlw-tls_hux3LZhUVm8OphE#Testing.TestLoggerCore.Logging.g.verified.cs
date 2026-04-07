@@ -19,7 +19,6 @@ namespace Testing
 	sealed partial class TestLoggerCore : global::Testing.ITestLogger
 	{
 		readonly global::Microsoft.Extensions.Logging.ILogger<global::Testing.ITestLogger> _logger;
-
 		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, string, int, bool, global::System.Exception?> _logAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<string, int, bool>(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(1579320335, "LogNameSetViaLogTargetAttribute"), "LogNameSetViaLogTargetAttribute: StringParam = {StringParam}, IntParam = {IntParam}, BoolParam = {BoolParam}");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]

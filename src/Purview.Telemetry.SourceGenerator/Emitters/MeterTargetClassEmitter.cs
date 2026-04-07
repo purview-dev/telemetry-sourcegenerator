@@ -8,10 +8,12 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 static partial class MeterTargetClassEmitter
 {
-	static readonly PurviewTypeInfo DictionaryStringObjectType =
+	static PurviewTypeInfo GetDictionaryType(bool emitNullable) =>
 		Constants.System.Dictionary.MakeGeneric(
 			Constants.System.BuiltInTypes.String,
-			Constants.System.BuiltInTypes.Object.WithNullable()
+			emitNullable
+				? Constants.System.BuiltInTypes.Object.WithNullable()
+				: Constants.System.BuiltInTypes.Object
 		);
 
 	const string MeterFieldName = "_meter";
@@ -20,26 +22,14 @@ static partial class MeterTargetClassEmitter
 	public static void GenerateImplementation(
 		MeterTarget target,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true,
+		bool supportsIMeterFactory = true
 	)
 	{
 		StringBuilder builder = new();
 
 		logger?.Debug($"Generating metric class for: {target.FullyQualifiedName}");
-
-		if (
-			EmitHelpers.GenerateDuplicateMethodDiagnostics(
-				GenerationType.Metrics,
-				target.GenerationType,
-				target.DuplicateMethods,
-				context,
-				logger
-			)
-		)
-		{
-			logger?.Debug("Found duplicate methods while generating metrics, exiting.");
-			return;
-		}
 
 		var indent = EmitHelpers.EmitNamespaceStart(
 			target.ClassNamespace,
@@ -57,20 +47,60 @@ static partial class MeterTargetClassEmitter
 			context.CancellationToken
 		);
 
-		indent = EmitFields(target, builder, indent, context, logger);
-		indent = ConstructorEmitter.EmitCtor(
+		// When metrics owns the constructor (no Logging target), emit readonly fields and
+		// inline the initialisation directly into the constructor for JIT-optimisable code.
+		// When Logging owns the constructor, keep the InitializeMeters() helper method path
+		// so the Logging emitter can call it.
+		var metricsOwnsConstructor = SharedHelpers.ShouldEmitConstructor(
 			GenerationType.Metrics,
-			target.GenerationType,
-			target.ClassNameToGenerate,
-			target.InterfaceType,
+			target.GenerationType
+		);
+
+		indent = EmitFields(
+			target,
 			builder,
 			indent,
 			context,
-			logger
+			logger,
+			readonlyFields: metricsOwnsConstructor,
+			emitNullable: emitNullable
 		);
 
-		indent = EmitInitializationMethod(target, builder, indent, context);
-		indent = EmitMethods(target, builder, indent, context, logger);
+		if (metricsOwnsConstructor)
+		{
+			indent = EmitInlineConstructor(
+				target,
+				builder,
+				indent,
+				context,
+				emitNullable,
+				supportsIMeterFactory
+			);
+		}
+		else
+		{
+			indent = ConstructorEmitter.EmitCtor(
+				GenerationType.Metrics,
+				target.GenerationType,
+				target.ClassNameToGenerate,
+				target.InterfaceType,
+				builder,
+				indent,
+				context,
+				logger,
+				supportsIMeterFactory
+			);
+
+			indent = EmitInitializationMethod(
+				target,
+				builder,
+				indent,
+				context,
+				emitNullable,
+				supportsIMeterFactory
+			);
+		}
+		indent = EmitMethods(target, builder, indent, context, logger, emitNullable);
 
 		EmitHelpers.EmitClassEnd(builder, indent);
 		EmitHelpers.EmitNamespaceEnd(
@@ -81,7 +111,7 @@ static partial class MeterTargetClassEmitter
 			context.CancellationToken
 		);
 
-		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString());
+		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString(), emitNullable);
 		var hintName = $"{target.FullyQualifiedName}.Metric.g.cs";
 
 		context.AddSource(
@@ -97,7 +127,8 @@ static partial class MeterTargetClassEmitter
 			target.InterfaceType.TypeName,
 			target.FullNamespace,
 			context,
-			logger
+			logger,
+			emitNullable
 		);
 	}
 }

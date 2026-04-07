@@ -18,26 +18,14 @@ namespace Testing
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class TestMetricsCore : global::Testing.ITestMetrics
 	{
-		global::System.Diagnostics.Metrics.Meter _meter = default!;
+		readonly global::System.Diagnostics.Metrics.Meter _meter;
 
-		global::System.Diagnostics.Metrics.Counter<int>? _autoCounterInstrument = null;
+		readonly global::System.Diagnostics.Metrics.Counter<int> _autoCounterInstrument;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestMetricsCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
 		{
-			InitializeMeters(meterFactory);
-		}
-
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		void InitializeMeters(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
-		{
-			if (_meter != null)
-			{
-				throw new global::System.Exception("The meters have already been initialized.");
-			}
-
-			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateMeterTags(meterTags);
 
@@ -47,11 +35,11 @@ namespace Testing
 				Tags = meterTags
 			});
 
-			global::System.Collections.Generic.Dictionary<string, object?> autoCounterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> autoCounterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateAutoCounterTags(autoCounterTags);
 
-			_autoCounterInstrument = _meter.CreateCounter<int>(name: "autocounter", unit: null, description: null, tags: autoCounterTags);
+			_autoCounterInstrument = _meter.CreateCounter<int>(name: "test_metrics.auto_counter", unit: null, description: null, tags: autoCounterTags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
@@ -64,17 +52,7 @@ namespace Testing
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public void AutoCounter(int intParam, bool boolParam)
 		{
-			if (_autoCounterInstrument == null)
-			{
-				return;
-			}
-
-			global::System.Diagnostics.TagList autoCounterTagList = new();
-
-			autoCounterTagList.Add("intparam", intParam);
-			autoCounterTagList.Add("boolparam", boolParam);
-
-			_autoCounterInstrument.Add(1, tagList: autoCounterTagList);
+			_autoCounterInstrument.Add(1, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 	}
 }

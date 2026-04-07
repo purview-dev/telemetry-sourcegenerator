@@ -1,17 +1,19 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Logging;
+namespace Purview.Telemetry.SourceGenerator.Logging;
 
 partial class TelemetrySourceGeneratorLoggingTests
 {
-	[Theory]
-	[InlineData("Testing.Test1")]
-	[InlineData("Testing.Test1.Test2")]
-	[InlineData("Testing.Test1.Test2.Test3")]
-	public async Task Generate_GivenLoggerWithNamespaces_GeneratesScopedLogTarget(string @namespace)
+	[Test]
+	[Arguments("Testing.Test1")]
+	[Arguments("Testing.Test1.Test2")]
+	[Arguments("Testing.Test1.Test2.Test3")]
+	public async Task Generate_GivenLoggerWithNamespaces_GeneratesScopedLogTarget(
+		string @namespace,
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		var basicLogger =
 			@$"
-using Purview.Telemetry.Logging;
 
 namespace {@namespace};
 
@@ -22,28 +24,32 @@ public interface ITestLogger {{
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
+			cancellationToken: cancellationToken,
 			parameters: @namespace
 		);
 	}
 
-	[Theory]
-	[InlineData("Testing.Test1")]
-	[InlineData("Testing.Test1.Test2")]
-	[InlineData("Testing.Test1.Test2.Test3")]
+	[Test]
+	[Arguments("Testing.Test1")]
+	[Arguments("Testing.Test1.Test2")]
+	[Arguments("Testing.Test1.Test2.Test3")]
 	public async Task Generate_GivenLoggerWithNamespacesAndNestedClass_GeneratesScopedLogTarget(
-		string @namespace
+		string @namespace,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
 		var basicLogger =
 			@$"
-using Purview.Telemetry.Logging;
 
 namespace {@namespace};
 
@@ -56,28 +62,32 @@ public partial class TestClass1 {{
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
+			cancellationToken: cancellationToken,
 			parameters: @namespace
 		);
 	}
 
-	[Theory]
-	[InlineData("Testing.Test1")]
-	[InlineData("Testing.Test1.Test2")]
-	[InlineData("Testing.Test1.Test2.Test3")]
+	[Test]
+	[Arguments("Testing.Test1")]
+	[Arguments("Testing.Test1.Test2")]
+	[Arguments("Testing.Test1.Test2.Test3")]
 	public async Task Generate_GivenLoggerWithNamespacesAndNestedClasses_GeneratesScopedLogTarget(
-		string @namespace
+		string @namespace,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
 		var basicLogger =
 			@$"
-using Purview.Telemetry.Logging;
 
 namespace {@namespace};
 
@@ -94,12 +104,16 @@ public partial class TestClass1 {{
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
+			cancellationToken: cancellationToken,
 			parameters: @namespace
 		);
 	}

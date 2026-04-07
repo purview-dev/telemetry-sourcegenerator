@@ -18,28 +18,16 @@ namespace Testing
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class TestMetricsCore : global::Testing.ITestMetrics
 	{
-		global::System.Diagnostics.Metrics.Meter _meter = default!;
+		readonly global::System.Diagnostics.Metrics.Meter _meter;
 
-		global::System.Diagnostics.Metrics.ObservableCounter<int>? _observableCounterInstrument = null;
-		global::System.Diagnostics.Metrics.ObservableCounter<int>? _observableCounter2Instrument = null;
-		global::System.Diagnostics.Metrics.ObservableCounter<int>? _observableCounter3Instrument = null;
+		global::System.Diagnostics.Metrics.ObservableCounter<int> _observableCounterInstrument = default!;
+		global::System.Diagnostics.Metrics.ObservableCounter<int> _observableCounter2Instrument = default!;
+		global::System.Diagnostics.Metrics.ObservableCounter<int> _observableCounter3Instrument = default!;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestMetricsCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
 		{
-			InitializeMeters(meterFactory);
-		}
-
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		void InitializeMeters(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
-		{
-			if (_meter != null)
-			{
-				throw new global::System.Exception("The meters have already been initialized.");
-			}
-
-			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateMeterTags(meterTags);
 
@@ -63,14 +51,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList observableCounterTagList = new();
-
-			observableCounterTagList.Add("intparam", intParam);
-			observableCounterTagList.Add("boolparam", boolParam);
-
-			_observableCounterInstrument = _meter.CreateObservableCounter<int>("observablecounter", f, unit: null, description: null
-				, tags: observableCounterTagList
-			);
+			_observableCounterInstrument = _meter.CreateObservableCounter<int>("test_metrics.observable_counter", f, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -78,17 +59,10 @@ namespace Testing
 		{
 			if (_observableCounter2Instrument != null)
 			{
-				throw new global::System.Exception("observablecounter2 has already been initialized.");
+				throw new global::System.Exception("test_metrics.observable_counter2 has already been initialized.");
 			}
 
-			global::System.Diagnostics.TagList observableCounter2TagList = new();
-
-			observableCounter2TagList.Add("intparam", intParam);
-			observableCounter2TagList.Add("boolparam", boolParam);
-
-			_observableCounter2Instrument = _meter.CreateObservableCounter<int>("observablecounter2", f, unit: null, description: null
-				, tags: observableCounter2TagList
-			);
+			_observableCounter2Instrument = _meter.CreateObservableCounter<int>("test_metrics.observable_counter2", f, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -99,14 +73,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList observableCounter3TagList = new();
-
-			observableCounter3TagList.Add("intparam", intParam);
-			observableCounter3TagList.Add("boolparam", boolParam);
-
-			_observableCounter3Instrument = _meter.CreateObservableCounter<int>("observablecounter3", f, unit: null, description: null
-				, tags: observableCounter3TagList
-			);
+			_observableCounter3Instrument = _meter.CreateObservableCounter<int>("test_metrics.observable_counter3", f, unit: null, description: null);
 		}
 	}
 }

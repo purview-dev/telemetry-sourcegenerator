@@ -1,18 +1,18 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Activities;
+namespace Purview.Telemetry.SourceGenerator.Activities;
 
 partial class TelemetrySourceGeneratorActivityTests
 {
-	[Fact]
-	public async Task Generate_GivenBasicContextGen_GeneratesActivity()
+	[Test]
+	public async Task Generate_GivenBasicContextGen_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			@"
-using Purview.Telemetry.Activities;
+		const string basicActivity = """
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities
 {
 	[Activity]
@@ -21,27 +21,32 @@ public interface ITestActivities
 	[Context]
 	void Context(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenBasicContextGenWithReturningActivity_GeneratesActivity()
+	[Test]
+	public async Task Generate_GivenBasicContextGenWithReturningActivity_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			@"
-using Purview.Telemetry.Activities;
+		const string basicActivity = """
+
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities
 {
 	[Activity]
@@ -50,27 +55,32 @@ public interface ITestActivities
 	[Context]
 	Activity Context(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenBasicContextGenWithReturningNullableActivity_GeneratesActivity()
+	[Test]
+	public async Task Generate_GivenBasicContextGenWithReturningNullableActivity_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			@"
-using Purview.Telemetry.Activities;
+		const string basicActivity = """
+
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Activity]
 	System.Diagnostics.Activity? Activity();
@@ -81,27 +91,32 @@ public interface ITestActivities {
 	[Context]
 	Activity? ContextWithNullableReturnActivity(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenBasicContextGenWithNullableParams_GeneratesActivity()
+	[Test]
+	public async Task Generate_GivenBasicContextGenWithNullableParams_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			@"
-using Purview.Telemetry.Activities;
+		const string basicActivity = """
+
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities
 {
 	[Activity]
@@ -113,27 +128,32 @@ public interface ITestActivities
 	[Context]
 	Activity? ContextWithNullableParams(System.Diagnostics.Activity? activity, [Baggage]string? stringParam, [Tag]int? intParam, bool? boolParam);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenBasicContextGenWithActivity_GeneratesActivity()
+	[Test]
+	public async Task Generate_GivenBasicContextGenWithActivity_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			@"
-using Purview.Telemetry.Activities;
+		const string basicActivity = """
+
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities
 {
 	[Activity]
@@ -145,27 +165,32 @@ public interface ITestActivities
 	[Context]
 	Activity? ContextWithNullableParams(Activity? activityParameter, [Baggage]string? stringParam, [Tag]int? intParam, bool? boolParam);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenBasicContextGenWithActivityAndNoReturn_GeneratesActivity()
+	[Test]
+	public async Task Generate_GivenBasicContextGenWithActivityAndNoReturn_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			@"
-using Purview.Telemetry.Activities;
+		const string basicActivity = """
+
 using System.Diagnostics;
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities
 {
 	[Activity]
@@ -177,12 +202,16 @@ public interface ITestActivities
 	[Context]
 	void ContextWithNullableParams(Activity? activityParameter, [Baggage]string? stringParam, [Tag]int? intParam, bool? boolParam);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity);
+		var generationResult = await GenerateAsync(
+			basicActivity,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

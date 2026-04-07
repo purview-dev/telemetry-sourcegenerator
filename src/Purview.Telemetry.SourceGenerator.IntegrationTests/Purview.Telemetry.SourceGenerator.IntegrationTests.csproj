@@ -20,6 +20,6 @@
 		<PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" />
 		<PackageReference Include="Verify.DiffPlex" />
 		<PackageReference Include="Verify.SourceGenerators" />
-		<PackageReference Include="Verify.Xunitv3" />
+		<PackageReference Include="Verify.TUnit" />
 	</ItemGroup>
 </Project>

@@ -7,26 +7,69 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 partial class MeterTargetClassEmitter
 {
+	static void EmitThrowStub(StringBuilder builder, int indent, InstrumentTarget methodTarget)
+	{
+		builder
+			.AppendLine()
+			.Append(indent, "public ", withNewLine: false)
+			.Append(methodTarget.ReturnType);
+
+		builder.Append(' ').Append(methodTarget.MethodName).Append('(');
+
+		for (var i = 0; i < methodTarget.Parameters.Length; i++)
+		{
+			if (i > 0)
+				builder.Append(", ");
+			builder
+				.Append(methodTarget.Parameters[i].ParameterType)
+				.Append(' ')
+				.Append(methodTarget.Parameters[i].ParameterName);
+		}
+
+		builder.AppendLine(") => throw new global::System.NotSupportedException();").AppendLine();
+	}
+
 	static int EmitMethods(
 		MeterTarget target,
 		StringBuilder builder,
 		int indent,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable
 	)
 	{
 		indent++;
 
-		EmitPartialMethods(builder, indent, target, context, logger);
+		EmitPartialMethods(builder, indent, target, context, logger, emitNullable);
 
 		foreach (var methodTarget in target.InstrumentationMethods)
 		{
 			context.CancellationToken.ThrowIfCancellationRequested();
 
 			if (!methodTarget.TargetGenerationState.IsValid)
+			{
+				if (
+					EmitterHelpers.ShouldEmitThrowStub(
+						methodTarget.TargetGenerationState,
+						GenerationType.Metrics,
+						target.GenerationType
+					)
+				)
+				{
+					EmitThrowStub(builder, indent, methodTarget);
+				}
 				continue;
+			}
 
-			EmitMethod(builder, indent, methodTarget, context, logger);
+			// Report warning for Activity parameter without Activity target
+			if (methodTarget.TargetGenerationState.ActivityParameterWithoutTarget != null)
+			{
+				logger?.Debug(
+					$"Activity parameter '{methodTarget.TargetGenerationState.ActivityParameterWithoutTarget}' on {methodTarget.MethodName} has no Activity target."
+				);
+			}
+
+			EmitMethod(builder, indent, methodTarget, context, logger, emitNullable);
 		}
 
 		return --indent;
@@ -37,20 +80,22 @@ partial class MeterTargetClassEmitter
 		int indent,
 		MeterTarget target,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
 
 		logger?.Debug($"Emitting partial method for populating tags: {PartialMeterTagsMethod}.");
 
+		var dictType = GetDictionaryType(emitNullable);
 		builder
 			.AppendLine()
 			.CodeGen(indent)
 			.Append(indent, "partial void ", withNewLine: false)
 			.Append(PartialMeterTagsMethod)
 			.Append('(')
-			.Append(DictionaryStringObjectType)
+			.Append(dictType)
 			.AppendLine(" meterTags);")
 			.AppendLine();
 
@@ -67,7 +112,7 @@ partial class MeterTargetClassEmitter
 				.Append(indent, "partial void ", withNewLine: false)
 				.Append(instrument.TagPopulateMethodName)
 				.Append('(')
-				.Append(DictionaryStringObjectType)
+				.Append(dictType)
 				.AppendLine(" instrumentTags);")
 				.AppendLine();
 		}
@@ -78,7 +123,8 @@ partial class MeterTargetClassEmitter
 		int indent,
 		InstrumentTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -86,24 +132,92 @@ partial class MeterTargetClassEmitter
 		if (methodTarget.InstrumentAttribute == null)
 			return;
 
+		var isMultiTarget = methodTarget.TargetGenerationState.IsMultiTarget;
+		var methodTargets = methodTarget.TargetGenerationState.MethodTargets;
+		var activityOwnsPublicMethod = methodTargets.HasFlag(GenerationType.Activities);
+		var loggingOwnsPublicMethod =
+			!activityOwnsPublicMethod && methodTargets.HasFlag(GenerationType.Logging);
+		var metricsOwnsPublicMethod = !activityOwnsPublicMethod && !loggingOwnsPublicMethod;
+
+		// Validate return type: must be void or bool (for metrics-owned public methods)
+		var isVoidReturn = methodTarget.ReturnType.SpecialType == SpecialType.System_Void;
+		if (metricsOwnsPublicMethod && !isVoidReturn && !methodTarget.ReturnsBool)
+		{
+			TelemetryDiagnostics.Report(
+				context.ReportDiagnostic,
+				TelemetryDiagnostics.Metrics.DoesNotReturnVoid
+			);
+			return;
+		}
+
+		// Observable instruments cannot return bool
+		if (methodTarget.IsObservable && methodTarget.ReturnsBool)
+		{
+			TelemetryDiagnostics.Report(
+				context.ReportDiagnostic,
+				TelemetryDiagnostics.Metrics.ObservableCannotReturnBool
+			);
+			return;
+		}
+
+		// Auto-counter instruments must return void (not bool)
+		if (methodTarget.InstrumentAttribute.IsAutoIncrement && methodTarget.ReturnsBool)
+		{
+			TelemetryDiagnostics.Report(
+				context.ReportDiagnostic,
+				TelemetryDiagnostics.Metrics.AutoCounterMustReturnVoid
+			);
+			return;
+		}
+
+		// Auto-counter cannot also have a measurement parameter
+		if (
+			methodTarget.InstrumentAttribute.IsAutoIncrement
+			&& methodTarget.MeasurementParameter != null
+		)
+		{
+			TelemetryDiagnostics.Report(
+				context.ReportDiagnostic,
+				TelemetryDiagnostics.Metrics.AutoIncrementCountAndMeasurementParam
+			);
+			return;
+		}
+
 		if (
 			!methodTarget.InstrumentAttribute!.IsAutoIncrement
 			&& methodTarget.MeasurementParameter == null
 		)
+		{
 			return;
+		}
 
 		logger?.Debug($"Emitting instrument method: {methodTarget.MethodName}.");
+
+		// For multi-target where Activity or Logging owns public method, generate private method
+		var accessModifier = isMultiTarget && !metricsOwnsPublicMethod ? "private" : "public";
+		var methodName =
+			isMultiTarget && !metricsOwnsPublicMethod
+				? methodTarget.MethodName + "_Metrics"
+				: methodTarget.MethodName;
 
 		builder
 			.CodeGen(indent)
 			.AggressiveInlining(indent)
-			.Append(indent, "public ", withNewLine: false)
-			.Append(methodTarget.ReturnType);
+			.Append(indent, accessModifier + " ", withNewLine: false);
 
-		if (methodTarget.IsNullableReturn)
-			builder.Append('?');
+		// For multi-target private methods, always return void
+		if (isMultiTarget && !metricsOwnsPublicMethod)
+		{
+			builder.Append(Constants.System.VoidKeyword);
+		}
+		else
+		{
+			builder.Append(methodTarget.ReturnType);
+			if (methodTarget.IsNullableReturn)
+				builder.Append('?');
+		}
 
-		builder.Append(' ').Append(methodTarget.MethodName).Append('(');
+		builder.Append(' ').Append(methodName).Append('(');
 
 		var index = 0;
 		foreach (var parameter in methodTarget.Parameters)
@@ -124,7 +238,9 @@ partial class MeterTargetClassEmitter
 				builder.Append(type);
 			}
 			else
+			{
 				builder.Append(parameter.ParameterType);
+			}
 
 			builder.Append(' ').Append(parameter.ParameterName);
 
@@ -138,15 +254,13 @@ partial class MeterTargetClassEmitter
 
 		if (methodTarget.IsObservable)
 			EmitObservableInstrumentBodyTest(builder, indent, methodTarget);
-		else
-			EmitInstrumentBodyTest(builder, indent, methodTarget);
 
 		var tagVariableName = EmitTags(builder, indent, methodTarget);
 
 		if (methodTarget.IsObservable)
 			EmitObservableInstrumentBody(builder, indent, methodTarget, tagVariableName);
 		else
-			EmitInstrumentBody(builder, indent, methodTarget, tagVariableName);
+			EmitInstrumentBody(builder, indent, methodTarget, tagVariableName, emitNullable);
 
 		builder.Append(indent, '}');
 	}
@@ -183,26 +297,6 @@ partial class MeterTargetClassEmitter
 			else
 				builder.AppendLine(';');
 		}
-
-		builder.Append(indent, '}').AppendLine();
-	}
-
-	static void EmitInstrumentBodyTest(StringBuilder builder, int indent, InstrumentTarget method)
-	{
-		indent++;
-
-		builder
-			.Append(indent, "if (", withNewLine: false)
-			.Append(method.FieldName)
-			.AppendLine(" == null)")
-			.Append(indent, '{');
-
-		builder.Append(indent + 1, "return", withNewLine: false);
-
-		if (method.ReturnsBool)
-			builder.AppendLine(" false;");
-		else
-			builder.AppendLine(';');
 
 		builder.Append(indent, '}').AppendLine();
 	}
@@ -257,7 +351,8 @@ partial class MeterTargetClassEmitter
 		StringBuilder builder,
 		int indent,
 		InstrumentTarget methodTarget,
-		string? tagVariableName
+		string? tagVariableName,
+		bool emitNullable = true
 	)
 	{
 		indent++;
@@ -267,20 +362,54 @@ partial class MeterTargetClassEmitter
 				? "Record"
 				: "Add";
 
+		var tagCount = methodTarget.Tags.Length;
+		var hasConditionalTags = methodTarget.Tags.Any(t => t.SkipOnNullOrEmpty);
+		var useDirectTagParams = tagCount <= 3 && tagCount > 0 && !hasConditionalTags;
+
 		builder
 			.Append(indent, methodTarget.FieldName, withNewLine: false)
 			.Append('.')
 			.Append(instrumentMeasureMethodName)
 			.Append('(')
-			.Append(methodTarget.MeasurementParameter?.ParameterName ?? "1")
-			.Append(", tagList: ");
+			.Append(methodTarget.MeasurementParameter?.ParameterName ?? "1");
 
-		if (tagVariableName == null)
-			builder.Append("default");
+		if (tagCount == 0)
+		{
+			// No tags — use the simple no-tag overload so the JIT can inline the hot path fully.
+			// Passing tagList: default would route through the TagList overload unnecessarily.
+			builder.AppendLine(");");
+		}
+		else if (useDirectTagParams)
+		{
+			// For 1-3 tags without conditionals, pass as direct KeyValuePair parameters
+			var kvpType = emitNullable
+				? "global::System.Collections.Generic.KeyValuePair<string, object?>("
+				: "global::System.Collections.Generic.KeyValuePair<string, object>(";
+			foreach (var tag in methodTarget.Tags)
+			{
+				builder
+					.Append(", new ")
+					.Append(kvpType)
+					.Append(tag.GeneratedName.Wrap())
+					.Append(", ")
+					.Append(tag.ParameterName)
+					.Append(')');
+			}
+
+			builder.AppendLine(");");
+		}
 		else
-			builder.Append(tagVariableName);
+		{
+			if (tagVariableName != null)
+			{
+				// 4+ tags or conditional tags: use the TagList variable
+				builder.Append(", tagList: ").Append(tagVariableName);
+			}
 
-		builder.AppendLine(");");
+			// 0 tags: close the call with no tag argument, using the simple overload
+			// (e.g. Add(1) or Record(value) rather than Add(1, tagList: default))
+			builder.AppendLine(");");
+		}
 
 		if (methodTarget.ReturnsBool)
 		{
@@ -292,6 +421,19 @@ partial class MeterTargetClassEmitter
 	{
 		if (methodTarget.Tags.Length == 0)
 			return null;
+
+		var tagCount = methodTarget.Tags.Length;
+		var hasConditionalTags = methodTarget.Tags.Any(t => t.SkipOnNullOrEmpty);
+
+		// OpenTelemetry best practice:
+		// - 0-3 tags without conditionals: pass directly as KeyValuePair parameters (no TagList needed)
+		// - 4+ tags OR any conditional tags: use TagList to avoid heap allocation or handle conditionals
+		// From: https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/docs/metrics#instruments
+		if (tagCount < Constants.Metrics.MinimumParamsForTagList && !hasConditionalTags)
+		{
+			// No TagList needed - tags will be passed directly as parameters
+			return null;
+		}
 
 		indent++;
 

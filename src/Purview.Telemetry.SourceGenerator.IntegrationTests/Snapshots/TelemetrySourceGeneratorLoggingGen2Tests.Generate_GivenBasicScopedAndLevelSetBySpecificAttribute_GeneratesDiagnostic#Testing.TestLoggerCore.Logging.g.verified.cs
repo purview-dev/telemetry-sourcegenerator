@@ -19,6 +19,7 @@ namespace Testing
 	sealed partial class TestLoggerCore : global::Testing.ITestLogger
 	{
 		readonly global::Microsoft.Extensions.Logging.ILogger<global::Testing.ITestLogger> _logger;
+		static readonly global::System.Func<global::Microsoft.Extensions.Logging.ILogger, global::System.IDisposable?> _basicScopedAction = global::Microsoft.Extensions.Logging.LoggerMessage.DefineScope("BasicScoped");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestLoggerCore(global::Microsoft.Extensions.Logging.ILogger<global::Testing.ITestLogger> logger)
@@ -30,22 +31,7 @@ namespace Testing
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public global::System.IDisposable? BasicScoped()
 		{
-			var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-			state.ReserveTagSpace(1);
-
-			state.TagArray[0] = new("{OriginalFormat}", "BasicScoped");
-
-			var formattedMessage = 
-#if NET
-				string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"BasicScoped");
-#else
-				global::System.FormattableString.Invariant($"BasicScoped");
-#endif
-			;
-
-			state.AddTag("FormattedMessage", formattedMessage);
-
-			return _logger.BeginScope(state);
+			return _basicScopedAction(_logger);
 		}
 
 	}

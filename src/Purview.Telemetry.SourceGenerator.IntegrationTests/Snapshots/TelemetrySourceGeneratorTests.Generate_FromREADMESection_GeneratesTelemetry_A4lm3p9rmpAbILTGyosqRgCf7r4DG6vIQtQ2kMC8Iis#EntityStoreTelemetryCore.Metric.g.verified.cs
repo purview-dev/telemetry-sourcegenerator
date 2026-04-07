@@ -11,21 +11,11 @@
 
 #nullable enable
 
-[global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
-[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
-[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 {
 	global::System.Diagnostics.Metrics.Meter _meter = default!;
 
-	global::System.Diagnostics.Metrics.Counter<int>? _retrievingEntityInstrument = null;
-
-	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-	public EntityStoreTelemetryCore(global::Microsoft.Extensions.Logging.ILogger<global::IEntityStoreTelemetry> logger, global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
-	{
-		_logger = logger;
-		InitializeMeters(meterFactory);
-	}
+	global::System.Diagnostics.Metrics.Counter<int> _retrievingEntityInstrument = default!;
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -36,21 +26,21 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 			throw new global::System.Exception("The meters have already been initialized.");
 		}
 
-		global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+		global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 		PopulateMeterTags(meterTags);
 
-		_meter = meterFactory.Create(new global::System.Diagnostics.Metrics.MeterOptions("EntityStoreTelemetry")
+		_meter = meterFactory.Create(new global::System.Diagnostics.Metrics.MeterOptions("Purview.Telemetry.SourceGenerator")
 		{
 			Version = null,
 			Tags = meterTags
 		});
 
-		global::System.Collections.Generic.Dictionary<string, object?> retrievingEntityTags = new();
+		global::System.Collections.Generic.Dictionary<string, object?> retrievingEntityTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 		PopulateRetrievingEntityTags(retrievingEntityTags);
 
-		_retrievingEntityInstrument = _meter.CreateCounter<int>(name: "retrievingentity", unit: null, description: null, tags: retrievingEntityTags);
+		_retrievingEntityInstrument = _meter.CreateCounter<int>(name: "entity_store.retrieving_entity", unit: null, description: null, tags: retrievingEntityTags);
 	}
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
@@ -63,15 +53,6 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public void RetrievingEntity(int entityId)
 	{
-		if (_retrievingEntityInstrument == null)
-		{
-			return;
-		}
-
-		global::System.Diagnostics.TagList retrievingEntityTagList = new();
-
-		retrievingEntityTagList.Add("entityid", entityId);
-
-		_retrievingEntityInstrument.Add(1, tagList: retrievingEntityTagList);
+		_retrievingEntityInstrument.Add(1, new global::System.Collections.Generic.KeyValuePair<string, object?>("entity_id", entityId));
 	}
 }

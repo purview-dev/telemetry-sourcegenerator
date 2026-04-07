@@ -11,26 +11,14 @@ static partial class LoggerTargetClassEmitter
 	public static void GenerateImplementation(
 		LoggerTarget target,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true,
+		bool supportsIMeterFactory = true
 	)
 	{
 		StringBuilder builder = new();
 
 		logger?.Debug($"Generating logging class for: {target.FullyQualifiedName}");
-
-		if (
-			EmitHelpers.GenerateDuplicateMethodDiagnostics(
-				GenerationType.Logging,
-				target.GenerationType,
-				target.DuplicateMethods,
-				context,
-				logger
-			)
-		)
-		{
-			logger?.Debug("Found duplicate methods while generating logger, exiting.");
-			return;
-		}
 
 		var indent = EmitHelpers.EmitNamespaceStart(
 			target.ClassNamespace,
@@ -48,7 +36,7 @@ static partial class LoggerTargetClassEmitter
 			context.CancellationToken
 		);
 
-		indent = EmitFields(target, builder, indent, context, logger);
+		indent = EmitFields(target, builder, indent, context, logger, emitNullable);
 
 		indent = ConstructorEmitter.EmitCtor(
 			GenerationType.Logging,
@@ -58,10 +46,11 @@ static partial class LoggerTargetClassEmitter
 			builder,
 			indent,
 			context,
-			logger
+			logger,
+			supportsIMeterFactory
 		);
 
-		indent = EmitMethods(target, builder, indent, context, logger);
+		indent = EmitMethods(target, builder, indent, context, logger, emitNullable);
 
 		EmitHelpers.EmitClassEnd(builder, indent);
 		EmitHelpers.EmitNamespaceEnd(
@@ -72,7 +61,7 @@ static partial class LoggerTargetClassEmitter
 			context.CancellationToken
 		);
 
-		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString());
+		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString(), emitNullable);
 		var hintName = $"{target.FullyQualifiedName}.Logging.g.cs";
 
 		context.AddSource(
@@ -88,7 +77,8 @@ static partial class LoggerTargetClassEmitter
 			target.InterfaceType.TypeName,
 			target.FullNamespace,
 			context,
-			logger
+			logger,
+			emitNullable
 		);
 	}
 }

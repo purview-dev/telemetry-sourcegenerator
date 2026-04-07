@@ -1,15 +1,17 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Records;
+﻿using Microsoft.CodeAnalysis;
+
+namespace Purview.Telemetry.SourceGenerator.Records;
 
 record LoggerAttributeRecord(
 	AttributeValue<int> DefaultLevel,
 	AttributeStringValue CustomPrefix,
 	AttributeValue<int> PrefixType,
-	AttributeValue<bool> DisableMSLoggingTelemetryGeneration
+	AttributeValue<int> GenerationMode
 );
 
 record LoggerGenerationAttributeRecord(
 	AttributeValue<int> DefaultLevel,
-	AttributeValue<bool> DisableMSLoggingTelemetryGeneration,
+	AttributeValue<int> GenerationMode,
 	AttributeValue<int> DefaultPrefixType
 );
 
@@ -17,7 +19,8 @@ record LogAttributeRecord(
 	AttributeValue<int> Level,
 	AttributeStringValue MessageTemplate,
 	AttributeValue<int> EventId,
-	AttributeStringValue Name
+	AttributeStringValue Name,
+	AttributeValue<int> GenerationMode
 );
 
 record LogPropertiesAttributeRecord(
@@ -26,4 +29,7 @@ record LogPropertiesAttributeRecord(
 	AttributeValue<bool> Transitive
 );
 
-record ExpandEnumerableAttributeRecord(AttributeValue<int> MaximumValueCount);
+record ExpandEnumerableAttributeRecord(
+	AttributeValue<int> MaximumValueCount,
+	Location? ParamLocation = null
+);

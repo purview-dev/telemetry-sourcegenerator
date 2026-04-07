@@ -1,17 +1,17 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Logging;
+namespace Purview.Telemetry.SourceGenerator.Logging;
 
 partial class TelemetrySourceGeneratorLoggingGen2Tests
 {
-	[Theory]
-	[MemberData(nameof(ExpandableArrays))]
+	[Test]
+	[MethodDataSource(nameof(ExpandableArrays))]
 	public async Task Generate_GivenMethodWithExpandableArrayOrEnumerable_GeneratesCorrectElements(
-		string parameter
+		string parameter,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
 		var basicLogger =
 			@$"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -25,23 +25,28 @@ public interface ITestLogger
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, parameters: parameter);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			cancellationToken: cancellationToken,
+			parameters: parameter
+		);
 	}
 
-	[Theory]
-	[MemberData(nameof(ExpandableMaxCount))]
+	[Test]
+	[MethodDataSource(nameof(ExpandableMaxCount))]
 	public async Task Generate_GivenMethodWithExpandableAndHighMaxCount_GeneratesDiagnostic(
-		int maxCount
+		int maxCount,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
 		var basicLogger =
 			@$"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -57,50 +62,44 @@ public interface ITestLogger
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG2008"],
+			cancellationToken: cancellationToken,
 			parameters: maxCount
 		);
 	}
 
-	public static TheoryData<string> ExpandableArrays
+	public static IEnumerable<string> ExpandableArrays
 	{
 		get
 		{
-			TheoryData<string> data = [];
-
-			data.Add("[ExpandEnumerable]string[] paramValue");
-			data.Add("[ExpandEnumerable]System.String[] paramValue");
-			data.Add(
-				"[ExpandEnumerable]System.Collections.Generic.IEnumerable<System.String> paramValue"
-			);
-			data.Add("[ExpandEnumerable]System.Collections.Generic.IEnumerable<string> paramValue");
-			data.Add("[ExpandEnumerable]System.Collections.Generic.ICollection<string> paramValue");
-			data.Add(
-				"[ExpandEnumerable]System.Collections.Generic.IDictionary<string, int> paramValue"
-			);
+			List<string> data =
+			[
+				"[ExpandEnumerable]string[] paramValue",
+				"[ExpandEnumerable]System.String[] paramValue",
+				"[ExpandEnumerable]System.Collections.Generic.IEnumerable<System.String> paramValue",
+				"[ExpandEnumerable]System.Collections.Generic.IEnumerable<string> paramValue",
+				"[ExpandEnumerable]System.Collections.Generic.ICollection<string> paramValue",
+				"[ExpandEnumerable]System.Collections.Generic.IDictionary<string, int> paramValue",
+			];
 
 			return data;
 		}
 	}
 
-	public static TheoryData<int> ExpandableMaxCount
+	public static IEnumerable<int> ExpandableMaxCount
 	{
 		get
 		{
-			TheoryData<int> data = [];
-
-			data.Add(6);
-			data.Add(12);
-			data.Add(100);
-			data.Add(10_000);
-			data.Add(int.MaxValue);
+			List<int> data = [6, 12, 100, 10_000, int.MaxValue];
 
 			return data;
 		}

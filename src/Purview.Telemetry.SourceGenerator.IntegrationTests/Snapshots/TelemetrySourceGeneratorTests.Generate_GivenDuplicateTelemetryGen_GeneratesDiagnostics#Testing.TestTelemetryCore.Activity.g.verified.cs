@@ -13,9 +13,12 @@
 
 namespace Testing
 {
+	[global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
+	[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class TestTelemetryCore : global::Testing.ITestTelemetry
 	{
-		readonly static global::System.Diagnostics.ActivitySource _activitySource = new("activity-source");
+		readonly static global::System.Diagnostics.ActivitySource _activitySource = new global::System.Diagnostics.ActivitySource("activity-source");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -26,15 +29,110 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.ActivityTagsCollection tagsCollection = new();
+			global::System.Diagnostics.ActivityTagsCollection tagsCollection = new global::System.Diagnostics.ActivityTagsCollection();
 			tagsCollection.Add("exception.escaped", escape);
 			tagsCollection.Add("exception.message", exception.Message);
 			tagsCollection.Add("exception.type", exception.GetType().FullName);
 			tagsCollection.Add("exception.stacktrace", exception.StackTrace);
 
-			global::System.Diagnostics.ActivityEvent recordExceptionEvent = new(name: "exception", timestamp: default, tags: tagsCollection);
+			global::System.Diagnostics.ActivityEvent recordExceptionEvent = new global::System.Diagnostics.ActivityEvent(name: "exception", timestamp: default, tags: tagsCollection);
 
 			activity.AddEvent(recordExceptionEvent);
+		}
+
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		private void Activity_Activity(string stringParam, int intParam, bool boolParam)
+		{
+			if (!_activitySource.HasListeners())
+			{
+				return;
+			}
+
+			global::System.Diagnostics.Activity? activityActivity = _activitySource.StartActivity("Activity", global::System.Diagnostics.ActivityKind.Internal, parentId: default, tags: default, links: default, startTime: default);
+
+			if (activityActivity != null)
+			{
+				activityActivity.SetTag("int_param", intParam);
+				activityActivity.SetTag("bool_param", boolParam);
+				activityActivity.SetBaggage("string_param", stringParam);
+			}
+		}
+
+
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		public void Activity(string stringParam, int intParam, bool boolParam)
+		{
+			Activity_Activity(stringParam, intParam, boolParam);
+			Activity_Logging(stringParam, intParam, boolParam);
+		}
+
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		private void Event_Activity(string stringParam, int intParam, bool boolParam)
+		{
+			if (!_activitySource.HasListeners())
+			{
+				return;
+			}
+
+			if (global::System.Diagnostics.Activity.Current != null)
+			{
+				global::System.Diagnostics.ActivityTagsCollection tagsCollectionEvent = new();
+				tagsCollectionEvent.Add("int_param", intParam);
+				tagsCollectionEvent.Add("bool_param", boolParam);
+
+				global::System.Diagnostics.ActivityEvent activityEventEvent = new global::System.Diagnostics.ActivityEvent(name: "Event", timestamp: default, tags: tagsCollectionEvent);
+
+				global::System.Diagnostics.Activity.Current.AddEvent(activityEventEvent);
+
+				global::System.Diagnostics.Activity.Current.SetBaggage("string_param", stringParam);
+			}
+		}
+
+
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		public void Event(string stringParam, int intParam, bool boolParam)
+		{
+			Event_Activity(stringParam, intParam, boolParam);
+			Event_Metrics(stringParam, intParam, boolParam);
+		}
+
+
+		public void Context(string stringParam, int intParam, bool boolParam) => throw new global::System.NotSupportedException();
+
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		private void Counter_Activity(int counterValue, int intParam, bool boolParam)
+		{
+			if (!_activitySource.HasListeners())
+			{
+				return;
+			}
+
+			if (global::System.Diagnostics.Activity.Current != null)
+			{
+				global::System.Diagnostics.ActivityTagsCollection tagsCollectionCounter = new();
+				tagsCollectionCounter.Add("counter_value", counterValue);
+				tagsCollectionCounter.Add("int_param", intParam);
+				tagsCollectionCounter.Add("bool_param", boolParam);
+
+				global::System.Diagnostics.ActivityEvent activityEventCounter = new global::System.Diagnostics.ActivityEvent(name: "Counter", timestamp: default, tags: tagsCollectionCounter);
+
+				global::System.Diagnostics.Activity.Current.AddEvent(activityEventCounter);
+			}
+		}
+
+
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+		public void Counter(int counterValue, int intParam, bool boolParam)
+		{
+			Counter_Activity(counterValue, intParam, boolParam);
+			Counter_Logging(counterValue, intParam, boolParam);
+			Counter_Metrics(counterValue, intParam, boolParam);
 		}
 
 	}

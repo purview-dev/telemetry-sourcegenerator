@@ -11,26 +11,13 @@ static partial class ActivitySourceTargetClassEmitter
 	public static void GenerateImplementation(
 		ActivitySourceTarget target,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true
 	)
 	{
 		StringBuilder builder = new();
 
 		logger?.Debug($"Generating activity class for: {target.FullyQualifiedName}");
-
-		if (
-			EmitHelpers.GenerateDuplicateMethodDiagnostics(
-				GenerationType.Activities,
-				target.GenerationType,
-				target.DuplicateMethods,
-				context,
-				logger
-			)
-		)
-		{
-			logger?.Debug("Found duplicate methods while generating activity, exiting.");
-			return;
-		}
 
 		var indent = EmitHelpers.EmitNamespaceStart(
 			target.ClassNamespace,
@@ -49,7 +36,7 @@ static partial class ActivitySourceTargetClassEmitter
 		);
 
 		indent = EmitFields(target, builder, indent, context, logger);
-		indent = EmitMethods(target, builder, indent, context, logger);
+		indent = EmitMethods(target, builder, indent, context, logger, emitNullable);
 
 		EmitHelpers.EmitClassEnd(builder, indent);
 		EmitHelpers.EmitNamespaceEnd(
@@ -60,7 +47,7 @@ static partial class ActivitySourceTargetClassEmitter
 			context.CancellationToken
 		);
 
-		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString());
+		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString(), emitNullable);
 		var hintName = $"{target.FullyQualifiedName}.Activity.g.cs";
 
 		context.AddSource(
@@ -76,7 +63,8 @@ static partial class ActivitySourceTargetClassEmitter
 			target.InterfaceType.TypeName,
 			target.FullNamespace,
 			context,
-			logger
+			logger,
+			emitNullable
 		);
 	}
 }

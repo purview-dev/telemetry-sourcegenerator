@@ -1,14 +1,15 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Logging;
+namespace Purview.Telemetry.SourceGenerator.Logging;
 
 partial class TelemetrySourceGeneratorLoggingTests
 {
-	[Fact]
-	public async Task Generate_GivenInterfaceWithSingleBasicExplicitLogEntry_GenerateLogger()
+	[Test]
+	public async Task Generate_GivenInterfaceWithSingleBasicExplicitLogEntry_GenerateLogger(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string basicLogger =
 			@"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -20,19 +21,23 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenInterfaceWithSingleBasicImplicitLogEntry_GenerateLogger()
+	[Test]
+	public async Task Generate_GivenInterfaceWithSingleBasicImplicitLogEntry_GenerateLogger(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string basicLogger =
 			@"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -43,24 +48,27 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Theory]
-	[InlineData("Level = Microsoft.Extensions.Logging.LogLevel.Trace")]
-	[InlineData("level: Microsoft.Extensions.Logging.LogLevel.Trace")]
-	[InlineData("Microsoft.Extensions.Logging.LogLevel.Trace")]
+	[Test]
+	[Arguments("Level = Microsoft.Extensions.Logging.LogLevel.Trace")]
+	[Arguments("level: Microsoft.Extensions.Logging.LogLevel.Trace")]
+	[Arguments("Microsoft.Extensions.Logging.LogLevel.Trace")]
 	public async Task Generate_GivenInterfaceWithExplicitLogLevelAndAnExceptionParameter_GenerateLogger(
-		string level
+		string level,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
 		var basicLogger =
 			@$"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -72,19 +80,28 @@ public interface ITestLogger {{
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, c => c.ScrubInlineGuids(), parameters: level);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			c => c.ScrubInlineGuids(),
+			cancellationToken: cancellationToken,
+			parameters: level
+		);
 	}
 
-	[Fact]
-	public async Task Generate_GivenInterfaceWithoutExplicitLogLevelAndAnExceptionParameter_GenerateLogger()
+	[Test]
+	public async Task Generate_GivenInterfaceWithoutExplicitLogLevelAndAnExceptionParameter_GenerateLogger(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string basicLogger =
 			@"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -95,51 +112,61 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
-			expectsDiagnostics: true
+			expectsDiagnostics: true,
+			cancellationToken: cancellationToken
 		);
 	}
 
-	[Fact]
-	public async Task Generate_GivenInterfaceMoreThanSixParameters_RaisesDiagnostic()
+	[Test]
+	public async Task Generate_GivenInterfaceMoreThanSixParameters_RaisesDiagnostic(
+		CancellationToken cancellationToken
+	)
 	{
-		// Arrange
+		// Arrange: explicit V1 mode with 9 params — exceeds the 6-param v1 limit, raises TSG2001.
 		const string basicLogger =
 			@"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
-[Logger]
+[Logger(GenerationMode = LoggerGenerationMode.V1)]
 public interface ITestLogger {
 	void Log(string stringParam, int intParam, bool boolParam, string stringParam1, int intParam1, bool boolParam1, string stringParam2, int intParam2, bool boolParam2);
 }
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
-			validationCompilation: false
+			validationCompilation: false,
+			cancellationToken: cancellationToken
 		);
 	}
 
-	[Fact]
-	public async Task Generate_GivenInterfaceMoreThanOneExceptionParameter_RaisesDiagnostic()
+	[Test]
+	public async Task Generate_GivenInterfaceMoreThanOneExceptionParameter_RaisesDiagnostic(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string basicLogger =
 			@"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -150,24 +177,29 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
-			validationCompilation: false
+			validationCompilation: false,
+			cancellationToken: cancellationToken
 		);
 	}
 
-	[Fact]
-	public async Task Generate_GivenMethodReturnsIDisposable_GeneratesScopedLogEntry()
+	[Test]
+	public async Task Generate_GivenMethodReturnsIDisposable_GeneratesScopedLogEntry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string basicLogger =
 			@"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -178,19 +210,27 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, c => c.ScrubInlineGuids());
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			c => c.ScrubInlineGuids(),
+			cancellationToken: cancellationToken
+		);
 	}
 
-	[Fact]
-	public async Task Generate_GivenMethodWithParamsAndExceptionReturnsIDisposable_GeneratesScopedLogEntry()
+	[Test]
+	public async Task Generate_GivenMethodWithParamsAndExceptionReturnsIDisposable_GeneratesScopedLogEntry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string basicLogger =
 			@"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -201,19 +241,27 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, c => c.ScrubInlineGuids());
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			c => c.ScrubInlineGuids(),
+			cancellationToken: cancellationToken
+		);
 	}
 
-	[Fact]
-	public async Task Generate_GivenMethodWithParamsReturnsIDisposable_GeneratesScopedLogEntry()
+	[Test]
+	public async Task Generate_GivenMethodWithParamsReturnsIDisposable_GeneratesScopedLogEntry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string basicLogger =
 			@"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -224,9 +272,16 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, c => c.ScrubInlineGuids());
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			c => c.ScrubInlineGuids(),
+			cancellationToken: cancellationToken
+		);
 	}
 }

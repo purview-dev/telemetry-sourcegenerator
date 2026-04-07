@@ -1,0 +1,33 @@
+﻿@page "/"
+
+<PageTitle>Purview Telemetry Sample</PageTitle>
+
+<h1>Purview Telemetry Source Generator - Sample App</h1>
+
+<p class="lead">
+	This Blazor application demonstrates distributed tracing between a frontend (Blazor SSR) and backend API service
+	using the Purview Telemetry Source Generator.
+</p>
+
+<h2>Features Demonstrated</h2>
+
+<ul>
+	<li><strong>Distributed Tracing:</strong> Activities flow automatically between the Blazor frontend and API service via HTTP headers</li>
+	<li><strong>HTTP Resiliency:</strong> Automatic retries with exponential backoff using Microsoft.Extensions.Http.Resilience</li>
+	<li><strong>Service Discovery:</strong> Aspire-based service discovery for API communication</li>
+	<li><strong>Multi-Target Telemetry:</strong> v4.0 feature - single method generates Activity + Log + Metric simultaneously</li>
+</ul>
+
+<h2>Try It Out</h2>
+
+<p>Navigate to the <a href="/weather">Weather</a> page to see the API in action with:</p>
+<ul>
+	<li>Normal weather data fetching</li>
+	<li>Failure scenario buttons to test validation errors and retry behavior</li>
+</ul>
+
+<h2>View Traces</h2>
+
+<p>Run with the Aspire AppHost to see distributed traces in the Aspire dashboard:</p>
+<pre><code>cd samples/SampleApp
+dotnet run --project SampleApp.AppHost</code></pre>

@@ -16,7 +16,8 @@ static class DependencyInjectionClassEmitter
 		string sourceInterfaceName,
 		string? fullyQualifiedNamespace,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -27,7 +28,7 @@ static class DependencyInjectionClassEmitter
 			return;
 		}
 
-		if (!SharedHelpers.ShouldEmit(requestingType, generationType))
+		if (!SharedHelpers.ShouldEmitDIExtension(requestingType, generationType))
 		{
 			logger?.Debug(
 				$"Skipping dependency injection emit for {requestingType} ({generationType})."
@@ -62,8 +63,7 @@ static class DependencyInjectionClassEmitter
 			.Append(1, Constants.System.ExcludeFromCodeCoverageConstant)
 			.CodeGen(1)
 			.Append(1, $"{classAccessModifier} class ", withNewLine: false)
-			.Append(classNameToGenerate)
-			.AppendLine()
+			.AppendLine(classNameToGenerate)
 			.Append(1, '{');
 
 		EmitMethod(
@@ -80,7 +80,7 @@ static class DependencyInjectionClassEmitter
 
 		builder.AppendLine('}');
 
-		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString());
+		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString(), emitNullable);
 		var hintName = $"{fullyQualifiedNamespace}{classNameToGenerate}.DependencyInjection.g.cs";
 
 		context.AddSource(

@@ -9,19 +9,23 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
+#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE
 #nullable enable
+#endif
 
-namespace Purview.Telemetry.Activities;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Determines if the methods parameters should be
 /// added to the current <see cref="global::System.Diagnostics.Activity"/>, using
 /// either the <see cref="global::Purview.Telemetry.TagAttribute"/>,
-/// the <see cref="global::Purview.Telemetry.Activities.BaggageAttribute"/> or inferred.
+/// the <see cref="global::Purview.Telemetry.BaggageAttribute"/> or inferred.
 /// </summary>
 [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 [global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false)]
 [global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
 sealed class ContextAttribute : global::System.Attribute
 {
+}
 }

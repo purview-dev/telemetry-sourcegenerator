@@ -18,7 +18,7 @@ namespace Testing
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class TestActivitiesCore : global::Testing.ITestActivities
 	{
-		readonly static global::System.Diagnostics.ActivitySource _activitySource = new("testing-activity-source");
+		readonly static global::System.Diagnostics.ActivitySource _activitySource = new global::System.Diagnostics.ActivitySource("testing-activity-source");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -29,13 +29,13 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.ActivityTagsCollection tagsCollection = new();
+			global::System.Diagnostics.ActivityTagsCollection tagsCollection = new global::System.Diagnostics.ActivityTagsCollection();
 			tagsCollection.Add("exception.escaped", escape);
 			tagsCollection.Add("exception.message", exception.Message);
 			tagsCollection.Add("exception.type", exception.GetType().FullName);
 			tagsCollection.Add("exception.stacktrace", exception.StackTrace);
 
-			global::System.Diagnostics.ActivityEvent recordExceptionEvent = new(name: "exception", timestamp: default, tags: tagsCollection);
+			global::System.Diagnostics.ActivityEvent recordExceptionEvent = new global::System.Diagnostics.ActivityEvent(name: "exception", timestamp: default, tags: tagsCollection);
 
 			activity.AddEvent(recordExceptionEvent);
 		}
@@ -53,16 +53,12 @@ namespace Testing
 
 			if (activityActivity != null)
 			{
-				activityActivity.SetTag("intparam", intParam);
-				activityActivity.SetTag("boolparam", boolParam);
+				activityActivity.SetTag("int_param", intParam);
+				activityActivity.SetTag("bool_param", boolParam);
+				activityActivity.SetBaggage("string_param", stringParam);
 			}
 
-			if (activityActivity != null)
-			{
-				activityActivity.SetBaggage("stringparam", stringParam);
-			}
-
-			return activityActivity;
+			return activityActivity!;
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
@@ -78,13 +74,9 @@ namespace Testing
 
 			if (activityActivityWithNullableReturnActivity != null)
 			{
-				activityActivityWithNullableReturnActivity.SetTag("intparam", intParam);
-				activityActivityWithNullableReturnActivity.SetTag("boolparam", boolParam);
-			}
-
-			if (activityActivityWithNullableReturnActivity != null)
-			{
-				activityActivityWithNullableReturnActivity.SetBaggage("stringparam", stringParam);
+				activityActivityWithNullableReturnActivity.SetTag("int_param", intParam);
+				activityActivityWithNullableReturnActivity.SetTag("bool_param", boolParam);
+				activityActivityWithNullableReturnActivity.SetBaggage("string_param", stringParam);
 			}
 
 			return activityActivityWithNullableReturnActivity;

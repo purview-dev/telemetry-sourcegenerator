@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -37,10 +37,7 @@ partial class PipelineHelpers
 			logger?.Diagnostic(
 				$"Cannot generate a Meter target for a generic interface '{interfaceDeclaration.Flatten()}'."
 			);
-			return MeterTarget.Failed(
-				TelemetryDiagnostics.General.GenericInterfacesNotSupported,
-				interfaceSymbol.Locations
-			);
+			return null;
 		}
 
 		var semanticModel = context.SemanticModel;
@@ -64,10 +61,7 @@ partial class PipelineHelpers
 			logger,
 			token
 		);
-		var className = telemetryGeneration.ClassName.IsSet
-			? telemetryGeneration.ClassName.Value!
-			: GenerateClassName(interfaceSymbol.Name);
-
+		var className = telemetryGeneration.ClassName.Or(GenerateClassName(interfaceSymbol.Name));
 		var generationType = SharedHelpers.GetGenerationTypes(interfaceSymbol, token);
 		var meterGenerationAttribute = SharedHelpers.GetMeterGenerationAttribute(
 			semanticModel,
@@ -75,24 +69,45 @@ partial class PipelineHelpers
 			token
 		);
 		var fullNamespace = Utilities.GetFullNamespace(interfaceDeclaration, true);
-		var instrumentMethods = BuildInstrumentationMethods(
-			generationType,
-			meterAttribute,
-			meterGenerationAttribute,
-			semanticModel,
-			interfaceSymbol,
-			logger,
-			token,
-			out var methodDiagnostics
-		);
 
 		var meterName = meterAttribute.Name.Value;
 		if (string.IsNullOrWhiteSpace(meterName))
 		{
-			meterName = interfaceSymbol.Name;
-			if (meterName[0] == 'I')
-				meterName = meterName.Substring(1);
+			// First check assembly-wide MeterName from MeterGenerationAttribute
+			meterName = meterGenerationAttribute?.MeterName.Value;
+
+			if (string.IsNullOrWhiteSpace(meterName))
+			{
+				// Fall back to assembly name with generation type convention
+				var assemblyName = semanticModel.Compilation.Assembly.Name;
+				var meterNameGenType = meterGenerationAttribute?.MeterNameGenerationType.Value ?? 1; // Default to DotNet
+
+				if (meterNameGenType == 0) // OpenTelemetry
+				{
+					// OpenTelemetry: lowercase assembly name
+#pragma warning disable CA1308 // Intentional lowercase for OpenTelemetry convention
+					meterName = assemblyName.ToLowerInvariant();
+#pragma warning restore CA1308
+				}
+				else // DotNet
+				{
+					// .NET: preserve assembly name as-is
+					meterName = assemblyName;
+				}
+			}
 		}
+
+		var instrumentMethods = BuildInstrumentationMethods(
+			generationType,
+			meterAttribute,
+			meterGenerationAttribute,
+			telemetryGeneration,
+			meterName!,
+			semanticModel,
+			interfaceSymbol,
+			logger,
+			token
+		);
 
 		return new(
 			TelemetryGeneration: telemetryGeneration,
@@ -105,9 +120,7 @@ partial class PipelineHelpers
 			InterfaceType: PurviewTypeFactory.Create(interfaceSymbol),
 			MeterName: meterName,
 			MeterGeneration: meterGenerationAttribute,
-			InstrumentationMethods: instrumentMethods,
-			DuplicateMethods: BuildDuplicateMethods(interfaceSymbol, semanticModel, token),
-			Failures: methodDiagnostics?.ToImmutableArray()
+			InstrumentationMethods: instrumentMethods
 		);
 	}
 
@@ -115,24 +128,33 @@ partial class PipelineHelpers
 		GenerationType generationType,
 		MeterAttributeRecord meterAttribute,
 		MeterGenerationAttributeRecord? meterGenerationAttribute,
+		TelemetryGenerationAttributeRecord telemetryGeneration,
+		string meterName,
 		SemanticModel semanticModel,
 		INamedTypeSymbol interfaceSymbol,
 		GenerationLogger? logger,
-		CancellationToken token,
-		out (TelemetryDiagnosticDescriptor, ImmutableArray<Location>)[]? methodDiagnostics
+		CancellationToken token
 	)
 	{
 		token.ThrowIfCancellationRequested();
 
-		List<(TelemetryDiagnosticDescriptor, ImmutableArray<Location>)>? methodDiagnosticsList =
-			null;
+		// Get naming convention from TelemetryGenerationAttribute (default to OpenTelemetry = 1)
+		var namingConvention = telemetryGeneration?.NamingConvention.Value ?? 1;
+
 		var lowercaseInstrumentName = meterAttribute.LowercaseInstrumentName.IsSet
 			? meterAttribute.LowercaseInstrumentName.Value!.Value
 			: (meterGenerationAttribute?.LowercaseInstrumentName?.IsSet) != true
 				|| meterGenerationAttribute.LowercaseInstrumentName.Value!.Value;
 
-		var prefix = GeneratePrefix(meterGenerationAttribute, meterAttribute, token);
-		var lowercaseTagKeys = meterAttribute.LowercaseTagKeys!.Value!.Value;
+		var prefix = GeneratePrefix(
+			meterGenerationAttribute,
+			meterAttribute,
+			interfaceSymbol.Name,
+			token
+		);
+		var lowercaseTagKeys =
+			meterAttribute.LowercaseTagKeys?.IsSet == true
+			&& meterAttribute.LowercaseTagKeys.Value!.Value;
 
 		List<InstrumentTarget> methodTargets = [];
 		foreach (
@@ -151,10 +173,6 @@ partial class PipelineHelpers
 
 			if (method.Arity > 0)
 			{
-				methodDiagnosticsList ??= [];
-				methodDiagnosticsList.Add(
-					(TelemetryDiagnostics.General.GenericMethodsNotSupported, method.Locations)
-				);
 				continue;
 			}
 
@@ -176,6 +194,7 @@ partial class PipelineHelpers
 				method,
 				lowercaseTagKeys,
 				validAutoCounter,
+				namingConvention,
 				semanticModel,
 				logger,
 				token
@@ -193,12 +212,44 @@ partial class PipelineHelpers
 			if (string.IsNullOrWhiteSpace(instrumentName))
 				instrumentName = method.Name;
 
+			var isLegacy = namingConvention == 0;
+
 			if (lowercaseInstrumentName)
 			{
-#pragma warning disable CA1308 // Normalize strings to uppercase
-				instrumentName = instrumentName!.ToLowerInvariant();
-				prefix = prefix?.ToLowerInvariant();
-#pragma warning restore CA1308 // Normalize strings to uppercase
+				if (!isLegacy)
+				{
+					// OpenTelemetry: Convert PascalCase to snake_case (underscores separate words)
+					// Per OTel semantic conventions: dots separate namespace hierarchy, underscores separate words
+					// Example: dotnet.gc.last_collection.memory.committed_size
+					instrumentName = Utilities.ConvertToSeparatedLowercase(instrumentName!, '_');
+					if (!string.IsNullOrEmpty(prefix))
+					{
+						// Convert prefix components while preserving separator structure
+						// This handles both explicitly-set prefixes (e.g., "This.Is.A.Prefix")
+						// and auto-generated prefixes (already in snake_case, won't be affected)
+						prefix = Utilities.ConvertToSeparatedLowercase(prefix!, '_');
+					}
+
+					// For OpenTelemetry convention only: Prepend meter name as namespace with dot separator
+					// Check if we're using OpenTelemetry meter name generation (lowercase assembly name)
+					// e.g., meter "myapp.products" + instrument "pricing_page_requests"
+					//       -> "myapp_products.pricing_page_requests"
+					var meterNameGenType =
+						meterGenerationAttribute?.MeterNameGenerationType.Value ?? 1; // Default to DotNet
+					if (meterNameGenType == 0 && !string.IsNullOrWhiteSpace(meterName)) // OpenTelemetry only
+					{
+						var meterPrefix = Utilities.ConvertToSeparatedLowercase(meterName, '_');
+						instrumentName = $"{meterPrefix}.{instrumentName}";
+					}
+				}
+				else
+				{
+					// Legacy: Just lowercase without word-boundary splitting
+#pragma warning disable CA1308 // Intentional lowercase for legacy compatibility
+					instrumentName = instrumentName!.ToLowerInvariant();
+					prefix = prefix?.ToLowerInvariant();
+#pragma warning restore CA1308
+				}
 			}
 
 			var returnsBool = method.ReturnType.SpecialType == SpecialType.System_Boolean;
@@ -214,25 +265,17 @@ partial class PipelineHelpers
 					logger?.Debug(
 						$"Identified {interfaceSymbol.Name}.{method.Name} as problematic as it has another target types."
 					);
-					methodDiagnosticsList ??= [];
-					methodDiagnosticsList.Add(
-						(
-							TelemetryDiagnostics.General.MultiGenerationTargetsNotSupported,
-							method.Locations
-						)
-					);
 				}
 				else if (targetGenerationState.RaiseInferenceNotSupportedWithMultiTargeting)
 				{
 					logger?.Debug(
 						$"Identified {interfaceSymbol.Name}.{method.Name} as problematic as it is inferred."
 					);
-					methodDiagnosticsList ??= [];
-					methodDiagnosticsList.Add(
-						(
-							TelemetryDiagnostics.General.InferenceNotSupportedWithMultiTargeting,
-							method.Locations
-						)
+				}
+				else if (targetGenerationState.RaiseMissingInterfaceSource)
+				{
+					logger?.Debug(
+						$"Identified {interfaceSymbol.Name}.{method.Name} as problematic as the interface is missing source attribute(s) for the method's target(s)."
 					);
 				}
 			}
@@ -241,100 +284,36 @@ partial class PipelineHelpers
 				if (instrumentAttribute == null)
 				{
 					logger?.Warning("Missing instrument attribute.");
-					methodDiagnosticsList ??= [];
-					methodDiagnosticsList.Add(
-						(TelemetryDiagnostics.Metrics.NoInstrumentDefined, method.Locations)
-					);
 				}
 				else if (!validAutoCounter && measurementParameter == null)
 				{
-					methodDiagnosticsList ??= [];
-					methodDiagnosticsList.Add(
-						(TelemetryDiagnostics.Metrics.NoMeasurementValueDefined, method.Locations)
-					);
+					// No measurement value defined
 				}
 				else
 				{
-					if (validAutoCounter)
-					{
-						if (measurementParameters.Length > 0)
-						{
-							methodDiagnosticsList ??= [];
-							methodDiagnosticsList.Add(
-								(
-									TelemetryDiagnostics
-										.Metrics
-										.AutoIncrementCountAndMeasurementParam,
-									measurementParameters
-										.SelectMany(m => m.Locations)
-										.ToImmutableArray()
-								)
-							);
-						}
-					}
-					else
+					if (!validAutoCounter)
 					{
 						// Validate the parameters and type.
-						if (instrumentAttribute.IsObservable)
+						if (!instrumentAttribute.IsObservable)
 						{
-							if (!measurementParameter!.IsFunc)
-							{
-								methodDiagnosticsList ??= [];
-								methodDiagnosticsList.Add(
-									(
-										TelemetryDiagnostics.Metrics.ObservableRequiredFunc,
-										measurementParameter.Locations
-									)
-								);
-							}
-						}
-						else
-						{
-							if (measurementParameters.Length != 1)
-							{
-								methodDiagnosticsList ??= [];
-								methodDiagnosticsList.Add(
-									(
-										TelemetryDiagnostics
-											.Metrics
-											.MoreThanOneMeasurementValueDefined,
-										measurementParameters
-											.SelectMany(m => m.Locations)
-											.ToImmutableArray()
-									)
-								);
-							}
+							// Multiple measurement parameters or other issues are informational only
 						}
 					}
-				}
 
-				if (instrumentAttribute != null)
-				{
-					if (!method.ReturnsVoid && !returnsBool)
-					{
-						methodDiagnosticsList ??= [];
-						methodDiagnosticsList.Add(
-							(
-								TelemetryDiagnostics.Metrics.DoesNotReturnVoid,
-								method.ReturnType.Locations
-							)
-						);
-					}
+					// Check if this is multi-target with Activity (Activity return type is allowed)
+					var isMultiTargetWithActivity =
+						targetGenerationState.IsMultiTarget
+						&& targetGenerationState.MethodTargets.HasFlag(GenerationType.Activities);
+					var returnsActivity = Constants.Activities.SystemDiagnostics.Activity.Equals(
+						method.ReturnType
+					);
+					_ = isMultiTargetWithActivity;
+					_ = returnsActivity;
 				}
 			}
 
 			var instrumentMeasurementType =
 				measurementParameter?.InstrumentType ?? Constants.System.BuiltInTypes.Int32;
-			if (measurementParameter != null && !measurementParameter.IsValidInstrumentType)
-			{
-				methodDiagnosticsList ??= [];
-				methodDiagnosticsList.Add(
-					(
-						TelemetryDiagnostics.Metrics.InvalidMeasurementType,
-						measurementParameter.Locations
-					)
-				);
-			}
 
 			methodTargets.Add(
 				new(
@@ -344,10 +323,9 @@ partial class PipelineHelpers
 					IsNullableReturn: method.ReturnType.NullableAnnotation
 						== NullableAnnotation.Annotated,
 					FieldName: fieldName,
+					InstrumentMeasurementType: instrumentMeasurementType,
 					IsObservable: instrumentAttribute?.IsObservable == true,
 					MetricName: prefix + instrumentName!,
-					InstrumentMeasurementType: instrumentMeasurementType,
-					Locations: method.Locations,
 					InstrumentAttribute: instrumentAttribute,
 					Parameters: parameters,
 					Tags: tagParameters,
@@ -357,7 +335,17 @@ partial class PipelineHelpers
 			);
 		}
 
-		methodDiagnostics = methodDiagnosticsList?.ToArray();
+		// Post-pass: mark duplicate method names as invalid (emitter generates throw stubs; TSG1003 raised by analyzer)
+		var seenNames = new HashSet<string>(StringComparer.Ordinal);
+		for (var i = 0; i < methodTargets.Count; i++)
+		{
+			var t = methodTargets[i];
+			if (!seenNames.Add(t.MethodName))
+				methodTargets[i] = t with
+				{
+					TargetGenerationState = t.TargetGenerationState with { IsValid = false },
+				};
+		}
 
 		return [.. methodTargets];
 	}
@@ -366,6 +354,7 @@ partial class PipelineHelpers
 		IMethodSymbol method,
 		bool lowercaseTagKeys,
 		bool isAutoCounter,
+		int namingConvention,
 		SemanticModel semanticModel,
 		GenerationLogger? logger,
 		CancellationToken token
@@ -375,6 +364,21 @@ partial class PipelineHelpers
 		foreach (var parameter in method.Parameters)
 		{
 			token.ThrowIfCancellationRequested();
+
+			// Skip Activity-related parameters - they are not valid for metrics
+			var paramType = PurviewTypeFactory.Create(parameter.Type);
+			if (
+				Constants.Activities.SystemDiagnostics.Activity.Equals(paramType)
+				|| Constants.Activities.SystemDiagnostics.ActivityContext.Equals(paramType)
+				|| Constants.Activities.SystemDiagnostics.ActivityLink.Equals(paramType)
+				|| Constants.Activities.SystemDiagnostics.ActivityLinkArray.Equals(paramType)
+			)
+			{
+				logger?.Debug(
+					$"Skipping Activity-related parameter '{parameter.Name}' from metrics."
+				);
+				continue;
+			}
 
 			TagOrBaggageAttributeRecord? tagAttribute = null;
 			var destination = InstrumentParameterDestination.Unknown;
@@ -548,7 +552,16 @@ partial class PipelineHelpers
 			var generatedName = GenerateParameterName(
 				tagAttribute?.Name.Value ?? parameterName,
 				null,
-				lowercaseTagKeys
+				lowercaseTagKeys,
+				namingConvention
+			);
+
+			// Check for ExcludeTargetsAttribute
+			var excludeTargets = SharedHelpers.GetExcludeTargetsAttribute(
+				parameter,
+				semanticModel,
+				logger,
+				token
 			);
 
 			parameterTargets.Add(
@@ -563,7 +576,7 @@ partial class PipelineHelpers
 					GeneratedName: generatedName,
 					ParamDestination: destination,
 					SkipOnNullOrEmpty: GetSkipOnNullOrEmptyValue(tagAttribute),
-					Locations: parameter.Locations
+					ExcludedTargets: excludeTargets?.ExcludedTargets ?? GenerationType.None
 				)
 			);
 		}
@@ -574,15 +587,17 @@ partial class PipelineHelpers
 	static string? GeneratePrefix(
 		MeterGenerationAttributeRecord? meterGenerationAttribute,
 		MeterAttributeRecord meterAttribute,
+		string interfaceName,
 		CancellationToken token
 	)
 	{
 		token.ThrowIfCancellationRequested();
 
 		string? prefix = null;
-		var separator = meterGenerationAttribute?.InstrumentSeparator.Or(
-			Constants.Metrics.InstrumentSeparatorDefault
-		);
+		var separator =
+			meterGenerationAttribute?.InstrumentSeparator.Or(
+				Constants.Metrics.InstrumentSeparatorDefault
+			) ?? Constants.Metrics.InstrumentSeparatorDefault;
 
 		if (meterAttribute.IncludeAssemblyInstrumentPrefix.Value == true)
 		{
@@ -590,11 +605,23 @@ partial class PipelineHelpers
 				meterGenerationAttribute?.InstrumentPrefix.IsSet == true
 				&& !string.IsNullOrWhiteSpace(meterGenerationAttribute?.InstrumentPrefix.Value)
 			)
+			{
 				prefix = meterGenerationAttribute!.InstrumentPrefix.Value! + separator;
+			}
 		}
 
+		// Check if interface-level prefix is explicitly set
 		if (!string.IsNullOrWhiteSpace(meterAttribute.InstrumentPrefix.Value))
+		{
 			prefix += meterAttribute.InstrumentPrefix.Value! + separator;
+		}
+		else
+		{
+			// Auto-generate prefix from interface name if not explicitly set
+			var autoPrefix = Utilities.GenerateInstrumentPrefixFromInterfaceName(interfaceName);
+			if (!string.IsNullOrWhiteSpace(autoPrefix))
+				prefix += autoPrefix + separator;
+		}
 
 		return prefix;
 	}

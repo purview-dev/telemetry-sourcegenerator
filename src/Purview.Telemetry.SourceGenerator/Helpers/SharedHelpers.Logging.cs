@@ -21,7 +21,9 @@ partial class SharedHelpers
 				out var matchingTemplate
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeValue<int>? level = null;
 		if (matchingTemplate != Constants.Logging.LogAttribute)
@@ -30,6 +32,7 @@ partial class SharedHelpers
 		AttributeStringValue? messageTemplate = null;
 		AttributeValue<int>? eventId = null;
 		AttributeStringValue? nameValue = null;
+		AttributeValue<int>? generationMode = null;
 
 		if (
 			!AttributeParser(
@@ -42,28 +45,45 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						level = new((int)value);
+					}
 					else if (
 						name.Equals(
 							nameof(LogAttributeRecord.MessageTemplate),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						messageTemplate = new((string)value);
+					}
 					else if (
 						name.Equals(
 							nameof(LogAttributeRecord.EventId),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						eventId = new((int)value);
+					}
 					else if (
 						name.Equals(
 							nameof(LogAttributeRecord.Name),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						nameValue = new((string)value);
+					}
+					else if (
+						name.Equals(
+							nameof(LogAttributeRecord.GenerationMode),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
+					{
+						generationMode = new((int)value);
+					}
 				},
 				semanticModel,
 				logger,
@@ -79,7 +99,8 @@ partial class SharedHelpers
 			Level: level ?? new(),
 			MessageTemplate: messageTemplate ?? new(),
 			EventId: eventId ?? new(),
-			Name: nameValue ?? new()
+			Name: nameValue ?? new(),
+			GenerationMode: generationMode ?? new()
 		);
 	}
 
@@ -98,12 +119,14 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeValue<int>? defaultLevel = null;
 		AttributeStringValue? customPrefix = null;
 		AttributeValue<int>? prefixType = null;
-		AttributeValue<bool>? disableMSLoggingTelemetryGeneration = null;
+		AttributeValue<int>? generationMode = null;
 
 		if (
 			!AttributeParser(
@@ -116,28 +139,36 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						defaultLevel = new((int)value);
+					}
 					else if (
 						name.Equals(
 							nameof(LoggerAttributeRecord.CustomPrefix),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						customPrefix = new((string)value);
+					}
 					else if (
 						name.Equals(
 							nameof(LoggerAttributeRecord.PrefixType),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						prefixType = new((int)value);
+					}
 					else if (
 						name.Equals(
-							nameof(LoggerAttributeRecord.DisableMSLoggingTelemetryGeneration),
+							nameof(LoggerAttributeRecord.GenerationMode),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
-						disableMSLoggingTelemetryGeneration = new((bool)value);
+					{
+						generationMode = new((int)value);
+					}
 				},
 				semanticModel,
 				logger,
@@ -153,7 +184,7 @@ partial class SharedHelpers
 			DefaultLevel: defaultLevel ?? new(),
 			CustomPrefix: customPrefix ?? new(),
 			PrefixType: prefixType ?? new(),
-			DisableMSLoggingTelemetryGeneration: disableMSLoggingTelemetryGeneration ?? new()
+			GenerationMode: generationMode ?? new()
 		);
 	}
 
@@ -172,10 +203,12 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeValue<int>? defaultLevel = null;
-		AttributeValue<bool>? disableMSLoggingTelemetryGeneration = null;
+		AttributeValue<int>? generationMode = null;
 		AttributeValue<int>? prefixType = null;
 
 		if (
@@ -189,23 +222,27 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						defaultLevel = new((int)value);
+					}
 					else if (
 						name.Equals(
-							nameof(
-								LoggerGenerationAttributeRecord.DisableMSLoggingTelemetryGeneration
-							),
+							nameof(LoggerGenerationAttributeRecord.GenerationMode),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
-						disableMSLoggingTelemetryGeneration = new((bool)value);
+					{
+						generationMode = new((int)value);
+					}
 					else if (
 						name.Equals(
 							nameof(LoggerGenerationAttributeRecord.DefaultPrefixType),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						prefixType = new((int)value);
+					}
 				},
 				semanticModel,
 				logger,
@@ -219,7 +256,7 @@ partial class SharedHelpers
 
 		return new(
 			DefaultLevel: defaultLevel ?? new(),
-			DisableMSLoggingTelemetryGeneration: disableMSLoggingTelemetryGeneration ?? new(),
+			GenerationMode: generationMode ?? new(),
 			DefaultPrefixType: prefixType ?? new()
 		);
 	}
@@ -239,7 +276,9 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeValue<bool>? omitReferenceName = null;
 		AttributeValue<bool>? skipNullProperties = null;
@@ -256,21 +295,27 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						omitReferenceName = new((bool)value);
+					}
 					else if (
 						name.Equals(
 							nameof(LogPropertiesAttributeRecord.SkipNullProperties),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						skipNullProperties = new((bool)value);
+					}
 					else if (
 						name.Equals(
 							nameof(LogPropertiesAttributeRecord.Transitive),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						transitive = new((bool)value);
+					}
 				},
 				semanticModel,
 				logger,
@@ -304,7 +349,9 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeValue<int>? maximumValueCount = null;
 
@@ -319,7 +366,9 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						maximumValueCount = new((int)value);
+					}
 				},
 				semanticModel,
 				logger,
@@ -331,7 +380,10 @@ partial class SharedHelpers
 			return null;
 		}
 
-		return new(MaximumValueCount: maximumValueCount ?? new(5));
+		return new(
+			MaximumValueCount: maximumValueCount ?? new(5),
+			ParamLocation: symbol.Locations.FirstOrDefault()
+		);
 	}
 
 	public static LoggerGenerationAttributeRecord? GetLoggerGenerationAttribute(

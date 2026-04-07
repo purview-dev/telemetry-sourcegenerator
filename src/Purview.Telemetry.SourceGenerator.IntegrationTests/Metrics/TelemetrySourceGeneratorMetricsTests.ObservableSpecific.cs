@@ -1,65 +1,75 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Metrics;
+namespace Purview.Telemetry.SourceGenerator.Metrics;
 
 partial class TelemetrySourceGeneratorMetricsTests
 {
-	[Fact]
-	public async Task Generate_GivenObservablesReturnBool_GeneratesMetrics()
+	[Test]
+	public async Task Generate_GivenObservablesReturnVoid_GeneratesMetrics(
+		CancellationToken cancellationToken
+	)
 	{
-		// Arrange
-		const string basicMetric =
-			@"
-using Purview.Telemetry.Metrics;
+		// Arrange - v4.0: Observable instruments must return void and accept Func<T> parameter
+		const string basicMetric = """
+
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
-public interface ITestMetrics 
+[Meter("testing-meter")]
+public interface ITestMetrics
 {
 	[ObservableCounter]
-	bool Counter(Func<int> counterValue, [Tag]int intParam, [Tag]bool boolParam);
+	void Counter(Func<int> counterValue, [Tag]int intParam, [Tag]bool boolParam);
 
 	[ObservableGauge]
-	bool Gauge(Func<int> counterValue, [Tag]int intParam, [Tag]bool boolParam);
+	void Gauge(Func<int> gaugeValue, [Tag]int intParam, [Tag]bool boolParam);
 
 	[ObservableUpDownCounter]
-	bool UpDown(Func<int> counterValue, [Tag]int intParam, [Tag]bool boolParam);
+	void UpDown(Func<int> upDownValue, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenObservablesReturnBoolAndThrowsOnAlreadyInitialized_GeneratesMetrics()
+	[Test]
+	public async Task Generate_GivenObservablesWithThrowsOnAlreadyInitialized_GeneratesMetrics(
+		CancellationToken cancellationToken
+	)
 	{
-		// Arrange
-		const string basicMetric =
-			@"
-using Purview.Telemetry.Metrics;
+		// Arrange - v4.0: Observable instruments must return void
+		const string basicMetric = """
+
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface ITestMetrics {
 	[ObservableCounter(ThrowOnAlreadyInitialized = true)]
-	bool Counter(Func<int> counterValue, [Tag]int intParam, [Tag]bool boolParam);
+	void Counter(Func<int> counterValue, [Tag]int intParam, [Tag]bool boolParam);
 
 	[ObservableGauge(ThrowOnAlreadyInitialized = true)]
-	bool Gauge(Func<int> counterValue, [Tag]int intParam, [Tag]bool boolParam);
+	void Gauge(Func<int> gaugeValue, [Tag]int intParam, [Tag]bool boolParam);
 
 	[ObservableUpDownCounter(ThrowOnAlreadyInitialized = true)]
-	bool UpDown(Func<int> counterValue, [Tag]int intParam, [Tag]bool boolParam);
+	void UpDown(Func<int> upDownValue, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

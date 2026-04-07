@@ -7,5 +7,3 @@
 // </auto-generated>
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
-
-#nullable enable

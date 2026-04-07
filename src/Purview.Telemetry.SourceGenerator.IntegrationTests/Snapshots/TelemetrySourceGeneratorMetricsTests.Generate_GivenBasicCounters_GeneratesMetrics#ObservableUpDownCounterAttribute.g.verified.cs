@@ -9,9 +9,12 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
+#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE
 #nullable enable
+#endif
 
-namespace Purview.Telemetry.Metrics;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Specifies the meter type generated corresponds to a <see cref="global::System.Diagnostics.Metrics.ObservableUpDownCounter{T}"/>.
@@ -38,7 +41,11 @@ sealed class ObservableUpDownCounterAttribute : global::System.Attribute
 	/// <param name="unit">Optionally specifies the <see cref="Unit"/>.</param>
 	/// <param name="description">Optionally specifies the <see cref="Description"/>.</param>
 	/// <param name="throwOnAlreadyInitialized">Optionally specifies if the observable counter throws an exception if it is already initialised. <see cref="ThrowOnAlreadyInitialized" />.</param>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public ObservableUpDownCounterAttribute(string name, string unit = null, string description = null, bool throwOnAlreadyInitialized = false)
+#else
 	public ObservableUpDownCounterAttribute(string name, string? unit = null, string? description = null, bool throwOnAlreadyInitialized = false)
+#endif
 	{
 		Name = name;
 		Unit = unit;
@@ -50,21 +57,34 @@ sealed class ObservableUpDownCounterAttribute : global::System.Attribute
 	/// Optionally specifies the name of the instrument. If
 	/// one is not specified, the method is used.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public string Name { get; set; }
+#else
 	public string? Name { get; set; }
+#endif
 
 	/// <summary>
 	/// Optionally specifies the unit of the meter.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public string Unit { get; set; }
+#else
 	public string? Unit { get; set; }
+#endif
 
 	/// <summary>
 	/// Optionally specifies the description of the meter.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public string Description { get; set; }
+#else
 	public string? Description { get; set; }
+#endif
 
 	/// <summary>
 	/// Optional, determines if the instrument method throws
 	/// if it's already initialised. Defaults to false.
 	/// </summary>
 	public bool ThrowOnAlreadyInitialized { get; set; }
+}
 }

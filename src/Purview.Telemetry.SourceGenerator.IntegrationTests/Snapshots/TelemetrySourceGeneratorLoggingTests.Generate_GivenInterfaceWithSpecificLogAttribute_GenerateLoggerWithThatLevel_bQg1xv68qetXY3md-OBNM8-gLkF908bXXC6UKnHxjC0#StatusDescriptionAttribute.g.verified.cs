@@ -9,9 +9,12 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
+#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE
 #nullable enable
+#endif
 
-namespace Purview.Telemetry.Activities;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Marker attribute used to control the generation
@@ -26,4 +29,5 @@ namespace Purview.Telemetry.Activities;
 [global::System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1019:Define accessors for attribute arguments")]
 sealed class StatusDescriptionAttribute : global::System.Attribute
 {
+}
 }

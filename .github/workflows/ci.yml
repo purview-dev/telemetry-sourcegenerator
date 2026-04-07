@@ -1,33 +1,81 @@
 name: CI
 
+permissions:
+  contents: read
+
 on:
   pull_request:
     branches:
       - main
-      
+
 jobs:
+  format-check:
+    name: Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: ./global.json
+
+      - name: Restore dotnet tools
+        run: dotnet tool restore
+
+      - name: CSharpier format check
+        run: dotnet csharpier check .
+
   build-and-test:
+    name: Build and Test
     runs-on: ubuntu-latest
 
     env:
-      CONFIGURATION: ${{ secrets.CONFIGURATION || 'Release' }}
+      CONFIGURATION: Release
       SOLUTION: ./src/Purview.Telemetry.SourceGenerator.slnx
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           global-json-file: ./src/global.json
 
-      - name: Install dependencies
+      - name: Restore dependencies
         run: dotnet restore ${{ env.SOLUTION }}
 
       - name: Build
         run: dotnet build ${{ env.SOLUTION }} --no-restore --configuration ${{ env.CONFIGURATION }}
 
       - name: Run tests
-        run: dotnet test ${{ env.SOLUTION }} --no-build --verbosity normal --configuration ${{ env.CONFIGURATION }}
-      
+        run: dotnet test --solution ${{ env.SOLUTION }} --no-build --verbosity normal --configuration ${{ env.CONFIGURATION }}
+
+  build-and-test-samples:
+    name: Build and Test Samples
+    runs-on: ubuntu-latest
+
+    env:
+      CONFIGURATION: Release
+      SOLUTION: ./samples/SampleApp/SampleApp.slnx
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: ./samples/SampleApp/global.json
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.SOLUTION }}
+
+      - name: Build
+        run: dotnet build ${{ env.SOLUTION }} --no-restore --configuration ${{ env.CONFIGURATION }}
+
+      - name: Run tests
+        run: dotnet test --solution ${{ env.SOLUTION }} --no-build --verbosity normal --configuration ${{ env.CONFIGURATION }}

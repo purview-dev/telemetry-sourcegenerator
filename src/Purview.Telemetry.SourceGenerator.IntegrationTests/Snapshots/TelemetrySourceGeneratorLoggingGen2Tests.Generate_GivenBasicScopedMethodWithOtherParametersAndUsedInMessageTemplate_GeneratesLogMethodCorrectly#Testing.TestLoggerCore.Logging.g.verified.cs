@@ -19,6 +19,7 @@ namespace Testing
 	sealed partial class TestLoggerCore : global::Testing.ITestLogger
 	{
 		readonly global::Microsoft.Extensions.Logging.ILogger<global::Testing.ITestLogger> _logger;
+		static readonly global::System.Func<global::Microsoft.Extensions.Logging.ILogger, int, string?, uint, global::System.IDisposable?> _basicScopedAction = global::Microsoft.Extensions.Logging.LoggerMessage.DefineScope<int, string?, uint>("intValue: {intValue} nullableStringValue: {nullableStringValue} uintValue: {uintValue}");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestLoggerCore(global::Microsoft.Extensions.Logging.ILogger<global::Testing.ITestLogger> logger)
@@ -30,29 +31,7 @@ namespace Testing
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public global::System.IDisposable? BasicScoped(int intValue, string? nullableStringValue, uint uintValue)
 		{
-			var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-			state.ReserveTagSpace(4);
-
-			state.TagArray[0] = new("{OriginalFormat}", "intValue: {intValue} nullableStringValue: {nullableStringValue} uintValue: {uintValue}");
-			state.TagArray[1] = new("intValue", intValue);
-			state.TagArray[2] = new("nullableStringValue", nullableStringValue);
-			state.TagArray[3] = new("uintValue", uintValue);
-
-			var v0 = state.TagArray[1].Value ?? "(null)";
-			var v1 = state.TagArray[2].Value ?? "(null)";
-			var v2 = state.TagArray[3].Value ?? "(null)";
-
-			var formattedMessage = 
-#if NET
-				string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"intValue: {v0} nullableStringValue: {v1} uintValue: {v2}");
-#else
-				global::System.FormattableString.Invariant($"intValue: {v0} nullableStringValue: {v1} uintValue: {v2}");
-#endif
-			;
-
-			state.AddTag("FormattedMessage", formattedMessage);
-
-			return _logger.BeginScope(state);
+			return _basicScopedAction(_logger, intValue, nullableStringValue, uintValue);
 		}
 
 	}

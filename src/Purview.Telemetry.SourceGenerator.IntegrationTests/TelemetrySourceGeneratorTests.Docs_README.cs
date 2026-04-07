@@ -1,18 +1,18 @@
-﻿namespace Purview.Telemetry.SourceGenerator;
+namespace Purview.Telemetry.SourceGenerator;
 
 partial class TelemetrySourceGeneratorTests
 {
-	[Theory]
-	[InlineData(IncludeLoggerTypes.LoggerOnly)]
-	[InlineData(IncludeLoggerTypes.Telemetry)]
-	public async Task Generate_FromREADMESection_GeneratesTelemetry(IncludeLoggerTypes loggerTypes)
+	[Test]
+	[Arguments(IncludeLoggerTypes.LoggerOnly)]
+	[Arguments(IncludeLoggerTypes.Telemetry)]
+	public async Task Generate_FromREADMESection_GeneratesTelemetry(
+		IncludeLoggerTypes loggerTypes,
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			@"
-using Purview.Telemetry.Activities;
-using Purview.Telemetry.Logging;
-using Purview.Telemetry.Metrics;
+		const string basicTelemetry = """
+
 using System.Diagnostics;
 
 [ActivitySource]
@@ -59,7 +59,7 @@ interface IEntityStoreTelemetry
     /// <summary>
     /// Generates a structured log message using an ILogger, specifically defined as Error.
     /// </summary>
-    [Error(""An explicit error message. The entity Id is {EntityId}, and the error is {Exception}."")]
+    [Error("An explicit error message. The entity Id is {EntityId}, and the error is {Exception}.")]
     void ExplicitErrorMessage(int entityId, Exception exception);
 
     /// <summary>
@@ -68,38 +68,45 @@ interface IEntityStoreTelemetry
     [AutoCounter]
     void RetrievingEntity(int entityId);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
 			disableDependencyInjection: false,
-			includeLoggerTypes: loggerTypes
+			includeLoggerTypes: loggerTypes,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, parameters: loggerTypes);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			cancellationToken: cancellationToken,
+			parameters: loggerTypes
+		);
 	}
 
-	[Fact]
-	public async Task Generate_FromWikiActivitiesSection_GeneratesTelemetry()
+	[Test]
+	public async Task Generate_FromWikiActivitiesSection_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			@"
-using Purview.Telemetry.Activities;
+		const string basicTelemetry = """
+
 using System.Diagnostics;
 
-[ActivitySource(""some-activity"")]
+[ActivitySource("some-activity")]
 interface IActivityTelemetry
 {
     [Activity]
     Activity? GettingItemFromCache([Baggage]string key, [Tag]string itemType);
 
-    [Event(""cachemiss"")]
+    [Event("cachemiss")]
     void Miss(Activity? activity);
 
-    [Event(""cachehit"")]
+    [Event("cachehit")]
     void Hit(Activity? activity);
 
     [Event]
@@ -108,25 +115,28 @@ interface IActivityTelemetry
     [Event]
     void Finished(Activity? activity, [Tag]TimeSpan duration);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_FromWikiLoggingSection_GeneratesTelemetry()
+	[Test]
+	public async Task Generate_FromWikiLoggingSection_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string basicTelemetry =
 			@"
-using Purview.Telemetry.Logging;
 using Microsoft.Extensions.Logging;
 
 [Logger]
@@ -157,20 +167,22 @@ enum ItemTypes
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_FromWikiMetricsSection_GeneratesTelemetry()
+	[Test]
+	public async Task Generate_FromWikiMetricsSection_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string basicTelemetry =
 			@"
-using Purview.Telemetry.Metrics;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 
@@ -206,25 +218,25 @@ interface IMeterTelemetry
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_FromWikiMultiTargetingSection_GeneratesTelemetry()
+	[Test]
+	public async Task Generate_FromWikiMultiTargetingSection_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			@"
-using Purview.Telemetry.Activities;
-using Purview.Telemetry.Logging;
-using Purview.Telemetry.Metrics;
+		const string basicTelemetry = """
+
 using System.Diagnostics;
 
-[ActivitySource(""multi-targeting"")]
+[ActivitySource("multi-targeting")]
 [Logger]
 [Meter]
 interface IServiceTelemetry
@@ -244,15 +256,17 @@ interface IServiceTelemetry
     [Counter(AutoIncrement = true)]
     void AnAutoIncrement([Tag]int value);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

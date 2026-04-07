@@ -9,9 +9,12 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
+#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE
 #nullable enable
+#endif
 
-namespace Purview.Telemetry.Activities;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Used during <see cref="global::System.Diagnostics.ActivityEvent"/> generation
@@ -24,4 +27,5 @@ namespace Purview.Telemetry.Activities;
 [global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
 sealed class EscapeAttribute : global::System.Attribute
 {
+}
 }

@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Collections.Immutable;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -8,81 +9,167 @@ namespace Purview.Telemetry.SourceGenerator.Helpers;
 
 static partial class Utilities
 {
+	static readonly Regex WhitespaceRegex = new(
+		@"\s+",
+		RegexOptions.Compiled,
+		TimeSpan.FromMilliseconds(2000)
+	);
+
 	public static TargetGeneration IsValidGenerationTarget(
 		IMethodSymbol method,
 		GenerationType generationType,
 		GenerationType requestedType
 	)
 	{
-		var attributes = method
-			.GetAttributes()
-			.Where(m => m.AttributeClass != null)
-			.Select(m => PurviewTypeFactory.Create(m.AttributeClass!))
-			.ToArray();
-		var activityCount = attributes.Count(static m =>
-			Constants.Activities.ActivityAttribute == m
-			|| Constants.Activities.EventAttribute == m
-			|| Constants.Activities.ContextAttribute == m
-		);
-		var loggingCount = attributes.Count(static m =>
-			Constants.Logging.LogAttribute == m
-			|| Constants.Logging.TraceAttribute == m
-			|| Constants.Logging.DebugAttribute == m
-			|| Constants.Logging.InfoAttribute == m
-			|| Constants.Logging.WarningAttribute == m
-			|| Constants.Logging.ErrorAttribute == m
-			|| Constants.Logging.CriticalAttribute == m
-		);
-		var metricsCount = attributes.Count(static m =>
-			Constants.Metrics.CounterAttribute == m
-			|| Constants.Metrics.AutoCounterAttribute == m
-			|| Constants.Metrics.UpDownCounterAttribute == m
-			|| Constants.Metrics.HistogramAttribute == m
-			|| Constants.Metrics.ObservableCounterAttribute == m
-			|| Constants.Metrics.ObservableGaugeAttribute == m
-			|| Constants.Metrics.ObservableUpDownCounterAttribute == m
-		);
+		// Optimized: Count in single pass instead of multiple enumerations
+		var activityCount = 0;
+		var loggingCount = 0;
+		var metricsCount = 0;
 
-		var count = activityCount + loggingCount + metricsCount;
+		foreach (var attribute in method.GetAttributes())
+		{
+			if (attribute.AttributeClass == null)
+				continue;
+
+			var attributeType = PurviewTypeFactory.Create(attribute.AttributeClass);
+
+			// Check activities
+			if (
+				Constants.Activities.ActivityAttribute == attributeType
+				|| Constants.Activities.EventAttribute == attributeType
+				|| Constants.Activities.ContextAttribute == attributeType
+			)
+			{
+				activityCount++;
+			}
+			// Check logging
+			else if (
+				Constants.Logging.LogAttribute == attributeType
+				|| Constants.Logging.TraceAttribute == attributeType
+				|| Constants.Logging.DebugAttribute == attributeType
+				|| Constants.Logging.InfoAttribute == attributeType
+				|| Constants.Logging.WarningAttribute == attributeType
+				|| Constants.Logging.ErrorAttribute == attributeType
+				|| Constants.Logging.CriticalAttribute == attributeType
+			)
+			{
+				loggingCount++;
+			}
+			// Check metrics
+			else if (
+				Constants.Metrics.CounterAttribute == attributeType
+				|| Constants.Metrics.AutoCounterAttribute == attributeType
+				|| Constants.Metrics.UpDownCounterAttribute == attributeType
+				|| Constants.Metrics.HistogramAttribute == attributeType
+				|| Constants.Metrics.ObservableCounterAttribute == attributeType
+				|| Constants.Metrics.ObservableGaugeAttribute == attributeType
+				|| Constants.Metrics.ObservableUpDownCounterAttribute == attributeType
+			)
+			{
+				metricsCount++;
+			}
+		}
+
 		var inferenceNotSupportedWithMultiTargeting = false;
 		var multiGenerationTargetsNotSupported = false;
-		if (generationType != requestedType)
+		var raiseMissingInterfaceSource = false;
+
+		// Check for intra-family conflicts (multiple attributes within same family)
+		// This is always an error - can only have one activity/event/context, one log level, one instrument
+		if (activityCount > 1 || loggingCount > 1 || metricsCount > 1)
+			multiGenerationTargetsNotSupported = true;
+
+		// Count how many families are present on the interface
+		var interfaceTargetCount = 0;
+		if (generationType.HasFlag(GenerationType.Activities))
+			interfaceTargetCount++;
+		if (generationType.HasFlag(GenerationType.Logging))
+			interfaceTargetCount++;
+		if (generationType.HasFlag(GenerationType.Metrics))
+			interfaceTargetCount++;
+
+		// Determine which target families this method has explicit attributes for
+		var methodTargets = GenerationType.None;
+		if (activityCount > 0)
+			methodTargets |= GenerationType.Activities;
+		if (loggingCount > 0)
+			methodTargets |= GenerationType.Logging;
+		if (metricsCount > 0)
+			methodTargets |= GenerationType.Metrics;
+
+		// Count how many target families this method targets
+		var methodTargetFamilyCount = 0;
+		if (methodTargets.HasFlag(GenerationType.Activities))
+			methodTargetFamilyCount++;
+		if (methodTargets.HasFlag(GenerationType.Logging))
+			methodTargetFamilyCount++;
+		if (methodTargets.HasFlag(GenerationType.Metrics))
+			methodTargetFamilyCount++;
+
+		// This method is multi-target if it has attributes from more than one family
+		var isMultiTarget = methodTargetFamilyCount > 1;
+
+		// If interface has multiple target families, methods need explicit attributes (no inference)
+		if (interfaceTargetCount > 1)
 		{
-			// This means it's multi-target generation so we need everything to be explicit.
-			if (count == 0)
+			// If no explicit attribute for any target, that's the inference error
+			if (methodTargetFamilyCount == 0)
 				inferenceNotSupportedWithMultiTargeting = true;
 		}
 
-		if (count > 1)
-			multiGenerationTargetsNotSupported = true;
+		// Check if the method has explicit attributes for a family not registered on the interface.
+		// e.g. method has [AutoCounter] but interface only has [Logger] (missing [Meter]).
+		var missingInterfaceTargets = methodTargets & ~generationType;
+		if (missingInterfaceTargets != GenerationType.None)
+			raiseMissingInterfaceSource = true;
 
+		// Determine if this method is valid for the requested target type
 		var isValid =
-			!multiGenerationTargetsNotSupported && !inferenceNotSupportedWithMultiTargeting;
+			!multiGenerationTargetsNotSupported
+			&& !inferenceNotSupportedWithMultiTargeting
+			&& !raiseMissingInterfaceSource;
 		if (isValid)
 		{
-			if (
-				generationType.HasFlag(GenerationType.Activities)
-				&& requestedType == GenerationType.Activities
-			)
-				isValid = loggingCount == 0 && metricsCount == 0;
+			// Method is valid for this target if it has an explicit attribute for this target,
+			// OR if it's single-target generation and can use inference
+			if (interfaceTargetCount > 1)
+			{
+				// Multi-target interface: must have explicit attribute for this target
+				isValid = requestedType switch
+				{
+					GenerationType.Activities => activityCount > 0,
+					GenerationType.Logging => loggingCount > 0,
+					GenerationType.Metrics => metricsCount > 0,
+					_ => false,
+				};
+			}
+			// Single-target interface: original inference logic applies
+		}
 
-			if (
-				generationType.HasFlag(GenerationType.Logging)
-				&& requestedType == GenerationType.Logging
-			)
-				isValid = activityCount == 0 && metricsCount == 0;
-
-			if (
-				generationType.HasFlag(GenerationType.Metrics)
-				&& requestedType == GenerationType.Metrics
-			)
-				isValid = activityCount == 0 && loggingCount == 0;
+		// Check for Activity parameter without Activity target
+		string? activityParameterWithoutTarget = null;
+		if (activityCount == 0)
+		{
+			// No Activity attribute, check if there are Activity parameters
+			foreach (var param in method.Parameters)
+			{
+				var paramType = PurviewTypeFactory.Create(param.Type);
+				if (Constants.Activities.SystemDiagnostics.Activity.Equals(paramType))
+				{
+					activityParameterWithoutTarget = param.Name;
+					break;
+				}
+			}
 		}
 
 		return new(
 			IsValid: isValid,
 			RaiseInferenceNotSupportedWithMultiTargeting: inferenceNotSupportedWithMultiTargeting,
-			RaiseMultiGenerationTargetsNotSupported: multiGenerationTargetsNotSupported
+			RaiseMultiGenerationTargetsNotSupported: multiGenerationTargetsNotSupported,
+			IsMultiTarget: isMultiTarget,
+			MethodTargets: methodTargets,
+			ActivityParameterWithoutTarget: activityParameterWithoutTarget,
+			RaiseMissingInterfaceSource: raiseMissingInterfaceSource
 		);
 	}
 
@@ -91,7 +178,7 @@ static partial class Utilities
 
 	public static string Wrap(this string value, char c = '"') => c + value + c;
 
-	public static string[] GetParentClasses(TypeDeclarationSyntax classDeclaration)
+	public static EquatableArray<string> GetParentClasses(TypeDeclarationSyntax classDeclaration)
 	{
 		var parentClass = classDeclaration.Parent as ClassDeclarationSyntax;
 
@@ -103,7 +190,9 @@ static partial class Utilities
 			parentClass = parentClass.Parent as ClassDeclarationSyntax;
 		}
 
-		return [.. parentClassList];
+		return parentClassList.Count == 0
+			? new EquatableArray<string>([])
+			: parentClassList.ToImmutableArray();
 	}
 
 	public static string? GetParentClassesAsNamespace(TypeDeclarationSyntax classDeclaration)
@@ -113,12 +202,16 @@ static partial class Utilities
 		List<string> parentClasses = [];
 		while (parentClass != null)
 		{
-			parentClasses.Insert(0, parentClass.Identifier.Text);
+			parentClasses.Add(parentClass.Identifier.Text);
 
 			parentClass = parentClass.Parent as ClassDeclarationSyntax;
 		}
 
-		return parentClasses.Count == 0 ? null : string.Join(".", parentClasses);
+		if (parentClasses.Count == 0)
+			return null;
+
+		parentClasses.Reverse();
+		return string.Join(".", parentClasses);
 	}
 
 	public static string? GetNamespace(TypeDeclarationSyntax typeSymbol)
@@ -126,9 +219,10 @@ static partial class Utilities
 		// Determine the namespace the type is declared in, if any
 		var potentialNamespaceParent = typeSymbol.Parent;
 		while (
-			potentialNamespaceParent != null
-			&& potentialNamespaceParent is not NamespaceDeclarationSyntax
-			&& potentialNamespaceParent is not FileScopedNamespaceDeclarationSyntax
+			potentialNamespaceParent
+				is not null
+					and not NamespaceDeclarationSyntax
+					and not FileScopedNamespaceDeclarationSyntax
 		)
 		{
 			potentialNamespaceParent = potentialNamespaceParent.Parent;
@@ -137,11 +231,8 @@ static partial class Utilities
 		if (potentialNamespaceParent is BaseNamespaceDeclarationSyntax namespaceParent)
 		{
 			var @namespace = namespaceParent.Name.ToString();
-			while (true)
+			while (namespaceParent.Parent is NamespaceDeclarationSyntax namespaceParentParent)
 			{
-				if (namespaceParent.Parent is not NamespaceDeclarationSyntax namespaceParentParent)
-					break;
-
 				namespaceParent = namespaceParentParent;
 				@namespace = $"{namespaceParent.Name}.{@namespace}";
 			}
@@ -175,7 +266,9 @@ static partial class Utilities
 				fullNamespace += ".";
 		}
 		else if (includeTrailingSeparator && fullNamespace != null)
+		{
 			fullNamespace += ".";
+		}
 
 		return fullNamespace;
 	}
@@ -194,7 +287,7 @@ static partial class Utilities
 	public static bool IsComplexType(this ITypeSymbol typeSymbol)
 	{
 		// Check for class, struct, or record types
-		if (typeSymbol.TypeKind == TypeKind.Class || typeSymbol.TypeKind == TypeKind.Struct)
+		if (typeSymbol.TypeKind is TypeKind.Class or TypeKind.Struct)
 		{
 			// Exclude primitive types and special types like string
 			if (typeSymbol.SpecialType is SpecialType.None)
@@ -244,7 +337,7 @@ static partial class Utilities
 
 	public static bool IsExceptionType(this ITypeSymbol typeSymbol)
 	{
-		ITypeSymbol? localTypeSymbol = typeSymbol;
+		var localTypeSymbol = typeSymbol;
 		while (localTypeSymbol != null)
 		{
 			if (Constants.System.Exception.Equals(localTypeSymbol))
@@ -259,8 +352,7 @@ static partial class Utilities
 	public static string Flatten(this SyntaxNode syntax) =>
 		syntax.WithoutTrivia().ToString().Flatten();
 
-	public static string Flatten(this string value) =>
-		Regex.Replace(value, @"\s+", " ", RegexOptions.None, TimeSpan.FromMilliseconds(2000));
+	public static string Flatten(this string value) => WhitespaceRegex.Replace(value, " ");
 
 	public static bool ContainsAttribute(
 		ISymbol symbol,
@@ -389,5 +481,183 @@ static partial class Utilities
 		}
 
 		return value;
+	}
+
+	/// <summary>
+	/// Converts PascalCase or camelCase identifiers to lowercase with separators between words.
+	/// E.g., "EntityId" -> "entity.id" (dot separator), "entity_id" (underscore separator)
+	/// </summary>
+	public static string ConvertToSeparatedLowercase(string pascalCaseName, char separator = '.')
+	{
+		if (string.IsNullOrEmpty(pascalCaseName))
+			return pascalCaseName;
+
+		System.Text.StringBuilder result = new();
+		bool previousWasUpper = false;
+		bool previousWasLower = false;
+
+		for (int i = 0; i < pascalCaseName.Length; i++)
+		{
+			char current = pascalCaseName[i];
+			bool isUpper = char.IsUpper(current);
+			bool isLower = char.IsLower(current);
+
+			if (i > 0 && isUpper)
+			{
+				// Add separator before uppercase if:
+				// 1. Previous was lowercase (camelCase boundary: "entityId" -> "entity.id")
+				// 2. Next is lowercase and previous was uppercase (acronym boundary: "HTTPSConnection" -> "https.connection")
+				bool nextIsLower =
+					i + 1 < pascalCaseName.Length && char.IsLower(pascalCaseName[i + 1]);
+
+				if (previousWasLower || (previousWasUpper && nextIsLower))
+				{
+					result.Append(separator);
+				}
+			}
+
+			result.Append(char.ToLowerInvariant(current));
+
+			previousWasUpper = isUpper;
+			previousWasLower = isLower;
+		}
+
+		return result.ToString();
+	}
+
+	/// <summary>
+	/// Generates an instrument prefix from an interface name by:
+	/// 1. Stripping leading 'I' if present
+	/// 2. Stripping trailing 'Logs' or 'Telemetry' if present
+	/// 3. Converting to snake_case
+	/// Example: "IWeatherServiceTelemetry" -> "weather_service"
+	/// </summary>
+	public static string GenerateInstrumentPrefixFromInterfaceName(string interfaceName)
+	{
+		if (string.IsNullOrWhiteSpace(interfaceName))
+			return string.Empty;
+
+		var name = interfaceName;
+
+		// Strip leading 'I' if present
+		if (name.Length > 1 && name[0] == 'I' && char.IsUpper(name[1]))
+			name = name.Substring(1);
+
+		// Strip trailing 'Telemetry' or 'Logs'
+		if (name.EndsWith("Telemetry", StringComparison.Ordinal))
+			name = name.Substring(0, name.Length - "Telemetry".Length);
+		else if (name.EndsWith("Logs", StringComparison.Ordinal))
+			name = name.Substring(0, name.Length - "Logs".Length);
+
+		// If we stripped everything, return empty
+		if (string.IsNullOrWhiteSpace(name))
+			return string.Empty;
+
+		// Convert to snake_case
+		return ConvertToSeparatedLowercase(name, '_');
+	}
+
+	/// <summary>
+	/// Detects if a lowercase string appears to be a compound word without separators.
+	/// E.g., "entityid", "requestcount", "httpconnection" (likely compounds)
+	/// Returns true if the string is likely multiple words smashed together.
+	/// </summary>
+	public static bool IsLikelyCompoundWord(string lowercaseName)
+	{
+		if (string.IsNullOrEmpty(lowercaseName) || lowercaseName.Length < 6)
+			return false;
+
+		// If it contains separators already, it's not a compound
+		if (
+			lowercaseName.Contains('.')
+			|| lowercaseName.Contains('_')
+			|| lowercaseName.Contains('-')
+		)
+			return false;
+
+		// Common compound patterns (heuristic)
+		string[] commonSuffixes =
+		[
+			"id",
+			"key",
+			"name",
+			"type",
+			"count",
+			"value",
+			"time",
+			"date",
+			"code",
+			"number",
+		];
+		string[] commonPrefixes = ["get", "set", "is", "has", "can", "should", "will"];
+
+		foreach (var suffix in commonSuffixes)
+		{
+			if (
+				lowercaseName.EndsWith(suffix, StringComparison.Ordinal)
+				&& lowercaseName.Length > suffix.Length + 2
+			)
+				return true;
+		}
+
+		foreach (var prefix in commonPrefixes)
+		{
+			if (
+				lowercaseName.StartsWith(prefix, StringComparison.Ordinal)
+				&& lowercaseName.Length > prefix.Length + 2
+			)
+				return true;
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	/// Checks if a name is a generic or reserved term that provides little semantic value.
+	/// </summary>
+	[System.Diagnostics.CodeAnalysis.SuppressMessage(
+		"Globalization",
+		"CA1308:Normalize strings to uppercase"
+	)]
+	public static bool IsGenericOrReservedName(string name)
+	{
+		if (string.IsNullOrWhiteSpace(name))
+			return false;
+
+		string[] genericTerms =
+		[
+			"activity",
+			"event",
+			"error",
+			"exception",
+			"start",
+			"stop",
+			"begin",
+			"end",
+			"task",
+			"action",
+			"func",
+			"method",
+			"operation",
+			"process",
+			"handler",
+		];
+
+		string lowerName = name.ToLowerInvariant();
+		return genericTerms.Contains(lowerName);
+	}
+
+	/// <summary>
+	/// Checks if a method has any metrics-related attribute (Counter, AutoCounter, UpDownCounter, Histogram, etc.)
+	/// </summary>
+	public static bool HasMetricsAttribute(IMethodSymbol method, CancellationToken token)
+	{
+		return ContainsAttribute(method, Constants.Metrics.CounterAttribute, token)
+			|| ContainsAttribute(method, Constants.Metrics.AutoCounterAttribute, token)
+			|| ContainsAttribute(method, Constants.Metrics.UpDownCounterAttribute, token)
+			|| ContainsAttribute(method, Constants.Metrics.HistogramAttribute, token)
+			|| ContainsAttribute(method, Constants.Metrics.ObservableCounterAttribute, token)
+			|| ContainsAttribute(method, Constants.Metrics.ObservableGaugeAttribute, token)
+			|| ContainsAttribute(method, Constants.Metrics.ObservableUpDownCounterAttribute, token);
 	}
 }

@@ -12,7 +12,8 @@ partial class ActivitySourceTargetClassEmitter
 		int indent,
 		ActivityBasedGenerationTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -43,26 +44,12 @@ partial class ActivitySourceTargetClassEmitter
 		{
 			logger?.Diagnostic("Parent context/ Id not allowed on event method, only activities.");
 
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.ParentContextOrIdParameterNotAllowed,
-				parentContextOrId.Locations,
-				parentContextOrId.ParameterName
-			);
-
 			return;
 		}
 
 		if (linksParam != null)
 		{
 			logger?.Diagnostic("Links parameter not allowed on event method, only activities.");
-
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.LinksParameterNotAllowed,
-				linksParam.Locations,
-				linksParam.ParameterName
-			);
 
 			return;
 		}
@@ -73,17 +60,10 @@ partial class ActivitySourceTargetClassEmitter
 				"Start time parameter not allowed on event method, only activities."
 			);
 
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.StartTimeParameterNotAllowed,
-				startTimeParam.Locations,
-				startTimeParam.ParameterName
-			);
-
 			return;
 		}
 
-		EmitHasListenersTest(builder, indent, methodTarget);
+		EmitHasListenersTest(builder, indent, methodTarget, emitNullable);
 
 		builder
 			.Append(indent, "if (", withNewLine: false)
@@ -108,7 +88,11 @@ partial class ActivitySourceTargetClassEmitter
 				)
 				.Append(' ')
 				.Append(tagsListVariableName)
-				.Append(" = new(");
+				.Append(
+					emitNullable
+						? " = new("
+						: $" = new {Constants.Activities.SystemDiagnostics.ActivityTagsCollection}("
+				);
 
 			if (tagsParam != null)
 				builder.Append(tagsParam.ParameterName);
@@ -119,18 +103,22 @@ partial class ActivitySourceTargetClassEmitter
 			var emitExceptionEscape =
 				escapeParam != null || Constants.Activities.RecordExceptionEscapedDefault;
 			if (methodTarget.EventAttribute?.UseRecordExceptionRules.IsSet == true)
+			{
 				useRecordedExceptionRules = methodTarget
 					.EventAttribute
 					.UseRecordExceptionRules
 					.Value!
 					.Value;
+			}
 
 			if (methodTarget.EventAttribute?.RecordExceptionEscape.IsSet == true)
+			{
 				emitExceptionEscape = methodTarget
 					.EventAttribute
 					.RecordExceptionEscape!
 					.Value!
 					.Value;
+			}
 
 			var escapeValue = escapeParam?.ParameterName ?? "true";
 			foreach (var tagParam in methodTarget.Tags)
@@ -230,8 +218,9 @@ partial class ActivitySourceTargetClassEmitter
 			)
 			.Append(' ')
 			.Append(eventVariableName)
-			.Append(" = new")
-			// name:
+			.Append(" = new ")
+			// Use explicit type for C# 7.3 compatibility (target-typed new() requires C# 9+)
+			.Append(Constants.Activities.SystemDiagnostics.ActivityEvent)
 			.Append("(name: ")
 			.Append(methodTarget.ActivityOrEventName.Wrap())
 			// timestamp:

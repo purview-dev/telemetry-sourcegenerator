@@ -18,28 +18,16 @@ namespace Testing
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class TestMetricsCore : global::Testing.ITestMetrics
 	{
-		global::System.Diagnostics.Metrics.Meter _meter = default!;
+		readonly global::System.Diagnostics.Metrics.Meter _meter;
 
-		global::System.Diagnostics.Metrics.ObservableGauge<int>? _observableGaugeInstrument = null;
-		global::System.Diagnostics.Metrics.ObservableGauge<int>? _observableGauge2Instrument = null;
-		global::System.Diagnostics.Metrics.ObservableGauge<int>? _observableGauge3Instrument = null;
+		global::System.Diagnostics.Metrics.ObservableGauge<int> _observableGaugeInstrument = default!;
+		global::System.Diagnostics.Metrics.ObservableGauge<int> _observableGauge2Instrument = default!;
+		global::System.Diagnostics.Metrics.ObservableGauge<int> _observableGauge3Instrument = default!;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestMetricsCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
 		{
-			InitializeMeters(meterFactory);
-		}
-
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		void InitializeMeters(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
-		{
-			if (_meter != null)
-			{
-				throw new global::System.Exception("The meters have already been initialized.");
-			}
-
-			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateMeterTags(meterTags);
 
@@ -63,14 +51,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList observableGaugeTagList = new();
-
-			observableGaugeTagList.Add("intparam", intParam);
-			observableGaugeTagList.Add("boolparam", boolParam);
-
-			_observableGaugeInstrument = _meter.CreateObservableGauge<int>("observablegauge", f, unit: null, description: null
-				, tags: observableGaugeTagList
-			);
+			_observableGaugeInstrument = _meter.CreateObservableGauge<int>("test_metrics.observable_gauge", f, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -78,17 +59,10 @@ namespace Testing
 		{
 			if (_observableGauge2Instrument != null)
 			{
-				throw new global::System.Exception("observablegauge2 has already been initialized.");
+				throw new global::System.Exception("test_metrics.observable_gauge2 has already been initialized.");
 			}
 
-			global::System.Diagnostics.TagList observableGauge2TagList = new();
-
-			observableGauge2TagList.Add("intparam", intParam);
-			observableGauge2TagList.Add("boolparam", boolParam);
-
-			_observableGauge2Instrument = _meter.CreateObservableGauge<int>("observablegauge2", f, unit: null, description: null
-				, tags: observableGauge2TagList
-			);
+			_observableGauge2Instrument = _meter.CreateObservableGauge<int>("test_metrics.observable_gauge2", f, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -99,14 +73,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList observableGauge3TagList = new();
-
-			observableGauge3TagList.Add("intparam", intParam);
-			observableGauge3TagList.Add("boolparam", boolParam);
-
-			_observableGauge3Instrument = _meter.CreateObservableGauge<int>("observablegauge3", f, unit: null, description: null
-				, tags: observableGauge3TagList
-			);
+			_observableGauge3Instrument = _meter.CreateObservableGauge<int>("test_metrics.observable_gauge3", f, unit: null, description: null);
 		}
 	}
 }

@@ -37,10 +37,7 @@ partial class PipelineHelpers
 			logger?.Diagnostic(
 				$"Cannot generate a Activity target for a generic interface '{interfaceDeclaration.Flatten()}'."
 			);
-			return ActivitySourceTarget.Failed(
-				TelemetryDiagnostics.General.GenericInterfacesNotSupported,
-				interfaceSymbol.Locations
-			);
+			return null;
 		}
 
 		var semanticModel = context.SemanticModel;
@@ -79,13 +76,21 @@ partial class PipelineHelpers
 			: activitySourceAttribute.Name.IsSet ? activitySourceAttribute.Name.Value!
 			: null;
 
+		// Get naming convention from TelemetryGenerationAttribute (default to OpenTelemetry = 1)
+		var namingConvention = telemetryGeneration.NamingConvention.Value ?? 1;
+		var isLegacy = namingConvention == 0;
+
 		if (activitySourceName == null)
 		{
-#pragma warning disable CA1308 // Normalize strings to uppercase
-			var assemblyName = context.SemanticModel.Compilation.AssemblyName?.ToLowerInvariant();
-#pragma warning restore CA1308 // Normalize strings to uppercase
+			var assemblyName = context.SemanticModel.Compilation.AssemblyName;
 			if (!string.IsNullOrWhiteSpace(assemblyName))
-				activitySourceName = assemblyName;
+			{
+				// Legacy mode: lowercase the assembly name
+				// OpenTelemetry mode: preserve casing
+#pragma warning disable CA1308 // Intentional lowercase for legacy compatibility
+				activitySourceName = isLegacy ? assemblyName!.ToLowerInvariant() : assemblyName;
+#pragma warning restore CA1308
+			}
 		}
 
 		var fullNamespace = Utilities.GetFullNamespace(interfaceDeclaration, true);
@@ -94,11 +99,11 @@ partial class PipelineHelpers
 			generationType,
 			activitySourceAttribute,
 			activitySourceGenerationAttribute,
+			telemetryGeneration,
 			semanticModel,
 			interfaceSymbol,
 			logger,
-			token,
-			out var methodDiagnostics
+			token
 		);
 
 		return new(
@@ -112,11 +117,8 @@ partial class PipelineHelpers
 			InterfaceType: PurviewTypeFactory.Create(interfaceSymbol),
 			ActivitySourceGenerationAttribute: activitySourceGenerationAttribute,
 			ActivitySourceName: activitySourceName,
-			ActivityTargetAttributeRecord: activitySourceAttribute,
 			ActivityMethods: activityMethods,
-			InterfaceLocation: interfaceDeclaration.GetLocation(),
-			DuplicateMethods: BuildDuplicateMethods(interfaceSymbol, semanticModel, token),
-			Failures: methodDiagnostics?.ToImmutableArray()
+			ActivityTargetAttributeRecord: activitySourceAttribute
 		);
 	}
 
@@ -124,14 +126,17 @@ partial class PipelineHelpers
 		GenerationType generationType,
 		ActivitySourceAttributeRecord activitySourceAttribute,
 		ActivitySourceGenerationAttributeRecord? activitySourceGenerationAttribute,
+		TelemetryGenerationAttributeRecord telemetryGeneration,
 		SemanticModel semanticModel,
 		INamedTypeSymbol interfaceSymbol,
 		GenerationLogger? logger,
-		CancellationToken token,
-		out (TelemetryDiagnosticDescriptor, ImmutableArray<Location>)[]? methodDiagnostics
+		CancellationToken token
 	)
 	{
 		token.ThrowIfCancellationRequested();
+
+		// Get naming convention from TelemetryGenerationAttribute (default to OpenTelemetry = 1)
+		var namingConvention = telemetryGeneration?.NamingConvention.Value ?? 1;
 
 		var prefix = GeneratePrefix(
 			activitySourceGenerationAttribute,
@@ -141,14 +146,13 @@ partial class PipelineHelpers
 		var defaultToTags =
 			activitySourceGenerationAttribute?.DefaultToTags.IsSet == true
 				? activitySourceGenerationAttribute.DefaultToTags.Value!.Value
-				: activitySourceAttribute.DefaultToTags.Value!.Value;
-		var lowercaseBaggageAndTagKeys = activitySourceAttribute
-			.LowercaseBaggageAndTagKeys!
-			.Value!
-			.Value;
+				: activitySourceAttribute.DefaultToTags?.IsSet != true
+					|| activitySourceAttribute.DefaultToTags.Value!.Value; // Default value
 
-		List<(TelemetryDiagnosticDescriptor, ImmutableArray<Location>)>? methodDiagnosticsList =
-			null;
+		var lowercaseBaggageAndTagKeys =
+			activitySourceAttribute.LowercaseBaggageAndTagKeys?.IsSet != true
+			|| activitySourceAttribute.LowercaseBaggageAndTagKeys.Value!.Value; // Default value
+
 		List<ActivityBasedGenerationTarget> methodTargets = [];
 		foreach (
 			var method in GetAllInterfaceMethods(interfaceSymbol, semanticModel.Compilation, token)
@@ -158,9 +162,28 @@ partial class PipelineHelpers
 
 			if (method.Arity > 0)
 			{
-				methodDiagnosticsList ??= [];
-				methodDiagnosticsList.Add(
-					(TelemetryDiagnostics.General.GenericMethodsNotSupported, method.Locations)
+				methodTargets.Add(
+					new(
+						MethodName: method.Name,
+						ReturnType: PurviewTypeFactory.Create(method.ReturnType),
+						ActivityOrEventName: method.Name,
+						HasActivityParameter: false,
+						ActivityAttribute: null,
+						EventAttribute: null,
+						MethodType: ActivityMethodType.Activity,
+						Parameters: ImmutableArray<ActivityBasedParameterTarget>.Empty,
+						Baggage: ImmutableArray<ActivityBasedParameterTarget>.Empty,
+						Tags: ImmutableArray<ActivityBasedParameterTarget>.Empty,
+						TargetGenerationState: new TargetGeneration(
+							IsValid: false,
+							RaiseInferenceNotSupportedWithMultiTargeting: false,
+							RaiseMultiGenerationTargetsNotSupported: false
+						),
+						TypeParameters: ImmutableArray.CreateRange(
+							method.TypeParameters,
+							tp => tp.Name
+						)
+					)
 				);
 				continue;
 			}
@@ -196,6 +219,7 @@ partial class PipelineHelpers
 				prefix,
 				defaultToTags,
 				lowercaseBaggageAndTagKeys,
+				namingConvention,
 				semanticModel,
 				logger,
 				token
@@ -207,6 +231,18 @@ partial class PipelineHelpers
 				.Where(m => m.ParamDestination == ActivityParameterDestination.Tag)
 				.ToImmutableArray();
 
+			var targetGenerationState = Utilities.IsValidGenerationTarget(
+				method,
+				generationType,
+				GenerationType.Activities
+			);
+			if (targetGenerationState.RaiseMissingInterfaceSource)
+			{
+				logger?.Debug(
+					$"Identified {interfaceSymbol.Name}.{method.Name} as problematic as the interface is missing source attribute(s) for the method's target(s)."
+				);
+			}
+
 			methodTargets.Add(
 				new(
 					MethodName: method.Name,
@@ -215,23 +251,16 @@ partial class PipelineHelpers
 					HasActivityParameter: parameters.Any(m =>
 						Constants.Activities.SystemDiagnostics.Activity.Equals(m.ParameterType)
 					),
-					Locations: method.Locations,
 					ActivityAttribute: activityAttribute,
 					EventAttribute: eventAttribute,
 					MethodType: methodType,
 					Parameters: parameters,
 					Baggage: baggageParameters,
 					Tags: tagParameters,
-					TargetGenerationState: Utilities.IsValidGenerationTarget(
-						method,
-						generationType,
-						GenerationType.Activities
-					)
+					TargetGenerationState: targetGenerationState
 				)
 			);
 		}
-
-		methodDiagnostics = methodDiagnosticsList?.ToArray();
 
 		return [.. methodTargets];
 	}
@@ -241,6 +270,7 @@ partial class PipelineHelpers
 		string? prefix,
 		bool defaultToTags,
 		bool lowercaseBaggageAndTagKeys,
+		int namingConvention,
 		SemanticModel semanticModel,
 		GenerationLogger? logger,
 		CancellationToken token
@@ -298,7 +328,9 @@ partial class PipelineHelpers
 				destination = ActivityParameterDestination.StatusDescription;
 			}
 			else if (Constants.Activities.SystemDiagnostics.Activity.Equals(parameterType))
+			{
 				destination = ActivityParameterDestination.Activity;
+			}
 			else if (
 				Constants.Activities.SystemDiagnostics.ActivityTagsCollection.Equals(parameterType)
 				|| Constants.Activities.SystemDiagnostics.ActivityTagIEnumerable.Equals(
@@ -306,7 +338,9 @@ partial class PipelineHelpers
 				)
 				|| Constants.System.TagList.Equals(parameterType)
 			)
+			{
 				destination = ActivityParameterDestination.TagsEnumerable;
+			}
 			else if (
 				Constants.Activities.SystemDiagnostics.ActivityContext.Equals(parameterType)
 				|| (
@@ -314,55 +348,76 @@ partial class PipelineHelpers
 					&& parameterType.SpecialType == SpecialType.System_String
 				)
 			)
+			{
 				destination = ActivityParameterDestination.ParentContextOrId;
+			}
 			else if (
 				Constants.Activities.SystemDiagnostics.ActivityLinkArray.Equals(parameterType)
 				|| Constants.Activities.SystemDiagnostics.ActivityLinkIEnumerable.Equals(
 					parameterType
 				)
 			)
+			{
 				destination = ActivityParameterDestination.LinksEnumerable;
+			}
 			else if (
 				parameter.Name == Constants.Activities.StartTimeParameterName
 				&& Constants.System.DateTimeOffset.Equals(parameterType)
 			)
+			{
 				destination = ActivityParameterDestination.StartTime;
+			}
 			else if (
 				parameter.Name == Constants.Activities.TimeStampParameterName
 				&& Constants.System.DateTimeOffset.Equals(parameterType)
 			)
+			{
 				destination = ActivityParameterDestination.Timestamp;
+			}
 			else
+			{
 				// destination is already set to default.
 				logger?.Debug(
 					$"Inferring {(defaultToTags ? "tag" : "baggage")}: {parameter.Name}."
 				);
+			}
 
 			TagOrBaggageAttributeRecord? tagOrBaggageAttribute = null;
 			if (attribute != null)
+			{
 				tagOrBaggageAttribute = SharedHelpers.GetTagOrBaggageAttribute(
 					attribute,
 					semanticModel,
 					logger,
 					token
 				);
+			}
+
+			// Check for ExcludeTargetsAttribute
+			var excludeTargets = SharedHelpers.GetExcludeTargetsAttribute(
+				parameter,
+				semanticModel,
+				logger,
+				token
+			);
 
 			var parameterName = parameter.Name;
 			var generatedName = GenerateParameterName(
 				tagOrBaggageAttribute?.Name.Value ?? parameterName,
 				prefix,
-				lowercaseBaggageAndTagKeys
+				lowercaseBaggageAndTagKeys,
+				namingConvention
 			);
 
 			parameterTargets.Add(
 				new(
 					ParameterName: parameterName,
 					ParameterType: parameterType,
-					IsException: Utilities.IsExceptionType(parameter.Type),
 					GeneratedName: generatedName,
 					ParamDestination: destination,
 					SkipOnNullOrEmpty: GetSkipOnNullOrEmptyValue(tagOrBaggageAttribute),
-					Locations: parameter.Locations
+					IsException: parameter.Type.IsExceptionType(),
+					ExcludedTargets: excludeTargets?.ExcludedTargets ?? GenerationType.None
 				)
 			);
 		}

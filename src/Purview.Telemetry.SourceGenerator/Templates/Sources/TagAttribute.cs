@@ -1,8 +1,10 @@
-﻿namespace Purview.Telemetry;
+﻿namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Marker attribute to specify that a parameter should be included as a tag.
 /// </summary>
+{CodeGen}
 [global::System.AttributeUsage(global::System.AttributeTargets.Parameter, AllowMultiple = false)]
 [global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
 [global::System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -33,7 +35,7 @@ sealed class TagAttribute : global::System.Attribute
 	/// </summary>
 	/// <param name="name">Specifies the key/ name of the tag.</param>
 	/// <param name="skipOnNullOrEmpty">Optionally specifies the <see cref="SkipOnNullOrEmpty" />.</param>
-	public TagAttribute(string? name, bool skipOnNullOrEmpty = false)
+	public TagAttribute(string name, bool skipOnNullOrEmpty = false)
 	{
 		Name = name;
 		SkipOnNullOrEmpty = skipOnNullOrEmpty;
@@ -43,11 +45,16 @@ sealed class TagAttribute : global::System.Attribute
 	/// Optionally specifies the key/ name of the tag. If one is not specified,
 	/// the of the parameter is used.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public string Name { get; set; }
+#else
 	public string? Name { get; set; }
+#endif
 
 	/// <summary>
 	/// Determines if the tag is skipped if it equals it's default value.
 	/// Defaults to false.
 	/// </summary>
 	public bool SkipOnNullOrEmpty { get; set; }
+}
 }

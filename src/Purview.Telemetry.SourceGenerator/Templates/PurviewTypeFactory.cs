@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 
@@ -36,16 +36,27 @@ static class PurviewTypeFactory
 
 		var lastDotIndex = fullName.LastIndexOf('.');
 		if (lastDotIndex < 0)
+		{
 			throw new ArgumentException(
 				"Type name must contain a namespace and a type name.",
 				nameof(fullName)
 			);
+		}
 
 		var typeName = fullName.Substring(lastDotIndex + 1);
 		var @namespace = fullName.Substring(0, lastDotIndex);
 		var isNullable = typeName[typeName.Length - 1] == '?';
 
-		return new(typeName, fullName, @namespace, null, isNullable, SpecialType.None, []);
+		return new(
+			typeName,
+			fullName,
+			@namespace,
+			null,
+			isNullable,
+			IsValueType: false,
+			SpecialType.None,
+			[]
+		);
 	}
 
 	public static PurviewTypeInfo Create(ITypeSymbol typeSymbol)
@@ -71,6 +82,7 @@ static class PurviewTypeFactory
 			Namespace: SymbolHelpers.GetNamespace(typeSymbol),
 			SystemAlias: systemAlias,
 			IsNullable: isNullable,
+			IsValueType: typeSymbol.IsValueType,
 			SpecialType: typeSymbol.SpecialType,
 			GenericTypeArguments: typeArguments
 		);
@@ -88,6 +100,7 @@ static class PurviewTypeFactory
 				"System",
 				Constants.System.VoidKeyword,
 				false,
+				IsValueType: false,
 				special,
 				[]
 			),
@@ -97,6 +110,7 @@ static class PurviewTypeFactory
 				"System",
 				"object",
 				false,
+				IsValueType: false,
 				special,
 				[]
 			),
@@ -106,6 +120,7 @@ static class PurviewTypeFactory
 				"System",
 				"string",
 				false,
+				IsValueType: false,
 				special,
 				[]
 			),
@@ -115,6 +130,7 @@ static class PurviewTypeFactory
 				"System",
 				"bool",
 				false,
+				IsValueType: true,
 				special,
 				[]
 			),
@@ -124,6 +140,7 @@ static class PurviewTypeFactory
 				"System",
 				"char",
 				false,
+				IsValueType: true,
 				special,
 				[]
 			),
@@ -133,6 +150,7 @@ static class PurviewTypeFactory
 				"System",
 				"byte",
 				false,
+				IsValueType: true,
 				special,
 				[]
 			),
@@ -142,6 +160,7 @@ static class PurviewTypeFactory
 				"System",
 				"sbyte",
 				false,
+				IsValueType: true,
 				special,
 				[]
 			),
@@ -151,6 +170,7 @@ static class PurviewTypeFactory
 				"System",
 				"short",
 				false,
+				IsValueType: true,
 				special,
 				[]
 			),
@@ -160,6 +180,7 @@ static class PurviewTypeFactory
 				"System",
 				"ushort",
 				false,
+				IsValueType: true,
 				special,
 				[]
 			),
@@ -169,6 +190,7 @@ static class PurviewTypeFactory
 				"System",
 				"int",
 				false,
+				IsValueType: true,
 				special,
 				[]
 			),
@@ -178,6 +200,7 @@ static class PurviewTypeFactory
 				"System",
 				"uint",
 				false,
+				IsValueType: true,
 				special,
 				[]
 			),
@@ -187,6 +210,7 @@ static class PurviewTypeFactory
 				"System",
 				"long",
 				false,
+				IsValueType: true,
 				special,
 				[]
 			),
@@ -196,6 +220,7 @@ static class PurviewTypeFactory
 				"System",
 				"ulong",
 				false,
+				IsValueType: true,
 				special,
 				[]
 			),
@@ -205,6 +230,7 @@ static class PurviewTypeFactory
 				"System",
 				"decimal",
 				false,
+				IsValueType: true,
 				special,
 				[]
 			),
@@ -214,6 +240,7 @@ static class PurviewTypeFactory
 				"System",
 				"float",
 				false,
+				IsValueType: true,
 				special,
 				[]
 			),
@@ -223,6 +250,7 @@ static class PurviewTypeFactory
 				"System",
 				"double",
 				false,
+				IsValueType: true,
 				special,
 				[]
 			),

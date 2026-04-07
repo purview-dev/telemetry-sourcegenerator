@@ -33,28 +33,28 @@ partial class Constants
 		public const string RecordExceptionMethodName = "RecordExceptionInternal";
 
 		public static readonly TemplateInfo ActivitySourceGenerationAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Activities.ActivitySourceGenerationAttribute"
+			"Purview.Telemetry.ActivitySourceGenerationAttribute"
 		);
 		public static readonly TemplateInfo ActivitySourceAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Activities.ActivitySourceAttribute"
+			"Purview.Telemetry.ActivitySourceAttribute"
 		);
 		public static readonly TemplateInfo ActivityAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Activities.ActivityAttribute"
+			"Purview.Telemetry.ActivityAttribute"
 		);
 		public static readonly TemplateInfo EventAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Activities.EventAttribute"
+			"Purview.Telemetry.EventAttribute"
 		);
 		public static readonly TemplateInfo ContextAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Activities.ContextAttribute"
+			"Purview.Telemetry.ContextAttribute"
 		);
 		public static readonly TemplateInfo BaggageAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Activities.BaggageAttribute"
+			"Purview.Telemetry.BaggageAttribute"
 		);
 		public static readonly TemplateInfo EscapeAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Activities.EscapeAttribute"
+			"Purview.Telemetry.EscapeAttribute"
 		);
 		public static readonly TemplateInfo StatusDescriptionAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Activities.StatusDescriptionAttribute"
+			"Purview.Telemetry.StatusDescriptionAttribute"
 		);
 
 		public static readonly ImmutableDictionary<int, string> ActivityKindTypeMap =

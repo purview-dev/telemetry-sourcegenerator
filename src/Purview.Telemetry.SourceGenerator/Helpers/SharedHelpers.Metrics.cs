@@ -33,7 +33,9 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeStringValue? nameValue = null;
 		AttributeStringValue? instrumentPrefix = null;
@@ -52,35 +54,45 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						nameValue = new((string)value);
+					}
 					else if (
 						name.Equals(
 							nameof(MeterAttributeRecord.InstrumentPrefix),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						instrumentPrefix = new((string)value);
+					}
 					else if (
 						name.Equals(
 							nameof(MeterAttributeRecord.IncludeAssemblyInstrumentPrefix),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						includeAssemblyInstrumentPrefix = new((bool)value);
+					}
 					else if (
 						name.Equals(
 							nameof(MeterAttributeRecord.LowercaseInstrumentName),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						lowercaseInstrumentName = new((bool)value);
+					}
 					else if (
 						name.Equals(
 							nameof(MeterAttributeRecord.LowercaseTagKeys),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						lowercaseTagKeys = new((bool)value);
+					}
 				},
 				semanticModel,
 				logger,
@@ -117,12 +129,16 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeStringValue? instrumentPrefix = null;
 		AttributeStringValue? instrumentSeparator = null;
 		AttributeValue<bool>? lowercaseInstrumentName = null;
 		AttributeValue<bool>? lowercaseTagKeys = null;
+		AttributeStringValue? meterName = null;
+		AttributeValue<int>? meterNameGenerationType = null;
 
 		if (
 			!AttributeParser(
@@ -135,28 +151,54 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						instrumentPrefix = new((string)value);
+					}
 					else if (
 						name.Equals(
 							nameof(MeterGenerationAttributeRecord.InstrumentSeparator),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						instrumentSeparator = new((string)value);
+					}
 					else if (
 						name.Equals(
 							nameof(MeterGenerationAttributeRecord.LowercaseInstrumentName),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						lowercaseInstrumentName = new((bool)value);
+					}
 					else if (
 						name.Equals(
 							nameof(MeterGenerationAttributeRecord.LowercaseTagKeys),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						lowercaseTagKeys = new((bool)value);
+					}
+					else if (
+						name.Equals(
+							nameof(MeterGenerationAttributeRecord.MeterName),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
+					{
+						meterName = new((string)value);
+					}
+					else if (
+						name.Equals(
+							nameof(MeterGenerationAttributeRecord.MeterNameGenerationType),
+							StringComparison.OrdinalIgnoreCase
+						)
+					)
+					{
+						meterNameGenerationType = new((int)value);
+					}
 				},
 				semanticModel,
 				logger,
@@ -174,7 +216,9 @@ partial class SharedHelpers
 				?? new(Constants.Metrics.InstrumentSeparatorDefault),
 			LowercaseInstrumentName: lowercaseInstrumentName
 				?? new(Constants.Metrics.LowercaseInstrumentNameDefault),
-			LowercaseTagKeys: lowercaseTagKeys ?? new(Constants.Metrics.LowercaseTagKeysDefault)
+			LowercaseTagKeys: lowercaseTagKeys ?? new(Constants.Metrics.LowercaseTagKeysDefault),
+			MeterName: meterName ?? new(),
+			MeterNameGenerationType: meterNameGenerationType ?? new(1) // Default to DotNet
 		);
 	}
 
@@ -196,7 +240,9 @@ partial class SharedHelpers
 					out attributeData
 				)
 			)
+			{
 				break;
+			}
 		}
 
 		if (attributeData?.AttributeClass == null)
@@ -219,35 +265,45 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						nameValue = new((string)value);
+					}
 					else if (
 						name.Equals(
 							nameof(InstrumentAttributeRecord.Unit),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						unit = new((string)value);
+					}
 					else if (
 						name.Equals(
 							nameof(InstrumentAttributeRecord.Description),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						description = new((string)value);
+					}
 					else if (
 						name.Equals(
 							nameof(InstrumentAttributeRecord.AutoIncrement),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						autoIncrement = new((bool)value);
+					}
 					else if (
 						name.Equals(
 							nameof(InstrumentAttributeRecord.ThrowOnAlreadyInitialized),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						throwOnAlreadyInitialized = new((bool)value);
+					}
 				},
 				semanticModel,
 				logger,
@@ -270,15 +326,25 @@ partial class SharedHelpers
 				autoIncrement = new(true);
 		}
 		else if (Constants.Metrics.HistogramAttribute == attributeType)
+		{
 			instrumentType = InstrumentTypes.Histogram;
+		}
 		else if (Constants.Metrics.UpDownCounterAttribute == attributeType)
+		{
 			instrumentType = InstrumentTypes.UpDownCounter;
+		}
 		else if (Constants.Metrics.ObservableCounterAttribute == attributeType)
+		{
 			instrumentType = InstrumentTypes.ObservableCounter;
+		}
 		else if (Constants.Metrics.ObservableUpDownCounterAttribute == attributeType)
+		{
 			instrumentType = InstrumentTypes.ObservableUpDownCounter;
+		}
 		else if (Constants.Metrics.ObservableGaugeAttribute == attributeType)
+		{
 			instrumentType = InstrumentTypes.ObservableGauge;
+		}
 		else
 		{
 			logger?.Error($"Unknown instrument type {attributeType}.");
@@ -296,6 +362,5 @@ partial class SharedHelpers
 	}
 
 	public static bool IsValidMeasurementValueType(ITypeSymbol type) =>
-		Array.FindIndex(Constants.Metrics.ValidMeasurementSpecialTypes, m => m == type.SpecialType)
-		> -1;
+		Array.Exists(Constants.Metrics.ValidMeasurementSpecialTypes, m => m == type.SpecialType);
 }

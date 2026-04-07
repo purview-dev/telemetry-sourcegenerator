@@ -1,246 +1,266 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Logging;
+namespace Purview.Telemetry.SourceGenerator.Logging;
 
 partial class TelemetrySourceGeneratorLoggingGen2Tests
 {
-	[Fact]
-	public async Task Generate_GivenMethodWithLogProperty_GeneratesIndividualProperties()
+	[Test]
+	public async Task Generate_GivenMethodWithLogProperty_GeneratesIndividualProperties(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
-			@$"
-using Purview.Telemetry.Logging;
+		const string basicLogger =
+			@"
 using Microsoft.Extensions.Logging;
 
 namespace Testing;
 
 [Logger]
 public interface ITestLogger
-{{
+{
 	void LogWeather([LogProperties]WeatherForecast weather);
-}}
+}
 
 public class WeatherForecast
-{{
-	public DateTime Date {{ get; set; }}
-	public int TemperatureC {{ get; set; }}
-	public string Summary {{ get; set; }}
-}}
+{
+	public DateTime Date { get; set; }
+	public int TemperatureC { get; set; }
+	public string Summary { get; set; }
+}
 ";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenMethodWithLogPropertyAndExpandEnumerable_GeneratesDiagnostic()
+	[Test]
+	public async Task Generate_GivenMethodWithLogPropertyAndExpandEnumerable_GeneratesDiagnostic(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
-			@$"
-using Purview.Telemetry.Logging;
+		const string basicLogger =
+			@"
 using Microsoft.Extensions.Logging;
 
 namespace Testing;
 
 [Logger]
 public interface ITestLogger
-{{
+{
 	void LogWeather([LogProperties][ExpandEnumerable]WeatherForecast[] weather);
-}}
+}
 
 public class WeatherForecast
-{{
-	public DateTime Date {{ get; set; }}
-	public int TemperatureC {{ get; set; }}
-	public string Summary {{ get; set; }}
-}}
+{
+	public DateTime Date { get; set; }
+	public int TemperatureC { get; set; }
+	public string Summary { get; set; }
+}
 ";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, expectsDiagnostics: true);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			c => c.ScrubInlineGuids(),
+			expectsDiagnostics: true,
+			cancellationToken: cancellationToken
+		);
 	}
 
-	[Fact]
-	public async Task Generate_GivenMethodWithExceptionUsedInTemplate_UsesPassInException()
+	[Test]
+	public async Task Generate_GivenMethodWithExceptionUsedInTemplate_UsesPassInException(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
-			@$"
-using Purview.Telemetry.Logging;
+		const string basicLogger = """
+
 using Microsoft.Extensions.Logging;
 
 namespace Testing;
 
-[Logger]
+[Logger(GenerationMode = LoggerGenerationMode.V2)]
 public interface ITestLogger
-{{
-	[Log(MessageTemplate = ""v = {{v}} Exception = {{ex}}"")]
+{
+	[Log(MessageTemplate = "v = {v} Exception = {ex}")]
 	void Log(string v, Exception ex);
-}}
-";
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenMethodWithLogPropertyOmit_GeneratesIndividualProperties()
+	[Test]
+	public async Task Generate_GivenMethodWithLogPropertyOmit_GeneratesIndividualProperties(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
-			@$"
-using Purview.Telemetry.Logging;
+		const string basicLogger =
+			@"
 using Microsoft.Extensions.Logging;
 
 namespace Testing;
 
 [Logger]
 public interface ITestLogger
-{{
+{
 	void LogWeatherWithOmit([LogProperties(OmitReferenceName = true)]WeatherForecast weather);
-}}
+}
 
 public class WeatherForecast
-{{
-	public DateTime Date {{ get; set; }}
-	public int TemperatureC {{ get; set; }}
-	public string Summary {{ get; set; }}
-}}
+{
+	public DateTime Date { get; set; }
+	public int TemperatureC { get; set; }
+	public string Summary { get; set; }
+}
 ";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenMethodWithLogPropertySkipNull_GeneratesIndividualProperties()
+	[Test]
+	public async Task Generate_GivenMethodWithLogPropertySkipNull_GeneratesIndividualProperties(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
-			@$"
-using Purview.Telemetry.Logging;
+		const string basicLogger =
+			@"
 using Microsoft.Extensions.Logging;
 
 namespace Testing;
 
 [Logger]
 public interface ITestLogger
-{{
+{
 	void LogWeather([LogProperties(SkipNullProperties = true)]WeatherForecast weather);
-}}
+}
 
 public class WeatherForecast
-{{
-	public DateTime Date {{ get; set; }}
-	public int TemperatureC {{ get; set; }}
-	public string Summary {{ get; set; }}
-}}
+{
+	public DateTime Date { get; set; }
+	public int TemperatureC { get; set; }
+	public string Summary { get; set; }
+}
 ";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenMethodWithLogPropertySkipNullAndOmit_GeneratesIndividualProperties()
+	[Test]
+	public async Task Generate_GivenMethodWithLogPropertySkipNullAndOmit_GeneratesIndividualProperties(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
-			@$"
-using Purview.Telemetry.Logging;
+		const string basicLogger =
+			@"
 using Microsoft.Extensions.Logging;
 
 namespace Testing;
 
 [Logger]
 public interface ITestLogger
-{{
+{
 	void LogWeather([LogProperties(SkipNullProperties = true, OmitReferenceName = true)]WeatherForecast weather);
-}}
+}
 
 public class WeatherForecast
-{{
-	public DateTime Date {{ get; set; }}
-	public int TemperatureC {{ get; set; }}
-	public string Summary {{ get; set; }}
-}}
+{
+	public DateTime Date { get; set; }
+	public int TemperatureC { get; set; }
+	public string Summary { get; set; }
+}
 ";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenMethodWithLogPropertyIgnore_GeneratesIndividualProperties()
+	[Test]
+	public async Task Generate_GivenMethodWithLogPropertyIgnore_GeneratesIndividualProperties(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
-			@$"
-using Purview.Telemetry.Logging;
+		const string basicLogger =
+			@"
 using Microsoft.Extensions.Logging;
 
 namespace Testing;
 
 [Logger]
 public interface ITestLogger
-{{
+{
 	void LogWeather([LogProperties]WeatherForecast weather);
-}}
+}
 
 public class WeatherForecast
-{{
-	public DateTime Date {{ get; set; }}
-	public int TemperatureC {{ get; set; }}
-	public string Summary {{ get; set; }}
+{
+	public DateTime Date { get; set; }
+	public int TemperatureC { get; set; }
+	public string Summary { get; set; }
 
 	[LogPropertyIgnore]
-	public string IgnoreMe {{ get; set; }}
-}}
+	public string IgnoreMe { get; set; }
+}
 ";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

@@ -1,86 +1,97 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Logging;
+namespace Purview.Telemetry.SourceGenerator.Logging;
 
 partial class TelemetrySourceGeneratorLoggingGen2Tests
 {
-	[Fact]
-	public async Task Generate_GivenMethodWithNonSpecificException_UsesExceptionParameter()
+	[Test]
+	public async Task Generate_GivenMethodWithNonSpecificException_UsesExceptionParameter(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
-			@$"
-using Purview.Telemetry.Logging;
+		const string basicLogger =
+			@"
 
 namespace Testing;
 
-[Logger]
-public interface ITestLogger {{
+[Logger(GenerationMode = LoggerGenerationMode.V2)]
+public interface ITestLogger {
 	void LogEntryWithCustomExceptionType(NullReferenceException nrf);
-}}
+}
 ";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenMethodWithCustomException_UsesExceptionParameter()
+	[Test]
+	public async Task Generate_GivenMethodWithCustomException_UsesExceptionParameter(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
-			@$"
-using Purview.Telemetry.Logging;
+		const string basicLogger =
+			@"
 
 namespace Testing;
 
-[Logger]
-public interface ITestLogger {{
+[Logger(GenerationMode = LoggerGenerationMode.V2)]
+public interface ITestLogger {
 	void LogEntryWithCustomExceptionType(BadLuckException custom);
-}}
+}
 
-public class BadLuckException : Exception {{ }}
+public class BadLuckException : Exception { }
 ";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenMethodWithMultipleExceptionParameters_GeneratesEntry()
+	[Test]
+	public async Task Generate_GivenMethodWithMultipleExceptionParameters_GeneratesEntry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
-			@$"
-using Purview.Telemetry.Logging;
+		const string basicLogger =
+			@"
 
 namespace Testing;
 
 [Logger]
-public interface ITestLogger {{
+public interface ITestLogger {
 	void LogEntryWithMoreThanSixParams(int one, int two, int three, int four, int five, BadLuckException six, InvalidOperationException seven, ArgumentException eight, Exception nine, Exception? ten, Exception eleven);
-}}
+}
 
-public class BadLuckException : Exception {{ }}
+public class BadLuckException : Exception { }
 ";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			c => c.ScrubInlineGuids(),
+			expectsDiagnostics: true,
+			cancellationToken: cancellationToken
+		);
 	}
 }

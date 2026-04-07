@@ -9,9 +9,12 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
+#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE
 #nullable enable
+#endif
 
-namespace Purview.Telemetry.Activities;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Marker attribute required for <see cref="global::System.Diagnostics.Activity"/>
@@ -41,14 +44,18 @@ sealed class ActivitySourceAttribute : global::System.Attribute
 
 	/// <summary>
 	/// Sets the name for the generated <see cref="global::System.Diagnostics.ActivitySource.Name"/>,
-	/// overriding the <see cref="global::Purview.Telemetry.Activities.ActivitySourceGenerationAttribute.Name"/>.
+	/// overriding the <see cref="global::Purview.Telemetry.ActivitySourceGenerationAttribute.Name"/>.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public string Name { get; set; }
+#else
 	public string? Name { get; set; }
+#endif
 
 	/// <summary>
 	/// Specifies the default when inferring between
 	/// <see cref="global::Purview.Telemetry.TagAttribute"/> or
-	/// <see cref="global::Purview.Telemetry.Activities.BaggageAttribute"/>, unless
+	/// <see cref="global::Purview.Telemetry.BaggageAttribute"/>, unless
 	/// explicitly marked.
 	/// </summary>
 	public bool DefaultToTags { get; set; } = true;
@@ -56,20 +63,25 @@ sealed class ActivitySourceAttribute : global::System.Attribute
 	/// <summary>
 	/// Prefix used to when generating the tag or baggage name. Prepended
 	/// before the <see cref="global::Purview.Telemetry.TagAttribute.Name"/> or
-	/// <see cref="global::Purview.Telemetry.Activities.BaggageAttribute.Name"/>.
+	/// <see cref="global::Purview.Telemetry.BaggageAttribute.Name"/>.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public string BaggageAndTagPrefix { get; set; }
+#else
 	public string? BaggageAndTagPrefix { get; set; }
+#endif
 
 	/// <summary>
-	/// Determines if the <see cref="Name"/> (or <see cref="global::Purview.Telemetry.Activities.ActivitySourceGenerationAttribute.BaggageAndTagPrefix"/>)
+	/// Determines if the <see cref="Name"/> (or <see cref="global::Purview.Telemetry.ActivitySourceGenerationAttribute.BaggageAndTagPrefix"/>)
 	/// is used as a prefix, before the <see cref="BaggageAndTagPrefix"/>.
 	/// </summary>
 	public bool IncludeActivitySourcePrefix { get; set; } = true;
 
 	/// <summary>
 	/// Determines if the <see cref="global::Purview.Telemetry.TagAttribute.Name"/> or
-	/// <see cref="global::Purview.Telemetry.Activities.BaggageAttribute.Name"/> (including
+	/// <see cref="global::Purview.Telemetry.BaggageAttribute.Name"/> (including
 	/// any prefixes) are lowercased.
 	/// </summary>
 	public bool LowercaseBaggageAndTagKeys { get; set; } = true;
+}
 }

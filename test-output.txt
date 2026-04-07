@@ -1,0 +1,793 @@
+Running tests for [34m./src/Purview.Telemetry.SourceGenerator.slnx[0m with [33mRelease[0m...
+Running tests from P:\GitHub\kjldev\purview-telemetry-sourcegenerator\src\Purview.Telemetry.SourceGenerator.IntegrationTests\bin\Release\net10.0\Purview.Telemetry.SourceGenerator.IntegrationTests.dll (net10.0|x64)
+failed Generate_GivenMethodWithLogPropertyAndExpandEnumerable_GeneratesDiagnostic (2s 497ms)
+  [Test Failure] AssertionException: Expected to not be empty
+but received empty collection
+
+at Assert.That(diag).IsNotEmpty()
+  from P:\GitHub\kjldev\purview-telemetry-sourcegenerator\src\Purview.Telemetry.SourceGenerator.IntegrationTests\bin\Release\net10.0\Purview.Telemetry.SourceGenerator.IntegrationTests.dll (net10.0|x64)
+  TUnit.Engine.Exceptions.TestFailedException: [Test Failure] AssertionException: Expected to not be empty
+  but received empty collection
+  
+  at Assert.That(diag).IsNotEmpty()
+  Standard output
+    DBG: --- Adding templates.
+    DBG: Adding ActivitySourceGenerationAttribute as ActivitySourceGenerationAttribute.g.cs.
+    DBG: Adding ActivitySourceAttribute as ActivitySourceAttribute.g.cs.
+    DBG: Adding ActivityAttribute as ActivityAttribute.g.cs.
+    DBG: Adding EventAttribute as EventAttribute.g.cs.
+    DBG: Adding ContextAttribute as ContextAttribute.g.cs.
+    DBG: Adding BaggageAttribute as BaggageAttribute.g.cs.
+    DBG: Adding EscapeAttribute as EscapeAttribute.g.cs.
+    DBG: Adding StatusDescriptionAttribute as StatusDescriptionAttribute.g.cs.
+    DBG: Adding LoggerGenerationAttribute as LoggerGenerationAttribute.g.cs.
+    DBG: Adding LoggerAttribute as LoggerAttribute.g.cs.
+    DBG: Adding LogAttribute as LogAttribute.g.cs.
+    DBG: Adding LogPrefixType as LogPrefixType.g.cs.
+    DBG: Adding LoggerGenerationMode as LoggerGenerationMode.g.cs.
+    DBG: Adding ExpandEnumerableAttribute as ExpandEnumerableAttribute.g.cs.
+    DBG: Adding TraceAttribute as TraceAttribute.g.cs.
+    DBG: Adding DebugAttribute as DebugAttribute.g.cs.
+    DBG: Adding InfoAttribute as InfoAttribute.g.cs.
+    DBG: Adding WarningAttribute as WarningAttribute.g.cs.
+    DBG: Adding ErrorAttribute as ErrorAttribute.g.cs.
+    DBG: Adding CriticalAttribute as CriticalAttribute.g.cs.
+    DBG: Adding MeterGenerationAttribute as MeterGenerationAttribute.g.cs.
+    DBG: Adding MeterAttribute as MeterAttribute.g.cs.
+    DBG: Adding MeterNameGenerationType as MeterNameGenerationType.g.cs.
+    DBG: Adding InstrumentMeasurementAttribute as InstrumentMeasurementAttribute.g.cs.
+    DBG: Adding AutoCounterAttribute as AutoCounterAttribute.g.cs.
+    DBG: Adding CounterAttribute as CounterAttribute.g.cs.
+    DBG: Adding UpDownCounterAttribute as UpDownCounterAttribute.g.cs.
+    DBG: Adding HistogramAttribute as HistogramAttribute.g.cs.
+    DBG: Adding ObservableCounterAttribute as ObservableCounterAttribute.g.cs.
+    DBG: Adding ObservableGaugeAttribute as ObservableGaugeAttribute.g.cs.
+    DBG: Adding ObservableUpDownCounterAttribute as ObservableUpDownCounterAttribute.g.cs.
+    DBG: Adding TagAttribute as TagAttribute.g.cs.
+    DBG: Adding ExcludeAttribute as ExcludeAttribute.g.cs.
+    DBG: Adding TelemetryGenerationAttribute as TelemetryGenerationAttribute.g.cs.
+    DBG: Adding Targets as Targets.g.cs.
+    DBG: Adding NamingConvention as NamingConvention.g.cs.
+    DBG: Adding ExcludeTargetsAttribute as ExcludeTargetsAttribute.g.cs.
+    DBG: --- Finished adding templates.
+    DBG: Found attribute: Purview.Telemetry.LoggerAttribute
+    DBG: Found attribute: Purview.Telemetry.TelemetryGenerationAttribute(GenerateDependencyExtension = false)
+    DBG: Found method ITestLogger.LogWeather.
+    DBG: Found attribute: Microsoft.Extensions.Logging.LogPropertiesAttribute
+    DBG: Found attribute: Purview.Telemetry.ExpandEnumerableAttribute(5)
+    DBG: Found 0 parameter(s) for LogWeather.
+    DBG: Logger generation target: Testing.TestLoggerCore
+    DBG: Generating MS Gen-based logging class for: Testing.TestLoggerCore
+    DBG: Skipping dependency injection emit.
+    
+  Error output
+failed Generate_GivenBasicScopedAndLogHasLevelSet_GeneratesDiagnostic (2s 076ms)
+  [Test Failure] AssertionException: Expected to not be empty
+but received empty collection
+
+at Assert.That(diag).IsNotEmpty()
+  from P:\GitHub\kjldev\purview-telemetry-sourcegenerator\src\Purview.Telemetry.SourceGenerator.IntegrationTests\bin\Release\net10.0\Purview.Telemetry.SourceGenerator.IntegrationTests.dll (net10.0|x64)
+  TUnit.Engine.Exceptions.TestFailedException: [Test Failure] AssertionException: Expected to not be empty
+  but received empty collection
+  
+  at Assert.That(diag).IsNotEmpty()
+  Standard output
+    DBG: --- Adding templates.
+    DBG: Adding ActivitySourceGenerationAttribute as ActivitySourceGenerationAttribute.g.cs.
+    DBG: Adding ActivitySourceAttribute as ActivitySourceAttribute.g.cs.
+    DBG: Adding ActivityAttribute as ActivityAttribute.g.cs.
+    DBG: Adding EventAttribute as EventAttribute.g.cs.
+    DBG: Adding ContextAttribute as ContextAttribute.g.cs.
+    DBG: Adding BaggageAttribute as BaggageAttribute.g.cs.
+    DBG: Adding EscapeAttribute as EscapeAttribute.g.cs.
+    DBG: Adding StatusDescriptionAttribute as StatusDescriptionAttribute.g.cs.
+    DBG: Adding LoggerGenerationAttribute as LoggerGenerationAttribute.g.cs.
+    DBG: Adding LoggerAttribute as LoggerAttribute.g.cs.
+    DBG: Adding LogAttribute as LogAttribute.g.cs.
+    DBG: Adding LogPrefixType as LogPrefixType.g.cs.
+    DBG: Adding LoggerGenerationMode as LoggerGenerationMode.g.cs.
+    DBG: Adding ExpandEnumerableAttribute as ExpandEnumerableAttribute.g.cs.
+    DBG: Adding TraceAttribute as TraceAttribute.g.cs.
+    DBG: Adding DebugAttribute as DebugAttribute.g.cs.
+    DBG: Adding InfoAttribute as InfoAttribute.g.cs.
+    DBG: Adding WarningAttribute as WarningAttribute.g.cs.
+    DBG: Adding ErrorAttribute as ErrorAttribute.g.cs.
+    DBG: Adding CriticalAttribute as CriticalAttribute.g.cs.
+    DBG: Adding MeterGenerationAttribute as MeterGenerationAttribute.g.cs.
+    DBG: Adding MeterAttribute as MeterAttribute.g.cs.
+    DBG: Adding MeterNameGenerationType as MeterNameGenerationType.g.cs.
+    DBG: Adding InstrumentMeasurementAttribute as InstrumentMeasurementAttribute.g.cs.
+    DBG: Adding AutoCounterAttribute as AutoCounterAttribute.g.cs.
+    DBG: Adding CounterAttribute as CounterAttribute.g.cs.
+    DBG: Adding UpDownCounterAttribute as UpDownCounterAttribute.g.cs.
+    DBG: Adding HistogramAttribute as HistogramAttribute.g.cs.
+    DBG: Adding ObservableCounterAttribute as ObservableCounterAttribute.g.cs.
+    DBG: Adding ObservableGaugeAttribute as ObservableGaugeAttribute.g.cs.
+    DBG: Adding ObservableUpDownCounterAttribute as ObservableUpDownCounterAttribute.g.cs.
+    DBG: Adding TagAttribute as TagAttribute.g.cs.
+    DBG: Adding ExcludeAttribute as ExcludeAttribute.g.cs.
+    DBG: Adding TelemetryGenerationAttribute as TelemetryGenerationAttribute.g.cs.
+    DBG: Adding Targets as Targets.g.cs.
+    DBG: Adding NamingConvention as NamingConvention.g.cs.
+    DBG: Adding ExcludeTargetsAttribute as ExcludeTargetsAttribute.g.cs.
+    DBG: --- Finished adding templates.
+    DBG: Found attribute: Purview.Telemetry.LoggerAttribute
+    DBG: Found attribute: Purview.Telemetry.TelemetryGenerationAttribute(GenerateDependencyExtension = false)
+    DBG: Found method ITestLogger.BasicScoped.
+    DBG: Found 0 parameter(s) for BasicScoped.
+    DBG: Found attribute: Purview.Telemetry.LogAttribute(Level = Microsoft.Extensions.Logging.LogLevel.Information)
+    DBG: Logger generation target: Testing.TestLoggerCore
+    DBG: Generating MS Gen-based logging class for: Testing.TestLoggerCore
+    DBG: Building logging method: BasicScoped
+    DBG: Building logging method: BasicScoped
+    DBG: Skipping dependency injection emit.
+    
+  Error output
+failed Generate_GivenBasicScopedAndLevelSetBySpecificAttribute_GeneratesDiagnostic (2s 299ms)
+  [Test Failure] AssertionException: Expected to not be empty
+but received empty collection
+
+at Assert.That(diag).IsNotEmpty()
+  from P:\GitHub\kjldev\purview-telemetry-sourcegenerator\src\Purview.Telemetry.SourceGenerator.IntegrationTests\bin\Release\net10.0\Purview.Telemetry.SourceGenerator.IntegrationTests.dll (net10.0|x64)
+  TUnit.Engine.Exceptions.TestFailedException: [Test Failure] AssertionException: Expected to not be empty
+  but received empty collection
+  
+  at Assert.That(diag).IsNotEmpty()
+  Standard output
+    DBG: --- Adding templates.
+    DBG: Adding ActivitySourceGenerationAttribute as ActivitySourceGenerationAttribute.g.cs.
+    DBG: Adding ActivitySourceAttribute as ActivitySourceAttribute.g.cs.
+    DBG: Adding ActivityAttribute as ActivityAttribute.g.cs.
+    DBG: Adding EventAttribute as EventAttribute.g.cs.
+    DBG: Adding ContextAttribute as ContextAttribute.g.cs.
+    DBG: Adding BaggageAttribute as BaggageAttribute.g.cs.
+    DBG: Adding EscapeAttribute as EscapeAttribute.g.cs.
+    DBG: Adding StatusDescriptionAttribute as StatusDescriptionAttribute.g.cs.
+    DBG: Adding LoggerGenerationAttribute as LoggerGenerationAttribute.g.cs.
+    DBG: Adding LoggerAttribute as LoggerAttribute.g.cs.
+    DBG: Adding LogAttribute as LogAttribute.g.cs.
+    DBG: Adding LogPrefixType as LogPrefixType.g.cs.
+    DBG: Adding LoggerGenerationMode as LoggerGenerationMode.g.cs.
+    DBG: Adding ExpandEnumerableAttribute as ExpandEnumerableAttribute.g.cs.
+    DBG: Adding TraceAttribute as TraceAttribute.g.cs.
+    DBG: Adding DebugAttribute as DebugAttribute.g.cs.
+    DBG: Adding InfoAttribute as InfoAttribute.g.cs.
+    DBG: Adding WarningAttribute as WarningAttribute.g.cs.
+    DBG: Adding ErrorAttribute as ErrorAttribute.g.cs.
+    DBG: Adding CriticalAttribute as CriticalAttribute.g.cs.
+    DBG: Adding MeterGenerationAttribute as MeterGenerationAttribute.g.cs.
+    DBG: Adding MeterAttribute as MeterAttribute.g.cs.
+    DBG: Adding MeterNameGenerationType as MeterNameGenerationType.g.cs.
+    DBG: Adding InstrumentMeasurementAttribute as InstrumentMeasurementAttribute.g.cs.
+    DBG: Adding AutoCounterAttribute as AutoCounterAttribute.g.cs.
+    DBG: Adding CounterAttribute as CounterAttribute.g.cs.
+    DBG: Adding UpDownCounterAttribute as UpDownCounterAttribute.g.cs.
+    DBG: Adding HistogramAttribute as HistogramAttribute.g.cs.
+    DBG: Adding ObservableCounterAttribute as ObservableCounterAttribute.g.cs.
+    DBG: Adding ObservableGaugeAttribute as ObservableGaugeAttribute.g.cs.
+    DBG: Adding ObservableUpDownCounterAttribute as ObservableUpDownCounterAttribute.g.cs.
+    DBG: Adding TagAttribute as TagAttribute.g.cs.
+    DBG: Adding ExcludeAttribute as ExcludeAttribute.g.cs.
+    DBG: Adding TelemetryGenerationAttribute as TelemetryGenerationAttribute.g.cs.
+    DBG: Adding Targets as Targets.g.cs.
+    DBG: Adding NamingConvention as NamingConvention.g.cs.
+    DBG: Adding ExcludeTargetsAttribute as ExcludeTargetsAttribute.g.cs.
+    DBG: --- Finished adding templates.
+    DBG: Found attribute: Purview.Telemetry.LoggerAttribute
+    DBG: Found attribute: Purview.Telemetry.TelemetryGenerationAttribute(GenerateDependencyExtension = false)
+    DBG: Found method ITestLogger.BasicScoped.
+    DBG: Found 0 parameter(s) for BasicScoped.
+    DBG: Found attribute: Purview.Telemetry.InfoAttribute(null, null)
+    DBG: Logger generation target: Testing.TestLoggerCore
+    DBG: Generating MS Gen-based logging class for: Testing.TestLoggerCore
+    DBG: Building logging method: BasicScoped
+    DBG: Building logging method: BasicScoped
+    DBG: Skipping dependency injection emit.
+    
+  Error output
+failed Generate_GivenMethodWithoutAttributeInMultiTarget_RaisesInferenceNotSupportedDiagnostic (4s 136ms)
+  [Test Failure] AssertionException: Expected to be empty, because b7461d81-2bb2-4b54-a59e-ee700343765d(14,29): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\Testing.MultiTelemetryCore.Activity.g.cs(62,15): error CS0111: Type 'MultiTelemetryCore' already defines a member called 'MethodWithoutAttribute' with the same parameter types
+-----------------------------------------------------
+but collection contains items: [b7461d81-2bb2-4b54-a59e-ee700343765d(14,29): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context., Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\Testing.MultiTelemetryCore.Activity.g.cs(62,15): error CS0111: Type 'MultiTelemetryCore' already defines a member called 'MethodWithoutAttribute' with the same parameter types]
+
+at Assert.That(result.Diagnostics.Where(m => !m.Id.StartsWith("TSG", StringComparison.Ordinal))).IsEmpty().Because("b7461d81-2bb2-4b54-a59e-ee700343765d(14,29): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\Testing.MultiTelemetryCore.Activity.g.cs(62,15): error CS0111: Type 'MultiTelemetryCore' already defines a member called 'MethodWithoutAttribute' with the same parameter types
+-----------------------------------------------------")
+  from P:\GitHub\kjldev\purview-telemetry-sourcegenerator\src\Purview.Telemetry.SourceGenerator.IntegrationTests\bin\Release\net10.0\Purview.Telemetry.SourceGenerator.IntegrationTests.dll (net10.0|x64)
+  TUnit.Engine.Exceptions.TestFailedException: [Test Failure] AssertionException: Expected to be empty, because b7461d81-2bb2-4b54-a59e-ee700343765d(14,29): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\Testing.MultiTelemetryCore.Activity.g.cs(62,15): error CS0111: Type 'MultiTelemetryCore' already defines a member called 'MethodWithoutAttribute' with the same parameter types
+  -----------------------------------------------------
+  but collection contains items: [b7461d81-2bb2-4b54-a59e-ee700343765d(14,29): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context., Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\Testing.MultiTelemetryCore.Activity.g.cs(62,15): error CS0111: Type 'MultiTelemetryCore' already defines a member called 'MethodWithoutAttribute' with the same parameter types]
+  
+  at Assert.That(result.Diagnostics.Where(m => !m.Id.StartsWith("TSG", StringComparison.Ordinal))).IsEmpty().Because("b7461d81-2bb2-4b54-a59e-ee700343765d(14,29): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\Testing.MultiTelemetryCore.Activity.g.cs(62,15): error CS0111: Type 'MultiTelemetryCore' already defines a member called 'MethodWithoutAttribute' with the same parameter types
+  -----------------------------------------------------")
+  Standard output
+    DBG: --- Adding templates.
+    DBG: Adding ActivitySourceGenerationAttribute as ActivitySourceGenerationAttribute.g.cs.
+    DBG: Adding ActivitySourceAttribute as ActivitySourceAttribute.g.cs.
+    DBG: Adding ActivityAttribute as ActivityAttribute.g.cs.
+    DBG: Adding EventAttribute as EventAttribute.g.cs.
+    DBG: Adding ContextAttribute as ContextAttribute.g.cs.
+    DBG: Adding BaggageAttribute as BaggageAttribute.g.cs.
+    DBG: Adding EscapeAttribute as EscapeAttribute.g.cs.
+    DBG: Adding StatusDescriptionAttribute as StatusDescriptionAttribute.g.cs.
+    DBG: Adding LoggerGenerationAttribute as LoggerGenerationAttribute.g.cs.
+    DBG: Adding LoggerAttribute as LoggerAttribute.g.cs.
+    DBG: Adding LogAttribute as LogAttribute.g.cs.
+    DBG: Adding LogPrefixType as LogPrefixType.g.cs.
+    DBG: Adding LoggerGenerationMode as LoggerGenerationMode.g.cs.
+    DBG: Adding ExpandEnumerableAttribute as ExpandEnumerableAttribute.g.cs.
+    DBG: Adding TraceAttribute as TraceAttribute.g.cs.
+    DBG: Adding DebugAttribute as DebugAttribute.g.cs.
+    DBG: Adding InfoAttribute as InfoAttribute.g.cs.
+    DBG: Adding WarningAttribute as WarningAttribute.g.cs.
+    DBG: Adding ErrorAttribute as ErrorAttribute.g.cs.
+    DBG: Adding CriticalAttribute as CriticalAttribute.g.cs.
+    DBG: Adding MeterGenerationAttribute as MeterGenerationAttribute.g.cs.
+    DBG: Adding MeterAttribute as MeterAttribute.g.cs.
+    DBG: Adding MeterNameGenerationType as MeterNameGenerationType.g.cs.
+    DBG: Adding InstrumentMeasurementAttribute as InstrumentMeasurementAttribute.g.cs.
+    DBG: Adding AutoCounterAttribute as AutoCounterAttribute.g.cs.
+    DBG: Adding CounterAttribute as CounterAttribute.g.cs.
+    DBG: Adding UpDownCounterAttribute as UpDownCounterAttribute.g.cs.
+    DBG: Adding HistogramAttribute as HistogramAttribute.g.cs.
+    DBG: Adding ObservableCounterAttribute as ObservableCounterAttribute.g.cs.
+    DBG: Adding ObservableGaugeAttribute as ObservableGaugeAttribute.g.cs.
+    DBG: Adding ObservableUpDownCounterAttribute as ObservableUpDownCounterAttribute.g.cs.
+    DBG: Adding TagAttribute as TagAttribute.g.cs.
+    DBG: Adding ExcludeAttribute as ExcludeAttribute.g.cs.
+    DBG: Adding TelemetryGenerationAttribute as TelemetryGenerationAttribute.g.cs.
+    DBG: Adding Targets as Targets.g.cs.
+    DBG: Adding NamingConvention as NamingConvention.g.cs.
+    DBG: Adding ExcludeTargetsAttribute as ExcludeTargetsAttribute.g.cs.
+    DBG: --- Finished adding templates.
+    DBG: Found attribute: Purview.Telemetry.ActivitySourceAttribute("testing-activity-source")
+    DBG: Found attribute: Purview.Telemetry.TelemetryGenerationAttribute(GenerateDependencyExtension = false)
+    DBG: Found attribute: Purview.Telemetry.ActivityAttribute
+    DBG: Found explicit activity: StartActivity.
+    DBG: Found Activity method IMultiTelemetry.StartActivity.
+    DBG: Found explicit tag: operationId.
+    DBG: Found attribute: Purview.Telemetry.TagAttribute
+    DBG: Defaulting to activity: MethodWithoutAttribute.
+    DBG: Found Activity method IMultiTelemetry.MethodWithoutAttribute.
+    DBG: Inferring tag: message.
+    DBG: Activity generation target: Testing.MultiTelemetryCore
+    DBG: Generating activity class for: Testing.MultiTelemetryCore
+    DBG: Generating RecordExceptionInternal.
+    DBG: Skipping dependency injection emit.
+    DBG: Found attribute: Purview.Telemetry.LoggerAttribute
+    DBG: Found attribute: Purview.Telemetry.TelemetryGenerationAttribute(GenerateDependencyExtension = false)
+    DBG: Skipping IMultiTelemetry.StartActivity from logging - no explicit Logging attribute on multi-target interface.
+    DBG: Skipping IMultiTelemetry.MethodWithoutAttribute from logging - no explicit Logging attribute on multi-target interface.
+    DBG: Logger generation target: Testing.MultiTelemetryCore
+    DBG: Generating MS Gen-based logging class for: Testing.MultiTelemetryCore
+    DBG: Skipping dependency injection emit.
+    DBG: Generating Telemetry Names using class 'TelemetryNames'.
+    
+  Error output
+failed Generate_GivenDuplicateMultiTargetMethodNames_GeneratesDiagnostic(Telemetry) (3s 292ms)
+  [Test Failure] AssertionException: Expected to be empty, because 18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(13,29): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+-----------------------------------------------------
+18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(16,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+-----------------------------------------------------
+18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(19,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+-----------------------------------------------------
+18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(22,13): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): error CS0102: The type 'TestTelemetryCore' already contains a definition for '_duplicateMethodNameInstrument'
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(17,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used
+-----------------------------------------------------
+but collection contains items: [18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(13,29): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context., 18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(16,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context., 18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(19,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context., 18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(22,13): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context., Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): error CS0102: The type 'TestTelemetryCore' already contains a definition for '_duplicateMethodNameInstrument', Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used, Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(17,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used]
+
+at Assert.That(result.Diagnostics.Where(m => !m.Id.StartsWith("TSG", StringComparison.Ordinal))).IsEmpty().Because("18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(13,29): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+-----------------------------------------------------
+18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(16,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+-----------------------------------------------------
+18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(19,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+-----------------------------------------------------
+18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(22,13): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): error CS0102: The type 'TestTelemetryCore' already contains a definition for '_duplicateMethodNameInstrument'
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(17,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used
+-----------------------------------------------------")
+  from P:\GitHub\kjldev\purview-telemetry-sourcegenerator\src\Purview.Telemetry.SourceGenerator.IntegrationTests\bin\Release\net10.0\Purview.Telemetry.SourceGenerator.IntegrationTests.dll (net10.0|x64)
+  TUnit.Engine.Exceptions.TestFailedException: [Test Failure] AssertionException: Expected to be empty, because 18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(13,29): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+  -----------------------------------------------------
+  18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(16,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+  -----------------------------------------------------
+  18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(19,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+  -----------------------------------------------------
+  18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(22,13): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): error CS0102: The type 'TestTelemetryCore' already contains a definition for '_duplicateMethodNameInstrument'
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(17,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used
+  -----------------------------------------------------
+  but collection contains items: [18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(13,29): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context., 18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(16,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context., 18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(19,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context., 18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(22,13): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context., Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): error CS0102: The type 'TestTelemetryCore' already contains a definition for '_duplicateMethodNameInstrument', Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used, Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(17,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used]
+  
+  at Assert.That(result.Diagnostics.Where(m => !m.Id.StartsWith("TSG", StringComparison.Ordinal))).IsEmpty().Because("18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(13,29): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+  -----------------------------------------------------
+  18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(16,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+  -----------------------------------------------------
+  18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(19,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+  -----------------------------------------------------
+  18ac8ce8-b4fd-4f56-8dbf-ac7eb31e45f0(22,13): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): error CS0102: The type 'TestTelemetryCore' already contains a definition for '_duplicateMethodNameInstrument'
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(17,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used
+  -----------------------------------------------------")
+  Standard output
+    DBG: --- Adding templates.
+    DBG: Adding ActivitySourceGenerationAttribute as ActivitySourceGenerationAttribute.g.cs.
+    DBG: Adding ActivitySourceAttribute as ActivitySourceAttribute.g.cs.
+    DBG: Adding ActivityAttribute as ActivityAttribute.g.cs.
+    DBG: Adding EventAttribute as EventAttribute.g.cs.
+    DBG: Adding ContextAttribute as ContextAttribute.g.cs.
+    DBG: Adding BaggageAttribute as BaggageAttribute.g.cs.
+    DBG: Adding EscapeAttribute as EscapeAttribute.g.cs.
+    DBG: Adding StatusDescriptionAttribute as StatusDescriptionAttribute.g.cs.
+    DBG: Adding LoggerGenerationAttribute as LoggerGenerationAttribute.g.cs.
+    DBG: Adding LoggerAttribute as LoggerAttribute.g.cs.
+    DBG: Adding LogAttribute as LogAttribute.g.cs.
+    DBG: Adding LogPrefixType as LogPrefixType.g.cs.
+    DBG: Adding LoggerGenerationMode as LoggerGenerationMode.g.cs.
+    DBG: Adding ExpandEnumerableAttribute as ExpandEnumerableAttribute.g.cs.
+    DBG: Adding TraceAttribute as TraceAttribute.g.cs.
+    DBG: Adding DebugAttribute as DebugAttribute.g.cs.
+    DBG: Adding InfoAttribute as InfoAttribute.g.cs.
+    DBG: Adding WarningAttribute as WarningAttribute.g.cs.
+    DBG: Adding ErrorAttribute as ErrorAttribute.g.cs.
+    DBG: Adding CriticalAttribute as CriticalAttribute.g.cs.
+    DBG: Adding MeterGenerationAttribute as MeterGenerationAttribute.g.cs.
+    DBG: Adding MeterAttribute as MeterAttribute.g.cs.
+    DBG: Adding MeterNameGenerationType as MeterNameGenerationType.g.cs.
+    DBG: Adding InstrumentMeasurementAttribute as InstrumentMeasurementAttribute.g.cs.
+    DBG: Adding AutoCounterAttribute as AutoCounterAttribute.g.cs.
+    DBG: Adding CounterAttribute as CounterAttribute.g.cs.
+    DBG: Adding UpDownCounterAttribute as UpDownCounterAttribute.g.cs.
+    DBG: Adding HistogramAttribute as HistogramAttribute.g.cs.
+    DBG: Adding ObservableCounterAttribute as ObservableCounterAttribute.g.cs.
+    DBG: Adding ObservableGaugeAttribute as ObservableGaugeAttribute.g.cs.
+    DBG: Adding ObservableUpDownCounterAttribute as ObservableUpDownCounterAttribute.g.cs.
+    DBG: Adding TagAttribute as TagAttribute.g.cs.
+    DBG: Adding ExcludeAttribute as ExcludeAttribute.g.cs.
+    DBG: Adding TelemetryGenerationAttribute as TelemetryGenerationAttribute.g.cs.
+    DBG: Adding Targets as Targets.g.cs.
+    DBG: Adding NamingConvention as NamingConvention.g.cs.
+    DBG: Adding ExcludeTargetsAttribute as ExcludeTargetsAttribute.g.cs.
+    DBG: --- Finished adding templates.
+    DBG: Found attribute: Purview.Telemetry.ActivitySourceAttribute("activity-source")
+    DBG: Found attribute: Purview.Telemetry.TelemetryGenerationAttribute(GenerateDependencyExtension = false)
+    DBG: Found attribute: Purview.Telemetry.ActivityAttribute
+    DBG: Found explicit activity: DuplicateMethodName.
+    DBG: Found Activity method ITestTelemetry.DuplicateMethodName.
+    DBG: Found explicit baggage: stringParam.
+    DBG: Found attribute: Purview.Telemetry.BaggageAttribute
+    DBG: Found explicit tag: intParam.
+    DBG: Found attribute: Purview.Telemetry.TagAttribute
+    DBG: Inferring tag: boolParam.
+    DBG: Found attribute: Purview.Telemetry.EventAttribute(System.Diagnostics.ActivityStatusCode.Unset)
+    DBG: Found explicit event: DuplicateMethodName.
+    DBG: Found Event method ITestTelemetry.DuplicateMethodName.
+    DBG: Inferring tag: stringParam.
+    DBG: Found explicit context: DuplicateMethodName.
+    DBG: Found Context method ITestTelemetry.DuplicateMethodName.
+    DBG: Inferring tag: intParam.
+    DBG: Defaulting to activity: DuplicateMethodName.
+    DBG: Found Activity method ITestTelemetry.DuplicateMethodName.
+    DBG: Inferring tag: stringParam.
+    DBG: Inferring tag: intParam.
+    DBG: Inferring tag: objectParam.
+    DBG: Defaulting to activity: DuplicateMethodName.
+    DBG: Found Activity method ITestTelemetry.DuplicateMethodName.
+    DBG: Defaulting to activity: DuplicateMethodName.
+    DBG: Found Activity method ITestTelemetry.DuplicateMethodName.
+    DBG: Inferring tag: stringParam.
+    DBG: Inferring tag: intParam.
+    DBG: Inferring tag: uintParam.
+    DBG: Defaulting to activity: DuplicateMethodName.
+    DBG: Found Activity method ITestTelemetry.DuplicateMethodName.
+    DBG: Inferring tag: measurementValue.
+    DBG: Activity generation target: TestTelemetryCore
+    DBG: Generating activity class for: TestTelemetryCore
+    DBG: Generating RecordExceptionInternal.
+    DBG: Skipping dependency injection emit.
+    DBG: Found attribute: Purview.Telemetry.LoggerAttribute
+    DBG: Found attribute: Purview.Telemetry.TelemetryGenerationAttribute(GenerateDependencyExtension = false)
+    DBG: Skipping ITestTelemetry.DuplicateMethodName from logging - no explicit Logging attribute on multi-target interface.
+    DBG: Skipping ITestTelemetry.DuplicateMethodName from logging - no explicit Logging attribute on multi-target interface.
+    DBG: Skipping ITestTelemetry.DuplicateMethodName from logging - no explicit Logging attribute on multi-target interface.
+    DBG: Found attribute: Purview.Telemetry.LogAttribute
+    DBG: Found method ITestTelemetry.DuplicateMethodName.
+    DBG: Found 3 parameter(s) for DuplicateMethodName.
+    DBG: Found attribute: Purview.Telemetry.LogAttribute
+    DBG: Found attribute: Purview.Telemetry.LogAttribute
+    DBG: Found method ITestTelemetry.DuplicateMethodName.
+    DBG: Found 0 parameter(s) for DuplicateMethodName.
+    DBG: Found attribute: Purview.Telemetry.LogAttribute
+    DBG: Skipping ITestTelemetry.DuplicateMethodName from logging - no explicit Logging attribute on multi-target interface.
+    DBG: Skipping ITestTelemetry.DuplicateMethodName from logging - no explicit Logging attribute on multi-target interface.
+    DBG: Logger generation target: TestTelemetryCore
+    DBG: Generating MS Gen-based logging class for: TestTelemetryCore
+    DBG: Building logging method: DuplicateMethodName
+    DBG: Building logging method: DuplicateMethodName
+    DBG: Skipping dependency injection emit.
+    DBG: Found attribute: Purview.Telemetry.MeterAttribute
+    DBG: Found attribute: Purview.Telemetry.TelemetryGenerationAttribute(GenerateDependencyExtension = false)
+    DBG: Found possible instrument method ITestTelemetry.DuplicateMethodName.
+    DBG: Unable to match parameter stringParam, inferring tag.
+    DBG: Found explicit tag: intParam.
+    DBG: Found attribute: Purview.Telemetry.TagAttribute
+    DBG: Unable to match parameter boolParam, inferring tag.
+    DBG: Found possible instrument method ITestTelemetry.DuplicateMethodName.
+    DBG: Skipping Activity-related parameter 'activity' from metrics.
+    DBG: Unable to match parameter stringParam, inferring tag.
+    DBG: Found possible instrument method ITestTelemetry.DuplicateMethodName.
+    DBG: Skipping Activity-related parameter 'activity' from metrics.
+    DBG: Found valid instrument type: int
+    DBG: Found possible instrument method ITestTelemetry.DuplicateMethodName.
+    DBG: Unable to match parameter stringParam, inferring tag.
+    DBG: Found valid instrument type: int
+    DBG: Unable to match parameter objectParam, inferring tag.
+    DBG: Found possible instrument method ITestTelemetry.DuplicateMethodName.
+    DBG: Found possible instrument method ITestTelemetry.DuplicateMethodName.
+    DBG: Found attribute: Purview.Telemetry.AutoCounterAttribute
+    DBG: Unable to match parameter stringParam, inferring tag.
+    DBG: Unable to match parameter intParam, inferring tag.
+    DBG: Unable to match parameter uintParam, inferring tag.
+    DBG: Found possible instrument method ITestTelemetry.DuplicateMethodName.
+    DBG: Found attribute: Purview.Telemetry.CounterAttribute
+    DBG: Found valid instrument type: int
+    DBG: Meter generation target: TestTelemetryCore
+    DBG: Generating metric class for: TestTelemetryCore
+    DBG: Emitting fields for TestTelemetryCore
+    DBG: Skipping constructor emit for Metrics (All).
+    DBG: Emitting partial method for populating tags: PopulateMeterTags.
+    DBG: Skipping dependency injection emit.
+    DBG: Generating Telemetry Names using class 'TelemetryNames'.
+    
+  Error output
+failed Generate_GivenDuplicateMetricsMethodNames_GeneratesDiagnostic (2s 776ms)
+  [Test Failure] AssertionException: Expected to be empty, because Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(21,59): error CS0102: The type 'TestTelemetryCore' already contains a definition for '_duplicateMethodNameInstrument'
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(40,3): error CS0229: Ambiguity between 'TestTelemetryCore._duplicateMethodNameInstrument' and 'TestTelemetryCore._duplicateMethodNameInstrument'
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(24,9): warning CS8618: Non-nullable field '_duplicateMethodNameInstrument' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(24,9): warning CS8618: Non-nullable field '_duplicateMethodNameInstrument' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(53,3): error CS0229: Ambiguity between 'TestTelemetryCore._duplicateMethodNameInstrument' and 'TestTelemetryCore._duplicateMethodNameInstrument'
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(20,59): warning CS0169: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is never used
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(21,59): warning CS0169: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is never used
+-----------------------------------------------------
+but collection contains items: [Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(21,59): error CS0102: The type 'TestTelemetryCore' already contains a definition for '_duplicateMethodNameInstrument', Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(40,3): error CS0229: Ambiguity between 'TestTelemetryCore._duplicateMethodNameInstrument' and 'TestTelemetryCore._duplicateMethodNameInstrument', Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(24,9): warning CS8618: Non-nullable field '_duplicateMethodNameInstrument' must contain a non-null value when exiting constructor. Consider declaring the field as nullable., Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(24,9): warning CS8618: Non-nullable field '_duplicateMethodNameInstrument' must contain a non-null value when exiting constructor. Consider declaring the field as nullable., Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(53,3): error CS0229: Ambiguity between 'TestTelemetryCore._duplicateMethodNameInstrument' and 'TestTelemetryCore._duplicateMethodNameInstrument', Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(20,59): warning CS0169: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is never used, Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(21,59): warning CS0169: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is never used]
+
+at Assert.That(result.Diagnostics.Where(m => !m.Id.StartsWith("TSG", StringComparison.Ordinal))).IsEmpty().Because("Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(21,59): error CS0102: The type 'TestTelemetryCore' already contains a definition for '_duplicateMethodNameInstrument'
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(40,3): error CS0229: Ambiguity between 'TestTelemetryCore._duplicateMethodNameInstrument' and 'TestTelemetryCore._duplicateMethodNameInstrument'
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(24,9): warning CS8618: Non-nullable field '_duplicateMethodNameInstrument' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(24,9): warning CS8618: Non-nullable field '_duplicateMethodNameInstrument' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(53,3): error CS0229: Ambiguity between 'TestTelemetryCore._duplicateMethodNameInstrument' and 'TestTelemetryCore._duplicateMethodNameInstrument'
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(20,59): warning CS0169: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is never used
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(21,59): warning CS0169: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is never used
+-----------------------------------------------------")
+  from P:\GitHub\kjldev\purview-telemetry-sourcegenerator\src\Purview.Telemetry.SourceGenerator.IntegrationTests\bin\Release\net10.0\Purview.Telemetry.SourceGenerator.IntegrationTests.dll (net10.0|x64)
+  TUnit.Engine.Exceptions.TestFailedException: [Test Failure] AssertionException: Expected to be empty, because Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(21,59): error CS0102: The type 'TestTelemetryCore' already contains a definition for '_duplicateMethodNameInstrument'
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(40,3): error CS0229: Ambiguity between 'TestTelemetryCore._duplicateMethodNameInstrument' and 'TestTelemetryCore._duplicateMethodNameInstrument'
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(24,9): warning CS8618: Non-nullable field '_duplicateMethodNameInstrument' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(24,9): warning CS8618: Non-nullable field '_duplicateMethodNameInstrument' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(53,3): error CS0229: Ambiguity between 'TestTelemetryCore._duplicateMethodNameInstrument' and 'TestTelemetryCore._duplicateMethodNameInstrument'
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(20,59): warning CS0169: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is never used
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(21,59): warning CS0169: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is never used
+  -----------------------------------------------------
+  but collection contains items: [Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(21,59): error CS0102: The type 'TestTelemetryCore' already contains a definition for '_duplicateMethodNameInstrument', Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(40,3): error CS0229: Ambiguity between 'TestTelemetryCore._duplicateMethodNameInstrument' and 'TestTelemetryCore._duplicateMethodNameInstrument', Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(24,9): warning CS8618: Non-nullable field '_duplicateMethodNameInstrument' must contain a non-null value when exiting constructor. Consider declaring the field as nullable., Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(24,9): warning CS8618: Non-nullable field '_duplicateMethodNameInstrument' must contain a non-null value when exiting constructor. Consider declaring the field as nullable., Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(53,3): error CS0229: Ambiguity between 'TestTelemetryCore._duplicateMethodNameInstrument' and 'TestTelemetryCore._duplicateMethodNameInstrument', Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(20,59): warning CS0169: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is never used, Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(21,59): warning CS0169: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is never used]
+  
+  at Assert.That(result.Diagnostics.Where(m => !m.Id.StartsWith("TSG", StringComparison.Ordinal))).IsEmpty().Because("Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(21,59): error CS0102: The type 'TestTelemetryCore' already contains a definition for '_duplicateMethodNameInstrument'
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(40,3): error CS0229: Ambiguity between 'TestTelemetryCore._duplicateMethodNameInstrument' and 'TestTelemetryCore._duplicateMethodNameInstrument'
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(24,9): warning CS8618: Non-nullable field '_duplicateMethodNameInstrument' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(24,9): warning CS8618: Non-nullable field '_duplicateMethodNameInstrument' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(53,3): error CS0229: Ambiguity between 'TestTelemetryCore._duplicateMethodNameInstrument' and 'TestTelemetryCore._duplicateMethodNameInstrument'
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(20,59): warning CS0169: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is never used
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(21,59): warning CS0169: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is never used
+  -----------------------------------------------------")
+  Standard output
+    DBG: --- Adding templates.
+    DBG: Adding ActivitySourceGenerationAttribute as ActivitySourceGenerationAttribute.g.cs.
+    DBG: Adding ActivitySourceAttribute as ActivitySourceAttribute.g.cs.
+    DBG: Adding ActivityAttribute as ActivityAttribute.g.cs.
+    DBG: Adding EventAttribute as EventAttribute.g.cs.
+    DBG: Adding ContextAttribute as ContextAttribute.g.cs.
+    DBG: Adding BaggageAttribute as BaggageAttribute.g.cs.
+    DBG: Adding EscapeAttribute as EscapeAttribute.g.cs.
+    DBG: Adding StatusDescriptionAttribute as StatusDescriptionAttribute.g.cs.
+    DBG: Adding LoggerGenerationAttribute as LoggerGenerationAttribute.g.cs.
+    DBG: Adding LoggerAttribute as LoggerAttribute.g.cs.
+    DBG: Adding LogAttribute as LogAttribute.g.cs.
+    DBG: Adding LogPrefixType as LogPrefixType.g.cs.
+    DBG: Adding LoggerGenerationMode as LoggerGenerationMode.g.cs.
+    DBG: Adding ExpandEnumerableAttribute as ExpandEnumerableAttribute.g.cs.
+    DBG: Adding TraceAttribute as TraceAttribute.g.cs.
+    DBG: Adding DebugAttribute as DebugAttribute.g.cs.
+    DBG: Adding InfoAttribute as InfoAttribute.g.cs.
+    DBG: Adding WarningAttribute as WarningAttribute.g.cs.
+    DBG: Adding ErrorAttribute as ErrorAttribute.g.cs.
+    DBG: Adding CriticalAttribute as CriticalAttribute.g.cs.
+    DBG: Adding MeterGenerationAttribute as MeterGenerationAttribute.g.cs.
+    DBG: Adding MeterAttribute as MeterAttribute.g.cs.
+    DBG: Adding MeterNameGenerationType as MeterNameGenerationType.g.cs.
+    DBG: Adding InstrumentMeasurementAttribute as InstrumentMeasurementAttribute.g.cs.
+    DBG: Adding AutoCounterAttribute as AutoCounterAttribute.g.cs.
+    DBG: Adding CounterAttribute as CounterAttribute.g.cs.
+    DBG: Adding UpDownCounterAttribute as UpDownCounterAttribute.g.cs.
+    DBG: Adding HistogramAttribute as HistogramAttribute.g.cs.
+    DBG: Adding ObservableCounterAttribute as ObservableCounterAttribute.g.cs.
+    DBG: Adding ObservableGaugeAttribute as ObservableGaugeAttribute.g.cs.
+    DBG: Adding ObservableUpDownCounterAttribute as ObservableUpDownCounterAttribute.g.cs.
+    DBG: Adding TagAttribute as TagAttribute.g.cs.
+    DBG: Adding ExcludeAttribute as ExcludeAttribute.g.cs.
+    DBG: Adding TelemetryGenerationAttribute as TelemetryGenerationAttribute.g.cs.
+    DBG: Adding Targets as Targets.g.cs.
+    DBG: Adding NamingConvention as NamingConvention.g.cs.
+    DBG: Adding ExcludeTargetsAttribute as ExcludeTargetsAttribute.g.cs.
+    DBG: --- Finished adding templates.
+    DBG: Found attribute: Purview.Telemetry.MeterAttribute
+    DBG: Found attribute: Purview.Telemetry.TelemetryGenerationAttribute(GenerateDependencyExtension = false)
+    DBG: Found possible instrument method ITestTelemetry.DuplicateMethodName.
+    DBG: Found attribute: Purview.Telemetry.AutoCounterAttribute
+    DBG: Unable to match parameter stringParam, inferring tag.
+    DBG: Unable to match parameter intParam, inferring tag.
+    DBG: Unable to match parameter boolParam, inferring tag.
+    DBG: Found possible instrument method ITestTelemetry.DuplicateMethodName.
+    DBG: Found attribute: Purview.Telemetry.CounterAttribute
+    DBG: Found valid instrument type: int
+    DBG: Meter generation target: TestTelemetryCore
+    DBG: Generating metric class for: TestTelemetryCore
+    DBG: Emitting fields for TestTelemetryCore
+    DBG: Emitting partial method for populating tags: PopulateMeterTags.
+    DBG: Emitting instrument method: DuplicateMethodName.
+    DBG: Skipping dependency injection emit.
+    DBG: Generating Telemetry Names using class 'TelemetryNames'.
+    
+  Error output
+failed Generate_GivenDuplicateMultiTargetMethodNames_GeneratesDiagnostic(LoggerOnly) (2s 933ms)
+  [Test Failure] AssertionException: Expected to be empty, because db80c244-0727-44db-a57b-93dd201d4809(13,29): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+-----------------------------------------------------
+db80c244-0727-44db-a57b-93dd201d4809(16,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+-----------------------------------------------------
+db80c244-0727-44db-a57b-93dd201d4809(19,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+-----------------------------------------------------
+db80c244-0727-44db-a57b-93dd201d4809(22,13): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): error CS0102: The type 'TestTelemetryCore' already contains a definition for '_duplicateMethodNameInstrument'
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(17,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used
+-----------------------------------------------------
+but collection contains items: [db80c244-0727-44db-a57b-93dd201d4809(13,29): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context., db80c244-0727-44db-a57b-93dd201d4809(16,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context., db80c244-0727-44db-a57b-93dd201d4809(19,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context., db80c244-0727-44db-a57b-93dd201d4809(22,13): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context., Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): error CS0102: The type 'TestTelemetryCore' already contains a definition for '_duplicateMethodNameInstrument', Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used, Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(17,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used]
+
+at Assert.That(result.Diagnostics.Where(m => !m.Id.StartsWith("TSG", StringComparison.Ordinal))).IsEmpty().Because("db80c244-0727-44db-a57b-93dd201d4809(13,29): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+-----------------------------------------------------
+db80c244-0727-44db-a57b-93dd201d4809(16,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+-----------------------------------------------------
+db80c244-0727-44db-a57b-93dd201d4809(19,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+-----------------------------------------------------
+db80c244-0727-44db-a57b-93dd201d4809(22,13): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): error CS0102: The type 'TestTelemetryCore' already contains a definition for '_duplicateMethodNameInstrument'
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used
+-----------------------------------------------------
+Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(17,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used
+-----------------------------------------------------")
+  from P:\GitHub\kjldev\purview-telemetry-sourcegenerator\src\Purview.Telemetry.SourceGenerator.IntegrationTests\bin\Release\net10.0\Purview.Telemetry.SourceGenerator.IntegrationTests.dll (net10.0|x64)
+  TUnit.Engine.Exceptions.TestFailedException: [Test Failure] AssertionException: Expected to be empty, because db80c244-0727-44db-a57b-93dd201d4809(13,29): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+  -----------------------------------------------------
+  db80c244-0727-44db-a57b-93dd201d4809(16,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+  -----------------------------------------------------
+  db80c244-0727-44db-a57b-93dd201d4809(19,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+  -----------------------------------------------------
+  db80c244-0727-44db-a57b-93dd201d4809(22,13): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): error CS0102: The type 'TestTelemetryCore' already contains a definition for '_duplicateMethodNameInstrument'
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(17,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used
+  -----------------------------------------------------
+  but collection contains items: [db80c244-0727-44db-a57b-93dd201d4809(13,29): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context., db80c244-0727-44db-a57b-93dd201d4809(16,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context., db80c244-0727-44db-a57b-93dd201d4809(19,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context., db80c244-0727-44db-a57b-93dd201d4809(22,13): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context., Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): error CS0102: The type 'TestTelemetryCore' already contains a definition for '_duplicateMethodNameInstrument', Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used, Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(17,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used]
+  
+  at Assert.That(result.Diagnostics.Where(m => !m.Id.StartsWith("TSG", StringComparison.Ordinal))).IsEmpty().Because("db80c244-0727-44db-a57b-93dd201d4809(13,29): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+  -----------------------------------------------------
+  db80c244-0727-44db-a57b-93dd201d4809(16,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+  -----------------------------------------------------
+  db80c244-0727-44db-a57b-93dd201d4809(19,54): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+  -----------------------------------------------------
+  db80c244-0727-44db-a57b-93dd201d4809(22,13): warning CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): error CS0102: The type 'TestTelemetryCore' already contains a definition for '_duplicateMethodNameInstrument'
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(18,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used
+  -----------------------------------------------------
+  Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator\TestTelemetryCore.Metric.g.cs(17,50): warning CS0414: The field 'TestTelemetryCore._duplicateMethodNameInstrument' is assigned but its value is never used
+  -----------------------------------------------------")
+  Standard output
+    DBG: --- Adding templates.
+    DBG: Adding ActivitySourceGenerationAttribute as ActivitySourceGenerationAttribute.g.cs.
+    DBG: Adding ActivitySourceAttribute as ActivitySourceAttribute.g.cs.
+    DBG: Adding ActivityAttribute as ActivityAttribute.g.cs.
+    DBG: Adding EventAttribute as EventAttribute.g.cs.
+    DBG: Adding ContextAttribute as ContextAttribute.g.cs.
+    DBG: Adding BaggageAttribute as BaggageAttribute.g.cs.
+    DBG: Adding EscapeAttribute as EscapeAttribute.g.cs.
+    DBG: Adding StatusDescriptionAttribute as StatusDescriptionAttribute.g.cs.
+    DBG: Adding LoggerGenerationAttribute as LoggerGenerationAttribute.g.cs.
+    DBG: Adding LoggerAttribute as LoggerAttribute.g.cs.
+    DBG: Adding LogAttribute as LogAttribute.g.cs.
+    DBG: Adding LogPrefixType as LogPrefixType.g.cs.
+    DBG: Adding LoggerGenerationMode as LoggerGenerationMode.g.cs.
+    DBG: Adding ExpandEnumerableAttribute as ExpandEnumerableAttribute.g.cs.
+    DBG: Adding TraceAttribute as TraceAttribute.g.cs.
+    DBG: Adding DebugAttribute as DebugAttribute.g.cs.
+    DBG: Adding InfoAttribute as InfoAttribute.g.cs.
+    DBG: Adding WarningAttribute as WarningAttribute.g.cs.
+    DBG: Adding ErrorAttribute as ErrorAttribute.g.cs.
+    DBG: Adding CriticalAttribute as CriticalAttribute.g.cs.
+    DBG: Adding MeterGenerationAttribute as MeterGenerationAttribute.g.cs.
+    DBG: Adding MeterAttribute as MeterAttribute.g.cs.
+    DBG: Adding MeterNameGenerationType as MeterNameGenerationType.g.cs.
+    DBG: Adding InstrumentMeasurementAttribute as InstrumentMeasurementAttribute.g.cs.
+    DBG: Adding AutoCounterAttribute as AutoCounterAttribute.g.cs.
+    DBG: Adding CounterAttribute as CounterAttribute.g.cs.
+    DBG: Adding UpDownCounterAttribute as UpDownCounterAttribute.g.cs.
+    DBG: Adding HistogramAttribute as HistogramAttribute.g.cs.
+    DBG: Adding ObservableCounterAttribute as ObservableCounterAttribute.g.cs.
+    DBG: Adding ObservableGaugeAttribute as ObservableGaugeAttribute.g.cs.
+    DBG: Adding ObservableUpDownCounterAttribute as ObservableUpDownCounterAttribute.g.cs.
+    DBG: Adding TagAttribute as TagAttribute.g.cs.
+    DBG: Adding ExcludeAttribute as ExcludeAttribute.g.cs.
+    DBG: Adding TelemetryGenerationAttribute as TelemetryGenerationAttribute.g.cs.
+    DBG: Adding Targets as Targets.g.cs.
+    DBG: Adding NamingConvention as NamingConvention.g.cs.
+    DBG: Adding ExcludeTargetsAttribute as ExcludeTargetsAttribute.g.cs.
+    DBG: --- Finished adding templates.
+    DBG: Found attribute: Purview.Telemetry.ActivitySourceAttribute("activity-source")
+    DBG: Found attribute: Purview.Telemetry.TelemetryGenerationAttribute(GenerateDependencyExtension = false)
+    DBG: Found attribute: Purview.Telemetry.ActivityAttribute
+    DBG: Found explicit activity: DuplicateMethodName.
+    DBG: Found Activity method ITestTelemetry.DuplicateMethodName.
+    DBG: Found explicit baggage: stringParam.
+    DBG: Found attribute: Purview.Telemetry.BaggageAttribute
+    DBG: Found explicit tag: intParam.
+    DBG: Found attribute: Purview.Telemetry.TagAttribute
+    DBG: Inferring tag: boolParam.
+    DBG: Found attribute: Purview.Telemetry.EventAttribute(System.Diagnostics.ActivityStatusCode.Unset)
+    DBG: Found explicit event: DuplicateMethodName.
+    DBG: Found Event method ITestTelemetry.DuplicateMethodName.
+    DBG: Inferring tag: stringParam.
+    DBG: Found explicit context: DuplicateMethodName.
+    DBG: Found Context method ITestTelemetry.DuplicateMethodName.
+    DBG: Inferring tag: intParam.
+    DBG: Defaulting to activity: DuplicateMethodName.
+    DBG: Found Activity method ITestTelemetry.DuplicateMethodName.
+    DBG: Inferring tag: stringParam.
+    DBG: Inferring tag: intParam.
+    DBG: Inferring tag: objectParam.
+    DBG: Defaulting to activity: DuplicateMethodName.
+    DBG: Found Activity method ITestTelemetry.DuplicateMethodName.
+    DBG: Defaulting to activity: DuplicateMethodName.
+    DBG: Found Activity method ITestTelemetry.DuplicateMethodName.
+    DBG: Inferring tag: stringParam.
+    DBG: Inferring tag: intParam.
+    DBG: Inferring tag: uintParam.
+    DBG: Defaulting to activity: DuplicateMethodName.
+    DBG: Found Activity method ITestTelemetry.DuplicateMethodName.
+    DBG: Inferring tag: measurementValue.
+    DBG: Activity generation target: TestTelemetryCore
+    DBG: Generating activity class for: TestTelemetryCore
+    DBG: Generating RecordExceptionInternal.
+    DBG: Skipping dependency injection emit.
+    DBG: Found attribute: Purview.Telemetry.LoggerAttribute
+    DBG: Found attribute: Purview.Telemetry.TelemetryGenerationAttribute(GenerateDependencyExtension = false)
+    DBG: Skipping ITestTelemetry.DuplicateMethodName from logging - no explicit Logging attribute on multi-target interface.
+    DBG: Skipping ITestTelemetry.DuplicateMethodName from logging - no explicit Logging attribute on multi-target interface.
+    DBG: Skipping ITestTelemetry.DuplicateMethodName from logging - no explicit Logging attribute on multi-target interface.
+    DBG: Found attribute: Purview.Telemetry.LogAttribute
+    DBG: Found method ITestTelemetry.DuplicateMethodName.
+    DBG: Found 3 parameter(s) for DuplicateMethodName.
+    DBG: Found attribute: Purview.Telemetry.LogAttribute
+    DBG: Found attribute: Purview.Telemetry.LogAttribute
+    DBG: Found method ITestTelemetry.DuplicateMethodName.
+    DBG: Found 0 parameter(s) for DuplicateMethodName.
+    DBG: Found attribute: Purview.Telemetry.LogAttribute
+    DBG: Skipping ITestTelemetry.DuplicateMethodName from logging - no explicit Logging attribute on multi-target interface.
+    DBG: Skipping ITestTelemetry.DuplicateMethodName from logging - no explicit Logging attribute on multi-target interface.
+    DBG: Logger generation target: TestTelemetryCore
+    DBG: Generating MS Gen-based logging class for: TestTelemetryCore
+    DBG: Building logging method: DuplicateMethodName
+    DBG: Building logging method: DuplicateMethodName
+    DBG: Skipping dependency injection emit.
+    DBG: Found attribute: Purview.Telemetry.MeterAttribute
+    DBG: Found attribute: Purview.Telemetry.TelemetryGenerationAttribute(GenerateDependencyExtension = false)
+    DBG: Found possible instrument method ITestTelemetry.DuplicateMethodName.
+    DBG: Unable to match parameter stringParam, inferring tag.
+    DBG: Found explicit tag: intParam.
+    DBG: Found attribute: Purview.Telemetry.TagAttribute
+    DBG: Unable to match parameter boolParam, inferring tag.
+    DBG: Found possible instrument method ITestTelemetry.DuplicateMethodName.
+    DBG: Skipping Activity-related parameter 'activity' from metrics.
+    DBG: Unable to match parameter stringParam, inferring tag.
+    DBG: Found possible instrument method ITestTelemetry.DuplicateMethodName.
+    DBG: Skipping Activity-related parameter 'activity' from metrics.
+    DBG: Found valid instrument type: int
+    DBG: Found possible instrument method ITestTelemetry.DuplicateMethodName.
+    DBG: Unable to match parameter stringParam, inferring tag.
+    DBG: Found valid instrument type: int
+    DBG: Unable to match parameter objectParam, inferring tag.
+    DBG: Found possible instrument method ITestTelemetry.DuplicateMethodName.
+    DBG: Found possible instrument method ITestTelemetry.DuplicateMethodName.
+    DBG: Found attribute: Purview.Telemetry.AutoCounterAttribute
+    DBG: Unable to match parameter stringParam, inferring tag.
+    DBG: Unable to match parameter intParam, inferring tag.
+    DBG: Unable to match parameter uintParam, inferring tag.
+    DBG: Found possible instrument method ITestTelemetry.DuplicateMethodName.
+    DBG: Found attribute: Purview.Telemetry.CounterAttribute
+    DBG: Found valid instrument type: int
+    DBG: Meter generation target: TestTelemetryCore
+    DBG: Generating metric class for: TestTelemetryCore
+    DBG: Emitting fields for TestTelemetryCore
+    DBG: Skipping constructor emit for Metrics (All).
+    DBG: Emitting partial method for populating tags: PopulateMeterTags.
+    DBG: Skipping dependency injection emit.
+    DBG: Generating Telemetry Names using class 'TelemetryNames'.
+    
+  Error output
+P:\GitHub\kjldev\purview-telemetry-sourcegenerator\src\Purview.Telemetry.SourceGenerator.IntegrationTests\bin\Release\net10.0\Purview.Telemetry.SourceGenerator.IntegrationTests.dll (net10.0|x64) failed with 7 error(s) (38s 801ms)
+Exit code: 2
+  Standard output: HTML test report written to: P:\GitHub\kjldev\purview-telemetry-sourcegenerator\TestResults\Purview.Telemetry.SourceGenerator.IntegrationTests-windows-net10.0-report.html
+  
+
+Test run summary: Failed!
+  total: 472
+  failed: 7
+  succeeded: 465
+  skipped: 0
+  duration: 39s 143ms
+Test run completed with non-success exit code: 2 (see: https://aka.ms/testingplatform/exitcodes)
+error: Recipe `test` failed on line 23 with exit code 2

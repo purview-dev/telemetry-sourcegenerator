@@ -12,9 +12,14 @@
 # in Unix via a file share from Windows, the scripts will work.
 *.sh text eol=lf
 
-# PowerShell is cross-platform, and I think Winddows is more forgiving so
+# PowerShell is cross-platform, and I think Windows is more forgiving so
 # let's set it to Unix line endings.
 *.ps1 text eol=lf
+
+# Source files — enforce LF to match .editorconfig (end_of_line = lf) and
+# CSharpier, which uses the editorconfig setting when checking formatting.
+*.cs text eol=lf working-tree-encoding=UTF-8
+*.csx text eol=lf working-tree-encoding=UTF-8
 
 # Verify file rules
 *.verified.txt text eol=lf working-tree-encoding=UTF-8

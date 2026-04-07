@@ -1,0 +1,24 @@
+﻿{
+  Diagnostics: [
+    {
+      Location: /*
+	[Log]
+	void InvalidMethod(string message);
+      ^^^^^^^^^^^^^
+}
+*/
+ Guid_1: (14,6)-(14,19),
+      Message: It's best practice to return the created Activity so you can dispose of it, and use it for Event or Context methods.,
+      Severity: Warning,
+      WarningLevel: 1,
+      Descriptor: {
+        Id: TSG3013,
+        Title: Should return the created Activity,
+        MessageFormat: It's best practice to return the created Activity so you can dispose of it, and use it for Event or Context methods.,
+        Category: Activity.Usage,
+        DefaultSeverity: Warning,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}

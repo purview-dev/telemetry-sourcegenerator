@@ -18,26 +18,14 @@ namespace Testing
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class TestMetricsCore : global::Testing.ITestMetrics
 	{
-		global::System.Diagnostics.Metrics.Meter _meter = default!;
+		readonly global::System.Diagnostics.Metrics.Meter _meter;
 
-		global::System.Diagnostics.Metrics.UpDownCounter<byte>? _metricInstrument = null;
+		readonly global::System.Diagnostics.Metrics.UpDownCounter<byte> _metricInstrument;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestMetricsCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
 		{
-			InitializeMeters(meterFactory);
-		}
-
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		void InitializeMeters(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
-		{
-			if (_meter != null)
-			{
-				throw new global::System.Exception("The meters have already been initialized.");
-			}
-
-			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateMeterTags(meterTags);
 
@@ -47,11 +35,11 @@ namespace Testing
 				Tags = meterTags
 			});
 
-			global::System.Collections.Generic.Dictionary<string, object?> metricTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> metricTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateMetricTags(metricTags);
 
-			_metricInstrument = _meter.CreateUpDownCounter<byte>(name: "an-updown-counter-name-property", unit: "sponges-property", description: "sponge sales per-capita-property.", tags: metricTags);
+			_metricInstrument = _meter.CreateUpDownCounter<byte>(name: "test_metrics.an-updown-counter-name-property", unit: "sponges-property", description: "sponge sales per-capita-property.", tags: metricTags);
 		}
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
@@ -64,17 +52,7 @@ namespace Testing
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 		public void Metric(byte counterValue, int intParam, bool boolParam)
 		{
-			if (_metricInstrument == null)
-			{
-				return;
-			}
-
-			global::System.Diagnostics.TagList metricTagList = new();
-
-			metricTagList.Add("intparam", intParam);
-			metricTagList.Add("boolparam", boolParam);
-
-			_metricInstrument.Add(counterValue, tagList: metricTagList);
+			_metricInstrument.Add(counterValue, new global::System.Collections.Generic.KeyValuePair<string, object?>("int_param", intParam), new global::System.Collections.Generic.KeyValuePair<string, object?>("bool_param", boolParam));
 		}
 	}
 }

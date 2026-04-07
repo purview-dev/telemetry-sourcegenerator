@@ -9,9 +9,12 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
+#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE
 #nullable enable
+#endif
 
-namespace Purview.Telemetry.Metrics;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Specifies the meter type generated corresponds to a 
@@ -40,7 +43,11 @@ sealed class AutoCounterAttribute : global::System.Attribute
 	/// <param name="name">Specifies the <see cref="Name"/>.</param>
 	/// <param name="unit">Optionally specifies the <see cref="Unit"/>.</param>
 	/// <param name="description">Optionally specifies the <see cref="Description"/>.</param>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public AutoCounterAttribute(string name, string unit = null, string description = null)
+#else
 	public AutoCounterAttribute(string name, string? unit = null, string? description = null)
+#endif
 	{
 		Name = name;
 		Unit = unit;
@@ -52,15 +59,28 @@ sealed class AutoCounterAttribute : global::System.Attribute
 	/// of the method is used.
 	/// </summary>
 
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public string Name { get; set; }
+#else
 	public string? Name { get; set; }
+#endif
 
 	/// <summary>
 	/// Optionally specifies the unit of the meter.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public string Unit { get; set; }
+#else
 	public string? Unit { get; set; }
+#endif
 
 	/// <summary>
 	/// Optionally specifies the description of the meter.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public string Description { get; set; }
+#else
 	public string? Description { get; set; }
+#endif
+}
 }

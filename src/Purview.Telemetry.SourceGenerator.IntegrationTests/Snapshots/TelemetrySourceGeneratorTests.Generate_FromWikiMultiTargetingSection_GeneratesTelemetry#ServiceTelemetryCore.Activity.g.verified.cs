@@ -11,9 +11,12 @@
 
 #nullable enable
 
+[global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 sealed partial class ServiceTelemetryCore : global::IServiceTelemetry
 {
-	readonly static global::System.Diagnostics.ActivitySource _activitySource = new("multi-targeting");
+	readonly static global::System.Diagnostics.ActivitySource _activitySource = new global::System.Diagnostics.ActivitySource("multi-targeting");
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -24,13 +27,13 @@ sealed partial class ServiceTelemetryCore : global::IServiceTelemetry
 			return;
 		}
 
-		global::System.Diagnostics.ActivityTagsCollection tagsCollection = new();
+		global::System.Diagnostics.ActivityTagsCollection tagsCollection = new global::System.Diagnostics.ActivityTagsCollection();
 		tagsCollection.Add("exception.escaped", escape);
 		tagsCollection.Add("exception.message", exception.Message);
 		tagsCollection.Add("exception.type", exception.GetType().FullName);
 		tagsCollection.Add("exception.stacktrace", exception.StackTrace);
 
-		global::System.Diagnostics.ActivityEvent recordExceptionEvent = new(name: "exception", timestamp: default, tags: tagsCollection);
+		global::System.Diagnostics.ActivityEvent recordExceptionEvent = new global::System.Diagnostics.ActivityEvent(name: "exception", timestamp: default, tags: tagsCollection);
 
 		activity.AddEvent(recordExceptionEvent);
 	}
@@ -48,12 +51,8 @@ sealed partial class ServiceTelemetryCore : global::IServiceTelemetry
 
 		if (activityStartAnActivity != null)
 		{
-			activityStartAnActivity.SetTag("tagintparam", tagIntParam);
-		}
-
-		if (activityStartAnActivity != null)
-		{
-			activityStartAnActivity.SetBaggage("entityid", entityId);
+			activityStartAnActivity.SetTag("tag_int_param", tagIntParam);
+			activityStartAnActivity.SetBaggage("entity_id", entityId);
 		}
 
 		return activityStartAnActivity;
@@ -71,9 +70,9 @@ sealed partial class ServiceTelemetryCore : global::IServiceTelemetry
 		if (activity != null)
 		{
 			global::System.Diagnostics.ActivityTagsCollection tagsCollectionAnInterestingEvent = new();
-			tagsCollectionAnInterestingEvent.Add("atagvalue", aTagValue);
+			tagsCollectionAnInterestingEvent.Add("a_tag_value", aTagValue);
 
-			global::System.Diagnostics.ActivityEvent activityEventAnInterestingEvent = new(name: "AnInterestingEvent", timestamp: default, tags: tagsCollectionAnInterestingEvent);
+			global::System.Diagnostics.ActivityEvent activityEventAnInterestingEvent = new global::System.Diagnostics.ActivityEvent(name: "AnInterestingEvent", timestamp: default, tags: tagsCollectionAnInterestingEvent);
 
 			activity.AddEvent(activityEventAnInterestingEvent);
 		}
@@ -90,8 +89,8 @@ sealed partial class ServiceTelemetryCore : global::IServiceTelemetry
 
 		if (activity != null)
 		{
-			activity.SetTag("anothertagvalue", anotherTagValue);
-			activity.SetTag("inttagvalue", intTagValue);
+			activity.SetTag("another_tag_value", anotherTagValue);
+			activity.SetTag("int_tag_value", intTagValue);
 		}
 	}
 

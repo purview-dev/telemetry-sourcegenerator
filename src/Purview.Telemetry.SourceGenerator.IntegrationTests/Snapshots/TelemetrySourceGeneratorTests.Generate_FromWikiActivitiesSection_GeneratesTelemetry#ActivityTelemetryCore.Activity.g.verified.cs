@@ -16,7 +16,7 @@
 [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 sealed partial class ActivityTelemetryCore : global::IActivityTelemetry
 {
-	readonly static global::System.Diagnostics.ActivitySource _activitySource = new("some-activity");
+	readonly static global::System.Diagnostics.ActivitySource _activitySource = new global::System.Diagnostics.ActivitySource("some-activity");
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -27,13 +27,13 @@ sealed partial class ActivityTelemetryCore : global::IActivityTelemetry
 			return;
 		}
 
-		global::System.Diagnostics.ActivityTagsCollection tagsCollection = new();
+		global::System.Diagnostics.ActivityTagsCollection tagsCollection = new global::System.Diagnostics.ActivityTagsCollection();
 		tagsCollection.Add("exception.escaped", escape);
 		tagsCollection.Add("exception.message", exception.Message);
 		tagsCollection.Add("exception.type", exception.GetType().FullName);
 		tagsCollection.Add("exception.stacktrace", exception.StackTrace);
 
-		global::System.Diagnostics.ActivityEvent recordExceptionEvent = new(name: "exception", timestamp: default, tags: tagsCollection);
+		global::System.Diagnostics.ActivityEvent recordExceptionEvent = new global::System.Diagnostics.ActivityEvent(name: "exception", timestamp: default, tags: tagsCollection);
 
 		activity.AddEvent(recordExceptionEvent);
 	}
@@ -51,11 +51,7 @@ sealed partial class ActivityTelemetryCore : global::IActivityTelemetry
 
 		if (activityGettingItemFromCache != null)
 		{
-			activityGettingItemFromCache.SetTag("itemtype", itemType);
-		}
-
-		if (activityGettingItemFromCache != null)
-		{
+			activityGettingItemFromCache.SetTag("item_type", itemType);
 			activityGettingItemFromCache.SetBaggage("key", key);
 		}
 
@@ -74,7 +70,7 @@ sealed partial class ActivityTelemetryCore : global::IActivityTelemetry
 		if (activity != null)
 		{
 
-			global::System.Diagnostics.ActivityEvent activityEventMiss = new(name: "cachemiss", timestamp: default, tags: default);
+			global::System.Diagnostics.ActivityEvent activityEventMiss = new global::System.Diagnostics.ActivityEvent(name: "cachemiss", timestamp: default, tags: default);
 
 			activity.AddEvent(activityEventMiss);
 		}
@@ -92,7 +88,7 @@ sealed partial class ActivityTelemetryCore : global::IActivityTelemetry
 		if (activity != null)
 		{
 
-			global::System.Diagnostics.ActivityEvent activityEventHit = new(name: "cachehit", timestamp: default, tags: default);
+			global::System.Diagnostics.ActivityEvent activityEventHit = new global::System.Diagnostics.ActivityEvent(name: "cachehit", timestamp: default, tags: default);
 
 			activity.AddEvent(activityEventHit);
 		}
@@ -113,7 +109,7 @@ sealed partial class ActivityTelemetryCore : global::IActivityTelemetry
 
 			RecordExceptionInternal(activity: activity, exception: ex, escape: true);
 
-			global::System.Diagnostics.ActivityEvent activityEventError = new(name: "Error", timestamp: default, tags: tagsCollectionError);
+			global::System.Diagnostics.ActivityEvent activityEventError = new global::System.Diagnostics.ActivityEvent(name: "Error", timestamp: default, tags: tagsCollectionError);
 
 			activity.AddEvent(activityEventError);
 		}
@@ -133,7 +129,7 @@ sealed partial class ActivityTelemetryCore : global::IActivityTelemetry
 			global::System.Diagnostics.ActivityTagsCollection tagsCollectionFinished = new();
 			tagsCollectionFinished.Add("duration", duration);
 
-			global::System.Diagnostics.ActivityEvent activityEventFinished = new(name: "Finished", timestamp: default, tags: tagsCollectionFinished);
+			global::System.Diagnostics.ActivityEvent activityEventFinished = new global::System.Diagnostics.ActivityEvent(name: "Finished", timestamp: default, tags: tagsCollectionFinished);
 
 			activity.AddEvent(activityEventFinished);
 		}

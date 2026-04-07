@@ -4,103 +4,274 @@ Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system
 
 [![CI](https://github.com/kjldev/purview-telemetry-sourcegenerator/actions/workflows/ci.yml/badge.svg)](https://github.com/kjldev/purview-telemetry-sourcegenerator/actions/workflows/ci.yml)
 
-This approach allows for:
+## Features
 
-- Faster iteration cycles - simply create the method on your interface and the implementation will be automatically generated
-- Easy mocking/ substitution for testing - a full sample project, including tests can be found [here](https://github.com/kjldev/purview-telemetry-sourcegenerator/tree/main/samples/SampleApp)
-- Built-in dependency injection helper generation
+- **Zero boilerplate** - define methods on an interface, get full telemetry implementation generated
+- **Multi-target generation** - generate Activities, Logging, and Metrics from a single interface
+- **Testable** - easy mocking/substitution for unit testing
+- **DI-ready** - automatic dependency injection registration helpers
 
-Use the latest version available on [NuGet](https://www.nuget.org/packages/Purview.Telemetry.SourceGenerator/), which supports the following frameworks:
+## Supported Frameworks
 
-- .NET Framework 4.7.2, or higher
+- .NET Framework 4.8
 - .NET 8 or higher
 
-Reference in your `Directory.Build.props` or `.csproj` file:
+## Installation
+
+Add to your `Directory.Build.props` or `.csproj` file:
 
 ```xml
-<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="3.2.4">
+<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="4.0.0">
   <PrivateAssets>all</PrivateAssets>
-  <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+  <IncludeAssets>analyzers</IncludeAssets>
 </PackageReference>
 ```
 
-For more information see the [wiki](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki).
+## Quick Start
 
-## Example Interface
-
-This is called a **multi-target interface** because it generates more than one output type: **Activities, Logging, and Metrics**.
-
-> [!TIP]
-> When generating a single target, the generator will automatically infer the necessary attributes. More information about multi-targeting can be found in [here](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Multi-Targeting).
+Define an interface with telemetry methods and the generator creates the implementation:
 
 ```csharp
-using Purview.Telemetry.Activities;
-using Purview.Telemetry.Logging;
-using Purview.Telemetry.Metrics;
+using Purview.Telemetry;
 
-/// <summary>
-/// Generates an implementation of the methods for each generation type (Activity, Logging, or Metrics)
-/// and an extension method to enable easy registration with the IServiceCollection.
-/// </summary>
+// Multi-target interface: generates Activities, Logging, AND Metrics from combined methods
 [ActivitySource]
 [Logger]
 [Meter]
 interface IEntityStoreTelemetry
 {
-    /// <summary>
-    /// Creates and starts an Activity and adds the parameters as Tags and Baggage.
-    /// </summary>
+    // MULTI-TARGET: Creates Activity + Logs Info + Increments Counter - all from one method!
     [Activity]
+    [Info]
+    [AutoCounter]
     Activity? GettingEntityFromStore(int entityId, [Baggage]string serviceUrl);
 
-    /// <summary>
-    /// Adds an ActivityEvent to the Activity with the parameters as Tags.
-    /// </summary>
+    // MULTI-TARGET: Adds ActivityEvent + Logs the duration as Trace.
     [Event]
+    [Trace]
     void GetDuration(Activity? activity, int durationInMS);
 
-    /// <summary>
-    /// Adds the parameters as Baggage to the Activity.
-    /// </summary>
+    // Single-target examples (when you only need one telemetry type):
+    
+    // Activity-only: Adds Baggage to the Activity
     [Context]
     void RetrievedEntity(Activity? activity, float totalValue, int lastUpdatedByUserId);
 
-    /// <summary>
-    /// Generates a structured log message using an ILogger - defaults to Informational.
-    /// </summary>
-    [Log]
-    void ProcessingEntity(int entityId, string updateState);
+    // Log-only: Structured log message
+    [Warning]
+    void EntityNotFound(int entityId);
 
-    /// <summary>
-    /// Generates a structured log message using an ILogger, specifically defined as Informational.
-    /// </summary>
-    [Info]
-    void ProcessingAnotherEntity(int entityId, string updateState);
-
-    /// <summary>
-    /// Adds 1 to a Counter<T> with the entityId as a Tag.
-    /// </summary>
-    [AutoCounter]
-    void RetrievingEntity(int entityId);
+    // Metric-only: Histogram for tracking values
+    [Histogram]
+    void RecordEntitySize(int sizeInBytes);
 }
 ```
 
-To see the code generated for the `IEntityStoreTelemetry` interface, see the [`Generated Output`](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Generated-Output) page in the wiki.
+Register with dependency injection:
 
-## Example Project
+```csharp
+// Generated extension method
+services.AddEntityStoreTelemetry();
+```
 
-The [.NET Aspire Sample](https://github.com/kjldev/purview-telemetry-sourcegenerator/tree/main/samples/SampleApp) demos the Activities, Logs, and Metrics generation working together with the Aspire Dashboard.
+Then inject and use - a single method call emits an Activity, Log, and Metric simultaneously:
 
-Check the page in the the [wiki](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Sample-Application) for information.
+```csharp
+public class EntityService(IEntityStoreTelemetry telemetry)
+{
+    public async Task<Entity> GetEntityAsync(int id, string serviceUrl, CancellationToken cancellationToken)
+    {
+        // Single call creates Activity AND logs AND increments counter
+        using var activity = telemetry.GettingEntityFromStore(id, serviceUrl);
+        
+        var entity = await _repository.GetAsync(id, cancellationToken);
+                        
+        // Adds event to activity AND logs duration
+        telemetry.GetDuration(activity, stopwatch.ElapsedMilliseconds);
+
+        if (entity == null)
+        {
+            // Logs warning if entity not found
+            telemetry.EntityNotFound(id);
+            return null;
+        }
+
+        // Activity context addition
+        telemetry.RetrievedEntity(activity, entity.TotalValue, entity.LastUpdatedByUserId);
+        
+        // Histogram only records size
+        telemetry.RecordEntitySize(entity.SizeInBytes);
+
+        return entity;
+    }
+}
+```
+
+## Telemetry Types
+
+| Attribute | Generation Type | Description |
+|-----------|----------------|-------------|
+| `[ActivitySource]` | Class-level | Marks interface for Activity generation |
+| `[Activity]` | Method | Creates and starts a new Activity |
+| `[Event]` | Method | Adds an ActivityEvent to an Activity |
+| `[Context]` | Method | Adds Baggage to an Activity |
+| `[Logger]` | Class-level | Marks interface for ILogger generation |
+| `[Log]` | Method | Generates structured log message |
+| `[Trace]`, `[Debug]`, `[Info]`, `[Warning]`, `[Error]`, `[Critical]` | Method | Log with specific level |
+| `[Meter]` | Class-level | Marks interface for Metrics generation |
+| `[Counter]`, `[AutoCounter]` | Method | Counter instrument |
+| `[UpDownCounter]` | Method | Up-down counter instrument |
+| `[Histogram]` | Method | Histogram instrument |
+| `[ObservableCounter]`, `[ObservableGauge]`, `[ObservableUpDownCounter]` | Method | Observable instruments |
 
 > [!TIP]
-> This sample project has [`EmitCompilerGeneratedFiles`](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration-generator#enable-the-configuration-source-generator) set to `true`, so you can easily see the generated output.
+> For single-target interfaces (only Activities, only Logging, or only Metrics), the generator automatically infers the necessary attributes. See the [wiki](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Multi-Targeting) for details.
 
-## Notes on Logging Generation
+## Documentation
 
-There are two types of logging generation based on:
+- [Full Wiki](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki)
+- [Generated Output Examples](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Generated-Output)
+- [Multi-Targeting Guide](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Multi-Targeting)
+- [Logging Configuration](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Logging)
 
-1. **Microsoft Logging Extension Packages** – Determined by the NuGet packages referenced in your project.
-2. **Attribute-based Configuration** – Controlled using attributes in your code.
+## Sample Project
 
-For more details, see the [Logging](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Logging) page in the wiki.  
+The [.NET Aspire Sample](https://github.com/kjldev/purview-telemetry-sourcegenerator/tree/main/samples/SampleApp) demonstrates Activities, Logs, and Metrics generation working together with the Aspire Dashboard.
+
+> [!TIP]
+> The sample project has [`EmitCompilerGeneratedFiles`](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration-generator#enable-the-configuration-source-generator) enabled so you can inspect the generated output.
+
+## Performance
+
+Benchmarked on 13th Gen Intel Core i9-13900KF, .NET SDK 10.0.201. See the [Performance](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Performance) wiki page for full cross-runtime results.
+
+### Activities (.NET 10.0)
+
+| Scenario | HasListener | Manual | Generated | Ratio |
+|---|---|---|---|---|
+| start + complete | False | 0.56 ns | 0.55 ns | 0.99x |
+| start + complete | True | 218 ns / 1008 B | 204 ns / 1008 B | 0.94x |
+| start + fail | True | 198 ns / 920 B | 189 ns / 920 B | 0.87x |
+
+Generated activities match or outperform hand-written code with identical allocations.
+
+### Logging (.NET 10.0)
+
+| Scenario | HasLogging | LoggerMessage.Define | Generated v1 | Generated v2 |
+|---|---|---|---|---|
+| single Info call | False | 0.21 ns | 0.18 ns | 0.21 ns |
+| single Info call | True | 4.29 ns | 4.24 ns (0.99x) | 4.20 ns (0.98x) |
+| full lifecycle (4 calls) | True | 17.73 ns | 19.52 ns (1.10x) | 18.81 ns (1.06x) |
+
+Both v1 and v2 allocate **0 bytes** per call on all runtimes. Both generated variants are within ~2% of the manual baseline for single calls; full lifecycle cost is within ~10%.
+
+### Multi-Target (.NET 10.0, Activity + Logging + Metrics)
+
+| Scenario | HasListener | Single-target | Multi-target generated | Multi-target manual |
+|---|---|---|---|---|
+| start + complete | True | 203 ns / 1008 B | 230 ns / 1032 B (1.13x) | 233 ns / 1032 B (1.15x) |
+
+Adding full Activity+Logging+Metrics multi-target generation costs ~13% over Activity-only on .NET 10.0 — matching hand-written multi-target code within 2%.
+
+### Metrics (.NET 10.0)
+
+| Scenario | Generated | Notes |
+|---|---|---|
+| auto-counter (0 tags) | 0.37 ns | - |
+| auto-counter (1 tag) | 0.37 ns | - |
+| up-down counter | 0.35 ns | - |
+| histogram (0 tags) | 0.36 ns | - |
+| histogram (1 tag) | 0.36 ns | - |
+| 4+ tags (TagList) | 4-7 ns | Stack-allocated `TagList` |
+
+All instruments are **0 allocations**. Manual baselines are JIT-eliminated on .NET 10.0 (no active listener), so absolute times are shown. On .NET 8/9, generated and manual are within ~25%.
+
+## v4 Breaking Changes
+
+### Namespace Consolidation
+
+v4 consolidates all attributes into a single namespace. Update your using statements:
+
+**Before (v3):**
+
+```csharp
+using Purview.Telemetry.Activities;
+using Purview.Telemetry.Logging;
+using Purview.Telemetry.Metrics;
+```
+
+**After (v4):**
+
+```csharp
+using Purview.Telemetry;
+```
+
+All attributes (`[ActivitySource]`, `[Logger]`, `[Meter]`, `[Activity]`, `[Event]`, `[Log]`, `[Counter]`, etc.) are now in the unified `Purview.Telemetry` namespace.
+
+### OpenTelemetry-Aligned Naming (NEW in v4.0.0-alpha.5+)
+
+v4 defaults to **OpenTelemetry semantic conventions** for generated telemetry names, improving observability and cross-platform compatibility. This is a **breaking change** if you rely on specific telemetry names.
+
+#### What Changed
+
+| Telemetry Type | v3 Behavior | v4 Default | Impact |
+|----------------|-------------|------------|--------|
+| **ActivitySource Name** | Assembly name lowercased: `"myapp"` | Assembly name preserved: `"MyApp"` | ActivitySource names change casing |
+| **Tag/Baggage Keys** | Lowercased, smashed: `"entityid"` | snake_case: `"entity_id"` | Tag keys have underscores for word boundaries |
+| **Metric Instrument Names** | Lowercased, smashed: `"recordhistogram"` | Hierarchical dot.separated: `"myapp.products.record.histogram"` | Includes meter name prefix + word boundaries |
+| **Metric Tag Keys** | Lowercased, smashed: `"requestcount"` | snake_case: `"request_count"` | Metric tag keys have underscores |
+
+#### Examples
+
+**Before (v3/Legacy):**
+
+```csharp
+// Generated code:
+new ActivitySource("myapp")           // lowercase
+activity.SetTag("entityid", ...)      // smashed compound
+var meter = meterFactory.Create("MyApp.Products");
+meter.CreateCounter<int>("recordcount")  // smashed compound, no meter prefix
+```
+
+**After (v4 OpenTelemetry mode - DEFAULT):**
+
+```csharp
+// Generated code:
+new ActivitySource("MyApp")           // preserves casing
+activity.SetTag("entity_id", ...)     // snake_case
+var meter = meterFactory.Create("MyApp.Products");
+meter.CreateCounter<int>("myapp.products.record.count")  // hierarchical: meter + instrument
+```
+
+**Note**: In OpenTelemetry mode, instrument names automatically include the meter name prefix (converted to lowercase dot.separated), following OpenTelemetry best practices for hierarchical metric naming.
+
+#### Reverting to v3 Naming (Legacy Mode)
+
+If you need to maintain v3-style naming for backward compatibility, set `NamingConvention = Legacy` on the `[TelemetryGeneration]` attribute:
+
+```csharp
+using Purview.Telemetry;
+
+// Revert ALL telemetry to v3 naming (assembly-level)
+[assembly: TelemetryGeneration(NamingConvention = NamingConvention.Legacy)]
+```
+
+Or set per-interface:
+
+```csharp
+// Legacy naming for this interface only
+[TelemetryGeneration(NamingConvention = NamingConvention.Legacy)]
+interface IMyTelemetry { }
+```
+
+#### Available Naming Conventions
+
+```csharp
+public enum NamingConvention
+{
+    Legacy = 0,          // v3 behaviour: lowercase, smashed compounds
+    OpenTelemetry = 1    // v4 default: OTel conventions (dot.separated, snake_case)
+}
+```
+
+**Recommendation:** Use `NamingConvention.OpenTelemetry` (default) for new projects. Only use `Legacy` if you need exact v3 compatibility.

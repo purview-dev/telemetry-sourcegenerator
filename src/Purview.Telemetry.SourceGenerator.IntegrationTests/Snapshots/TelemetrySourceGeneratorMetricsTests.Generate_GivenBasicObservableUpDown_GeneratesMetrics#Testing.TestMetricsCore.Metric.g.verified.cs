@@ -18,28 +18,16 @@ namespace Testing
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class TestMetricsCore : global::Testing.ITestMetrics
 	{
-		global::System.Diagnostics.Metrics.Meter _meter = default!;
+		readonly global::System.Diagnostics.Metrics.Meter _meter;
 
-		global::System.Diagnostics.Metrics.ObservableUpDownCounter<int>? _observableUpDownInstrument = null;
-		global::System.Diagnostics.Metrics.ObservableUpDownCounter<int>? _observableUpDown2Instrument = null;
-		global::System.Diagnostics.Metrics.ObservableUpDownCounter<int>? _observableUpDown3Instrument = null;
+		global::System.Diagnostics.Metrics.ObservableUpDownCounter<int> _observableUpDownInstrument = default!;
+		global::System.Diagnostics.Metrics.ObservableUpDownCounter<int> _observableUpDown2Instrument = default!;
+		global::System.Diagnostics.Metrics.ObservableUpDownCounter<int> _observableUpDown3Instrument = default!;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestMetricsCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
 		{
-			InitializeMeters(meterFactory);
-		}
-
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		void InitializeMeters(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
-		{
-			if (_meter != null)
-			{
-				throw new global::System.Exception("The meters have already been initialized.");
-			}
-
-			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateMeterTags(meterTags);
 
@@ -63,14 +51,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList observableUpDownTagList = new();
-
-			observableUpDownTagList.Add("intparam", intParam);
-			observableUpDownTagList.Add("boolparam", boolParam);
-
-			_observableUpDownInstrument = _meter.CreateObservableUpDownCounter<int>("observableupdown", f, unit: null, description: null
-				, tags: observableUpDownTagList
-			);
+			_observableUpDownInstrument = _meter.CreateObservableUpDownCounter<int>("test_metrics.observable_up_down", f, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -78,17 +59,10 @@ namespace Testing
 		{
 			if (_observableUpDown2Instrument != null)
 			{
-				throw new global::System.Exception("observableupdown2 has already been initialized.");
+				throw new global::System.Exception("test_metrics.observable_up_down2 has already been initialized.");
 			}
 
-			global::System.Diagnostics.TagList observableUpDown2TagList = new();
-
-			observableUpDown2TagList.Add("intparam", intParam);
-			observableUpDown2TagList.Add("boolparam", boolParam);
-
-			_observableUpDown2Instrument = _meter.CreateObservableUpDownCounter<int>("observableupdown2", f, unit: null, description: null
-				, tags: observableUpDown2TagList
-			);
+			_observableUpDown2Instrument = _meter.CreateObservableUpDownCounter<int>("test_metrics.observable_up_down2", f, unit: null, description: null);
 		}
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -99,14 +73,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList observableUpDown3TagList = new();
-
-			observableUpDown3TagList.Add("intparam", intParam);
-			observableUpDown3TagList.Add("boolparam", boolParam);
-
-			_observableUpDown3Instrument = _meter.CreateObservableUpDownCounter<int>("observableupdown3", f, unit: null, description: null
-				, tags: observableUpDown3TagList
-			);
+			_observableUpDown3Instrument = _meter.CreateObservableUpDownCounter<int>("test_metrics.observable_up_down3", f, unit: null, description: null);
 		}
 	}
 }

@@ -1,60 +1,55 @@
-﻿namespace Purview.Telemetry.SourceGenerator;
+namespace Purview.Telemetry.SourceGenerator;
 
-public partial class TelemetrySourceGeneratorTests(ITestOutputHelper testOutputHelper)
-	: IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>(testOutputHelper)
+public partial class TelemetrySourceGeneratorTests
+	: IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>
 {
-	[Fact]
-	public async Task Generate_GivenGeneratedAttributes_GeneratesAsExpected()
+	[Test]
+	public async Task Generate_GivenGeneratedAttributes_GeneratesAsExpected(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
 		const string empty =
 			@"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(empty);
+		var generationResult = await GenerateAsync(empty, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, autoVerifyTemplates: false);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			autoVerifyTemplates: false,
+			cancellationToken: cancellationToken
+		);
 	}
 
-	public static TheoryData<string> BasicGenericParameters
+	public static IEnumerable<string> BasicGenericParameters
 	{
 		get
 		{
-			TheoryData<string> parameter = [];
-
-			parameter.Add(
-				TestHelpers.GetFriendlyTypeName(typeof(List<>).MakeGenericType(typeof(string)))
-			);
-			parameter.Add(
+			List<string> parameter =
+			[
+				TestHelpers.GetFriendlyTypeName(typeof(List<>).MakeGenericType(typeof(string))),
 				TestHelpers.GetFriendlyTypeName(
-					typeof(IEnumerable<>).MakeGenericType(typeof(System.String)),
+					typeof(IEnumerable<>).MakeGenericType(typeof(string)),
 					useSystemType: false
-				)
-			);
-			parameter.Add(
+				),
 				TestHelpers.GetFriendlyTypeName(
 					typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(int))
-				)
-			);
-			parameter.Add(
+				),
 				TestHelpers.GetFriendlyTypeName(
-					typeof(IDictionary<,>).MakeGenericType(
-						typeof(System.String),
-						typeof(System.Int32)
-					),
+					typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(int)),
 					useSystemType: false
-				)
-			);
+				),
+			];
 
 			return parameter;
 		}
 	}
 
-	public static TheoryData<int> GetGenericTypeDefCount => [1, 2, 5];
+	public static IEnumerable<int> GetGenericTypeDefCount => [1, 2, 5];
 }

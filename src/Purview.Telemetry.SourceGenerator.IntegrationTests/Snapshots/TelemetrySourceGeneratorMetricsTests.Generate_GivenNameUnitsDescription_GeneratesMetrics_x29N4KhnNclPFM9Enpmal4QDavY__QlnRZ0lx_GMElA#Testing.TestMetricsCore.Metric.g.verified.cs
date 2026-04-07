@@ -18,26 +18,14 @@ namespace Testing
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class TestMetricsCore : global::Testing.ITestMetrics
 	{
-		global::System.Diagnostics.Metrics.Meter _meter = default!;
+		readonly global::System.Diagnostics.Metrics.Meter _meter;
 
-		global::System.Diagnostics.Metrics.ObservableGauge<byte>? _metricInstrument = null;
+		global::System.Diagnostics.Metrics.ObservableGauge<byte> _metricInstrument = default!;
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestMetricsCore(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
 		{
-			InitializeMeters(meterFactory);
-		}
-
-		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-		void InitializeMeters(global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
-		{
-			if (_meter != null)
-			{
-				throw new global::System.Exception("The meters have already been initialized.");
-			}
-
-			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new();
+			global::System.Collections.Generic.Dictionary<string, object?> meterTags = new global::System.Collections.Generic.Dictionary<string, object?>();
 
 			PopulateMeterTags(meterTags);
 
@@ -61,14 +49,7 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.TagList metricTagList = new();
-
-			metricTagList.Add("intparam", intParam);
-			metricTagList.Add("boolparam", boolParam);
-
-			_metricInstrument = _meter.CreateObservableGauge<byte>("an-observablegauge-name-property", f, unit: "biscuits-property", description: "biscuit sales per-capita-property."
-				, tags: metricTagList
-			);
+			_metricInstrument = _meter.CreateObservableGauge<byte>("test_metrics.an-observablegauge-name-property", f, unit: "biscuits-property", description: "biscuit sales per-capita-property.");
 		}
 	}
 }

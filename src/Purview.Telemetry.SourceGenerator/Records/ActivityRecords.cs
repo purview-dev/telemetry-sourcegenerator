@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
-using Purview.Telemetry.SourceGenerator.Templates;
+﻿using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator.Records;
 
@@ -9,55 +7,29 @@ record ActivitySourceTarget(
 	GenerationType GenerationType,
 	string ClassNameToGenerate,
 	string? ClassNamespace,
-	string[] ParentClasses,
+	EquatableArray<string> ParentClasses,
 	string? FullNamespace,
 	string? FullyQualifiedName,
 	PurviewTypeInfo InterfaceType,
 	ActivitySourceGenerationAttributeRecord? ActivitySourceGenerationAttribute,
 	string? ActivitySourceName,
-	ImmutableArray<ActivityBasedGenerationTarget> ActivityMethods,
-	ActivitySourceAttributeRecord ActivityTargetAttributeRecord,
-	Location? InterfaceLocation,
-	ImmutableDictionary<string, Location[]> DuplicateMethods,
-	ImmutableArray<(TelemetryDiagnosticDescriptor, ImmutableArray<Location>)>? Failures
-)
-{
-	public static ActivitySourceTarget Failed(
-		TelemetryDiagnosticDescriptor diagnostic,
-		ImmutableArray<Location> locations
-	) =>
-		new(
-			null!,
-			GenerationType.None,
-			null!,
-			null,
-			null!,
-			null,
-			null!,
-			Constants.Empty,
-			null,
-			null,
-			[],
-			null!,
-			null,
-			null!,
-			[(diagnostic, locations)]
-		);
-}
+	EquatableArray<ActivityBasedGenerationTarget> ActivityMethods,
+	ActivitySourceAttributeRecord ActivityTargetAttributeRecord
+);
 
 record ActivityBasedGenerationTarget(
 	string MethodName,
 	PurviewTypeInfo ReturnType,
 	string ActivityOrEventName,
 	bool HasActivityParameter,
-	ImmutableArray<Location> Locations,
 	ActivityAttributeRecord? ActivityAttribute,
 	EventAttributeRecord? EventAttribute,
 	ActivityMethodType MethodType,
-	ImmutableArray<ActivityBasedParameterTarget> Parameters,
-	ImmutableArray<ActivityBasedParameterTarget> Baggage,
-	ImmutableArray<ActivityBasedParameterTarget> Tags,
-	TargetGeneration TargetGenerationState
+	EquatableArray<ActivityBasedParameterTarget> Parameters,
+	EquatableArray<ActivityBasedParameterTarget> Baggage,
+	EquatableArray<ActivityBasedParameterTarget> Tags,
+	TargetGeneration TargetGenerationState,
+	EquatableArray<string> TypeParameters = default
 );
 
 record ActivityBasedParameterTarget(
@@ -67,7 +39,7 @@ record ActivityBasedParameterTarget(
 	ActivityParameterDestination ParamDestination,
 	bool SkipOnNullOrEmpty,
 	bool IsException,
-	ImmutableArray<Location> Locations
+	GenerationType ExcludedTargets
 );
 
 enum ActivityParameterDestination

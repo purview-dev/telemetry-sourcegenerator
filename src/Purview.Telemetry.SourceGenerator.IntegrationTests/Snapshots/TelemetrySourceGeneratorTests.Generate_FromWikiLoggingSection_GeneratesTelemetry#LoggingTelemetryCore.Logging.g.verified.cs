@@ -17,7 +17,6 @@
 sealed partial class LoggingTelemetryCore : global::ILoggingTelemetry
 {
 	readonly global::Microsoft.Extensions.Logging.ILogger<global::ILoggingTelemetry> _logger;
-
 	static readonly global::System.Func<global::Microsoft.Extensions.Logging.ILogger, global::System.Guid, global::System.IDisposable?> _processingWorkItemAction = global::Microsoft.Extensions.Logging.LoggerMessage.DefineScope<global::System.Guid>("ProcessingWorkItem: Id = {Id}");
 	static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, global::ItemTypes, global::System.Exception?> _processingItemTypeAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<global::ItemTypes>(global::Microsoft.Extensions.Logging.LogLevel.Trace, new global::Microsoft.Extensions.Logging.EventId(1819684787, "ProcessingItemType"), "ProcessingItemType: ItemType = {ItemType}");
 	static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, global::System.Exception?> _failedToProcessWorkItemAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define(global::Microsoft.Extensions.Logging.LogLevel.Error, new global::Microsoft.Extensions.Logging.EventId(1082978768, "FailedToProcessWorkItem"), "FailedToProcessWorkItem");

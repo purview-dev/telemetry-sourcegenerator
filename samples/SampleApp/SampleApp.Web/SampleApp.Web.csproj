@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+	<PropertyGroup>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- Use ProjectReference for local development -->
+		<ProjectReference
+			Include="..\..\..\src\Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.csproj"
+			OutputItemType="Analyzer"
+			ReferenceOutputAssembly="false"
+		/>
+		<ProjectReference Include="..\SampleApp.ServiceDefaults\SampleApp.ServiceDefaults.csproj" />
+		<ProjectReference Include="..\SampleApp.Shared\SampleApp.Shared.csproj" />
+	</ItemGroup>
+</Project>

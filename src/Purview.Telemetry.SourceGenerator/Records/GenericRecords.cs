@@ -7,19 +7,24 @@ namespace Purview.Telemetry.SourceGenerator.Records;
 [Flags]
 enum GenerationType
 {
-	None,
+	None = 0,
 	Activities = 1,
 	Logging = 2,
 	Metrics = 4,
+	All = Activities | Logging | Metrics,
 }
 
-record TargetGeneration(
+sealed record TargetGeneration(
 	bool IsValid,
 	bool RaiseInferenceNotSupportedWithMultiTargeting,
-	bool RaiseMultiGenerationTargetsNotSupported
+	bool RaiseMultiGenerationTargetsNotSupported,
+	bool IsMultiTarget = false,
+	GenerationType MethodTargets = GenerationType.None,
+	string? ActivityParameterWithoutTarget = null,
+	bool RaiseMissingInterfaceSource = false
 );
 
-record AttributeValue<T>
+sealed record AttributeValue<T>
 	where T : struct
 {
 	public AttributeValue(T? value)
@@ -83,7 +88,7 @@ public record struct MessageTemplateHole(
 			throw new Exception("Destructure and Stringify cannot both be true.");
 	}
 
-	public static ImmutableArray<MessageTemplateHole> FromMatches(MatchCollection matches)
+	public static EquatableArray<MessageTemplateHole> FromMatches(MatchCollection matches)
 	{
 		List<MessageTemplateHole>? holes = null;
 		if (matches != null)
@@ -96,12 +101,12 @@ public record struct MessageTemplateHole(
 			}
 		}
 
-		return holes?.ToImmutableArray() ?? [];
+		return holes?.ToImmutableArray() ?? new EquatableArray<MessageTemplateHole>([]);
 	}
 
 	static MessageTemplateHole FromMatch(Match match)
 	{
-		if (match == null || !match.Success)
+		if (match?.Success != true)
 			throw new ArgumentException("Match must be successful.", nameof(match));
 
 		string? name = null;

@@ -1,113 +1,133 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Metrics;
+namespace Purview.Telemetry.SourceGenerator.Metrics;
 
 partial class TelemetrySourceGeneratorMetricsTests
 {
-	[Fact]
-	public async Task Generate_GivenAssemblyEnableDI_GeneratesMetrics()
+	[Test]
+	public async Task Generate_GivenAssemblyEnableDI_GeneratesMetrics(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicMetric =
-			@"
-using Purview.Telemetry;
-using Purview.Telemetry.Metrics;
+		const string basicMetric = """
+
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = true)]
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface ITestMetrics {
 	[Counter]
 	void Counter(int counterValue, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric, disableDependencyInjection: false);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenInterfaceEnableDI_GeneratesMetrics()
+	[Test]
+	public async Task Generate_GivenInterfaceEnableDI_GeneratesMetrics(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicMetric =
-			@"
-using Purview.Telemetry;
-using Purview.Telemetry.Metrics;
+		const string basicMetric = """
+
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 [TelemetryGeneration(GenerateDependencyExtension = true)]
 public interface ITestMetrics {
 	[Counter]
 	void Counter(int counterValue, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric, disableDependencyInjection: false);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenDIDisabledAtAssemblyAndInterfaceEnableDI_GeneratesMetrics()
+	[Test]
+	public async Task Generate_GivenDIDisabledAtAssemblyAndInterfaceEnableDI_GeneratesMetrics(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicMetric =
-			@"
-using Purview.Telemetry;
-using Purview.Telemetry.Metrics;
+		const string basicMetric = """
+
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = false)]
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 [TelemetryGeneration(GenerateDependencyExtension = true)]
 public interface ITestMetrics {
 	[Counter]
 	void Counter(int counterValue, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric, disableDependencyInjection: false);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenDIEnabledAtAssemblyAndInterfaceDisabledDI_GeneratesMetrics()
+	[Test]
+	public async Task Generate_GivenDIEnabledAtAssemblyAndInterfaceDisabledDI_GeneratesMetrics(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicMetric =
-			@"
-using Purview.Telemetry;
-using Purview.Telemetry.Metrics;
+		const string basicMetric = """
+
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = true)]
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 [TelemetryGeneration(GenerateDependencyExtension = false)]
 public interface ITestMetrics {
 	[Counter]
 	void Counter(int counterValue, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric, disableDependencyInjection: false);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

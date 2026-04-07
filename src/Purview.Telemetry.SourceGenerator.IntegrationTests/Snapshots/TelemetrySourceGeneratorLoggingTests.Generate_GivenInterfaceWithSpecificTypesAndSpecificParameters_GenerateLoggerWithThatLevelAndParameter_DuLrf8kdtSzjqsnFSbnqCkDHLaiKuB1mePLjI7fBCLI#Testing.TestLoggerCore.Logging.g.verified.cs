@@ -19,7 +19,6 @@ namespace Testing
 	sealed partial class TestLoggerCore : global::Testing.ITestLogger
 	{
 		readonly global::Microsoft.Extensions.Logging.ILogger<global::Testing.ITestLogger> _logger;
-
 		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, string, int, bool, global::System.Exception?> _logAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<string, int, bool>(global::Microsoft.Extensions.Logging.LogLevel.Debug, new global::Microsoft.Extensions.Logging.EventId(1579320335, "Log"), "Log: StringParam = {StringParam}, IntParam = {IntParam}, BoolParam = {BoolParam}");
 		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, string, int, bool, global::System.Exception?> _log_EventId_1Action = global::Microsoft.Extensions.Logging.LoggerMessage.Define<string, int, bool>(global::Microsoft.Extensions.Logging.LogLevel.Debug, new global::Microsoft.Extensions.Logging.EventId(100, "Log_EventId_1"), "Log_EventId_1: StringParam = {StringParam}, IntParam = {IntParam}, BoolParam = {BoolParam}");
 		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, string, int, bool, global::System.Exception?> _log_EventId_3Action = global::Microsoft.Extensions.Logging.LoggerMessage.Define<string, int, bool>(global::Microsoft.Extensions.Logging.LogLevel.Debug, new global::Microsoft.Extensions.Logging.EventId(100, "Log_EventId_3"), "Log_EventId_3: StringParam = {StringParam}, IntParam = {IntParam}, BoolParam = {BoolParam}");

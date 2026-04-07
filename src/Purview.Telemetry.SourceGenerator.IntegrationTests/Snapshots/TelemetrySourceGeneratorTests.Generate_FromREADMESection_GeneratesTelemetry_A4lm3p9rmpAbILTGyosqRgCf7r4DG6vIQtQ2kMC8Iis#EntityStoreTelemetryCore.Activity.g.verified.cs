@@ -11,9 +11,12 @@
 
 #nullable enable
 
+[global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 {
-	readonly static global::System.Diagnostics.ActivitySource _activitySource = new("purview.telemetry.sourcegenerator");
+	readonly static global::System.Diagnostics.ActivitySource _activitySource = new global::System.Diagnostics.ActivitySource("Purview.Telemetry.SourceGenerator");
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -24,13 +27,13 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 			return;
 		}
 
-		global::System.Diagnostics.ActivityTagsCollection tagsCollection = new();
+		global::System.Diagnostics.ActivityTagsCollection tagsCollection = new global::System.Diagnostics.ActivityTagsCollection();
 		tagsCollection.Add("exception.escaped", escape);
 		tagsCollection.Add("exception.message", exception.Message);
 		tagsCollection.Add("exception.type", exception.GetType().FullName);
 		tagsCollection.Add("exception.stacktrace", exception.StackTrace);
 
-		global::System.Diagnostics.ActivityEvent recordExceptionEvent = new(name: "exception", timestamp: default, tags: tagsCollection);
+		global::System.Diagnostics.ActivityEvent recordExceptionEvent = new global::System.Diagnostics.ActivityEvent(name: "exception", timestamp: default, tags: tagsCollection);
 
 		activity.AddEvent(recordExceptionEvent);
 	}
@@ -48,12 +51,8 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 
 		if (activityGettingEntityFromStore != null)
 		{
-			activityGettingEntityFromStore.SetTag("entityid", entityId);
-		}
-
-		if (activityGettingEntityFromStore != null)
-		{
-			activityGettingEntityFromStore.SetBaggage("serviceurl", serviceUrl);
+			activityGettingEntityFromStore.SetTag("entity_id", entityId);
+			activityGettingEntityFromStore.SetBaggage("service_url", serviceUrl);
 		}
 
 		return activityGettingEntityFromStore;
@@ -71,9 +70,9 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 		if (activity != null)
 		{
 			global::System.Diagnostics.ActivityTagsCollection tagsCollectionGetDuration = new();
-			tagsCollectionGetDuration.Add("durationinms", durationInMS);
+			tagsCollectionGetDuration.Add("duration_in_ms", durationInMS);
 
-			global::System.Diagnostics.ActivityEvent activityEventGetDuration = new(name: "GetDuration", timestamp: default, tags: tagsCollectionGetDuration);
+			global::System.Diagnostics.ActivityEvent activityEventGetDuration = new global::System.Diagnostics.ActivityEvent(name: "GetDuration", timestamp: default, tags: tagsCollectionGetDuration);
 
 			activity.AddEvent(activityEventGetDuration);
 		}
@@ -90,8 +89,8 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 
 		if (activity != null)
 		{
-			activity.SetTag("totalvalue", totalValue);
-			activity.SetTag("lastupdatedbyuserid", lastUpdatedByUserId);
+			activity.SetTag("total_value", totalValue);
+			activity.SetTag("last_updated_by_user_id", lastUpdatedByUserId);
 		}
 	}
 

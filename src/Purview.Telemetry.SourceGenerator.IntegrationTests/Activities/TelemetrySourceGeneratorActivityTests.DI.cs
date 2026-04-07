@@ -1,21 +1,22 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Activities;
+namespace Purview.Telemetry.SourceGenerator.Activities;
 
 partial class TelemetrySourceGeneratorActivityTests
 {
-	[Fact]
-	public async Task Generate_GivenAssemblyEnableDI_GeneratesActivity()
+	[Test]
+	public async Task Generate_GivenAssemblyEnableDI_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			@"
-using Purview.Telemetry.Activities;
+		const string basicActivity = """
+
 using System.Diagnostics;
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = true)]
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Activity]
 	Activity? Activity([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
@@ -23,31 +24,34 @@ public interface ITestActivities {
 	[Event]
 	void Event(Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicActivity,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenInterfaceEnableDI_GeneratesActivity()
+	[Test]
+	public async Task Generate_GivenInterfaceEnableDI_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			@"
-using Purview.Telemetry.Activities;
+		const string basicActivity = """
+
 using System.Diagnostics;
 
 namespace Testing;
 
 [TelemetryGeneration(GenerateDependencyExtension = true)]
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Activity]
 	Activity? Activity([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
@@ -55,25 +59,28 @@ public interface ITestActivities {
 	[Event]
 	void Event(Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicActivity,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenDIDisabledAtAssemblyAndInterfaceEnableDI_GeneratesActivity()
+	[Test]
+	public async Task Generate_GivenDIDisabledAtAssemblyAndInterfaceEnableDI_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			@"
-using Purview.Telemetry.Activities;
+		const string basicActivity = """
+
 using System.Diagnostics;
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = false)]
@@ -81,7 +88,7 @@ using System.Diagnostics;
 namespace Testing;
 
 [TelemetryGeneration(GenerateDependencyExtension = true)]
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Activity]
 	Activity? Activity([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
@@ -89,25 +96,28 @@ public interface ITestActivities {
 	[Event]
 	void Event(Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicActivity,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenDIEnabledAtAssemblyAndInterfaceDisableDI_GeneratesActivity()
+	[Test]
+	public async Task Generate_GivenDIEnabledAtAssemblyAndInterfaceDisableDI_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			@"
-using Purview.Telemetry.Activities;
+		const string basicActivity = """
+
 using System.Diagnostics;
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = true)]
@@ -115,7 +125,7 @@ using System.Diagnostics;
 namespace Testing;
 
 [TelemetryGeneration(GenerateDependencyExtension = false)]
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Activity]
 	Activity? Activity([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
@@ -123,32 +133,35 @@ public interface ITestActivities {
 	[Event]
 	void Event(Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicActivity,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenAssemblyEnableDIAndClassIsPublic_GeneratesActivity()
+	[Test]
+	public async Task Generate_GivenAssemblyEnableDIAndClassIsPublic_GeneratesActivity(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicActivity =
-			@"
-using Purview.Telemetry.Activities;
+		const string basicActivity = """
+
 using System.Diagnostics;
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = true, DependencyInjectionClassIsPublic = true)]
 
 namespace Testing;
 
-[ActivitySource(""testing-activity-source"")]
+[ActivitySource("testing-activity-source")]
 public interface ITestActivities {
 	[Activity]
 	Activity? Activity([Baggage]string stringParam, [Tag]int intParam, bool boolParam);
@@ -156,15 +169,17 @@ public interface ITestActivities {
 	[Event]
 	void Event(Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicActivity,
-			disableDependencyInjection: false
+			disableDependencyInjection: false,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

@@ -1,9 +1,8 @@
 {
 	"name": "purview-telemetry-sourcegenerator",
-	"version": "3.2.4",
+	"version": "4.0.0",
 	"description": "Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.activitysource), [`ILogger`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.ilogger), and [`Metrics`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics) based on interface methods.",
 	"readme": "README.md",
-	"main": "index.js",
 	"scripts": {
 		"release": "commit-and-tag-version --commit-all"
 	},
@@ -18,21 +17,11 @@
 	},
 	"homepage": "https://github.com/purview-dev/purview-telemetry-sourcegenerator#readme",
 	"devDependencies": {
-		"@commitlint/cli": "^19.8.0",
-		"@commitlint/config-conventional": "^19.8.0",
-		"@types/node": "^22.14.1",
-		"commit-and-tag-version": "^12.5.1",
-		"commitlint": "^19.8.0",
-		"husky": "^9.1.7"
-	},
-	"commitlint": {
-		"extends": [
-			"@commitlint/config-conventional"
-		]
+		"commit-and-tag-version": "^12.6.1"
 	},
 	"commit-and-tag-version": {
 		"scripts": {
-			"postbump": "make update-version && git add ."
+			"postbump": "just update-version && git add ."
 		}
 	}
 }

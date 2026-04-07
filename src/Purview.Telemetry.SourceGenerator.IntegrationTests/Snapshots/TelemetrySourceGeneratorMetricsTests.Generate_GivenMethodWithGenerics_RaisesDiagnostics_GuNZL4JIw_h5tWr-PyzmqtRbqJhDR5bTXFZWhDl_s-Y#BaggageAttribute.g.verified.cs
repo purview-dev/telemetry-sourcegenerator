@@ -9,9 +9,12 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
+#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE
 #nullable enable
+#endif
 
-namespace Purview.Telemetry.Activities;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Marker attribute required for explicitly setting a
@@ -46,7 +49,7 @@ sealed class BaggageAttribute : global::System.Attribute
 	/// </summary>
 	/// <param name="name">Sets the <see cref="Name"/>.</param>
 	/// <param name="skipOnNullOrEmpty">Optionally sets the <see cref="SkipOnNullOrEmpty"/> (defaults to false).</param>
-	public BaggageAttribute(string? name, bool skipOnNullOrEmpty = false)
+	public BaggageAttribute(string name, bool skipOnNullOrEmpty = false)
 	{
 		Name = name;
 		SkipOnNullOrEmpty = skipOnNullOrEmpty;
@@ -56,10 +59,15 @@ sealed class BaggageAttribute : global::System.Attribute
 	/// Specifies the name of the baggage item. If null, empty or whitespace
 	/// defaults to the name of the parameter.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public string Name { get; set; }
+#else
 	public string? Name { get; set; }
+#endif
 
 	/// <summary>
 	/// Determines if the parameter should be skipped when the value is a default value.
 	/// </summary>
 	public bool SkipOnNullOrEmpty { get; set; }
+}
 }

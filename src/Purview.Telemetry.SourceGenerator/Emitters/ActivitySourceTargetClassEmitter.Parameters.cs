@@ -67,11 +67,9 @@ partial class ActivitySourceTargetClassEmitter
 			if (!populateTags && param.ParameterType.SpecialType != SpecialType.System_String)
 			{
 				logger?.Diagnostic("Found a baggage parameter type that is not a string.");
-
 				TelemetryDiagnostics.Report(
 					context.ReportDiagnostic,
-					TelemetryDiagnostics.Activities.BaggageParameterShouldBeString,
-					param.Locations
+					TelemetryDiagnostics.Activities.BaggageParameterShouldBeString
 				);
 
 				if (param.ParameterType.IsNullable)
@@ -150,52 +148,34 @@ partial class ActivitySourceTargetClassEmitter
 		{
 			logger?.Diagnostic("More than one activity parameter defined.");
 
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.DuplicateParameterTypes,
-				activityParams.SelectMany(m => m.Locations),
-				string.Join(", ", activityParams.Select(m => m.ParameterName)),
-				"activity"
-			);
-
 			return false;
 		}
 		else
+		{
 			activityParam = activityParams.FirstOrDefault();
+		}
 
 		if (parentContextOrIdParams.Length > 1)
 		{
 			logger?.Diagnostic("More than one parent context/ id defined.");
 
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.DuplicateParameterTypes,
-				parentContextOrIdParams.SelectMany(m => m.Locations),
-				string.Join(", ", parentContextOrIdParams.Select(m => m.ParameterName)),
-				"parent context/ parent context Id"
-			);
-
 			return false;
 		}
 		else
+		{
 			parentContextOrId = parentContextOrIdParams.FirstOrDefault();
+		}
 
 		if (tagsParams.Length > 1)
 		{
 			logger?.Diagnostic("More than one tag IEnumerable defined.");
 
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.DuplicateParameterTypes,
-				tagsParams.SelectMany(m => m.Locations),
-				string.Join(", ", tagsParams.Select(m => m.ParameterName)),
-				"IEnumerable of ActivityTags"
-			);
-
 			return false;
 		}
 		else
+		{
 			tagsParam = tagsParams.FirstOrDefault();
+		}
 
 		if (linksParams.Length > 1)
 		{
@@ -203,30 +183,16 @@ partial class ActivitySourceTargetClassEmitter
 				"More than one ActivityLink/ IEnumerable of ActivityLink is defined."
 			);
 
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.DuplicateParameterTypes,
-				linksParams.SelectMany(m => m.Locations),
-				string.Join(", ", linksParams.Select(m => m.ParameterName)),
-				"IEnumerable of ActivityLinks"
-			);
-
 			return false;
 		}
 		else
+		{
 			linksParam = linksParams.FirstOrDefault();
+		}
 
 		if (escapeParams.Length > 1)
 		{
 			logger?.Diagnostic("More than one Escape parameter defined.");
-
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.DuplicateParameterTypes,
-				escapeParams.SelectMany(m => m.Locations),
-				string.Join(", ", escapeParams.Select(m => m.ParameterName)),
-				"escape parameters"
-			);
 
 			return false;
 		}
@@ -237,26 +203,11 @@ partial class ActivitySourceTargetClassEmitter
 			{
 				if (escapeParam.ParameterType.SpecialType != SpecialType.System_Boolean)
 				{
-					TelemetryDiagnostics.Report(
-						context.ReportDiagnostic,
-						TelemetryDiagnostics.Activities.EscapedParameterInvalidType,
-						escapeParams.SelectMany(m => m.Locations),
-						string.Join(", ", escapeParams.Select(m => m.ParameterName)),
-						"escape parameters"
-					);
-
 					return false;
 				}
 
 				if (methodTarget.MethodType != ActivityMethodType.Event)
 				{
-					TelemetryDiagnostics.Report(
-						context.ReportDiagnostic,
-						TelemetryDiagnostics.Activities.EscapedParameterInvalidType,
-						escapeParams.SelectMany(m => m.Locations),
-						escapeParam.ParameterName
-					);
-
 					return false;
 				}
 			}
@@ -265,14 +216,6 @@ partial class ActivitySourceTargetClassEmitter
 		if (statusDescriptionParams.Length > 1)
 		{
 			logger?.Diagnostic("More than one StatusDescription parameter defined.");
-
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.DuplicateParameterTypes,
-				statusDescriptionParams.SelectMany(m => m.Locations),
-				string.Join(", ", escapeParams.Select(m => m.ParameterName)),
-				"status description parameters"
-			);
 
 			return false;
 		}
@@ -283,26 +226,11 @@ partial class ActivitySourceTargetClassEmitter
 			{
 				if (statusDescriptionParam.ParameterType.SpecialType != SpecialType.System_String)
 				{
-					TelemetryDiagnostics.Report(
-						context.ReportDiagnostic,
-						TelemetryDiagnostics.Activities.StatusDescriptionMustBeString,
-						statusDescriptionParams.SelectMany(m => m.Locations),
-						string.Join(", ", escapeParams.Select(m => m.ParameterName)),
-						"status description parameters"
-					);
-
 					return false;
 				}
 
 				if (methodTarget.MethodType != ActivityMethodType.Event)
 				{
-					TelemetryDiagnostics.Report(
-						context.ReportDiagnostic,
-						TelemetryDiagnostics.Activities.StatusDescriptionParameterInvalidType,
-						statusDescriptionParams.SelectMany(m => m.Locations),
-						statusDescriptionParam.ParameterName
-					);
-
 					return false;
 				}
 			}

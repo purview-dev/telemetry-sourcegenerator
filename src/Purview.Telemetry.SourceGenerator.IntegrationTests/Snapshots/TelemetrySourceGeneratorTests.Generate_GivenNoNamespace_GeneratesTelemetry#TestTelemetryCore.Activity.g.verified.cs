@@ -11,9 +11,12 @@
 
 #nullable enable
 
+[global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 sealed partial class TestTelemetryCore : global::ITestTelemetry
 {
-	readonly static global::System.Diagnostics.ActivitySource _activitySource = new("activity-source");
+	readonly static global::System.Diagnostics.ActivitySource _activitySource = new global::System.Diagnostics.ActivitySource("activity-source");
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -24,13 +27,13 @@ sealed partial class TestTelemetryCore : global::ITestTelemetry
 			return;
 		}
 
-		global::System.Diagnostics.ActivityTagsCollection tagsCollection = new();
+		global::System.Diagnostics.ActivityTagsCollection tagsCollection = new global::System.Diagnostics.ActivityTagsCollection();
 		tagsCollection.Add("exception.escaped", escape);
 		tagsCollection.Add("exception.message", exception.Message);
 		tagsCollection.Add("exception.type", exception.GetType().FullName);
 		tagsCollection.Add("exception.stacktrace", exception.StackTrace);
 
-		global::System.Diagnostics.ActivityEvent recordExceptionEvent = new(name: "exception", timestamp: default, tags: tagsCollection);
+		global::System.Diagnostics.ActivityEvent recordExceptionEvent = new global::System.Diagnostics.ActivityEvent(name: "exception", timestamp: default, tags: tagsCollection);
 
 		activity.AddEvent(recordExceptionEvent);
 	}
@@ -48,13 +51,9 @@ sealed partial class TestTelemetryCore : global::ITestTelemetry
 
 		if (activityActivity != null)
 		{
-			activityActivity.SetTag("intparam", intParam);
-			activityActivity.SetTag("boolparam", boolParam);
-		}
-
-		if (activityActivity != null)
-		{
-			activityActivity.SetBaggage("stringparam", stringParam);
+			activityActivity.SetTag("int_param", intParam);
+			activityActivity.SetTag("bool_param", boolParam);
+			activityActivity.SetBaggage("string_param", stringParam);
 		}
 
 		return activityActivity;
@@ -72,14 +71,14 @@ sealed partial class TestTelemetryCore : global::ITestTelemetry
 		if (activity != null)
 		{
 			global::System.Diagnostics.ActivityTagsCollection tagsCollectionEvent = new();
-			tagsCollectionEvent.Add("intparam", intParam);
-			tagsCollectionEvent.Add("boolparam", boolParam);
+			tagsCollectionEvent.Add("int_param", intParam);
+			tagsCollectionEvent.Add("bool_param", boolParam);
 
-			global::System.Diagnostics.ActivityEvent activityEventEvent = new(name: "Event", timestamp: default, tags: tagsCollectionEvent);
+			global::System.Diagnostics.ActivityEvent activityEventEvent = new global::System.Diagnostics.ActivityEvent(name: "Event", timestamp: default, tags: tagsCollectionEvent);
 
 			activity.AddEvent(activityEventEvent);
 
-			activity.SetBaggage("stringparam", stringParam);
+			activity.SetBaggage("string_param", stringParam);
 		}
 	}
 
@@ -94,9 +93,9 @@ sealed partial class TestTelemetryCore : global::ITestTelemetry
 
 		if (activity != null)
 		{
-			activity.SetTag("intparam", intParam);
-			activity.SetTag("boolparam", boolParam);
-			activity.SetBaggage("stringparam", stringParam);
+			activity.SetTag("int_param", intParam);
+			activity.SetTag("bool_param", boolParam);
+			activity.SetBaggage("string_param", stringParam);
 		}
 	}
 

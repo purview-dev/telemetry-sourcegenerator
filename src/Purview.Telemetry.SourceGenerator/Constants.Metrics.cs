@@ -9,6 +9,8 @@ partial class Constants
 {
 	public static class Metrics
 	{
+		public const int MinimumParamsForTagList = 4;
+
 		public const string MeterInitializationMethod = "InitializeMeters";
 		public const string MeterFactoryParameterName = "meterFactory";
 
@@ -17,37 +19,41 @@ partial class Constants
 		public const bool LowercaseTagKeysDefault = true;
 
 		public static readonly TemplateInfo MeterGenerationAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Metrics.MeterGenerationAttribute"
+			"Purview.Telemetry.MeterGenerationAttribute"
 		);
 		public static readonly TemplateInfo MeterAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Metrics.MeterAttribute"
+			"Purview.Telemetry.MeterAttribute"
+		);
+
+		public static readonly TemplateInfo MeterNameGenerationType = TemplateInfo.Create(
+			"Purview.Telemetry.MeterNameGenerationType"
 		);
 
 		public static readonly TemplateInfo InstrumentMeasurementAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Metrics.InstrumentMeasurementAttribute"
+			"Purview.Telemetry.InstrumentMeasurementAttribute"
 		);
 
 		public static readonly TemplateInfo AutoCounterAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Metrics.AutoCounterAttribute"
+			"Purview.Telemetry.AutoCounterAttribute"
 		);
 		public static readonly TemplateInfo CounterAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Metrics.CounterAttribute"
+			"Purview.Telemetry.CounterAttribute"
 		);
 		public static readonly TemplateInfo UpDownCounterAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Metrics.UpDownCounterAttribute"
+			"Purview.Telemetry.UpDownCounterAttribute"
 		);
 		public static readonly TemplateInfo HistogramAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Metrics.HistogramAttribute"
+			"Purview.Telemetry.HistogramAttribute"
 		);
 
 		public static readonly TemplateInfo ObservableCounterAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Metrics.ObservableCounterAttribute"
+			"Purview.Telemetry.ObservableCounterAttribute"
 		);
 		public static readonly TemplateInfo ObservableUpDownCounterAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Metrics.ObservableUpDownCounterAttribute"
+			"Purview.Telemetry.ObservableUpDownCounterAttribute"
 		);
 		public static readonly TemplateInfo ObservableGaugeAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.Metrics.ObservableGaugeAttribute"
+			"Purview.Telemetry.ObservableGaugeAttribute"
 		);
 
 		public static readonly TemplateInfo[] ValidInstrumentAttributes =
@@ -100,6 +106,7 @@ partial class Constants
 			[
 				MeterGenerationAttribute,
 				MeterAttribute,
+				MeterNameGenerationType,
 				InstrumentMeasurementAttribute,
 				AutoCounterAttribute,
 				CounterAttribute,

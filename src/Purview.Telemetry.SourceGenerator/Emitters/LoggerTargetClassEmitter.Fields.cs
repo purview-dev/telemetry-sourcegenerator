@@ -12,7 +12,8 @@ partial class LoggerTargetClassEmitter
 		StringBuilder builder,
 		int indent,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -42,11 +43,6 @@ partial class LoggerTargetClassEmitter
 					logger?.Debug(
 						$"Identified {target.InterfaceType.TypeName}.{methodTarget.MethodName} as problematic as it has another target types."
 					);
-					TelemetryDiagnostics.Report(
-						context.ReportDiagnostic,
-						TelemetryDiagnostics.General.MultiGenerationTargetsNotSupported,
-						methodTarget.MethodLocation
-					);
 				}
 				else if (
 					methodTarget.TargetGenerationState.RaiseInferenceNotSupportedWithMultiTargeting
@@ -55,25 +51,36 @@ partial class LoggerTargetClassEmitter
 					logger?.Debug(
 						$"Identified {target.InterfaceType.TypeName}.{methodTarget.MethodName} as problematic as it is inferred."
 					);
-					TelemetryDiagnostics.Report(
-						context.ReportDiagnostic,
-						TelemetryDiagnostics.General.InferenceNotSupportedWithMultiTargeting,
-						methodTarget.MethodLocation
-					);
 				}
 
+				continue;
+			}
+
+			// Report warning for Activity parameter without Activity target
+			if (methodTarget.TargetGenerationState.ActivityParameterWithoutTarget != null)
+			{
+				logger?.Debug(
+					$"Activity parameter '{methodTarget.TargetGenerationState.ActivityParameterWithoutTarget}' on {methodTarget.MethodName} has no Activity target."
+				);
+			}
+
+			if (methodTarget.UnknownReturnType)
+			{
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Logging.LogMustReturnVoidOrAsync
+				);
 				continue;
 			}
 
 			if (methodTarget.HasMultipleExceptions)
 			{
 				logger?.Diagnostic(
-					$"Method has multiple exception parameters, only a single one is permitted."
+					"Method has multiple exception parameters, only a single one is permitted."
 				);
 				TelemetryDiagnostics.Report(
 					context.ReportDiagnostic,
-					TelemetryDiagnostics.Logging.MultipleExceptionsDefined,
-					methodTarget.MethodLocation
+					TelemetryDiagnostics.Logging.MultipleExceptionsDefined
 				);
 
 				continue;
@@ -84,11 +91,10 @@ partial class LoggerTargetClassEmitter
 				> Constants.Logging.MaxNonExceptionParameters
 			)
 			{
-				logger?.Diagnostic($"Method has more than 6 parameters.");
+				logger?.Diagnostic("Method has more than 6 parameters.");
 				TelemetryDiagnostics.Report(
 					context.ReportDiagnostic,
-					TelemetryDiagnostics.Logging.MaximumLogEntryParametersExceeded,
-					methodTarget.MethodLocation
+					TelemetryDiagnostics.Logging.MaximumLogEntryParametersExceeded
 				);
 
 				continue;
@@ -96,21 +102,25 @@ partial class LoggerTargetClassEmitter
 
 			if (methodTarget.InferredErrorLevel)
 			{
-				logger?.Diagnostic($"Inferring error log level.");
+				logger?.Diagnostic("Inferring error log level.");
 				TelemetryDiagnostics.Report(
 					context.ReportDiagnostic,
-					TelemetryDiagnostics.Logging.InferringErrorLogLevel,
-					methodTarget.MethodLocation
+					TelemetryDiagnostics.Logging.InferringErrorLogLevel
 				);
 			}
 
-			EmitLogActionField(builder, indent, methodTarget);
+			EmitLogActionField(builder, indent, methodTarget, emitNullable);
 		}
 
 		return --indent;
 	}
 
-	static void EmitLogActionField(StringBuilder builder, int indent, LogMethodTarget methodTarget)
+	internal static void EmitLogActionField(
+		StringBuilder builder,
+		int indent,
+		LogMethodTarget methodTarget,
+		bool emitNullable = true
+	)
 	{
 		builder
 			.Append(indent, "static readonly ", withNewLine: false)
@@ -123,9 +133,19 @@ partial class LoggerTargetClassEmitter
 			builder.Append(parameter.ParameterType).Append(", ");
 
 		if (methodTarget.IsScoped)
-			builder.Append(Constants.System.IDisposable).Append("?> ");
+		{
+			builder.Append(Constants.System.IDisposable);
+			if (emitNullable)
+				builder.Append('?');
+			builder.Append("> ");
+		}
 		else
-			builder.Append(Constants.System.Exception).Append("?> ");
+		{
+			builder.Append(Constants.System.Exception);
+			if (emitNullable)
+				builder.Append('?');
+			builder.Append("> ");
+		}
 
 		builder
 			.Append(methodTarget.LoggerActionFieldName)

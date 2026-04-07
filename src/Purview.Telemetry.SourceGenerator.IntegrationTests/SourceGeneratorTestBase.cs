@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Purview.Telemetry.SourceGenerator.BuildTools;
 using Purview.Telemetry.SourceGenerator.Helpers;
+using Assembly = System.Reflection.Assembly;
 
 namespace Purview.Telemetry.SourceGenerator;
 
@@ -10,11 +11,8 @@ public abstract class IncrementalSourceGeneratorTestBase<TGenerator>
 	: SourceGeneratorTestBase<ISourceGenerator>
 	where TGenerator : class, IIncrementalGenerator
 {
-	protected IncrementalSourceGeneratorTestBase(
-		ITestOutputHelper? testOutputHelper = null,
-		bool throwOnLoggedOnError = true
-	)
-		: base(testOutputHelper, throwOnLoggedOnError)
+	protected IncrementalSourceGeneratorTestBase(bool throwOnLoggedOnError = true)
+		: base(throwOnLoggedOnError)
 	{
 		ThrowOnLoggedOnError = throwOnLoggedOnError;
 	}
@@ -31,10 +29,7 @@ public abstract class IncrementalSourceGeneratorTestBase<TGenerator>
 	}
 }
 
-public abstract class SourceGeneratorTestBase<TGenerator>(
-	ITestOutputHelper? testOutputHelper = null,
-	bool throwOnLoggedOnError = true
-)
+public abstract class SourceGeneratorTestBase<TGenerator>(bool throwOnLoggedOnError = true)
 	where TGenerator : ISourceGenerator
 {
 	protected virtual bool ThrowOnLoggedOnError { get; set; } = throwOnLoggedOnError;
@@ -56,7 +51,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 
 		GuardGenerator(generator);
 
-		if (generator is ILogSupport logging && testOutputHelper is not null)
+		if (generator is ILogSupport logging && TestContext.Current is not null)
 		{
 			logging.SetLogOutput(
 				(message, outputType) =>
@@ -70,10 +65,10 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 						_ => "???",
 					};
 
-					testOutputHelper.WriteLine($"{prefix}: {message}");
+					TestContext.Current.OutputWriter.WriteLine($"{prefix}: {message}");
 
-					if (ThrowOnLoggedOnError)
-						outputType.ShouldNotBe(OutputType.Error, message);
+					if (ThrowOnLoggedOnError && outputType == OutputType.Error)
+						throw new InvalidOperationException($"Generator logged error: {message}");
 				}
 			);
 		}
@@ -131,7 +126,9 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 	{
 		var assembly = GetAssembly(result);
 
-		return assembly.GetType(typeName, true).ShouldNotBeNull();
+		var type = assembly.GetType(typeName, true);
+		ArgumentNullException.ThrowIfNull(type, nameof(typeName));
+		return type;
 	}
 
 	protected Assembly GetAssembly(GenerationResult result)
@@ -142,8 +139,13 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 		using (var stream = new MemoryStream())
 		{
 			var emitResult = result.Compilation.Emit(stream);
-			emitResult.ShouldNotBeNull();
-			emitResult.Success.ShouldBeTrue(string.Join("\n", emitResult.Diagnostics));
+			ArgumentNullException.ThrowIfNull(emitResult);
+			if (!emitResult.Success)
+			{
+				throw new InvalidOperationException(
+					$"Compilation failed: {string.Join("\n", emitResult.Diagnostics)}"
+				);
+			}
 
 			assembly = Assembly.Load(stream.GetBuffer());
 		}
@@ -159,7 +161,8 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 		bool disableDependencyInjection = true,
 		bool autoIncludeUsings = true,
 		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
-		bool debugLog = true
+		LanguageVersion languageVersion = LanguageVersion.Default,
+		CancellationToken cancellationToken = default
 	)
 	{
 		return await GenerateAsync(
@@ -169,7 +172,8 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 			projectModifier,
 			disableDependencyInjection,
 			includeLoggerTypes,
-			debugLog
+			languageVersion: languageVersion,
+			cancellationToken: cancellationToken
 		);
 	}
 
@@ -180,7 +184,8 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 		Func<Project, Project>? projectModifier = null,
 		bool disableDependencyInjection = true,
 		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
-		bool debugLog = true
+		LanguageVersion languageVersion = LanguageVersion.Default,
+		CancellationToken cancellationToken = default
 	)
 	{
 		return await GenerateAsync(
@@ -190,7 +195,8 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 			projectModifier,
 			disableDependencyInjection,
 			includeLoggerTypes,
-			debugLog
+			languageVersion: languageVersion,
+			cancellationToken: cancellationToken
 		);
 	}
 
@@ -201,24 +207,25 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 		Func<Project, Project>? projectModifier = null,
 		bool disableDependencyInjection = true,
 		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
-		bool debugLog = true
+		LanguageVersion languageVersion = LanguageVersion.Default,
+		CancellationToken cancellationToken = default
 	)
 	{
-		List<string> preprocessorSymbols = [];
+		List<string> preprocessorSymbols =
+		[
+			languageVersion == LanguageVersion.CSharp7_3 ? "NET48_OR_GREATER" : "NET8_0_OR_GREATER",
+		];
 		if (includeLoggerTypes == IncludeLoggerTypes.None)
 			preprocessorSymbols.Add("EXCLUDE_PURVIEW_TELEMETRY_LOGGING");
 
 		CSharpParseOptions parseOptions = new(
-			kind: SourceCodeKind.Regular,
+			languageVersion: languageVersion,
 			documentationMode: DocumentationMode.Parse,
+			kind: SourceCodeKind.Regular,
 			preprocessorSymbols: preprocessorSymbols
 		);
 
-		globalOptions ??= ImmutableDictionary<string, string>.Empty;
-		if (debugLog)
-			globalOptions = globalOptions.SetItem("purview_debug_log", "true");
-
-		globalOptions = globalOptions.SetItem("CompilerVersion", "v4.7");
+		globalOptions ??= [];
 
 		var optionsProvider = TestAnalyzerConfigOptionsProvider.Empty.WithGlobalOptions(
 			new TestAnalyzerConfigOptions(globalOptions)
@@ -257,25 +264,39 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 		(var _, var compilation) = await ObtainProjectAndCompilationAsync(
 			projectModifier,
 			csharpDocuments,
-			includeLoggerTypes
+			includeLoggerTypes,
+			languageVersion,
+			cancellationToken
 		);
 
 		var result = driver.RunGeneratorsAndUpdateCompilation(
 			compilation,
 			out var outputCompilation,
-			out var diagnostics
+			out var diagnostics,
+			cancellationToken
 		);
-		if (testOutputHelper is object)
+		if (TestContext.Current is not null)
 		{
 			foreach (var d in diagnostics)
-				testOutputHelper.WriteLine(d.ToString());
+			{
+				if (d.Severity is DiagnosticSeverity.Error)
+					await TestContext.Current.ErrorOutputWriter.WriteLineAsync(d.ToString());
+				else
+					await TestContext.Current.OutputWriter.WriteLineAsync(d.ToString());
+			}
 		}
 
 		var runResult = result.GetRunResult();
 
-		runResult.Results.Where(m => m.Exception != null).Select(m => m.Exception).ShouldBeEmpty();
+		// Run the analyzer on outputCompilation (which includes generated attribute source files).
+		var analyzerDiagnostics = await RunAnalyzerAsync(outputCompilation, cancellationToken);
+		var allDiagnostics = diagnostics.AddRange(analyzerDiagnostics);
 
-		return new(runResult, diagnostics, outputCompilation);
+		await Assert
+			.That(runResult.Results.Where(m => m.Exception != null).Select(m => m.Exception))
+			.IsEmpty();
+
+		return new(runResult, allDiagnostics, outputCompilation);
 	}
 
 	static void GuardGenerator(object generator)
@@ -283,9 +304,11 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 		var generatorType = generator.GetType();
 
 		if (!generatorType.IsDefined(typeof(GeneratorAttribute)))
+		{
 			throw new InvalidOperationException(
 				$"Type is not marked [Generator]: {generatorType}."
 			);
+		}
 	}
 
 	protected virtual bool ReferenceCore => true;
@@ -296,7 +319,9 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 	)> ObtainProjectAndCompilationAsync(
 		Func<Project, Project>? projectModifier = null,
 		AdditionalText[]? csharpDocuments = null,
-		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly
+		IncludeLoggerTypes includeLoggerTypes = IncludeLoggerTypes.LoggerOnly,
+		LanguageVersion languageVersion = LanguageVersion.Default,
+		CancellationToken cancellationToken = default
 	)
 	{
 		using AdhocWorkspace workspace = new();
@@ -305,18 +330,33 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 			LanguageNames.CSharp
 		);
 
-		project = project
-			.WithCompilationOptions(
-				project.CompilationOptions!.WithOutputKind(OutputKind.DynamicallyLinkedLibrary)
-			)
-			.AddMetadataReference(
-				MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location)
-			);
+		project = project.WithCompilationOptions(
+			project.CompilationOptions!.WithOutputKind(OutputKind.DynamicallyLinkedLibrary)
+		);
 
-		if (csharpDocuments != null && csharpDocuments.Length > 0)
+		var compilationFrameworkSymbol =
+			languageVersion == LanguageVersion.CSharp7_3 ? "NET48_OR_GREATER" : "NET8_0_OR_GREATER";
+		var compilationParseOptions =
+			languageVersion != LanguageVersion.Default
+				? new CSharpParseOptions(
+					languageVersion: languageVersion,
+					preprocessorSymbols: [compilationFrameworkSymbol]
+				)
+				: new CSharpParseOptions(preprocessorSymbols: [compilationFrameworkSymbol]);
+		project = project.WithParseOptions(compilationParseOptions);
+
+		project = project.AddMetadataReference(
+			MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location)
+		);
+
+		if (csharpDocuments?.Length > 0)
 		{
 			foreach (var csDoc in csharpDocuments)
-				project = project.AddDocument(csDoc.Path, csDoc.GetText()!).Project;
+			{
+				project = project
+					.AddDocument(csDoc.Path, csDoc.GetText(cancellationToken)!)
+					.Project;
+			}
 		}
 
 		project = SetupProject(project);
@@ -370,6 +410,7 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 					)
 				);
 				if (includeLoggerTypes == IncludeLoggerTypes.Telemetry)
+				{
 					project = project.AddMetadataReference(
 						MetadataReference.CreateFromFile(
 							typeof(Microsoft.Extensions.Logging.LogPropertiesAttribute)
@@ -377,16 +418,29 @@ public abstract class SourceGeneratorTestBase<TGenerator>(
 								.Location
 						)
 					);
+				}
 			}
 		}
 
 		project = projectModifier?.Invoke(project) ?? project;
 
-		var compilation = await project.GetCompilationAsync();
+		var compilation = await project.GetCompilationAsync(cancellationToken);
 		return (project, compilation!);
 	}
 
 	protected virtual Project SetupProject(Project project) => project;
+
+	static async Task<ImmutableArray<Diagnostic>> RunAnalyzerAsync(
+		Compilation compilation,
+		CancellationToken cancellationToken
+	)
+	{
+		var compilationWithAnalyzers = compilation.WithAnalyzers([
+			new TelemetryDiagnosticAnalyzer(),
+		]);
+
+		return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync(cancellationToken);
+	}
 }
 
 public record GenerationResult(

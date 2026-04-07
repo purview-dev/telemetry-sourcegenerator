@@ -36,7 +36,7 @@ namespace Testing
 			}
 
 			var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-			state.ReserveTagSpace(2);
+			state.ReserveTagSpace(5);
 
 			state.TagArray[0] = new("{OriginalFormat}", "LogWeatherWithOmit: Weather = {Weather}");
 			state.TagArray[1] = new("weather", weather);

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Purview.Telemetry.SourceGenerator.Records;
 
 namespace Purview.Telemetry.SourceGenerator.Templates;
 
@@ -9,8 +10,9 @@ sealed record PurviewTypeInfo(
 	string? Namespace,
 	string? SystemAlias,
 	bool IsNullable,
+	bool IsValueType,
 	SpecialType SpecialType,
-	ImmutableArray<PurviewTypeInfo> GenericTypeArguments
+	EquatableArray<PurviewTypeInfo> GenericTypeArguments
 ) : IEquatable<PurviewTypeInfo>, IEquatable<ITypeSymbol>, IEquatable<string>
 {
 	public bool Equals(PurviewTypeInfo? other) =>
@@ -45,6 +47,7 @@ sealed record PurviewTypeInfo(
 			Namespace,
 			SystemAlias,
 			isNullable,
+			IsValueType,
 			SpecialType,
 			GenericTypeArguments
 		);
@@ -56,8 +59,9 @@ sealed record PurviewTypeInfo(
 			Namespace,
 			SystemAlias,
 			IsNullable,
+			IsValueType,
 			SpecialType,
-			[.. types]
+			types.ToImmutableArray()
 		);
 
 	public string MakeGeneric(bool includeGlobal, params string[] types) =>
@@ -70,16 +74,27 @@ sealed record PurviewTypeInfo(
 
 	public override string ToString() => ToString(includeGlobal: true);
 
-	public string ToString(bool includeGlobal)
+	public string ToString(bool includeGlobal) =>
+		ToString(includeGlobal, emitNullableAnnotations: true);
+
+	public string ToString(bool includeGlobal, bool emitNullableAnnotations)
 	{
-		var isNullableSuffix = IsNullable ? "?" : null;
+		// Always emit ? for value types (Nullable<T>); reference type ? requires C# 8+.
+		var isNullableSuffix = IsNullable && (IsValueType || emitNullableAnnotations) ? "?" : null;
 		var result = (SystemAlias ?? (includeGlobal ? "global::" : null) + FullyQualifiedName);
 
 		if (GenericTypeArguments.Length > 0)
+		{
 			result +=
 				"<"
-				+ string.Join(", ", GenericTypeArguments.Select(m => m.ToString(includeGlobal)))
+				+ string.Join(
+					", ",
+					GenericTypeArguments.Select(m =>
+						m.ToString(includeGlobal, emitNullableAnnotations)
+					)
+				)
 				+ ">";
+		}
 
 		return result + isNullableSuffix;
 	}

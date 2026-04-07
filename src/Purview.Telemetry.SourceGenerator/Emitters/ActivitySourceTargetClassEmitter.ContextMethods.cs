@@ -12,7 +12,8 @@ partial class ActivitySourceTargetClassEmitter
 		int indent,
 		ActivityBasedGenerationTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -46,13 +47,6 @@ partial class ActivitySourceTargetClassEmitter
 				"Tags parameter not allowed on context method, only activities or events."
 			);
 
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.TagsParameterNotAllowed,
-				tagsParam.Locations,
-				tagsParam.ParameterName
-			);
-
 			return;
 		}
 
@@ -60,17 +54,10 @@ partial class ActivitySourceTargetClassEmitter
 		{
 			logger?.Diagnostic("Links parameter not allowed on context method, only activities.");
 
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.LinksParameterNotAllowed,
-				linksParam.Locations,
-				linksParam.ParameterName
-			);
-
 			return;
 		}
 
-		EmitHasListenersTest(builder, indent, methodTarget);
+		EmitHasListenersTest(builder, indent, methodTarget, emitNullable);
 
 		builder
 			.Append(indent, "if (", withNewLine: false)

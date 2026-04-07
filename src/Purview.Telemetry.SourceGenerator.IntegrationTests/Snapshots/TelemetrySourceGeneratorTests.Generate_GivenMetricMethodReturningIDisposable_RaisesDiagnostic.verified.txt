@@ -1,0 +1,16 @@
+﻿{
+  Diagnostics: [
+    {
+      Message: Instrument methods can only return void or boolean.,
+      Severity: Error,
+      Descriptor: {
+        Id: TSG4001,
+        Title: Must return void or bool,
+        MessageFormat: Instrument methods can only return void or boolean.,
+        Category: Metrics.Usage,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}

@@ -10,53 +10,20 @@ partial class TelemetrySourceGenerator
 {
 	static void RegisterActivitiesGeneration(
 		IncrementalGeneratorInitializationContext context,
+		IncrementalValuesProvider<ActivitySourceTarget?> activityTargets,
+		IncrementalValueProvider<bool> supportsNullableAnnotations,
 		GenerationLogger? logger
 	)
 	{
-		// Transform
-		Func<
-			GeneratorAttributeSyntaxContext,
-			CancellationToken,
-			ActivitySourceTarget?
-		> activityTargetTransform =
-			logger == null
-				? static (context, cancellationToken) =>
-					PipelineHelpers.BuildActivityTransform(context, null, cancellationToken)
-				: (context, cancellationToken) =>
-					PipelineHelpers.BuildActivityTransform(context, logger, cancellationToken);
-
-		// Register
-		var activityTargetsPredicate = context
-			.SyntaxProvider.ForAttributeWithMetadataName(
-				Constants.Activities.ActivitySourceAttribute.TypeInfo.FullyQualifiedName,
-				static (node, token) => PipelineHelpers.HasActivityTargetAttribute(node, token),
-				activityTargetTransform
-			)
-			.WhereNotNull()
-			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_Activities");
-
-		// Build generation (static vs. non-static is for the logger).
-		Action<
-			SourceProductionContext,
-			(Compilation Compilation, ImmutableArray<ActivitySourceTarget?> Targets)
-		> generationActivityAction =
-			logger == null
-				? static (spc, source) => GenerateActivitiesTargets(source.Targets, spc, null)
-				: (spc, source) => GenerateActivitiesTargets(source.Targets, spc, logger);
-
-		// Register with the source generator.
-		var activityTargets = context.CompilationProvider.Combine(
-			activityTargetsPredicate.Collect()
-		);
-
 		context.RegisterImplementationSourceOutput(
-			source: activityTargets,
-			action: generationActivityAction
+			source: activityTargets.Collect().Combine(supportsNullableAnnotations),
+			action: (spc, pair) => GenerateActivitiesTargets(pair.Left, pair.Right, spc, logger)
 		);
 	}
 
 	static void GenerateActivitiesTargets(
 		ImmutableArray<ActivitySourceTarget?> targets,
+		bool emitNullable,
 		SourceProductionContext spc,
 		GenerationLogger? logger
 	)
@@ -64,43 +31,15 @@ partial class TelemetrySourceGenerator
 		if (targets.Length == 0)
 			return;
 
-		if (targets.Any(m => m!.Failures?.Length > 0))
+		foreach (var target in targets)
 		{
-			foreach (var failure in targets.SelectMany(m => m!.Failures!.Value))
-				TelemetryDiagnostics.Report(spc.ReportDiagnostic, failure.Item1, failure.Item1);
-		}
+			logger?.Debug($"Activity generation target: {target!.FullyQualifiedName}");
 
-		try
-		{
-			foreach (var target in targets)
-			{
-				if (
-					target!.Failures?.Length > 0
-					&& target.Failures.Value.Any(m => m.Item1.Severity == DiagnosticSeverity.Error)
-				)
-				{
-					logger?.Debug(
-						$"Skipping activity generation target due to error diagnostic: {target.FullyQualifiedName}"
-					);
-
-					continue;
-				}
-
-				logger?.Debug($"Activity generation target: {target.FullyQualifiedName}");
-
-				ActivitySourceTargetClassEmitter.GenerateImplementation(target, spc, logger);
-			}
-		}
-		catch (Exception ex)
-		{
-			logger?.Error(
-				$"A fatal error occurred while executing the source generation stage: {ex}"
-			);
-
-			TelemetryDiagnostics.Report(
-				spc.ReportDiagnostic,
-				TelemetryDiagnostics.General.FatalExecutionDuringExecution,
-				ex
+			ActivitySourceTargetClassEmitter.GenerateImplementation(
+				target!,
+				spc,
+				logger,
+				emitNullable
 			);
 		}
 	}

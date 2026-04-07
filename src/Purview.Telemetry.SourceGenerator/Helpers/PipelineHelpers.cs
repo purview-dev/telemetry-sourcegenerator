@@ -19,10 +19,26 @@ static partial class PipelineHelpers
 		"Globalization",
 		"CA1308:Normalize strings to uppercase"
 	)]
-	static string GenerateParameterName(string name, string? prefix, bool lowercase)
+	static string GenerateParameterName(
+		string name,
+		string? prefix,
+		bool lowercase,
+		int namingConvention = 1
+	)
 	{
-		if (lowercase)
+		// NamingConvention: 0 = Legacy, 1 = OpenTelemetry
+		var isLegacy = namingConvention == 0;
+
+		if (!isLegacy && lowercase)
+		{
+			// OpenTelemetry: Convert PascalCase to snake_case for tags/baggage
+			name = Utilities.ConvertToSeparatedLowercase(name, '_');
+		}
+		else if (lowercase)
+		{
+			// Legacy: Just lowercase without word-boundary splitting
 			name = name.ToLowerInvariant();
+		}
 
 		return $"{prefix}{name}";
 	}
@@ -34,8 +50,7 @@ static partial class PipelineHelpers
 	)]
 	static bool GetSkipOnNullOrEmptyValue(TagOrBaggageAttributeRecord? tagOrBaggageAttribute) =>
 		tagOrBaggageAttribute?.SkipOnNullOrEmpty.IsSet == true
-			? tagOrBaggageAttribute.SkipOnNullOrEmpty.Value!.Value
-			: false;
+		&& tagOrBaggageAttribute.SkipOnNullOrEmpty.Value!.Value;
 
 	static IEnumerable<IMethodSymbol> GetAllInterfaceMethods(
 		INamedTypeSymbol interfaceSymbol,
@@ -57,7 +72,9 @@ static partial class PipelineHelpers
 					semanticModel.GetDeclaredSymbol(member, token) is IMethodSymbol symbol
 					&& seen.Add(symbol.ToDisplayString())
 				)
+				{
 					yield return symbol;
+				}
 			}
 		}
 	}

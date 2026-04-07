@@ -2,8 +2,8 @@
 	<Import Project="./BuildVariables.props" />
 	<!-- All C# Projects -->
 	<PropertyGroup Label="C# Project Property Groups" Condition="'$(IsCSharpProject)' == 'true'">
-		<TargetFramework>net9.0</TargetFramework>
-		<LangVersion>13.0</LangVersion>
+		<TargetFramework>net10.0</TargetFramework>
+		<LangVersion>14.0</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
@@ -72,12 +72,11 @@
 	<!-- Test Projects. -->
 	<PropertyGroup Label="Testing Project Properties" Condition="'$(IsTestProject)' == 'true'">
 		<OutputType>Exe</OutputType>
-		<UseAppHost>true</UseAppHost>
 		<UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
 		<TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
 		<NoWarn>$(NoWarn);CA1515;CA1707;CA1822</NoWarn>
 		<CollectCoverage>true</CollectCoverage>
-		<Exclude>[NSubstitute*]*,[Shouldly*]*,[xunit.*]*,[TUnit.*]*,[Microsoft.Testing.*]*,[Microsoft.NET.Test*]*[NCrunch*]*</Exclude>
+		<Exclude>[NSubstitute*]*,[TUnit.*]*,[Microsoft.Testing.*]*,[Microsoft.NET.Test*]</Exclude>
 		<ExcludeByAttribute>System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute</ExcludeByAttribute>
 		<Packable>false</Packable>
 		<IsPackable>false</IsPackable>
@@ -95,37 +94,16 @@
 		<None Remove="TestResults/**" />
 	</ItemGroup>
 	<ItemGroup Label="Testing NuGet Packages" Condition="'$(IsTestProject)' == 'true'">
-		<Using Include="Shouldly" />
-		<Using Include="Xunit" />
 		<Using Include="NSubstitute" />
-		<Content
-			Include="$(MSBuildThisFileDirectory)xunit/xunit.runner.json"
-			Link="xunit.runner.json"
-			CopyToOutputDirectory="PreserveNewest"
-		/>
-		<AssemblyAttribute Include="Xunit.Trait">
-			<_Parameter1>Category</_Parameter1>
-			<_Parameter2>$(TestingType)</_Parameter2>
+		<AssemblyAttribute Include="TUnit.Core.Category">
+			<_Parameter1>$(TestingType)</_Parameter1>
 		</AssemblyAttribute>
 		<AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute" />
-		<PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
-		<PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" />
-		<PackageReference Include="Shouldly" />
 		<PackageReference Include="NSubstitute" />
 		<PackageReference Include="NSubstitute.Analyzers.CSharp">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="NCrunch.Framework" />
-		<PackageReference Include="xunit.v3" />
-		<PackageReference Include="xunit.analyzers">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="xunit.runner.visualstudio">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
+		<PackageReference Include="TUnit" />
 	</ItemGroup>
 </Project>

@@ -9,9 +9,12 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
+#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE
 #nullable enable
+#endif
 
-namespace Purview.Telemetry.Metrics;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Specifies the meter type generated corresponds to a <see cref="global::System.Diagnostics.Metrics.Histogram{T}"/>.
@@ -35,7 +38,11 @@ sealed class HistogramAttribute : global::System.Attribute
 	/// <param name="name">Specifies the <see cref="Name"/>.</param>
 	/// <param name="unit">Optionally specifies the <see cref="Unit"/>.</param>
 	/// <param name="description">Optionally specifies the <see cref="Description"/>.</param>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public HistogramAttribute(string name, string unit = null, string description = null)
+#else
 	public HistogramAttribute(string name, string? unit = null, string? description = null)
+#endif
 	{
 		Name = name;
 		Unit = unit;
@@ -47,15 +54,28 @@ sealed class HistogramAttribute : global::System.Attribute
 	/// of the method is used.
 	/// </summary>
 
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public string Name { get; internal set; }
+#else
 	public string? Name { get; internal set; }
+#endif
 
 	/// <summary>
 	/// Optionally specifies the unit of the meter.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public string Unit { get; internal set; }
+#else
 	public string? Unit { get; internal set; }
+#endif
 
 	/// <summary>
 	/// Optionally specifies the description of the meter.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public string Description { get; internal set; }
+#else
 	public string? Description { get; internal set; }
+#endif
+}
 }

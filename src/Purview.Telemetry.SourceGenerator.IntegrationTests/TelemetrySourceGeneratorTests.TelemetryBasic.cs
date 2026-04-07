@@ -1,28 +1,27 @@
-﻿namespace Purview.Telemetry.SourceGenerator;
+namespace Purview.Telemetry.SourceGenerator;
 
 partial class TelemetrySourceGeneratorTests
 {
-	[Fact]
-	public async Task Generate_GivenPartialInterface_GeneratesTelemetry()
+	[Test]
+	public async Task Generate_GivenPartialInterface_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string partialInterfaceDef =
-			@"
-using Purview.Telemetry.Activities;
-using Purview.Telemetry.Logging;
-using Purview.Telemetry.Metrics;
+		const string partialInterfaceDef = """
 
-[ActivitySource(""activity-source"")]
+
+[ActivitySource("activity-source")]
 [Logger]
 [Meter]
 partial interface ITestTelemetry
 {
 }
-";
+
+""";
 
 		const string partialInterfaceActivities =
 			@"
-using Purview.Telemetry.Activities;
 
 partial interface ITestTelemetry
 {
@@ -39,7 +38,6 @@ partial interface ITestTelemetry
 
 		const string partialInterfaceLogging =
 			@"
-using Purview.Telemetry.Logging;
 
 partial interface ITestTelemetry
 {
@@ -53,7 +51,6 @@ partial interface ITestTelemetry
 
 		const string partialInterfaceMetric =
 			@"
-using Purview.Telemetry.Metrics;
 
 
 partial interface ITestTelemetry
@@ -71,24 +68,24 @@ partial interface ITestTelemetry
 				Text(partialInterfaceActivities),
 				Text(partialInterfaceLogging),
 				Text(partialInterfaceMetric),
-			]
+			],
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenNoNamespace_GeneratesTelemetry()
+	[Test]
+	public async Task Generate_GivenNoNamespace_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			@"
-using Purview.Telemetry.Activities;
-using Purview.Telemetry.Logging;
-using Purview.Telemetry.Metrics;
+		const string basicTelemetry = """
 
-[ActivitySource(""activity-source"")]
+
+[ActivitySource("activity-source")]
 [Logger]
 [Meter]
 public interface ITestTelemetry
@@ -111,28 +108,31 @@ public interface ITestTelemetry
 	[Counter]
 	bool Counter(int counterValue, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenBasicTelemetryGen_GeneratesTelemetry()
+	[Test]
+	public async Task Generate_GivenBasicTelemetryGen_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			@"
-using Purview.Telemetry.Activities;
-using Purview.Telemetry.Logging;
-using Purview.Telemetry.Metrics;
+		const string basicTelemetry = """
+
 
 namespace Testing;
 
-[ActivitySource(""activity-source"")]
+[ActivitySource("activity-source")]
 [Logger]
 [Meter]
 public interface ITestTelemetry
@@ -155,26 +155,31 @@ public interface ITestTelemetry
 	[Counter]
 	bool Counter(int counterValue, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenBasicEventWithException_GeneratesTelemetry()
+	[Test]
+	public async Task Generate_GivenBasicEventWithException_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			@"
-using Purview.Telemetry.Activities;
+		const string basicTelemetry = """
+
 
 namespace Testing;
 
-[ActivitySource(""activity-source"")]
+[ActivitySource("activity-source")]
 public interface ITestTelemetry
 {
 	[Activity]
@@ -183,26 +188,31 @@ public interface ITestTelemetry
 	[Event]
 	void Event(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam, Exception anException);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenBasicEventWithExceptionAndEscape_GeneratesTelemetry()
+	[Test]
+	public async Task Generate_GivenBasicEventWithExceptionAndEscape_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			@"
-using Purview.Telemetry.Activities;
+		const string basicTelemetry = """
+
 
 namespace Testing;
 
-[ActivitySource(""activity-source"")]
+[ActivitySource("activity-source")]
 public interface ITestTelemetry
 {
 	[Activity]
@@ -211,26 +221,31 @@ public interface ITestTelemetry
 	[Event]
 	void Event(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam, Exception anException, [Escape]bool escape);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenBasicEventWithExceptionAndDisabledOTelExceptionRulesAndEscape_GeneratesTelemetry()
+	[Test]
+	public async Task Generate_GivenBasicEventWithExceptionAndDisabledOTelExceptionRulesAndEscape_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			@"
-using Purview.Telemetry.Activities;
+		const string basicTelemetry = """
+
 
 namespace Testing;
 
-[ActivitySource(""activity-source"")]
+[ActivitySource("activity-source")]
 public interface ITestTelemetry
 {
 	[Activity]
@@ -239,84 +254,97 @@ public interface ITestTelemetry
 	[Event(UseRecordExceptionRules = false)]
 	void EventMethod(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam, Exception anException, [Escape]bool escape);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenBasicEventWithExplicitExceptionAndNamedExceptionAndRulesAreFalse_GeneratesTelemetry()
+	[Test]
+	public async Task Generate_GivenBasicEventWithExplicitExceptionAndNamedExceptionAndRulesAreFalse_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			@"
-using Purview.Telemetry.Activities;
+		const string basicTelemetry = """
+
 
 namespace Testing;
 
-[ActivitySource(""activity-source"")]
+[ActivitySource("activity-source")]
 public interface ITestTelemetry
 {
 	[Activity]
 	System.Diagnostics.Activity? Activity();
 
-	[Event(name: ""exception"", UseRecordExceptionRules = false)]
+	[Event(name: "exception", UseRecordExceptionRules = false)]
 	void EventMethod(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam, Exception anException, [Escape]bool escape);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenBasicEventWithExplicitExceptionAndEventIsNamedExceptionAndRulesAreTrue_GeneratesTelemetry()
+	[Test]
+	public async Task Generate_GivenBasicEventWithExplicitExceptionAndEventIsNamedExceptionAndRulesAreTrue_GeneratesTelemetry(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			@"
-using Purview.Telemetry.Activities;
+		const string basicTelemetry = """
+
 
 namespace Testing;
-	
-[ActivitySource(""activity-source"")]
+
+[ActivitySource("activity-source")]
 public interface ITestTelemetry
 {
 	[Activity]
 	System.Diagnostics.Activity? Activity();
 
-	[Event(name: ""exception"", UseRecordExceptionRules = true)]
+	[Event(name: "exception", UseRecordExceptionRules = true)]
 	void EventMethod(System.Diagnostics.Activity? activity, [Baggage]string stringParam, [Tag]int intParam, bool boolParam, Exception anException, [Escape]bool escape);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
-	[Fact]
-	public async Task Generate_GivenDuplicateTelemetryGen_GeneratesDiagnostics()
+	[Test]
+	public async Task Generate_GivenDuplicateTelemetryGen_GeneratesDiagnostics(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicTelemetry =
-			@"
-using Purview.Telemetry.Activities;
-using Purview.Telemetry.Logging;
-using Purview.Telemetry.Metrics;
+		const string basicTelemetry = """
+
 
 namespace Testing;
 
-[ActivitySource(""activity-source"")]
+[ActivitySource("activity-source")]
 [Logger]
 [Meter]
 public interface ITestTelemetry
@@ -346,17 +374,22 @@ public interface ITestTelemetry
 	[Log]
 	void Counter(int counterValue, [Tag]int intParam, bool boolParam);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry);
+		var generationResult = await GenerateAsync(
+			basicTelemetry,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
-			validationCompilation: false
+			validationCompilation: false,
+			cancellationToken: cancellationToken
 		);
 	}
 }

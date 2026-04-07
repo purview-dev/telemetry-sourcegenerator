@@ -19,6 +19,7 @@ namespace Testing
 	sealed partial class TestLoggerCore : global::Testing.ITestLogger
 	{
 		readonly global::Microsoft.Extensions.Logging.ILogger<global::Testing.ITestLogger> _logger;
+		static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, global::System.Collections.Generic.IDictionary<string, int>, global::System.Exception?> _logEntryWithGenericTypeParamAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<global::System.Collections.Generic.IDictionary<string, int>>(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(842060863, "LogEntryWithGenericTypeParam"), "LogEntryWithGenericTypeParam: ParamName = {ParamName}");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		public TestLoggerCore(global::Microsoft.Extensions.Logging.ILogger<global::Testing.ITestLogger> logger)
@@ -35,31 +36,7 @@ namespace Testing
 				return;
 			}
 
-			var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-			state.ReserveTagSpace(2);
-
-			state.TagArray[0] = new("{OriginalFormat}", "LogEntryWithGenericTypeParam: ParamName = {ParamName}");
-			state.TagArray[1] = new("paramName", paramName);
-
-			_logger.Log(
-				global::Microsoft.Extensions.Logging.LogLevel.Information,
-				new (842060863, nameof(LogEntryWithGenericTypeParam)),
-				state,
-				null,
-				[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-				static string (s, _) =>
-				{
-					var v0 = s.TagArray[1].Value ?? "(null)";
-
-#if NET
-					return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"LogEntryWithGenericTypeParam: ParamName = {v0}");
-#else
-					return global::System.FormattableString.Invariant($"LogEntryWithGenericTypeParam: ParamName = {v0}");
-#endif
-				}
-			);
-
-			state.Clear();
+			_logEntryWithGenericTypeParamAction(_logger, paramName, null);
 		}
 
 	}

@@ -32,7 +32,9 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeStringValue? nameValue = null;
 		AttributeValue<bool>? defaultToTags = null;
@@ -51,35 +53,45 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						nameValue = new((string)value);
+					}
 					else if (
 						name.Equals(
 							nameof(ActivitySourceAttributeRecord.DefaultToTags),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						defaultToTags = new((bool)value);
+					}
 					else if (
 						name.Equals(
 							nameof(ActivitySourceAttributeRecord.BaggageAndTagPrefix),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						baggageAndTagPrefix = new((string)value);
+					}
 					else if (
 						name.Equals(
 							nameof(ActivitySourceAttributeRecord.IncludeActivitySourcePrefix),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						includeActivitySourcePrefix = new((bool)value);
+					}
 					else if (
 						name.Equals(
 							nameof(ActivitySourceAttributeRecord.LowercaseBaggageAndTagKeys),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						lowercaseBaggageAndTagKeys = new((bool)value);
+					}
 				},
 				semanticModel,
 				logger,
@@ -115,7 +127,9 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeStringValue? nameValue = null;
 		AttributeValue<bool>? defaultToTags = null;
@@ -135,28 +149,36 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						nameValue = new((string)value);
+					}
 					else if (
 						name.Equals(
 							nameof(ActivitySourceGenerationAttributeRecord.DefaultToTags),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						defaultToTags = new((bool)value);
+					}
 					else if (
 						name.Equals(
 							nameof(ActivitySourceGenerationAttributeRecord.BaggageAndTagPrefix),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						baggageAndTagPrefix = new((string)value);
+					}
 					else if (
 						name.Equals(
 							nameof(ActivitySourceGenerationAttributeRecord.BaggageAndTagSeparator),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						baggageAndTagSeparator = new((string)value);
+					}
 					else if (
 						name.Equals(
 							nameof(
@@ -165,7 +187,9 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						lowercaseBaggageAndTagKeys = new((bool)value);
+					}
 					else if (
 						name.Equals(
 							nameof(
@@ -174,7 +198,9 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						generateDiagnosticsForMissingActivity = new((bool)value);
+					}
 				},
 				semanticModel,
 				logger,
@@ -212,7 +238,9 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeStringValue? nameValue = null;
 		AttributeValue<int>? kind = null;
@@ -229,21 +257,27 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						nameValue = new((string)value);
+					}
 					else if (
 						name.Equals(
 							nameof(ActivityAttributeRecord.Kind),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						kind = new((int)value);
+					}
 					else if (
 						name.Equals(
 							nameof(ActivityAttributeRecord.CreateOnly),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						createOnly = new((bool)value);
+					}
 				},
 				semanticModel,
 				logger,
@@ -277,7 +311,9 @@ partial class SharedHelpers
 				out var attributeData
 			)
 		)
+		{
 			return null;
+		}
 
 		AttributeStringValue? nameValue = null;
 		AttributeValue<bool>? useRecordExceptionRules = null;
@@ -296,35 +332,45 @@ partial class SharedHelpers
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						nameValue = new((string)value);
+					}
 					else if (
 						name.Equals(
 							nameof(EventAttributeRecord.UseRecordExceptionRules),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						useRecordExceptionRules = new((bool)value);
+					}
 					else if (
 						name.Equals(
 							nameof(EventAttributeRecord.RecordExceptionEscape),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						recordExceptionEscape = new((bool)value);
+					}
 					else if (
 						name.Equals(
 							nameof(EventAttributeRecord.StatusCode),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						statusCode = new((int)value);
+					}
 					else if (
 						name.Equals(
 							nameof(EventAttributeRecord.StatusDescription),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
+					{
 						statusDescription = new((string)value);
+					}
 				},
 				semanticModel,
 				logger,
@@ -350,6 +396,5 @@ partial class SharedHelpers
 		return Utilities.ContainsAttribute(method, Constants.Activities.ActivityAttribute, token)
 			|| Utilities.ContainsAttribute(method, Constants.Activities.EventAttribute, token)
 			|| Utilities.ContainsAttribute(method, Constants.Activities.ContextAttribute, token);
-		;
 	}
 }

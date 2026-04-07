@@ -18,7 +18,7 @@ namespace Testing
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	sealed partial class TestActivitiesCore : global::Testing.ITestActivities
 	{
-		readonly static global::System.Diagnostics.ActivitySource _activitySource = new("testing-activity-source");
+		readonly static global::System.Diagnostics.ActivitySource _activitySource = new global::System.Diagnostics.ActivitySource("testing-activity-source");
 
 		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 		[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -29,13 +29,13 @@ namespace Testing
 				return;
 			}
 
-			global::System.Diagnostics.ActivityTagsCollection tagsCollection = new();
+			global::System.Diagnostics.ActivityTagsCollection tagsCollection = new global::System.Diagnostics.ActivityTagsCollection();
 			tagsCollection.Add("exception.escaped", escape);
 			tagsCollection.Add("exception.message", exception.Message);
 			tagsCollection.Add("exception.type", exception.GetType().FullName);
 			tagsCollection.Add("exception.stacktrace", exception.StackTrace);
 
-			global::System.Diagnostics.ActivityEvent recordExceptionEvent = new(name: "exception", timestamp: default, tags: tagsCollection);
+			global::System.Diagnostics.ActivityEvent recordExceptionEvent = new global::System.Diagnostics.ActivityEvent(name: "exception", timestamp: default, tags: tagsCollection);
 
 			activity.AddEvent(recordExceptionEvent);
 		}
@@ -53,9 +53,9 @@ namespace Testing
 
 			if (activityActivity != null)
 			{
-				activityActivity.SetBaggage("stringnonnullparam", stringNonNullParam);
-				activityActivity.SetBaggage("intparam", intParam.ToString());
-				activityActivity.SetBaggage("boolparam", boolParam.ToString());
+				activityActivity.SetBaggage("string_non_null_param", stringNonNullParam);
+				activityActivity.SetBaggage("int_param", intParam.ToString());
+				activityActivity.SetBaggage("bool_param", boolParam.ToString());
 			}
 
 			return activityActivity;
@@ -73,13 +73,13 @@ namespace Testing
 			if (activity != null)
 			{
 
-				global::System.Diagnostics.ActivityEvent activityEventEvent = new(name: "Event", timestamp: default, tags: default);
+				global::System.Diagnostics.ActivityEvent activityEventEvent = new global::System.Diagnostics.ActivityEvent(name: "Event", timestamp: default, tags: default);
 
 				activity.AddEvent(activityEventEvent);
 
-				activity.SetBaggage("stringnullableparam", stringNullableParam);
-				activity.SetBaggage("intparam", intParam?.ToString());
-				activity.SetBaggage("boolparam", boolParam?.ToString());
+				activity.SetBaggage("string_nullable_param", stringNullableParam);
+				activity.SetBaggage("int_param", intParam?.ToString());
+				activity.SetBaggage("bool_param", boolParam?.ToString());
 			}
 		}
 
@@ -94,9 +94,9 @@ namespace Testing
 
 			if (activity != null)
 			{
-				activity.SetBaggage("objectparam", objectParam?.ToString());
-				activity.SetBaggage("stringnonnullparam", stringNonNullParam);
-				activity.SetBaggage("floatparam", floatParam?.ToString());
+				activity.SetBaggage("object_param", objectParam?.ToString());
+				activity.SetBaggage("string_non_null_param", stringNonNullParam);
+				activity.SetBaggage("float_param", floatParam?.ToString());
 			}
 		}
 

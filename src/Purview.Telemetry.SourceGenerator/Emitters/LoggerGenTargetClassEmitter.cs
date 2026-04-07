@@ -11,26 +11,14 @@ static partial class LoggerGenTargetClassEmitter
 	public static void GenerateImplementation(
 		LoggerTarget target,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool emitNullable = true,
+		bool supportsIMeterFactory = true
 	)
 	{
 		StringBuilder builder = new();
 
 		logger?.Debug($"Generating MS Gen-based logging class for: {target.FullyQualifiedName}");
-
-		if (
-			EmitHelpers.GenerateDuplicateMethodDiagnostics(
-				GenerationType.Logging,
-				target.GenerationType,
-				target.DuplicateMethods,
-				context,
-				logger
-			)
-		)
-		{
-			logger?.Debug("Found duplicate methods while generating logger, exiting.");
-			return;
-		}
 
 		var indent = EmitHelpers.EmitNamespaceStart(
 			target.ClassNamespace,
@@ -48,7 +36,7 @@ static partial class LoggerGenTargetClassEmitter
 			context.CancellationToken
 		);
 
-		EmitFields(target, builder, indent, context);
+		EmitFields(target, builder, indent, context, logger, emitNullable);
 
 		indent = ConstructorEmitter.EmitCtor(
 			GenerationType.Logging,
@@ -58,10 +46,13 @@ static partial class LoggerGenTargetClassEmitter
 			builder,
 			indent,
 			context,
-			logger
+			logger,
+			supportsIMeterFactory
 		);
 
-		indent = EmitMethods(target, builder, indent, context, logger);
+		indent = EmitMethods(target, builder, indent, context, logger, emitNullable);
+
+		EmitLogStateStructs(target, builder, indent, context, logger, emitNullable);
 
 		EmitHelpers.EmitClassEnd(builder, indent);
 		EmitHelpers.EmitNamespaceEnd(
@@ -72,7 +63,7 @@ static partial class LoggerGenTargetClassEmitter
 			context.CancellationToken
 		);
 
-		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString());
+		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString(), emitNullable);
 		var hintName = $"{target.FullyQualifiedName}.Logging.g.cs";
 
 		context.AddSource(
@@ -88,7 +79,8 @@ static partial class LoggerGenTargetClassEmitter
 			target.InterfaceType.TypeName,
 			target.FullNamespace,
 			context,
-			logger
+			logger,
+			emitNullable
 		);
 	}
 
@@ -96,7 +88,9 @@ static partial class LoggerGenTargetClassEmitter
 		LoggerTarget target,
 		StringBuilder builder,
 		int indent,
-		SourceProductionContext context
+		SourceProductionContext context,
+		GenerationLogger? logger,
+		bool emitNullable
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -111,5 +105,67 @@ static partial class LoggerGenTargetClassEmitter
 			.Append(Constants.Logging.LoggerFieldName)
 			.Append(';')
 			.AppendLine();
+
+		foreach (var methodTarget in target.LogMethods)
+		{
+			context.CancellationToken.ThrowIfCancellationRequested();
+
+			if (!methodTarget.TargetGenerationState.IsValid)
+				continue;
+
+			if (methodTarget.UnknownReturnType)
+			{
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Logging.LogMustReturnVoidOrAsync
+				);
+				continue;
+			}
+
+			// Multiple exceptions is always invalid, regardless of v1 or v2 generation.
+			if (methodTarget.HasMultipleExceptions)
+			{
+				logger?.Diagnostic(
+					"Method has multiple exception parameters, only a single one is permitted."
+				);
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Logging.MultipleExceptionsDefined
+				);
+				continue;
+			}
+
+			if (!methodTarget.UseV1Generation)
+				continue;
+
+			if (
+				methodTarget.ParameterCountSansException
+				> Constants.Logging.MaxNonExceptionParameters
+			)
+			{
+				logger?.Diagnostic("Method has more than 6 parameters.");
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Logging.MaximumLogEntryParametersExceeded
+				);
+				continue;
+			}
+
+			if (methodTarget.InferredErrorLevel)
+			{
+				logger?.Diagnostic("Inferring error log level.");
+				TelemetryDiagnostics.Report(
+					context.ReportDiagnostic,
+					TelemetryDiagnostics.Logging.InferringErrorLogLevel
+				);
+			}
+
+			LoggerTargetClassEmitter.EmitLogActionField(
+				builder,
+				indent + 1,
+				methodTarget,
+				emitNullable
+			);
+		}
 	}
 }

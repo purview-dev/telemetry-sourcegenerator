@@ -1,13 +1,6 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-	[Activity]
-	System.Diagnostics.Activity?  Activity([Baggage]string stringNonNullParam, [Baggage]int intParam, [Baggage]bool boolParam);
-                                                                                         ^^^^^^^^
-
-*/
- Guid_1: (12,89)-(12,97),
       Message: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
       Severity: Warning,
       WarningLevel: 1,
@@ -21,13 +14,6 @@
       }
     },
     {
-      Location: /*
-	[Activity]
-	System.Diagnostics.Activity?  Activity([Baggage]string stringNonNullParam, [Baggage]int intParam, [Baggage]bool boolParam);
-                                                                                                                 ^^^^^^^^^
-
-*/
- Guid_1: (12,113)-(12,122),
       Message: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
       Severity: Warning,
       WarningLevel: 1,
@@ -41,13 +27,6 @@
       }
     },
     {
-      Location: /*
-	[Event]
-	void Event(System.Diagnostics.Activity? activity, [Baggage]string? stringNullableParam, [Baggage]int? intParam, [Baggage]bool? boolParam);
-                                                                                                       ^^^^^^^^
-
-*/
- Guid_1: (15,103)-(15,111),
       Message: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
       Severity: Warning,
       WarningLevel: 1,
@@ -61,13 +40,6 @@
       }
     },
     {
-      Location: /*
-	[Event]
-	void Event(System.Diagnostics.Activity? activity, [Baggage]string? stringNullableParam, [Baggage]int? intParam, [Baggage]bool? boolParam);
-                                                                                                                                ^^^^^^^^^
-
-*/
- Guid_1: (15,128)-(15,137),
       Message: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
       Severity: Warning,
       WarningLevel: 1,
@@ -81,13 +53,6 @@
       }
     },
     {
-      Location: /*
-	[Context]
-	void Context(System.Diagnostics.Activity? activity, [Baggage]object? objectParam, [Baggage]string stringNonNullParam, [Baggage]float? floatParam);
-                                                                      ^^^^^^^^^^^
-}
-*/
- Guid_1: (18,70)-(18,81),
       Message: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
       Severity: Warning,
       WarningLevel: 1,
@@ -101,13 +66,6 @@
       }
     },
     {
-      Location: /*
-	[Context]
-	void Context(System.Diagnostics.Activity? activity, [Baggage]object? objectParam, [Baggage]string stringNonNullParam, [Baggage]float? floatParam);
-                                                                                                                                       ^^^^^^^^^^
-}
-*/
- Guid_1: (18,135)-(18,145),
       Message: Baggage parameter types only accept strings, be aware this parameter will have ToString() called.,
       Severity: Warning,
       WarningLevel: 1,

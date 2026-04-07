@@ -1,19 +1,19 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Logging;
+namespace Purview.Telemetry.SourceGenerator.Logging;
 
 partial class TelemetrySourceGeneratorLoggingGen2Tests
 {
-	[Theory]
-	[InlineData(true)]
-	[InlineData(false)]
+	[Test]
+	[Arguments(true)]
+	[Arguments(false)]
 	public async Task Generate_GivenBasicScopedMethod_GeneratesLogMethodCorrectly(
-		bool nullableDisposable
+		bool nullableDisposable,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
 		char? suffix = nullableDisposable ? '?' : null;
 		var basicLogger =
 			@$"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -27,155 +27,191 @@ public interface ITestLogger
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(
+		await TestHelpers.VerifyAsync(
 			generationResult,
 			c => c.ScrubInlineGuids(),
+			cancellationToken: cancellationToken,
 			parameters: nullableDisposable
 		);
 	}
 
-	[Fact]
-	public async Task Generate_GivenBasicScopedMethodWithOtherParameters_GeneratesLogMethodCorrectly()
+	[Test]
+	public async Task Generate_GivenBasicScopedMethodWithOtherParameters_GeneratesLogMethodCorrectly(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
-			@$"
-using Purview.Telemetry.Logging;
+		const string basicLogger =
+			@"
 
 namespace Testing;
 
 [Logger]
 public interface ITestLogger
-{{
+{
 	IDisposable BasicScoped(int intValue, string? nullableStringValue, uint uintValue);
-}}
+}
 ";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, c => c.ScrubInlineGuids());
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			c => c.ScrubInlineGuids(),
+			cancellationToken: cancellationToken
+		);
 	}
 
-	[Fact]
-	public async Task Generate_GivenBasicScopedMethodWithOtherParametersAndUsedInMessageTemplate_GeneratesLogMethodCorrectly()
+	[Test]
+	public async Task Generate_GivenBasicScopedMethodWithOtherParametersAndUsedInMessageTemplate_GeneratesLogMethodCorrectly(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
-			@$"
-using Purview.Telemetry.Logging;
+		const string basicLogger = """
+
 
 namespace Testing;
 
 [Logger]
 public interface ITestLogger
-{{
-	[Log(MessageTemplate = ""intValue: {{intValue}} nullableStringValue: {{nullableStringValue}} uintValue: {{uintValue}}"")]
+{
+	[Log(MessageTemplate = "intValue: {intValue} nullableStringValue: {nullableStringValue} uintValue: {uintValue}")]
 	IDisposable BasicScoped(int intValue, string? nullableStringValue, uint uintValue);
-}}
-";
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, c => c.ScrubInlineGuids());
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			c => c.ScrubInlineGuids(),
+			cancellationToken: cancellationToken
+		);
 	}
 
-	[Fact]
-	public async Task Generate_GivenBasicScopedMethodWithOtherParametersPartiallyUsedInMessageTemplate_GeneratesLogMethodCorrectly()
+	[Test]
+	public async Task Generate_GivenBasicScopedMethodWithOtherParametersPartiallyUsedInMessageTemplate_GeneratesLogMethodCorrectly(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
-			@$"
-using Purview.Telemetry.Logging;
+		const string basicLogger = """
+
 
 namespace Testing;
 
 [Logger]
 public interface ITestLogger
-{{
-	[Log(MessageTemplate = ""intValue: {{intValue}} uintValue: {{uintValue}}"")]
+{
+	[Log(MessageTemplate = "intValue: {intValue} uintValue: {uintValue}")]
 	IDisposable BasicScoped(int intValue, string? UNUSEDnullableStringValue, uint uintValue);
-}}
-";
+}
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, c => c.ScrubInlineGuids());
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			c => c.ScrubInlineGuids(),
+			cancellationToken: cancellationToken
+		);
 	}
 
-	[Fact]
-	public async Task Generate_GivenBasicScopedAndLogHasLevelSet_GeneratesDiagnostic()
+	[Test]
+	public async Task Generate_GivenBasicScopedAndLogHasLevelSet_GeneratesDiagnostic(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
-			@$"
-using Purview.Telemetry.Logging;
+		const string basicLogger =
+			@"
 using Microsoft.Extensions.Logging;
 
 namespace Testing;
 
 [Logger]
 public interface ITestLogger
-{{
+{
 	[Log(Level = LogLevel.Information)]
 	IDisposable BasicScoped();
-}}
+}
 ";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, expectsDiagnostics: true);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			c => c.ScrubInlineGuids(),
+			expectsDiagnostics: true,
+			cancellationToken: cancellationToken
+		);
 	}
 
-	[Fact]
-	public async Task Generate_GivenBasicScopedAndLevelSetBySpecificAttribute_GeneratesDiagnostic()
+	[Test]
+	public async Task Generate_GivenBasicScopedAndLevelSetBySpecificAttribute_GeneratesDiagnostic(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		var basicLogger =
-			@$"
-using Purview.Telemetry.Logging;
+		const string basicLogger =
+			@"
 using Microsoft.Extensions.Logging;
 
 namespace Testing;
 
 [Logger]
 public interface ITestLogger
-{{
+{
 	[Info]
 	IDisposable BasicScoped();
-}}
+}
 ";
 
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry
+			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, expectsDiagnostics: true);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			c => c.ScrubInlineGuids(),
+			expectsDiagnostics: true,
+			cancellationToken: cancellationToken
+		);
 	}
 }

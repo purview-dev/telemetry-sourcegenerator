@@ -12,7 +12,9 @@ partial class MeterTargetClassEmitter
 		StringBuilder builder,
 		int indent,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		GenerationLogger? logger,
+		bool readonlyFields = false,
+		bool emitNullable = true
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -21,33 +23,67 @@ partial class MeterTargetClassEmitter
 
 		indent++;
 
-		builder
-			.Append(
-				indent,
-				Constants.Metrics.SystemDiagnostics.Meter,
-				withNewLine: false
-			)
-			.Append(' ')
-			.Append(MeterFieldName)
-			.AppendLine(" = default!;")
-			.AppendLine();
+		// When metrics owns the constructor, emit readonly fields so the JIT can treat
+		// them as immutable after construction and eliminate null checks in hot paths.
+		if (readonlyFields)
+		{
+			builder
+				.Append(indent, "readonly ", withNewLine: false)
+				.Append((string)Constants.Metrics.SystemDiagnostics.Meter)
+				.Append(' ')
+				.Append(MeterFieldName)
+				.AppendLine(";")
+				.AppendLine();
+		}
+		else
+		{
+			builder
+				.Append(indent, Constants.Metrics.SystemDiagnostics.Meter, withNewLine: false)
+				.Append(' ')
+				.Append(MeterFieldName)
+				.AppendLine(emitNullable ? " = default!;" : " = default;")
+				.AppendLine();
+		}
 
 		foreach (var method in target.InstrumentationMethods)
 		{
+			if (!method.TargetGenerationState.IsValid)
+			{
+				// Skip invalid methods (e.g. post-pass duplicates); no field needed.
+				continue;
+			}
+
 			if (method.InstrumentAttribute == null)
+			{
 				// We've already 'reported' this error, so we can skip it.
 				continue;
+			}
 
 			var type = Constants
 				.Metrics.InstrumentTypeMap[method.InstrumentAttribute.InstrumentType]
-				.MakeGeneric(method.InstrumentMeasurementType)
-				;
+				.MakeGeneric(method.InstrumentMeasurementType);
 
-			builder
-				.Append(indent, type, withNewLine: false)
-				.Append("? ")
-				.Append(method.FieldName)
-				.AppendLine(" = null;");
+			// Observable instruments are registered via callback, not assigned in the constructor,
+			// so they cannot be readonly.
+			var emitReadonly = readonlyFields && !method.IsObservable;
+
+			if (emitReadonly)
+			{
+				builder
+					.Append(indent, "readonly ", withNewLine: false)
+					.Append((string)type)
+					.Append(' ')
+					.Append(method.FieldName)
+					.AppendLine(";");
+			}
+			else
+			{
+				builder
+					.Append(indent, type, withNewLine: false)
+					.Append(' ')
+					.Append(method.FieldName)
+					.AppendLine(emitNullable ? " = default!;" : " = default;");
+			}
 		}
 
 		return --indent;

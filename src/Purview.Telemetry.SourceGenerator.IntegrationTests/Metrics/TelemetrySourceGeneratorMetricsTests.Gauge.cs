@@ -1,20 +1,21 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Metrics;
+namespace Purview.Telemetry.SourceGenerator.Metrics;
 
 partial class TelemetrySourceGeneratorMetricsTests
 {
-	[Fact]
-	public async Task Generate_GivenBasicObservableGauge_GeneratesMetrics()
+	[Test]
+	public async Task Generate_GivenBasicObservableGauge_GeneratesMetrics(
+		CancellationToken cancellationToken
+	)
 	{
 		// Arrange
-		const string basicMetric =
-			@"
-using Purview.Telemetry.Metrics;
+		const string basicMetric = """
+
 using System.Diagnostics.Metrics;
 using System.Collections.Generic;
 
 namespace Testing;
 
-[Meter(""testing-meter"")]
+[Meter("testing-meter")]
 public interface ITestMetrics {
 	[ObservableGauge]
 	void ObservableGauge(Func<int> f, [Tag]int intParam, [Tag]bool boolParam);
@@ -25,12 +26,16 @@ public interface ITestMetrics {
 	[ObservableGauge]
 	void ObservableGauge3(Func<IEnumerable<Measurement<int>>> f, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric);
+		var generationResult = await GenerateAsync(
+			basicMetric,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

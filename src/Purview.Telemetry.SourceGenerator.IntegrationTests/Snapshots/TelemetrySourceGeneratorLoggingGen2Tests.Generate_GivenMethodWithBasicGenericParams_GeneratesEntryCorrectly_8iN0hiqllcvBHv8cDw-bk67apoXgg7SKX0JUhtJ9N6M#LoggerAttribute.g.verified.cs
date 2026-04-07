@@ -9,11 +9,14 @@
 
 #pragma warning disable 1591 // publicly visible type or member must be documented
 
+#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE
 #nullable enable
+#endif
 
 #if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING
 
-namespace Purview.Telemetry.Logging;
+namespace Purview.Telemetry
+{
 
 /// <summary>
 /// Marker attribute required for Log generation.
@@ -38,17 +41,19 @@ sealed class LoggerAttribute : global::System.Attribute
 	/// </summary>
 	/// <param name="defaultLevel">The default <see cref="global::Microsoft.Extensions.Logging.LogLevel"/> to use
 	/// when one is not specified.</param>
-	/// <param name="customPrefix">If specified, also sets the <see cref="global::Purview.Telemetry.Logging.LogPrefixType"/> to <see cref="global::Purview.Telemetry.Logging.LogPrefixType.Custom"/>.</param>
-	/// <param name="disableMSLoggingTelemetryGeneration">Disables the generation of the new style of telemetry generation for Microsoft.Extensions.Logging.</param>
-	public LoggerAttribute(global::Microsoft.Extensions.Logging.LogLevel defaultLevel, string? customPrefix = null, bool disableMSLoggingTelemetryGeneration = false)
+	/// <param name="customPrefix">If specified, also sets the <see cref="global::Purview.Telemetry.LogPrefixType"/> to <see cref="global::Purview.Telemetry.LogPrefixType.Custom"/>.</param>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public LoggerAttribute(global::Microsoft.Extensions.Logging.LogLevel defaultLevel, string customPrefix = null)
+#else
+	public LoggerAttribute(global::Microsoft.Extensions.Logging.LogLevel defaultLevel, string? customPrefix = null)
+#endif
 	{
 		DefaultLevel = defaultLevel;
 		CustomPrefix = customPrefix;
-		DisableMSLoggingTelemetryGeneration = disableMSLoggingTelemetryGeneration;
 
 		if (!string.IsNullOrWhiteSpace(CustomPrefix))
 		{
-			PrefixType = global::Purview.Telemetry.Logging.LogPrefixType.Custom;
+			PrefixType = global::Purview.Telemetry.LogPrefixType.Custom;
 		}
 	}
 
@@ -62,19 +67,26 @@ sealed class LoggerAttribute : global::System.Attribute
 	/// <summary>
 	/// Optional. The prefix used to when generating the log entry name.
 	/// </summary>
+#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+	public string CustomPrefix { get; set; }
+#else
 	public string? CustomPrefix { get; set; }
+#endif
 
 	/// <summary>
 	/// Specifies the mode used to generate or override the prefix for the log entry.
 	/// </summary>
-	public global::Purview.Telemetry.Logging.LogPrefixType PrefixType { get; set; }
+	public global::Purview.Telemetry.LogPrefixType PrefixType { get; set; }
 
 	/// <summary>
-	/// Disables the generation of the new style of telemetry generation for Microsoft.Extensions.Logging.
-	/// 
-	/// Defaults to false.
+	/// Controls which generation mode is used for all log methods on this interface.
+	/// <see cref="global::Purview.Telemetry.LoggerGenerationMode.Auto"/> (the default) inherits from the
+	/// assembly-level <see cref="global::Purview.Telemetry.LoggerGenerationAttribute.GenerationMode"/> setting,
+	/// falling back to automatic per-method selection based on parameters.
+	/// Can be overridden per-method via <see cref="global::Purview.Telemetry.LogAttribute.GenerationMode"/>.
 	/// </summary>
-	public bool DisableMSLoggingTelemetryGeneration { get; set; }
+	public global::Purview.Telemetry.LoggerGenerationMode GenerationMode { get; set; }
 }
 
+}
 #endif

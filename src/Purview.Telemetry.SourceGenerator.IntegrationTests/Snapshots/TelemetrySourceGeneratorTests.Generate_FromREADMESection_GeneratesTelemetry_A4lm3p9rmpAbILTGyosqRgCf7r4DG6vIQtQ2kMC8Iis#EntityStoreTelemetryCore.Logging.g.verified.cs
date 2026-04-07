@@ -14,30 +14,23 @@
 sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 {
 	readonly global::Microsoft.Extensions.Logging.ILogger<global::IEntityStoreTelemetry> _logger;
+	static readonly global::System.Func<global::Microsoft.Extensions.Logging.ILogger, int, global::System.IDisposable?> _aScopedLogEntryAction = global::Microsoft.Extensions.Logging.LoggerMessage.DefineScope<int>("AScopedLogEntry: ParentEntityId = {ParentEntityId}");
+	static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, int, string, global::System.Exception?> _logMessageAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<int, string>(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(1180592680, "LogMessage"), "LogMessage: EntityId = {EntityId}, UpdateState = {UpdateState}");
+	static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, int, string, global::System.Exception?> _explicitInfoMessageAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<int, string>(global::Microsoft.Extensions.Logging.LogLevel.Information, new global::Microsoft.Extensions.Logging.EventId(1861353128, "ExplicitInfoMessage"), "ExplicitInfoMessage: EntityId = {EntityId}, UpdateState = {UpdateState}");
+	static readonly global::System.Action<global::Microsoft.Extensions.Logging.ILogger, int, global::System.Exception?> _explicitErrorMessageAction = global::Microsoft.Extensions.Logging.LoggerMessage.Define<int>(global::Microsoft.Extensions.Logging.LogLevel.Error, new global::Microsoft.Extensions.Logging.EventId(1928434156, "ExplicitErrorMessage"), "An explicit error message. The entity Id is {EntityId}, and the error is {Exception}.");
+
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+	public EntityStoreTelemetryCore(global::Microsoft.Extensions.Logging.ILogger<global::IEntityStoreTelemetry> logger, global::System.Diagnostics.Metrics.IMeterFactory meterFactory)
+	{
+		_logger = logger;
+		InitializeMeters(meterFactory);
+	}
 
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
 	[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 	public global::System.IDisposable? AScopedLogEntry(int parentEntityId)
 	{
-		var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-		state.ReserveTagSpace(2);
-
-		state.TagArray[0] = new("{OriginalFormat}", "AScopedLogEntry: ParentEntityId = {ParentEntityId}");
-		state.TagArray[1] = new("parentEntityId", parentEntityId);
-
-		var v0 = state.TagArray[1].Value ?? "(null)";
-
-		var formattedMessage = 
-#if NET
-			string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"AScopedLogEntry: ParentEntityId = {v0}");
-#else
-			global::System.FormattableString.Invariant($"AScopedLogEntry: ParentEntityId = {v0}");
-#endif
-		;
-
-		state.AddTag("FormattedMessage", formattedMessage);
-
-		return _logger.BeginScope(state);
+		return _aScopedLogEntryAction(_logger, parentEntityId);
 	}
 
 
@@ -50,33 +43,7 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 			return;
 		}
 
-		var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-		state.ReserveTagSpace(3);
-
-		state.TagArray[0] = new("{OriginalFormat}", "LogMessage: EntityId = {EntityId}, UpdateState = {UpdateState}");
-		state.TagArray[1] = new("entityId", entityId);
-		state.TagArray[2] = new("updateState", updateState);
-
-		_logger.Log(
-			global::Microsoft.Extensions.Logging.LogLevel.Information,
-			new (1180592680, nameof(LogMessage)),
-			state,
-			null,
-			[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-			static string (s, _) =>
-			{
-				var v0 = s.TagArray[1].Value ?? "(null)";
-				var v1 = s.TagArray[2].Value ?? "(null)";
-
-#if NET
-				return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"LogMessage: EntityId = {v0}, UpdateState = {v1}");
-#else
-				return global::System.FormattableString.Invariant($"LogMessage: EntityId = {v0}, UpdateState = {v1}");
-#endif
-			}
-		);
-
-		state.Clear();
+		_logMessageAction(_logger, entityId, updateState, null);
 	}
 
 
@@ -89,33 +56,7 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 			return;
 		}
 
-		var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-		state.ReserveTagSpace(3);
-
-		state.TagArray[0] = new("{OriginalFormat}", "ExplicitInfoMessage: EntityId = {EntityId}, UpdateState = {UpdateState}");
-		state.TagArray[1] = new("entityId", entityId);
-		state.TagArray[2] = new("updateState", updateState);
-
-		_logger.Log(
-			global::Microsoft.Extensions.Logging.LogLevel.Information,
-			new (1861353128, nameof(ExplicitInfoMessage)),
-			state,
-			null,
-			[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-			static string (s, _) =>
-			{
-				var v0 = s.TagArray[1].Value ?? "(null)";
-				var v1 = s.TagArray[2].Value ?? "(null)";
-
-#if NET
-				return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"ExplicitInfoMessage: EntityId = {v0}, UpdateState = {v1}");
-#else
-				return global::System.FormattableString.Invariant($"ExplicitInfoMessage: EntityId = {v0}, UpdateState = {v1}");
-#endif
-			}
-		);
-
-		state.Clear();
+		_explicitInfoMessageAction(_logger, entityId, updateState, null);
 	}
 
 
@@ -128,31 +69,7 @@ sealed partial class EntityStoreTelemetryCore : global::IEntityStoreTelemetry
 			return;
 		}
 
-		var state = global::Microsoft.Extensions.Logging.LoggerMessageHelper.ThreadLocalState;
-		state.ReserveTagSpace(2);
-
-		state.TagArray[0] = new("{OriginalFormat}", "An explicit error message. The entity Id is {EntityId}, and the error is {Exception}.");
-		state.TagArray[1] = new("entityId", entityId);
-
-		_logger.Log(
-			global::Microsoft.Extensions.Logging.LogLevel.Error,
-			new (1928434156, nameof(ExplicitErrorMessage)),
-			state,
-			exception,
-			[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
-			static string (s, e) =>
-			{
-				var v0 = s.TagArray[1].Value ?? "(null)";
-
-#if NET
-				return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"An explicit error message. The entity Id is {v0}, and the error is {e}.");
-#else
-				return global::System.FormattableString.Invariant($"An explicit error message. The entity Id is {v0}, and the error is {e}.");
-#endif
-			}
-		);
-
-		state.Clear();
+		_explicitErrorMessageAction(_logger, entityId, exception);
 	}
 
 }

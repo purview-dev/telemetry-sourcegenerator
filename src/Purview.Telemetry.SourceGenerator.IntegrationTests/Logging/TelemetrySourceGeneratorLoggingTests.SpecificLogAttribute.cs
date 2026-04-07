@@ -1,17 +1,17 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Logging;
+namespace Purview.Telemetry.SourceGenerator.Logging;
 
 partial class TelemetrySourceGeneratorLoggingTests
 {
-	[Theory]
-	[MemberData(nameof(SpecificLogAttributeTypes))]
+	[Test]
+	[MethodDataSource(nameof(SpecificLogAttributeTypes))]
 	public async Task Generate_GivenInterfaceWithSpecificLogAttribute_GenerateLoggerWithThatLevel(
-		string attribute
+		string attribute,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
 		string basicLogger =
 			@$"
-using Purview.Telemetry.Logging;
 
 namespace Testing;
 
@@ -24,60 +24,75 @@ public interface ITestLogger
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, parameters: attribute);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			cancellationToken: cancellationToken,
+			parameters: attribute
+		);
 	}
 
-	[Theory]
-	[MemberData(nameof(SpecificLogAttributeTypes))]
+	[Test]
+	[MethodDataSource(nameof(SpecificLogAttributeTypes))]
 	public async Task Generate_GivenInterfaceWithSpecificTypesAndSpecificParameters_GenerateLoggerWithThatLevelAndParameter(
-		string attribute
+		string attribute,
+		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
-		string basicLogger =
-			@$"
-using Purview.Telemetry.Logging;
+		string basicLogger = $$"""
+
 
 namespace Testing;
 
 [Logger]
 public interface ITestLogger
-{{
-	[{attribute}]
+{
+	[{{attribute}}]
 	void Log(string stringParam, int intParam, bool boolParam);
 
-	[{attribute}(eventId: 100)]
+	[{{attribute}}(eventId: 100)]
 	void Log_EventId_1(string stringParam, int intParam, bool boolParam);
 
-	[{attribute}(100)]
+	[{{attribute}}(100)]
 	void Log_EventId_3(string stringParam, int intParam, bool boolParam);
 
-	[{attribute}(messageTemplate: ""template"")]
+	[{{attribute}}(messageTemplate: "template")]
 	void Log_MessageTemplate_1(string stringParam, int intParam, bool boolParam);
 
-	[{attribute}(MessageTemplate = ""template"")]
+	[{{attribute}}(MessageTemplate = "template")]
 	void Log_MessageTemplate_2(string stringParam, int intParam, bool boolParam);
 
-	[{attribute}(""template"")]
+	[{{attribute}}("template")]
 	void Log_MessageTemplate_3(string stringParam, int intParam, bool boolParam);
-}}
-";
+}
+
+""";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger);
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
-		await TestHelpers.Verify(generationResult, parameters: attribute);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			cancellationToken: cancellationToken,
+			parameters: attribute
+		);
 	}
 
-	public static TheoryData<string> SpecificLogAttributeTypes
+	public static IEnumerable<string> SpecificLogAttributeTypes
 	{
 		get
 		{
-			TheoryData<string> data = [];
+			List<string> data = [];
 
 			data.Add("Trace");
 			data.Add("Debug");
