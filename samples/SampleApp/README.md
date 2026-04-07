@@ -1,20 +1,55 @@
 # Purview Telemetry Sample App
 
-This sample demonstrates the **Purview Telemetry Source Generator** in a real-world .NET Aspire application with comprehensive telemetry instrumentation using Activities, Logging, and Metrics.
+A real-world .NET Aspire weather forecast application demonstrating the **Purview Telemetry Source Generator** with all three telemetry targets — Activities, Logging, and Metrics — across two services, including multi-target methods that emit multiple telemetry types from a single call.
 
 ## Overview
 
-The sample app is a weather forecast API built with:
-
-- **Backend API** (`SampleApp.APIService`) - RESTful weather service with generated telemetry
-- **Blazor Web Frontend** (`SampleApp.Web`) - Interactive UI consuming the API
-- **.NET Aspire** (`SampleApp.AppHost`) - Orchestration and observability dashboard
+| Project | Description |
+| --- | --- |
+| `SampleApp.AppHost` | .NET Aspire orchestrator — wires up all resources and the Aspire dashboard |
+| `SampleApp.APIService` | Weather REST API backend; contains the primary telemetry interfaces |
+| `SampleApp.Web` | Blazor Server frontend that calls the API with its own HTTP client telemetry |
+| `SampleApp.Shared` | Shared `WeatherForecast` DTO used by both API and frontend |
+| `SampleApp.ServiceDefaults` | Common Aspire service defaults (OpenTelemetry, health checks, resilience) |
+| `SampleApp.APIService.UnitTests` | Unit tests demonstrating how to mock and assert generated telemetry interfaces |
 
 ## What It Demonstrates
 
-### Multi-Target Telemetry Generation
+### Three telemetry interfaces
 
-The `IWeatherServiceTelemetry` interface showcases **v4.0 multi-target generation**, where a single method call generates multiple telemetry types simultaneously:
+#### `IEntityStoreTelemetry` (global namespace, `SampleApp.APIService`)
+
+A self-contained reference example matching the [Quick Start](../../README.md) guide. Not wired into the API endpoints — its purpose is to show a clean before/after comparison and demonstrate that generated code is inspectable with `EmitCompilerGeneratedFiles`.
+
+```csharp
+[ActivitySource]
+[Logger]
+[Meter]
+interface IEntityStoreTelemetry
+{
+    [Activity]
+    [Info]
+    [AutoCounter]
+    Activity? GettingEntityFromStore(int entityId, [Baggage] string serviceUrl);
+
+    [Event]
+    [Trace]
+    void GetDuration(Activity? activity, int durationInMS);
+
+    [Context]
+    void RetrievedEntity(Activity? activity, float totalValue, int lastUpdatedByUserId);
+
+    [Warning]
+    void EntityNotFound(int entityId);
+
+    [Histogram]
+    void RecordEntitySize(int sizeInBytes);
+}
+```
+
+#### `IWeatherServiceTelemetry` (`SampleApp.APIService.Services`)
+
+The primary backend telemetry. Injected into `WeatherService` and registered via `builder.Services.AddWeatherServiceTelemetry()`. Demonstrates the full range of multi-target patterns:
 
 ```csharp
 [ActivitySource]
@@ -22,75 +57,130 @@ The `IWeatherServiceTelemetry` interface showcases **v4.0 multi-target generatio
 [Meter]
 public interface IWeatherServiceTelemetry
 {
-    // ✨ MULTI-TARGET: Single call creates Activity + Logs Trace + Increments Counter
+    // MULTI-TARGET: starts Activity (Client kind) + logs Trace
     [Activity(ActivityKind.Client)]
     [Trace]
     Activity? GettingWeatherForecast([Baggage] string someRandomBaggageInfo, int requestedCount);
 
-    // ✨ MULTI-TARGET: AutoCounter + Warning Log entry + Event
+    // SINGLE-TARGET: adds ActivityEvent
+    [Event]
+    void ForecastReceived(Activity? activity, int minTempInC, int maxTempInC);
+
+    // SINGLE-TARGET: adds ActivityEvent with Error status
+    [Event(ActivityStatusCode.Error)]
+    void FailedToRetrieveForecast(Activity? activity, Exception ex);
+
+    // SINGLE-TARGET: adds ActivityEvent with Ok status
+    [Event(ActivityStatusCode.Ok)]
+    void TemperaturesReceived(Activity? activity, TimeSpan elapsed);
+
+    // MULTI-TARGET: increments counter + logs Warning + adds ActivityEvent
     [AutoCounter]
     [Warning]
     [Event]
     void ItsTooCold(Activity? activity, int minTempInC, int tooColdCount);
 
-    // Single-target examples
-    [Event]
-    void ForecastReceived(Activity? activity, int minTempInC, int maxTempInC);
-
+    // SINGLE-TARGET: histogram per temperature reading
     [Histogram]
     void HistogramOfTemperature(int temperature);
+
+    // MULTI-TARGET: logs Error + increments counter
+    [Error]
+    [AutoCounter]
+    void RequestedCountIsOutOfRange(int requestCount);
+
+    // SINGLE-TARGET: Info log with enumerable expansion (up to 100 items)
+    [Info]
+    void TemperaturesWithinRange([ExpandEnumerable(maximumValueCount: 100)] int[] temperaturesInC);
 }
 ```
 
-### Key Features Demonstrated
+#### `IWeatherAPIClientTelemetry` (`SampleApp.Web.Clients`)
 
-1. **Activity Generation** - Distributed tracing with OpenTelemetry
-   - Activity start/stop with automatic timing
-   - Baggage propagation across service boundaries
-   - Activity events for key milestones
-   - Activity status codes (Ok, Error)
+Frontend HTTP client telemetry. Registered via `builder.Services.AddWeatherAPIClientTelemetry()` and injected into `WeatherAPIClient`. Demonstrates `[ExcludeTargets]` and `[ExpandEnumerable]`:
 
-2. **Structured Logging** - ILogger integration
-   - Log levels: Trace, Debug, Info, Warning, Error, Critical
-   - Structured log properties from method parameters
-   - Enumerable expansion with bounds checking
-   - Correlation with Activity trace IDs
+```csharp
+[ActivitySource]
+[Logger]
+[Meter(InstrumentPrefix = "weather")]
+public interface IWeatherAPIClientTelemetry
+{
+    // MULTI-TARGET: starts Activity (Client kind) + logs Info + increments counter
+    [Activity(ActivityKind.Client)]
+    [Info]
+    [AutoCounter]
+    Activity? GetWeatherForecasts(int? count);
 
-3. **Metrics Collection** - OpenTelemetry Metrics
-   - Counters (manual and auto-incrementing)
-   - Histograms for distribution tracking
-   - Tagged metrics for dimensional analysis
+    // MULTI-TARGET: adds ActivityEvent + logs Error + increments counter
+    // count excluded from Activities
+    [Event]
+    [Error]
+    [AutoCounter]
+    void FailedToGetForecast(Activity? activity, Exception ex,
+        [ExcludeTargets(Targets.Activities)] int? count);
 
-4. **Dependency Injection** - Generated DI extensions
-   - Automatic service registration
-   - Scoped lifecycle management
-   - Constructor injection
+    // SINGLE-TARGET: adds ActivityEvent with HTTP status details
+    [Event]
+    void RequestComplete(Activity? activity, HttpStatusCode statusCode, bool isSuccessStatusCode);
 
-5. **Unit Testing** - Test-friendly generated code
-   - Mock telemetry interfaces
-   - Validate telemetry calls in tests
-   - See `SampleApp.APIService.UnitTests` for examples
+    // SINGLE-TARGET: increments success counter
+    [AutoCounter]
+    void RequestSuccess();
+
+    // MULTI-TARGET: adds ActivityEvent + logs Warning
+    [Event]
+    [Warning]
+    void NoForecastsRecieved(Activity? activity);
+
+    // MULTI-TARGET: adds ActivityEvent with Ok status + logs Debug
+    // forecasts excluded from Activities
+    [Event(ActivityStatusCode.Ok)]
+    [Debug]
+    void ForecastsRecieved(Activity? activity, int forecastCount,
+        [ExpandEnumerable(100), ExcludeTargets(Targets.Activities)] WeatherForecast[] weatherForecasts);
+}
+```
+
+### Key features shown
+
+1. **Multi-target generation** — single method call emits Activity + Log + Metric simultaneously
+2. **Activity lifecycle** — start, events, status codes (Ok / Error), baggage propagation
+3. **Structured logging** — all log levels (Trace → Critical), structured properties, enumerable expansion
+4. **Metrics** — auto-counters, histograms, `InstrumentPrefix` customisation
+5. **`[ExcludeTargets]`** — exclude a parameter from specific telemetry types in multi-target methods
+6. **`[ExpandEnumerable]`** — log individual array/IEnumerable elements as separate properties
+7. **DI registration** — generated `Add*Telemetry()` extension methods
+8. **`TelemetryNames`** — generated static class with all meter and activity source names for OTel registration
+9. **Unit testing** — mock telemetry interfaces with NSubstitute; see `SampleApp.APIService.UnitTests`
 
 ## Project Structure
 
 ```text
 SampleApp/
-├── SampleApp.AppHost/              # .NET Aspire orchestrator
-│   └── Program.cs                  # Aspire app configuration
-├── SampleApp.APIService/           # Weather API backend
+├── SampleApp.AppHost/
+│   └── Program.cs                          # Aspire orchestration
+├── SampleApp.APIService/
 │   ├── Endpoints/
-│   │   └── WeatherEndpoints.cs    # Minimal API endpoints
+│   │   └── WeatherEndpoints.cs             # Minimal API endpoints
+│   ├── Properties/
+│   │   └── AssemblyInfo.cs                 # [assembly: ActivitySourceGeneration]
 │   ├── Services/
-│   │   ├── IWeatherService.cs     # Business logic interface
-│   │   ├── WeatherService.cs      # Business logic implementation
-│   │   └── IWeatherServiceTelemetry.cs  # 🔥 Telemetry interface
-│   └── Program.cs                  # API startup
-├── SampleApp.Web/                  # Blazor frontend
-│   ├── Components/                 # Blazor components
-│   └── Program.cs                  # Web startup
-├── SampleApp.ServiceDefaults/      # Shared Aspire config
-├── SampleApp.Shared/               # Shared DTOs
-└── SampleApp.APIService.UnitTests/ # Unit tests with telemetry mocking
+│   │   ├── IEntityStoreTelemetry.cs        # Reference telemetry interface (Quick Start)
+│   │   ├── IWeatherService.cs              # Business logic interface
+│   │   ├── IWeatherServiceTelemetry.cs     # Primary telemetry interface
+│   │   └── WeatherService.cs              # Business logic implementation
+│   └── Program.cs
+├── SampleApp.Web/
+│   ├── Clients/
+│   │   ├── IWeatherAPIClientTelemetry.cs   # Frontend HTTP client telemetry
+│   │   └── WeatherAPIClient.cs
+│   ├── Components/                         # Blazor components
+│   ├── Properties/
+│   │   └── AssemblyInfo.cs
+│   └── Program.cs
+├── SampleApp.ServiceDefaults/              # OpenTelemetry, health checks, resilience
+├── SampleApp.Shared/                       # WeatherForecast DTO
+└── SampleApp.APIService.UnitTests/         # Unit tests with telemetry mocking
 ```
 
 ## Getting Started
@@ -100,246 +190,104 @@ SampleApp/
 - [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) or later
 - [.NET Aspire workload](https://learn.microsoft.com/en-us/dotnet/aspire/fundamentals/setup-tooling)
 
-Install the Aspire workload:
-
 ```bash
 dotnet workload install aspire
 ```
 
 ### Running the Application
 
-1. **Start the Aspire App Host:**
+```bash
+cd samples/SampleApp
+dotnet run --project SampleApp.AppHost
+```
 
-   ```bash
-   cd samples/SampleApp
-   dotnet run --project SampleApp.AppHost
-   ```
+The .NET Aspire dashboard opens automatically. It lists three running resources: `api-service`, `web`, and `scalar`.
 
-2. **Access the Applications:**
-   - **Aspire Dashboard**: <http://localhost:15888> (or port shown in console)
-   - **Web Frontend**: Listed in Aspire dashboard
-   - **API Service**: Listed in Aspire dashboard
-   - **Scalar API Docs**: Listed in Aspire dashboard
-
-3. **Navigate to the Weather Page** in the web frontend to trigger API calls and generate telemetry.
+To generate telemetry:
+- **Web Frontend** — click the `web` resource endpoint, go to the **Weather** page, and click **Load Weather**
+- **Scalar API Docs** — click the `scalar` endpoint, expand the Weather API, and use the Send button
 
 ### Running Tests
-
-Execute the unit tests that demonstrate telemetry mocking:
 
 ```bash
 cd samples/SampleApp
 dotnet test
 ```
 
-Tests validate business logic while mocking telemetry calls. See `SampleApp.APIService.UnitTests` for examples of:
-
-- Mocking telemetry interfaces
-- Verifying telemetry method calls
-- Testing with and without telemetry
-
-## Monitoring Telemetry
-
-### Using the Aspire Dashboard
-
-The .NET Aspire dashboard provides a comprehensive view of your application's telemetry:
-
-1. **Traces Tab** - View distributed traces
-   - See the full request path through your services
-   - Inspect Activity spans, duration, and events
-   - View baggage and tags on each span
-
-2. **Metrics Tab** - Monitor counter and histogram values
-   - View `ItsTooCold` counter increments
-   - Analyze `HistogramOfTemperature` distributions
-   - Filter by tags and time ranges
-
-3. **Logs Tab** - Search structured logs
-   - Filter by log level (Trace, Debug, Info, Warning, Error)
-   - View correlated logs within trace contexts
-   - Search by properties and message content
-
-4. **Console Output Tab** - Real-time application output
-
-### Using dotnet-counter
-
-[`dotnet-counter`](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-counters) is a command-line tool for monitoring .NET metrics in real-time.
-
-#### Use dotnet-counter
-
-Either via `dnx` (recommended):
-
-```bash
-dnx dotnet-counters [options]
-```
-
-Or install the tool globally:
-
-```bash
-dotnet tool install --global dotnet-counters
-```
-
-#### Monitor Metrics
-
-1. **Find the Process ID:**
-
-   ```bash
-   dnx dotnet-counters ps
-   // or
-   dotnet-counters ps
-   ```
-
-   Look for `SampleApp.APIService` in the output and note its PID.
-
-2. **Monitor All Meters:**
-
-   ```bash
-   dnx dotnet-counters monitor --process-id <PID>
-   // or
-   dotnet-counters monitor --process-id <PID>
-   ```
-
-3. **Monitor Specific Meter:**
-
-   The sample app uses a meter named based on the interface. To monitor only weather service metrics:
-
-   ```bash
-   dnx dotnet-counters monitor --process-id <PID> --counters SampleApp.APIService.Services.IWeatherServiceTelemetry
-   // or
-   dotnet-counters monitor --process-id <PID> --counters SampleApp.APIService.Services.IWeatherServiceTelemetry
-   ```
-
-4. **Watch Specific Counters:**
-
-   ```bash
-   # Monitor the "too cold" counter
-   dnx dotnet-counters monitor --process-id <PID> --counters SampleApp.APIService.Services.IWeatherServiceTelemetry[its-too-cold]
-   // or
-   dotnet-counters monitor --process-id <PID> --counters SampleApp.APIService.Services.IWeatherServiceTelemetry[its-too-cold]
-
-   # Monitor temperature histogram
-   dnx dotnet-counters monitor --process-id <PID> --counters SampleApp.APIService.Services.IWeatherServiceTelemetry[histogram-of-temperature]
-   // or
-   dotnet-counters monitor --process-id <PID> --counters SampleApp.APIService.Services.IWeatherServiceTelemetry[histogram-of-temperature]
-   ```
-
-#### Example Output
-
-```plain
-Press p to pause, r to resume, q to quit.
-    Status: Running
-
-[SampleApp.APIService.Services.IWeatherServiceTelemetry]
-    getting-weather-forecast (Count / 1 sec)                    2
-    its-too-cold (Count / 1 sec)                               1
-    histogram-of-temperature
-        Percentile=50                                           15
-        Percentile=95                                           28
-        Percentile=99                                           30
-```
-
-### Using dotnet-trace
-
-Capture detailed trace files for offline analysis:
-
-```bash
-# Install dotnet-trace
-dotnet tool install --global dotnet-trace
-
-# Collect traces
-dotnet-trace collect --process-id <PID> --format <Chromium|NetTrace|Speedscope>
-```
-
-### Using OpenTelemetry Collector
-
-For production scenarios, configure the Aspire app to export to an OpenTelemetry Collector, which can forward to:
-
-- **Jaeger** - Distributed tracing visualization
-- **Prometheus** - Metrics storage and querying
-- **Grafana** - Dashboards and alerting
-- **Azure Monitor** / **Application Insights**
-- **AWS X-Ray** / **CloudWatch**
-
-See the [.NET Aspire telemetry documentation](https://learn.microsoft.com/en-us/dotnet/aspire/fundamentals/telemetry) for configuration details.
+Tests validate business logic while mocking telemetry calls using NSubstitute. See `SampleApp.APIService.UnitTests` for examples of mocking and asserting generated telemetry interfaces.
 
 ## Exploring Generated Code
 
-The source generator creates implementation code that you can inspect:
+Both `SampleApp.APIService` and `SampleApp.Web` have `<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>` enabled, so generated files appear in your IDE and on disk.
 
-**Location:** `SampleApp.APIService/obj/Debug/net10.0/generated/`
+**`SampleApp.APIService`** generates:
 
-Generated files include:
-
-- `IWeatherServiceTelemetry.Activity.g.cs` - Activity source implementation
-- `IWeatherServiceTelemetry.Logging.g.cs` - ILogger implementation  
-- `IWeatherServiceTelemetry.Metrics.g.cs` - Metrics implementation
-- `IWeatherServiceTelemetry.DI.g.cs` - Dependency injection extensions
-
-**Enable in IDE:** The project already has `<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>` enabled, so generated files appear in your IDE's file explorer.
-
-## Key Concepts
-
-### Multi-Target Methods
-
-Methods can have multiple telemetry attributes to generate Activity + Log + Metric from a single call:
-
-```csharp
-// Before (manual, verbose):
-var activity = _activitySource.StartActivity("Getting Weather");
-_logger.LogTrace("Getting weather forecast for {Count}", count);
-_counter.Add(1, new KeyValuePair<string, object>("operation", "get-weather"));
-
-// After (generated, concise):
-var activity = _telemetry.GettingWeatherForecast(baggageInfo, count);
-// ↑ Single call: Activity started, Trace logged, Counter incremented
+```
+obj/Release/net10.0/generated/Purview.Telemetry.SourceGenerator/Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator/
+  EntityStoreTelemetryCore.Activity.g.cs
+  EntityStoreTelemetryCore.Logging.g.cs
+  EntityStoreTelemetryCore.Metric.g.cs
+  EntityStoreTelemetryCoreDIExtension.DependencyInjection.g.cs
+  SampleApp.APIService.Services.WeatherServiceTelemetryCore.Activity.g.cs
+  SampleApp.APIService.Services.WeatherServiceTelemetryCore.Logging.g.cs
+  SampleApp.APIService.Services.WeatherServiceTelemetryCore.Metric.g.cs
+  SampleApp.APIService.Services.WeatherServiceTelemetryCoreDIExtension.DependencyInjection.g.cs
+  SampleApp.APIService.TelemetryNames.g.cs
 ```
 
-### Activity Event Chaining
+**`SampleApp.Web`** generates:
 
-Add events to the current activity throughout the operation lifecycle:
-
-```csharp
-using var activity = telemetry.GettingWeatherForecast(info, count);
-// ... do work ...
-telemetry.ForecastReceived(activity, minTemp, maxTemp);  // Adds event to activity
-// ... more work ...
-telemetry.TemperaturesReceived(activity, elapsed);       // Adds another event
+```
+obj/Release/net10.0/generated/Purview.Telemetry.SourceGenerator/Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator/
+  SampleApp.Web.Clients.WeatherAPIClientTelemetryCore.Activity.g.cs
+  SampleApp.Web.Clients.WeatherAPIClientTelemetryCore.Logging.g.cs
+  SampleApp.Web.Clients.WeatherAPIClientTelemetryCore.Metric.g.cs
+  SampleApp.Web.Clients.WeatherAPIClientTelemetryCoreDIExtension.DependencyInjection.g.cs
+  SampleApp.Web.TelemetryNames.g.cs
 ```
 
-### Enumerable Expansion
-
-Control how collections are logged:
+The `TelemetryNames.g.cs` files expose static arrays used in `Program.cs` to register all sources with OpenTelemetry:
 
 ```csharp
-// Expands array items into individual log properties (up to 100 items)
-[Info]
-void TemperaturesWithinRange([ExpandEnumerable(maximumValueCount: 100)] int[] temperaturesInC);
+builder.AddServiceDefaults(TelemetryNames.MeterNames, TelemetryNames.ActivitySourceNames);
+```
+
+## Monitoring Telemetry
+
+### Aspire Dashboard
+
+After generating some traffic, explore each tab:
+
+| Tab | What you see |
+| --- | --- |
+| **Traces** | Distributed traces spanning both `web` and `api-service` hops with full end-to-end duration, Activity span hierarchy, ActivityEvents, baggage, and tag properties |
+| **Structured Logs** | Log entries with Level, Message, and all structured properties (e.g. `RequestedCount`, `MinTempInC`) |
+| **Metrics** | Generated counters and histograms from both services: `getting-weather-forecast`, `its-too-cold`, `histogram-of-temperature`, `get-weather-forecasts`, etc. |
+| **Console Logs** | Raw stdout output per service |
+| **Resources** | Failed requests surface as error badges on `api-service` and/or `web` |
+
+### Using dotnet-counters
+
+Monitor metrics from the running API service in real time:
+
+```bash
+# Find the process ID
+dotnet-counters ps
+
+# Monitor all meters
+dotnet-counters monitor --process-id <PID>
+
+# Monitor a specific meter
+dotnet-counters monitor --process-id <PID> --counters SampleApp.APIService.Services.IWeatherServiceTelemetry
+
+# Watch specific instruments
+dotnet-counters monitor --process-id <PID> --counters SampleApp.APIService.Services.IWeatherServiceTelemetry[its-too-cold]
 ```
 
 ## Learn More
 
-- [Purview Telemetry Documentation](../../README.md) - Full feature documentation
-- [.NET Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/) - Cloud-native app development
-- [OpenTelemetry .NET](https://opentelemetry.io/docs/languages/net/) - Observability framework
-- [dotnet-counters](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-counters) - Performance monitoring
-- [dotnet-trace](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-trace) - Trace collection
+- [Purview Telemetry Source Generator docs](../../README.md)
+- [Wiki: Sample Application](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Sample-Application) — annotated walkthroughs, sequence diagrams, dashboard screenshots
+- [Wiki: Generated Output](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Generated-Output) — full annotated examples of generated code
+- [.NET Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/)
 
-## Troubleshooting
-
-### "Unable to find project 'SampleApp.AppHost'"
-
-Ensure you're running from the `samples/SampleApp` directory.
-
-### Port Already in Use
-
-If the default ports are in use, Aspire will automatically assign different ports. Check the console output for the actual URLs.
-
-### Telemetry Not Appearing
-
-1. Ensure you're triggering the API by using the web frontend
-2. Check the Aspire dashboard's Traces/Logs/Metrics tabs
-3. Verify the API service is running (check Aspire dashboard Resources tab)
-
-### Generated Code Not Visible
-
-Ensure `<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>` is in your `.csproj` file and rebuild the project.

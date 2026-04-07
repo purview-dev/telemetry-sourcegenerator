@@ -1,3 +1,8 @@
+pre-commit:
+  jobs:
+    - name: csharpier format check
+      run: dotnet csharpier check .
+
 commit-msg:
   jobs:
     - name: conventional commits

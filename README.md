@@ -94,7 +94,7 @@ public class EntityService(IEntityStoreTelemetry telemetry)
             // Logs warning if entity not found
             telemetry.EntityNotFound(id);
             return null;
-        })
+        }
 
         // Activity context addition
         telemetry.RetrievedEntity(activity, entity.TotalValue, entity.LastUpdatedByUserId);
@@ -117,9 +117,10 @@ public class EntityService(IEntityStoreTelemetry telemetry)
 | `[Context]` | Method | Adds Baggage to an Activity |
 | `[Logger]` | Class-level | Marks interface for ILogger generation |
 | `[Log]` | Method | Generates structured log message |
-| `[Debug]`, `[Info]`, `[Warning]`, `[Error]`, `[Critical]` | Method | Log with specific level |
+| `[Trace]`, `[Debug]`, `[Info]`, `[Warning]`, `[Error]`, `[Critical]` | Method | Log with specific level |
 | `[Meter]` | Class-level | Marks interface for Metrics generation |
 | `[Counter]`, `[AutoCounter]` | Method | Counter instrument |
+| `[UpDownCounter]` | Method | Up-down counter instrument |
 | `[Histogram]` | Method | Histogram instrument |
 | `[ObservableCounter]`, `[ObservableGauge]`, `[ObservableUpDownCounter]` | Method | Observable instruments |
 
@@ -142,47 +143,48 @@ The [.NET Aspire Sample](https://github.com/kjldev/purview-telemetry-sourcegener
 
 ## Performance
 
-Benchmarked on 13th Gen Intel Core i9-13900KF, .NET SDK 10.0.200. See the [Performance](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Performance) wiki page for full cross-runtime results.
+Benchmarked on 13th Gen Intel Core i9-13900KF, .NET SDK 10.0.201. See the [Performance](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Performance) wiki page for full cross-runtime results.
 
 ### Activities (.NET 10.0)
 
 | Scenario | HasListener | Manual | Generated | Ratio |
 |---|---|---|---|---|
-| start + complete | False | 0.58 ns | 0.54 ns | 0.93× |
-| start + complete | True | 220 ns / 1008 B | 222 ns / 1008 B | 1.01× |
-| start + fail | True | 210 ns / 920 B | 196 ns / 920 B | 0.89× |
+| start + complete | False | 0.56 ns | 0.55 ns | 0.99x |
+| start + complete | True | 218 ns / 1008 B | 204 ns / 1008 B | 0.94x |
+| start + fail | True | 198 ns / 920 B | 189 ns / 920 B | 0.87x |
 
-Generated activities are within ±2% of hand-written code with identical allocations.
+Generated activities match or outperform hand-written code with identical allocations.
 
 ### Logging (.NET 10.0)
 
 | Scenario | HasLogging | LoggerMessage.Define | Generated v1 | Generated v2 |
 |---|---|---|---|---|
-| single Info call | False | 0.17 ns | 0.19 ns | 0.20 ns |
-| single Info call | True | 4.39 ns | 4.47 ns (1.02×) | 4.16 ns (0.95×) |
-| full lifecycle (4 calls) | True | 17.30 ns | 17.78 ns (1.02×) | 19.10 ns (1.10×) |
+| single Info call | False | 0.21 ns | 0.18 ns | 0.21 ns |
+| single Info call | True | 4.29 ns | 4.24 ns (0.99x) | 4.20 ns (0.98x) |
+| full lifecycle (4 calls) | True | 17.73 ns | 19.52 ns (1.10x) | 18.81 ns (1.06x) |
 
-Both v1 and v2 allocate **0 bytes** per call on all runtimes. v2 (ThreadLocalState pattern) matches v1 in allocation and is within ~10% in CPU time.
+Both v1 and v2 allocate **0 bytes** per call on all runtimes. Both generated variants are within ~2% of the manual baseline for single calls; full lifecycle cost is within ~10%.
 
 ### Multi-Target (.NET 10.0, Activity + Logging + Metrics)
 
 | Scenario | HasListener | Single-target | Multi-target generated | Multi-target manual |
 |---|---|---|---|---|
-| start + complete | True | 219 ns / 1008 B | 234 ns / 1032 B (1.07×) | 229 ns / 1032 B (1.05×) |
+| start + complete | True | 203 ns / 1008 B | 230 ns / 1032 B (1.13x) | 233 ns / 1032 B (1.15x) |
 
-Adding full Activity+Logging+Metrics multi-target generation costs ~7% over Activity-only — matching hand-written multi-target code within 2%.
+Adding full Activity+Logging+Metrics multi-target generation costs ~13% over Activity-only on .NET 10.0 — matching hand-written multi-target code within 2%.
 
 ### Metrics (.NET 10.0)
 
 | Scenario | Generated | Notes |
 |---|---|---|
 | auto-counter (0 tags) | 0.37 ns | - |
-| auto-counter (1 tag) | 0.36 ns | - |
-| histogram (0 tags) | 0.37 ns | - |
-| histogram (1 tag) | 0.37 ns | - |
-| 4+ tags (TagList) | 4–6 ns | Stack-allocated `TagList` |
+| auto-counter (1 tag) | 0.37 ns | - |
+| up-down counter | 0.35 ns | - |
+| histogram (0 tags) | 0.36 ns | - |
+| histogram (1 tag) | 0.36 ns | - |
+| 4+ tags (TagList) | 4-7 ns | Stack-allocated `TagList` |
 
-All instruments are **0 allocations**. Manual baselines are JIT-eliminated on .NET 10.0 (no active listener), so absolute times are shown. On .NET 8/9 and .NET Framework, generated and manual are within ±25%.
+All instruments are **0 allocations**. Manual baselines are JIT-eliminated on .NET 10.0 (no active listener), so absolute times are shown. On .NET 8/9, generated and manual are within ~25%.
 
 ## v4 Breaking Changes
 
