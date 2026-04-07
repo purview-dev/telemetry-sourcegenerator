@@ -10,7 +10,7 @@ Always reference these instructions first and fallback to search or bash command
 
 Install these exact dependencies in order:
 
-- Install .NET 10.0.100 SDK: `curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s -- --version 10.0.100`
+- Install .NET 10.0.200 SDK: `curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s -- --version 10.0.200`
 - Install .NET 10.0 runtime: `curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s -- --runtime dotnet --version 10.0.0`
 - Install Bun: `curl -fsSL https://bun.sh/install | bash`
 - Set environment variables: `export PATH=$HOME/.bun/bin:$HOME/.dotnet:$PATH && export DOTNET_ROOT=$HOME/.dotnet`
@@ -39,7 +39,7 @@ The sample application demonstrates the source generator in action:
 ### Package Creation
 
 - `just pack` -- creates NuGet package with current version from package.json
-- `just version` -- displays current version (currently 3.2.4)
+- `just version` -- displays current version (currently 4.0.0)
 
 ## Validation
 
@@ -99,7 +99,7 @@ benchmarks/
 └── update-version.ts                           # Version management script
 
 Justfile                                        # Main build automation (just)
-package.json                                    # Version 3.2.4, Bun scripts
+package.json                                    # Version 4.0.0, Bun scripts
 ```
 
 ### Key Commands Output
@@ -164,10 +164,10 @@ Any manual edits to `.verified.*` files will be silently overwritten the next ti
 
 ### Version Management
 
-- Version is managed in `package.json` (currently 3.2.4)
+- Version is managed in `package.json` (currently 4.0.0)
 
 - `bun .build/update-version.ts` synchronizes version across all files
-- `make release-final` and `make release-pre` create new releases using commit-and-tag-version
+- `just release-final` and `just release-pre` create new releases using commit-and-tag-version
 
 ## Benchmarking and Performance Documentation
 
