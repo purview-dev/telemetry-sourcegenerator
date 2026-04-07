@@ -6,7 +6,6 @@ All notable changes to this project will be documented in this file. See [commit
 
 ## [4.0.0-prerelease.8](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.7...v4.0.0-prerelease.8) (2026-03-25)
 
-
 ### Features
 
 * emit C# 7.3-compatible code when language version < 8 ([153dd49](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/153dd4936dbf74f5fc08c5f35799d91c9d35b0de))
@@ -14,13 +13,11 @@ All notable changes to this project will be documented in this file. See [commit
 
 ## [4.0.0-prerelease.7](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.6...v4.0.0-prerelease.7) (2026-03-24)
 
-
 ### Features
 
 * add ILogger-to-Purview-Telemetry code refactoring provider with tests ([24ac577](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/24ac57792242b01bbf1c762558419e15c396aee2))
 * implement multi-target telemetry methods and apply Roslyn incremental generator best practices ([f98b0f1](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/f98b0f1db399590327c9f8ec97844e55c2bf1882))
 * improve ILogger-to-Telemetry refactoring provider ([1fcbbb9](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/1fcbbb983a96b9cb5921156f11186c7e120373a1))
-
 
 ### Bug Fixes
 
@@ -32,12 +29,10 @@ All notable changes to this project will be documented in this file. See [commit
 
 ## [4.0.0-prerelease.5](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.4...v4.0.0-prerelease.5) (2026-03-16)
 
-
 ### Features
 
 * add per-method logging v1/v2 selection via DisableMSLoggingTelemetryGeneration ([f718ea5](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/f718ea53faa8e9de56e21131aec0958641feae89))
 * **logging:** replace DisableMSLoggingTelemetryGeneration with LoggerGenerationMode enum ([a1db589](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/a1db5895ea4c6134e38f3651f839942b96faee67))
-
 
 ### Bug Fixes
 
@@ -47,13 +42,11 @@ All notable changes to this project will be documented in this file. See [commit
 
 ## [4.0.0-prerelease.4](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.3...v4.0.0-prerelease.4) (2026-03-08)
 
-
 ### Features
 
 * add TSG1010 diagnostic for missing interface source attribute ([6822ef4](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/6822ef4636dc12dfd8f567ed8c41f9184157d67c))
 
 ## [4.0.0-prerelease.3](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.2...v4.0.0-prerelease.3) (2026-02-23)
-
 
 ### Features
 
@@ -61,11 +54,9 @@ All notable changes to this project will be documented in this file. See [commit
 
 ## [4.0.0-prerelease.2](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.1...v4.0.0-prerelease.2) (2026-02-14)
 
-
 ### Features
 
 * added Telemetry Names generated clases with meter and activity names ([8681033](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/86810330314cae7bc540c99f029d4bc4bf6ad402))
-
 
 ### Bug Fixes
 

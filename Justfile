@@ -98,7 +98,7 @@ build-pack:
     @bun -e "const exec = require('child_process').execSync; console.log('  Commit:          {{ GREEN }}' + exec('git rev-parse HEAD').toString().trim() + '{{ NORMAL }}');"
     @bun -e "console.log('  Copyright Year:  {{ GREEN }}' + new Date().getFullYear() + '{{ NORMAL }}');"
     @Write-Host "  Output Folder:   {{ GREEN }}{{ artifact_folder }}{{ NORMAL }}"
-    @bun -e "const version = require('./package.json').version; const exec = require('child_process').execSync; const branch = exec('git rev-parse --abbrev-ref HEAD').toString().trim(); const commit = exec('git rev-parse HEAD').toString().trim(); const year = new Date().getFullYear(); const cmd = 'dotnet pack \"{{ root_folder }}Purview.Telemetry.SourceGenerator/Purview.Telemetry.SourceGenerator.csproj\" --configuration \"{{ configuration }}\" --output \"{{ artifact_folder }}\" --include-symbols --property:Version=\"' + version + '\" --property:RepositoryBranch=\"' + branch + '\" --property:RepositoryCommit=\"' + commit + '\" --property:COPYRIGHT_YEAR=\"' + year + '\"'; exec(cmd, {stdio: 'inherit'});"
+    @bun .build/build-pack.ts "{{ root_folder }}" "{{ configuration }}" "{{ artifact_folder }}"
 
 [group('Benchmarking')]
 benchmark:
