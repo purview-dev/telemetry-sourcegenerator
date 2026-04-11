@@ -24,17 +24,6 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		RegexOptions.Compiled | RegexOptions.ExplicitCapture
 	);
 
-	static readonly Dictionary<string, string> MethodToAttribute = new(StringComparer.Ordinal)
-	{
-		["LogTrace"] = "Trace",
-		["LogDebug"] = "Debug",
-		["LogInformation"] = "Info",
-		["LogWarning"] = "Warning",
-		["LogError"] = "Error",
-		["LogCritical"] = "Critical",
-	};
-
-	// Matches words for template-based method name extraction (starts with letter, may have digits).
 	static readonly Regex TemplateWordRegex = new(@"\b[A-Za-z][A-Za-z0-9]*", RegexOptions.Compiled);
 
 	// Uses keyword aliases (string, int, bool) and short type names without global:: prefix.
@@ -319,7 +308,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 				continue;
 
 			var methodName = memberAccess.Name.Identifier.Text;
-			if (methodName != "Log" && !MethodToAttribute.ContainsKey(methodName))
+			if (methodName != "Log" && !IsLoggerConvenienceMethod(methodName))
 				continue;
 
 			var call = AnalyzeLogCall(invocation, methodName, semanticModel, cancellationToken);
@@ -624,18 +613,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 			if (call.ExplicitLogLevel is null)
 				return "Log";
 
-			// Map known LogLevel values to their named convenience attributes.
-			var mappedName = call.ExplicitLogLevel switch
-			{
-				"Trace" => "Trace",
-				"Debug" => "Debug",
-				"Information" => "Info",
-				"Warning" => "Warning",
-				"Error" => "Error",
-				"Critical" => "Critical",
-				_ => null,
-			};
-
+			var mappedName = LogLevelToAttributeName(call.ExplicitLogLevel);
 			if (mappedName is not null)
 				return BuildAttributeArgs(mappedName, call, leadingArg: null);
 
@@ -645,11 +623,34 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 			return BuildAttributeArgs("Log", call, leadingArg: levelArg);
 		}
 
-		var attrName = MethodToAttribute.TryGetValue(call.ILoggerMethodName, out var attr)
-			? attr
-			: "Log";
+		// For LogTrace / LogDebug / LogInformation / … — derive attribute name from the level
+		// suffix (strip "Log" prefix, then map the level name).
+		var levelSuffix = call.ILoggerMethodName.StartsWith("Log", StringComparison.Ordinal)
+			? call.ILoggerMethodName.Substring(3)
+			: null;
+		var attrName = levelSuffix is not null ? LogLevelToAttributeName(levelSuffix) ?? "Log" : "Log";
 		return BuildAttributeArgs(attrName, call, leadingArg: null);
 	}
+
+	/// <summary>
+	/// Maps a <see cref="Microsoft.Extensions.Logging.LogLevel"/> member name to the
+	/// corresponding Purview Telemetry convenience-attribute name.
+	/// The only non-trivial mapping is <c>Information</c> → <c>Info</c>;
+	/// all other known levels match their own name.
+	/// Returns <c>null</c> for unrecognised values (e.g. <c>None</c>).
+	/// </summary>
+	static string? LogLevelToAttributeName(string level) =>
+		level == "Information" ? "Info"
+		: level is "Trace" or "Debug" or "Warning" or "Error" or "Critical" ? level
+		: null;
+
+	/// <summary>
+	/// Returns <see langword="true"/> when <paramref name="methodName"/> is one of the
+	/// ILogger convenience methods (e.g. <c>LogTrace</c>, <c>LogInformation</c>).
+	/// </summary>
+	static bool IsLoggerConvenienceMethod(string methodName) =>
+		methodName.StartsWith("Log", StringComparison.Ordinal)
+		&& LogLevelToAttributeName(methodName.Substring(3)) is not null;
 
 	/// <summary>
 	/// Builds the full attribute expression string, incorporating an optional
