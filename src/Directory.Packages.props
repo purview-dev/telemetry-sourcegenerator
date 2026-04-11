@@ -1,7 +1,7 @@
 <Project>
 	<PropertyGroup>
 		<CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
-		<MSCodeAnalysisCSharpVersion>4.9.2</MSCodeAnalysisCSharpVersion>
+		<RoslynVersion>4.9.2</RoslynVersion>
 	</PropertyGroup>
 	<ItemGroup Label="NuGet Package References">
 		<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.201" />
@@ -9,15 +9,23 @@
 	<ItemGroup Label=".NET Packages">
 		<PackageVersion
 			Include="Microsoft.CodeAnalysis.CSharp"
-			Version="$(MSCodeAnalysisCSharpVersion)"
+			Version="$(RoslynVersion)"
 		/>
 		<PackageVersion
 			Include="Microsoft.CodeAnalysis.Common"
-			Version="$(MSCodeAnalysisCSharpVersion)"
+			Version="$(RoslynVersion)"
 		/>
 		<PackageVersion
 			Include="Microsoft.CodeAnalysis.CSharp.Workspaces"
-			Version="$(MSCodeAnalysisCSharpVersion)"
+			Version="$(RoslynVersion)"
+		/>
+		<PackageVersion
+			Include="Microsoft.CodeAnalysis.Workspaces.Common"
+			Version="$(RoslynVersion)"
+		/>
+		<PackageVersion
+			Include="Microsoft.CodeAnalysis.Workspaces.MSBuild"
+			Version="$(RoslynVersion)"
 		/>
 		<!-- Analyzers uses independent versioning; 3.11.0 is the latest stable on nuget.org for 4.x Roslyn -->
 		<PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
