@@ -455,8 +455,14 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	/// evaluating a constructor call, which is out of scope for a refactoring.
 	/// </summary>
 	static int? TryExtractLiteralIntEventId(ArgumentSyntax arg) =>
-		arg.Expression is LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NumericLiteralExpression } lit
-			&& int.TryParse(lit.Token.ValueText, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var id)
+		arg.Expression
+			is LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NumericLiteralExpression } lit
+		&& int.TryParse(
+			lit.Token.ValueText,
+			System.Globalization.NumberStyles.Integer,
+			System.Globalization.CultureInfo.InvariantCulture,
+			out var id
+		)
 			? id
 			: null;
 
@@ -628,7 +634,9 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		var levelSuffix = call.ILoggerMethodName.StartsWith("Log", StringComparison.Ordinal)
 			? call.ILoggerMethodName.Substring(3)
 			: null;
-		var attrName = levelSuffix is not null ? LogLevelToAttributeName(levelSuffix) ?? "Log" : "Log";
+		var attrName = levelSuffix is not null
+			? LogLevelToAttributeName(levelSuffix) ?? "Log"
+			: "Log";
 		return BuildAttributeArgs(attrName, call, leadingArg: null);
 	}
 
@@ -674,7 +682,11 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 			args.Add(leadingArg);
 
 		if (call.ExplicitEventId.HasValue)
-			args.Add(call.ExplicitEventId.Value.ToString(System.Globalization.CultureInfo.InvariantCulture));
+			args.Add(
+				call.ExplicitEventId.Value.ToString(
+					System.Globalization.CultureInfo.InvariantCulture
+				)
+			);
 
 		if (call.MessageTemplate is { Length: > 0 } template)
 			args.Add(EscapeStringForAttribute(template));
