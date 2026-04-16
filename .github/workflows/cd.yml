@@ -9,7 +9,13 @@ on:
     branches:
       - main
     paths:
+      - .github/workflows/cd.yml
+      - Justfile
+      - global.json
       - package.json
+      - benchmarks/**
+      - samples/**
+      - src/**
 
 jobs:
   release:
@@ -26,9 +32,39 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - id: release-trigger
+        name: Determine whether to publish a release
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          CURRENT_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            echo "should_release=true" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          if [[ "${BEFORE_SHA}" == "0000000000000000000000000000000000000000" ]]; then
+            changed_files="$(git show --name-only --pretty='' "${CURRENT_SHA}")"
+          else
+            changed_files="$(git diff --name-only "${BEFORE_SHA}" "${CURRENT_SHA}")"
+          fi
+
+          if grep -Fxq "package.json" <<< "${changed_files}"; then
+            echo "should_release=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "should_release=false" >> "${GITHUB_OUTPUT}"
+          fi
 
       - id: version
         name: Read release version
+        if: ${{ steps.release-trigger.outputs.should_release == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -44,6 +80,7 @@ jobs:
           fi
 
       - name: Block duplicate version
+        if: ${{ steps.release-trigger.outputs.should_release == 'true' }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ steps.version.outputs.tag }}
@@ -109,6 +146,7 @@ jobs:
         run: dotnet test --solution ${{ env.SAMPLE_SOLUTION }} --no-build --configuration ${{ env.CONFIGURATION }} --verbosity normal
 
       - name: Pack NuGet artifacts
+        if: ${{ steps.release-trigger.outputs.should_release == 'true' }}
         env:
           PACKAGE_VERSION: ${{ steps.version.outputs.value }}
         shell: bash
@@ -128,6 +166,7 @@ jobs:
             "/p:COPYRIGHT_YEAR=$(date -u +%Y)"
 
       - name: Create GitHub release
+        if: ${{ steps.release-trigger.outputs.should_release == 'true' }}
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.version.outputs.tag }}
@@ -139,3 +178,7 @@ jobs:
           files: |
             ./artifacts/nuget/*.nupkg
             ./artifacts/nuget/*.snupkg
+
+      - name: Skip release publish
+        if: ${{ steps.release-trigger.outputs.should_release != 'true' }}
+        run: echo "package.json did not change on this push, so release publishing was skipped."
