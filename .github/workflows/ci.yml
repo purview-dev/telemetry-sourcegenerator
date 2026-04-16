@@ -15,10 +15,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           global-json-file: ./global.json
 
@@ -38,10 +38,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           global-json-file: ./src/global.json
 
@@ -64,10 +64,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           global-json-file: ./samples/SampleApp/global.json
 
@@ -79,3 +79,43 @@ jobs:
 
       - name: Run tests
         run: dotnet test --solution ${{ env.SOLUTION }} --no-build --verbosity normal --configuration ${{ env.CONFIGURATION }}
+
+  ci-gate:
+    name: CI Gate
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs:
+      - format-check
+      - build-and-test
+      - build-and-test-samples
+
+    steps:
+      - name: Verify upstream jobs succeeded
+        env:
+          FORMAT_CHECK_RESULT: ${{ needs['format-check'].result }}
+          BUILD_AND_TEST_RESULT: ${{ needs['build-and-test'].result }}
+          BUILD_AND_TEST_SAMPLES_RESULT: ${{ needs['build-and-test-samples'].result }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          declare -A results=(
+            ["Format Check"]="${FORMAT_CHECK_RESULT}"
+            ["Build and Test"]="${BUILD_AND_TEST_RESULT}"
+            ["Build and Test Samples"]="${BUILD_AND_TEST_SAMPLES_RESULT}"
+          )
+
+          failures=0
+
+          for job_name in "${!results[@]}"; do
+            result="${results[$job_name]}"
+
+            if [[ "${result}" != "success" ]]; then
+              echo "::error::${job_name} finished with result '${result}'."
+              failures=1
+            fi
+          done
+
+          if [[ "${failures}" -ne 0 ]]; then
+            exit 1
+          fi
