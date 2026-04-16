@@ -24,17 +24,6 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		RegexOptions.Compiled | RegexOptions.ExplicitCapture
 	);
 
-	static readonly Dictionary<string, string> MethodToAttribute = new(StringComparer.Ordinal)
-	{
-		["LogTrace"] = "Trace",
-		["LogDebug"] = "Debug",
-		["LogInformation"] = "Info",
-		["LogWarning"] = "Warning",
-		["LogError"] = "Error",
-		["LogCritical"] = "Critical",
-	};
-
-	// Matches words for template-based method name extraction (starts with letter, may have digits).
 	static readonly Regex TemplateWordRegex = new(@"\b[A-Za-z][A-Za-z0-9]*", RegexOptions.Compiled);
 
 	// Uses keyword aliases (string, int, bool) and short type names without global:: prefix.
@@ -319,7 +308,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 				continue;
 
 			var methodName = memberAccess.Name.Identifier.Text;
-			if (methodName != "Log" && !MethodToAttribute.ContainsKey(methodName))
+			if (methodName != "Log" && !IsLoggerConvenienceMethod(methodName))
 				continue;
 
 			var call = AnalyzeLogCall(invocation, methodName, semanticModel, cancellationToken);
@@ -365,9 +354,13 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 			idx++;
 		}
 
-		// Optional EventId (skip)
+		// Optional EventId (skip but capture literal integer value)
+		int? explicitEventId = null;
 		if (idx < args.Count && IsEventIdType(args[idx], semanticModel))
+		{
+			explicitEventId = TryExtractLiteralIntEventId(args[idx]);
 			idx++;
+		}
 
 		// Optional Exception
 		ExpressionSyntax? exceptionExpression = null;
@@ -438,7 +431,8 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 			ExplicitLogLevel: explicitLogLevel,
 			MessageTemplate: template,
 			Parameters: parameters,
-			ExceptionExpression: exceptionExpression
+			ExceptionExpression: exceptionExpression,
+			ExplicitEventId: explicitEventId
 		);
 	}
 
@@ -453,6 +447,24 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 				|| type.SpecialType == SpecialType.System_Int32
 			);
 	}
+
+	/// <summary>
+	/// Returns the integer value when the EventId argument is a plain numeric literal
+	/// (e.g. <c>42</c> in <c>LogInformation(42, "template", ...)</c>), otherwise null.
+	/// <c>new EventId(42)</c> is intentionally not extracted because it requires
+	/// evaluating a constructor call, which is out of scope for a refactoring.
+	/// </summary>
+	static int? TryExtractLiteralIntEventId(ArgumentSyntax arg) =>
+		arg.Expression
+			is LiteralExpressionSyntax { RawKind: (int)SyntaxKind.NumericLiteralExpression } lit
+		&& int.TryParse(
+			lit.Token.ValueText,
+			System.Globalization.NumberStyles.Integer,
+			System.Globalization.CultureInfo.InvariantCulture,
+			out var id
+		)
+			? id
+			: null;
 
 	static bool IsExceptionType(ArgumentSyntax arg, SemanticModel semanticModel)
 	{
@@ -535,9 +547,11 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 	static string GetCallSignatureKey(LogCallInfo call)
 	{
+		// GetAttributeFor already embeds the MessageTemplate and ExplicitEventId, so the
+		// attribute string alone is sufficient to uniquely identify the logging configuration.
 		var attribute = GetAttributeFor(call);
 		var paramTypes = string.Join(",", call.Parameters.Select(p => p.TypeDisplayString));
-		return $"{attribute}|{call.MessageTemplate ?? ""}|{paramTypes}";
+		return $"{attribute}|{paramTypes}";
 	}
 
 	static string GetBaseMethodName(LogCallInfo call)
@@ -600,24 +614,105 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 	static string GetAttributeFor(LogCallInfo call)
 	{
-		return call.ILoggerMethodName == "Log"
-			? call.ExplicitLogLevel is null
-				? "Log"
-				: call.ExplicitLogLevel switch
-				{
-					"Trace" => "Trace",
-					"Debug" => "Debug",
-					"Information" => "Info",
-					"Warning" => "Warning",
-					"Error" => "Error",
-					"Critical" => "Critical",
-					_ =>
-						$"Log({Constants.Logging.MicrosoftExtensions.LogLevel.ToString(includeGlobal: true)}.{call.ExplicitLogLevel})",
-				}
-			: MethodToAttribute.TryGetValue(call.ILoggerMethodName, out var attr)
-				? attr
-				: "Log";
+		if (call.ILoggerMethodName == "Log")
+		{
+			if (call.ExplicitLogLevel is null)
+				return "Log";
+
+			var mappedName = LogLevelToAttributeName(call.ExplicitLogLevel);
+			if (mappedName is not null)
+				return BuildAttributeArgs(mappedName, call, leadingArg: null);
+
+			// Unmapped / None levels use [Log(LogLevel.X, …)]
+			var levelArg =
+				$"{Constants.Logging.MicrosoftExtensions.LogLevel.ToString(includeGlobal: true)}.{call.ExplicitLogLevel}";
+			return BuildAttributeArgs("Log", call, leadingArg: levelArg);
+		}
+
+		// For LogTrace / LogDebug / LogInformation / … — derive attribute name from the level
+		// suffix (strip "Log" prefix, then map the level name).
+		var levelSuffix = call.ILoggerMethodName.StartsWith("Log", StringComparison.Ordinal)
+			? call.ILoggerMethodName.Substring(3)
+			: null;
+		var attrName = levelSuffix is not null
+			? LogLevelToAttributeName(levelSuffix) ?? "Log"
+			: "Log";
+		return BuildAttributeArgs(attrName, call, leadingArg: null);
 	}
+
+	/// <summary>
+	/// Maps a <see cref="Microsoft.Extensions.Logging.LogLevel"/> member name to the
+	/// corresponding Purview Telemetry convenience-attribute name.
+	/// The only non-trivial mapping is <c>Information</c> → <c>Info</c>;
+	/// all other known levels match their own name.
+	/// Returns <c>null</c> for unrecognised values (e.g. <c>None</c>).
+	/// </summary>
+	static string? LogLevelToAttributeName(string level) =>
+		level == "Information" ? "Info"
+		: level is "Trace" or "Debug" or "Warning" or "Error" or "Critical" ? level
+		: null;
+
+	/// <summary>
+	/// Returns <see langword="true"/> when <paramref name="methodName"/> is one of the
+	/// ILogger convenience methods (e.g. <c>LogTrace</c>, <c>LogInformation</c>).
+	/// </summary>
+	static bool IsLoggerConvenienceMethod(string methodName) =>
+		methodName.StartsWith("Log", StringComparison.Ordinal)
+		&& LogLevelToAttributeName(methodName.Substring(3)) is not null;
+
+	/// <summary>
+	/// Builds the full attribute expression string, incorporating an optional
+	/// leading positional argument (e.g. a log-level), the call's literal EventId,
+	/// and its message template.
+	/// </summary>
+	/// <example>
+	/// BuildAttributeArgs("Info", call, null)
+	///   → "Info" (no extra args)                           [plain log call with no literal template]
+	///   → "Info(\"Getting weather for {City}\")"           [literal template, no EventId]
+	///   → "Info(42, \"Getting weather for {City}\")"       [literal int EventId + template]
+	/// BuildAttributeArgs("Log", call, "global::Microsoft.Extensions.Logging.LogLevel.None")
+	///   → "Log(global::Microsoft.Extensions.Logging.LogLevel.None)"
+	///   → "Log(global::Microsoft.Extensions.Logging.LogLevel.None, \"Diag: {Info}\")"
+	///   → "Log(42, global::Microsoft.Extensions.Logging.LogLevel.None, \"Diag: {Info}\")"
+	///      [eventId comes before level — matches LogAttribute(int eventId, LogLevel level, …)]
+	/// </example>
+	static string BuildAttributeArgs(string attrName, LogCallInfo call, string? leadingArg)
+	{
+		var args = new List<string>();
+		var explicitEventId = call.ExplicitEventId.HasValue
+			? call.ExplicitEventId.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)
+			: null;
+
+		// For [Log(…)], the constructor with both eventId and level is
+		//   LogAttribute(int eventId, LogLevel level, …)
+		// so eventId must come before the level argument.
+		if (attrName == "Log" && leadingArg is not null && explicitEventId is not null)
+		{
+			args.Add(explicitEventId);
+			args.Add(leadingArg);
+		}
+		else
+		{
+			if (leadingArg is not null)
+				args.Add(leadingArg);
+
+			if (explicitEventId is not null)
+				args.Add(explicitEventId);
+		}
+
+		if (call.MessageTemplate is { Length: > 0 } template)
+			args.Add(EscapeStringForAttribute(template));
+
+		return args.Count == 0 ? attrName : $"{attrName}({string.Join(", ", args)})";
+	}
+
+	/// <summary>
+	/// Wraps <paramref name="value"/> in a quoted C# string literal suitable for
+	/// embedding in an attribute argument list, using Roslyn's
+	/// <see cref="SymbolDisplay.FormatLiteral"/> to correctly escape all C# special characters.
+	/// </summary>
+	static string EscapeStringForAttribute(string value) =>
+		SymbolDisplay.FormatLiteral(value, quote: true);
 
 	static string BuildParamList(IReadOnlyList<LogParameterInfo> parameters)
 	{

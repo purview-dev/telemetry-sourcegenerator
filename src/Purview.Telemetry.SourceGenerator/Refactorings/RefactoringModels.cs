@@ -16,7 +16,8 @@ sealed record LogCallInfo(
 	string? ExplicitLogLevel,
 	string? MessageTemplate,
 	IReadOnlyList<LogParameterInfo> Parameters,
-	ExpressionSyntax? ExceptionExpression
+	ExpressionSyntax? ExceptionExpression,
+	int? ExplicitEventId
 );
 
 sealed record LogParameterInfo(

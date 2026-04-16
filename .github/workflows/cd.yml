@@ -1,0 +1,141 @@
+name: CD
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - package.json
+
+jobs:
+  release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+
+    env:
+      CONFIGURATION: Release
+      MAIN_SOLUTION: ./src/Purview.Telemetry.SourceGenerator.slnx
+      SAMPLE_SOLUTION: ./samples/SampleApp/SampleApp.slnx
+      PACKAGE_PROJECT: ./src/Purview.Telemetry.SourceGenerator/Purview.Telemetry.SourceGenerator.csproj
+      ARTIFACTS_DIR: ./artifacts/nuget
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - id: version
+        name: Read release version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          version="$(node -p "require('./package.json').version")"
+          echo "value=${version}" >> "${GITHUB_OUTPUT}"
+          echo "tag=v${version}" >> "${GITHUB_OUTPUT}"
+
+          if [[ "${version}" == *-* ]]; then
+            echo "prerelease=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "prerelease=false" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Block duplicate version
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if git ls-remote --exit-code --tags origin "refs/tags/${RELEASE_TAG}" > /dev/null 2>&1; then
+            echo "::error::Tag ${RELEASE_TAG} already exists on origin. Refusing to replace an existing release version."
+            exit 1
+          fi
+
+          release_status="$(
+            curl -sS \
+              -o release.json \
+              -w "%{http_code}" \
+              -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}"
+          )"
+
+          if [[ "${release_status}" == "200" ]]; then
+            echo "::error::Release ${RELEASE_TAG} already exists. Refusing to replace an existing release version."
+            cat release.json
+            exit 1
+          fi
+
+          if [[ "${release_status}" != "404" ]]; then
+            echo "::error::Unexpected GitHub API response while checking ${RELEASE_TAG} (HTTP ${release_status})."
+            cat release.json
+            exit 1
+          fi
+
+          rm -f release.json
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: ./global.json
+
+      - name: Restore dotnet tools
+        run: dotnet tool restore
+
+      - name: CSharpier format check
+        run: dotnet csharpier check .
+
+      - name: Restore main solution
+        run: dotnet restore ${{ env.MAIN_SOLUTION }}
+
+      - name: Build main solution
+        run: dotnet build ${{ env.MAIN_SOLUTION }} --no-restore --configuration ${{ env.CONFIGURATION }}
+
+      - name: Test main solution
+        run: dotnet test --solution ${{ env.MAIN_SOLUTION }} --no-build --configuration ${{ env.CONFIGURATION }} --verbosity normal
+
+      - name: Restore sample solution
+        run: dotnet restore ${{ env.SAMPLE_SOLUTION }}
+
+      - name: Build sample solution
+        run: dotnet build ${{ env.SAMPLE_SOLUTION }} --no-restore --configuration ${{ env.CONFIGURATION }}
+
+      - name: Test sample solution
+        run: dotnet test --solution ${{ env.SAMPLE_SOLUTION }} --no-build --configuration ${{ env.CONFIGURATION }} --verbosity normal
+
+      - name: Pack NuGet artifacts
+        env:
+          PACKAGE_VERSION: ${{ steps.version.outputs.value }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p "${ARTIFACTS_DIR}"
+
+          dotnet pack "${PACKAGE_PROJECT}" \
+            --configuration "${CONFIGURATION}" \
+            --no-build \
+            --output "${ARTIFACTS_DIR}" \
+            --include-symbols \
+            "/p:Version=${PACKAGE_VERSION}" \
+            "/p:RepositoryBranch=${GITHUB_REF_NAME}" \
+            "/p:RepositoryCommit=${GITHUB_SHA}" \
+            "/p:COPYRIGHT_YEAR=$(date -u +%Y)"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
+          prerelease: ${{ steps.version.outputs.prerelease }}
+          fail_on_unmatched_files: true
+          files: |
+            ./artifacts/nuget/*.nupkg
+            ./artifacts/nuget/*.snupkg

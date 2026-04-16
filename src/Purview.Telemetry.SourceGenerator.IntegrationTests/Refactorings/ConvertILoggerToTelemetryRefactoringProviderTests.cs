@@ -126,7 +126,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("IWeatherServiceLogger");
-		await Assert.That(result).Contains("[Info]");
+		await Assert.That(result).Contains("[Info(\"Getting weather for {City}\")]");
 		await Assert.That(result).Contains("void GettingWeatherFor(string city)");
 		await Assert.That(result).Contains("using Purview.Telemetry;");
 	}
@@ -162,12 +162,12 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
-		await Assert.That(result).Contains("[Trace]");
-		await Assert.That(result).Contains("[Debug]");
-		await Assert.That(result).Contains("[Info]");
-		await Assert.That(result).Contains("[Warning]");
-		await Assert.That(result).Contains("[Error]");
-		await Assert.That(result).Contains("[Critical]");
+		await Assert.That(result).Contains("[Trace(\"Trace {OrderId}\")]");
+		await Assert.That(result).Contains("[Debug(\"Debug {OrderId}\")]");
+		await Assert.That(result).Contains("[Info(\"Info {OrderId}\")]");
+		await Assert.That(result).Contains("[Warning(\"Warn {OrderId}\")]");
+		await Assert.That(result).Contains("[Error(\"Error {OrderId}\")]");
+		await Assert.That(result).Contains("[Critical(\"Critical {OrderId}\")]");
 	}
 
 	[Test]
@@ -201,7 +201,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
-		await Assert.That(result).Contains("[Error]");
+		await Assert.That(result).Contains("[Error(\"Payment failed for {PaymentId}\")]");
 		await Assert.That(result).Contains("System.Exception");
 		await Assert.That(result).Contains("exception");
 		await Assert.That(result).Contains("paymentId");
@@ -330,7 +330,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("ISimpleServiceLogger");
-		await Assert.That(result).Contains("[Warning]");
+		await Assert.That(result).Contains("[Warning(\"Running {Name}\")]");
 		await Assert.That(result).Contains("void Running(string name)");
 	}
 
@@ -390,7 +390,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
-		await Assert.That(result).Contains("[Warning]");
+		await Assert.That(result).Contains("[Warning(\"Audit: {Action}\")]");
 		await Assert.That(result).Contains("void Audit(string action)");
 	}
 
@@ -485,7 +485,9 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
-		await Assert.That(result).Contains("[Info]");
+		// new EventId(1, "OrderProcessed") is not a literal int, so EventId is not embedded in attribute;
+		// the message template IS embedded.
+		await Assert.That(result).Contains("[Info(\"Processing order {OrderId}\")]");
 		await Assert.That(result).Contains("void ProcessingOrder(int orderId)");
 		await Assert.That(result).DoesNotContain("EventId");
 	}
@@ -521,7 +523,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
-		await Assert.That(result).Contains("[Error]");
+		await Assert.That(result).Contains("[Error(\"Shipping failed for {TrackingId}\")]");
 		await Assert.That(result).Contains("exception");
 		await Assert.That(result).Contains("trackingId");
 		await Assert.That(result).DoesNotContain("EventId");
@@ -557,7 +559,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
-		await Assert.That(result).Contains("[Info]");
+		await Assert.That(result).Contains("[Info(\"Refreshing cache for {Key}\")]");
 		await Assert.That(result).Contains("void RefreshingCacheFor(string key)");
 	}
 
@@ -622,7 +624,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("void UserLoggedIn(object user)");
-		await Assert.That(result).DoesNotContain("@User");
+		// The template is preserved verbatim in the attribute (including the {@…} prefix),
+		// but the extracted parameter name in the method signature must not contain the prefix.
+		await Assert.That(result).Contains("[Info(\"User logged in: {@User}\")]");
+		await Assert.That(result).DoesNotContain("object @User");
 	}
 
 	[Test]
@@ -652,7 +657,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("void ProductCreated(object product)");
-		await Assert.That(result).DoesNotContain("$Product");
+		// The template is preserved verbatim in the attribute (including the {$…} prefix),
+		// but the extracted parameter name in the method signature must not contain the prefix.
+		await Assert.That(result).Contains("[Debug(\"Product created: {$Product}\")]");
+		await Assert.That(result).DoesNotContain("object $Product");
 	}
 
 	[Test]
@@ -903,7 +911,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("IWeatherServiceLogger");
-		await Assert.That(result).Contains("[Info]");
+		await Assert.That(result).Contains("[Info(\"Getting weather for {City}\")]");
 		await Assert.That(result).Contains("void GettingWeatherFor(string city)");
 		// Primary constructor param type should be replaced
 		await Assert.That(result).Contains("IWeatherServiceLogger logger");
@@ -934,7 +942,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("ISimpleServiceLogger");
-		await Assert.That(result).Contains("[Warning]");
+		await Assert.That(result).Contains("[Warning(\"Running {Name}\")]");
 		await Assert.That(result).Contains("ISimpleServiceLogger logger");
 		await Assert.That(result).DoesNotContain("ILogger logger");
 	}
@@ -964,8 +972,8 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("IServicesLogger");
-		await Assert.That(result).Contains("[Info]");
-		await Assert.That(result).Contains("[Warning]");
+		await Assert.That(result).Contains("[Info(\"HELLO: {Thing}\")]");
+		await Assert.That(result).Contains("[Warning(\"HELLO: {Thing}\")]");
 		// Both loggers consolidated into a single canonical parameter
 		await Assert.That(result).Contains("IServicesLogger logger");
 		await Assert.That(result).DoesNotContain("IServicesLogger logger2");
@@ -1062,7 +1070,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("IReportServiceLogger");
-		await Assert.That(result).Contains("[Info]");
+		await Assert.That(result).Contains("[Info(\"Generating {ReportName}\")]");
 		await Assert.That(result).Contains("IReportServiceLogger Logger");
 		await Assert.That(result).DoesNotContain("ILogger<ReportService>");
 	}
@@ -1150,7 +1158,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("IDataServiceLogger");
-		await Assert.That(result).Contains("[Debug]");
+		await Assert.That(result).Contains("[Debug(\"Saving {Key}={Value}\")]");
 		await Assert.That(result).Contains("IDataServiceLogger logger");
 		// Non-logger params must be untouched
 		await Assert.That(result).Contains("string key");
@@ -1185,10 +1193,317 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
-		await Assert.That(result).Contains("[Info]");
-		await Assert.That(result).Contains("[Error]");
+		await Assert.That(result).Contains("[Info(\"Starting {Task}\")]");
+		await Assert.That(result).Contains("[Error(\"Failed {Task}\")]");
 		// Both method params should be rewritten
 		await Assert.That(result).DoesNotContain("ILogger<WorkerService>");
 		await Assert.That(result).Contains("IWorkerServiceLogger");
+	}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// Typed config: message template in generated attributes
+	// ─────────────────────────────────────────────────────────────────────────
+
+	[Test]
+	public async Task ApplyRefactoring_GivenLiteralMessageTemplate_EmbedsTemplateInAttribute(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$OrderService
+			{
+				readonly ILogger<OrderService> _logger;
+
+				public OrderService(ILogger<OrderService> logger) => _logger = logger;
+
+				public void ProcessOrder(string orderId)
+				{
+					_logger.LogInformation("Processing order {OrderId} for customer", orderId);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		// The message template must appear verbatim in the attribute argument.
+		await Assert.That(result).Contains("[Info(\"Processing order {OrderId} for customer\")]");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenNonLiteralMessageTemplate_EmitsAttributeWithoutTemplate(
+		CancellationToken cancellationToken
+	)
+	{
+		// When the message template is stored in a variable, not a string literal, the refactoring
+		// cannot statically determine the template value.  The attribute should be emitted without
+		// any template argument — the source generator will auto-generate a name from parameters.
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$ConfigService
+			{
+				const string Template = "Processing config {Key}";
+
+				readonly ILogger<ConfigService> _logger;
+
+				public ConfigService(ILogger<ConfigService> logger) => _logger = logger;
+
+				public void Process(string key)
+				{
+					_logger.LogInformation(Template, key);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		// Refactoring should still trigger because there are log calls.
+		await Assert.That(result).IsNotNull();
+		// The attribute must NOT contain a template string argument.
+		await Assert.That(result).Contains("[Info]");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenAllLogLevelsWithTemplates_EmbedsCorrectTemplatePerLevel(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$PipelineService
+			{
+				readonly ILogger<PipelineService> _logger;
+
+				public PipelineService(ILogger<PipelineService> logger) => _logger = logger;
+
+				public void Run(string name)
+				{
+					_logger.LogTrace("Trace: {Name}", name);
+					_logger.LogDebug("Debug: {Name}", name);
+					_logger.LogInformation("Info: {Name}", name);
+					_logger.LogWarning("Warning: {Name}", name);
+					_logger.LogError("Error: {Name}", name);
+					_logger.LogCritical("Critical: {Name}", name);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("[Trace(\"Trace: {Name}\")]");
+		await Assert.That(result).Contains("[Debug(\"Debug: {Name}\")]");
+		await Assert.That(result).Contains("[Info(\"Info: {Name}\")]");
+		await Assert.That(result).Contains("[Warning(\"Warning: {Name}\")]");
+		await Assert.That(result).Contains("[Error(\"Error: {Name}\")]");
+		await Assert.That(result).Contains("[Critical(\"Critical: {Name}\")]");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenLogLevelNoneWithTemplate_EmbedsTemplateInLogAttribute(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$DiagService
+			{
+				readonly ILogger<DiagService> _logger;
+
+				public DiagService(ILogger<DiagService> logger) => _logger = logger;
+
+				public void Diag(string info)
+				{
+					_logger.Log(LogLevel.None, "Diag: {Info}", info);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		// Unmapped level → [Log(LogLevel.None, "Diag: {Info}")]
+		await Assert.That(result).Contains("[Log(");
+		await Assert.That(result).Contains("LogLevel.None");
+		await Assert.That(result).Contains("\"Diag: {Info}\"");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenTemplateWithSpecialChars_EscapesTemplate(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$EscapeService
+			{
+				readonly ILogger<EscapeService> _logger;
+
+				public EscapeService(ILogger<EscapeService> logger) => _logger = logger;
+
+				public void Log(string path)
+				{
+					_logger.LogInformation("File path: {Path} (c:\\temp)", path);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		// Backslash in the original template must be escaped in the attribute string argument.
+		await Assert.That(result).Contains("[Info(");
+		await Assert.That(result).Contains("{Path}");
+	}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// Typed config: literal EventId in generated attributes
+	// ─────────────────────────────────────────────────────────────────────────
+
+	[Test]
+	public async Task ApplyRefactoring_GivenLiteralIntEventId_EmbedsEventIdInAttribute(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$InvoiceService
+			{
+				readonly ILogger<InvoiceService> _logger;
+
+				public InvoiceService(ILogger<InvoiceService> logger) => _logger = logger;
+
+				public void CreateInvoice(string invoiceId)
+				{
+					_logger.LogInformation(42, "Creating invoice {InvoiceId}", invoiceId);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		// Literal int EventId 42 must appear in the attribute before the template.
+		await Assert.That(result).Contains("[Info(42, \"Creating invoice {InvoiceId}\")]");
+		await Assert.That(result).Contains("void CreatingInvoice(string invoiceId)");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenNewEventIdObject_OmitsEventIdFromAttribute(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$ShipService
+			{
+				readonly ILogger<ShipService> _logger;
+
+				public ShipService(ILogger<ShipService> logger) => _logger = logger;
+
+				public void Ship(string trackingId)
+				{
+					_logger.LogInformation(new EventId(99, "Ship"), "Shipping {TrackingId}", trackingId);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		// new EventId(…) is not a plain literal, so no EventId in the attribute; template IS embedded.
+		await Assert.That(result).Contains("[Info(\"Shipping {TrackingId}\")]");
+		await Assert.That(result).DoesNotContain("EventId");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenLiteralIntEventIdWithException_EmbedsEventIdInAttribute(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using System;
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$PaymentService
+			{
+				readonly ILogger<PaymentService> _logger;
+
+				public PaymentService(ILogger<PaymentService> logger) => _logger = logger;
+
+				public void ProcessPayment(string paymentId)
+				{
+					try { }
+					catch (Exception ex)
+					{
+						_logger.LogError(7, ex, "Payment failed for {PaymentId}", paymentId);
+					}
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		await Assert.That(result).Contains("[Error(7, \"Payment failed for {PaymentId}\")]");
+		await Assert.That(result).Contains("System.Exception exception");
+		await Assert.That(result).Contains("paymentId");
+	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenLogNoneWithLiteralEventId_EmitsEventIdBeforeLogLevel(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$AuditService
+			{
+				readonly ILogger<AuditService> _logger;
+
+				public AuditService(ILogger<AuditService> logger) => _logger = logger;
+
+				public void Audit(string action)
+				{
+					_logger.Log(LogLevel.None, 99, "Audit: {Action}", action);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		// [Log] with both EventId and LogLevel must use LogAttribute(int eventId, LogLevel level, …)
+		// so eventId (99) must appear before the LogLevel argument.
+		await Assert.That(result).Contains("[Log(99,");
+		await Assert.That(result).Contains("LogLevel.None");
+		await Assert.That(result).Contains("\"Audit: {Action}\"");
 	}
 }
