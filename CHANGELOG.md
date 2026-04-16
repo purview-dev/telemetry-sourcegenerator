@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.1.0](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v3.2.4...v4.1.0) (2026-04-16)
+
+
+### Features
+
+* embed message template and literal EventId in generated telemetry log attributes ([c1937cb](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/c1937cbe10f58c3166f5198fbbc019ef08213b1d))
+
+
+### Bug Fixes
+
+* correct Log+EventId arg ordering and use SymbolDisplay for string escaping ([1ccfdf5](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/1ccfdf50262a1cdb871bf1843bdef19bae30b5a0))
+
 ## [4.0.0](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.8...v4.0.0) (2026-04-07)
 
 ## [4.0.0-prerelease.8](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0-prerelease.7...v4.0.0-prerelease.8) (2026-03-25)
