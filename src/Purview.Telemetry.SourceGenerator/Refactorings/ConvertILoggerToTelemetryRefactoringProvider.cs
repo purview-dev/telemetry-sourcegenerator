@@ -673,20 +673,32 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	/// BuildAttributeArgs("Log", call, "global::Microsoft.Extensions.Logging.LogLevel.None")
 	///   → "Log(global::Microsoft.Extensions.Logging.LogLevel.None)"
 	///   → "Log(global::Microsoft.Extensions.Logging.LogLevel.None, \"Diag: {Info}\")"
+	///   → "Log(42, global::Microsoft.Extensions.Logging.LogLevel.None, \"Diag: {Info}\")"
+	///      [eventId comes before level — matches LogAttribute(int eventId, LogLevel level, …)]
 	/// </example>
 	static string BuildAttributeArgs(string attrName, LogCallInfo call, string? leadingArg)
 	{
 		var args = new List<string>();
+		var explicitEventId = call.ExplicitEventId.HasValue
+			? call.ExplicitEventId.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)
+			: null;
 
-		if (leadingArg is not null)
+		// For [Log(…)], the constructor with both eventId and level is
+		//   LogAttribute(int eventId, LogLevel level, …)
+		// so eventId must come before the level argument.
+		if (attrName == "Log" && leadingArg is not null && explicitEventId is not null)
+		{
+			args.Add(explicitEventId);
 			args.Add(leadingArg);
+		}
+		else
+		{
+			if (leadingArg is not null)
+				args.Add(leadingArg);
 
-		if (call.ExplicitEventId.HasValue)
-			args.Add(
-				call.ExplicitEventId.Value.ToString(
-					System.Globalization.CultureInfo.InvariantCulture
-				)
-			);
+			if (explicitEventId is not null)
+				args.Add(explicitEventId);
+		}
 
 		if (call.MessageTemplate is { Length: > 0 } template)
 			args.Add(EscapeStringForAttribute(template));
@@ -696,10 +708,11 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 	/// <summary>
 	/// Wraps <paramref name="value"/> in a quoted C# string literal suitable for
-	/// embedding in an attribute argument list, escaping backslashes and double-quotes.
+	/// embedding in an attribute argument list, using Roslyn's
+	/// <see cref="SymbolDisplay.FormatLiteral"/> to correctly escape all C# special characters.
 	/// </summary>
 	static string EscapeStringForAttribute(string value) =>
-		"\"" + value.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
+		SymbolDisplay.FormatLiteral(value, quote: true);
 
 	static string BuildParamList(IReadOnlyList<LogParameterInfo> parameters)
 	{

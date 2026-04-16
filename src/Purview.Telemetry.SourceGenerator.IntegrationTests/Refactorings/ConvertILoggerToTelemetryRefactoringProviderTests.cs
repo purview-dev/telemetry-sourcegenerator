@@ -1473,4 +1473,37 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		await Assert.That(result).Contains("System.Exception exception");
 		await Assert.That(result).Contains("paymentId");
 	}
+
+	[Test]
+	public async Task ApplyRefactoring_GivenLogNoneWithLiteralEventId_EmitsEventIdBeforeLogLevel(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			using Microsoft.Extensions.Logging;
+
+			namespace Testing;
+
+			public class $$AuditService
+			{
+				readonly ILogger<AuditService> _logger;
+
+				public AuditService(ILogger<AuditService> logger) => _logger = logger;
+
+				public void Audit(string action)
+				{
+					_logger.Log(LogLevel.None, 99, "Audit: {Action}", action);
+				}
+			}
+			""";
+
+		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
+
+		await Assert.That(result).IsNotNull();
+		// [Log] with both EventId and LogLevel must use LogAttribute(int eventId, LogLevel level, …)
+		// so eventId (99) must appear before the LogLevel argument.
+		await Assert.That(result).Contains("[Log(99,");
+		await Assert.That(result).Contains("LogLevel.None");
+		await Assert.That(result).Contains("\"Audit: {Action}\"");
+	}
 }
