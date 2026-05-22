@@ -1,0 +1,47 @@
+﻿{
+  Before:
+using Microsoft.Extensions.Logging;
+
+namespace Testing;
+
+public class UserService
+{
+	readonly ILogger<UserService> _logger;
+
+	public UserService(ILogger<UserService> logger) => _logger = logger;
+
+	public void Login(string userId, string ip)
+	{
+		_logger.LogInformation("User {UserId} logged in", userId);
+		_logger.LogInformation("User {UserId} logged in from {Ip}", userId, ip);
+	}
+},
+  After:
+using Microsoft.Extensions.Logging;
+using Purview.Telemetry;
+
+namespace Testing;
+[Logger]
+public interface IUserServiceLogs
+{
+	[Info("User {UserId} logged in")]
+	void UserLoggedIn(string userId);
+
+	[Info("User {UserId} logged in from {Ip}")]
+	void UserLoggedInFrom(string userId, string ip);
+
+}
+
+public class UserService
+{
+	readonly IUserServiceLogs _logger;
+
+	public UserService(IUserServiceLogs logger) => _logger = logger;
+
+	public void Login(string userId, string ip)
+	{
+		_logger.UserLoggedIn(userId);
+		_logger.UserLoggedInFrom(userId, ip);
+	}
+}
+}

@@ -8,7 +8,7 @@
 		<COPYRIGHT_YEAR>2025</COPYRIGHT_YEAR>
 		<PackageId>Purview.Telemetry.SourceGenerator</PackageId>
 		<Title>Purview Telemetry Source Generator</Title>
-		<Description>.NET Source Generator for interface-based telemetry generting activities, activity events, logs, and metrics.</Description>
+		<Description>.NET Source Generator for interface-based telemetry generting tracing, logs, and metrics.</Description>
 		<PackageIcon>kjldev-logo.png</PackageIcon>
 		<Authors>Kieron Lanning</Authors>
 		<Company>KJL Solutions Ltd.</Company>

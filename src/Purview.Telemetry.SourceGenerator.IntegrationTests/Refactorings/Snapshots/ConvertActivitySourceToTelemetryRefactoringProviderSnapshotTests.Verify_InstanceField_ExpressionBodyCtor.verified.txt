@@ -1,0 +1,42 @@
+﻿{
+  Before:
+using System.Diagnostics;
+
+namespace Testing;
+
+public class EmailService
+{
+	readonly ActivitySource _tracer;
+
+	public EmailService(ActivitySource tracer) => _tracer = tracer;
+
+	public void Send(string to, string subject)
+	{
+		using var activity = _tracer.StartActivity("SendEmail");
+	}
+},
+  After:
+using System.Diagnostics;
+using Purview.Telemetry;
+
+namespace Testing;
+[ActivitySource]
+public interface IEmailServiceTracing
+{
+	[Activity]
+	Activity? SendEmail();
+
+}
+
+public class EmailService
+{
+	readonly IEmailServiceTracing _tracer;
+
+	public EmailService(IEmailServiceTracing tracer) => _tracer = tracer;
+
+	public void Send(string to, string subject)
+	{
+		using var activity = _tracer.SendEmail();
+	}
+}
+}

@@ -1,0 +1,34 @@
+﻿{
+  Before:
+using System.Diagnostics;
+
+namespace Testing;
+
+public class SearchService(ActivitySource activitySource)
+{
+	public void Search(string query)
+	{
+		using var activity = activitySource.StartActivity("Search");
+	}
+},
+  After:
+using System.Diagnostics;
+using Purview.Telemetry;
+
+namespace Testing;
+[ActivitySource]
+public interface ISearchServiceTracing
+{
+	[Activity]
+	Activity? Search();
+
+}
+
+public class SearchService(ISearchServiceTracing activitySource)
+{
+	public void Search(string query)
+	{
+		using var activity = activitySource.Search();
+	}
+}
+}

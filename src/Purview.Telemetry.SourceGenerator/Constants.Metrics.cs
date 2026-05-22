@@ -11,6 +11,12 @@ partial class Constants
 	{
 		public const int MinimumParamsForTagList = 4;
 
+		public const string MeterAttributeShortName = "Meter";
+		public const string AutoCounterAttributeShortName = "AutoCounter";
+		public const string CounterAttributeShortName = "Counter";
+		public const string HistogramAttributeShortName = "Histogram";
+		public const string UpDownCounterAttributeShortName = "UpDownCounter";
+
 		public const string MeterInitializationMethod = "InitializeMeters";
 		public const string MeterFactoryParameterName = "meterFactory";
 
@@ -125,6 +131,10 @@ partial class Constants
 
 			const string SystemDiagnosticsMetricsNamespace =
 				SystemDiagnosticsNamespace + ".Metrics";
+
+			public const string CounterMetadataName = SystemDiagnosticsMetricsNamespace + ".Counter`1";
+			public const string HistogramMetadataName = SystemDiagnosticsMetricsNamespace + ".Histogram`1";
+			public const string UpDownCounterMetadataName = SystemDiagnosticsMetricsNamespace + ".UpDownCounter`1";
 
 			public static readonly PurviewTypeInfo Meter = PurviewTypeFactory.Create(
 				SystemDiagnosticsMetricsNamespace + ".Meter"

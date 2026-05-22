@@ -1,0 +1,64 @@
+﻿{
+  Before:
+using System.Diagnostics;
+
+namespace Testing;
+
+public class ApiGateway
+{
+	static readonly ActivitySource _activitySource = new("ApiGateway");
+
+	public void HandleIncoming(string path)
+	{
+		using var activity = _activitySource.StartActivity("HandleIncoming", ActivityKind.Server);
+	}
+
+	public void CallUpstream(string service)
+	{
+		using var activity = _activitySource.StartActivity("CallUpstream", ActivityKind.Client);
+	}
+
+	public void ProcessBackground(string jobId)
+	{
+		using var activity = _activitySource.StartActivity("ProcessBackground", ActivityKind.Internal);
+	}
+},
+  After:
+using System.Diagnostics;
+using Purview.Telemetry;
+
+namespace Testing;
+[ActivitySource]
+public interface IApiGatewayTracing
+{
+	[Activity(ActivityKind.Server)]
+	Activity? HandleIncoming();
+
+	[Activity(ActivityKind.Client)]
+	Activity? CallUpstream();
+
+	[Activity]
+	Activity? ProcessBackground();
+
+}
+
+public class ApiGateway
+{
+	static readonly IApiGatewayTracing _activitySource = new("ApiGateway");
+
+	public void HandleIncoming(string path)
+	{
+		using var activity = _activitySource.HandleIncoming();
+	}
+
+	public void CallUpstream(string service)
+	{
+		using var activity = _activitySource.CallUpstream();
+	}
+
+	public void ProcessBackground(string jobId)
+	{
+		using var activity = _activitySource.ProcessBackground();
+	}
+}
+}

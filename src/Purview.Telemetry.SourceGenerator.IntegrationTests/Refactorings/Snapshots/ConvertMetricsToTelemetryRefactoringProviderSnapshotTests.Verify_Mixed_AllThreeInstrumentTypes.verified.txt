@@ -1,0 +1,87 @@
+﻿{
+  Before:
+using System.Diagnostics.Metrics;
+
+namespace Testing;
+
+public class QueueMetrics
+{
+	readonly Counter<long> _enqueued;
+	readonly Counter<long> _dequeued;
+	readonly UpDownCounter<long> _depth;
+	readonly Histogram<double> _processingTime;
+
+	public QueueMetrics(IMeterFactory meterFactory)
+	{
+		var meter = meterFactory.Create("QueueMetrics");
+		_enqueued = meter.CreateCounter<long>("messages-enqueued");
+		_dequeued = meter.CreateCounter<long>("messages-dequeued");
+		_depth = meter.CreateUpDownCounter<long>("queue-depth");
+		_processingTime = meter.CreateHistogram<double>("message-processing-ms");
+	}
+
+	public void Enqueue()
+	{
+		_enqueued.Add(1);
+		_depth.Add(1);
+	}
+
+	public void Dequeue(double processMs)
+	{
+		_dequeued.Add(1);
+		_depth.Add(-1);
+		_processingTime.Record(processMs);
+	}
+},
+  After:
+using System.Diagnostics.Metrics;
+using Purview.Telemetry;
+
+namespace Testing;
+[Meter]
+public interface IQueueMetricsMetrics
+{
+	[AutoCounter]
+	void Enqueued();
+
+	[UpDownCounter]
+	void Depth(long value);
+
+	[AutoCounter]
+	void Dequeued();
+
+	[Histogram]
+	void ProcessingTime(double value);
+
+}
+
+public class QueueMetrics
+{
+	readonly IQueueMetricsMetrics _enqueued;
+	readonly IQueueMetricsMetrics _dequeued;
+	readonly IQueueMetricsMetrics _depth;
+	readonly IQueueMetricsMetrics _processingTime;
+
+	public QueueMetrics(IMeterFactory meterFactory)
+	{
+		var meter = meterFactory.Create("QueueMetrics");
+		_enqueued = meter.CreateCounter<long>("messages-enqueued");
+		_dequeued = meter.CreateCounter<long>("messages-dequeued");
+		_depth = meter.CreateUpDownCounter<long>("queue-depth");
+		_processingTime = meter.CreateHistogram<double>("message-processing-ms");
+	}
+
+	public void Enqueue()
+	{
+		_enqueued.Enqueued();
+		_depth.Depth(1);
+	}
+
+	public void Dequeue(double processMs)
+	{
+		_dequeued.Dequeued();
+		_depth.Depth(-1);
+		_processingTime.ProcessingTime(processMs);
+	}
+}
+}

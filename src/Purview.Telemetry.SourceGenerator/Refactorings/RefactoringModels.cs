@@ -25,3 +25,51 @@ sealed record LogParameterInfo(
 	string TypeDisplayString,
 	ExpressionSyntax ArgumentExpression
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ActivitySource models
+// ─────────────────────────────────────────────────────────────────────────────
+
+sealed record ActivitySourceFieldInfo(
+	string FieldName,
+	FieldDeclarationSyntax? FieldDeclaration,
+	PropertyDeclarationSyntax? PropertyDeclaration,
+	ITypeSymbol TypeSymbol
+);
+
+sealed record ActivitySourceCallInfo(
+	InvocationExpressionSyntax Invocation,
+	string? ActivityName,
+	string? ActivityKind,
+	string ReceiverName
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Metrics models
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum MetricsInstrumentKind
+{
+	Counter,
+	AutoCounter,
+	UpDownCounter,
+	Histogram,
+}
+
+sealed record MetricsFieldInfo(
+	string FieldName,
+	string MeasurementTypeDisplayString,
+	MetricsInstrumentKind InstrumentKind,
+	FieldDeclarationSyntax? FieldDeclaration,
+	PropertyDeclarationSyntax? PropertyDeclaration,
+	ITypeSymbol TypeSymbol
+);
+
+sealed record MetricsCallInfo(
+	InvocationExpressionSyntax Invocation,
+	string ReceiverFieldName,
+	MetricsInstrumentKind InstrumentKind,
+	string MeasurementTypeDisplayString,
+	ExpressionSyntax? MeasurementArgument,
+	bool IsAutoIncrement
+);

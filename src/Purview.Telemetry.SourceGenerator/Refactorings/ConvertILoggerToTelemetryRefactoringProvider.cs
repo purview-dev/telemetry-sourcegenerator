@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Composition;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -65,19 +66,33 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		if (logCalls.Count == 0)
 			return;
 
+		var doc = context.Document;
 		context.RegisterRefactoring(
 			CodeAction.Create(
-				"Convert ILogger usage to Purview Telemetry interface",
-				ct =>
-					ConvertAsync(
-						context.Document,
-						classDecl,
-						loggerFields,
-						logCalls,
-						semanticModel,
-						ct
+				$"Convert ILogger to I{classDecl.Identifier.ValueText}Logs",
+				nestedActions: ImmutableArray.Create<CodeAction>(
+					CodeAction.Create(
+						"In this class",
+						ct => ConvertAsync(doc, classDecl, loggerFields, logCalls, semanticModel, ct),
+						equivalenceKey: "Purview.Telemetry.ConvertILoggerToTelemetry.Class"
 					),
-				equivalenceKey: "Purview.Telemetry.ConvertILoggerToTelemetry"
+					CodeAction.Create(
+						"In this document",
+						ct => ConvertDocumentAsync(doc, ct),
+						equivalenceKey: "Purview.Telemetry.ConvertILoggerToTelemetry.Document"
+					),
+					CodeAction.Create(
+						"In this project",
+						ct => ConvertProjectAsync(doc.Project, ct),
+						equivalenceKey: "Purview.Telemetry.ConvertILoggerToTelemetry.Project"
+					),
+					CodeAction.Create(
+						"In this solution",
+						ct => ConvertSolutionAsync(doc.Project.Solution, ct),
+						equivalenceKey: "Purview.Telemetry.ConvertILoggerToTelemetry.Solution"
+					)
+				),
+				isInlinable: false
 			)
 		);
 	}
@@ -92,7 +107,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	)
 	{
 		var className = classDecl.Identifier.ValueText;
-		var interfaceName = "I" + className + "Logger";
+		var interfaceName = "I" + className + "Logs";
 
 		var callsWithMethods = AssignMethodNames(logCalls);
 
@@ -125,10 +140,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 		// Add using Purview.Telemetry; to the file if not already present.
 		var compilationRoot = (CompilationUnitSyntax)newRoot;
-		if (!compilationRoot.Usings.Any(u => u.Name?.ToString() == "Purview.Telemetry"))
+		if (!compilationRoot.Usings.Any(u => u.Name?.ToString() == Constants.PurviewTelemetryNamespace))
 		{
 			var newUsing = SyntaxFactory
-				.UsingDirective(SyntaxFactory.ParseName("Purview.Telemetry"))
+				.UsingDirective(SyntaxFactory.ParseName(Constants.PurviewTelemetryNamespace))
 				.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
 			newRoot = compilationRoot.AddUsings(newUsing);
 		}
@@ -140,7 +155,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	// Finding fields
 	// -------------------------------------------------------------------------
 
-	static List<ILoggerFieldInfo> FindILoggerFields(
+	internal static List<ILoggerFieldInfo> FindILoggerFields(
 		ClassDeclarationSyntax classDecl,
 		SemanticModel semanticModel,
 		CancellationToken cancellationToken
@@ -281,7 +296,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	// Finding log calls
 	// -------------------------------------------------------------------------
 
-	static List<LogCallInfo> FindLogCalls(
+	internal static List<LogCallInfo> FindLogCalls(
 		ClassDeclarationSyntax classDecl,
 		List<ILoggerFieldInfo> loggerFields,
 		SemanticModel semanticModel,
@@ -516,7 +531,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	// Method name assignment
 	// -------------------------------------------------------------------------
 
-	static List<(LogCallInfo Call, string MethodName)> AssignMethodNames(List<LogCallInfo> calls)
+	internal static List<(LogCallInfo Call, string MethodName)> AssignMethodNames(List<LogCallInfo> calls)
 	{
 		// Group calls that represent the same logical log operation (same attribute, template, params).
 		// Identical calls share one interface method; distinct calls that happen to produce the same
@@ -587,10 +602,24 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	{
 		var sb = new StringBuilder();
 
-		sb.AppendLine("[Logger]");
+		sb.AppendLine($"[{Constants.Logging.LoggerAttributeShortName}]");
 		sb.AppendLine($"public interface {interfaceName}");
 		sb.AppendLine("{");
+		sb.Append(BuildInterfaceMembers(callsWithMethods));
+		sb.AppendLine("}");
 
+		return sb.ToString();
+	}
+
+	/// <summary>
+	/// Emits the interface method members (without the interface declaration header/footer).
+	/// Used by the combined telemetry provider to merge log methods into a single interface.
+	/// </summary>
+	internal static string BuildInterfaceMembers(
+		List<(LogCallInfo Call, string MethodName)> callsWithMethods
+	)
+	{
+		var sb = new StringBuilder();
 		var emittedSignatures = new HashSet<string>(StringComparer.Ordinal);
 
 		foreach (var (call, methodName) in callsWithMethods)
@@ -606,8 +635,6 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 			sb.AppendLine($"\tvoid {methodName}({paramList});");
 			sb.AppendLine();
 		}
-
-		sb.AppendLine("}");
 
 		return sb.ToString();
 	}
@@ -721,6 +748,103 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 			: string.Join(", ", parameters.Select(p => $"{p.TypeDisplayString} {p.Name}"));
 	}
 
+	// -------------------------------------------------------------------------
+	// Document / project / solution scope helpers
+	// -------------------------------------------------------------------------
+
+	static async Task<Document> ConvertDocumentAsync(
+		Document document,
+		CancellationToken cancellationToken
+	)
+	{
+		while (true)
+		{
+			var root = await document
+				.GetSyntaxRootAsync(cancellationToken)
+				.ConfigureAwait(false);
+			if (root is null)
+				break;
+
+			var semanticModel = await document
+				.GetSemanticModelAsync(cancellationToken)
+				.ConfigureAwait(false);
+			if (semanticModel is null)
+				break;
+
+			ClassDeclarationSyntax? targetClass = null;
+			List<ILoggerFieldInfo>? fields = null;
+			List<LogCallInfo>? calls = null;
+
+			foreach (var classDecl in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
+			{
+				var f = FindILoggerFields(classDecl, semanticModel, cancellationToken);
+				if (f.Count == 0)
+					continue;
+
+				var c = FindLogCalls(classDecl, f, semanticModel, cancellationToken);
+				if (c.Count == 0)
+					continue;
+
+				targetClass = classDecl;
+				fields = f;
+				calls = c;
+				break;
+			}
+
+			if (targetClass is null)
+				break;
+
+			document = await ConvertAsync(
+					document,
+					targetClass,
+					fields!,
+					calls!,
+					semanticModel,
+					cancellationToken
+				)
+				.ConfigureAwait(false);
+		}
+
+		return document;
+	}
+
+	static async Task<Solution> ConvertProjectAsync(
+		Project project,
+		CancellationToken cancellationToken
+	)
+	{
+		var solution = project.Solution;
+		foreach (var documentId in project.DocumentIds)
+		{
+			var document = solution.GetDocument(documentId);
+			if (document is null)
+				continue;
+
+			var updated = await ConvertDocumentAsync(document, cancellationToken)
+				.ConfigureAwait(false);
+			solution = updated.Project.Solution;
+		}
+
+		return solution;
+	}
+
+	static async Task<Solution> ConvertSolutionAsync(
+		Solution solution,
+		CancellationToken cancellationToken
+	)
+	{
+		foreach (var projectId in solution.ProjectIds)
+		{
+			var project = solution.GetProject(projectId);
+			if (project is null)
+				continue;
+
+			solution = await ConvertProjectAsync(project, cancellationToken).ConfigureAwait(false);
+		}
+
+		return solution;
+	}
+
 	static InterfaceDeclarationSyntax ParseInterfaceNode(string code)
 	{
 		var tree = CSharpSyntaxTree.ParseText(code);
@@ -741,7 +865,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	// Class rewriting
 	// -------------------------------------------------------------------------
 
-	static ClassDeclarationSyntax RewriteClass(
+	internal static ClassDeclarationSyntax RewriteClass(
 		ClassDeclarationSyntax classDecl,
 		List<ILoggerFieldInfo> loggerFields,
 		List<(LogCallInfo Call, string MethodName)> callsWithMethods,

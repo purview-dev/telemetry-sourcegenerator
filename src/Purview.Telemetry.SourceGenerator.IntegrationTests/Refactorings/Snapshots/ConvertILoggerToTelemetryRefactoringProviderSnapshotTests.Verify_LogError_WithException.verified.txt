@@ -1,0 +1,52 @@
+﻿{
+  Before:
+using System;
+using Microsoft.Extensions.Logging;
+
+namespace Testing;
+
+public class PaymentService
+{
+	readonly ILogger<PaymentService> _logger;
+
+	public PaymentService(ILogger<PaymentService> logger) => _logger = logger;
+
+	public void ProcessPayment(string paymentId)
+	{
+		try { }
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Payment failed for {PaymentId}", paymentId);
+		}
+	}
+},
+  After:
+using System;
+using Microsoft.Extensions.Logging;
+using Purview.Telemetry;
+
+namespace Testing;
+[Logger]
+public interface IPaymentServiceLogs
+{
+	[Error("Payment failed for {PaymentId}")]
+	void PaymentFailedFor(System.Exception exception, string paymentId);
+
+}
+
+public class PaymentService
+{
+	readonly IPaymentServiceLogs _logger;
+
+	public PaymentService(IPaymentServiceLogs logger) => _logger = logger;
+
+	public void ProcessPayment(string paymentId)
+	{
+		try { }
+		catch (Exception ex)
+		{
+			_logger.PaymentFailedFor(ex, paymentId);
+		}
+	}
+}
+}

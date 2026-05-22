@@ -1,0 +1,142 @@
+﻿{
+  Before:
+using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using Microsoft.Extensions.Logging;
+
+namespace Testing;
+
+public class WeatherService
+{
+	readonly ILogger<WeatherService> _logger;
+	readonly ActivitySource _activitySource = new("WeatherService");
+	readonly Counter<long> _requestCount;
+
+	public WeatherService(ILogger<WeatherService> logger, IMeterFactory meterFactory)
+	{
+		_logger = logger;
+		_requestCount = meterFactory.Create("WeatherService").CreateCounter<long>("requests");
+	}
+
+	public void GetWeather(string city)
+	{
+		using var activity = _activitySource.StartActivity("GetWeather");
+		_logger.LogInformation("Fetching weather for {City}", city);
+		_requestCount.Add(1);
+	}
+}
+
+public class OrderService
+{
+	readonly ILogger<OrderService> _logger;
+	readonly Counter<long> _orderCount;
+
+	public OrderService(ILogger<OrderService> logger, IMeterFactory meterFactory)
+	{
+		_logger = logger;
+		_orderCount = meterFactory.Create("OrderService").CreateCounter<long>("orders");
+	}
+
+	public void PlaceOrder(int orderId)
+	{
+		_logger.LogInformation("Order {OrderId} placed", orderId);
+		_orderCount.Add(1);
+	}
+},
+  After:
+using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using Microsoft.Extensions.Logging;
+using Purview.Telemetry;
+
+namespace Testing;
+[ActivitySource]
+[Logger]
+[Meter]
+public interface IWeatherServiceTelemetry
+{
+	[Activity]
+	Activity? GetWeather();
+
+	[Info("Fetching weather for {City}")]
+	void FetchingWeatherFor(string city);
+
+	[AutoCounter]
+	void RequestCount();
+
+}
+[ActivitySource]
+[Meter]
+public interface IWeatherServiceTelemetry
+{
+	[Activity]
+	Activity? GetWeather();
+
+	[AutoCounter]
+	void RequestCount();
+
+}
+[Meter]
+public interface IWeatherServiceTelemetry
+{
+	[AutoCounter]
+	void RequestCount();
+
+}
+
+public class WeatherService
+{
+	readonly IWeatherServiceTelemetry _logger;
+	readonly IWeatherServiceTelemetry _activitySource = new("WeatherService");
+	readonly IWeatherServiceTelemetry _requestCount;
+
+	public WeatherService(IWeatherServiceTelemetry logger, IMeterFactory meterFactory)
+	{
+		_logger = logger;
+		_requestCount = meterFactory.Create("WeatherService").CreateCounter<long>("requests");
+	}
+
+	public void GetWeather(string city)
+	{
+		using var activity = _activitySource.GetWeather();
+		_logger.FetchingWeatherFor(city);
+		_requestCount.RequestCount();
+	}
+}
+[Logger]
+[Meter]
+public interface IOrderServiceTelemetry
+{
+	[Info("Order {OrderId} placed")]
+	void OrderPlaced(int orderId);
+
+	[AutoCounter]
+	void OrderCount();
+
+}
+[Meter]
+public interface IOrderServiceTelemetry
+{
+	[AutoCounter]
+	void OrderCount();
+
+}
+
+public class OrderService
+{
+	readonly IOrderServiceTelemetry _logger;
+	readonly IOrderServiceTelemetry _orderCount;
+
+	public OrderService(IOrderServiceTelemetry logger, IMeterFactory meterFactory)
+	{
+		_logger = logger;
+		_orderCount = meterFactory.Create("OrderService").CreateCounter<long>("orders");
+	}
+
+	public void PlaceOrder(int orderId)
+	{
+		_logger.OrderPlaced(orderId);
+		_orderCount.OrderCount();
+	}
+}
+}

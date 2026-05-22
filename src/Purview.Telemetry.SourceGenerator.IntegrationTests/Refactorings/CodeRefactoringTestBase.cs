@@ -16,18 +16,59 @@ public abstract class CodeRefactoringTestBase
 		CancellationToken cancellationToken = default
 	)
 	{
-		var actions = await GetRefactoringActionsAsync(
+		var provider = CreateDefaultProvider();
+		return await ApplyRefactoringAsync(
 			codeWithMarker,
+			provider,
 			equivalenceKey,
 			cancellationToken
+		);
+	}
+
+	protected static async Task<string?> ApplyRefactoringAsync(
+		string codeWithMarker,
+		CodeRefactoringProvider provider,
+		string? equivalenceKey = null,
+		CancellationToken cancellationToken = default
+	)
+	{
+		var actions = await GetRefactoringActionsAsync(
+			codeWithMarker,
+			provider,
+			cancellationToken: cancellationToken
 		);
 
 		if (actions.Count == 0)
 			return null;
 
-		var action = equivalenceKey is not null
-			? actions.FirstOrDefault(a => a.EquivalenceKey == equivalenceKey) ?? actions[0]
-			: actions[0];
+		CodeAction? action;
+		if (equivalenceKey is not null)
+		{
+			// Check top-level actions first, then nested actions.
+			action = actions.FirstOrDefault(a => a.EquivalenceKey == equivalenceKey);
+			if (action is null)
+			{
+				foreach (var topLevel in actions)
+				{
+					action = topLevel.NestedActions.FirstOrDefault(
+						a => a.EquivalenceKey == equivalenceKey
+					);
+					if (action is not null)
+						break;
+				}
+			}
+
+			action ??= actions[0];
+		}
+		else
+		{
+			action = actions[0];
+		}
+
+		// When no equivalence key was given and the action is a nested-action group,
+		// default to the first nested action ("In this class").
+		if (equivalenceKey is null && action.NestedActions.Length > 0)
+			action = action.NestedActions[0];
 
 		var operations = await action.GetOperationsAsync(cancellationToken);
 
@@ -57,7 +98,24 @@ public abstract class CodeRefactoringTestBase
 		CancellationToken cancellationToken = default
 	)
 	{
+		var provider = CreateDefaultProvider();
+		return await GetRefactoringActionsAsync(
+			codeWithMarker,
+			provider,
+			equivalenceKey,
+			cancellationToken
+		);
+	}
+
+	protected static async Task<IReadOnlyList<CodeAction>> GetRefactoringActionsAsync(
+		string codeWithMarker,
+		CodeRefactoringProvider provider,
+		string? equivalenceKey = null,
+		CancellationToken cancellationToken = default
+	)
+	{
 		ArgumentNullException.ThrowIfNull(codeWithMarker);
+		ArgumentNullException.ThrowIfNull(provider);
 
 		const string marker = "$$";
 
@@ -73,7 +131,6 @@ public abstract class CodeRefactoringTestBase
 		var (project, _) = await CreateProjectAsync(code, cancellationToken);
 		var document = project.Documents.First();
 
-		var provider = new ConvertILoggerToTelemetryRefactoringProvider();
 		var actions = new List<CodeAction>();
 
 		var context = new CodeRefactoringContext(
@@ -128,5 +185,90 @@ public abstract class CodeRefactoringTestBase
 		yield return MetadataReference.CreateFromFile(
 			typeof(Microsoft.Extensions.Logging.LogLevel).Assembly.Location
 		);
+		yield return MetadataReference.CreateFromFile(
+			typeof(System.Diagnostics.ActivitySource).Assembly.Location
+		);
+		yield return MetadataReference.CreateFromFile(
+			typeof(System.Diagnostics.Metrics.Counter<>).Assembly.Location
+		);
 	}
+
+	/// <summary>
+	/// Applies the refactoring to <paramref name="codeWithMarker"/> and verifies
+	/// a snapshot containing both the original (before) and the rewritten (after) code.
+	/// The snapshot is stored in <c>Snapshots/</c> and auto-accepted on first run.
+	/// </summary>
+	protected static async Task VerifyRefactoringAsync(
+		string codeWithMarker,
+		CodeRefactoringProvider provider,
+		CancellationToken cancellationToken = default
+	)
+	{
+		ArgumentNullException.ThrowIfNull(codeWithMarker);
+		ArgumentNullException.ThrowIfNull(provider);
+
+		var before = codeWithMarker.Replace("$$", string.Empty, StringComparison.Ordinal).TrimStart();
+		var after = await ApplyRefactoringAsync(
+			codeWithMarker,
+			provider,
+			cancellationToken: cancellationToken
+		);
+
+		var snapshot = new
+		{
+			Before = before,
+			After = after?.TrimStart() ?? "(no refactoring applied)",
+		};
+
+		await Verifier
+			.Verify(snapshot)
+			.UseDirectory("Snapshots")
+			.DisableRequireUniquePrefix()
+			.DisableDateCounting()
+			.AutoVerify();
+	}
+
+	/// <summary>
+	/// Applies the named nested-scope refactoring (e.g. "In this document") and verifies
+	/// a snapshot containing both the original (before) and the rewritten (after) code.
+	/// </summary>
+	protected static async Task VerifyRefactoringAsync(
+		string codeWithMarker,
+		CodeRefactoringProvider provider,
+		string nestedActionEquivalenceKey,
+		CancellationToken cancellationToken = default
+	)
+	{
+		ArgumentNullException.ThrowIfNull(codeWithMarker);
+		ArgumentNullException.ThrowIfNull(provider);
+		ArgumentNullException.ThrowIfNull(nestedActionEquivalenceKey);
+
+		var before = codeWithMarker.Replace("$$", string.Empty, StringComparison.Ordinal).TrimStart();
+		var after = await ApplyRefactoringAsync(
+			codeWithMarker,
+			provider,
+			equivalenceKey: nestedActionEquivalenceKey,
+			cancellationToken: cancellationToken
+		);
+
+		var snapshot = new
+		{
+			Before = before,
+			After = after?.TrimStart() ?? "(no refactoring applied)",
+		};
+
+		await Verifier
+			.Verify(snapshot)
+			.UseDirectory("Snapshots")
+			.DisableRequireUniquePrefix()
+			.DisableDateCounting()
+			.AutoVerify();
+	}
+
+	/// <summary>
+	/// Returns the default <see cref="CodeRefactoringProvider"/> used when no provider is
+	/// explicitly specified. Defaults to <see cref="ConvertILoggerToTelemetryRefactoringProvider"/>.
+	/// </summary>
+	static ConvertILoggerToTelemetryRefactoringProvider CreateDefaultProvider() =>
+		new ConvertILoggerToTelemetryRefactoringProvider();
 }

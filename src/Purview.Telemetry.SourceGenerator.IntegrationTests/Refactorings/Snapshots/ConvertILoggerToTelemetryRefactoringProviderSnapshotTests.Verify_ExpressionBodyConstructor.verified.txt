@@ -1,0 +1,42 @@
+﻿{
+  Before:
+using Microsoft.Extensions.Logging;
+
+namespace Testing;
+
+public class CacheService
+{
+	readonly ILogger<CacheService> _log;
+
+	public CacheService(ILogger<CacheService> log) => _log = log;
+
+	public void Evict(string key)
+	{
+		_log.LogDebug("Cache evict: {Key}", key);
+	}
+},
+  After:
+using Microsoft.Extensions.Logging;
+using Purview.Telemetry;
+
+namespace Testing;
+[Logger]
+public interface ICacheServiceLogs
+{
+	[Debug("Cache evict: {Key}")]
+	void CacheEvict(string key);
+
+}
+
+public class CacheService
+{
+	readonly ICacheServiceLogs _log;
+
+	public CacheService(ICacheServiceLogs log) => _log = log;
+
+	public void Evict(string key)
+	{
+		_log.CacheEvict(key);
+	}
+}
+}

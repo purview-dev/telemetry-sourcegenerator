@@ -1,0 +1,50 @@
+﻿{
+  Before:
+using System.Diagnostics.Metrics;
+
+namespace Testing;
+
+public class WorkerMetrics
+{
+	readonly Counter<int> _taskCount;
+
+	public WorkerMetrics(IMeterFactory meterFactory)
+	{
+		var meter = meterFactory.Create("WorkerMetrics");
+		_taskCount = meter.CreateCounter<int>("tasks");
+	}
+
+	public void RecordTasks(int count)
+	{
+		_taskCount.Add(count);
+	}
+},
+  After:
+using System.Diagnostics.Metrics;
+using Purview.Telemetry;
+
+namespace Testing;
+[Meter]
+public interface IWorkerMetricsMetrics
+{
+	[Counter]
+	void TaskCount(int value);
+
+}
+
+public class WorkerMetrics
+{
+	readonly IWorkerMetricsMetrics _taskCount;
+
+	public WorkerMetrics(IMeterFactory meterFactory)
+	{
+		var meter = meterFactory.Create("WorkerMetrics");
+		_taskCount = meter.CreateCounter<int>("tasks");
+	}
+
+	public void RecordTasks(int count)
+	{
+		_taskCount.TaskCount(count);
+	}
+}
+}

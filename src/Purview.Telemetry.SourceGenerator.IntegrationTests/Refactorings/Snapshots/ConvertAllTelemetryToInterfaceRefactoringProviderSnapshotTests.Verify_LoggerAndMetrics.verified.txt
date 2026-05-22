@@ -1,0 +1,86 @@
+﻿{
+  Before:
+using System;
+using System.Diagnostics.Metrics;
+using Microsoft.Extensions.Logging;
+
+namespace Testing;
+
+public class PaymentProcessor
+{
+	readonly ILogger<PaymentProcessor> _logger;
+	readonly Counter<long> _paymentCount;
+	readonly Histogram<double> _paymentAmount;
+
+	public PaymentProcessor(ILogger<PaymentProcessor> logger, IMeterFactory meterFactory)
+	{
+		_logger = logger;
+		var meter = meterFactory.Create("PaymentProcessor");
+		_paymentCount = meter.CreateCounter<long>("payments-processed");
+		_paymentAmount = meter.CreateHistogram<double>("payment-amount-usd");
+	}
+
+	public void Process(string paymentId, decimal amount)
+	{
+		_logger.LogInformation("Processing payment {PaymentId} for {Amount}", paymentId, amount);
+		_paymentCount.Add(1);
+		_paymentAmount.Record((double)amount);
+	}
+
+	public void Fail(string paymentId, Exception ex)
+	{
+		_logger.LogError(ex, "Payment {PaymentId} failed", paymentId);
+	}
+},
+  After:
+using System;
+using System.Diagnostics.Metrics;
+using Microsoft.Extensions.Logging;
+using Purview.Telemetry;
+
+namespace Testing;
+[Logger]
+[Meter]
+public interface IPaymentProcessorTelemetry
+{
+	[Info("Processing payment {PaymentId} for {Amount}")]
+	void ProcessingPaymentFor(string paymentId, decimal amount);
+
+	[Error("Payment {PaymentId} failed")]
+	void PaymentFailed(System.Exception exception, string paymentId);
+
+	[AutoCounter]
+	void PaymentCount();
+
+	[Histogram]
+	void PaymentAmount(double value);
+
+}
+
+public class PaymentProcessor
+{
+	readonly IPaymentProcessorTelemetry _logger;
+	readonly Counter<long> _paymentCount;
+	readonly Histogram<double> _paymentAmount;
+
+	public PaymentProcessor(IPaymentProcessorTelemetry logger, IMeterFactory meterFactory)
+	{
+		_logger = logger;
+		var meter = meterFactory.Create("PaymentProcessor");
+		_paymentCount = meter.CreateCounter<long>("payments-processed");
+		_paymentAmount = meter.CreateHistogram<double>("payment-amount-usd");
+	}
+
+	public void Process(string paymentId, decimal amount)
+	{
+		_logger.ProcessingPaymentFor(paymentId, amount);
+		_paymentCount.Add(1);
+		_paymentAmount.Record((double)amount);
+	}
+
+	public void Fail(string paymentId, Exception ex)
+	{
+		_logger.PaymentFailed(ex, paymentId);
+	}
+}
+}

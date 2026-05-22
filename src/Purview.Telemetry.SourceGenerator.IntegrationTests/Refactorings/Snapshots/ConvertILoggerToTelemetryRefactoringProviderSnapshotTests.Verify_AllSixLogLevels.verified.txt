@@ -1,0 +1,67 @@
+﻿{
+  Before:
+using Microsoft.Extensions.Logging;
+
+namespace Testing;
+
+public class OrderService
+{
+	readonly ILogger<OrderService> _logger;
+
+	public OrderService(ILogger<OrderService> logger) => _logger = logger;
+
+	public void ProcessOrder(int orderId)
+	{
+		_logger.LogTrace("Trace {OrderId}", orderId);
+		_logger.LogDebug("Debug {OrderId}", orderId);
+		_logger.LogInformation("Info {OrderId}", orderId);
+		_logger.LogWarning("Warn {OrderId}", orderId);
+		_logger.LogError("Error {OrderId}", orderId);
+		_logger.LogCritical("Critical {OrderId}", orderId);
+	}
+},
+  After:
+using Microsoft.Extensions.Logging;
+using Purview.Telemetry;
+
+namespace Testing;
+[Logger]
+public interface IOrderServiceLogs
+{
+	[Trace("Trace {OrderId}")]
+	void Trace(int orderId);
+
+	[Debug("Debug {OrderId}")]
+	void Debug(int orderId);
+
+	[Info("Info {OrderId}")]
+	void Info(int orderId);
+
+	[Warning("Warn {OrderId}")]
+	void Warn(int orderId);
+
+	[Error("Error {OrderId}")]
+	void Error(int orderId);
+
+	[Critical("Critical {OrderId}")]
+	void Critical(int orderId);
+
+}
+
+public class OrderService
+{
+	readonly IOrderServiceLogs _logger;
+
+	public OrderService(IOrderServiceLogs logger) => _logger = logger;
+
+	public void ProcessOrder(int orderId)
+	{
+		_logger.Trace(orderId);
+		_logger.Debug(orderId);
+		_logger.Info(orderId);
+		_logger.Warn(orderId);
+		_logger.Error(orderId);
+		_logger.Critical(orderId);
+	}
+}
+}

@@ -1,0 +1,50 @@
+﻿{
+  Before:
+using System.Diagnostics.Metrics;
+
+namespace Testing;
+
+public class RequestHandler
+{
+	readonly Counter<long> _requestCounter;
+
+	public RequestHandler(IMeterFactory meterFactory)
+	{
+		var meter = meterFactory.Create("RequestHandler");
+		_requestCounter = meter.CreateCounter<long>("requests");
+	}
+
+	public void Handle(string path)
+	{
+		_requestCounter.Add(1);
+	}
+},
+  After:
+using System.Diagnostics.Metrics;
+using Purview.Telemetry;
+
+namespace Testing;
+[Meter]
+public interface IRequestHandlerMetrics
+{
+	[AutoCounter]
+	void Request();
+
+}
+
+public class RequestHandler
+{
+	readonly IRequestHandlerMetrics _requestCounter;
+
+	public RequestHandler(IMeterFactory meterFactory)
+	{
+		var meter = meterFactory.Create("RequestHandler");
+		_requestCounter = meter.CreateCounter<long>("requests");
+	}
+
+	public void Handle(string path)
+	{
+		_requestCounter.Request();
+	}
+}
+}

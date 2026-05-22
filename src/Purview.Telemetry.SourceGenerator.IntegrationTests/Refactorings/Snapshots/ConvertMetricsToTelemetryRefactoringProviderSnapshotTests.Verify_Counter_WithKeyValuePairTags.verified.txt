@@ -1,0 +1,54 @@
+﻿{
+  Before:
+using System.Collections.Generic;
+using System.Diagnostics.Metrics;
+
+namespace Testing;
+
+public class ApiMetrics
+{
+	readonly Counter<long> _apiCounter;
+
+	public ApiMetrics(IMeterFactory meterFactory)
+	{
+		var meter = meterFactory.Create("ApiMetrics");
+		_apiCounter = meter.CreateCounter<long>("api-calls");
+	}
+
+	public void RecordCall(string route, string method)
+	{
+		_apiCounter.Add(1,
+			new KeyValuePair<string, object?>("route", route),
+			new KeyValuePair<string, object?>("method", method));
+	}
+},
+  After:
+using System.Collections.Generic;
+using System.Diagnostics.Metrics;
+using Purview.Telemetry;
+
+namespace Testing;
+[Meter]
+public interface IApiMetricsMetrics
+{
+	[AutoCounter]
+	void Api();
+
+}
+
+public class ApiMetrics
+{
+	readonly IApiMetricsMetrics _apiCounter;
+
+	public ApiMetrics(IMeterFactory meterFactory)
+	{
+		var meter = meterFactory.Create("ApiMetrics");
+		_apiCounter = meter.CreateCounter<long>("api-calls");
+	}
+
+	public void RecordCall(string route, string method)
+	{
+		_apiCounter.Api();
+	}
+}
+}

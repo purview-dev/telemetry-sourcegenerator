@@ -1,0 +1,48 @@
+﻿{
+  Before:
+using Microsoft.Extensions.Logging;
+
+namespace Testing;
+
+public class ReportService
+{
+	readonly ILogger<ReportService> _logger;
+
+	public ReportService(ILogger<ReportService> logger)
+	{
+		_logger = logger;
+	}
+
+	public void GenerateReport(string reportId)
+	{
+		_logger.LogInformation("Generating report {ReportId}", reportId);
+	}
+},
+  After:
+using Microsoft.Extensions.Logging;
+using Purview.Telemetry;
+
+namespace Testing;
+[Logger]
+public interface IReportServiceLogs
+{
+	[Info("Generating report {ReportId}")]
+	void GeneratingReport(string reportId);
+
+}
+
+public class ReportService
+{
+	readonly IReportServiceLogs _logger;
+
+	public ReportService(IReportServiceLogs logger)
+	{
+		_logger = logger;
+	}
+
+	public void GenerateReport(string reportId)
+	{
+		_logger.GeneratingReport(reportId);
+	}
+}
+}

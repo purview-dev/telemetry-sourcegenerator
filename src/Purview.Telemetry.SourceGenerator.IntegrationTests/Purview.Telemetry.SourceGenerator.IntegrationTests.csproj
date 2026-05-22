@@ -5,6 +5,9 @@
 		<None Update="Snapshots/**/*" Visible="false" />
 		<Compile Update="Snapshots/**/*" Visible="false" />
 		<Content Update="Snapshots/**/*" Visible="false" />
+		<None Update="Refactorings/Snapshots/**/*" Visible="false" />
+		<Compile Update="Refactorings/Snapshots/**/*" Visible="false" />
+		<Content Update="Refactorings/Snapshots/**/*" Visible="false" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.csproj" />
