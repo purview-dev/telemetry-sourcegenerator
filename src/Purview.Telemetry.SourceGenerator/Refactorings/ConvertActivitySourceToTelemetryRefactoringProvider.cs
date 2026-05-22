@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using System.Composition;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -64,12 +63,13 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		context.RegisterRefactoring(
 			CodeAction.Create(
 				$"Convert ActivitySource to I{className}Tracing",
-				nestedActions: ImmutableArray.Create<CodeAction>(
+				nestedActions:
+				[
 					CodeAction.Create(
-						"In this class",
-						ct => ConvertAsync(doc, classDecl, activitySourceFields, activityCalls, semanticModel, ct),
-						equivalenceKey: "Purview.Telemetry.ConvertActivitySourceToTelemetry.Class"
-					),
+									"In this class",
+									ct => ConvertAsync(doc, classDecl, activitySourceFields, activityCalls, semanticModel, ct),
+									equivalenceKey: "Purview.Telemetry.ConvertActivitySourceToTelemetry.Class"
+								),
 					CodeAction.Create(
 						"In this document",
 						ct => ConvertDocumentAsync(doc, ct),
@@ -85,7 +85,8 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 						ct => ConvertSolutionAsync(doc.Project.Solution, ct),
 						equivalenceKey: "Purview.Telemetry.ConvertActivitySourceToTelemetry.Solution"
 					)
-				),
+,
+				],
 				isInlinable: false
 			)
 		);

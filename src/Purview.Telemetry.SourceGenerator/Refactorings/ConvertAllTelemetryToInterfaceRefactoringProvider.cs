@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using System.Composition;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -96,24 +95,25 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 		context.RegisterRefactoring(
 			CodeAction.Create(
 				$"Convert all telemetry to I{className}Telemetry",
-				nestedActions: ImmutableArray.Create<CodeAction>(
+				nestedActions:
+				[
 					CodeAction.Create(
-						"In this class",
-						ct =>
-							ConvertAsync(
-								doc,
-								classDecl,
-								loggerFields,
-								logCalls,
-								activityFields,
-								activityCalls,
-								metricsFields,
-								metricsCalls,
-								semanticModel,
-								ct
-							),
-						equivalenceKey: "Purview.Telemetry.ConvertAllTelemetryToInterface.Class"
-					),
+									"In this class",
+									ct =>
+										ConvertAsync(
+											doc,
+											classDecl,
+											loggerFields,
+											logCalls,
+											activityFields,
+											activityCalls,
+											metricsFields,
+											metricsCalls,
+											semanticModel,
+											ct
+										),
+									equivalenceKey: "Purview.Telemetry.ConvertAllTelemetryToInterface.Class"
+								),
 					CodeAction.Create(
 						"In this document",
 						ct => ConvertDocumentAsync(doc, ct),
@@ -129,7 +129,8 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 						ct => ConvertSolutionAsync(doc.Project.Solution, ct),
 						equivalenceKey: "Purview.Telemetry.ConvertAllTelemetryToInterface.Solution"
 					)
-				),
+,
+				],
 				isInlinable: false
 			)
 		);

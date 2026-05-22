@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using System.Composition;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -74,12 +73,13 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		context.RegisterRefactoring(
 			CodeAction.Create(
 				$"Convert Metrics to I{className}Metrics",
-				nestedActions: ImmutableArray.Create<CodeAction>(
+				nestedActions:
+				[
 					CodeAction.Create(
-						"In this class",
-						ct => ConvertAsync(doc, classDecl, metricsFields, metricsCalls, semanticModel, ct),
-						equivalenceKey: "Purview.Telemetry.ConvertMetricsToTelemetry.Class"
-					),
+									"In this class",
+									ct => ConvertAsync(doc, classDecl, metricsFields, metricsCalls, semanticModel, ct),
+									equivalenceKey: "Purview.Telemetry.ConvertMetricsToTelemetry.Class"
+								),
 					CodeAction.Create(
 						"In this document",
 						ct => ConvertDocumentAsync(doc, ct),
@@ -95,7 +95,8 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 						ct => ConvertSolutionAsync(doc.Project.Solution, ct),
 						equivalenceKey: "Purview.Telemetry.ConvertMetricsToTelemetry.Solution"
 					)
-				),
+,
+				],
 				isInlinable: false
 			)
 		);
@@ -357,10 +358,9 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		if (histogramType is not null && SymbolEqualityComparer.Default.Equals(constructedFrom, histogramType))
 			return MetricsInstrumentKind.Histogram;
 
-		if (upDownCounterType is not null && SymbolEqualityComparer.Default.Equals(constructedFrom, upDownCounterType))
-			return MetricsInstrumentKind.UpDownCounter;
-
-		return null;
+		return upDownCounterType is null || !SymbolEqualityComparer.Default.Equals(constructedFrom, upDownCounterType)
+			? null
+			: MetricsInstrumentKind.UpDownCounter;
 	}
 
 	static string GetMeasurementType(ITypeSymbol type)
@@ -374,7 +374,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 	internal static List<MetricsCallInfo> FindMetricsCalls(
 		ClassDeclarationSyntax classDecl,
 		List<MetricsFieldInfo> metricsFields,
-		SemanticModel semanticModel,
+		SemanticModel _,
 		CancellationToken cancellationToken
 	)
 	{
@@ -451,9 +451,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 				fieldNameMap[field.FieldName] = DeriveMethodName(field);
 		}
 
-		return calls
-				.Select(c => (c, fieldNameMap.TryGetValue(c.ReceiverFieldName, out var n) ? n : c.ReceiverFieldName))
-			.ToList();
+		return [.. calls.Select(c => (c, fieldNameMap.TryGetValue(c.ReceiverFieldName, out var n) ? n : c.ReceiverFieldName))];
 	}
 
 	internal static string DeriveMethodName(MetricsFieldInfo field)
@@ -559,7 +557,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 	internal static string BuildInterfaceCode(
 		string interfaceName,
 		List<(MetricsCallInfo Call, string MethodName)> callsWithMethods,
-		List<MetricsFieldInfo> fields
+		List<MetricsFieldInfo> _
 	)
 	{
 		var sb = new StringBuilder();

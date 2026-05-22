@@ -110,7 +110,7 @@ public abstract class CodeRefactoringTestBase
 	protected static async Task<IReadOnlyList<CodeAction>> GetRefactoringActionsAsync(
 		string codeWithMarker,
 		CodeRefactoringProvider provider,
-		string? equivalenceKey = null,
+		string? _ = null,
 		CancellationToken cancellationToken = default
 	)
 	{
@@ -220,8 +220,8 @@ public abstract class CodeRefactoringTestBase
 			After = after?.TrimStart() ?? "(no refactoring applied)",
 		};
 
-		await Verifier
-			.Verify(snapshot)
+		await
+			Verify(snapshot)
 			.UseDirectory("Snapshots")
 			.DisableRequireUniquePrefix()
 			.DisableDateCounting()
@@ -257,8 +257,8 @@ public abstract class CodeRefactoringTestBase
 			After = after?.TrimStart() ?? "(no refactoring applied)",
 		};
 
-		await Verifier
-			.Verify(snapshot)
+		await
+			Verify(snapshot)
 			.UseDirectory("Snapshots")
 			.DisableRequireUniquePrefix()
 			.DisableDateCounting()
@@ -270,5 +270,5 @@ public abstract class CodeRefactoringTestBase
 	/// explicitly specified. Defaults to <see cref="ConvertILoggerToTelemetryRefactoringProvider"/>.
 	/// </summary>
 	static ConvertILoggerToTelemetryRefactoringProvider CreateDefaultProvider() =>
-		new ConvertILoggerToTelemetryRefactoringProvider();
+		new();
 }

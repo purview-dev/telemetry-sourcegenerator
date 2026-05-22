@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using System.Composition;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -70,12 +69,13 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		context.RegisterRefactoring(
 			CodeAction.Create(
 				$"Convert ILogger to I{classDecl.Identifier.ValueText}Logs",
-				nestedActions: ImmutableArray.Create<CodeAction>(
+				nestedActions:
+				[
 					CodeAction.Create(
-						"In this class",
-						ct => ConvertAsync(doc, classDecl, loggerFields, logCalls, semanticModel, ct),
-						equivalenceKey: "Purview.Telemetry.ConvertILoggerToTelemetry.Class"
-					),
+									"In this class",
+									ct => ConvertAsync(doc, classDecl, loggerFields, logCalls, semanticModel, ct),
+									equivalenceKey: "Purview.Telemetry.ConvertILoggerToTelemetry.Class"
+								),
 					CodeAction.Create(
 						"In this document",
 						ct => ConvertDocumentAsync(doc, ct),
@@ -91,7 +91,8 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 						ct => ConvertSolutionAsync(doc.Project.Solution, ct),
 						equivalenceKey: "Purview.Telemetry.ConvertILoggerToTelemetry.Solution"
 					)
-				),
+,
+				],
 				isInlinable: false
 			)
 		);
