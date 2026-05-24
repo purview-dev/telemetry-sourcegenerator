@@ -142,11 +142,22 @@ jobs:
             PRERELEASE_FLAG="--prerelease"
           fi
 
-          # *.nupkg matches both the main package and *.symbols.nupkg.
-          # nullglob prevents failures if either pattern matches nothing.
+          # Collect assets safely and fail if no package output exists.
           shopt -s nullglob
-          ASSETS=( ./artifacts/nuget/*.nupkg )
+          PACKAGES=( ./artifacts/nuget/*.nupkg )
+          SYMBOLS=( ./artifacts/nuget/*.snupkg )
           shopt -u nullglob
+
+          if (( ${#PACKAGES[@]} == 0 )); then
+            echo "::error::No .nupkg package assets found in ./artifacts/nuget."
+            exit 1
+          fi
+
+          if (( ${#SYMBOLS[@]} == 0 )); then
+            echo "::warning::No .snupkg symbol assets found in ./artifacts/nuget."
+          fi
+
+          ASSETS=( "${PACKAGES[@]}" "${SYMBOLS[@]}" )
 
           gh release create "${RELEASE_TAG}" \
             --draft \
