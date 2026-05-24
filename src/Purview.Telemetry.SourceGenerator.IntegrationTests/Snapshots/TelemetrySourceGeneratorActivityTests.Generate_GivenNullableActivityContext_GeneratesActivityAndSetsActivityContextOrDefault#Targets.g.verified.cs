@@ -22,6 +22,7 @@ namespace Purview.Telemetry
 /// </summary>
 [global::System.Flags]
 [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+[global::Microsoft.CodeAnalysis.Embedded]
 enum Targets
 {
 	/// <summary>

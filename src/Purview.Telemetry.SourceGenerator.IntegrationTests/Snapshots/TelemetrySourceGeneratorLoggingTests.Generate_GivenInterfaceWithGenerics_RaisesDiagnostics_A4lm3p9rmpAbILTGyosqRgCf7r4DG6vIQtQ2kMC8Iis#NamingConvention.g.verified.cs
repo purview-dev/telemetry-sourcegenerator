@@ -20,6 +20,7 @@ namespace Purview.Telemetry
 /// Naming convention strategies for generated telemetry names.
 /// </summary>
 [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+[global::Microsoft.CodeAnalysis.Embedded]
 enum NamingConvention
 {
 	/// <summary>

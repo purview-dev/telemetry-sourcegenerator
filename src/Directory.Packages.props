@@ -5,8 +5,10 @@
          - ForAttributeWithMetadataName requires 4.3.1+
          - ImmutableArray<T> collection expression support (CS9210) requires System.Collections.Immutable 9.0,
            which ships with Roslyn 4.9.x (VS 2022 17.9 / .NET 9 SDK).
-         Consumers on net48 or net8 built with VS 2022 17.9+ or .NET 9+ SDK are fully supported. -->
-    <RoslynVersion>4.9.2</RoslynVersion>
+         - IncrementalGeneratorPostInitializationContext.AddEmbeddedAttributeDefinition() requires Roslyn 4.14.0+,
+           which ships with VS 2022 17.14 / .NET 10 SDK.
+         Consumers on net48 or net8+ built with VS 2022 17.14+ or .NET 10+ SDK are fully supported. -->
+    <RoslynVersion>4.14.0</RoslynVersion>
   </PropertyGroup>
   <ItemGroup Label="NuGet Package References">
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.300" />

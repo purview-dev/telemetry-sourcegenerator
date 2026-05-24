@@ -35,7 +35,11 @@ sealed class EmbeddedResources
 		using StreamReader reader = new(resourceStream, Encoding.UTF8);
 		var result = reader.ReadToEnd();
 
-		result = result.Replace("{CodeGen}", Constants.System.GeneratedCode.Value);
+		result = result.Replace(
+			"{CodeGen}",
+			Constants.System.GeneratedCode.Value
+				+ "\n[global::Microsoft.CodeAnalysis.Embedded]"
+		);
 
 		return result.Trim();
 	}
