@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -63,7 +63,7 @@ jobs:
 
       - name: Set up .NET
         if: ${{ steps.release-check.outputs.should_release == 'true' }}
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v4
         with:
           global-json-file: ./global.json
 

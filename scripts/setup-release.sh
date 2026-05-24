@@ -52,6 +52,7 @@ TOKEN_TYPE="app"
 GHES_HOST=""
 APP_ID=""
 APP_PEM=""
+BASE_BRANCH="main"
 DRY_RUN=false
 
 # ─── colours ─────────────────────────────────────────────────────────────────
@@ -115,14 +116,15 @@ _tag_ruleset_ui_instructions() {
 # ─── argument parsing ─────────────────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --owner)         OWNER="$2";     shift 2 ;;
-    --repo)          REPO="$2";      shift 2 ;;
-    --scope)         SCOPE="$2";     shift 2 ;;
-    --token-type)    TOKEN_TYPE="$2";shift 2 ;;
-    --ghes-host)     GHES_HOST="$2"; shift 2 ;;
-    --app-id)        APP_ID="$2";    shift 2 ;;
-    --app-pem)       APP_PEM="$2";   shift 2 ;;
-    --dry-run)       DRY_RUN=true;   shift   ;;
+    --owner)         OWNER="$2";        shift 2 ;;
+    --repo)          REPO="$2";         shift 2 ;;
+    --scope)         SCOPE="$2";        shift 2 ;;
+    --token-type)    TOKEN_TYPE="$2";   shift 2 ;;
+    --ghes-host)     GHES_HOST="$2";    shift 2 ;;
+    --app-id)        APP_ID="$2";       shift 2 ;;
+    --app-pem)       APP_PEM="$2";      shift 2 ;;
+    --base-branch)   BASE_BRANCH="$2";  shift 2 ;;
+    --dry-run)       DRY_RUN=true;      shift   ;;
     -h|--help)
       print_help
       exit 0
@@ -167,8 +169,42 @@ echo -e "  Token type: ${TOKEN_TYPE}"
 [[ "${DRY_RUN}" == true ]] && echo -e "  ${YELLOW}DRY RUN — no changes will be made${RESET}"
 echo ""
 
+# ── Step 0: .changeset/config.json ───────────────────────────────────────────
+header "Step 0/5 — .changeset/config.json"
+
+CHANGESET_CONFIG=".changeset/config.json"
+
+if [[ -f "${CHANGESET_CONFIG}" ]]; then
+  current_repo="$(python3 -c "import json,sys; d=json.load(open('${CHANGESET_CONFIG}')); cfg=d.get('changelog'); print(cfg[1]['repo'] if isinstance(cfg,list) else '')" 2>/dev/null || true)"
+
+  if [[ "${current_repo}" == "${FULL_REPO}" ]]; then
+    success ".changeset/config.json already points to ${FULL_REPO} — skipping."
+  else
+    info "Patching .changeset/config.json: repo → ${FULL_REPO}, baseBranch → ${BASE_BRANCH}"
+    if [[ "${DRY_RUN}" == true ]]; then
+      dry "python3: update changelog[1].repo=${FULL_REPO}, baseBranch=${BASE_BRANCH} in ${CHANGESET_CONFIG}"
+    else
+      python3 - <<PYEOF
+import json, sys
+with open("${CHANGESET_CONFIG}") as f:
+    d = json.load(f)
+if isinstance(d.get("changelog"), list) and len(d["changelog"]) > 1 and isinstance(d["changelog"][1], dict):
+    d["changelog"][1]["repo"] = "${FULL_REPO}"
+d["baseBranch"] = "${BASE_BRANCH}"
+with open("${CHANGESET_CONFIG}", "w") as f:
+    json.dump(d, f, indent=2)
+    f.write("\n")
+PYEOF
+      success ".changeset/config.json updated."
+    fi
+  fi
+else
+  warning ".changeset/config.json not found — run 'npx changeset init' first, then re-run this script."
+fi
+
 # ── Step 1: branch ruleset ────────────────────────────────────────────────────
-header "Step 1/4 — Branch ruleset (protect main)"
+
+header "Step 1/5 — Branch ruleset (protect main)"
 
 BRANCH_RULESET_NAME="Protect main branch"
 
@@ -220,7 +256,7 @@ ENDJSON
 fi
 
 # ── Step 2: tag ruleset ───────────────────────────────────────────────────────
-header "Step 2/4 — Tag ruleset (protect v* tags)"
+header "Step 2/5 — Tag ruleset (protect v* tags)"
 
 TAG_RULESET_NAME="Protect release tags"
 
@@ -273,7 +309,7 @@ ENDJSON
 fi
 
 # ── Step 3: skip-changeset label ──────────────────────────────────────────────
-header "Step 3/4 — GitHub label: skip-changeset"
+header "Step 3/5 — GitHub label: skip-changeset"
 
 if label_exists "skip-changeset"; then
   success "Label 'skip-changeset' already exists — skipping."
@@ -294,7 +330,7 @@ else
 fi
 
 # ── Step 4: secrets guidance ──────────────────────────────────────────────────
-header "Step 4/4 — Repository secrets"
+header "Step 4/5 — Repository secrets"
 
 _check_secret() {
   local secret_name="$1"

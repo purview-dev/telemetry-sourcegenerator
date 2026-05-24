@@ -87,6 +87,8 @@ param (
 
     [string]$AppPem = '',
 
+    [string]$BaseBranch = 'main',
+
     [switch]$DryRun
 )
 
@@ -178,8 +180,37 @@ Write-Host "  Scope:      $Scope"
 Write-Host "  Token type: $TokenType"
 Write-Host ""
 
+# ─── Step 0: .changeset/config.json ──────────────────────────────────────────
+Write-Step "Step 0/5 — .changeset/config.json"
+
+$ChangesetConfig = '.changeset/config.json'
+if (Test-Path $ChangesetConfig) {
+    $cfg = Get-Content $ChangesetConfig -Raw | ConvertFrom-Json
+    $currentRepo = ''
+    if ($cfg.changelog -is [array] -and $cfg.changelog.Count -gt 1 -and $cfg.changelog[1] -is [psobject]) {
+        $currentRepo = $cfg.changelog[1].repo
+    }
+    if ($currentRepo -eq $FullRepo -and $cfg.baseBranch -eq $BaseBranch) {
+        Write-OK ".changeset/config.json already correct — skipping."
+    } else {
+        Write-Info "Patching .changeset/config.json: repo → $FullRepo, baseBranch → $BaseBranch"
+        if ($DryRun) {
+            Write-Dry "Update $ChangesetConfig: changelog[1].repo=$FullRepo, baseBranch=$BaseBranch"
+        } else {
+            if ($cfg.changelog -is [array] -and $cfg.changelog.Count -gt 1) {
+                $cfg.changelog[1] | Add-Member -MemberType NoteProperty -Name 'repo' -Value $FullRepo -Force
+            }
+            $cfg | Add-Member -MemberType NoteProperty -Name 'baseBranch' -Value $BaseBranch -Force
+            $cfg | ConvertTo-Json -Depth 10 | Set-Content $ChangesetConfig -Encoding UTF8
+            Write-OK ".changeset/config.json updated."
+        }
+    }
+} else {
+    Write-Warn ".changeset/config.json not found — run 'npx changeset init' first, then re-run this script."
+}
+
 # ─── Step 1: branch ruleset ───────────────────────────────────────────────────
-Write-Step "Step 1/4 — Branch ruleset (protect main)"
+Write-Step "Step 1/5 — Branch ruleset (protect main)"
 
 $BranchRulesetName = 'Protect main branch'
 if (Test-RulesetExists $BranchRulesetName) {
@@ -228,7 +259,7 @@ if (Test-RulesetExists $BranchRulesetName) {
 }
 
 # ─── Step 2: tag ruleset ──────────────────────────────────────────────────────
-Write-Step "Step 2/4 — Tag ruleset (protect v* tags)"
+Write-Step "Step 2/5 — Tag ruleset (protect v* tags)"
 
 $TagRulesetName = 'Protect release tags'
 if (Test-RulesetExists $TagRulesetName) {
@@ -289,7 +320,7 @@ if (Test-RulesetExists $TagRulesetName) {
 }
 
 # ─── Step 3: skip-changeset label ─────────────────────────────────────────────
-Write-Step "Step 3/4 — GitHub label: skip-changeset"
+Write-Step "Step 3/5 — GitHub label: skip-changeset"
 
 if (Test-LabelExists 'skip-changeset') {
     Write-OK "Label 'skip-changeset' already exists — skipping."
@@ -309,7 +340,7 @@ if (Test-LabelExists 'skip-changeset') {
 }
 
 # ─── Step 4: secrets guidance ─────────────────────────────────────────────────
-Write-Step "Step 4/4 — Repository secrets"
+Write-Step "Step 4/5 — Repository secrets"
 
 switch ($TokenType) {
     'app' {
