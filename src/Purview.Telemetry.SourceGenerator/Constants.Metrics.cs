@@ -132,9 +132,12 @@ partial class Constants
 			const string SystemDiagnosticsMetricsNamespace =
 				SystemDiagnosticsNamespace + ".Metrics";
 
-			public const string CounterMetadataName = SystemDiagnosticsMetricsNamespace + ".Counter`1";
-			public const string HistogramMetadataName = SystemDiagnosticsMetricsNamespace + ".Histogram`1";
-			public const string UpDownCounterMetadataName = SystemDiagnosticsMetricsNamespace + ".UpDownCounter`1";
+			public const string CounterMetadataName =
+				SystemDiagnosticsMetricsNamespace + ".Counter`1";
+			public const string HistogramMetadataName =
+				SystemDiagnosticsMetricsNamespace + ".Histogram`1";
+			public const string UpDownCounterMetadataName =
+				SystemDiagnosticsMetricsNamespace + ".UpDownCounter`1";
 
 			public static readonly PurviewTypeInfo Meter = PurviewTypeFactory.Create(
 				SystemDiagnosticsMetricsNamespace + ".Meter"

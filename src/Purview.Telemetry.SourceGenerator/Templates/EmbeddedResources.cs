@@ -37,8 +37,7 @@ sealed class EmbeddedResources
 
 		result = result.Replace(
 			"{CodeGen}",
-			Constants.System.GeneratedCode.Value
-				+ "\n[global::Microsoft.CodeAnalysis.Embedded]"
+			Constants.System.GeneratedCode.Value + "\n[global::Microsoft.CodeAnalysis.Embedded]"
 		);
 
 		return result.Trim();

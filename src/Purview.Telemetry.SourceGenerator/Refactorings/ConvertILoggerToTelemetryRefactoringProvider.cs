@@ -72,10 +72,11 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 				nestedActions:
 				[
 					CodeAction.Create(
-									"In this class",
-									ct => ConvertAsync(doc, classDecl, loggerFields, logCalls, semanticModel, ct),
-									equivalenceKey: "Purview.Telemetry.ConvertILoggerToTelemetry.Class"
-								),
+						"In this class",
+						ct =>
+							ConvertAsync(doc, classDecl, loggerFields, logCalls, semanticModel, ct),
+						equivalenceKey: "Purview.Telemetry.ConvertILoggerToTelemetry.Class"
+					),
 					CodeAction.Create(
 						"In this document",
 						ct => ConvertDocumentAsync(doc, ct),
@@ -90,8 +91,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 						"In this solution",
 						ct => ConvertSolutionAsync(doc.Project.Solution, ct),
 						equivalenceKey: "Purview.Telemetry.ConvertILoggerToTelemetry.Solution"
-					)
-,
+					),
 				],
 				isInlinable: false
 			)
@@ -141,7 +141,11 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 		// Add using Purview.Telemetry; to the file if not already present.
 		var compilationRoot = (CompilationUnitSyntax)newRoot;
-		if (!compilationRoot.Usings.Any(u => u.Name?.ToString() == Constants.PurviewTelemetryNamespace))
+		if (
+			!compilationRoot.Usings.Any(u =>
+				u.Name?.ToString() == Constants.PurviewTelemetryNamespace
+			)
+		)
 		{
 			var newUsing = SyntaxFactory
 				.UsingDirective(SyntaxFactory.ParseName(Constants.PurviewTelemetryNamespace))
@@ -532,7 +536,9 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	// Method name assignment
 	// -------------------------------------------------------------------------
 
-	internal static List<(LogCallInfo Call, string MethodName)> AssignMethodNames(List<LogCallInfo> calls)
+	internal static List<(LogCallInfo Call, string MethodName)> AssignMethodNames(
+		List<LogCallInfo> calls
+	)
 	{
 		// Group calls that represent the same logical log operation (same attribute, template, params).
 		// Identical calls share one interface method; distinct calls that happen to produce the same
@@ -760,9 +766,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	{
 		while (true)
 		{
-			var root = await document
-				.GetSyntaxRootAsync(cancellationToken)
-				.ConfigureAwait(false);
+			var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
 			if (root is null)
 				break;
 

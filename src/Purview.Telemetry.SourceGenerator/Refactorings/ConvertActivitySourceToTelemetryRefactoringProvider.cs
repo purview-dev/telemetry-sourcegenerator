@@ -66,10 +66,18 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 				nestedActions:
 				[
 					CodeAction.Create(
-									"In this class",
-									ct => ConvertAsync(doc, classDecl, activitySourceFields, activityCalls, semanticModel, ct),
-									equivalenceKey: "Purview.Telemetry.ConvertActivitySourceToTelemetry.Class"
-								),
+						"In this class",
+						ct =>
+							ConvertAsync(
+								doc,
+								classDecl,
+								activitySourceFields,
+								activityCalls,
+								semanticModel,
+								ct
+							),
+						equivalenceKey: "Purview.Telemetry.ConvertActivitySourceToTelemetry.Class"
+					),
 					CodeAction.Create(
 						"In this document",
 						ct => ConvertDocumentAsync(doc, ct),
@@ -84,8 +92,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 						"In this solution",
 						ct => ConvertSolutionAsync(doc.Project.Solution, ct),
 						equivalenceKey: "Purview.Telemetry.ConvertActivitySourceToTelemetry.Solution"
-					)
-,
+					),
 				],
 				isInlinable: false
 			)
@@ -134,7 +141,11 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 
 		// Add using Purview.Telemetry; and using System.Diagnostics; if not already present.
 		var compilationRoot = (CompilationUnitSyntax)newRoot;
-		if (!compilationRoot.Usings.Any(u => u.Name?.ToString() == Constants.PurviewTelemetryNamespace))
+		if (
+			!compilationRoot.Usings.Any(u =>
+				u.Name?.ToString() == Constants.PurviewTelemetryNamespace
+			)
+		)
 		{
 			var newUsing = SyntaxFactory
 				.UsingDirective(SyntaxFactory.ParseName(Constants.PurviewTelemetryNamespace))
@@ -143,7 +154,11 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 			compilationRoot = (CompilationUnitSyntax)newRoot;
 		}
 
-		if (!compilationRoot.Usings.Any(u => u.Name?.ToString() == Constants.SystemDiagnosticsNamespace))
+		if (
+			!compilationRoot.Usings.Any(u =>
+				u.Name?.ToString() == Constants.SystemDiagnosticsNamespace
+			)
+		)
 		{
 			var newUsing = SyntaxFactory
 				.UsingDirective(SyntaxFactory.ParseName(Constants.SystemDiagnosticsNamespace))
@@ -165,9 +180,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 	{
 		while (true)
 		{
-			var root = await document
-				.GetSyntaxRootAsync(cancellationToken)
-				.ConfigureAwait(false);
+			var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
 			if (root is null)
 				break;
 
@@ -282,9 +295,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 				)
 					continue;
 
-				if (
-					!SymbolEqualityComparer.Default.Equals(fieldSymbol.Type, activitySourceType)
-				)
+				if (!SymbolEqualityComparer.Default.Equals(fieldSymbol.Type, activitySourceType))
 					continue;
 
 				result.Add(
@@ -311,12 +322,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 				)
 					continue;
 
-				if (
-					!SymbolEqualityComparer.Default.Equals(
-						paramSymbol.Type,
-						activitySourceType
-					)
-				)
+				if (!SymbolEqualityComparer.Default.Equals(paramSymbol.Type, activitySourceType))
 					continue;
 
 				result.Add(
@@ -370,9 +376,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		);
 		var result = new List<ActivitySourceCallInfo>();
 
-		foreach (
-			var invocation in classDecl.DescendantNodes().OfType<InvocationExpressionSyntax>()
-		)
+		foreach (var invocation in classDecl.DescendantNodes().OfType<InvocationExpressionSyntax>())
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 
@@ -395,13 +399,12 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 			if (args.Count >= 1)
 			{
 				var nameArg = args[0];
-				if (
-					nameArg.NameColon is null
-					&& nameArg.Expression is LiteralExpressionSyntax lit
-				)
+				if (nameArg.NameColon is null && nameArg.Expression is LiteralExpressionSyntax lit)
 					activityName = lit.Token.ValueText;
-				else if (nameArg.NameColon?.Name.Identifier.Text == "name"
-					&& nameArg.Expression is LiteralExpressionSyntax namedLit)
+				else if (
+					nameArg.NameColon?.Name.Identifier.Text == "name"
+					&& nameArg.Expression is LiteralExpressionSyntax namedLit
+				)
 					activityName = namedLit.Token.ValueText;
 			}
 
@@ -415,14 +418,10 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 				if (!isKindArg)
 					continue;
 
-				var kindSymbol = semanticModel.GetSymbolInfo(arg.Expression, cancellationToken).Symbol;
-				if (
-					kindSymbol
-					is IFieldSymbol
-					{
-						ContainingType.Name: "ActivityKind",
-					} kindField
-				)
+				var kindSymbol = semanticModel
+					.GetSymbolInfo(arg.Expression, cancellationToken)
+					.Symbol;
+				if (kindSymbol is IFieldSymbol { ContainingType.Name: "ActivityKind" } kindField)
 					activityKind = kindField.Name;
 				break;
 			}
@@ -554,9 +553,10 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 			);
 	}
 
-	internal static List<(ActivitySourceCallInfo Call, string MethodName)> AssignMethodNamesInternal(
-		List<ActivitySourceCallInfo> calls
-	) => AssignMethodNames(calls);
+	internal static List<(
+		ActivitySourceCallInfo Call,
+		string MethodName
+	)> AssignMethodNamesInternal(List<ActivitySourceCallInfo> calls) => AssignMethodNames(calls);
 
 	internal static string BuildActivityAttributeInternal(ActivitySourceCallInfo call) =>
 		BuildActivityAttribute(call);
@@ -567,7 +567,14 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		List<(ActivitySourceCallInfo Call, string MethodName)> callsWithMethods,
 		string interfaceName,
 		SemanticModel semanticModel
-	) => RewriteClass(classDecl, activitySourceFields, callsWithMethods, interfaceName, semanticModel);
+	) =>
+		RewriteClass(
+			classDecl,
+			activitySourceFields,
+			callsWithMethods,
+			interfaceName,
+			semanticModel
+		);
 
 	internal static string BuildInterfaceMembers(
 		List<(ActivitySourceCallInfo Call, string MethodName)> callsWithMethods
@@ -605,10 +612,9 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 	)
 	{
 		// Build invocation map: StartActivity("name") → interface method call
-		var invocationMap = new Dictionary<
-			InvocationExpressionSyntax,
-			InvocationExpressionSyntax
-		>(SyntaxNodeReferenceComparer<InvocationExpressionSyntax>.Instance);
+		var invocationMap = new Dictionary<InvocationExpressionSyntax, InvocationExpressionSyntax>(
+			SyntaxNodeReferenceComparer<InvocationExpressionSyntax>.Instance
+		);
 
 		foreach (var (call, methodName) in callsWithMethods)
 		{
@@ -684,16 +690,12 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		var memberAccess = (MemberAccessExpressionSyntax)call.Invocation.Expression;
 
 		// Replace StartActivity(...) with {MethodName}()
-		var newMemberAccess = memberAccess.WithName(
-			SyntaxFactory.IdentifierName(newMethodName)
-		);
+		var newMemberAccess = memberAccess.WithName(SyntaxFactory.IdentifierName(newMethodName));
 
 		return call
 			.Invocation.WithExpression(newMemberAccess)
 			.WithArgumentList(
-				SyntaxFactory
-					.ArgumentList()
-					.WithTriviaFrom(call.Invocation.ArgumentList)
+				SyntaxFactory.ArgumentList().WithTriviaFrom(call.Invocation.ArgumentList)
 			);
 	}
 
@@ -796,16 +798,15 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 			{
 				var typeInfo = semanticModel.GetTypeInfo(param.Type);
 				var type = typeInfo.Type;
-				matched = type is not null
-					&& fieldTypeNames.Contains(type.ToDisplayString());
+				matched = type is not null && fieldTypeNames.Contains(type.ToDisplayString());
 			}
 			catch (ArgumentException)
 			{
 				// Node is not in the semantic tree (e.g., already rewritten).
 				// Fall back to matching by short name from source text.
 				var typeName = param.Type.ToString().TrimEnd('?');
-				matched = fieldTypeShortNames.Contains(typeName)
-					|| fieldTypeNames.Contains(typeName);
+				matched =
+					fieldTypeShortNames.Contains(typeName) || fieldTypeNames.Contains(typeName);
 			}
 
 			if (!matched)

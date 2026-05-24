@@ -22,7 +22,11 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 			}
 			""";
 
-		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
+		var actions = await GetRefactoringActionsAsync(
+			code,
+			Provider,
+			cancellationToken: cancellationToken
+		);
 
 		await Assert.That(actions).IsEmpty();
 	}
@@ -54,7 +58,11 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 			}
 			""";
 
-		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
+		var actions = await GetRefactoringActionsAsync(
+			code,
+			Provider,
+			cancellationToken: cancellationToken
+		);
 
 		await Assert.That(actions).IsNotEmpty();
 		await Assert
@@ -83,7 +91,11 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 			}
 			""";
 
-		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
+		var actions = await GetRefactoringActionsAsync(
+			code,
+			Provider,
+			cancellationToken: cancellationToken
+		);
 
 		await Assert.That(actions).IsNotEmpty();
 		await Assert
@@ -115,7 +127,11 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 			}
 			""";
 
-		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
+		var actions = await GetRefactoringActionsAsync(
+			code,
+			Provider,
+			cancellationToken: cancellationToken
+		);
 
 		await Assert.That(actions).IsNotEmpty();
 		await Assert
@@ -160,7 +176,11 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 			}
 			""";
 
-		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
+		var result = await ApplyRefactoringAsync(
+			code,
+			Provider,
+			cancellationToken: cancellationToken
+		);
 
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[ActivitySource]");
@@ -193,7 +213,11 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 			}
 			""";
 
-		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
+		var result = await ApplyRefactoringAsync(
+			code,
+			Provider,
+			cancellationToken: cancellationToken
+		);
 
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Logger]");
@@ -223,7 +247,11 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 			}
 			""";
 
-		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
+		var result = await ApplyRefactoringAsync(
+			code,
+			Provider,
+			cancellationToken: cancellationToken
+		);
 
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[ActivitySource]");

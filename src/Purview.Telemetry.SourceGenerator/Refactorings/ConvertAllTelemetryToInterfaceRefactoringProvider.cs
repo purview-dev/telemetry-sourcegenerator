@@ -60,32 +60,35 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 		if (loggerFields.Count == 0 && activityFields.Count == 0 && metricsFields.Count == 0)
 			return;
 
-		var logCalls = loggerFields.Count > 0
-			? ConvertILoggerToTelemetryRefactoringProvider.FindLogCalls(
-				classDecl,
-				loggerFields,
-				semanticModel,
-				context.CancellationToken
-			)
-			: [];
+		var logCalls =
+			loggerFields.Count > 0
+				? ConvertILoggerToTelemetryRefactoringProvider.FindLogCalls(
+					classDecl,
+					loggerFields,
+					semanticModel,
+					context.CancellationToken
+				)
+				: [];
 
-		var activityCalls = activityFields.Count > 0
-			? ConvertActivitySourceToTelemetryRefactoringProvider.FindActivityCalls(
-				classDecl,
-				activityFields,
-				semanticModel,
-				context.CancellationToken
-			)
-			: [];
+		var activityCalls =
+			activityFields.Count > 0
+				? ConvertActivitySourceToTelemetryRefactoringProvider.FindActivityCalls(
+					classDecl,
+					activityFields,
+					semanticModel,
+					context.CancellationToken
+				)
+				: [];
 
-		var metricsCalls = metricsFields.Count > 0
-			? ConvertMetricsToTelemetryRefactoringProvider.FindMetricsCalls(
-				classDecl,
-				metricsFields,
-				semanticModel,
-				context.CancellationToken
-			)
-			: [];
+		var metricsCalls =
+			metricsFields.Count > 0
+				? ConvertMetricsToTelemetryRefactoringProvider.FindMetricsCalls(
+					classDecl,
+					metricsFields,
+					semanticModel,
+					context.CancellationToken
+				)
+				: [];
 
 		if (logCalls.Count == 0 && activityCalls.Count == 0 && metricsCalls.Count == 0)
 			return;
@@ -98,22 +101,22 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 				nestedActions:
 				[
 					CodeAction.Create(
-									"In this class",
-									ct =>
-										ConvertAsync(
-											doc,
-											classDecl,
-											loggerFields,
-											logCalls,
-											activityFields,
-											activityCalls,
-											metricsFields,
-											metricsCalls,
-											semanticModel,
-											ct
-										),
-									equivalenceKey: "Purview.Telemetry.ConvertAllTelemetryToInterface.Class"
-								),
+						"In this class",
+						ct =>
+							ConvertAsync(
+								doc,
+								classDecl,
+								loggerFields,
+								logCalls,
+								activityFields,
+								activityCalls,
+								metricsFields,
+								metricsCalls,
+								semanticModel,
+								ct
+							),
+						equivalenceKey: "Purview.Telemetry.ConvertAllTelemetryToInterface.Class"
+					),
 					CodeAction.Create(
 						"In this document",
 						ct => ConvertDocumentAsync(doc, ct),
@@ -128,8 +131,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 						"In this solution",
 						ct => ConvertSolutionAsync(doc.Project.Solution, ct),
 						equivalenceKey: "Purview.Telemetry.ConvertAllTelemetryToInterface.Solution"
-					)
-,
+					),
 				],
 				isInlinable: false
 			)
@@ -152,22 +154,25 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 		var className = classDecl.Identifier.ValueText;
 		var interfaceName = "I" + className + "Telemetry";
 
-		var logCallsWithMethods = logCalls.Count > 0
-			? ConvertILoggerToTelemetryRefactoringProvider.AssignMethodNames(logCalls)
-			: [];
+		var logCallsWithMethods =
+			logCalls.Count > 0
+				? ConvertILoggerToTelemetryRefactoringProvider.AssignMethodNames(logCalls)
+				: [];
 
-		var activityCallsWithMethods = activityCalls.Count > 0
-			? ConvertActivitySourceToTelemetryRefactoringProvider.AssignMethodNamesInternal(
-				activityCalls
-			)
-			: [];
+		var activityCallsWithMethods =
+			activityCalls.Count > 0
+				? ConvertActivitySourceToTelemetryRefactoringProvider.AssignMethodNamesInternal(
+					activityCalls
+				)
+				: [];
 
-		var metricsCallsWithMethods = metricsCalls.Count > 0
-			? ConvertMetricsToTelemetryRefactoringProvider.AssignMethodNamesInternal(
-				metricsCalls,
-				metricsFields
-			)
-			: [];
+		var metricsCallsWithMethods =
+			metricsCalls.Count > 0
+				? ConvertMetricsToTelemetryRefactoringProvider.AssignMethodNamesInternal(
+					metricsCalls,
+					metricsFields
+				)
+				: [];
 
 		var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
 		if (root is null)
@@ -196,13 +201,14 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 
 		if (activityFields.Count > 0 && activityCallsWithMethods.Count > 0)
 		{
-			rewrittenClass = ConvertActivitySourceToTelemetryRefactoringProvider.RewriteClassInternal(
-				rewrittenClass,
-				activityFields,
-				activityCallsWithMethods,
-				interfaceName,
-				semanticModel
-			);
+			rewrittenClass =
+				ConvertActivitySourceToTelemetryRefactoringProvider.RewriteClassInternal(
+					rewrittenClass,
+					activityFields,
+					activityCallsWithMethods,
+					interfaceName,
+					semanticModel
+				);
 		}
 
 		if (metricsFields.Count > 0 && metricsCallsWithMethods.Count > 0)
@@ -228,7 +234,11 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 		);
 
 		var compilationRoot = (CompilationUnitSyntax)newRoot;
-		if (!compilationRoot.Usings.Any(u => u.Name?.ToString() == Constants.PurviewTelemetryNamespace))
+		if (
+			!compilationRoot.Usings.Any(u =>
+				u.Name?.ToString() == Constants.PurviewTelemetryNamespace
+			)
+		)
 		{
 			var newUsing = SyntaxFactory
 				.UsingDirective(SyntaxFactory.ParseName(Constants.PurviewTelemetryNamespace))
@@ -239,7 +249,9 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 
 		if (
 			activityFields.Count > 0
-			&& !compilationRoot.Usings.Any(u => u.Name?.ToString() == Constants.SystemDiagnosticsNamespace)
+			&& !compilationRoot.Usings.Any(u =>
+				u.Name?.ToString() == Constants.SystemDiagnosticsNamespace
+			)
 		)
 		{
 			var newUsing = SyntaxFactory
@@ -262,9 +274,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 	{
 		while (true)
 		{
-			var root = await document
-				.GetSyntaxRootAsync(cancellationToken)
-				.ConfigureAwait(false);
+			var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
 			if (root is null)
 				break;
 
@@ -289,11 +299,12 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 					semanticModel,
 					cancellationToken
 				);
-				var af = ConvertActivitySourceToTelemetryRefactoringProvider.FindActivitySourceFields(
-					classDecl,
-					semanticModel,
-					cancellationToken
-				);
+				var af =
+					ConvertActivitySourceToTelemetryRefactoringProvider.FindActivitySourceFields(
+						classDecl,
+						semanticModel,
+						cancellationToken
+					);
 				var mf = ConvertMetricsToTelemetryRefactoringProvider.FindMetricsFields(
 					classDecl,
 					semanticModel,
@@ -303,30 +314,33 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 				if (lf.Count == 0 && af.Count == 0 && mf.Count == 0)
 					continue;
 
-				var lc = lf.Count > 0
-					? ConvertILoggerToTelemetryRefactoringProvider.FindLogCalls(
-						classDecl,
-						lf,
-						semanticModel,
-						cancellationToken
-					)
-					: [];
-				var ac = af.Count > 0
-					? ConvertActivitySourceToTelemetryRefactoringProvider.FindActivityCalls(
-						classDecl,
-						af,
-						semanticModel,
-						cancellationToken
-					)
-					: [];
-				var mc = mf.Count > 0
-					? ConvertMetricsToTelemetryRefactoringProvider.FindMetricsCalls(
-						classDecl,
-						mf,
-						semanticModel,
-						cancellationToken
-					)
-					: [];
+				var lc =
+					lf.Count > 0
+						? ConvertILoggerToTelemetryRefactoringProvider.FindLogCalls(
+							classDecl,
+							lf,
+							semanticModel,
+							cancellationToken
+						)
+						: [];
+				var ac =
+					af.Count > 0
+						? ConvertActivitySourceToTelemetryRefactoringProvider.FindActivityCalls(
+							classDecl,
+							af,
+							semanticModel,
+							cancellationToken
+						)
+						: [];
+				var mc =
+					mf.Count > 0
+						? ConvertMetricsToTelemetryRefactoringProvider.FindMetricsCalls(
+							classDecl,
+							mf,
+							semanticModel,
+							cancellationToken
+						)
+						: [];
 
 				if (lc.Count == 0 && ac.Count == 0 && mc.Count == 0)
 					continue;
@@ -421,13 +435,25 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 		sb.AppendLine("{");
 
 		if (activityCallsWithMethods.Count > 0)
-			sb.Append(ConvertActivitySourceToTelemetryRefactoringProvider.BuildInterfaceMembers(activityCallsWithMethods));
+			sb.Append(
+				ConvertActivitySourceToTelemetryRefactoringProvider.BuildInterfaceMembers(
+					activityCallsWithMethods
+				)
+			);
 
 		if (logCallsWithMethods.Count > 0)
-			sb.Append(ConvertILoggerToTelemetryRefactoringProvider.BuildInterfaceMembers(logCallsWithMethods));
+			sb.Append(
+				ConvertILoggerToTelemetryRefactoringProvider.BuildInterfaceMembers(
+					logCallsWithMethods
+				)
+			);
 
 		if (metricsCallsWithMethods.Count > 0)
-			sb.Append(ConvertMetricsToTelemetryRefactoringProvider.BuildInterfaceMembers(metricsCallsWithMethods));
+			sb.Append(
+				ConvertMetricsToTelemetryRefactoringProvider.BuildInterfaceMembers(
+					metricsCallsWithMethods
+				)
+			);
 
 		sb.AppendLine("}");
 

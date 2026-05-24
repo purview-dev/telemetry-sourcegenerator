@@ -51,11 +51,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		if (semanticModel is null)
 			return;
 
-		var metricsFields = FindMetricsFields(
-			classDecl,
-			semanticModel,
-			context.CancellationToken
-		);
+		var metricsFields = FindMetricsFields(classDecl, semanticModel, context.CancellationToken);
 		if (metricsFields.Count == 0)
 			return;
 
@@ -76,10 +72,18 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 				nestedActions:
 				[
 					CodeAction.Create(
-									"In this class",
-									ct => ConvertAsync(doc, classDecl, metricsFields, metricsCalls, semanticModel, ct),
-									equivalenceKey: "Purview.Telemetry.ConvertMetricsToTelemetry.Class"
-								),
+						"In this class",
+						ct =>
+							ConvertAsync(
+								doc,
+								classDecl,
+								metricsFields,
+								metricsCalls,
+								semanticModel,
+								ct
+							),
+						equivalenceKey: "Purview.Telemetry.ConvertMetricsToTelemetry.Class"
+					),
 					CodeAction.Create(
 						"In this document",
 						ct => ConvertDocumentAsync(doc, ct),
@@ -94,8 +98,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 						"In this solution",
 						ct => ConvertSolutionAsync(doc.Project.Solution, ct),
 						equivalenceKey: "Purview.Telemetry.ConvertMetricsToTelemetry.Solution"
-					)
-,
+					),
 				],
 				isInlinable: false
 			)
@@ -143,7 +146,11 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		);
 
 		var compilationRoot = (CompilationUnitSyntax)newRoot;
-		if (!compilationRoot.Usings.Any(u => u.Name?.ToString() == Constants.PurviewTelemetryNamespace))
+		if (
+			!compilationRoot.Usings.Any(u =>
+				u.Name?.ToString() == Constants.PurviewTelemetryNamespace
+			)
+		)
 		{
 			var newUsing = SyntaxFactory
 				.UsingDirective(SyntaxFactory.ParseName(Constants.PurviewTelemetryNamespace))
@@ -165,9 +172,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 	{
 		while (true)
 		{
-			var root = await document
-				.GetSyntaxRootAsync(cancellationToken)
-				.ConfigureAwait(false);
+			var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
 			if (root is null)
 				break;
 
@@ -261,7 +266,9 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		CancellationToken cancellationToken
 	)
 	{
-		var counterType = semanticModel.Compilation.GetTypeByMetadataName(Constants.Metrics.SystemDiagnostics.CounterMetadataName);
+		var counterType = semanticModel.Compilation.GetTypeByMetadataName(
+			Constants.Metrics.SystemDiagnostics.CounterMetadataName
+		);
 		var histogramType = semanticModel.Compilation.GetTypeByMetadataName(
 			Constants.Metrics.SystemDiagnostics.HistogramMetadataName
 		);
@@ -329,7 +336,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 				new MetricsFieldInfo(
 					FieldName: propSymbol.Name,
 					InstrumentKind: kind.Value,
-						MeasurementTypeDisplayString: GetMeasurementType(propSymbol.Type),
+					MeasurementTypeDisplayString: GetMeasurementType(propSymbol.Type),
 					FieldDeclaration: null,
 					PropertyDeclaration: member,
 					TypeSymbol: propSymbol.Type
@@ -352,21 +359,34 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 
 		var constructedFrom = namedType.ConstructedFrom;
 
-		if (counterType is not null && SymbolEqualityComparer.Default.Equals(constructedFrom, counterType))
+		if (
+			counterType is not null
+			&& SymbolEqualityComparer.Default.Equals(constructedFrom, counterType)
+		)
 			return MetricsInstrumentKind.Counter;
 
-		if (histogramType is not null && SymbolEqualityComparer.Default.Equals(constructedFrom, histogramType))
+		if (
+			histogramType is not null
+			&& SymbolEqualityComparer.Default.Equals(constructedFrom, histogramType)
+		)
 			return MetricsInstrumentKind.Histogram;
 
-		return upDownCounterType is null || !SymbolEqualityComparer.Default.Equals(constructedFrom, upDownCounterType)
+		return
+			upDownCounterType is null
+			|| !SymbolEqualityComparer.Default.Equals(constructedFrom, upDownCounterType)
 			? null
 			: MetricsInstrumentKind.UpDownCounter;
 	}
 
 	static string GetMeasurementType(ITypeSymbol type)
 	{
-		if (type is INamedTypeSymbol { IsGenericType: true } named && named.TypeArguments.Length > 0)
-			return named.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+		if (
+			type is INamedTypeSymbol { IsGenericType: true } named
+			&& named.TypeArguments.Length > 0
+		)
+			return named
+				.TypeArguments[0]
+				.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
 
 		return "long";
 	}
@@ -381,9 +401,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		var fieldNames = metricsFields.ToDictionary(f => f.FieldName, StringComparer.Ordinal);
 		var result = new List<MetricsCallInfo>();
 
-		foreach (
-			var invocation in classDecl.DescendantNodes().OfType<InvocationExpressionSyntax>()
-		)
+		foreach (var invocation in classDecl.DescendantNodes().OfType<InvocationExpressionSyntax>())
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 
@@ -412,23 +430,22 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 			)
 			{
 				var firstArg = args[0].Expression;
-				if (
-					firstArg is LiteralExpressionSyntax lit
-					&& lit.Token.ValueText == "1"
-				)
+				if (firstArg is LiteralExpressionSyntax lit && lit.Token.ValueText == "1")
 					isAutoCounter = true;
 			}
 
 			result.Add(
 				new MetricsCallInfo(
 					Invocation: invocation,
-						ReceiverFieldName: receiverName,
-						InstrumentKind: isAutoCounter ? MetricsInstrumentKind.AutoCounter : fieldInfo.InstrumentKind,
-						MeasurementTypeDisplayString: fieldInfo.MeasurementTypeDisplayString,
-						MeasurementArgument: args.Count >= 1 ? args[0].Expression : null,
-						IsAutoIncrement: isAutoCounter
-					)
-				);
+					ReceiverFieldName: receiverName,
+					InstrumentKind: isAutoCounter
+						? MetricsInstrumentKind.AutoCounter
+						: fieldInfo.InstrumentKind,
+					MeasurementTypeDisplayString: fieldInfo.MeasurementTypeDisplayString,
+					MeasurementArgument: args.Count >= 1 ? args[0].Expression : null,
+					IsAutoIncrement: isAutoCounter
+				)
+			);
 		}
 
 		return result;
@@ -451,7 +468,17 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 				fieldNameMap[field.FieldName] = DeriveMethodName(field);
 		}
 
-		return [.. calls.Select(c => (c, fieldNameMap.TryGetValue(c.ReceiverFieldName, out var n) ? n : c.ReceiverFieldName))];
+		return
+		[
+			.. calls.Select(c =>
+				(
+					c,
+					fieldNameMap.TryGetValue(c.ReceiverFieldName, out var n)
+						? n
+						: c.ReceiverFieldName
+				)
+			),
+		];
 	}
 
 	internal static string DeriveMethodName(MetricsFieldInfo field)
@@ -462,7 +489,10 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		// Strip recognised suffix (case-insensitive match at end of word)
 		foreach (var suffix in InstrumentSuffixes)
 		{
-			if (raw.EndsWith(suffix, StringComparison.OrdinalIgnoreCase) && raw.Length > suffix.Length)
+			if (
+				raw.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)
+				&& raw.Length > suffix.Length
+			)
 			{
 				raw = raw.Substring(0, raw.Length - suffix.Length);
 				break;
@@ -515,8 +545,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 	internal static string BuildMetricsAttributeInternal(MetricsCallInfo call) =>
 		BuildMetricsAttribute(call);
 
-	internal static string BuildParamListInternal(MetricsCallInfo call) =>
-		BuildParamList(call);
+	internal static string BuildParamListInternal(MetricsCallInfo call) => BuildParamList(call);
 
 	internal static ClassDeclarationSyntax RewriteClassInternal(
 		ClassDeclarationSyntax classDecl,
@@ -577,7 +606,9 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 			MetricsInstrumentKind.AutoCounter => Constants.Metrics.AutoCounterAttributeShortName,
 			MetricsInstrumentKind.Counter => Constants.Metrics.CounterAttributeShortName,
 			MetricsInstrumentKind.Histogram => Constants.Metrics.HistogramAttributeShortName,
-			MetricsInstrumentKind.UpDownCounter => Constants.Metrics.UpDownCounterAttributeShortName,
+			MetricsInstrumentKind.UpDownCounter => Constants
+				.Metrics
+				.UpDownCounterAttributeShortName,
 			_ => Constants.Metrics.CounterAttributeShortName,
 		};
 
@@ -622,10 +653,9 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 	)
 	{
 		// Map each invocation to its replacement
-		var invocationMap = new Dictionary<
-			InvocationExpressionSyntax,
-			InvocationExpressionSyntax
-		>(SyntaxNodeReferenceComparer<InvocationExpressionSyntax>.Instance);
+		var invocationMap = new Dictionary<InvocationExpressionSyntax, InvocationExpressionSyntax>(
+			SyntaxNodeReferenceComparer<InvocationExpressionSyntax>.Instance
+		);
 
 		foreach (var (call, methodName) in callsWithMethods)
 		{
@@ -665,12 +695,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		}
 
 		// Map constructor/method parameters
-		var paramMap = BuildParamRewriteMap(
-			classDecl,
-			metricsFields,
-			interfaceName,
-			semanticModel
-		);
+		var paramMap = BuildParamRewriteMap(classDecl, metricsFields, interfaceName, semanticModel);
 
 		return classDecl.ReplaceNodes(
 			invocationMap
@@ -694,10 +719,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		);
 	}
 
-	static InvocationExpressionSyntax RewriteInvocation(
-		MetricsCallInfo call,
-		string methodName
-	)
+	static InvocationExpressionSyntax RewriteInvocation(MetricsCallInfo call, string methodName)
 	{
 		var memberAccess = (MemberAccessExpressionSyntax)call.Invocation.Expression;
 		var newMemberAccess = memberAccess.WithName(SyntaxFactory.IdentifierName(methodName));
@@ -708,9 +730,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 			return call
 				.Invocation.WithExpression(newMemberAccess)
 				.WithArgumentList(
-					SyntaxFactory
-						.ArgumentList()
-						.WithTriviaFrom(call.Invocation.ArgumentList)
+					SyntaxFactory.ArgumentList().WithTriviaFrom(call.Invocation.ArgumentList)
 				);
 		}
 
@@ -811,14 +831,13 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 			{
 				var typeInfo = semanticModel.GetTypeInfo(param.Type);
 				var type = typeInfo.Type;
-				matched = type is not null
-					&& fieldTypeNames.Contains(type.ToDisplayString());
+				matched = type is not null && fieldTypeNames.Contains(type.ToDisplayString());
 			}
 			catch (ArgumentException)
 			{
 				var typeName = param.Type.ToString().TrimEnd('?');
-				matched = fieldTypeShortNames.Contains(typeName)
-					|| fieldTypeNames.Contains(typeName);
+				matched =
+					fieldTypeShortNames.Contains(typeName) || fieldTypeNames.Contains(typeName);
 			}
 
 			if (!matched)

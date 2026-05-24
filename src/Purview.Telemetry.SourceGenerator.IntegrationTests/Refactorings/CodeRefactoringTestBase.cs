@@ -50,8 +50,8 @@ public abstract class CodeRefactoringTestBase
 			{
 				foreach (var topLevel in actions)
 				{
-					action = topLevel.NestedActions.FirstOrDefault(
-						a => a.EquivalenceKey == equivalenceKey
+					action = topLevel.NestedActions.FirstOrDefault(a =>
+						a.EquivalenceKey == equivalenceKey
 					);
 					if (action is not null)
 						break;
@@ -207,7 +207,9 @@ public abstract class CodeRefactoringTestBase
 		ArgumentNullException.ThrowIfNull(codeWithMarker);
 		ArgumentNullException.ThrowIfNull(provider);
 
-		var before = codeWithMarker.Replace("$$", string.Empty, StringComparison.Ordinal).TrimStart();
+		var before = codeWithMarker
+			.Replace("$$", string.Empty, StringComparison.Ordinal)
+			.TrimStart();
 		var after = await ApplyRefactoringAsync(
 			codeWithMarker,
 			provider,
@@ -220,8 +222,7 @@ public abstract class CodeRefactoringTestBase
 			After = after?.TrimStart() ?? "(no refactoring applied)",
 		};
 
-		await
-			Verify(snapshot)
+		await Verify(snapshot)
 			.UseDirectory("Snapshots")
 			.DisableRequireUniquePrefix()
 			.DisableDateCounting()
@@ -243,7 +244,9 @@ public abstract class CodeRefactoringTestBase
 		ArgumentNullException.ThrowIfNull(provider);
 		ArgumentNullException.ThrowIfNull(nestedActionEquivalenceKey);
 
-		var before = codeWithMarker.Replace("$$", string.Empty, StringComparison.Ordinal).TrimStart();
+		var before = codeWithMarker
+			.Replace("$$", string.Empty, StringComparison.Ordinal)
+			.TrimStart();
 		var after = await ApplyRefactoringAsync(
 			codeWithMarker,
 			provider,
@@ -257,8 +260,7 @@ public abstract class CodeRefactoringTestBase
 			After = after?.TrimStart() ?? "(no refactoring applied)",
 		};
 
-		await
-			Verify(snapshot)
+		await Verify(snapshot)
 			.UseDirectory("Snapshots")
 			.DisableRequireUniquePrefix()
 			.DisableDateCounting()
@@ -269,6 +271,5 @@ public abstract class CodeRefactoringTestBase
 	/// Returns the default <see cref="CodeRefactoringProvider"/> used when no provider is
 	/// explicitly specified. Defaults to <see cref="ConvertILoggerToTelemetryRefactoringProvider"/>.
 	/// </summary>
-	static ConvertILoggerToTelemetryRefactoringProvider CreateDefaultProvider() =>
-		new();
+	static ConvertILoggerToTelemetryRefactoringProvider CreateDefaultProvider() => new();
 }

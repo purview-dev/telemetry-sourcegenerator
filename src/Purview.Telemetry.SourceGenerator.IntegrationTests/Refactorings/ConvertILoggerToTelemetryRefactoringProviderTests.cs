@@ -88,9 +88,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(actions).IsNotEmpty();
-		await Assert
-			.That(actions[0].Title)
-			.IsEqualTo("Convert ILogger to IWeatherServiceLogs");
+		await Assert.That(actions[0].Title).IsEqualTo("Convert ILogger to IWeatherServiceLogs");
 	}
 
 	[Test]
@@ -880,9 +878,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(actions).IsNotEmpty();
-		await Assert
-			.That(actions[0].Title)
-			.IsEqualTo("Convert ILogger to IWeatherServiceLogs");
+		await Assert.That(actions[0].Title).IsEqualTo("Convert ILogger to IWeatherServiceLogs");
 	}
 
 	[Test]
@@ -1037,9 +1033,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(actions).IsNotEmpty();
-		await Assert
-			.That(actions[0].Title)
-			.IsEqualTo("Convert ILogger to IWeatherServiceLogs");
+		await Assert.That(actions[0].Title).IsEqualTo("Convert ILogger to IWeatherServiceLogs");
 	}
 
 	[Test]
@@ -1127,9 +1121,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
 
 		await Assert.That(actions).IsNotEmpty();
-		await Assert
-			.That(actions[0].Title)
-			.IsEqualTo("Convert ILogger to IWeatherServiceLogs");
+		await Assert.That(actions[0].Title).IsEqualTo("Convert ILogger to IWeatherServiceLogs");
 	}
 
 	[Test]
@@ -1505,5 +1497,3 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		await Assert.That(result).Contains("\"Audit: {Action}\"");
 	}
 }
-
-
