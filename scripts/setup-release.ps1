@@ -236,59 +236,51 @@ if (Test-RulesetExists $TagRulesetName) {
 } else {
     Write-Info "Configuring tag ruleset for v* ..."
 
-    if ($TokenType -eq 'app' -and $AppId -and $AppPem) {
-        Write-Info "GitHub App detected — fetching installation ID ..."
+    if ($TokenType -eq 'app' -and $AppId) {
+        # Use App ID directly as the Integration bypass actor.
+        # The actor_id for an Integration (GitHub App) bypass is the App's numeric ID,
+        # NOT the installation ID. The App must be installed on the repo/org first.
+        Write-Info "GitHub App detected — creating tag ruleset with App ID $AppId as bypass actor ..."
 
-        $InstallationId = $null
+        $TagRulesetBody = @{
+            name        = $TagRulesetName
+            target      = 'tag'
+            enforcement = 'active'
+            conditions  = @{
+                ref_name = @{ include = @('refs/tags/v*'); exclude = @() }
+            }
+            rules        = @(
+                @{ type = 'creation' }
+                @{ type = 'deletion' }
+                @{ type = 'non_fast_forward' }
+                @{ type = 'update' }
+            )
+            bypass_actors = @(
+                @{
+                    actor_id    = [int]$AppId
+                    actor_type  = 'Integration'
+                    bypass_mode = 'always'
+                }
+            )
+        } | ConvertTo-Json -Depth 10
+
+        $created = $false
         if (-not $DryRun) {
-            $installation = Invoke-GhApi "repos/$FullRepo/installation" -Silent
-            $InstallationId = $installation?.id
+            try {
+                Invoke-GhApi "repos/$FullRepo/rulesets" -Method POST -Body $TagRulesetBody | Out-Null
+                $created = $true
+            } catch {
+                Write-Warn "Tag ruleset API creation failed — ensure the App is installed on this repo/org."
+            }
         } else {
-            $InstallationId = '<INSTALLATION_ID>'
+            Write-Dry "POST repos/$FullRepo/rulesets (tag ruleset, App bypass actor_id=$AppId)"
+            $created = $true
         }
 
-        if (-not $InstallationId) {
-            Write-Warn "Could not retrieve installation ID for App $AppId."
-            Write-Warn "Ensure the app is installed on ${FullRepo} before re-running."
-            Show-TagRulesetUiInstructions
+        if ($created) {
+            Write-OK "Tag ruleset created with GitHub App bypass (App ID $AppId)."
         } else {
-            Write-Info "Installation ID: $InstallationId — creating tag ruleset with App bypass ..."
-
-            $TagRulesetBody = @{
-                name        = $TagRulesetName
-                target      = 'tag'
-                enforcement = 'active'
-                conditions  = @{
-                    ref_name = @{ include = @('refs/tags/v*'); exclude = @() }
-                }
-                rules        = @( @{ type = 'creation' } )
-                bypass_actors = @(
-                    @{
-                        actor_id    = $InstallationId
-                        actor_type  = 'Integration'
-                        bypass_mode = 'always'
-                    }
-                )
-            } | ConvertTo-Json -Depth 10
-
-            $created = $false
-            if (-not $DryRun) {
-                try {
-                    Invoke-GhApi "repos/$FullRepo/rulesets" -Method POST -Body $TagRulesetBody | Out-Null
-                    $created = $true
-                } catch {
-                    Write-Warn "Tag ruleset API creation failed (may need admin:org scope)."
-                }
-            } else {
-                Write-Dry "POST repos/$FullRepo/rulesets (tag ruleset, App bypass actor_id=$InstallationId)"
-                $created = $true
-            }
-
-            if ($created) {
-                Write-OK "Tag ruleset created with GitHub App bypass (installation $InstallationId)."
-            } else {
-                Show-TagRulesetUiInstructions
-            }
+            Show-TagRulesetUiInstructions
         }
     } else {
         Write-Warn "Tag ruleset bypass for github-actions[bot] requires the GitHub UI."

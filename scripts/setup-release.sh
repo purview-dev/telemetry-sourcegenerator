@@ -200,26 +200,13 @@ if ruleset_exists "${TAG_RULESET_NAME}"; then
 else
   info "Configuring tag ruleset for v* ..."
 
-  if [[ "${TOKEN_TYPE}" == "app" && -n "${APP_ID}" && -n "${APP_PEM}" ]]; then
-    # ── Option A: GitHub App — get installation ID and use it as bypass actor ──
-    info "GitHub App detected — fetching installation ID..."
+  if [[ "${TOKEN_TYPE}" == "app" && -n "${APP_ID}" ]]; then
+    # ── Option A: GitHub App — use App ID directly as the Integration bypass actor ──
+    # The bypass actor actor_id for an Integration (GitHub App) is the App's numeric ID,
+    # NOT the installation ID. The App must be installed on the repo (or org) first.
+    info "GitHub App detected — creating tag ruleset with App ID ${APP_ID} as bypass actor..."
 
-    if [[ "${DRY_RUN}" == true ]]; then
-      dry "gh api repos/${FULL_REPO}/installation --jq '.id'"
-      INSTALLATION_ID="<INSTALLATION_ID>"
-    else
-      INSTALLATION_ID=$(gh api "repos/${FULL_REPO}/installation" --jq '.id' 2>/dev/null || true)
-    fi
-
-    if [[ -z "${INSTALLATION_ID}" || "${INSTALLATION_ID}" == "null" ]]; then
-      warning "Could not determine installation ID for GitHub App ${APP_ID}."
-      warning "Ensure the app is installed on the repository first."
-      warning "Falling back to UI instructions for tag ruleset."
-      _tag_ruleset_ui_instructions
-    else
-      info "Installation ID: ${INSTALLATION_ID} — creating tag ruleset with App bypass..."
-
-      TAG_RULESET_JSON=$(cat <<ENDJSON
+    TAG_RULESET_JSON=$(cat <<ENDJSON
 {
   "name": "Protect release tags",
   "target": "tag",
@@ -227,9 +214,9 @@ else
   "conditions": {
     "ref_name": { "include": ["refs/tags/v*"], "exclude": [] }
   },
-  "rules": [{ "type": "creation" }],
+  "rules": [{ "type": "creation" }, { "type": "deletion" }, { "type": "non_fast_forward" }, { "type": "update" }],
   "bypass_actors": [{
-    "actor_id": ${INSTALLATION_ID},
+    "actor_id": ${APP_ID},
     "actor_type": "Integration",
     "bypass_mode": "always"
   }]
@@ -237,16 +224,15 @@ else
 ENDJSON
 )
 
-      if [[ "${DRY_RUN}" == true ]]; then
-        dry "POST repos/${FULL_REPO}/rulesets  (tag ruleset with App bypass, actor_id=${INSTALLATION_ID})"
+    if [[ "${DRY_RUN}" == true ]]; then
+      dry "POST repos/${FULL_REPO}/rulesets  (tag ruleset with App bypass, actor_id=${APP_ID})"
+    else
+      if echo "${TAG_RULESET_JSON}" | gh api "repos/${FULL_REPO}/rulesets" \
+          --method POST --header "Content-Type: application/json" --input - > /dev/null 2>&1; then
+        success "Tag ruleset created with GitHub App bypass (App ID ${APP_ID})."
       else
-        if echo "${TAG_RULESET_JSON}" | gh api "repos/${FULL_REPO}/rulesets" \
-            --method POST --header "Content-Type: application/json" --input - > /dev/null 2>&1; then
-          success "Tag ruleset created with GitHub App bypass (installation ${INSTALLATION_ID})."
-        else
-          warning "Tag ruleset creation via API failed — admin:org scope may be required."
-          _tag_ruleset_ui_instructions
-        fi
+        warning "Tag ruleset creation via API failed — ensure the App is installed on this repo/org."
+        _tag_ruleset_ui_instructions
       fi
     fi
 
