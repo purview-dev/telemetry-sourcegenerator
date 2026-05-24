@@ -5,7 +5,8 @@
 	"readme": "README.md",
 	"scripts": {
 		"changeset": "changeset",
-		"version-packages": "changeset version && bun .build/update-version.ts"
+		"version-packages": "changeset version && bun .build/update-version.ts",
+		"prepare": "husky"
 	},
 	"repository": {
 		"type": "git",
@@ -19,6 +20,7 @@
 	"homepage": "https://github.com/kjldev/purview-telemetry-sourcegenerator#readme",
 	"devDependencies": {
 		"@changesets/changelog-github": "^0.5.0",
-		"@changesets/cli": "^2.27.12"
+		"@changesets/cli": "^2.27.12",
+		"husky": "^9.1.7"
 	}
 }

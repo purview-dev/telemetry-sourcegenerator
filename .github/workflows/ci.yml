@@ -80,6 +80,10 @@ jobs:
       - name: Run tests
         run: dotnet test ${{ env.SOLUTION }} --no-build --verbosity normal --configuration ${{ env.CONFIGURATION }}
 
+  validate-workflows:
+    name: Validate Workflows
+    uses: kjldev/.github/.github/workflows/validate-workflows.yml@main
+
   changeset-check:
     name: Changeset Check
     uses: kjldev/.github/.github/workflows/changeset-check.yml@main
@@ -92,6 +96,7 @@ jobs:
       - format-check
       - build-and-test
       - build-and-test-samples
+      - validate-workflows
       - changeset-check
 
     steps:
@@ -100,6 +105,7 @@ jobs:
           FORMAT_CHECK_RESULT: ${{ needs['format-check'].result }}
           BUILD_AND_TEST_RESULT: ${{ needs['build-and-test'].result }}
           BUILD_AND_TEST_SAMPLES_RESULT: ${{ needs['build-and-test-samples'].result }}
+          VALIDATE_WORKFLOWS_RESULT: ${{ needs['validate-workflows'].result }}
           CHANGESET_CHECK_RESULT: ${{ needs['changeset-check'].result }}
         shell: bash
         run: |
@@ -109,6 +115,7 @@ jobs:
             ["Format Check"]="${FORMAT_CHECK_RESULT}"
             ["Build and Test"]="${BUILD_AND_TEST_RESULT}"
             ["Build and Test Samples"]="${BUILD_AND_TEST_SAMPLES_RESULT}"
+            ["Validate Workflows"]="${VALIDATE_WORKFLOWS_RESULT}"
             ["Changeset Check"]="${CHANGESET_CHECK_RESULT}"
           )
 
