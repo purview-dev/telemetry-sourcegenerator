@@ -1,0 +1,11 @@
+# act configuration for local workflow testing.
+# See: https://nektosact.com/usage/index.html
+
+# Use full Ubuntu image (has dotnet, node, bun, gh CLI pre-installed)
+-P ubuntu-latest=catthehacker/ubuntu:full-latest
+
+# Load secrets from local .secrets file (never commit this file)
+--secret-file .secrets
+
+# Load env vars for act-specific overrides
+--env-file .env.act

@@ -142,15 +142,18 @@ jobs:
             PRERELEASE_FLAG="--prerelease"
           fi
 
-          # Create as draft first — draft releases are never immutable, so assets
-          # can be freely attached. The release becomes immutable only after --draft=false.
+          # *.nupkg matches both the main package and *.symbols.nupkg.
+          # nullglob prevents failures if either pattern matches nothing.
+          shopt -s nullglob
+          ASSETS=( ./artifacts/nuget/*.nupkg )
+          shopt -u nullglob
+
           gh release create "${RELEASE_TAG}" \
             --draft \
             --title "${RELEASE_TAG}" \
             --generate-notes \
             ${PRERELEASE_FLAG} \
-            ./artifacts/nuget/*.nupkg \
-            ./artifacts/nuget/*.snupkg
+            "${ASSETS[@]}"
 
           # Publish: marks as latest and becomes immutable. Any retry will clean up above.
           gh release edit "${RELEASE_TAG}" \

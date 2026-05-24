@@ -197,3 +197,7 @@ node_modules/
 
 # BenchmarkDotNet output
 BenchmarkDotNet.Artifacts/!scripts/*
+
+# act local secrets
+.secrets
+.env.act
