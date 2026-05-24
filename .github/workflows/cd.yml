@@ -88,11 +88,9 @@ jobs:
         run: |
           set -euo pipefail
 
-          if git ls-remote --exit-code --tags origin "refs/tags/${RELEASE_TAG}" > /dev/null 2>&1; then
-            echo "::error::Tag ${RELEASE_TAG} already exists on origin. Refusing to replace an existing release version."
-            exit 1
-          fi
-
+          # A pre-existing tag is expected: commit-and-tag-version creates the tag
+          # locally and it may be pushed before this workflow runs. Only an existing
+          # GitHub Release is a hard error (it means the release was already published).
           release_status="$(
             curl -sS \
               -o release.json \
