@@ -3,12 +3,12 @@ using System.Collections.Immutable;
 
 namespace Purview.Telemetry.SourceGenerator.Records;
 
-public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnumerable<T>
+public readonly struct EquatableArray<T>(ImmutableArray<T> array)
+	: IEquatable<EquatableArray<T>>,
+		IEnumerable<T>
 	where T : IEquatable<T>
 {
-	readonly ImmutableArray<T> _array;
-
-	public EquatableArray(ImmutableArray<T> array) => _array = array;
+	readonly ImmutableArray<T> _array = array;
 
 	public int Length => _array.IsDefault ? 0 : _array.Length;
 

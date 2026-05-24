@@ -90,7 +90,7 @@ partial class ActivitySourceTargetClassEmitter
 
 	static bool GuardParameters(
 		ActivityBasedGenerationTarget methodTarget,
-		SourceProductionContext context,
+		SourceProductionContext _,
 		GenerationLogger? logger,
 		out ActivityBasedParameterTarget? activityParam,
 		out ActivityBasedParameterTarget? parentContextOrId,

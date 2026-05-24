@@ -1,0 +1,38 @@
+﻿{
+  Before:
+using System.Diagnostics;
+
+namespace Testing;
+
+public class MetadataService
+{
+	static readonly ActivitySource _source = new ActivitySource("MetadataService", "1.0.0");
+
+	public void Fetch(string id)
+	{
+		using var activity = _source.StartActivity("FetchMetadata", ActivityKind.Internal);
+	}
+},
+  After:
+using System.Diagnostics;
+using Purview.Telemetry;
+
+namespace Testing;
+[ActivitySource]
+public interface IMetadataServiceTracing
+{
+	[Activity]
+	Activity? FetchMetadata();
+
+}
+
+public class MetadataService
+{
+	static readonly IMetadataServiceTracing _source = new ActivitySource("MetadataService", "1.0.0");
+
+	public void Fetch(string id)
+	{
+		using var activity = _source.FetchMetadata();
+	}
+}
+}

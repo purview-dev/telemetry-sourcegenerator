@@ -22,6 +22,7 @@ namespace Purview.Telemetry
 /// Controls which generation mode is used for <see cref="global::Microsoft.Extensions.Logging.ILogger"/>-based log methods.
 /// </summary>
 [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+[global::Microsoft.CodeAnalysis.Embedded]
 enum LoggerGenerationMode
 {
 	/// <summary>

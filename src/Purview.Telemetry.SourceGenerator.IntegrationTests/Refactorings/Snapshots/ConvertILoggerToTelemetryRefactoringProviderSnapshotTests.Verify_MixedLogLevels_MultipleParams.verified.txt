@@ -1,0 +1,67 @@
+﻿{
+  Before:
+using System;
+using Microsoft.Extensions.Logging;
+
+namespace Testing;
+
+public class TransactionService
+{
+	readonly ILogger<TransactionService> _logger;
+
+	public TransactionService(ILogger<TransactionService> logger) => _logger = logger;
+
+	public void Execute(string txId, decimal amount, string currency)
+	{
+		_logger.LogDebug("Starting tx {TxId} for {Amount} {Currency}", txId, amount, currency);
+		_logger.LogInformation("Tx {TxId} processing {Amount}", txId, amount);
+		_logger.LogWarning("Tx {TxId} amount {Amount} exceeds threshold", txId, amount);
+	}
+
+	public void Fail(string txId, Exception ex)
+	{
+		_logger.LogError(ex, "Tx {TxId} failed", txId);
+	}
+},
+  After:
+using System;
+using Microsoft.Extensions.Logging;
+using Purview.Telemetry;
+
+namespace Testing;
+[Logger]
+public interface ITransactionServiceLogs
+{
+	[Debug("Starting tx {TxId} for {Amount} {Currency}")]
+	void StartingTxFor(string txId, decimal amount, string currency);
+
+	[Info("Tx {TxId} processing {Amount}")]
+	void TxProcessing(string txId, decimal amount);
+
+	[Warning("Tx {TxId} amount {Amount} exceeds threshold")]
+	void TxAmountExceedsThreshold(string txId, decimal amount);
+
+	[Error("Tx {TxId} failed")]
+	void TxFailed(System.Exception exception, string txId);
+
+}
+
+public class TransactionService
+{
+	readonly ITransactionServiceLogs _logger;
+
+	public TransactionService(ITransactionServiceLogs logger) => _logger = logger;
+
+	public void Execute(string txId, decimal amount, string currency)
+	{
+		_logger.StartingTxFor(txId, amount, currency);
+		_logger.TxProcessing(txId, amount);
+		_logger.TxAmountExceedsThreshold(txId, amount);
+	}
+
+	public void Fail(string txId, Exception ex)
+	{
+		_logger.TxFailed(ex, txId);
+	}
+}
+}

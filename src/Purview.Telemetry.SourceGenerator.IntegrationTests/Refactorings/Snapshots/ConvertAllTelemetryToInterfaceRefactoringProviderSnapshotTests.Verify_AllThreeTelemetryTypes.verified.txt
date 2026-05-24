@@ -1,0 +1,87 @@
+﻿{
+  Before:
+using System;
+using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using Microsoft.Extensions.Logging;
+
+namespace Testing;
+
+public class OrderService
+{
+	readonly ILogger<OrderService> _logger;
+	static readonly ActivitySource _activitySource = new("OrderService");
+	readonly Counter<long> _orderCounter;
+
+	public OrderService(ILogger<OrderService> logger, IMeterFactory meterFactory)
+	{
+		_logger = logger;
+		var meter = meterFactory.Create("OrderService");
+		_orderCounter = meter.CreateCounter<long>("orders-processed");
+	}
+
+	public void PlaceOrder(string orderId, decimal amount)
+	{
+		using var activity = _activitySource.StartActivity("PlaceOrder", ActivityKind.Internal);
+		_logger.LogInformation("Placing order {OrderId} for {Amount}", orderId, amount);
+		_orderCounter.Add(1);
+	}
+
+	public void CancelOrder(string orderId, Exception ex)
+	{
+		_logger.LogError(ex, "Order {OrderId} cancelled", orderId);
+	}
+},
+  After:
+using System;
+using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using Microsoft.Extensions.Logging;
+using Purview.Telemetry;
+
+namespace Testing;
+[ActivitySource]
+[Logger]
+[Meter]
+public interface IOrderServiceTelemetry
+{
+	[Activity]
+	Activity? PlaceOrder();
+
+	[Info("Placing order {OrderId} for {Amount}")]
+	void PlacingOrderFor(string orderId, decimal amount);
+
+	[Error("Order {OrderId} cancelled")]
+	void OrderCancelled(System.Exception exception, string orderId);
+
+	[AutoCounter]
+	void Order();
+
+}
+
+public class OrderService
+{
+	readonly IOrderServiceTelemetry _logger;
+	static readonly ActivitySource _activitySource = new("OrderService");
+	readonly Counter<long> _orderCounter;
+
+	public OrderService(IOrderServiceTelemetry logger, IMeterFactory meterFactory)
+	{
+		_logger = logger;
+		var meter = meterFactory.Create("OrderService");
+		_orderCounter = meter.CreateCounter<long>("orders-processed");
+	}
+
+	public void PlaceOrder(string orderId, decimal amount)
+	{
+		using var activity = _activitySource.StartActivity("PlaceOrder", ActivityKind.Internal);
+		_logger.PlacingOrderFor(orderId, amount);
+		_orderCounter.Add(1);
+	}
+
+	public void CancelOrder(string orderId, Exception ex)
+	{
+		_logger.OrderCancelled(ex, orderId);
+	}
+}
+}

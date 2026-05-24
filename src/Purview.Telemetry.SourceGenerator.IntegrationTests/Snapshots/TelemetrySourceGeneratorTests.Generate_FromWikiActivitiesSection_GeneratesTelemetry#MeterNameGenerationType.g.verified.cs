@@ -20,6 +20,7 @@ namespace Purview.Telemetry
 /// Determines how meter names are generated when not explicitly specified.
 /// </summary>
 [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+[global::Microsoft.CodeAnalysis.Embedded]
 enum MeterNameGenerationType
 {
 	/// <summary>

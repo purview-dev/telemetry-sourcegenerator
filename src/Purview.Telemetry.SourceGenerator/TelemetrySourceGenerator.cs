@@ -54,6 +54,11 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator, IL
 		// can resolve attribute types before it runs.
 		context.RegisterPostInitializationOutput(ctx =>
 		{
+			// Adds Microsoft.CodeAnalysis.EmbeddedAttribute to the compilation so generated marker
+			// types (decorated with [Microsoft.CodeAnalysis.Embedded]) are invisible to downstream
+			// assemblies, preventing CS0436 conflicts when multiple projects reference this generator.
+			ctx.AddEmbeddedAttributeDefinition();
+
 			_logger?.Debug("--- Adding templates.");
 
 			foreach (var template in Constants.GetAllTemplates())

@@ -22,6 +22,7 @@ namespace Purview.Telemetry
 /// The types of prefixes that can be used for the log entry name generation.
 /// </summary>
 [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+[global::Microsoft.CodeAnalysis.Embedded]
 enum LogPrefixType
 {
 	/// <summary>

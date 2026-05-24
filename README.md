@@ -13,15 +13,19 @@ Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system
 
 ## Supported Frameworks
 
+**Consumer runtime targets:**
 - .NET Framework 4.8
 - .NET 8 or higher
+
+**Build toolchain requirement:**
+- Visual Studio 2022 17.14+ or .NET 10 SDK (Roslyn 4.14.0+)
 
 ## Installation
 
 Add to your `Directory.Build.props` or `.csproj` file:
 
 ```xml
-<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="4.1.0">
+<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="4.2.0">
   <PrivateAssets>all</PrivateAssets>
   <IncludeAssets>analyzers</IncludeAssets>
 </PackageReference>

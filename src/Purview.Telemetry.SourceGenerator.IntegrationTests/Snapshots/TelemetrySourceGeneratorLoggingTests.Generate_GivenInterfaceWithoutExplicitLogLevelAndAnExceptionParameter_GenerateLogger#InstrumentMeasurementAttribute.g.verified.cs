@@ -20,6 +20,7 @@ namespace Purview.Telemetry
 /// Determines if the parameter is an instrument measurement.
 /// </summary>
 [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+[global::Microsoft.CodeAnalysis.Embedded]
 [global::System.AttributeUsage(global::System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
 [global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
 sealed class InstrumentMeasurementAttribute : global::System.Attribute

@@ -20,6 +20,7 @@ namespace Purview.Telemetry
 /// Specifies the meter type generated corresponds to a <see cref="global::System.Diagnostics.Metrics.Histogram{T}"/>.
 /// </summary>
 [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+[global::Microsoft.CodeAnalysis.Embedded]
 [global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
 [global::System.Diagnostics.Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]
 sealed class HistogramAttribute : global::System.Attribute

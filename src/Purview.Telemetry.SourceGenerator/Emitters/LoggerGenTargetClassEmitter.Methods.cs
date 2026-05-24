@@ -973,7 +973,7 @@ partial class LoggerGenTargetClassEmitter
 		StringBuilder builder,
 		int indent,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		GenerationLogger? _,
 		bool emitNullable
 	)
 	{

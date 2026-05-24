@@ -1,0 +1,82 @@
+﻿{
+  Before:
+using System.Diagnostics;
+using System.Diagnostics.Metrics;
+
+namespace Testing;
+
+public class CachingLayer
+{
+	static readonly ActivitySource _activitySource = new("CachingLayer");
+	readonly Counter<long> _hits;
+	readonly Counter<long> _misses;
+
+	public CachingLayer(IMeterFactory meterFactory)
+	{
+		var meter = meterFactory.Create("CachingLayer");
+		_hits = meter.CreateCounter<long>("cache-hits");
+		_misses = meter.CreateCounter<long>("cache-misses");
+	}
+
+	public void Hit(string key)
+	{
+		using var activity = _activitySource.StartActivity("CacheHit");
+		_hits.Add(1);
+	}
+
+	public void Miss(string key)
+	{
+		using var activity = _activitySource.StartActivity("CacheMiss");
+		_misses.Add(1);
+	}
+},
+  After:
+using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using Purview.Telemetry;
+
+namespace Testing;
+[ActivitySource]
+[Meter]
+public interface ICachingLayerTelemetry
+{
+	[Activity]
+	Activity? CacheHit();
+
+	[Activity]
+	Activity? CacheMiss();
+
+	[AutoCounter]
+	void Hits();
+
+	[AutoCounter]
+	void Misses();
+
+}
+
+public class CachingLayer
+{
+	static readonly ICachingLayerTelemetry _activitySource = new("CachingLayer");
+	readonly Counter<long> _hits;
+	readonly Counter<long> _misses;
+
+	public CachingLayer(IMeterFactory meterFactory)
+	{
+		var meter = meterFactory.Create("CachingLayer");
+		_hits = meter.CreateCounter<long>("cache-hits");
+		_misses = meter.CreateCounter<long>("cache-misses");
+	}
+
+	public void Hit(string key)
+	{
+		using var activity = _activitySource.CacheHit();
+		_hits.Add(1);
+	}
+
+	public void Miss(string key)
+	{
+		using var activity = _activitySource.CacheMiss();
+		_misses.Add(1);
+	}
+}
+}

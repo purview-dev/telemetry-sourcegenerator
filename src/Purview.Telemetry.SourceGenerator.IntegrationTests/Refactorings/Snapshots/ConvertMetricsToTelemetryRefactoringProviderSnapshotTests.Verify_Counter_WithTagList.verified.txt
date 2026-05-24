@@ -1,0 +1,64 @@
+﻿{
+  Before:
+using System.Diagnostics.Metrics;
+
+namespace Testing;
+
+public class SearchMetrics
+{
+	readonly Counter<long> _searchCounter;
+
+	public SearchMetrics(IMeterFactory meterFactory)
+	{
+		var meter = meterFactory.Create("SearchMetrics");
+		_searchCounter = meter.CreateCounter<long>("searches");
+	}
+
+	public void RecordSearch(string query, string index, string tenant, bool cacheHit)
+	{
+		var tags = new TagList
+		{
+			{ "query_type", query },
+			{ "index", index },
+			{ "tenant", tenant },
+			{ "cache_hit", cacheHit }
+		};
+		_searchCounter.Add(1, tags);
+	}
+},
+  After:
+using System.Diagnostics.Metrics;
+using Purview.Telemetry;
+
+namespace Testing;
+[Meter]
+public interface ISearchMetricsMetrics
+{
+	[AutoCounter]
+	void Search();
+
+}
+
+public class SearchMetrics
+{
+	readonly ISearchMetricsMetrics _searchCounter;
+
+	public SearchMetrics(IMeterFactory meterFactory)
+	{
+		var meter = meterFactory.Create("SearchMetrics");
+		_searchCounter = meter.CreateCounter<long>("searches");
+	}
+
+	public void RecordSearch(string query, string index, string tenant, bool cacheHit)
+	{
+		var tags = new TagList
+		{
+			{ "query_type", query },
+			{ "index", index },
+			{ "tenant", tenant },
+			{ "cache_hit", cacheHit }
+		};
+		_searchCounter.Search();
+	}
+}
+}

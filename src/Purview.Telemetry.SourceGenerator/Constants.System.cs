@@ -53,15 +53,10 @@ partial class Constants
 			"[global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]";
 
 		const string GeneratedCodeConstant =
-			"[global::System.CodeDom.Compiler.GeneratedCodeAttribute(\"{0}\", \"{1}\")]";
+			"[global::System.CodeDom.Compiler.GeneratedCodeAttribute(\"Purview.Telemetry.SourceGenerator\", \"{0}\")]";
 
 		public static readonly Lazy<string> GeneratedCode = new(() =>
-			string.Format(
-				CultureInfo.InvariantCulture,
-				GeneratedCodeConstant,
-				"Purview.Telemetry.SourceGenerator",
-				Version.Value
-			)
+			string.Format(CultureInfo.InvariantCulture, GeneratedCodeConstant, Version.Value)
 		);
 
 		public static class BuiltInTypes

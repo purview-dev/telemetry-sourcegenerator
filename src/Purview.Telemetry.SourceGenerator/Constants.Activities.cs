@@ -10,6 +10,8 @@ partial class Constants
 		public const bool UseRecordExceptionRulesDefault = true;
 		public const bool RecordExceptionEscapedDefault = true;
 
+		public const string ActivitySourceAttributeShortName = "ActivitySource";
+
 		public const string DefaultActivitySourceName = "purview";
 		public const int DefaultActivityKind = 0;
 

@@ -20,6 +20,7 @@ namespace Purview.Telemetry
 /// Marker attribute to control the generation of telemetry-based classes.
 /// </summary>
 [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Purview.Telemetry.SourceGenerator", "0.1.0.0")]
+[global::Microsoft.CodeAnalysis.Embedded]
 [global::System.AttributeUsage(
 	global::System.AttributeTargets.Assembly | global::System.AttributeTargets.Interface,
 	AllowMultiple = false

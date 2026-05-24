@@ -16,6 +16,7 @@ NCrunchCache/
 NDepends/
 TestResults/
 artifacts/
+BenchmarkDotNet.Artifacts/
 test-result-artifacts/
 
 # Build results

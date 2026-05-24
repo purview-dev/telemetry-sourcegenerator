@@ -1,0 +1,59 @@
+﻿{
+  Before:
+using System.Diagnostics.Metrics;
+
+namespace Testing;
+
+public class ThroughputMonitor
+{
+	readonly Counter<long> _events;
+	readonly Histogram<double> _latency;
+
+	public ThroughputMonitor(IMeterFactory meterFactory)
+	{
+		var meter = meterFactory.Create("ThroughputMonitor");
+		_events = meter.CreateCounter<long>("events-processed");
+		_latency = meter.CreateHistogram<double>("processing-latency-ms");
+	}
+
+	public void RecordEvent(double latencyMs)
+	{
+		_events.Add(1);
+		_latency.Record(latencyMs);
+	}
+},
+  After:
+using System.Diagnostics.Metrics;
+using Purview.Telemetry;
+
+namespace Testing;
+[Meter]
+public interface IThroughputMonitorTelemetry
+{
+	[AutoCounter]
+	void Events();
+
+	[Histogram]
+	void Latency(double value);
+
+}
+
+public class ThroughputMonitor
+{
+	readonly IThroughputMonitorTelemetry _events;
+	readonly IThroughputMonitorTelemetry _latency;
+
+	public ThroughputMonitor(IMeterFactory meterFactory)
+	{
+		var meter = meterFactory.Create("ThroughputMonitor");
+		_events = meter.CreateCounter<long>("events-processed");
+		_latency = meter.CreateHistogram<double>("processing-latency-ms");
+	}
+
+	public void RecordEvent(double latencyMs)
+	{
+		_events.Events();
+		_latency.Latency(latencyMs);
+	}
+}
+}

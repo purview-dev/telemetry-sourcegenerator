@@ -1,0 +1,46 @@
+﻿{
+  Before:
+using System.Diagnostics.Metrics;
+
+namespace Testing;
+
+public class ConnectionPool
+{
+	readonly UpDownCounter<int> _activeConnections;
+
+	public ConnectionPool(IMeterFactory meterFactory)
+	{
+		var meter = meterFactory.Create("ConnectionPool");
+		_activeConnections = meter.CreateUpDownCounter<int>("active-connections");
+	}
+
+	public void Acquired() => _activeConnections.Add(1);
+	public void Released() => _activeConnections.Add(-1);
+},
+  After:
+using System.Diagnostics.Metrics;
+using Purview.Telemetry;
+
+namespace Testing;
+[Meter]
+public interface IConnectionPoolMetrics
+{
+	[UpDownCounter]
+	void ActiveConnections(int value);
+
+}
+
+public class ConnectionPool
+{
+	readonly IConnectionPoolMetrics _activeConnections;
+
+	public ConnectionPool(IMeterFactory meterFactory)
+	{
+		var meter = meterFactory.Create("ConnectionPool");
+		_activeConnections = meter.CreateUpDownCounter<int>("active-connections");
+	}
+
+	public void Acquired() => _activeConnections.ActiveConnections(1);
+	public void Released() => _activeConnections.ActiveConnections(-1);
+}
+}

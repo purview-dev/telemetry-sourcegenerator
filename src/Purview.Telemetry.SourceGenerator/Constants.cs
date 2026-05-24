@@ -6,6 +6,7 @@ namespace Purview.Telemetry;
 
 static partial class Constants
 {
+	public const string PurviewTelemetryNamespace = "Purview.Telemetry";
 	public const string SystemDiagnosticsNamespace = "System.Diagnostics";
 	public const string EmbedAttributesHashDefineName = "PURVIEW_TELEMETRY_ATTRIBUTES";
 

@@ -1,0 +1,39 @@
+﻿{
+  Before:
+using System.Diagnostics.Metrics;
+
+namespace Testing;
+
+public class StorageMetrics(IMeterFactory meterFactory)
+{
+	readonly Counter<long> _writes = meterFactory.Create("StorageMetrics").CreateCounter<long>("writes");
+	readonly Counter<long> _reads = meterFactory.Create("StorageMetrics").CreateCounter<long>("reads");
+
+	public void RecordWrite() => _writes.Add(1);
+	public void RecordRead() => _reads.Add(1);
+},
+  After:
+using System.Diagnostics.Metrics;
+using Purview.Telemetry;
+
+namespace Testing;
+[Meter]
+public interface IStorageMetricsMetrics
+{
+	[AutoCounter]
+	void Writes();
+
+	[AutoCounter]
+	void Reads();
+
+}
+
+public class StorageMetrics(IMeterFactory meterFactory)
+{
+	readonly IStorageMetricsMetrics _writes = meterFactory.Create("StorageMetrics").CreateCounter<long>("writes");
+	readonly IStorageMetricsMetrics _reads = meterFactory.Create("StorageMetrics").CreateCounter<long>("reads");
+
+	public void RecordWrite() => _writes.Writes();
+	public void RecordRead() => _reads.Reads();
+}
+}

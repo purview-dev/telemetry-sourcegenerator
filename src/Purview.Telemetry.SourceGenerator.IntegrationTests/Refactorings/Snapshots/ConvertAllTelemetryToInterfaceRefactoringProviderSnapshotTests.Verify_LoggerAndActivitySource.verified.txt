@@ -1,0 +1,67 @@
+﻿{
+  Before:
+using System;
+using System.Diagnostics;
+using Microsoft.Extensions.Logging;
+
+namespace Testing;
+
+public class BackgroundJob
+{
+	readonly ILogger<BackgroundJob> _logger;
+	static readonly ActivitySource _activitySource = new("BackgroundJob");
+
+	public BackgroundJob(ILogger<BackgroundJob> logger) => _logger = logger;
+
+	public void Execute(string jobId)
+	{
+		using var activity = _activitySource.StartActivity("Execute", ActivityKind.Internal);
+		_logger.LogInformation("Executing job {JobId}", jobId);
+	}
+
+	public void Failed(string jobId, Exception ex)
+	{
+		_logger.LogError(ex, "Job {JobId} failed", jobId);
+	}
+},
+  After:
+using System;
+using System.Diagnostics;
+using Microsoft.Extensions.Logging;
+using Purview.Telemetry;
+
+namespace Testing;
+[ActivitySource]
+[Logger]
+public interface IBackgroundJobTelemetry
+{
+	[Activity]
+	Activity? Execute();
+
+	[Info("Executing job {JobId}")]
+	void ExecutingJob(string jobId);
+
+	[Error("Job {JobId} failed")]
+	void JobFailed(System.Exception exception, string jobId);
+
+}
+
+public class BackgroundJob
+{
+	readonly IBackgroundJobTelemetry _logger;
+	static readonly ActivitySource _activitySource = new("BackgroundJob");
+
+	public BackgroundJob(IBackgroundJobTelemetry logger) => _logger = logger;
+
+	public void Execute(string jobId)
+	{
+		using var activity = _activitySource.StartActivity("Execute", ActivityKind.Internal);
+		_logger.ExecutingJob(jobId);
+	}
+
+	public void Failed(string jobId, Exception ex)
+	{
+		_logger.JobFailed(ex, jobId);
+	}
+}
+}

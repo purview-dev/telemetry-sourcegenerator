@@ -12,6 +12,8 @@ partial class Constants
 		public const int MaxNonExceptionParameters = 6;
 		public const string DefaultLogLevelConstantName = "DEFAULT_LOGLEVEL";
 
+		public const string LoggerAttributeShortName = "Logger";
+
 		public const string LoggerFieldName = "_logger";
 
 		public const int DefaultLevel = 2;

@@ -1,0 +1,42 @@
+﻿{
+  Before:
+using Microsoft.Extensions.Logging;
+
+namespace Testing;
+
+public class WeatherService
+{
+	readonly ILogger<WeatherService> _logger;
+
+	public WeatherService(ILogger<WeatherService> logger) => _logger = logger;
+
+	public void GetWeather(string city, int days)
+	{
+		_logger.LogInformation("Getting weather for {City} over {Days} days", city, days);
+	}
+},
+  After:
+using Microsoft.Extensions.Logging;
+using Purview.Telemetry;
+
+namespace Testing;
+[Logger]
+public interface IWeatherServiceLogs
+{
+	[Info("Getting weather for {City} over {Days} days")]
+	void GettingWeatherForOverDays(string city, int days);
+
+}
+
+public class WeatherService
+{
+	readonly IWeatherServiceLogs _logger;
+
+	public WeatherService(IWeatherServiceLogs logger) => _logger = logger;
+
+	public void GetWeather(string city, int days)
+	{
+		_logger.GettingWeatherForOverDays(city, days);
+	}
+}
+}
