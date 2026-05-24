@@ -163,3 +163,25 @@ jobs:
         if: ${{ steps.release-check.outputs.should_release != 'true' }}
         run: echo "Release ${{ steps.version.outputs.tag }} already exists — skipping."
 
+      - name: Set up Bun
+        if: ${{ steps.release-check.outputs.should_release == 'true' }}
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        if: ${{ steps.release-check.outputs.should_release == 'true' }}
+        run: bun install
+
+      - name: Update wiki
+        if: ${{ steps.release-check.outputs.should_release == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+
+          bun .build/update-version.ts
+

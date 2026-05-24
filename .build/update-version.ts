@@ -147,6 +147,14 @@ function pushWiki() {
 }
 
 // --- Main ---
-pullWiki();
+// When running in CI (changeset version PR creation), skip the wiki push.
+// The wiki is updated post-release in the CD pipeline instead.
+const isCI = !!process.env.GITHUB_ACTIONS;
+
+if (!isCI) {
+	pullWiki();
+}
 updateFilesVersion();
-pushWiki();
+if (!isCI) {
+	pushWiki();
+}
