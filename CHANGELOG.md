@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.2.0](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.1.0...v4.2.0) (2026-05-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* consumers must build with VS 2022 17.14+ or .NET 10 SDK
+(10.0.200+). Runtime targets (.NET 4.8, .NET 8+) are unaffected.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+
+### Features
+
+* adding Benchmark.DotNet Artifacts to teh git ignore ([a330703](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/a330703e12713164a4a315ddab0af83f004d9624))
+* use AddEmbeddedAttributeDefinition and apply [Embedded] to generated marker types ([0be0054](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/0be0054c8403f77a48b401f0fc3a9ebbe34ca74d))
+
+
+### Bug Fixes
+
+* trigger CD for merged code changes ([4c76c82](https://github.com/purview-dev/purview-telemetry-sourcegenerator/commit/4c76c828ada945c6a9e2fcea9676cb5be7ab4005))
+
 ## [4.1.0](https://github.com/purview-dev/purview-telemetry-sourcegenerator/compare/v4.0.0...v4.1.0) (2026-04-16)
 
 
