@@ -64,6 +64,54 @@ error()   { echo -e "${RED}  ✖ ${RESET}$*" >&2; }
 header()  { echo -e "\n${BOLD}${CYAN}▶ $*${RESET}"; }
 dry()     { echo -e "${YELLOW}  [dry-run]${RESET} $*"; }
 
+# ─── helper functions ─────────────────────────────────────────────────────────
+gh_api() {
+  if [[ "${DRY_RUN}" == true ]]; then
+    dry "gh api $*"
+    return 0
+  fi
+  gh api "$@"
+}
+
+ruleset_exists() {
+  local name="$1"
+  gh api "repos/${FULL_REPO}/rulesets" --jq ".[] | select(.name == \"${name}\") | .id" 2>/dev/null | grep -q .
+}
+
+label_exists() {
+  local name="$1"
+  gh api "repos/${FULL_REPO}/labels" --jq ".[].name" 2>/dev/null | grep -qxF "${name}"
+}
+
+print_help() {
+  awk '
+    /^# =============================================================================$/ {
+      delimiter_count++
+      if (delimiter_count == 1) {
+        next
+      }
+      if (delimiter_count == 2) {
+        exit
+      }
+    }
+    delimiter_count >= 1 {
+      sub(/^# ?/, "")
+      print
+    }
+  ' "$0"
+}
+
+_tag_ruleset_ui_instructions() {
+  echo ""
+  echo -e "  ${BOLD}Manual step required — Tag Ruleset:${RESET}"
+  echo -e "  1. Navigate to: https://github.com/${FULL_REPO}/settings/rules/new?target=tag"
+  echo -e "  2. Name:   Protect release tags"
+  echo -e "  3. Target: refs/tags/v*"
+  echo -e "  4. Rules:  ✅ Restrict creations"
+  echo -e "  5. Bypass: Add → search 'GitHub Actions' → select it → Save"
+  echo ""
+}
+
 # ─── argument parsing ─────────────────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -76,7 +124,7 @@ while [[ $# -gt 0 ]]; do
     --app-pem)       APP_PEM="$2";   shift 2 ;;
     --dry-run)       DRY_RUN=true;   shift   ;;
     -h|--help)
-      sed -n '/^# ====/,/^# ====/p' "$0" | sed 's/^# \{0,2\}//;s/^#//'
+      print_help
       exit 0
       ;;
     *) error "Unknown argument: $1"; exit 1 ;;
@@ -109,25 +157,6 @@ else
 fi
 
 FULL_REPO="${OWNER}/${REPO}"
-
-# ─── helper functions ─────────────────────────────────────────────────────────
-gh_api() {
-  if [[ "${DRY_RUN}" == true ]]; then
-    dry "gh api $*"
-    return 0
-  fi
-  gh api "$@"
-}
-
-ruleset_exists() {
-  local name="$1"
-  gh api "repos/${FULL_REPO}/rulesets" --jq ".[] | select(.name == \"${name}\") | .id" 2>/dev/null | grep -q .
-}
-
-label_exists() {
-  local name="$1"
-  gh api "repos/${FULL_REPO}/labels" --jq ".[].name" 2>/dev/null | grep -qxF "${name}"
-}
 
 # ─── main setup ───────────────────────────────────────────────────────────────
 echo ""
@@ -242,17 +271,6 @@ ENDJSON
     _tag_ruleset_ui_instructions
   fi
 fi
-
-_tag_ruleset_ui_instructions() {
-  echo ""
-  echo -e "  ${BOLD}Manual step required — Tag Ruleset:${RESET}"
-  echo -e "  1. Navigate to: https://github.com/${FULL_REPO}/settings/rules/new?target=tag"
-  echo -e "  2. Name:   Protect release tags"
-  echo -e "  3. Target: refs/tags/v*"
-  echo -e "  4. Rules:  ✅ Restrict creations"
-  echo -e "  5. Bypass: Add → search 'GitHub Actions' → select it → Save"
-  echo ""
-}
 
 # ── Step 3: skip-changeset label ──────────────────────────────────────────────
 header "Step 3/4 — GitHub label: skip-changeset"
