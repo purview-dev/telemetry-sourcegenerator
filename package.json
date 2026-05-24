@@ -1,6 +1,6 @@
 {
   "name": "purview-telemetry-sourcegenerator",
-  "version": "4.2.0",
+  "version": "4.3.0",
   "description": "Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.activitysource), [`ILogger`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.ilogger), and [`Metrics`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics) based on interface methods.",
   "readme": "README.md",
   "scripts": {
