@@ -1,11 +1,11 @@
 #!/bin/sh
 # Validate GitHub Actions workflow files before push.
-# Install actionlint: go install github.com/rhysd/actionlint/cmd/actionlint@latest
+# Install actionlint: scoop install actionlint  (or: go install github.com/rhysd/actionlint/cmd/actionlint@latest)
 
 if command -v actionlint >/dev/null 2>&1; then
   echo "Running actionlint..."
   actionlint
 else
   echo "⚠️  actionlint not found — workflow validation skipped."
-  echo "   Install: go install github.com/rhysd/actionlint/cmd/actionlint@latest"
+  echo "   Install: scoop install actionlint  (or: go install github.com/rhysd/actionlint/cmd/actionlint@latest)"
 fi
