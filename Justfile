@@ -38,17 +38,15 @@ test-s:
     @Write-Host "Running tests for {{ BLUE }}{{ sample_solution_file }}{{ NORMAL }} with {{ YELLOW }}{{ configuration }}{{ NORMAL }}..."
     @dotnet test --solution "{{ sample_solution_file }}" --configuration "{{ configuration }}"
 
-# Creates a new release (final or prerelease) using bun
+# Creates a new changeset to describe the changes in your current branch (requires bun)
 [group('Versioning and Release')]
-release-final:
-    @Write-Host "Committing the changes and creating a new release..."
-    @bun release
+changeset:
+    @bun changeset
 
-# Creates a new prerelease using bun
+# Shows pending changesets and what version bump they imply (requires bun)
 [group('Versioning and Release')]
-release-pre:
-    @Write-Host "Committing the changes and creating a new release..."
-    @bun release -- --prerelease prerelease
+changeset-status:
+    @bun changeset status
 
 # Packs the source generator into a NuGet package and outputs it to the specified folder
 [group('Build and Test')]

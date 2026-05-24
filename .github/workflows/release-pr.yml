@@ -1,0 +1,44 @@
+name: Release PR
+
+permissions:
+  contents: write
+  pull-requests: write
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release-pr:
+    name: Create or update Release PR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        if: ${{ secrets.APP_ID != '' }}
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token || secrets.CHANGESET_TOKEN }}
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Create or update Release PR
+        uses: changesets/action@v1
+        with:
+          version: bun run version-packages
+          createGithubReleases: false
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token || secrets.CHANGESET_TOKEN }}

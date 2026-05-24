@@ -4,24 +4,21 @@
 	"description": "Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.activitysource), [`ILogger`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.ilogger), and [`Metrics`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics) based on interface methods.",
 	"readme": "README.md",
 	"scripts": {
-		"release": "commit-and-tag-version --commit-all"
+		"changeset": "changeset",
+		"version-packages": "changeset version && bun .build/update-version.ts"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/purview-dev/purview-telemetry-sourcegenerator.git"
+		"url": "git+https://github.com/kjldev/purview-telemetry-sourcegenerator.git"
 	},
 	"author": "Kieron Lanning (https://github.com/kieronlanning/)",
 	"license": "ISC",
 	"bugs": {
-		"url": "https://github.com/purview-dev/purview-telemetry-sourcegenerator/issues"
+		"url": "https://github.com/kjldev/purview-telemetry-sourcegenerator/issues"
 	},
-	"homepage": "https://github.com/purview-dev/purview-telemetry-sourcegenerator#readme",
+	"homepage": "https://github.com/kjldev/purview-telemetry-sourcegenerator#readme",
 	"devDependencies": {
-		"commit-and-tag-version": "^12.6.1"
-	},
-	"commit-and-tag-version": {
-		"scripts": {
-			"postbump": "just update-version && git add ."
-		}
+		"@changesets/changelog-github": "^0.5.0",
+		"@changesets/cli": "^2.27.12"
 	}
 }

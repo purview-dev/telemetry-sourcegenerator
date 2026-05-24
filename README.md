@@ -279,3 +279,9 @@ public enum NamingConvention
 ```
 
 **Recommendation:** Use `NamingConvention.OpenTelemetry` (default) for new projects. Only use `Legacy` if you need exact v3 compatibility.
+
+## Contributing
+
+Contributions are welcome! See the [Contributing guide](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Contributing) for development setup, testing instructions, and the changeset-based release workflow.
+
+Every user-facing change requires a [changeset](docs/release-process.md) — run `just changeset` to create one.
