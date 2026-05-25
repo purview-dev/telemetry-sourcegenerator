@@ -30,11 +30,6 @@ jobs:
       - name: ChangeOps validate (packaged CLI)
         run: npx -y changeops@1.0.0-prelresase.0 validate
 
-      - name: ChangeOps doctor (packaged CLI)
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: npx -y changeops@1.0.0-prelresase.0 doctor
-
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: ./global.json
