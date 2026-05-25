@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "platform": "github",
+  "buildSystem": "dotnet",
+  "release": {
+    "baseBranch": "main",
+    "releaseBranchPattern": "releases/v*",
+    "changesets": {
+      "enabled": true,
+      "enforcedOnPR": true,
+      "bypassLabel": "no-changeset"
+    }
+  },
+  "github": {
+    "owner": "kjldev",
+    "repo": "purview-telemetry-sourcegenerator"
+  }
+}

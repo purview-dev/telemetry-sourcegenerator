@@ -1,0 +1,68 @@
+name: Release Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: release-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-release-branch:
+    name: Validate release branch
+    runs-on: ubuntu-latest
+    if: startsWith(github.head_ref, 'releases/')
+    env:
+      CONFIGURATION: Release
+      MAIN_SOLUTION: ./src/Purview.Telemetry.SourceGenerator.slnx
+      SAMPLE_SOLUTION: ./samples/SampleApp/SampleApp.slnx
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: ./global.json
+
+      - name: Verify version matches branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(node -p "require('./package.json').version")"
+          EXPECTED="releases/v${VERSION}"
+          if [[ "${GITHUB_HEAD_REF}" != "${EXPECTED}" ]]; then
+            echo "::error::Branch '${GITHUB_HEAD_REF}' does not match version '${VERSION}'"
+            exit 1
+          fi
+          echo "Version/branch alignment OK: ${VERSION}"
+
+      - name: Restore dotnet tools
+        run: dotnet tool restore
+
+      - name: Format check
+        run: dotnet csharpier check .
+
+      - name: Restore main solution
+        run: dotnet restore "${MAIN_SOLUTION}"
+
+      - name: Build main solution
+        run: dotnet build "${MAIN_SOLUTION}" --no-restore --configuration "${CONFIGURATION}"
+
+      - name: Test main solution
+        run: dotnet test "${MAIN_SOLUTION}" --no-build --verbosity normal --configuration "${CONFIGURATION}"
+
+      - name: Restore sample solution
+        run: dotnet restore "${SAMPLE_SOLUTION}"
+
+      - name: Build sample solution
+        run: dotnet build "${SAMPLE_SOLUTION}" --no-restore --configuration "${CONFIGURATION}"
+
+      - name: Test sample solution
+        run: dotnet test "${SAMPLE_SOLUTION}" --no-build --verbosity normal --configuration "${CONFIGURATION}"
