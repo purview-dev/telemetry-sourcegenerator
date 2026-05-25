@@ -77,10 +77,10 @@ jobs:
           global-json-file: ./src/global.json
 
       - name: Run main solution tests
-        run: dotnet test "${MAIN_SOLUTION}" --no-build --verbosity normal --configuration "${CONFIGURATION}"
+        run: dotnet test "${MAIN_SOLUTION}" --verbosity normal --configuration "${CONFIGURATION}"
 
       - name: Run sample solution tests
-        run: dotnet test "${SAMPLE_SOLUTION}" --no-build --verbosity normal --configuration "${CONFIGURATION}"
+        run: dotnet test "${SAMPLE_SOLUTION}" --verbosity normal --configuration "${CONFIGURATION}"
 
   doctor:
     name: doctor
