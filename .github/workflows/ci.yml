@@ -9,8 +9,8 @@ on:
       - main
 
 jobs:
-  format-check:
-    name: Format Check
+  lint:
+    name: lint
     runs-on: ubuntu-latest
 
     steps:
@@ -28,13 +28,14 @@ jobs:
       - name: CSharpier format check
         run: dotnet csharpier check .
 
-  build-and-test:
-    name: Build and Test
+  build:
+    name: build
     runs-on: ubuntu-latest
 
     env:
       CONFIGURATION: Release
-      SOLUTION: ./src/Purview.Telemetry.SourceGenerator.slnx
+      MAIN_SOLUTION: ./src/Purview.Telemetry.SourceGenerator.slnx
+      SAMPLE_SOLUTION: ./samples/SampleApp/SampleApp.slnx
 
     steps:
       - name: Checkout code
@@ -45,22 +46,26 @@ jobs:
         with:
           global-json-file: ./src/global.json
 
-      - name: Restore dependencies
-        run: dotnet restore ${{ env.SOLUTION }}
+      - name: Restore main solution
+        run: dotnet restore "${MAIN_SOLUTION}"
 
-      - name: Build
-        run: dotnet build ${{ env.SOLUTION }} --no-restore --configuration ${{ env.CONFIGURATION }}
+      - name: Build main solution
+        run: dotnet build "${MAIN_SOLUTION}" --no-restore --configuration "${CONFIGURATION}"
 
-      - name: Run tests
-        run: dotnet test ${{ env.SOLUTION }} --no-build --verbosity normal --configuration ${{ env.CONFIGURATION }}
+      - name: Restore sample solution
+        run: dotnet restore "${SAMPLE_SOLUTION}"
 
-  build-and-test-samples:
-    name: Build and Test Samples
+      - name: Build sample solution
+        run: dotnet build "${SAMPLE_SOLUTION}" --no-restore --configuration "${CONFIGURATION}"
+
+  test:
+    name: test
     runs-on: ubuntu-latest
 
     env:
       CONFIGURATION: Release
-      SOLUTION: ./samples/SampleApp/SampleApp.slnx
+      MAIN_SOLUTION: ./src/Purview.Telemetry.SourceGenerator.slnx
+      SAMPLE_SOLUTION: ./samples/SampleApp/SampleApp.slnx
 
     steps:
       - name: Checkout code
@@ -69,16 +74,29 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v5
         with:
-          global-json-file: ./samples/SampleApp/global.json
+          global-json-file: ./src/global.json
 
-      - name: Restore dependencies
-        run: dotnet restore ${{ env.SOLUTION }}
+      - name: Run main solution tests
+        run: dotnet test "${MAIN_SOLUTION}" --no-build --verbosity normal --configuration "${CONFIGURATION}"
 
-      - name: Build
-        run: dotnet build ${{ env.SOLUTION }} --no-restore --configuration ${{ env.CONFIGURATION }}
+      - name: Run sample solution tests
+        run: dotnet test "${SAMPLE_SOLUTION}" --no-build --verbosity normal --configuration "${CONFIGURATION}"
 
-      - name: Run tests
-        run: dotnet test ${{ env.SOLUTION }} --no-build --verbosity normal --configuration ${{ env.CONFIGURATION }}
+  doctor:
+    name: doctor
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Validate ChangeOps config
+        run: npx -y changeops@1.0.0-prelresase.0 validate
 
   changeset-check:
     name: Changeset Check
@@ -89,26 +107,29 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ always() }}
     needs:
-      - format-check
-      - build-and-test
-      - build-and-test-samples
+      - lint
+      - build
+      - test
+      - doctor
       - changeset-check
 
     steps:
       - name: Verify upstream jobs succeeded
         env:
-          FORMAT_CHECK_RESULT: ${{ needs['format-check'].result }}
-          BUILD_AND_TEST_RESULT: ${{ needs['build-and-test'].result }}
-          BUILD_AND_TEST_SAMPLES_RESULT: ${{ needs['build-and-test-samples'].result }}
+          LINT_RESULT: ${{ needs['lint'].result }}
+          BUILD_RESULT: ${{ needs['build'].result }}
+          TEST_RESULT: ${{ needs['test'].result }}
+          DOCTOR_RESULT: ${{ needs['doctor'].result }}
           CHANGESET_CHECK_RESULT: ${{ needs['changeset-check'].result }}
         shell: bash
         run: |
           set -euo pipefail
 
           declare -A results=(
-            ["Format Check"]="${FORMAT_CHECK_RESULT}"
-            ["Build and Test"]="${BUILD_AND_TEST_RESULT}"
-            ["Build and Test Samples"]="${BUILD_AND_TEST_SAMPLES_RESULT}"
+            ["lint"]="${LINT_RESULT}"
+            ["build"]="${BUILD_RESULT}"
+            ["test"]="${TEST_RESULT}"
+            ["doctor"]="${DOCTOR_RESULT}"
             ["Changeset Check"]="${CHANGESET_CHECK_RESULT}"
           )
 
