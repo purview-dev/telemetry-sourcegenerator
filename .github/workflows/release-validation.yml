@@ -59,7 +59,7 @@ jobs:
         run: dotnet build "${MAIN_SOLUTION}" --no-restore --configuration "${CONFIGURATION}"
 
       - name: Test main solution
-        run: dotnet test "${MAIN_SOLUTION}" --no-build --verbosity normal --configuration "${CONFIGURATION}"
+        run: dotnet test "${MAIN_SOLUTION}" --no-build --no-restore --verbosity normal --configuration "${CONFIGURATION}"
 
       - name: Restore sample solution
         run: dotnet restore "${SAMPLE_SOLUTION}"
@@ -68,4 +68,4 @@ jobs:
         run: dotnet build "${SAMPLE_SOLUTION}" --no-restore --configuration "${CONFIGURATION}"
 
       - name: Test sample solution
-        run: dotnet test "${SAMPLE_SOLUTION}" --no-build --verbosity normal --configuration "${CONFIGURATION}"
+        run: dotnet test "${SAMPLE_SOLUTION}" --no-build --no-restore --verbosity normal --configuration "${CONFIGURATION}"
