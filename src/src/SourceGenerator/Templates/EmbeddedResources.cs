@@ -43,6 +43,7 @@ sealed class EmbeddedResources
 		return result.Trim();
 	}
 
+	/// <param name="text">The text to which the header will be added.</param>
 	/// <param name="emitNullable">
 	/// true = unconditional <c>#nullable enable</c>, false = omit, null = conditional on
 	/// <c>NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE</c> (for injected template files).

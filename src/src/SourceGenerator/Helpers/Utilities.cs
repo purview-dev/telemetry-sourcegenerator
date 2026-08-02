@@ -321,11 +321,10 @@ static partial class Utilities
 
 	static bool IsIEnumerable(ITypeSymbol typeSymbol)
 	{
-#pragma warning disable IDE0046 // Convert to conditional expression
 		if (typeSymbol.SpecialType == SpecialType.System_String)
 			return false;
-#pragma warning restore IDE0046 // Convert to conditional expression
 
+		// Check for common enumerable types
 		return typeSymbol.SpecialType
 			is SpecialType.System_Collections_IEnumerable
 				or SpecialType.System_Collections_Generic_ICollection_T

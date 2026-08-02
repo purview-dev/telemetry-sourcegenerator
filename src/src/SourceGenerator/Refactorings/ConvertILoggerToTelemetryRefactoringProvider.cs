@@ -675,7 +675,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	}
 
 	/// <summary>
-	/// Maps a <see cref="Microsoft.Extensions.Logging.LogLevel"/> member name to the
+	/// Maps a <code>Microsoft.Extensions.Logging.LogLevel</code> member name to the
 	/// corresponding Purview Telemetry convenience-attribute name.
 	/// The only non-trivial mapping is <c>Information</c> → <c>Info</c>;
 	/// all other known levels match their own name.
@@ -743,7 +743,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	/// <summary>
 	/// Wraps <paramref name="value"/> in a quoted C# string literal suitable for
 	/// embedding in an attribute argument list, using Roslyn's
-	/// <see cref="SymbolDisplay.FormatLiteral"/> to correctly escape all C# special characters.
+	/// <see cref="SymbolDisplay.FormatLiteral(string, bool)"/> to correctly escape all C# special characters.
 	/// </summary>
 	static string EscapeStringForAttribute(string value) =>
 		SymbolDisplay.FormatLiteral(value, quote: true);

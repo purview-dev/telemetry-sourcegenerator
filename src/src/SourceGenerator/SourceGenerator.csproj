@@ -2,14 +2,15 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+		<IsRoslynComponent>true</IsRoslynComponent>
 		<IncludeBuildOutput>false</IncludeBuildOutput>
 		<!--<NoPackageAnalysis>true</NoPackageAnalysis>-->
 		<IsPackable>true</IsPackable>
 		<COPYRIGHT_YEAR>2026</COPYRIGHT_YEAR>
 		<PackageId>Purview.Telemetry.SourceGenerator</PackageId>
 		<Title>Purview Telemetry Source Generator</Title>
-		<Description>.NET Source Generator for interface-based telemetry generting tracing, logs, and metrics.</Description>
-		<PackageIcon>purview-logo.jpg</PackageIcon>
+		<Description>.NET Source Generator for interface-based telemetry generating tracing, logs, and metrics.</Description>
+		<PackageIcon>../../../assets/images/purview-logo.jpg</PackageIcon>
 		<Authors>Kieron Lanning</Authors>
 		<Company>Purview-Dev</Company>
 		<Copyright>Purview-Dev, $(COPYRIGHT_YEAR) | All rights reserved.</Copyright>
@@ -21,7 +22,6 @@
 		<DevelopmentDependency>true</DevelopmentDependency>
 		<SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
 		<CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
-		<IsRoslynComponent>true</IsRoslynComponent>
 		<Version>0.1.0.0</Version>
 		<!-- RS1038: The source generator itself does not use workspace APIs; only the
 		     CodeRefactoringProvider does, which is the expected usage pattern. -->
@@ -33,7 +33,7 @@
 		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
 	</ItemGroup>
 	<ItemGroup>
-		<None Include="kjldev-logo.png" Pack="true" PackagePath="" />
+		<None Include="../../../assets/images/purview-logo.jpg" Pack="true" PackagePath="" />
 		<EmbeddedResource Remove="bin\**" />
 		<None Remove="bin\**" />
 		<None Remove="*.cache" />
@@ -47,7 +47,7 @@
 		<Compile Remove="Templates\Sources\**\*.cs" />
 		<EmbeddedResource Include="Templates\Sources\**\*.cs" />
 	</ItemGroup>
-	<!-- Package the build output into the "analyzer" slot in the NuGet package -->
+	<!-- Package the build output into the "analyser" slot in the NuGet package -->
 	<ItemGroup>
 		<None Include="..\..\..\README.md" Pack="true" PackagePath="\" />
 		<None Include="..\..\..\LICENSE.md" Pack="true" PackagePath="\" />
