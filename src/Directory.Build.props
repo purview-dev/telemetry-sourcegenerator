@@ -1,5 +1,12 @@
 ﻿<Project>
-	<Import Project="./.build-system/Directory.Build.props" />
+	<PropertyGroup>
+		<NamespacePrefix>Purview.Telemetry</NamespacePrefix>
+		<IsPackable>false</IsPackable>
+		<ExcludePurviewTelemetry>true</ExcludePurviewTelemetry>
+	</PropertyGroup>
+
+	<Import Sdk="Purview.DotNetProjectSdk" Project="Sdk.props" />
+
 	<PropertyGroup>
 		<DefineConstants Condition="'$(Configuration)' == 'DEBUG'">DEBUG_SG</DefineConstants>
 		<NoWarn>$(NoWarn);CA1031;</NoWarn>

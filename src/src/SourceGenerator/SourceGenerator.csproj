@@ -3,20 +3,20 @@
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 		<IncludeBuildOutput>false</IncludeBuildOutput>
-		<NoPackageAnalysis>true</NoPackageAnalysis>
+		<!--<NoPackageAnalysis>true</NoPackageAnalysis>-->
 		<IsPackable>true</IsPackable>
-		<COPYRIGHT_YEAR>2025</COPYRIGHT_YEAR>
+		<COPYRIGHT_YEAR>2026</COPYRIGHT_YEAR>
 		<PackageId>Purview.Telemetry.SourceGenerator</PackageId>
 		<Title>Purview Telemetry Source Generator</Title>
 		<Description>.NET Source Generator for interface-based telemetry generting tracing, logs, and metrics.</Description>
-		<PackageIcon>kjldev-logo.png</PackageIcon>
+		<PackageIcon>purview-logo.jpg</PackageIcon>
 		<Authors>Kieron Lanning</Authors>
-		<Company>KJL Solutions Ltd.</Company>
-		<Copyright>KJL Solutions Ltd., $(COPYRIGHT_YEAR) | All rights reserved.</Copyright>
-		<RepositoryUrl>https://github.com/kjldev/purview-telemetry-sourcegenerator/</RepositoryUrl>
+		<Company>Purview-Dev</Company>
+		<Copyright>Purview-Dev, $(COPYRIGHT_YEAR) | All rights reserved.</Copyright>
+		<RepositoryUrl>https://github.com/purview-dev/purview-telemetry-sourcegenerator/</RepositoryUrl>
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageProjectUrl>https://kjl.dev/projects/purviewtelemetrysourcegenerator/</PackageProjectUrl>
+		<!--<PackageProjectUrl>https://kjl.dev/projects/purviewtelemetrysourcegenerator/</PackageProjectUrl>-->
 		<PackageTags>logs;log;logger;logging;source-generator;high-performance-logging;otel;open-telemetry;telemetry;traces;tracing;metric;metrics;meter;meters;instrumentation;instruments;events;distributed-traces;distributed-tracing;melt;dotnet;aspnet;</PackageTags>
 		<DevelopmentDependency>true</DevelopmentDependency>
 		<SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
@@ -49,8 +49,8 @@
 	</ItemGroup>
 	<!-- Package the build output into the "analyzer" slot in the NuGet package -->
 	<ItemGroup>
-		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
-		<None Include="..\..\LICENSE.md" Pack="true" PackagePath="\" />
+		<None Include="..\..\..\README.md" Pack="true" PackagePath="\" />
+		<None Include="..\..\..\LICENSE.md" Pack="true" PackagePath="\" />
 		<None
 			Include="$(OutputPath)\$(AssemblyName).dll"
 			Pack="true"

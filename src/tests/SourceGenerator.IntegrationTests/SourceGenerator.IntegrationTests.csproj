@@ -10,9 +10,6 @@
 		<Content Update="Refactorings/Snapshots/**/*" Visible="false" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.csproj" />
-	</ItemGroup>
-	<ItemGroup>
 		<Using Include="Microsoft.CodeAnalysis" />
 		<Using Include="System.Collections.Immutable" />
 	</ItemGroup>
