@@ -1,7 +1,0 @@
-# This directory is copied into consuming repositories by Purview.DotNetProjectSdk
-# so AI agents can discover the bundled skills.
-# Keep this file if you want the generated skill content to stay out of source control.
-# To disable generation entirely, set <EnableEmbeddedAgentSkills>false</EnableEmbeddedAgentSkills>
-# in your project or Directory.Build.props.
-*
-!.gitignore

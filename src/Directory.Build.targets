@@ -7,11 +7,7 @@
 	>
 		<ItemGroup>
 			<!-- This filter is the key - only PrivateAssets=All references are bundled -->
-			<_ReferenceCopyLocalPaths
-				Include="@(ReferenceCopyLocalPaths
-      ->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')
-      ->WithMetadataValue('PrivateAssets', 'All'))"
-			/>
+			<_ReferenceCopyLocalPaths Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')->WithMetadataValue('PrivateAssets', 'All'))"/>
 		</ItemGroup>
 
 		<ItemGroup>

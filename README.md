@@ -25,7 +25,7 @@ Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system
 Add to your `Directory.Build.props` or `.csproj` file:
 
 ```xml
-<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="4.3.0">
+<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="4.4.0">
   <PrivateAssets>all</PrivateAssets>
   <IncludeAssets>analyzers</IncludeAssets>
 </PackageReference>
@@ -137,6 +137,14 @@ public class EntityService(IEntityStoreTelemetry telemetry)
 - [Generated Output Examples](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Generated-Output)
 - [Multi-Targeting Guide](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Multi-Targeting)
 - [Logging Configuration](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Logging)
+
+## Agent Skills
+
+This repository ships with [Agent Skills](https://agentskills.io/specification) under `src/ProjectAgent/skills/` to help you adopt the generator:
+
+- `telemetry-sourcegenerator-quickstart` — get started with the package, create your first interface, and register it in DI.
+- `telemetry-sourcegenerator-migration` — migrate existing `ILogger`, `ActivitySource`, and metrics code to generated interfaces.
+- `telemetry-sourcegenerator-design` — design best practices, choose between single and per-area interfaces, and apply OpenTelemetry naming conventions.
 
 ## Sample Project
 

@@ -28,6 +28,58 @@ jobs:
       - name: CSharpier format check
         run: dotnet csharpier check .
 
+  agent-skills-check:
+    name: Agent Skills Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Validate agent skills
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for skill_dir in src/ProjectAgent/skills/*/; do
+            skill_name=$(basename "$skill_dir")
+            skill_file="$skill_dir/SKILL.md"
+
+            if [ ! -f "$skill_file" ]; then
+              echo "::error::Missing SKILL.md in $skill_dir"
+              exit 1
+            fi
+
+            frontmatter_name=$(sed -n '/^---$/,/^---$/p' "$skill_file" | grep '^name:' | head -1 | sed 's/^name: *//')
+
+            if [ -z "$frontmatter_name" ]; then
+              echo "::error::Missing 'name' in $skill_file frontmatter"
+              exit 1
+            fi
+
+            if [ "$frontmatter_name" != "$skill_name" ]; then
+              echo "::error::Skill name '$frontmatter_name' does not match directory name '$skill_name'"
+              exit 1
+            fi
+
+            if ! [[ "$frontmatter_name" =~ ^[a-z0-9](-?[a-z0-9]+)*$ ]]; then
+              echo "::error::Invalid skill name '$frontmatter_name'. Must be lowercase alphanumeric with hyphens, no leading/trailing/consecutive hyphens."
+              exit 1
+            fi
+
+            if [ ${#frontmatter_name} -gt 64 ]; then
+              echo "::error::Skill name '$frontmatter_name' exceeds 64 characters"
+              exit 1
+            fi
+
+            if ! sed -n '/^---$/,/^---$/p' "$skill_file" | grep -q '^description:'; then
+              echo "::error::Missing 'description' in $skill_file frontmatter"
+              exit 1
+            fi
+          done
+
+          echo "All agent skills are valid."
+
   build-and-test:
     name: Build and Test
     runs-on: ubuntu-latest
@@ -90,6 +142,7 @@ jobs:
     if: ${{ always() }}
     needs:
       - format-check
+      - agent-skills-check
       - build-and-test
       - build-and-test-samples
       - changeset-check
@@ -98,6 +151,7 @@ jobs:
       - name: Verify upstream jobs succeeded
         env:
           FORMAT_CHECK_RESULT: ${{ needs['format-check'].result }}
+          AGENT_SKILLS_CHECK_RESULT: ${{ needs['agent-skills-check'].result }}
           BUILD_AND_TEST_RESULT: ${{ needs['build-and-test'].result }}
           BUILD_AND_TEST_SAMPLES_RESULT: ${{ needs['build-and-test-samples'].result }}
           CHANGESET_CHECK_RESULT: ${{ needs['changeset-check'].result }}
@@ -107,6 +161,7 @@ jobs:
 
           declare -A results=(
             ["Format Check"]="${FORMAT_CHECK_RESULT}"
+            ["Agent Skills Check"]="${AGENT_SKILLS_CHECK_RESULT}"
             ["Build and Test"]="${BUILD_AND_TEST_RESULT}"
             ["Build and Test Samples"]="${BUILD_AND_TEST_SAMPLES_RESULT}"
             ["Changeset Check"]="${CHANGESET_CHECK_RESULT}"

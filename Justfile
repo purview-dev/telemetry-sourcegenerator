@@ -1,4 +1,4 @@
-set quiet := true
+set quiet
 set windows-shell := ["pwsh", "-NoProfile", "-Command"]
 
 root_folder := "./src/"
@@ -6,7 +6,7 @@ solution_file := root_folder + "Purview.Telemetry.SourceGenerator.slnx"
 test_solution := solution_file
 configuration := "Release"
 sample_solution_file := "./samples/SampleApp/SampleApp.slnx"
-artifact_folder := "p:/sync-projects/.local-nuget/"
+artifact_folder := "./artifacts/"
 benchmark_solution := "./benchmarks/Purview.Telemetry.Benchmarks/Purview.Telemetry.Benchmarks.csproj"
 
 # Displays the list of available commands
