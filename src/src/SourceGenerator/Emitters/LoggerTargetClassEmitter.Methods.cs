@@ -1,4 +1,3 @@
-﻿using System.Text;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -7,48 +6,39 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 partial class LoggerTargetClassEmitter
 {
-	internal static void EmitThrowStub(
-		StringBuilder builder,
-		int indent,
-		LogMethodTarget methodTarget,
-		bool emitNullable = true
-	)
+	internal static void EmitThrowStub(CodeWriter writer, LogMethodTarget methodTarget, bool emitNullable = true)
 	{
-		builder.AppendLine().Append(indent, "public ", withNewLine: false);
+		writer.NewLine().Write("public ");
 
 		if (methodTarget.IsScoped)
-			builder.Append(
-				emitNullable ? Constants.System.IDisposable.WithNullable() : (string)Constants.System.IDisposable
+			writer.Write(
+				emitNullable
+					? Constants.System.IDisposable.WithNullable().ToString()
+					: (string)Constants.System.IDisposable
 			);
 		else
-			builder.Append(Constants.System.VoidKeyword);
+			writer.Write(Constants.System.VoidKeyword);
 
-		builder.Append(' ').Append(methodTarget.MethodName).Append('(');
+		writer.Write(' ').Write(methodTarget.MethodName).Write('(');
 
-		for (var i = 0; i < methodTarget.Parameters.Length; i++)
+		for (var i = 0; i < methodTarget.Parameters.Count; i++)
 		{
 			if (i > 0)
-				builder.Append(", ");
-			builder
-				.Append(methodTarget.Parameters[i].ParameterType)
-				.Append(' ')
-				.Append(methodTarget.Parameters[i].Name);
+				writer.Write(", ");
+			writer.Write(methodTarget.Parameters[i].ParameterType).Write(' ').Write(methodTarget.Parameters[i].Name);
 		}
 
-		builder.AppendLine(") => throw new global::System.NotSupportedException();").AppendLine();
+		writer.Write(") => throw new global::System.NotSupportedException();").NewLine();
 	}
 
-	static int EmitMethods(
+	static void EmitMethods(
 		LoggerTarget target,
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		SourceProductionContext context,
 		GenerationLogger? logger,
 		bool emitNullable
 	)
 	{
-		indent++;
-
 		foreach (var methodTarget in target.LogMethods)
 		{
 			context.CancellationToken.ThrowIfCancellationRequested();
@@ -63,38 +53,35 @@ partial class LoggerTargetClassEmitter
 					)
 				)
 				{
-					EmitThrowStub(builder, indent, methodTarget, emitNullable);
+					EmitThrowStub(writer, methodTarget, emitNullable);
 				}
 				continue;
 			}
 
 			if (methodTarget.UnknownReturnType)
 			{
-				EmitThrowStub(builder, indent, methodTarget, emitNullable);
+				EmitThrowStub(writer, methodTarget, emitNullable);
 				continue; // Diagnostic already reported in EmitFields
 			}
 
 			if (methodTarget.HasMultipleExceptions)
 			{
-				EmitThrowStub(builder, indent, methodTarget, emitNullable);
+				EmitThrowStub(writer, methodTarget, emitNullable);
 				continue;
 			}
 
 			if (methodTarget.ParameterCountSansException > Constants.Logging.MaxNonExceptionParameters)
 			{
-				EmitThrowStub(builder, indent, methodTarget, emitNullable);
+				EmitThrowStub(writer, methodTarget, emitNullable);
 				continue;
 			}
 
-			EmitLogActionMethod(builder, indent, methodTarget, context, logger, emitNullable);
+			EmitLogActionMethod(writer, methodTarget, context, logger, emitNullable);
 		}
-
-		return --indent;
 	}
 
 	internal static void EmitLogActionMethod(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		LogMethodTarget methodTarget,
 		SourceProductionContext context,
 		GenerationLogger? logger,
@@ -123,90 +110,92 @@ partial class LoggerTargetClassEmitter
 		var accessModifier = generatePrivateLogging ? "private" : "public";
 		var methodName = generatePrivateLogging ? methodTarget.MethodName + "_Logging" : methodTarget.MethodName;
 
-		builder
-			.AppendLine()
-			.CodeGen(indent)
-			.AggressiveInlining(indent)
-			.Append(indent, accessModifier + " ", withNewLine: false);
+		writer
+			.NewLine()
+			.WriteLine(Constants.System.GeneratedCode.Value)
+			.WriteLine(Constants.System.AggressiveInlining)
+			.Write(accessModifier + " ");
 
 		// For multi-target private methods, always return void (the logging side-effect)
 		// For single-target or public methods, use original return type logic
 		if (generatePrivateLogging)
 		{
-			builder.Append(Constants.System.VoidKeyword);
+			writer.Write(Constants.System.VoidKeyword);
 		}
 		else if (methodTarget.IsScoped)
 		{
-			builder.Append(Constants.System.IDisposable);
+			writer.Write(Constants.System.IDisposable);
 			if (emitNullable)
-				builder.Append('?');
+				writer.Write('?');
 		}
 		else
 		{
-			builder.Append(Constants.System.VoidKeyword);
+			writer.Write(Constants.System.VoidKeyword);
 		}
 
-		builder.Append(' ').Append(methodName).Append('(');
+		writer.Write(' ').Write(methodName).Write('(');
 
-		EmitParametersAsMethodArgumentList(methodTarget, builder, context);
+		EmitParametersAsMethodArgumentList(methodTarget, writer, context);
 
-		builder.Append(')').AppendLine().Append(indent, '{');
+		writer.Write(")");
 
-		if (methodTarget.IsScoped && !generatePrivateLogging)
+		using (writer.OpenBlockScope())
 		{
-			builder
-				.Append(indent + 1, "return ", withNewLine: false)
-				.Append(methodTarget.LoggerActionFieldName)
-				.Append('(')
-				.Append(Constants.Logging.LoggerFieldName);
-		}
-		else
-		{
-			builder
-				.Append(indent + 1, "if (!", withNewLine: false)
-				.Append(Constants.Logging.LoggerFieldName)
-				.Append(".IsEnabled(")
-				.Append(methodTarget.MSLevel)
-				.AppendLine("))")
-				.Append(indent + 1, '{')
-				.Append(indent + 2, "return;")
-				.Append(indent + 1, '}')
-				.AppendLine()
-				.Append(indent + 1, methodTarget.LoggerActionFieldName, withNewLine: false)
-				.Append('(')
-				.Append(Constants.Logging.LoggerFieldName);
-		}
+			if (methodTarget.IsScoped && !generatePrivateLogging)
+			{
+				writer
+					.Write("return ")
+					.Write(methodTarget.LoggerActionFieldName)
+					.Write('(')
+					.Write(Constants.Logging.LoggerFieldName);
+			}
+			else
+			{
+				writer
+					.Write("if (!")
+					.Write(Constants.Logging.LoggerFieldName)
+					.Write(".IsEnabled(")
+					.Write(methodTarget.MSLevel)
+					.WriteLine("))");
 
-		foreach (var parameter in methodTarget.ParametersSansException)
-		{
-			builder.Append(", ").Append(parameter.Name);
-		}
+				using (writer.OpenBlockScope())
+					writer.WriteLine("return;");
 
-		if (methodTarget.ExceptionParameter != null)
-		{
-			builder.Append(", ").Append(methodTarget.ExceptionParameter.Name);
-		}
-		else if (!methodTarget.IsScoped)
-		{
-			// Non-scoped log methods always need the exception parameter (null if not provided)
-			builder.Append(", ").Append("null");
-		}
-		// Scoped methods don't take an exception parameter
+				writer
+					.NewLine()
+					.Write(methodTarget.LoggerActionFieldName)
+					.Write('(')
+					.Write(Constants.Logging.LoggerFieldName);
+			}
 
-		builder.AppendLine(");");
+			foreach (var parameter in methodTarget.ParametersSansException)
+			{
+				writer.Write(", ").Write(parameter.Name);
+			}
 
-		builder.Append(indent, '}').AppendLine();
+			if (methodTarget.ExceptionParameter != null)
+			{
+				writer.Write(", ").Write(methodTarget.ExceptionParameter.Name);
+			}
+			else if (!methodTarget.IsScoped)
+			{
+				// Non-scoped log methods always need the exception parameter (null if not provided)
+				writer.Write(", ").Write("null");
+			}
+			// Scoped methods don't take an exception parameter
+
+			writer.Write(");").NewLine();
+		}
 
 		// Generate public delegating method if Logging owns it
 		if (generatePublicDelegator)
 		{
-			EmitPublicLoggingDelegatingMethod(builder, indent, methodTarget, context, logger, emitNullable);
+			EmitPublicLoggingDelegatingMethod(writer, methodTarget, context, logger, emitNullable);
 		}
 	}
 
 	static void EmitPublicLoggingDelegatingMethod(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		LogMethodTarget methodTarget,
 		SourceProductionContext context,
 		GenerationLogger? logger,
@@ -215,93 +204,100 @@ partial class LoggerTargetClassEmitter
 	{
 		logger?.Debug($"Building public delegating logging method: {methodTarget.MethodName}");
 
-		builder.AppendLine().CodeGen(indent).AggressiveInlining(indent).Append(indent, "public ", withNewLine: false);
+		writer
+			.NewLine()
+			.WriteLine(Constants.System.GeneratedCode.Value)
+			.WriteLine(Constants.System.AggressiveInlining)
+			.Write("public ");
 
 		// When Logging owns the public method (with Metrics), return void
 		// (Logging without Activity means the return type is void or IDisposable for scoped)
 		if (methodTarget.IsScoped)
 		{
-			builder.Append(Constants.System.IDisposable);
+			writer.Write(Constants.System.IDisposable);
 			if (emitNullable)
-				builder.Append('?');
+				writer.Write('?');
 		}
 		else
 		{
-			builder.Append(Constants.System.VoidKeyword);
+			writer.Write(Constants.System.VoidKeyword);
 		}
 
-		builder.Append(' ').Append(methodTarget.MethodName).Append('(');
+		writer.Write(' ').Write(methodTarget.MethodName).Write('(');
 
-		EmitParametersAsMethodArgumentList(methodTarget, builder, context);
+		EmitParametersAsMethodArgumentList(methodTarget, writer, context);
 
-		builder.Append(')').AppendLine().Append(indent, '{');
+		writer.Write(")");
 
-		// Call the private Logging method
-		if (methodTarget.IsScoped)
+		using (writer.OpenBlockScope())
 		{
-			builder.Append(indent + 1, "var loggingResult = ", withNewLine: false);
-		}
-		else
-		{
-			builder.Append(indent + 1, methodTarget.MethodName, withNewLine: false).Append("_Logging(");
-		}
+			// Call the private Logging method
+			if (methodTarget.IsScoped)
+			{
+				writer.Write("var loggingResult = ");
+			}
+			else
+			{
+				writer.Write(methodTarget.MethodName).Write("_Logging(");
+			}
 
-		if (!methodTarget.IsScoped)
-		{
-			// Emit parameters
+			if (!methodTarget.IsScoped)
+			{
+				// Emit parameters
+				for (var i = 0; i < methodTarget.TotalParameterCount; i++)
+				{
+					context.CancellationToken.ThrowIfCancellationRequested();
+
+					writer.Write(methodTarget.Parameters[i].Name);
+
+					if (i < methodTarget.TotalParameterCount - 1)
+						writer.Write(", ");
+				}
+				writer.Write(");").NewLine();
+			}
+			else
+			{
+				// For scoped, we need special handling
+				writer.Write(methodTarget.MethodName).Write("_Logging(");
+				for (var i = 0; i < methodTarget.TotalParameterCount; i++)
+				{
+					context.CancellationToken.ThrowIfCancellationRequested();
+
+					writer.Write(methodTarget.Parameters[i].Name);
+
+					if (i < methodTarget.TotalParameterCount - 1)
+						writer.Write(", ");
+				}
+				writer.Write(");").NewLine();
+			}
+
+			// Call the private Metrics method
+			writer.Write(methodTarget.MethodName).Write("_Metrics(");
+
 			for (var i = 0; i < methodTarget.TotalParameterCount; i++)
 			{
 				context.CancellationToken.ThrowIfCancellationRequested();
 
-				builder.Append(methodTarget.Parameters[i].Name);
+				writer.Write(methodTarget.Parameters[i].Name);
 
 				if (i < methodTarget.TotalParameterCount - 1)
-					builder.Append(", ");
+					writer.Write(", ");
 			}
-			builder.AppendLine(");");
-		}
-		else
-		{
-			// For scoped, we need special handling
-			builder.Append(methodTarget.MethodName).Append("_Logging(");
-			for (var i = 0; i < methodTarget.TotalParameterCount; i++)
+			writer.Write(");").NewLine();
+
+			// Return if scoped
+			if (methodTarget.IsScoped)
 			{
-				context.CancellationToken.ThrowIfCancellationRequested();
-
-				builder.Append(methodTarget.Parameters[i].Name);
-
-				if (i < methodTarget.TotalParameterCount - 1)
-					builder.Append(", ");
+				writer.NewLine().Write("return loggingResult;");
 			}
-			builder.AppendLine(");");
 		}
 
-		// Call the private Metrics method
-		builder.Append(indent + 1, methodTarget.MethodName, withNewLine: false).Append("_Metrics(");
-
-		for (var i = 0; i < methodTarget.TotalParameterCount; i++)
-		{
-			context.CancellationToken.ThrowIfCancellationRequested();
-
-			builder.Append(methodTarget.Parameters[i].Name);
-
-			if (i < methodTarget.TotalParameterCount - 1)
-				builder.Append(", ");
-		}
-		builder.AppendLine(");");
-
-		// Return if scoped
-		if (methodTarget.IsScoped)
-		{
-			builder.AppendLine().Append(indent + 1, "return loggingResult;");
-		}
-
-		builder.Append(indent, '}').AppendLine();
+		writer.NewLine();
 	}
 
 	static void EmitParametersAsMethodArgumentList(
 		LogMethodTarget methodTarget,
-		StringBuilder builder,
+		CodeWriter writer,
 		SourceProductionContext context
 	)
 	{
@@ -309,13 +305,10 @@ partial class LoggerTargetClassEmitter
 		{
 			context.CancellationToken.ThrowIfCancellationRequested();
 
-			builder
-				.Append(methodTarget.Parameters[i].ParameterType)
-				.Append(' ')
-				.Append(methodTarget.Parameters[i].Name);
+			writer.Write(methodTarget.Parameters[i].ParameterType).Write(' ').Write(methodTarget.Parameters[i].Name);
 
 			if (i < methodTarget.TotalParameterCount - 1)
-				builder.Append(", ");
+				writer.Write(", ");
 		}
 	}
 }

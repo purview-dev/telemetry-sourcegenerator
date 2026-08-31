@@ -55,7 +55,7 @@ partial class TelemetrySourceGenerator
 		}
 
 		// Check if any target has GenerateTelemetryNamesClass set to false
-		bool generateClass = true;
+		var generateClass = true;
 		string? customClassName = null;
 
 		// Check meter targets for TelemetryGeneration settings

@@ -1,8 +1,8 @@
-﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Emitters;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
+using System.Collections.Immutable;
 
 namespace Purview.Telemetry.SourceGenerator;
 

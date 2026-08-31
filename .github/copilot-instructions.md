@@ -155,19 +155,13 @@ When `EmitCompilerGeneratedFiles` is true (as in the sample app), generated file
 
 - `obj/Debug|Release/generated/` directories
 
-### Integration Test Snapshots
+### Integration Test Harness
 
-Snapshot files in `src/tests/SourceGenerator.IntegrationTests/Snapshots/` are **entirely machine-generated** by the [Verify](https://github.com/VerifyTests/Verify) library. **Never manually edit snapshot files.** They are only updated by:
-
-1. Running `just test` (or `dotnet test`)
-2. Reviewing the `*.received.*` diff output
-3. Accepting changes — copy `*.received.*` → `*.verified.*`, or use the Verify CLI/IDE extension
-
-Any manual edits to `.verified.*` files will be silently overwritten the next time tests run and snapshots are accepted.
+Tests run the generator against in-memory C# source via `Purview.SourceGeneratorFramework.Testing.TUnit` and assert on compilation validity, generated diagnostics, and key generated content. Add or update tests in `src/tests/SourceGenerator.IntegrationTests/` whenever generator behavior changes.
 
 ### Version Management
 
-- Version is managed in `package.json` (currently 4.0.0)
+- Version is managed in `package.json` (currently 4.5.0)
 
 - `bun .build/update-version.ts` synchronizes version across all files
 - `just release-final` and `just release-pre` create new releases using commit-and-tag-version

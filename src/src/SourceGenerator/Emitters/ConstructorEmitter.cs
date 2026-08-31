@@ -1,4 +1,3 @@
-﻿using System.Text;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -9,13 +8,12 @@ static class ConstructorEmitter
 {
 	const string LoggerParameterName = "logger";
 
-	public static int EmitCtor(
+	public static void EmitCtor(
 		GenerationType requestingType,
 		GenerationType generationType,
 		string classNameToGenerate,
 		string fullyQualifiedInterfaceName,
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		SourceProductionContext context,
 		GenerationLogger? logger,
 		bool supportsIMeterFactory = true
@@ -28,77 +26,75 @@ static class ConstructorEmitter
 		{
 			logger?.Debug($"Skipping constructor emit for {requestingType} ({generationType}).");
 
-			return indent;
+			return;
 		}
 
-		indent++;
+		writer
+			.NewLine()
+			.WriteLine(Constants.System.GeneratedCode.Value)
+			.Write("public ")
+			.Write(classNameToGenerate)
+			.Write('(');
 
-		builder
-			.AppendLine()
-			.CodeGen(indent)
-			.Append(indent, "public ", withNewLine: false)
-			.Append(classNameToGenerate)
-			.Append('(');
+		EmitParameters(generationType, fullyQualifiedInterfaceName, writer, supportsIMeterFactory);
 
-		EmitParameters(generationType, fullyQualifiedInterfaceName, builder, supportsIMeterFactory);
+		writer.Write(")");
 
-		builder.AppendLine(')').Append(indent, '{');
-
-		EmitBody(generationType, indent, builder, supportsIMeterFactory);
-
-		builder.Append(indent, '}');
-
-		return --indent;
+		using (writer.OpenBlockScope())
+		{
+			EmitBody(generationType, writer, supportsIMeterFactory);
+		}
 	}
 
 	static void EmitParameters(
 		GenerationType generationType,
 		string? loggerFullyQualifiedInterfaceName,
-		StringBuilder builder,
+		CodeWriter writer,
 		bool supportsIMeterFactory
 	)
 	{
 		if (generationType.HasFlag(GenerationType.Logging))
 		{
-			builder
-				.Append(Constants.Logging.MicrosoftExtensions.ILogger)
-				.Append('<')
-				.Append(loggerFullyQualifiedInterfaceName!)
-				.Append("> ")
-				.Append(LoggerParameterName);
+			writer
+				.Write(Constants.Logging.MicrosoftExtensions.ILogger)
+				.Write('<')
+				.Write(loggerFullyQualifiedInterfaceName)
+				.Write("> ")
+				.Write(LoggerParameterName);
 		}
 
 		if (generationType.HasFlag(GenerationType.Metrics) && supportsIMeterFactory)
 		{
 			if (generationType.HasFlag(GenerationType.Logging))
-				builder.Append(", ");
+				writer.Write(", ");
 
-			builder
-				.Append(Constants.Metrics.SystemDiagnostics.IMeterFactory)
-				.Append(' ')
-				.Append(Constants.Metrics.MeterFactoryParameterName);
+			writer
+				.Write(Constants.Metrics.SystemDiagnostics.IMeterFactory)
+				.Write(' ')
+				.Write(Constants.Metrics.MeterFactoryParameterName);
 		}
 	}
 
-	static void EmitBody(GenerationType generationType, int indent, StringBuilder builder, bool supportsIMeterFactory)
+	static void EmitBody(GenerationType generationType, CodeWriter writer, bool supportsIMeterFactory)
 	{
 		if (generationType.HasFlag(GenerationType.Logging))
 		{
-			builder
-				.Append(indent + 1, Constants.Logging.LoggerFieldName, withNewLine: false)
-				.Append(" = ")
-				.Append(LoggerParameterName)
-				.AppendLine(';');
+			writer
+				.Write(Constants.Logging.LoggerFieldName)
+				.Write(" = ")
+				.Write(LoggerParameterName)
+				.Write(";")
+				.NewLine();
 		}
 
 		if (generationType.HasFlag(GenerationType.Metrics))
 		{
-			builder.Append(indent + 1, Constants.Metrics.MeterInitializationMethod, withNewLine: false).Append('(');
+			writer.Write(Constants.Metrics.MeterInitializationMethod).Write('(');
 
 			if (supportsIMeterFactory)
-				builder.Append(Constants.Metrics.MeterFactoryParameterName);
+				writer.Write(Constants.Metrics.MeterFactoryParameterName);
 
-			builder.AppendLine(");");
+			writer.Write(");").NewLine();
 		}
 	}
 }

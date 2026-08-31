@@ -1,6 +1,5 @@
-﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Purview.Telemetry.SourceGenerator.Records;
+using System.Collections.Immutable;
 
 namespace Purview.Telemetry.SourceGenerator.Templates;
 
@@ -79,9 +78,9 @@ sealed record PurviewTypeInfo(
 	{
 		// Always emit ? for value types (Nullable<T>); reference type ? requires C# 8+.
 		var isNullableSuffix = IsNullable && (IsValueType || emitNullableAnnotations) ? "?" : null;
-		var result = (SystemAlias ?? (includeGlobal ? "global::" : null) + FullyQualifiedName);
+		var result = SystemAlias ?? ((includeGlobal ? "global::" : null) + FullyQualifiedName);
 
-		if (GenericTypeArguments.Length > 0)
+		if (GenericTypeArguments.Count > 0)
 		{
 			result +=
 				"<"

@@ -1,4 +1,3 @@
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -7,10 +6,9 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 partial class MeterTargetClassEmitter
 {
-	static int EmitInitializationMethod(
+	static void EmitInitializationMethod(
 		MeterTarget target,
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		SourceProductionContext context,
 		bool emitNullable,
 		bool supportsIMeterFactory
@@ -18,57 +16,50 @@ partial class MeterTargetClassEmitter
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		indent++;
-
-		builder
-			.AppendLine()
-			.CodeGen(indent)
-			.AggressiveInlining(indent)
-			.Append(indent, "void ", withNewLine: false)
-			.Append(Constants.Metrics.MeterInitializationMethod)
-			.Append('(');
+		writer
+			.NewLine()
+			.WriteLine(Constants.System.GeneratedCode.Value)
+			.WriteLine(Constants.System.AggressiveInlining)
+			.Write("void ")
+			.Write(Constants.Metrics.MeterInitializationMethod)
+			.Write('(');
 
 		if (supportsIMeterFactory)
 		{
-			builder
-				.Append(Constants.Metrics.SystemDiagnostics.IMeterFactory)
-				.Append(' ')
-				.Append(Constants.Metrics.MeterFactoryParameterName);
+			writer
+				.Write(Constants.Metrics.SystemDiagnostics.IMeterFactory)
+				.Write(' ')
+				.Write(Constants.Metrics.MeterFactoryParameterName);
 		}
 
-		builder.AppendLine(')').Append(indent, '{');
+		writer.Write(")");
 
-		indent++;
+		using (writer.OpenBlockScope())
+		{
+			// Double-init guard: prevents re-initialization when the method path is used
+			// (occurs in Logging+Metrics multi-target where Logging owns the constructor).
+			writer.Write("if (").Write(MeterFieldName).WriteLine(" != null)");
 
-		// Double-init guard: prevents re-initialization when the method path is used
-		// (occurs in Logging+Metrics multi-target where Logging owns the constructor).
-		builder
-			.Append(indent, "if (", withNewLine: false)
-			.Append(MeterFieldName)
-			.AppendLine(" != null)")
-			.Append(indent, '{')
-			.Append(indent + 1, "throw new ", withNewLine: false)
-			.Append(Constants.System.Exception)
-			.AppendLine("(\"The meters have already been initialized.\");")
-			.Append(indent, '}')
-			.AppendLine();
+			using (writer.OpenBlockScope())
+			{
+				writer
+					.Write("throw new ")
+					.Write(Constants.System.Exception)
+					.WriteLine("(\"The meters have already been initialized.\");");
+			}
 
-		EmitInitializationBodyContent(target, builder, indent, emitNullable, supportsIMeterFactory);
+			writer.NewLine();
 
-		indent--;
-
-		builder.Append(indent, '}');
-
-		return --indent;
+			EmitInitializationBodyContent(target, writer, emitNullable, supportsIMeterFactory);
+		}
 	}
 
 	// Emits the inline constructor for the Metrics-only (and Activity+Metrics) case
 	// where Metrics owns the constructor. Instrument fields are readonly, so we
 	// inline the init body directly rather than delegating to InitializeMeters().
-	static int EmitInlineConstructor(
+	static void EmitInlineConstructor(
 		MeterTarget target,
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		SourceProductionContext context,
 		bool emitNullable,
 		bool supportsIMeterFactory
@@ -76,40 +67,32 @@ partial class MeterTargetClassEmitter
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		indent++;
-
-		builder
-			.AppendLine()
-			.CodeGen(indent)
-			.Append(indent, "public ", withNewLine: false)
-			.Append(target.ClassNameToGenerate)
-			.Append('(');
+		writer
+			.NewLine()
+			.WriteLine(Constants.System.GeneratedCode.Value)
+			.Write("public ")
+			.Write(target.ClassNameToGenerate)
+			.Write('(');
 
 		if (supportsIMeterFactory)
 		{
-			builder
-				.Append(Constants.Metrics.SystemDiagnostics.IMeterFactory)
-				.Append(' ')
-				.Append(Constants.Metrics.MeterFactoryParameterName);
+			writer
+				.Write(Constants.Metrics.SystemDiagnostics.IMeterFactory)
+				.Write(' ')
+				.Write(Constants.Metrics.MeterFactoryParameterName);
 		}
 
-		builder.AppendLine(')').Append(indent, '{');
+		writer.Write(")");
 
-		indent++;
-
-		EmitInitializationBodyContent(target, builder, indent, emitNullable, supportsIMeterFactory);
-
-		indent--;
-
-		builder.Append(indent, '}');
-
-		return --indent;
+		using (writer.OpenBlockScope())
+		{
+			EmitInitializationBodyContent(target, writer, emitNullable, supportsIMeterFactory);
+		}
 	}
 
 	static void EmitInitializationBodyContent(
 		MeterTarget target,
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		bool emitNullable,
 		bool supportsIMeterFactory
 	)
@@ -117,63 +100,52 @@ partial class MeterTargetClassEmitter
 		const string meterTagsVariableName = "meterTags";
 
 		var dictType = GetDictionaryType(emitNullable);
-		builder
-			.Append(indent, (string)dictType, withNewLine: false)
-			.Append(' ')
-			.Append(meterTagsVariableName)
-			.Append(" = new ")
-			.Append((string)dictType)
-			.AppendLine("();")
-			.AppendLine();
+		writer
+			.Write((string)dictType)
+			.Write(' ')
+			.Write(meterTagsVariableName)
+			.Write(" = new ")
+			.Write((string)dictType)
+			.WriteLine("();")
+			.NewLine();
 
-		builder
-			.Append(indent, PartialMeterTagsMethod, withNewLine: false)
-			.Append('(')
-			.Append(meterTagsVariableName)
-			.AppendLine(");")
-			.AppendLine();
+		writer.Write(PartialMeterTagsMethod).Write('(').Write(meterTagsVariableName).WriteLine(");").NewLine();
 
 		if (supportsIMeterFactory)
 		{
-			builder
-				.Append(indent, MeterFieldName, withNewLine: false)
-				.Append(" = ")
-				.Append(Constants.Metrics.MeterFactoryParameterName)
-				.Append(".Create(new ")
-				.Append(Constants.Metrics.SystemDiagnostics.MeterOptions)
-				.Append('(')
-				.Append(target.MeterName!.Wrap())
-				.AppendLine(')')
-				.Append(indent, '{')
-				.Append(indent + 1, "Version = ", withNewLine: false)
-				.AppendLine("null,")
-				.Append(indent + 1, "Tags = ", withNewLine: false)
-				.AppendLine(meterTagsVariableName)
-				.Append(indent, "});")
-				.AppendLine();
+			writer
+				.Write(MeterFieldName)
+				.Write(" = ")
+				.Write(Constants.Metrics.MeterFactoryParameterName)
+				.Write(".Create(new ")
+				.Write(Constants.Metrics.SystemDiagnostics.MeterOptions)
+				.Write("(")
+				.Write(target.MeterName!.Wrap())
+				.Write(") {")
+				.NewLine();
+			writer.Indent();
+			writer.WriteLine("Version = null,");
+			writer.WriteLine($"Tags = {meterTagsVariableName}");
+			writer.Unindent();
+			writer.Write("});").NewLine();
 		}
 		else
 		{
-			builder
-				.Append(indent, MeterFieldName, withNewLine: false)
-				.Append(" = new ")
-				.Append(Constants.Metrics.SystemDiagnostics.Meter)
-				.Append('(')
-				.Append(target.MeterName!.Wrap())
-				.AppendLine(");")
-				.AppendLine();
+			writer
+				.Write(MeterFieldName)
+				.Write(" = new ")
+				.Write(Constants.Metrics.SystemDiagnostics.Meter)
+				.Write('(')
+				.Write(target.MeterName!.Wrap())
+				.WriteLine(");")
+				.NewLine();
 		}
 
 		foreach (var method in target.InstrumentationMethods)
-			EmitInitialiseInstrumentVariable(method, builder, indent, emitNullable);
+			EmitInitialiseInstrumentVariable(method, writer, emitNullable);
 	}
 
-	static void EmitInitialiseInstrumentVariable(
-		InstrumentTarget method,
-		StringBuilder builder,
-		int indent,
-		bool emitNullable
-	)
+	static void EmitInitialiseInstrumentVariable(InstrumentTarget method, CodeWriter writer, bool emitNullable)
 	{
 		if (!method.TargetGenerationState.IsValid)
 			return;
@@ -185,37 +157,37 @@ partial class MeterTargetClassEmitter
 			var tagVariableName = Utilities.LowercaseFirstChar(method.MethodName) + "Tags";
 
 			var dictType = GetDictionaryType(emitNullable);
-			builder
-				.Append(indent, (string)dictType, withNewLine: false)
-				.Append(' ')
-				.Append(tagVariableName)
-				.Append(" = new ")
-				.Append((string)dictType)
-				.AppendLine("();")
-				.AppendLine()
-				.Append(indent, method.TagPopulateMethodName, withNewLine: false)
-				.Append('(')
-				.Append(tagVariableName)
-				.AppendLine(");")
-				.AppendLine();
+			writer
+				.Write((string)dictType)
+				.Write(' ')
+				.Write(tagVariableName)
+				.Write(" = new ")
+				.Write((string)dictType)
+				.WriteLine("();")
+				.NewLine()
+				.Write(method.TagPopulateMethodName)
+				.Write('(')
+				.Write(tagVariableName)
+				.WriteLine(");")
+				.NewLine();
 
-			builder
-				.Append(indent, method.FieldName, withNewLine: false)
-				.Append(" = ")
-				.Append(MeterFieldName)
-				.Append(".Create")
-				.Append(method.InstrumentAttribute!.InstrumentType)
-				.Append('<')
-				.Append(method.InstrumentMeasurementType)
-				.Append(">(name: ")
-				.Append(method.MetricName.Wrap())
-				.Append(", unit: ")
-				.Append(unit)
-				.Append(", description: ")
-				.Append(description)
-				.Append(", tags: ")
-				.Append(tagVariableName)
-				.AppendLine(");");
+			writer
+				.Write(method.FieldName)
+				.Write(" = ")
+				.Write(MeterFieldName)
+				.Write(".Create")
+				.Write(method.InstrumentAttribute!.InstrumentType.ToString())
+				.Write('<')
+				.Write(method.InstrumentMeasurementType)
+				.Write(">(name: ")
+				.Write(method.MetricName.Wrap())
+				.Write(", unit: ")
+				.Write(unit)
+				.Write(", description: ")
+				.Write(description)
+				.Write(", tags: ")
+				.Write(tagVariableName)
+				.WriteLine(");");
 		}
 	}
 }

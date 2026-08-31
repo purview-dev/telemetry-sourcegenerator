@@ -1,4 +1,3 @@
-﻿using System.Text;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -7,37 +6,34 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 partial class MeterTargetClassEmitter
 {
-	static void EmitThrowStub(StringBuilder builder, int indent, InstrumentTarget methodTarget)
+	static void EmitThrowStub(CodeWriter writer, InstrumentTarget methodTarget)
 	{
-		builder.AppendLine().Append(indent, "public ", withNewLine: false).Append(methodTarget.ReturnType);
+		writer.NewLine().Write("public ").Write(methodTarget.ReturnType);
 
-		builder.Append(' ').Append(methodTarget.MethodName).Append('(');
+		writer.Write(' ').Write(methodTarget.MethodName).Write('(');
 
-		for (var i = 0; i < methodTarget.Parameters.Length; i++)
+		for (var i = 0; i < methodTarget.Parameters.Count; i++)
 		{
 			if (i > 0)
-				builder.Append(", ");
-			builder
-				.Append(methodTarget.Parameters[i].ParameterType)
-				.Append(' ')
-				.Append(methodTarget.Parameters[i].ParameterName);
+				writer.Write(", ");
+			writer
+				.Write(methodTarget.Parameters[i].ParameterType)
+				.Write(' ')
+				.Write(methodTarget.Parameters[i].ParameterName);
 		}
 
-		builder.AppendLine(") => throw new global::System.NotSupportedException();").AppendLine();
+		writer.Write(") => throw new global::System.NotSupportedException();").NewLine();
 	}
 
-	static int EmitMethods(
+	static void EmitMethods(
 		MeterTarget target,
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		SourceProductionContext context,
 		GenerationLogger? logger,
 		bool emitNullable
 	)
 	{
-		indent++;
-
-		EmitPartialMethods(builder, indent, target, context, logger, emitNullable);
+		EmitPartialMethods(writer, target, context, logger, emitNullable);
 
 		foreach (var methodTarget in target.InstrumentationMethods)
 		{
@@ -53,7 +49,7 @@ partial class MeterTargetClassEmitter
 					)
 				)
 				{
-					EmitThrowStub(builder, indent, methodTarget);
+					EmitThrowStub(writer, methodTarget);
 				}
 				continue;
 			}
@@ -66,15 +62,12 @@ partial class MeterTargetClassEmitter
 				);
 			}
 
-			EmitMethod(builder, indent, methodTarget, context, logger, emitNullable);
+			EmitMethod(writer, methodTarget, context, logger, emitNullable);
 		}
-
-		return --indent;
 	}
 
 	static void EmitPartialMethods(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		MeterTarget target,
 		SourceProductionContext context,
 		GenerationLogger? logger,
@@ -86,15 +79,15 @@ partial class MeterTargetClassEmitter
 		logger?.Debug($"Emitting partial method for populating tags: {PartialMeterTagsMethod}.");
 
 		var dictType = GetDictionaryType(emitNullable);
-		builder
-			.AppendLine()
-			.CodeGen(indent)
-			.Append(indent, "partial void ", withNewLine: false)
-			.Append(PartialMeterTagsMethod)
-			.Append('(')
-			.Append(dictType)
-			.AppendLine(" meterTags);")
-			.AppendLine();
+		writer
+			.NewLine()
+			.WriteLine(Constants.System.GeneratedCode.Value)
+			.Write("partial void ")
+			.Write(PartialMeterTagsMethod)
+			.Write('(')
+			.Write(dictType)
+			.WriteLine(" meterTags);")
+			.NewLine();
 
 		foreach (var instrument in target.InstrumentationMethods)
 		{
@@ -104,20 +97,19 @@ partial class MeterTargetClassEmitter
 			if (instrument.IsObservable)
 				continue;
 
-			builder
-				.CodeGen(indent)
-				.Append(indent, "partial void ", withNewLine: false)
-				.Append(instrument.TagPopulateMethodName)
-				.Append('(')
-				.Append(dictType)
-				.AppendLine(" instrumentTags);")
-				.AppendLine();
+			writer
+				.WriteLine(Constants.System.GeneratedCode.Value)
+				.Write("partial void ")
+				.Write(instrument.TagPopulateMethodName)
+				.Write('(')
+				.Write(dictType)
+				.WriteLine(" instrumentTags);")
+				.NewLine();
 		}
 	}
 
 	static void EmitMethod(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		InstrumentTarget methodTarget,
 		SourceProductionContext context,
 		GenerationLogger? logger,
@@ -185,21 +177,25 @@ partial class MeterTargetClassEmitter
 		var methodName =
 			isMultiTarget && !metricsOwnsPublicMethod ? methodTarget.MethodName + "_Metrics" : methodTarget.MethodName;
 
-		builder.CodeGen(indent).AggressiveInlining(indent).Append(indent, accessModifier + " ", withNewLine: false);
+		writer
+			.NewLine()
+			.WriteLine(Constants.System.GeneratedCode.Value)
+			.WriteLine(Constants.System.AggressiveInlining)
+			.Write(accessModifier + " ");
 
 		// For multi-target private methods, always return void
 		if (isMultiTarget && !metricsOwnsPublicMethod)
 		{
-			builder.Append(Constants.System.VoidKeyword);
+			writer.Write(Constants.System.VoidKeyword);
 		}
 		else
 		{
-			builder.Append(methodTarget.ReturnType);
+			writer.Write(methodTarget.ReturnType);
 			if (methodTarget.IsNullableReturn)
-				builder.Append('?');
+				writer.Write('?');
 		}
 
-		builder.Append(' ').Append(methodName).Append('(');
+		writer.Write(' ').Write(methodName).Write('(');
 
 		var index = 0;
 		foreach (var parameter in methodTarget.Parameters)
@@ -217,143 +213,127 @@ partial class MeterTargetClassEmitter
 
 				type = Constants.System.Func.MakeGeneric(type);
 
-				builder.Append(type);
+				writer.Write(type);
 			}
 			else
 			{
-				builder.Append(parameter.ParameterType);
+				writer.Write(parameter.ParameterType);
 			}
 
-			builder.Append(' ').Append(parameter.ParameterName);
+			writer.Write(' ').Write(parameter.ParameterName);
 
-			if (index < methodTarget.Parameters.Length - 1)
-				builder.Append(", ");
+			if (index < methodTarget.Parameters.Count - 1)
+				writer.Write(", ");
 
 			index++;
 		}
 
-		builder.AppendLine(')').Append(indent, '{');
+		writer.Write(")");
 
-		if (methodTarget.IsObservable)
-			EmitObservableInstrumentBodyTest(builder, indent, methodTarget);
-
-		var tagVariableName = EmitTags(builder, indent, methodTarget);
-
-		if (methodTarget.IsObservable)
-			EmitObservableInstrumentBody(builder, indent, methodTarget, tagVariableName);
-		else
-			EmitInstrumentBody(builder, indent, methodTarget, tagVariableName, emitNullable);
-
-		builder.Append(indent, '}');
-	}
-
-	static void EmitObservableInstrumentBodyTest(StringBuilder builder, int indent, InstrumentTarget method)
-	{
-		indent++;
-
-		builder
-			.Append(indent, "if (", withNewLine: false)
-			.Append(method.FieldName)
-			.AppendLine(" != null)")
-			.Append(indent, '{');
-
-		if (method.InstrumentAttribute?.ThrowOnAlreadyInitialized?.Value == true)
+		using (writer.OpenBlockScope())
 		{
-			builder
-				.Append(indent + 1, "throw new ", withNewLine: false)
-				.Append(Constants.System.Exception)
-				.Append("(\"")
-				.Append(method.MetricName)
-				.AppendLine(" has already been initialized.\");");
-		}
-		else
-		{
-			builder.Append(indent + 1, "return", withNewLine: false);
+			if (methodTarget.IsObservable)
+				EmitObservableInstrumentBodyTest(writer, methodTarget);
 
-			if (method.ReturnsBool)
-				builder.AppendLine(" false;");
+			var tagVariableName = EmitTags(writer, methodTarget);
+
+			if (methodTarget.IsObservable)
+				EmitObservableInstrumentBody(writer, methodTarget, tagVariableName);
 			else
-				builder.AppendLine(';');
+				EmitInstrumentBody(writer, methodTarget, tagVariableName, emitNullable);
 		}
-
-		builder.Append(indent, '}').AppendLine();
 	}
 
-	static void EmitObservableInstrumentBody(
-		StringBuilder builder,
-		int indent,
-		InstrumentTarget method,
-		string? tagVariableName
-	)
+	static void EmitObservableInstrumentBodyTest(CodeWriter writer, InstrumentTarget method)
 	{
-		indent++;
+		writer.Write("if (").Write(method.FieldName).WriteLine(" != null)");
 
+		using (writer.OpenBlockScope())
+		{
+			if (method.InstrumentAttribute?.ThrowOnAlreadyInitialized?.Value == true)
+			{
+				writer
+					.Write("throw new ")
+					.Write(Constants.System.Exception)
+					.Write("(\"")
+					.Write(method.MetricName)
+					.WriteLine(" has already been initialized.\");");
+			}
+			else
+			{
+				writer.Write("return");
+
+				if (method.ReturnsBool)
+					writer.WriteLine(" false;");
+				else
+					writer.Write(";").NewLine();
+			}
+		}
+
+		writer.NewLine();
+	}
+
+	static void EmitObservableInstrumentBody(CodeWriter writer, InstrumentTarget method, string? tagVariableName)
+	{
 		var unit = method.InstrumentAttribute!.Unit?.Value?.Wrap();
 		var description = method.InstrumentAttribute!.Description?.Value?.Wrap();
 
-		builder
-			.Append(indent, method.FieldName, withNewLine: false)
-			.Append(" = ")
-			.Append(MeterFieldName)
-			.Append(".Create")
-			.Append(method.InstrumentAttribute!.InstrumentType)
-			.Append('<')
-			.Append(method.InstrumentMeasurementType)
-			.Append(">(")
-			.Append(method.MetricName.Wrap())
-			.Append(", ")
-			.Append(method.MeasurementParameter!.ParameterName)
-			.Append(", unit: ")
-			.Append(unit ?? Constants.System.NullKeyword)
-			.Append(", description: ")
-			.Append(description ?? Constants.System.NullKeyword);
+		writer
+			.Write(method.FieldName)
+			.Write(" = ")
+			.Write(MeterFieldName)
+			.Write(".Create")
+			.Write(method.InstrumentAttribute!.InstrumentType.ToString())
+			.Write('<')
+			.Write(method.InstrumentMeasurementType)
+			.Write(">(")
+			.Write(method.MetricName.Wrap())
+			.Write(", ")
+			.Write(method.MeasurementParameter!.ParameterName)
+			.Write(", unit: ")
+			.Write(unit ?? Constants.System.NullKeyword)
+			.Write(", description: ")
+			.Write(description ?? Constants.System.NullKeyword);
 
 		if (tagVariableName != null)
 		{
-			builder
-				.AppendLine()
-				.Append(indent + 1, ", tags: ", withNewLine: false)
-				.AppendLine(tagVariableName)
-				.WithIndent(indent);
+			writer.WriteLine().Write(", tags: ").WriteLine(tagVariableName);
 		}
 
-		builder.AppendLine(");");
+		writer.WriteLine(");");
 
 		if (method.ReturnsBool)
 		{
-			builder.AppendLine().Append(indent, "return true;");
+			writer.NewLine().Write("return true;");
 		}
 	}
 
 	static void EmitInstrumentBody(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		InstrumentTarget methodTarget,
 		string? tagVariableName,
 		bool emitNullable = true
 	)
 	{
-		indent++;
-
 		var instrumentMeasureMethodName =
 			methodTarget.InstrumentAttribute!.InstrumentType == InstrumentTypes.Histogram ? "Record" : "Add";
 
-		var tagCount = methodTarget.Tags.Length;
+		var tagCount = methodTarget.Tags.Count;
 		var hasConditionalTags = methodTarget.Tags.Any(t => t.SkipOnNullOrEmpty);
 		var useDirectTagParams = tagCount <= 3 && tagCount > 0 && !hasConditionalTags;
 
-		builder
-			.Append(indent, methodTarget.FieldName, withNewLine: false)
-			.Append('.')
-			.Append(instrumentMeasureMethodName)
-			.Append('(')
-			.Append(methodTarget.MeasurementParameter?.ParameterName ?? "1");
+		writer
+			.Write(methodTarget.FieldName)
+			.Write('.')
+			.Write(instrumentMeasureMethodName)
+			.Write('(')
+			.Write(methodTarget.MeasurementParameter?.ParameterName ?? "1");
 
 		if (tagCount == 0)
 		{
 			// No tags — use the simple no-tag overload so the JIT can inline the hot path fully.
 			// Passing tagList: default would route through the TagList overload unnecessarily.
-			builder.AppendLine(");");
+			writer.Write(");").NewLine();
 		}
 		else if (useDirectTagParams)
 		{
@@ -363,42 +343,42 @@ partial class MeterTargetClassEmitter
 				: "global::System.Collections.Generic.KeyValuePair<string, object>(";
 			foreach (var tag in methodTarget.Tags)
 			{
-				builder
-					.Append(", new ")
-					.Append(kvpType)
-					.Append(tag.GeneratedName.Wrap())
-					.Append(", ")
-					.Append(tag.ParameterName)
-					.Append(')');
+				writer
+					.Write(", new ")
+					.Write(kvpType)
+					.Write(tag.GeneratedName.Wrap())
+					.Write(", ")
+					.Write(tag.ParameterName)
+					.Write(')');
 			}
 
-			builder.AppendLine(");");
+			writer.Write(");").NewLine();
 		}
 		else
 		{
 			if (tagVariableName != null)
 			{
 				// 4+ tags or conditional tags: use the TagList variable
-				builder.Append(", tagList: ").Append(tagVariableName);
+				writer.Write(", tagList: ").Write(tagVariableName);
 			}
 
 			// 0 tags: close the call with no tag argument, using the simple overload
 			// (e.g. Add(1) or Record(value) rather than Add(1, tagList: default))
-			builder.AppendLine(");");
+			writer.Write(");").NewLine();
 		}
 
 		if (methodTarget.ReturnsBool)
 		{
-			builder.AppendLine().Append(indent, "return true;");
+			writer.NewLine().Write("return true;");
 		}
 	}
 
-	static string? EmitTags(StringBuilder builder, int indent, InstrumentTarget methodTarget)
+	static string? EmitTags(CodeWriter writer, InstrumentTarget methodTarget)
 	{
-		if (methodTarget.Tags.Length == 0)
+		if (methodTarget.Tags.Count == 0)
 			return null;
 
-		var tagCount = methodTarget.Tags.Length;
+		var tagCount = methodTarget.Tags.Count;
 		var hasConditionalTags = methodTarget.Tags.Any(t => t.SkipOnNullOrEmpty);
 
 		// OpenTelemetry best practice:
@@ -411,47 +391,44 @@ partial class MeterTargetClassEmitter
 			return null;
 		}
 
-		indent++;
-
 		var tagVariableName = Utilities.LowercaseFirstChar(methodTarget.MethodName + "TagList");
-		builder
-			.Append(indent, Constants.System.TagList, withNewLine: false)
-			.Append(' ')
-			.Append(tagVariableName)
-			.Append(" = new")
-			.AppendLine("();")
-			.AppendLine();
+		writer
+			.Write(Constants.System.TagList)
+			.Write(' ')
+			.Write(tagVariableName)
+			.Write(" = new")
+			.WriteLine("();")
+			.NewLine();
 
 		foreach (var param in methodTarget.Tags)
 		{
 			if (param.SkipOnNullOrEmpty)
 			{
-				builder
-					.Append(indent, "if (", withNewLine: false)
-					.Append(param.ParameterName)
-					.AppendLine(" != default)")
-					.Append(indent, "{");
-
-				indent++;
+				writer.Write("if (").Write(param.ParameterName).WriteLine(" != default)");
+				using (writer.OpenBlockScope())
+				{
+					writer
+						.Write(tagVariableName)
+						.Write(".Add(")
+						.Write(param.GeneratedName.Wrap())
+						.Write(", ")
+						.Write(param.ParameterName)
+						.WriteLine(");");
+				}
 			}
-
-			builder
-				.Append(indent, tagVariableName, withNewLine: false)
-				.Append(".Add(")
-				.Append(param.GeneratedName.Wrap())
-				.Append(", ")
-				.Append(param.ParameterName)
-				.AppendLine(");");
-
-			if (param.SkipOnNullOrEmpty)
+			else
 			{
-				indent--;
-
-				builder.Append(indent, "}").AppendLine();
+				writer
+					.Write(tagVariableName)
+					.Write(".Add(")
+					.Write(param.GeneratedName.Wrap())
+					.Write(", ")
+					.Write(param.ParameterName)
+					.WriteLine(");");
 			}
 		}
 
-		builder.AppendLine();
+		writer.NewLine();
 
 		return tagVariableName;
 	}

@@ -1,12 +1,12 @@
-﻿using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Templates;
+using System.Globalization;
 
 namespace Purview.Telemetry;
 
 partial class Constants
 {
-	public static Lazy<Version> Version = new(() => typeof(Constants).Assembly.GetName().Version!);
+	public static Lazy<Version> Version = new(() => typeof(Constants).Assembly.GetName().Version);
 
 	public static class System
 	{

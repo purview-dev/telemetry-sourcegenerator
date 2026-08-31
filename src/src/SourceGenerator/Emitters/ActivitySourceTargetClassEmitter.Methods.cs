@@ -1,4 +1,3 @@
-﻿using System.Text;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -7,18 +6,15 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 partial class ActivitySourceTargetClassEmitter
 {
-	static int EmitMethods(
+	static void EmitMethods(
 		ActivitySourceTarget target,
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		SourceProductionContext context,
 		GenerationLogger? logger,
 		bool emitNullable
 	)
 	{
-		indent++;
-
-		EmitRecordExceptionEvent(builder, indent, context, logger, emitNullable);
+		EmitRecordExceptionEvent(writer, context, logger, emitNullable);
 
 		// Filter to only methods that are valid for Activities target
 		// (have explicit Activity/Event/Context attributes, or valid inference in single-target)
@@ -41,15 +37,12 @@ partial class ActivitySourceTargetClassEmitter
 		{
 			context.CancellationToken.ThrowIfCancellationRequested();
 
-			EmitMethod(builder, indent, methodTarget, target, context, logger, emitNullable);
+			EmitMethod(writer, methodTarget, target, context, logger, emitNullable);
 		}
-
-		return --indent;
 	}
 
 	static void EmitRecordExceptionEvent(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		SourceProductionContext context,
 		GenerationLogger? logger,
 		bool emitNullable
@@ -59,145 +52,138 @@ partial class ActivitySourceTargetClassEmitter
 
 		logger?.Debug($"Generating {Constants.Activities.RecordExceptionMethodName}.");
 
-		builder
-			.CodeGen(indent)
-			.AggressiveInlining(indent)
-			.Append(indent, "static void ", withNewLine: false)
-			.Append(Constants.Activities.RecordExceptionMethodName)
-			.Append('(')
-			.Append(Constants.Activities.SystemDiagnostics.Activity)
-			.Append(emitNullable ? "? activity, " : " activity, ")
-			.Append(Constants.System.Exception)
-			.Append(emitNullable ? "? exception, " : " exception, ")
-			.Append(Constants.System.BuiltInTypes.BoolKeyword)
-			.AppendLine(" escape)")
-			.Append(indent, '{');
+		writer
+			.WriteLine(Constants.System.GeneratedCode.Value)
+			.WriteLine(Constants.System.AggressiveInlining)
+			.Write("static void ")
+			.Write(Constants.Activities.RecordExceptionMethodName)
+			.Write('(')
+			.Write(Constants.Activities.SystemDiagnostics.Activity)
+			.Write(emitNullable ? "? activity, " : " activity, ")
+			.Write(Constants.System.Exception)
+			.Write(emitNullable ? "? exception, " : " exception, ")
+			.Write(Constants.System.BuiltInTypes.BoolKeyword)
+			.WriteLine(" escape)");
 
-		indent++;
+		using (writer.OpenBlockScope())
+		{
+			writer.WriteLine("if (activity == null || exception == null)");
+			using (writer.OpenBlockScope())
+				writer.WriteLine("return;");
 
-		builder
-			.Append(indent, "if (activity == null || exception == null)")
-			.Append(indent, '{')
-			.Append(indent + 1, "return;")
-			.Append(indent, '}')
-			.AppendLine();
+			writer.NewLine();
 
-		const string tagsListVariableName = "tagsCollection";
-		builder
-			.Append(indent, Constants.Activities.SystemDiagnostics.ActivityTagsCollection, withNewLine: false)
-			.Append(' ')
-			.Append(tagsListVariableName)
-			.Append(" = new ")
-			.Append(Constants.Activities.SystemDiagnostics.ActivityTagsCollection)
-			.AppendLine("();");
+			const string tagsListVariableName = "tagsCollection";
+			writer
+				.Write(Constants.Activities.SystemDiagnostics.ActivityTagsCollection)
+				.Write(' ')
+				.Write(tagsListVariableName)
+				.Write(" = new ")
+				.Write(Constants.Activities.SystemDiagnostics.ActivityTagsCollection)
+				.WriteLine("();");
 
-		EmitExceptionParam(builder, indent, tagsListVariableName, "escape", "exception");
+			EmitExceptionParam(writer, tagsListVariableName, "escape", "exception");
 
-		const string eventVariableName = "recordExceptionEvent";
+			const string eventVariableName = "recordExceptionEvent";
 
-		builder
-			.AppendLine()
-			.Append(indent, Constants.Activities.SystemDiagnostics.ActivityEvent, withNewLine: false)
-			.Append(' ')
-			.Append(eventVariableName)
-			.Append(" = new ")
-			.Append(Constants.Activities.SystemDiagnostics.ActivityEvent)
-			// name:
-			.Append("(name: ")
-			.Append(Constants.Activities.Tag_ExceptionEventName.Wrap())
-			// timestamp:
-			.Append(", timestamp: default")
-			// tags:
-			.Append(", tags: ")
-			.Append(tagsListVariableName)
-			.AppendLine(");");
+			writer
+				.NewLine()
+				.Write(Constants.Activities.SystemDiagnostics.ActivityEvent)
+				.Write(' ')
+				.Write(eventVariableName)
+				.Write(" = new ")
+				.Write(Constants.Activities.SystemDiagnostics.ActivityEvent)
+				// name:
+				.Write("(name: ")
+				.Write(Constants.Activities.Tag_ExceptionEventName.Wrap())
+				// timestamp:
+				.Write(", timestamp: default")
+				// tags:
+				.Write(", tags: ")
+				.Write(tagsListVariableName)
+				.WriteLine(");");
 
-		builder
-			.AppendLine()
-			.Append(indent, "activity.AddEvent(", withNewLine: false)
-			.Append(eventVariableName)
-			.AppendLine(");");
+			writer.NewLine().Write("activity.AddEvent(").Write(eventVariableName).WriteLine(");");
+		}
 
-		builder.Append(--indent, '}').AppendLine();
+		writer.NewLine();
 	}
 
 	static void EmitExceptionParam(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		string tagsListVariableName,
 		string escapeParam,
 		string exceptionParam
 	)
 	{
-		builder
-			.Append(indent, tagsListVariableName, withNewLine: false)
-			.Append(".Add(")
-			.Append(Constants.Activities.Tag_ExceptionEscaped.Wrap())
-			.Append(", ")
-			.Append(escapeParam)
-			.AppendLine(");");
+		writer
+			.Write(tagsListVariableName)
+			.Write(".Add(")
+			.Write(Constants.Activities.Tag_ExceptionEscaped.Wrap())
+			.Write(", ")
+			.Write(escapeParam)
+			.WriteLine(");");
 
-		builder
-			.Append(indent, tagsListVariableName, withNewLine: false)
-			.Append(".Add(")
-			.Append(Constants.Activities.Tag_ExceptionMessage.Wrap())
-			.Append(", ")
-			.Append(exceptionParam)
-			.AppendLine(".Message);");
+		writer
+			.Write(tagsListVariableName)
+			.Write(".Add(")
+			.Write(Constants.Activities.Tag_ExceptionMessage.Wrap())
+			.Write(", ")
+			.Write(exceptionParam)
+			.WriteLine(".Message);");
 
-		builder
-			.Append(indent, tagsListVariableName, withNewLine: false)
-			.Append(".Add(")
-			.Append(Constants.Activities.Tag_ExceptionType.Wrap())
-			.Append(", ")
-			.Append(exceptionParam)
-			.AppendLine(".GetType().FullName);");
+		writer
+			.Write(tagsListVariableName)
+			.Write(".Add(")
+			.Write(Constants.Activities.Tag_ExceptionType.Wrap())
+			.Write(", ")
+			.Write(exceptionParam)
+			.WriteLine(".GetType().FullName);");
 
-		builder
-			.Append(indent, tagsListVariableName, withNewLine: false)
-			.Append(".Add(")
-			.Append(Constants.Activities.Tag_ExceptionStackTrace.Wrap())
-			.Append(", ")
-			.Append(exceptionParam)
-			.AppendLine(".StackTrace);");
+		writer
+			.Write(tagsListVariableName)
+			.Write(".Add(")
+			.Write(Constants.Activities.Tag_ExceptionStackTrace.Wrap())
+			.Write(", ")
+			.Write(exceptionParam)
+			.WriteLine(".StackTrace);");
 	}
 
-	static void EmitThrowStub(StringBuilder builder, int indent, ActivityBasedGenerationTarget methodTarget)
+	static void EmitThrowStub(CodeWriter writer, ActivityBasedGenerationTarget methodTarget)
 	{
-		builder.AppendLine().Append(indent, "public ", withNewLine: false).Append(methodTarget.ReturnType);
+		writer.NewLine().Write("public ").Write(methodTarget.ReturnType);
 
-		builder.Append(' ').Append(methodTarget.MethodName);
+		writer.Write(' ').Write(methodTarget.MethodName);
 
-		if (methodTarget.TypeParameters.Length > 0)
+		if (methodTarget.TypeParameters.Count > 0)
 		{
-			builder.Append('<');
-			for (var i = 0; i < methodTarget.TypeParameters.Length; i++)
+			writer.Write('<');
+			for (var i = 0; i < methodTarget.TypeParameters.Count; i++)
 			{
 				if (i > 0)
-					builder.Append(", ");
-				builder.Append(methodTarget.TypeParameters[i]);
+					writer.Write(", ");
+				writer.Write(methodTarget.TypeParameters[i]);
 			}
-			builder.Append('>');
+			writer.Write('>');
 		}
 
-		builder.Append('(');
+		writer.Write('(');
 
-		for (var i = 0; i < methodTarget.Parameters.Length; i++)
+		for (var i = 0; i < methodTarget.Parameters.Count; i++)
 		{
 			if (i > 0)
-				builder.Append(", ");
-			builder
-				.Append(methodTarget.Parameters[i].ParameterType)
-				.Append(' ')
-				.Append(methodTarget.Parameters[i].ParameterName);
+				writer.Write(", ");
+			writer
+				.Write(methodTarget.Parameters[i].ParameterType)
+				.Write(' ')
+				.Write(methodTarget.Parameters[i].ParameterName);
 		}
 
-		builder.AppendLine(") => throw new global::System.NotSupportedException();").AppendLine();
+		writer.WriteLine(") => throw new global::System.NotSupportedException();").NewLine();
 	}
 
 	static void EmitMethod(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		ActivityBasedGenerationTarget methodTarget,
 		ActivitySourceTarget target,
 		SourceProductionContext context,
@@ -217,7 +203,7 @@ partial class ActivitySourceTargetClassEmitter
 				)
 			)
 			{
-				EmitThrowStub(builder, indent, methodTarget);
+				EmitThrowStub(writer, methodTarget);
 			}
 			return;
 		}
@@ -233,21 +219,20 @@ partial class ActivitySourceTargetClassEmitter
 		if (isMultiTarget)
 		{
 			// Generate private activity implementation method
-			EmitPrivateActivityMethod(builder, indent, methodTarget, target, context, logger, emitNullable);
+			EmitPrivateActivityMethod(writer, methodTarget, target, context, logger, emitNullable);
 
 			// Generate public delegating method (Activity emitter owns this for multi-target)
-			EmitPublicDelegatingMethod(builder, indent, methodTarget, methodTargets, context, logger, emitNullable);
+			EmitPublicDelegatingMethod(writer, methodTarget, methodTargets, context, logger, emitNullable);
 		}
 		else
 		{
 			// Single-target: generate public method as before
-			EmitPublicActivityMethod(builder, indent, methodTarget, context, logger, emitNullable);
+			EmitPublicActivityMethod(writer, methodTarget, context, logger, emitNullable);
 		}
 	}
 
 	static void EmitPrivateActivityMethod(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		ActivityBasedGenerationTarget methodTarget,
 		ActivitySourceTarget _, // target
 		SourceProductionContext context,
@@ -257,44 +242,44 @@ partial class ActivitySourceTargetClassEmitter
 	{
 		var privateMethodName = methodTarget.MethodName + "_Activity";
 
-		builder
-			.CodeGen(indent)
-			.AggressiveInlining(indent)
-			.Append(indent, "private ", withNewLine: false)
-			.Append(methodTarget.ReturnType);
+		writer
+			.WriteLine(Constants.System.GeneratedCode.Value)
+			.WriteLine(Constants.System.AggressiveInlining)
+			.Write("private ")
+			.Write(methodTarget.ReturnType);
 
-		builder.Append(' ').Append(privateMethodName).Append('(');
+		writer.Write(' ').Write(privateMethodName).Write('(');
 
 		var index = 0;
 		foreach (var parameter in methodTarget.Parameters)
 		{
 			context.CancellationToken.ThrowIfCancellationRequested();
 
-			builder.Append(parameter.ParameterType).Append(' ').Append(parameter.ParameterName);
+			writer.Write(parameter.ParameterType).Write(' ').Write(parameter.ParameterName);
 
-			if (index < methodTarget.Parameters.Length - 1)
-				builder.Append(", ");
+			if (index < methodTarget.Parameters.Count - 1)
+				writer.Write(", ");
 
 			index++;
 		}
 
-		builder.AppendLine(')').Append(indent, '{');
+		writer.WriteLine(")");
 
-		indent++;
+		using (writer.OpenBlockScope())
+		{
+			if (methodTarget.MethodType == ActivityMethodType.Activity)
+				EmitActivityMethodBody(writer, methodTarget, context, logger, emitNullable);
+			else if (methodTarget.MethodType == ActivityMethodType.Event)
+				EmitEventMethodBody(writer, methodTarget, context, logger, emitNullable);
+			else if (methodTarget.MethodType == ActivityMethodType.Context)
+				EmitContextMethodBody(writer, methodTarget, context, logger, emitNullable);
+		}
 
-		if (methodTarget.MethodType == ActivityMethodType.Activity)
-			EmitActivityMethodBody(builder, indent, methodTarget, context, logger, emitNullable);
-		else if (methodTarget.MethodType == ActivityMethodType.Event)
-			EmitEventMethodBody(builder, indent, methodTarget, context, logger, emitNullable);
-		else if (methodTarget.MethodType == ActivityMethodType.Context)
-			EmitContextMethodBody(builder, indent, methodTarget, context, logger, emitNullable);
-
-		builder.Append(--indent, '}').AppendLine();
+		writer.NewLine();
 	}
 
 	static void EmitPublicDelegatingMethod(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		ActivityBasedGenerationTarget methodTarget,
 		GenerationType methodTargets,
 		SourceProductionContext context,
@@ -304,147 +289,137 @@ partial class ActivitySourceTargetClassEmitter
 	{
 		logger?.Debug($"Building public delegating method for {methodTarget.MethodName}.");
 
-		builder
-			.AppendLine()
-			.CodeGen(indent)
-			.AggressiveInlining(indent)
-			.Append(indent, "public ", withNewLine: false)
-			.Append(methodTarget.ReturnType);
+		writer
+			.NewLine()
+			.WriteLine(Constants.System.GeneratedCode.Value)
+			.WriteLine(Constants.System.AggressiveInlining)
+			.Write("public ")
+			.Write(methodTarget.ReturnType);
 
-		builder.Append(' ').Append(methodTarget.MethodName).Append('(');
+		writer.Write(' ').Write(methodTarget.MethodName).Write('(');
 
 		var index = 0;
 		foreach (var parameter in methodTarget.Parameters)
 		{
 			context.CancellationToken.ThrowIfCancellationRequested();
 
-			builder.Append(parameter.ParameterType).Append(' ').Append(parameter.ParameterName);
+			writer.Write(parameter.ParameterType).Write(' ').Write(parameter.ParameterName);
 
-			if (index < methodTarget.Parameters.Length - 1)
-				builder.Append(", ");
+			if (index < methodTarget.Parameters.Count - 1)
+				writer.Write(", ");
 
 			index++;
 		}
 
-		builder.AppendLine(')').Append(indent, '{');
+		writer.WriteLine(")");
 
-		indent++;
-
-		var returnsActivity = Constants.Activities.SystemDiagnostics.Activity.Equals(methodTarget.ReturnType);
-		var paramList = string.Join(", ", methodTarget.Parameters.Select(p => p.ParameterName));
-
-		// Create filtered parameter list for Logging/Metrics (excludes Activity-related types)
-		var loggingMetricsParamList = string.Join(
-			", ",
-			methodTarget
-				.Parameters.Where(p =>
-					!Constants.Activities.SystemDiagnostics.Activity.Equals(p.ParameterType)
-					&& !Constants.Activities.SystemDiagnostics.ActivityContext.Equals(p.ParameterType)
-					&& !Constants.Activities.SystemDiagnostics.ActivityLink.Equals(p.ParameterType)
-					&& !Constants.Activities.SystemDiagnostics.ActivityLinkArray.Equals(p.ParameterType)
-					&& !Constants.System.TagList.Equals(p.ParameterType)
-				)
-				.Select(p => p.ParameterName)
-		);
-
-		// Call Activity private method first (returns Activity? if applicable)
-		if (methodTargets.HasFlag(GenerationType.Activities))
+		using (writer.OpenBlockScope())
 		{
+			var returnsActivity = Constants.Activities.SystemDiagnostics.Activity.Equals(methodTarget.ReturnType);
+			var paramList = string.Join(", ", methodTarget.Parameters.Select(p => p.ParameterName));
+
+			// Create filtered parameter list for Logging/Metrics (excludes Activity-related types)
+			var loggingMetricsParamList = string.Join(
+				", ",
+				methodTarget
+					.Parameters.Where(p =>
+						!Constants.Activities.SystemDiagnostics.Activity.Equals(p.ParameterType)
+						&& !Constants.Activities.SystemDiagnostics.ActivityContext.Equals(p.ParameterType)
+						&& !Constants.Activities.SystemDiagnostics.ActivityLink.Equals(p.ParameterType)
+						&& !Constants.Activities.SystemDiagnostics.ActivityLinkArray.Equals(p.ParameterType)
+						&& !Constants.System.TagList.Equals(p.ParameterType)
+					)
+					.Select(p => p.ParameterName)
+			);
+
+			// Call Activity private method first (returns Activity? if applicable)
+			if (methodTargets.HasFlag(GenerationType.Activities))
+			{
+				if (returnsActivity)
+				{
+					writer
+						.Write("var activityResult = ")
+						.Write(methodTarget.MethodName)
+						.Write("_Activity(")
+						.Write(paramList)
+						.WriteLine(");");
+				}
+				else
+				{
+					writer.Write(methodTarget.MethodName).Write("_Activity(").Write(paramList).WriteLine(");");
+				}
+			}
+
+			// Call Logging private method
+			if (methodTargets.HasFlag(GenerationType.Logging))
+			{
+				writer.Write(methodTarget.MethodName).Write("_Logging(").Write(loggingMetricsParamList).WriteLine(");");
+			}
+
+			// Call Metrics private method
+			if (methodTargets.HasFlag(GenerationType.Metrics))
+			{
+				writer.Write(methodTarget.MethodName).Write("_Metrics(").Write(loggingMetricsParamList).WriteLine(");");
+			}
+
+			// Return result if applicable
 			if (returnsActivity)
 			{
-				builder
-					.Append(indent, "var activityResult = ", withNewLine: false)
-					.Append(methodTarget.MethodName)
-					.Append("_Activity(")
-					.Append(paramList)
-					.AppendLine(");");
-			}
-			else
-			{
-				builder
-					.Append(indent, methodTarget.MethodName, withNewLine: false)
-					.Append("_Activity(")
-					.Append(paramList)
-					.AppendLine(");");
+				writer
+					.NewLine()
+					.Write(
+						"return activityResult"
+							+ (!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
+							+ ";"
+					);
 			}
 		}
 
-		// Call Logging private method
-		if (methodTargets.HasFlag(GenerationType.Logging))
-		{
-			builder
-				.Append(indent, methodTarget.MethodName, withNewLine: false)
-				.Append("_Logging(")
-				.Append(loggingMetricsParamList)
-				.AppendLine(");");
-		}
-
-		// Call Metrics private method
-		if (methodTargets.HasFlag(GenerationType.Metrics))
-		{
-			builder
-				.Append(indent, methodTarget.MethodName, withNewLine: false)
-				.Append("_Metrics(")
-				.Append(loggingMetricsParamList)
-				.AppendLine(");");
-		}
-
-		// Return result if applicable
-		if (returnsActivity)
-		{
-			builder
-				.AppendLine()
-				.Append(
-					indent,
-					"return activityResult" + (!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!") + ";"
-				);
-		}
-
-		builder.Append(--indent, '}').AppendLine();
+		writer.NewLine();
 	}
 
 	static void EmitPublicActivityMethod(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		ActivityBasedGenerationTarget methodTarget,
 		SourceProductionContext context,
 		GenerationLogger? logger,
 		bool emitNullable
 	)
 	{
-		builder
-			.CodeGen(indent)
-			.AggressiveInlining(indent)
-			.Append(indent, "public ", withNewLine: false)
-			.Append(methodTarget.ReturnType);
+		writer
+			.WriteLine(Constants.System.GeneratedCode.Value)
+			.WriteLine(Constants.System.AggressiveInlining)
+			.Write("public ")
+			.Write(methodTarget.ReturnType);
 
-		builder.Append(' ').Append(methodTarget.MethodName).Append('(');
+		writer.Write(' ').Write(methodTarget.MethodName).Write('(');
 
 		var index = 0;
 		foreach (var parameter in methodTarget.Parameters)
 		{
 			context.CancellationToken.ThrowIfCancellationRequested();
 
-			builder.Append(parameter.ParameterType).Append(' ').Append(parameter.ParameterName);
+			writer.Write(parameter.ParameterType).Write(' ').Write(parameter.ParameterName);
 
-			if (index < methodTarget.Parameters.Length - 1)
-				builder.Append(", ");
+			if (index < methodTarget.Parameters.Count - 1)
+				writer.Write(", ");
 
 			index++;
 		}
 
-		builder.AppendLine(')').Append(indent, '{');
+		writer.WriteLine(")");
 
-		indent++;
+		using (writer.OpenBlockScope())
+		{
+			if (methodTarget.MethodType == ActivityMethodType.Activity)
+				EmitActivityMethodBody(writer, methodTarget, context, logger, emitNullable);
+			else if (methodTarget.MethodType == ActivityMethodType.Event)
+				EmitEventMethodBody(writer, methodTarget, context, logger, emitNullable);
+			else if (methodTarget.MethodType == ActivityMethodType.Context)
+				EmitContextMethodBody(writer, methodTarget, context, logger, emitNullable);
+		}
 
-		if (methodTarget.MethodType == ActivityMethodType.Activity)
-			EmitActivityMethodBody(builder, indent, methodTarget, context, logger, emitNullable);
-		else if (methodTarget.MethodType == ActivityMethodType.Event)
-			EmitEventMethodBody(builder, indent, methodTarget, context, logger, emitNullable);
-		else if (methodTarget.MethodType == ActivityMethodType.Context)
-			EmitContextMethodBody(builder, indent, methodTarget, context, logger, emitNullable);
-
-		builder.Append(--indent, '}').AppendLine();
+		writer.NewLine();
 	}
 
 	static bool GuardMethod(

@@ -1,7 +1,7 @@
-﻿using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Purview.Telemetry.SourceGenerator.Records;
+using System.Globalization;
 
 namespace Purview.Telemetry.SourceGenerator.Helpers;
 
@@ -473,7 +473,7 @@ static partial class SharedHelpers
 			return null;
 		}
 
-		GenerationType excludedTargets = GenerationType.None;
+		var excludedTargets = GenerationType.None;
 
 		return !AttributeParser(
 			attributeData!,

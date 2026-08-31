@@ -1,5 +1,3 @@
 # Ignore template source files - these are embedded resources and should not be formatted
 
 src/src/SourceGenerator/Templates/Sources/
-src/tests/SourceGenerator.IntegrationTests/Snapshots/
-src/tests/SourceGenerator.IntegrationTests/Refactorings/Snapshots/

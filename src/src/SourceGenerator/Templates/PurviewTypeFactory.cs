@@ -1,6 +1,6 @@
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
+using System.Collections.Immutable;
 
 namespace Purview.Telemetry.SourceGenerator.Templates;
 

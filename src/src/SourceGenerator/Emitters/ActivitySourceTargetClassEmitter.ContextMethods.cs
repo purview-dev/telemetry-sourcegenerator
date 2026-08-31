@@ -1,4 +1,3 @@
-﻿using System.Text;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -8,8 +7,7 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 partial class ActivitySourceTargetClassEmitter
 {
 	static void EmitContextMethodBody(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		ActivityBasedGenerationTarget methodTarget,
 		SourceProductionContext context,
 		GenerationLogger? logger,
@@ -54,30 +52,21 @@ partial class ActivitySourceTargetClassEmitter
 			return;
 		}
 
-		EmitHasListenersTest(builder, indent, methodTarget, emitNullable);
+		EmitHasListenersTest(writer, methodTarget, emitNullable);
 
-		builder
-			.Append(indent, "if (", withNewLine: false)
-			.Append(activityVariableName)
-			.AppendLine(" != null)")
-			.Append(indent, '{');
+		writer.Write("if (").Write(activityVariableName).WriteLine(" != null)");
 
-		indent++;
-
-		EmitTagsOrBaggageParameters(builder, indent, activityVariableName, true, methodTarget, false, context, logger);
-		EmitTagsOrBaggageParameters(builder, indent, activityVariableName, false, methodTarget, false, context, logger);
-
-		builder.Append(--indent, '}');
+		using (writer.OpenBlockScope())
+		{
+			EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, context, logger);
+			EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, context, logger);
+		}
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
 		if (Constants.Activities.SystemDiagnostics.Activity.Equals(methodTarget.ReturnType))
 		{
-			builder
-				.AppendLine()
-				.Append(indent, "return ", withNewLine: false)
-				.Append(activityVariableName)
-				.AppendLine(';');
+			writer.NewLine().Write("return ").Write(activityVariableName).Write(";").NewLine();
 		}
 	}
 }

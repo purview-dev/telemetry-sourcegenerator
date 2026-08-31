@@ -1,8 +1,7 @@
-using System.Diagnostics;
-using System.Diagnostics.Metrics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Purview.SourceGeneratorFramework.Testing;
+using System.Diagnostics;
+using System.Diagnostics.Metrics;
 
 namespace Purview.Telemetry.SourceGenerator.Infra;
 

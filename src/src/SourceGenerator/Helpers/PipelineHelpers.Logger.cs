@@ -1,9 +1,9 @@
-﻿using System.Collections.Immutable;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Purview.Telemetry.SourceGenerator.Records;
 using Purview.Telemetry.SourceGenerator.Templates;
+using System.Collections.Immutable;
+using System.Text;
 
 namespace Purview.Telemetry.SourceGenerator.Helpers;
 
@@ -585,8 +585,8 @@ partial class PipelineHelpers
 					IsComplexType: parameter.Type.IsComplexType(),
 					LogPropertiesAttribute: logPropertiesAttribute,
 					LogProperties: logProperties != null
-						? new EquatableArray<LogPropertiesParameterDetails>(logProperties.ToImmutableArray())
-						: null,
+						? new([.. logProperties])
+						: [],
 					ExpandEnumerableAttribute: expandEnumerableAttribute,
 					ExcludedTargets: SharedHelpers
 						.GetExcludeTargetsAttribute(parameter, semanticModel, logger, token)

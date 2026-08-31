@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -7,10 +7,9 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 partial class LoggerTargetClassEmitter
 {
-	static int EmitFields(
+	static void EmitFields(
 		LoggerTarget target,
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		SourceProductionContext context,
 		GenerationLogger? logger,
 		bool emitNullable
@@ -18,19 +17,17 @@ partial class LoggerTargetClassEmitter
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		indent++;
-
-		builder
-			.Append(indent, "readonly ", withNewLine: false)
-			.Append(Constants.Logging.MicrosoftExtensions.ILogger)
-			.Append('<')
-			.Append(target.InterfaceType)
-			.Append('>')
-			.Append(' ')
-			.Append(Constants.Logging.LoggerFieldName)
-			.Append(';')
-			.AppendLine()
-			.AppendLine();
+		writer
+			.Write("readonly ")
+			.Write(Constants.Logging.MicrosoftExtensions.ILogger)
+			.Write('<')
+			.Write(target.InterfaceType)
+			.Write('>')
+			.Write(' ')
+			.Write(Constants.Logging.LoggerFieldName)
+			.Write(';')
+			.NewLine()
+			.NewLine();
 
 		foreach (var methodTarget in target.LogMethods)
 		{
@@ -102,87 +99,80 @@ partial class LoggerTargetClassEmitter
 				);
 			}
 
-			EmitLogActionField(builder, indent, methodTarget, emitNullable);
+			EmitLogActionField(writer, methodTarget, emitNullable);
 		}
-
-		return --indent;
 	}
 
-	internal static void EmitLogActionField(
-		StringBuilder builder,
-		int indent,
-		LogMethodTarget methodTarget,
-		bool emitNullable = true
-	)
+	internal static void EmitLogActionField(CodeWriter writer, LogMethodTarget methodTarget, bool emitNullable = true)
 	{
-		builder
-			.Append(indent, "static readonly ", withNewLine: false)
-			.Append(methodTarget.IsScoped ? Constants.System.Func : Constants.System.Action)
-			.Append('<')
-			.Append(Constants.Logging.MicrosoftExtensions.ILogger)
-			.Append(", ");
+		writer
+			.Write("static readonly ")
+			.Write(methodTarget.IsScoped ? Constants.System.Func : Constants.System.Action)
+			.Write('<')
+			.Write(Constants.Logging.MicrosoftExtensions.ILogger)
+			.Write(", ");
 
 		foreach (var parameter in methodTarget.ParametersSansException)
-			builder.Append(parameter.ParameterType).Append(", ");
+			writer.Write(parameter.ParameterType).Write(", ");
 
 		if (methodTarget.IsScoped)
 		{
-			builder.Append(Constants.System.IDisposable);
+			writer.Write(Constants.System.IDisposable);
 			if (emitNullable)
-				builder.Append('?');
-			builder.Append("> ");
+				writer.Write('?');
+			writer.Write("> ");
 		}
 		else
 		{
-			builder.Append(Constants.System.Exception);
+			writer.Write(Constants.System.Exception);
 			if (emitNullable)
-				builder.Append('?');
-			builder.Append("> ");
+				writer.Write('?');
+			writer.Write("> ");
 		}
 
-		builder
-			.Append(methodTarget.LoggerActionFieldName)
-			.Append(" = ")
-			.Append(Constants.Logging.MicrosoftExtensions.LoggerMessage)
-			.Append(".Define");
+		writer
+			.Write(methodTarget.LoggerActionFieldName)
+			.Write(" = ")
+			.Write(Constants.Logging.MicrosoftExtensions.LoggerMessage)
+			.Write(".Define");
 
 		if (methodTarget.IsScoped)
-			builder.Append("Scope");
+			writer.Write("Scope");
 
 		if (methodTarget.ParameterCountSansException > 0)
 		{
-			builder.Append('<');
+			writer.Write('<');
 
 			var i = 0;
 			foreach (var parameter in methodTarget.ParametersSansException)
 			{
-				builder.Append(parameter.ParameterType);
+				writer.Write(parameter.ParameterType);
 				if (i < methodTarget.ParameterCountSansException - 1)
-					builder.Append(", ");
+					writer.Write(", ");
 
 				i++;
 			}
 
-			builder.Append('>');
+			writer.Write('>');
 		}
 
-		builder.Append('(');
+		writer.Write('(');
 
 		if (!methodTarget.IsScoped)
 		{
-			builder.Append(methodTarget.MSLevel).Append(", ");
+			writer.Write(methodTarget.MSLevel).Write(", ");
 
 			var eventId = methodTarget.EventId ?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
-			builder
-				.Append("new ")
-				.Append(Constants.Logging.MicrosoftExtensions.EventId)
-				.Append('(')
-				.Append(eventId)
-				.Append(", \"")
-				.Append(methodTarget.LogName)
-				.Append("\"), ");
+			writer
+				.Write("new ")
+				.Write(Constants.Logging.MicrosoftExtensions.EventId)
+				.Write('(')
+				.Write(eventId.ToString(CultureInfo.InvariantCulture))
+				.Write(", \"")
+				.Write(methodTarget.LogName)
+				.Write("\"), ");
 		}
 
-		builder.Append('"').Append(methodTarget.MessageTemplate).Append('"').AppendLine(");");
+		writer.Write('"').Write(methodTarget.MessageTemplate).Write('"').Write(");").NewLine();
 	}
 }

@@ -1,11 +1,11 @@
-using System.Composition;
-using System.Text;
-using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeRefactorings;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Composition;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Purview.Telemetry.SourceGenerator.Refactorings;
 
@@ -307,7 +307,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		expression switch
 		{
 			IdentifierNameSyntax id => id.Identifier.Text,
-			MemberAccessExpressionSyntax _ => null, // chained access – not a field reference
+			MemberAccessExpressionSyntax => null, // chained access – not a field reference
 			_ => null,
 		};
 
@@ -322,7 +322,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		if (args.Count == 0)
 			return null;
 
-		int idx = 0;
+		var idx = 0;
 		string? explicitLogLevel = null;
 
 		// For generic Log(LogLevel, ...) method, first arg is the level

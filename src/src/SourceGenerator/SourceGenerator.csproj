@@ -30,6 +30,7 @@
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" PrivateAssets="all" />
 		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+		<PackageReference Include="Purview.SourceGeneratorFramework" PrivateAssets="all" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="../../../assets/images/purview-logo.jpg" Pack="true" PackagePath="" />

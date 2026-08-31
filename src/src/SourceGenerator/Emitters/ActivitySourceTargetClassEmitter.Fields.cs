@@ -1,4 +1,3 @@
-﻿using System.Text;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -7,17 +6,14 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 partial class ActivitySourceTargetClassEmitter
 {
-	static int EmitFields(
+	static void EmitFields(
 		ActivitySourceTarget target,
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		SourceProductionContext context,
 		GenerationLogger? logger
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
-
-		indent++;
 
 		var activitySourceName = target.ActivitySourceName;
 		if (string.IsNullOrWhiteSpace(activitySourceName))
@@ -31,18 +27,16 @@ partial class ActivitySourceTargetClassEmitter
 			activitySourceName = Constants.Activities.DefaultActivitySourceName;
 		}
 
-		builder
-			.Append(indent, "readonly static ", withNewLine: false)
-			.Append(Constants.Activities.SystemDiagnostics.ActivitySource)
-			.Append(' ')
-			.Append(Constants.Activities.ActivitySourceFieldName)
-			.Append(" = new ")
-			.Append(Constants.Activities.SystemDiagnostics.ActivitySource)
-			.Append('(')
-			.Append(activitySourceName!.Wrap())
-			.AppendLine(");")
-			.AppendLine();
-
-		return --indent;
+		writer
+			.Write("readonly static ")
+			.Write(Constants.Activities.SystemDiagnostics.ActivitySource)
+			.Write(' ')
+			.Write(Constants.Activities.ActivitySourceFieldName)
+			.Write(" = new ")
+			.Write(Constants.Activities.SystemDiagnostics.ActivitySource)
+			.Write('(')
+			.Write(activitySourceName!.Wrap())
+			.WriteLine(");")
+			.NewLine();
 	}
 }

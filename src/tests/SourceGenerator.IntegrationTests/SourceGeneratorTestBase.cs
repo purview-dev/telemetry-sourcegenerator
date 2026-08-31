@@ -1,4 +1,3 @@
-using Purview.SourceGeneratorFramework.Testing.TUnit;
 using Purview.Telemetry.SourceGenerator.Infra;
 
 namespace Purview.Telemetry.SourceGenerator;

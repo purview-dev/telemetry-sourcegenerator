@@ -1,11 +1,11 @@
-using System.Composition;
-using System.Text;
-using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeRefactorings;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Composition;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Purview.Telemetry.SourceGenerator.Refactorings;
 
@@ -295,18 +295,15 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		if (histogramType is not null && SymbolEqualityComparer.Default.Equals(constructedFrom, histogramType))
 			return MetricsInstrumentKind.Histogram;
 
+		// UpDownCounter
 		return upDownCounterType is null || !SymbolEqualityComparer.Default.Equals(constructedFrom, upDownCounterType)
 			? null
 			: MetricsInstrumentKind.UpDownCounter;
 	}
 
-	static string GetMeasurementType(ITypeSymbol type)
-	{
-		if (type is INamedTypeSymbol { IsGenericType: true } named && named.TypeArguments.Length > 0)
-			return named.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-
-		return "long";
-	}
+	static string GetMeasurementType(ITypeSymbol type) => type is INamedTypeSymbol { IsGenericType: true } named && named.TypeArguments.Length > 0
+			? named.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)
+			: "long";
 
 	internal static List<MetricsCallInfo> FindMetricsCalls(
 		ClassDeclarationSyntax classDecl,
@@ -337,7 +334,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 				continue;
 
 			var args = invocation.ArgumentList.Arguments;
-			bool isAutoCounter = false;
+			var isAutoCounter = false;
 
 			// Determine if this is an auto-counter (literal 1 on Counter/UpDownCounter)
 			if (isAdd && fieldInfo.InstrumentKind == MetricsInstrumentKind.Counter && args.Count >= 1)

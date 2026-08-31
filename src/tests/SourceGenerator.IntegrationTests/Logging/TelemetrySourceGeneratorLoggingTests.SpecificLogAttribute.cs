@@ -10,7 +10,7 @@ partial class TelemetrySourceGeneratorLoggingTests
 	)
 	{
 		// Arrange
-		string basicLogger =
+		var basicLogger =
 			@$"
 
 namespace Testing;
@@ -38,7 +38,7 @@ public interface ITestLogger
 	)
 	{
 		// Arrange
-		string basicLogger = $$"""
+		var basicLogger = $$"""
 
 
 namespace Testing;

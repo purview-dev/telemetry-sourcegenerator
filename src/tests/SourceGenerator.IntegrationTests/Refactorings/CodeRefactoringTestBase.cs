@@ -186,8 +186,8 @@ public abstract class CodeRefactoringTestBase
 			.IsNotEqualTo(codeWithMarker.Replace("$$", string.Empty, StringComparison.Ordinal).TrimStart())
 			.Because("Expected the refactoring to change the source.");
 
-		var parseResult = Microsoft.CodeAnalysis.CSharp.SyntaxFactory.ParseSyntaxTree(after!);
-		await Assert.That(parseResult.GetDiagnostics()).IsEmpty().Because("The rewritten source should be valid C#.");
+		var parseResult = SyntaxFactory.ParseSyntaxTree(after!, cancellationToken: cancellationToken);
+		await Assert.That(parseResult.GetDiagnostics(cancellationToken)).IsEmpty().Because("The rewritten source should be valid C#.");
 	}
 
 	/// <summary>

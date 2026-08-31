@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -57,7 +57,7 @@ public class RegexValidationTests
 		await Assert.That(matches.Count).IsEqualTo(holes.Length);
 		for (var i = 0; i < matches.Count; i++)
 		{
-			Match match = matches[i];
+			var match = matches[i];
 			await Assert.That(match.Success).IsTrue();
 
 			var hole = holes[i];

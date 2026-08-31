@@ -7,6 +7,10 @@
 		<File Path="../global.json" />
 		<File Path="../package.json" />
 	</Folder>
-	<Project Path="tests/SourceGenerator.IntegrationTests/SourceGenerator.IntegrationTests.csproj" />
-	<Project Path="src/SourceGenerator/SourceGenerator.csproj" />
+	<Folder Name="/src/">
+		<Project Path="src/SourceGenerator/SourceGenerator.csproj" />
+	</Folder>
+	<Folder Name="/tests/">
+		<Project Path="tests/SourceGenerator.IntegrationTests/SourceGenerator.IntegrationTests.csproj" />
+	</Folder>
 </Solution>

@@ -1,6 +1,5 @@
 using System.Reflection;
 using System.Text;
-using Purview.SourceGeneratorFramework.Testing;
 
 namespace Purview.Telemetry.SourceGenerator;
 

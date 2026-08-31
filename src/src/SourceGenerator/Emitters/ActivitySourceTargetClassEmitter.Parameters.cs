@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Text;
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -9,8 +8,7 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 partial class ActivitySourceTargetClassEmitter
 {
 	static void EmitTagsOrBaggageParameters(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		string activityVariableName,
 		bool populateTags,
 		ActivityBasedGenerationTarget method,
@@ -20,49 +18,23 @@ partial class ActivitySourceTargetClassEmitter
 	)
 	{
 		var parameters = populateTags ? method.Tags : method.Baggage;
-		if (parameters.Length == 0)
+		if (parameters.Count == 0)
 			return;
-
-		if (checkForNullableActivity)
-		{
-			builder
-				.AppendLine()
-				.Append(indent, "if (", withNewLine: false)
-				.Append(activityVariableName)
-				.AppendLine(" != null)")
-				.Append(indent, '{');
-
-			indent++;
-		}
 
 		var useRecordedExceptionRules = Constants.Activities.UseRecordExceptionRulesDefault;
 		if (method.EventAttribute?.UseRecordExceptionRules.IsSet == true)
 			useRecordedExceptionRules = method.EventAttribute.UseRecordExceptionRules.Value!.Value;
 
-		foreach (var param in parameters)
+		void EmitParameter(ActivityBasedParameterTarget param)
 		{
-			if (populateTags && param.IsException && useRecordedExceptionRules)
-				continue;
-
-			if (param.SkipOnNullOrEmpty)
-			{
-				builder
-					.Append(indent, "if (", withNewLine: false)
-					.Append(param.ParameterName)
-					.AppendLine(" != default)")
-					.Append(indent, "{");
-
-				indent++;
-			}
-
-			builder
-				.Append(indent, activityVariableName, withNewLine: false)
-				.Append('.')
-				.Append(populateTags ? "SetTag" : "SetBaggage")
-				.Append('(')
-				.Append(param.GeneratedName.Wrap())
-				.Append(", ")
-				.Append(param.ParameterName);
+			writer
+				.Write(activityVariableName)
+				.Write('.')
+				.Write(populateTags ? "SetTag" : "SetBaggage")
+				.Write('(')
+				.Write(param.GeneratedName.Wrap())
+				.Write(", ")
+				.Write(param.ParameterName);
 
 			if (!populateTags && param.ParameterType.SpecialType != SpecialType.System_String)
 			{
@@ -73,19 +45,44 @@ partial class ActivitySourceTargetClassEmitter
 				);
 
 				if (param.ParameterType.IsNullable)
-					builder.Append('?');
+					writer.Write('?');
 
-				builder.Append(".ToString()");
+				writer.Write(".ToString()");
 			}
 
-			builder.AppendLine(");");
+			writer.WriteLine(");");
+		}
 
-			if (param.SkipOnNullOrEmpty)
-				builder.Append(--indent, "}");
+		void EmitParameters()
+		{
+			foreach (var param in parameters)
+			{
+				if (populateTags && param.IsException && useRecordedExceptionRules)
+					continue;
+
+				if (param.SkipOnNullOrEmpty)
+				{
+					writer.Write("if (").Write(param.ParameterName).WriteLine(" != default)");
+					using (writer.OpenBlockScope())
+						EmitParameter(param);
+				}
+				else
+				{
+					EmitParameter(param);
+				}
+			}
 		}
 
 		if (checkForNullableActivity)
-			builder.Append(--indent, '}');
+		{
+			writer.NewLine().Write("if (").Write(activityVariableName).WriteLine(" != null)");
+			using (writer.OpenBlockScope())
+				EmitParameters();
+		}
+		else
+		{
+			EmitParameters();
+		}
 	}
 
 	static bool GuardParameters(

@@ -1,4 +1,3 @@
-﻿using System.Text;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -7,10 +6,9 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 partial class MeterTargetClassEmitter
 {
-	static int EmitFields(
+	static void EmitFields(
 		MeterTarget target,
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		SourceProductionContext context,
 		GenerationLogger? logger,
 		bool readonlyFields = false,
@@ -21,28 +19,26 @@ partial class MeterTargetClassEmitter
 
 		logger?.Debug($"Emitting fields for {target.ClassNameToGenerate}");
 
-		indent++;
-
 		// When metrics owns the constructor, emit readonly fields so the JIT can treat
 		// them as immutable after construction and eliminate null checks in hot paths.
 		if (readonlyFields)
 		{
-			builder
-				.Append(indent, "readonly ", withNewLine: false)
-				.Append((string)Constants.Metrics.SystemDiagnostics.Meter)
-				.Append(' ')
-				.Append(MeterFieldName)
-				.AppendLine(";")
-				.AppendLine();
+			writer
+				.Write("readonly ")
+				.Write((string)Constants.Metrics.SystemDiagnostics.Meter)
+				.Write(' ')
+				.Write(MeterFieldName)
+				.WriteLine(";")
+				.NewLine();
 		}
 		else
 		{
-			builder
-				.Append(indent, Constants.Metrics.SystemDiagnostics.Meter, withNewLine: false)
-				.Append(' ')
-				.Append(MeterFieldName)
-				.AppendLine(emitNullable ? " = default!;" : " = default;")
-				.AppendLine();
+			writer
+				.Write(Constants.Metrics.SystemDiagnostics.Meter)
+				.Write(' ')
+				.Write(MeterFieldName)
+				.WriteLine(emitNullable ? " = default!;" : " = default;")
+				.NewLine();
 		}
 
 		foreach (var method in target.InstrumentationMethods)
@@ -69,23 +65,16 @@ partial class MeterTargetClassEmitter
 
 			if (emitReadonly)
 			{
-				builder
-					.Append(indent, "readonly ", withNewLine: false)
-					.Append((string)type)
-					.Append(' ')
-					.Append(method.FieldName)
-					.AppendLine(";");
+				writer.Write("readonly ").Write((string)type).Write(' ').Write(method.FieldName).WriteLine(";");
 			}
 			else
 			{
-				builder
-					.Append(indent, type, withNewLine: false)
-					.Append(' ')
-					.Append(method.FieldName)
-					.AppendLine(emitNullable ? " = default!;" : " = default;");
+				writer
+					.Write(type)
+					.Write(' ')
+					.Write(method.FieldName)
+					.WriteLine(emitNullable ? " = default!;" : " = default;");
 			}
 		}
-
-		return --indent;
 	}
 }

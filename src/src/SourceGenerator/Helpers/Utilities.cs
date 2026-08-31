@@ -1,9 +1,9 @@
-﻿using System.Collections.Immutable;
-using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Purview.Telemetry.SourceGenerator.Records;
 using Purview.Telemetry.SourceGenerator.Templates;
+using System.Collections.Immutable;
+using System.Text.RegularExpressions;
 
 namespace Purview.Telemetry.SourceGenerator.Helpers;
 
@@ -469,21 +469,21 @@ static partial class Utilities
 			return pascalCaseName;
 
 		System.Text.StringBuilder result = new();
-		bool previousWasUpper = false;
-		bool previousWasLower = false;
+		var previousWasUpper = false;
+		var previousWasLower = false;
 
-		for (int i = 0; i < pascalCaseName.Length; i++)
+		for (var i = 0; i < pascalCaseName.Length; i++)
 		{
-			char current = pascalCaseName[i];
-			bool isUpper = char.IsUpper(current);
-			bool isLower = char.IsLower(current);
+			var current = pascalCaseName[i];
+			var isUpper = char.IsUpper(current);
+			var isLower = char.IsLower(current);
 
 			if (i > 0 && isUpper)
 			{
 				// Add separator before uppercase if:
 				// 1. Previous was lowercase (camelCase boundary: "entityId" -> "entity.id")
 				// 2. Next is lowercase and previous was uppercase (acronym boundary: "HTTPSConnection" -> "https.connection")
-				bool nextIsLower = i + 1 < pascalCaseName.Length && char.IsLower(pascalCaseName[i + 1]);
+				var nextIsLower = i + 1 < pascalCaseName.Length && char.IsLower(pascalCaseName[i + 1]);
 
 				if (previousWasLower || (previousWasUpper && nextIsLower))
 				{
@@ -593,7 +593,7 @@ static partial class Utilities
 			"handler",
 		];
 
-		string lowerName = name.ToLowerInvariant();
+		var lowerName = name.ToLowerInvariant();
 		return genericTerms.Contains(lowerName);
 	}
 

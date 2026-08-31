@@ -1,23 +1,20 @@
-﻿using System.Text;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
+using System.Globalization;
 
 namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 partial class LoggerGenTargetClassEmitter
 {
-	static int EmitMethods(
+	static void EmitMethods(
 		LoggerTarget target,
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		SourceProductionContext context,
 		GenerationLogger? logger,
 		bool emitNullable
 	)
 	{
-		indent++;
-
 		foreach (var methodTarget in target.LogMethods)
 		{
 			context.CancellationToken.ThrowIfCancellationRequested();
@@ -31,7 +28,7 @@ partial class LoggerGenTargetClassEmitter
 						context.ReportDiagnostic,
 						TelemetryDiagnostics.Logging.ExpandEnumerableAndLogPropertiesNotSupported
 					);
-					LoggerTargetClassEmitter.EmitThrowStub(builder, indent, methodTarget, emitNullable);
+					LoggerTargetClassEmitter.EmitThrowStub(writer, methodTarget, emitNullable);
 					continue;
 				}
 
@@ -43,14 +40,14 @@ partial class LoggerGenTargetClassEmitter
 					)
 				)
 				{
-					LoggerTargetClassEmitter.EmitThrowStub(builder, indent, methodTarget, emitNullable);
+					LoggerTargetClassEmitter.EmitThrowStub(writer, methodTarget, emitNullable);
 				}
 				continue;
 			}
 
 			if (methodTarget.UnknownReturnType)
 			{
-				LoggerTargetClassEmitter.EmitThrowStub(builder, indent, methodTarget, emitNullable);
+				LoggerTargetClassEmitter.EmitThrowStub(writer, methodTarget, emitNullable);
 				continue; // Diagnostic already reported in EmitFields
 			}
 
@@ -72,15 +69,12 @@ partial class LoggerGenTargetClassEmitter
 				);
 			}
 
-			EmitMethod(builder, indent, methodTarget, context, logger, emitNullable);
+			EmitMethod(writer, methodTarget, context, logger, emitNullable);
 		}
-
-		return --indent;
 	}
 
 	static void EmitMethod(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		LogMethodTarget methodTarget,
 		SourceProductionContext context,
 		GenerationLogger? logger,
@@ -99,14 +93,7 @@ partial class LoggerGenTargetClassEmitter
 				&& methodTarget.ParameterCountSansException <= Constants.Logging.MaxNonExceptionParameters
 			)
 			{
-				LoggerTargetClassEmitter.EmitLogActionMethod(
-					builder,
-					indent,
-					methodTarget,
-					context,
-					logger,
-					emitNullable
-				);
+				LoggerTargetClassEmitter.EmitLogActionMethod(writer, methodTarget, context, logger, emitNullable);
 				return;
 			}
 
@@ -131,321 +118,293 @@ partial class LoggerGenTargetClassEmitter
 		var accessModifier = generatePrivateLogging ? "private" : "public";
 		var methodName = generatePrivateLogging ? methodTarget.MethodName + "_Logging" : methodTarget.MethodName;
 
-		builder
-			.AppendLine()
-			.CodeGen(indent)
-			.AggressiveInlining(indent)
-			.Append(indent, accessModifier + " ", withNewLine: false);
+		writer
+			.NewLine()
+			.WriteLine(Constants.System.GeneratedCode.Value)
+			.WriteLine(Constants.System.AggressiveInlining)
+			.Write(accessModifier + " ");
 
 		if (methodTarget.IsScoped)
 		{
-			builder.Append(Constants.System.IDisposable);
+			writer.Write(Constants.System.IDisposable);
 			if (emitNullable)
-				builder.Append('?');
+				writer.Write('?');
 		}
 		else
-			builder.Append(Constants.System.VoidKeyword);
+			writer.Write(Constants.System.VoidKeyword);
 
-		builder.Append(' ').Append(methodName).Append('(');
+		writer.Write(' ').Write(methodName).Write('(');
 
-		EmitParametersAsMethodArgumentList(methodTarget, builder, context);
+		EmitParametersAsMethodArgumentList(methodTarget, writer, context);
 
-		builder.Append(')').AppendLine().Append(indent, '{');
+		writer.Write(")");
 
-		indent++;
-
-		// Output state here...then we can use it in
-		// the scoped and none-scoped output.
-		// If we have exceptions, output them to the state...
-		// UNLESS it's NOT-scoped and then we take the FIRST
-		// exception and output it as the exception parameter in
-		// the Log method.
-
-		List<string> existingParamNames = new(methodTarget.Parameters.Length);
-		foreach (var param in methodTarget.Parameters)
+		using (writer.OpenBlockScope())
 		{
-			existingParamNames.Add(param.Name);
-		}
-		var stateVarName = FindUniqueName("state", existingParamNames);
+			// Output state here...then we can use it in
+			// the scoped and none-scoped output.
+			// If we have exceptions, output them to the state...
+			// UNLESS it's NOT-scoped and then we take the FIRST
+			// exception and output it as the exception parameter in
+			// the Log method.
 
-		// Should always be state, because we'll use the messageFormat. And we'll generate one if
-		// one doesn't exist...
-		var useTypedState = !methodTarget.IsScoped && IsSimpleLogMethod(methodTarget);
-		var useScopedTypedState = methodTarget.IsScoped && IsSimpleLogMethod(methodTarget);
-		if (!methodTarget.IsScoped)
-		{
-			// First check if the the Log Level is enabled.
-			// if (!_logger.IsEnabled(LogLevel.Information)))
-			// { return; };
-			// ...but only if it's not been scoped.
-			builder
-				.Append(indent, "if (!", withNewLine: false)
-				.Append(Constants.Logging.LoggerFieldName)
-				.Append(".IsEnabled(")
-				.Append(methodTarget.MSLevel)
-				.AppendLine("))")
-				.Append(indent, '{')
-				.Append(indent + 1, "return;")
-				.Append(indent, '}')
-				.AppendLine();
-		}
-
-		// Output the state here...
-		if (!useTypedState && !useScopedTypedState)
-		{
-			EmitStateContent(
-				builder,
-				indent,
-				methodTarget,
-				stateVarName,
-				existingParamNames,
-				context,
-				logger,
-				emitNullable
-			);
-		}
-
-		if (methodTarget.IsScoped)
-		{
-			if (useScopedTypedState)
+			List<string> existingParamNames = new(methodTarget.Parameters.Count);
+			foreach (var param in methodTarget.Parameters)
 			{
-				// Zero-allocation: typed _ScopeState struct — no ThreadLocalState, no eager string formatting.
-				var scopeStructName = methodTarget.MethodName + "_ScopeState";
-				var scopeNonExceptionParams = methodTarget.ParametersSansException;
+				existingParamNames.Add(param.Name);
+			}
+			var stateVarName = FindUniqueName("state", existingParamNames);
 
-				builder
-					.Append(indent, "return ", withNewLine: false)
-					.Append(Constants.Logging.LoggerFieldName)
-					.Append(".BeginScope(new ")
-					.Append(scopeStructName)
-					.Append('(');
+			// Should always be state, because we'll use the messageFormat. And we'll generate one if
+			// one doesn't exist...
+			var useTypedState = !methodTarget.IsScoped && IsSimpleLogMethod(methodTarget);
+			var useScopedTypedState = methodTarget.IsScoped && IsSimpleLogMethod(methodTarget);
+			if (!methodTarget.IsScoped)
+			{
+				// First check if the the Log Level is enabled.
+				// if (!_logger.IsEnabled(LogLevel.Information)))
+				// { return; };
+				// ...but only if it's not been scoped.
+				writer
+					.Write("if (!")
+					.Write(Constants.Logging.LoggerFieldName)
+					.Write(".IsEnabled(")
+					.Write(methodTarget.MSLevel)
+					.WriteLine("))");
 
-				for (var i = 0; i < scopeNonExceptionParams.Length; i++)
+				using (writer.OpenBlockScope())
+					writer.WriteLine("return;");
+
+				writer.NewLine();
+			}
+
+			// Output the state here...
+			if (!useTypedState && !useScopedTypedState)
+			{
+				EmitStateContent(writer, methodTarget, stateVarName, existingParamNames, context, logger, emitNullable);
+			}
+
+			if (methodTarget.IsScoped)
+			{
+				if (useScopedTypedState)
 				{
-					context.CancellationToken.ThrowIfCancellationRequested();
+					// Zero-allocation: typed _ScopeState struct — no ThreadLocalState, no eager string formatting.
+					var scopeStructName = methodTarget.MethodName + "_ScopeState";
+					var scopeNonExceptionParams = methodTarget.ParametersSansException;
 
-					builder.Append(scopeNonExceptionParams[i].Name);
-					if (i < scopeNonExceptionParams.Length - 1)
-						builder.Append(", ");
+					writer
+						.Write("return ")
+						.Write(Constants.Logging.LoggerFieldName)
+						.Write(".BeginScope(new ")
+						.Write(scopeStructName)
+						.Write('(');
+
+					for (var i = 0; i < scopeNonExceptionParams.Count; i++)
+					{
+						context.CancellationToken.ThrowIfCancellationRequested();
+
+						writer.Write(scopeNonExceptionParams[i].Name);
+						if (i < scopeNonExceptionParams.Count - 1)
+							writer.Write(", ");
+					}
+
+					writer.Write("));").NewLine();
 				}
+				else
+				{
+					var (interpolatedMessage, variables) = GenerateInterpolatedFunction(
+						methodTarget.MessageTemplate,
+						stateVarName,
+						methodTarget.ExceptionParameter?.Name,
+						[.. methodTarget.Parameters],
+						existingParamNames
+					);
 
-				builder.AppendLine("));");
+					if (variables.Length > 0)
+					{
+						foreach (var variableDefinition in variables)
+							writer.WriteLine(variableDefinition);
+
+						writer.NewLine();
+					}
+
+					var formattedMessageVarName = FindUniqueName("formattedMessage", existingParamNames);
+					writer
+						.Write("var ")
+						.WriteLine("formattedMessage = ")
+						.WriteLine("#if NET")
+						.Write("string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
+						.Write(interpolatedMessage.Wrap())
+						.WriteLine(");")
+						.WriteLine("#else")
+						.Write("global::System.FormattableString.Invariant($")
+						.Write(interpolatedMessage.Wrap())
+						.WriteLine(");")
+						.WriteLine("#endif")
+						.Write(";")
+						.NewLine();
+
+					OutputState(
+						writer,
+						stateVarName,
+						Utilities.UppercaseFirstChar(formattedMessageVarName).Wrap(),
+						formattedMessageVarName,
+						index: null
+					);
+
+					writer
+						.NewLine()
+						.Write("return ")
+						.Write(Constants.Logging.LoggerFieldName)
+						.Write(".BeginScope(")
+						.Write(stateVarName)
+						.WriteLine(");");
+				}
 			}
 			else
 			{
-				var (interpolatedMessage, variables) = GenerateInterpolatedFunction(
-					methodTarget.MessageTemplate,
-					stateVarName,
-					methodTarget.ExceptionParameter?.Name,
-					[.. methodTarget.Parameters],
-					existingParamNames
-				);
+				var expressionStateVarName = FindUniqueName("s", existingParamNames);
+				var expressionExceptionVarName =
+					methodTarget.ExceptionParameter?.UsedInTemplate == true
+						? FindUniqueName("e", existingParamNames)
+						: null;
 
-				if (variables.Length > 0)
+				if (useTypedState)
 				{
-					foreach (var variableDefinition in variables)
-						builder.Append(indent, variableDefinition);
+					// Typed state struct approach: zero boxing, no ThreadLocalState.
+					var structName = methodTarget.MethodName + "_LogState";
+					var interpolatedMessage = GenerateTypedInterpolatedMessage(
+						methodTarget.MessageTemplate,
+						expressionStateVarName,
+						expressionExceptionVarName,
+						[.. methodTarget.Parameters]
+					);
 
-					builder.AppendLine();
+					var eventId =
+						methodTarget.EventId ?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
+
+					var nonExceptionParams = methodTarget.ParametersSansException;
+
+					writer
+						.Write(Constants.Logging.LoggerFieldName)
+						.WriteLine(".Log(")
+						.Write(methodTarget.MSLevel.WithComma(andSpace: false))
+						.Write(emitNullable ? "new (" : "new " + Constants.Logging.MicrosoftExtensions.EventId + "(")
+						.Write(eventId.ToString(CultureInfo.InvariantCulture))
+						.Write(", nameof(")
+						.Write(methodTarget.LogName)
+						.WriteLine(")),")
+						.Write("new ")
+						.Write(structName)
+						.Write('(');
+
+					for (var i = 0; i < nonExceptionParams.Count; i++)
+					{
+						writer.Write(nonExceptionParams[i].Name);
+						if (i < nonExceptionParams.Count - 1)
+							writer.Write(", ");
+					}
+
+					writer.WriteLine("),");
+					writer.Write(methodTarget.ExceptionParameter.OrNullKeyword().WithComma(andSpace: false));
+
+					if (emitNullable)
+						writer.WriteLine(Constants.System.GeneratedCode.Value);
+					writer
+						.Write(emitNullable ? "static string (" : "(")
+						.Write(expressionStateVarName)
+						.Write(", ")
+						.Write(expressionExceptionVarName ?? "_")
+						.WriteLine(") =>")
+						.WriteLine("{")
+						.WriteLine("#if NET")
+						.Write("return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
+						.Write(interpolatedMessage.Wrap())
+						.WriteLine(");")
+						.WriteLine("#else")
+						.Write("return global::System.FormattableString.Invariant($")
+						.Write(interpolatedMessage.Wrap())
+						.WriteLine(");")
+						.WriteLine("#endif")
+						.Write("}")
+						.Write(");");
+
+					writer.NewLine();
 				}
+				else
+				{
+					var (interpolatedMessage, variables) = GenerateInterpolatedFunction(
+						methodTarget.MessageTemplate,
+						expressionStateVarName,
+						expressionExceptionVarName,
+						[.. methodTarget.Parameters],
+						existingParamNames
+					);
 
-				var formattedMessageVarName = FindUniqueName("formattedMessage", existingParamNames);
-				builder
-					.Append(indent, "var ", withNewLine: false)
-					.AppendLine("formattedMessage = ")
-					.AppendLine("#if NET")
-					.Append(
-						indent + 1,
-						"string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $",
-						withNewLine: false
-					)
-					.Append(interpolatedMessage.Wrap())
-					.AppendLine(");")
-					.AppendLine("#else")
-					.Append(indent + 1, "global::System.FormattableString.Invariant($", withNewLine: false)
-					.Append(interpolatedMessage.Wrap())
-					.AppendLine(");")
-					.AppendLine("#endif")
-					.Append(indent, ';')
-					.AppendLine();
+					// Call the .Log method.
+					var eventId =
+						methodTarget.EventId ?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
+					writer
+						.Write(Constants.Logging.LoggerFieldName)
+						.WriteLine(".Log(")
+						// Log level
+						.Write(methodTarget.MSLevel.WithComma(andSpace: false))
+						// Event Id
+						.Write(emitNullable ? "new (" : "new " + Constants.Logging.MicrosoftExtensions.EventId + "(")
+						.Write(eventId.ToString(CultureInfo.InvariantCulture))
+						.Write(", nameof(")
+						.Write(methodTarget.LogName)
+						.WriteLine(")),")
+						// State
+						.Write(stateVarName.WithComma(andSpace: false))
+						// Exception
+						.Write(methodTarget.ExceptionParameter.OrNullKeyword().WithComma(andSpace: false));
+					// Message Template
+					if (emitNullable)
+						writer.WriteLine(Constants.System.GeneratedCode.Value);
+					writer
+						.Write(emitNullable ? "static string (" : "(")
+						.Write(expressionStateVarName)
+						.Write(", ")
+						.Write(expressionExceptionVarName ?? "_")
+						.WriteLine(") =>")
+						.WriteLine("{");
 
-				OutputState(
-					builder.WithIndent(indent),
-					stateVarName,
-					Utilities.UppercaseFirstChar(formattedMessageVarName).Wrap(),
-					formattedMessageVarName,
-					index: null
-				);
+					if (variables.Length > 0)
+					{
+						foreach (var variableDefinition in variables)
+							writer.WriteLine(variableDefinition);
 
-				builder
-					.AppendLine()
-					.Append(indent, "return ", withNewLine: false)
-					.Append(Constants.Logging.LoggerFieldName)
-					.Append(".BeginScope(")
-					.Append(stateVarName)
-					.AppendLine(");");
+						writer.NewLine();
+					}
+
+					writer
+						.WriteLine("#if NET")
+						.Write("return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
+						.Write(interpolatedMessage.Wrap())
+						.WriteLine(");")
+						.WriteLine("#else")
+						.Write("return global::System.FormattableString.Invariant($")
+						.Write(interpolatedMessage.Wrap())
+						.WriteLine(");")
+						.WriteLine("#endif")
+						.Write("}")
+						.Write(");");
+
+					writer.NewLine().Write(stateVarName).Write(".Clear();").NewLine();
+				}
 			}
 		}
-		else
-		{
-			var expressionStateVarName = FindUniqueName("s", existingParamNames);
-			var expressionExceptionVarName =
-				methodTarget.ExceptionParameter?.UsedInTemplate == true
-					? FindUniqueName("e", existingParamNames)
-					: null;
-
-			if (useTypedState)
-			{
-				// Typed state struct approach: zero boxing, no ThreadLocalState.
-				var structName = methodTarget.MethodName + "_LogState";
-				var interpolatedMessage = GenerateTypedInterpolatedMessage(
-					methodTarget.MessageTemplate,
-					expressionStateVarName,
-					expressionExceptionVarName,
-					[.. methodTarget.Parameters]
-				);
-
-				var eventId = methodTarget.EventId ?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
-
-				var nonExceptionParams = methodTarget.ParametersSansException;
-
-				builder
-					.Append(indent, Constants.Logging.LoggerFieldName, withNewLine: false)
-					.AppendLine(".Log(")
-					.Append(indent + 1, methodTarget.MSLevel.WithComma(andSpace: false))
-					.Append(
-						indent + 1,
-						emitNullable ? "new (" : "new " + Constants.Logging.MicrosoftExtensions.EventId + "(",
-						withNewLine: false
-					)
-					.Append(eventId)
-					.Append(", nameof(")
-					.Append(methodTarget.LogName)
-					.AppendLine(")),")
-					.Append(indent + 1, "new ", withNewLine: false)
-					.Append(structName)
-					.Append('(');
-
-				for (var i = 0; i < nonExceptionParams.Length; i++)
-				{
-					builder.Append(nonExceptionParams[i].Name);
-					if (i < nonExceptionParams.Length - 1)
-						builder.Append(", ");
-				}
-
-				builder.AppendLine("),");
-				builder.Append(indent + 1, methodTarget.ExceptionParameter.OrNullKeyword().WithComma(andSpace: false));
-
-				if (emitNullable)
-					builder.CodeGen(indent + 1);
-				builder
-					.Append(indent + 1, emitNullable ? "static string (" : "(", withNewLine: false)
-					.Append(expressionStateVarName)
-					.Append(", ")
-					.Append(expressionExceptionVarName ?? "_")
-					.AppendLine(") =>")
-					.Append(indent + 1, "{")
-					.AppendLine("#if NET")
-					.Append(
-						indent + 2,
-						"return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $",
-						withNewLine: false
-					)
-					.Append(interpolatedMessage.Wrap())
-					.AppendLine(");")
-					.AppendLine("#else")
-					.Append(indent + 2, "return global::System.FormattableString.Invariant($", withNewLine: false)
-					.Append(interpolatedMessage.Wrap())
-					.AppendLine(");")
-					.AppendLine("#endif")
-					.Append(indent + 1, '}')
-					.Append(indent, ");");
-
-				builder.AppendLine();
-			}
-			else
-			{
-				var (interpolatedMessage, variables) = GenerateInterpolatedFunction(
-					methodTarget.MessageTemplate,
-					expressionStateVarName,
-					expressionExceptionVarName,
-					[.. methodTarget.Parameters],
-					existingParamNames
-				);
-
-				// Call the .Log method.
-				var eventId = methodTarget.EventId ?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
-				builder
-					.Append(indent, Constants.Logging.LoggerFieldName, withNewLine: false)
-					.AppendLine(".Log(")
-					// Log level
-					.Append(indent + 1, methodTarget.MSLevel.WithComma(andSpace: false))
-					// Event Id
-					.Append(
-						indent + 1,
-						emitNullable ? "new (" : "new " + Constants.Logging.MicrosoftExtensions.EventId + "(",
-						withNewLine: false
-					)
-					.Append(eventId)
-					.Append(", nameof(")
-					.Append(methodTarget.LogName)
-					.AppendLine(")),")
-					// State
-					.Append(indent + 1, stateVarName.WithComma(andSpace: false))
-					// Exception
-					.Append(indent + 1, methodTarget.ExceptionParameter.OrNullKeyword().WithComma(andSpace: false));
-				// Message Template
-				if (emitNullable)
-					builder.CodeGen(indent + 1);
-				builder
-					.Append(indent + 1, emitNullable ? "static string (" : "(", withNewLine: false)
-					.Append(expressionStateVarName)
-					.Append(", ")
-					.Append(expressionExceptionVarName ?? "_")
-					.AppendLine(") =>")
-					.Append(indent + 1, "{");
-
-				if (variables.Length > 0)
-				{
-					foreach (var variableDefinition in variables)
-						builder.Append(indent + 2, variableDefinition);
-
-					builder.AppendLine();
-				}
-
-				builder
-					.AppendLine("#if NET")
-					.Append(
-						indent + 2,
-						"return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $",
-						withNewLine: false
-					)
-					.Append(interpolatedMessage.Wrap())
-					.AppendLine(");")
-					.AppendLine("#else")
-					.Append(indent + 2, "return global::System.FormattableString.Invariant($", withNewLine: false)
-					.Append(interpolatedMessage.Wrap())
-					.AppendLine(");")
-					.AppendLine("#endif")
-					.Append(indent + 1, '}')
-					.Append(indent, ");");
-
-				builder.AppendLine().Append(indent, stateVarName, withNewLine: false).AppendLine(".Clear();");
-			}
-		}
-
-		builder.Append(--indent, '}').AppendLine();
 
 		// Generate public delegating method if Logging owns it
 		if (generatePublicDelegator)
 		{
-			EmitPublicLoggingDelegatingMethod(builder, indent, methodTarget, context, logger, emitNullable);
+			EmitPublicLoggingDelegatingMethod(writer, methodTarget, context, logger, emitNullable);
 		}
 	}
 
 	static void EmitStateContent(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		LogMethodTarget methodTarget,
 		string stateVarName,
 		List<string> existingParamNames,
@@ -465,27 +424,27 @@ partial class LoggerGenTargetClassEmitter
 		foreach (var param in methodTarget.Parameters)
 		{
 			if (param.LogProperties.HasValue)
-				reservationCount += param.LogProperties.Value.Length;
+				reservationCount += param.LogProperties.Value.Count;
 		}
 
 		// Create the state variable,
 		// and reserve the required number of variables.
-		builder
-			.Append(indent, "var ", withNewLine: false)
-			.Append(stateVarName)
-			.Append(" = ")
-			.Append(Constants.Logging.MicrosoftExtensions.LoggerMessageHelper)
-			.Append('.')
-			.AppendLine("ThreadLocalState;")
-			.Append(indent, stateVarName, withNewLine: false)
-			.Append(".ReserveTagSpace(")
-			.Append(reservationCount)
-			.AppendLine(");")
-			.AppendLine();
+		writer
+			.Write("var ")
+			.Write(stateVarName)
+			.Write(" = ")
+			.Write(Constants.Logging.MicrosoftExtensions.LoggerMessageHelper)
+			.Write('.')
+			.WriteLine("ThreadLocalState;")
+			.Write(stateVarName)
+			.Write(".ReserveTagSpace(")
+			.Write(reservationCount.ToString(CultureInfo.InvariantCulture))
+			.WriteLine(");")
+			.NewLine();
 
 		// Original format is always at 0.
 		OutputState(
-			builder.WithIndent(indent),
+			writer,
 			stateVarName,
 			"{OriginalFormat}".Wrap(),
 			methodTarget.MessageTemplate.Wrap(),
@@ -509,7 +468,7 @@ partial class LoggerGenTargetClassEmitter
 			var isEnumerable = parameter.IsArray || parameter.IsIEnumerable;
 			// Need to match the name against the value.
 			OutputState(
-				builder.WithIndent(indent),
+				writer,
 				stateVarName,
 				parameter.Name.Wrap(),
 				parameter.Name,
@@ -524,14 +483,14 @@ partial class LoggerGenTargetClassEmitter
 				{
 					postSetProperties ??= [];
 					postSetProperties.Add(
-						OutputExpandedEnumerable(indent, stateVarName, parameter, context, existingParamNames, logger)
+						OutputExpandedEnumerable(writer, stateVarName, parameter, context, existingParamNames, logger)
 					);
 				}
 			}
 			else if (parameter.LogProperties != null)
 			{
 				OutputLogPropertyDetails(
-					indent,
+					writer,
 					stateVarName,
 					context,
 					ref postSetProperties,
@@ -543,19 +502,19 @@ partial class LoggerGenTargetClassEmitter
 
 		if (postSetProperties != null)
 		{
-			builder.AppendLine();
+			writer.NewLine();
 
 			foreach (var nullableLogProperty in postSetProperties)
 			{
 				context.CancellationToken.ThrowIfCancellationRequested();
-				builder.Append(nullableLogProperty);
+				writer.WriteLine(nullableLogProperty);
 			}
 		}
 
-		builder.AppendLine();
+		writer.NewLine();
 
 		static void OutputLogPropertyDetails(
-			int indent,
+			CodeWriter writer,
 			string stateVarName,
 			SourceProductionContext context,
 			ref List<string>? postPropertyDefinitions,
@@ -563,7 +522,11 @@ partial class LoggerGenTargetClassEmitter
 			List<string> existingParamNames
 		)
 		{
-			StringBuilder logPropertiesBuilder = new();
+			_ = writer;
+			CodeWriter logPropertiesWriter = new(
+				GenerationSettings.Create<TelemetrySourceGenerator>(),
+				throwOnUnclosedScopes: false
+			);
 			foreach (var logProperty in parameter.LogProperties!.Value)
 			{
 				context.CancellationToken.ThrowIfCancellationRequested();
@@ -580,47 +543,43 @@ partial class LoggerGenTargetClassEmitter
 				if (shouldSkipNull)
 				{
 					var tmpVarName = FindUniqueName("tmp", existingParamNames);
-					logPropertiesBuilder
-						.Append(indent, '{')
-						.Append(indent + 1, "var ", withNewLine: false)
-						.Append(tmpVarName)
-						.Append(" = ")
-						.Append(logPropertyValue)
-						.AppendLine(";")
-						.Append(indent + 1, "if (", withNewLine: false)
-						.Append(tmpVarName)
-						.AppendLine(" != null)")
-						.Append(indent + 1, '{');
+					logPropertiesWriter
+						.Write("{")
+						.Write("var ")
+						.Write(tmpVarName)
+						.Write(" = ")
+						.Write(logPropertyValue)
+						.WriteLine(";")
+						.Write("if (")
+						.Write(tmpVarName)
+						.WriteLine(" != null)")
+						.Write("{");
+					logPropertiesWriter.Indent();
 
 					logPropertyValue = tmpVarName;
-
-					indent += 2;
 				}
 
-				OutputState(
-					logPropertiesBuilder.WithIndent(indent),
-					stateVarName,
-					logPropertyName.Wrap(),
-					logPropertyValue,
-					null
-				);
+				OutputState(logPropertiesWriter, stateVarName, logPropertyName.Wrap(), logPropertyValue, null);
 
 				if (shouldSkipNull)
 				{
-					indent -= 2;
-					logPropertiesBuilder.Append(indent + 1, '}').Append(indent, '}');
+					logPropertiesWriter.Unindent();
+					logPropertiesWriter.Write("}").Write("}");
 				}
 
 				postPropertyDefinitions ??= [];
-				postPropertyDefinitions.Add(logPropertiesBuilder.ToString());
+				postPropertyDefinitions.Add(logPropertiesWriter.ToString().TrimEnd('\n'));
 
-				logPropertiesBuilder.Clear();
+				logPropertiesWriter = new(
+					GenerationSettings.Create<TelemetrySourceGenerator>(),
+					throwOnUnclosedScopes: false
+				);
 			}
 		}
 	}
 
 	static void OutputState(
-		StringBuilder builder,
+		CodeWriter writer,
 		string stateVarName,
 		string propertyName,
 		string value,
@@ -629,43 +588,43 @@ partial class LoggerGenTargetClassEmitter
 		bool emitNullable = true
 	)
 	{
-		builder.Append(stateVarName).Append('.');
+		writer.Write(stateVarName).Write('.');
 
 		if (index.HasValue)
 		{
-			builder
-				.Append("TagArray[")
-				.Append(index.Value)
-				.Append("] = ")
-				.Append(emitNullable ? "new(" : "new global::System.Collections.Generic.KeyValuePair<string, object>(");
+			writer
+				.Write("TagArray[")
+				.Write(index.Value.ToString(CultureInfo.InvariantCulture))
+				.Write("] = ")
+				.Write(emitNullable ? "new(" : "new global::System.Collections.Generic.KeyValuePair<string, object>(");
 		}
 		else
 		{
-			builder.Append("AddTag(");
+			writer.Write("AddTag(");
 		}
 
-		builder.Append(propertyName.WithComma());
+		writer.Write(propertyName.WithComma());
 
 		if (isEnumerable)
 		{
-			builder
-				.Append(value)
-				.Append(" == null ? null : ")
-				.Append(Constants.Logging.MicrosoftExtensions.LoggerMessageHelper)
-				.Append(".Stringify(")
-				.Append(value)
-				.Append(')');
+			writer
+				.Write(value)
+				.Write(" == null ? null : ")
+				.Write(Constants.Logging.MicrosoftExtensions.LoggerMessageHelper)
+				.Write(".Stringify(")
+				.Write(value)
+				.Write(')');
 		}
 		else
 		{
-			builder.Append(value);
+			writer.Write(value);
 		}
 
-		builder.AppendLine(");");
+		writer.Write(");").NewLine();
 	}
 
 	static string OutputExpandedEnumerable(
-		int indent,
+		CodeWriter writer,
 		string stateVarName,
 		LogParameterTarget parameter,
 		SourceProductionContext context,
@@ -674,18 +633,14 @@ partial class LoggerGenTargetClassEmitter
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
+		_ = writer;
 
-		StringBuilder builder = new();
+		CodeWriter snippet = new(GenerationSettings.Create<TelemetrySourceGenerator>(), throwOnUnclosedScopes: false);
 		var iteratorVarName = FindUniqueName("tmp_i", existingParamNames);
 		var iteratorItemVarName = FindUniqueName("item", existingParamNames);
-		builder
-			.Append(indent, "if (", withNewLine: false)
-			.Append(parameter.Name)
-			.AppendLine(" != null)")
-			.Append(indent, '{')
-			.Append(++indent, "var ", withNewLine: false)
-			.Append(iteratorVarName)
-			.AppendLine(" = 0;");
+		snippet.Write("if (").Write(parameter.Name).WriteLine(" != null)").Write("{");
+		snippet.Indent();
+		snippet.Write("var ").Write(iteratorVarName).WriteLine(" = 0;");
 
 		var maxCount =
 			parameter.ExpandEnumerableAttribute!.MaximumValueCount.Value
@@ -704,43 +659,43 @@ partial class LoggerGenTargetClassEmitter
 			);
 		}
 
-		builder
-			.Append(indent, "foreach (var ", withNewLine: false)
-			.Append(iteratorItemVarName)
-			.Append(" in ")
-			.Append(parameter.Name)
-			.AppendLine(")")
-			.Append(indent, '{')
-			.Append(++indent, "if (", withNewLine: false)
-			.Append(iteratorVarName)
-			.Append(" == ")
-			.Append(maxCount)
-			.AppendLine(")")
-			.Append(indent, '{')
-			.Append(indent + 1, "break;")
-			.Append(indent, "}")
-			.AppendLine();
+		snippet
+			.Write("foreach (var ")
+			.Write(iteratorItemVarName)
+			.Write(" in ")
+			.Write(parameter.Name)
+			.WriteLine(")")
+			.Write("{");
+		snippet.Indent();
+		snippet
+			.Write("if (")
+			.Write(iteratorVarName)
+			.Write(" == ")
+			.Write(maxCount.ToString(CultureInfo.InvariantCulture))
+			.WriteLine(")")
+			.Write("{");
 
-		OutputState(
-			builder.WithIndent(indent),
-			stateVarName,
-			$"$\"{parameter.Name}[{{{iteratorVarName}}}]\"",
-			iteratorItemVarName,
-			null
-		);
+		using (snippet.OpenBlockScope())
+			snippet.WriteLine("break;");
 
-		builder
-			.Append(indent, iteratorVarName, withNewLine: false)
-			.AppendLine("++;")
-			.Append(--indent, '}')
-			.Append(--indent, '}');
+		snippet.NewLine();
 
-		return builder.ToString();
+		OutputState(snippet, stateVarName, $"$\"{parameter.Name}[{{{iteratorVarName}}}]\"", iteratorItemVarName, null);
+
+		snippet.Write(iteratorVarName).WriteLine("++;");
+
+		snippet.Write("}");
+		snippet.Unindent();
+		snippet.Write("}");
+		snippet.Unindent();
+		snippet.Write("}");
+
+		return snippet.ToString().TrimEnd('\n');
 	}
 
 	static void EmitParametersAsMethodArgumentList(
 		LogMethodTarget methodTarget,
-		StringBuilder builder,
+		CodeWriter writer,
 		SourceProductionContext context
 	)
 	{
@@ -748,13 +703,10 @@ partial class LoggerGenTargetClassEmitter
 		{
 			context.CancellationToken.ThrowIfCancellationRequested();
 
-			builder
-				.Append(methodTarget.Parameters[i].ParameterType)
-				.Append(' ')
-				.Append(methodTarget.Parameters[i].Name);
+			writer.Write(methodTarget.Parameters[i].ParameterType).Write(' ').Write(methodTarget.Parameters[i].Name);
 
 			if (i < methodTarget.TotalParameterCount - 1)
-				builder.Append(", ");
+				writer.Write(", ");
 		}
 	}
 
@@ -821,13 +773,13 @@ partial class LoggerGenTargetClassEmitter
 			}
 
 			// If this hole belongs to the Exception parameter, use it directly
-			string replacement =
+			var replacement =
 				$"{{{varName}"
 				+ $"{(hole.Alignment.HasValue ? $",{hole.Alignment}" : "")}"
 				+ $"{(hole.Format != null ? $":{hole.Format}" : "")}}}";
 
 			// Replace all occurrences of this hole’s placeholders
-			string placeholder = hole.IsPositional ? $"{{{hole.Ordinal}}}" : $"{{{hole.Name}}}";
+			var placeholder = hole.IsPositional ? $"{{{hole.Ordinal}}}" : $"{{{hole.Name}}}";
 			escapedTemplate = escapedTemplate.Replace(placeholder, replacement);
 		}
 
@@ -901,8 +853,7 @@ partial class LoggerGenTargetClassEmitter
 
 	static void EmitLogStateStructs(
 		LoggerTarget target,
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		SourceProductionContext context,
 		GenerationLogger? _,
 		bool emitNullable
@@ -926,15 +877,14 @@ partial class LoggerGenTargetClassEmitter
 				continue;
 
 			if (methodTarget.IsScoped)
-				EmitScopeStateStruct(builder, indent, methodTarget, context, emitNullable);
+				EmitScopeStateStruct(writer, methodTarget, context, emitNullable);
 			else
-				EmitLogStateStruct(builder, indent, methodTarget, context, emitNullable);
+				EmitLogStateStruct(writer, methodTarget, context, emitNullable);
 		}
 	}
 
 	static void EmitLogStateStruct(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		LogMethodTarget methodTarget,
 		SourceProductionContext context,
 		bool emitNullable
@@ -942,7 +892,7 @@ partial class LoggerGenTargetClassEmitter
 	{
 		var nonExceptionParams = methodTarget.ParametersSansException;
 		var structName = methodTarget.MethodName + "_LogState";
-		var count = nonExceptionParams.Length + 1; // +1 for {OriginalFormat}
+		var count = nonExceptionParams.Count + 1; // +1 for {OriginalFormat}
 
 		var kvpType = emitNullable
 			? "global::System.Collections.Generic.KeyValuePair<string, object?>"
@@ -952,164 +902,144 @@ partial class LoggerGenTargetClassEmitter
 		var ienumerableKvpType = $"global::System.Collections.Generic.IEnumerable<{kvpType}>";
 		const string ienumerableType = "global::System.Collections.IEnumerator";
 
-		builder
-			.AppendLine()
-			.CodeGen(indent)
-			.Append(indent, "private readonly struct ", withNewLine: false)
-			.Append(structName)
-			.AppendLine($" : {iReadOnlyListType}")
-			.Append(indent, '{');
+		writer
+			.NewLine()
+			.WriteLine(Constants.System.GeneratedCode.Value)
+			.Write("private readonly struct ")
+			.Write(structName)
+			.WriteLine($" : {iReadOnlyListType}");
 
-		indent++;
-
-		builder
-			.Append(indent, "static readonly string s_originalFormat = ", withNewLine: false)
-			.Append(methodTarget.MessageTemplate.Wrap())
-			.AppendLine(";");
-
-		if (nonExceptionParams.Length > 0)
+		using (writer.OpenBlockScope())
 		{
-			builder.AppendLine();
+			writer
+				.Write("static readonly string s_originalFormat = ")
+				.Write(methodTarget.MessageTemplate.Wrap())
+				.WriteLine(";");
 
-			foreach (var param in nonExceptionParams)
+			if (nonExceptionParams.Count > 0)
 			{
-				context.CancellationToken.ThrowIfCancellationRequested();
+				writer.NewLine();
 
-				builder
-					.Append(indent, "public readonly ", withNewLine: false)
-					.Append(param.ParameterType)
-					.Append(" _")
-					.Append(param.UpperCasedName)
-					.AppendLine(";");
+				foreach (var param in nonExceptionParams)
+				{
+					context.CancellationToken.ThrowIfCancellationRequested();
+
+					writer
+						.Write("public readonly ")
+						.Write(param.ParameterType)
+						.Write(" _")
+						.Write(param.UpperCasedName)
+						.WriteLine(";");
+				}
+
+				writer.NewLine().Write("public ").Write(structName).Write('(');
+
+				for (var i = 0; i < nonExceptionParams.Count; i++)
+				{
+					context.CancellationToken.ThrowIfCancellationRequested();
+
+					writer.Write(nonExceptionParams[i].ParameterType).Write(' ').Write(nonExceptionParams[i].Name);
+
+					if (i < nonExceptionParams.Count - 1)
+						writer.Write(", ");
+				}
+
+				writer.Write(")");
+
+				using (writer.OpenBlockScope())
+				{
+					foreach (var param in nonExceptionParams)
+					{
+						context.CancellationToken.ThrowIfCancellationRequested();
+
+						writer.Write("_").Write(param.UpperCasedName).Write(" = ").Write(param.Name).WriteLine(";");
+					}
+				}
 			}
 
-			builder.AppendLine().Append(indent, "public ", withNewLine: false).Append(structName).Append('(');
+			writer
+				.NewLine()
+				.NewLine()
+				.Write("public int Count => ")
+				.Write(count.ToString(CultureInfo.InvariantCulture))
+				.WriteLine(";")
+				.NewLine()
+				.Write($"public {kvpType} this[int index]");
 
-			for (var i = 0; i < nonExceptionParams.Length; i++)
+			using (writer.OpenBlockScope())
 			{
-				context.CancellationToken.ThrowIfCancellationRequested();
+				writer.WriteLine(Constants.System.AggressiveInlining);
 
-				builder.Append(nonExceptionParams[i].ParameterType).Append(' ').Append(nonExceptionParams[i].Name);
+				if (emitNullable)
+				{
+					writer.WriteLine("get => index switch {");
+					writer.Indent();
+					writer.WriteLine("0 => new(\"{OriginalFormat}\", s_originalFormat),");
 
-				if (i < nonExceptionParams.Length - 1)
-					builder.Append(", ");
+					for (var i = 0; i < nonExceptionParams.Count; i++)
+					{
+						context.CancellationToken.ThrowIfCancellationRequested();
+
+						writer
+							.Write($"{i + 1} => new(")
+							.Write(nonExceptionParams[i].Name.Wrap())
+							.Write(", _")
+							.Write(nonExceptionParams[i].UpperCasedName)
+							.WriteLine("),");
+					}
+
+					writer.WriteLine("_ => throw new global::System.IndexOutOfRangeException(nameof(index))");
+					writer.Unindent();
+					writer.WriteLine("};");
+				}
+				else
+				{
+					writer.Write("get");
+					using (writer.OpenBlockScope())
+					{
+						writer.Write("switch (index)");
+						using (writer.OpenBlockScope())
+						{
+							writer.WriteLine(
+								"case 0: return new " + kvpType + "(\"{OriginalFormat}\", s_originalFormat);"
+							);
+
+							for (var i = 0; i < nonExceptionParams.Count; i++)
+							{
+								context.CancellationToken.ThrowIfCancellationRequested();
+
+								writer
+									.Write($"case {i + 1}: return new " + kvpType + "(")
+									.Write(nonExceptionParams[i].Name.Wrap())
+									.Write(", _")
+									.Write(nonExceptionParams[i].UpperCasedName)
+									.WriteLine(");");
+							}
+
+							writer.WriteLine(
+								"default: throw new global::System.IndexOutOfRangeException(nameof(index));"
+							);
+						}
+					}
+				}
 			}
 
-			builder.AppendLine(")").Append(indent, '{');
-			indent++;
-
-			foreach (var param in nonExceptionParams)
-			{
-				context.CancellationToken.ThrowIfCancellationRequested();
-
-				builder
-					.Append(indent, "_", withNewLine: false)
-					.Append(param.UpperCasedName)
-					.Append(" = ")
-					.Append(param.Name)
-					.AppendLine(";");
-			}
-
-			indent--;
-			builder.Append(indent, '}');
+			EmitStructEnumerator(
+				writer,
+				structName,
+				kvpType,
+				ienumeratorType,
+				ienumerableType,
+				ienumerableKvpType,
+				emitNullable
+			);
 		}
 
-		builder
-			.AppendLine()
-			.AppendLine()
-			.Append(indent, "public int Count => ", withNewLine: false)
-			.Append(count)
-			.AppendLine(";")
-			.AppendLine()
-			.Append(indent, $"public {kvpType} this[int index]")
-			.Append(indent, '{');
-
-		indent++;
-
-		builder.Append(indent, Constants.System.AggressiveInlining);
-
-		if (emitNullable)
-		{
-			builder.Append(indent, "get => index switch", withNewLine: false).AppendLine().Append(indent, '{');
-
-			indent++;
-
-			builder.Append(indent, "0 => new(\"{OriginalFormat}\", s_originalFormat),");
-
-			for (var i = 0; i < nonExceptionParams.Length; i++)
-			{
-				context.CancellationToken.ThrowIfCancellationRequested();
-
-				builder
-					.Append(indent, $"{i + 1} => new(", withNewLine: false)
-					.Append(nonExceptionParams[i].Name.Wrap())
-					.Append(", _")
-					.Append(nonExceptionParams[i].UpperCasedName)
-					.AppendLine("),");
-			}
-
-			builder.Append(indent, "_ => throw new global::System.IndexOutOfRangeException(nameof(index))");
-
-			indent--;
-			builder.Append(indent, "};");
-
-			indent--;
-			builder.Append(indent, '}').AppendLine();
-		}
-		else
-		{
-			builder.Append(indent, "get").Append(indent, '{');
-
-			indent++;
-
-			builder.Append(indent, "switch (index)").Append(indent, '{');
-
-			indent++;
-
-			builder.Append(indent, "case 0: return new " + kvpType + "(\"{OriginalFormat}\", s_originalFormat);");
-
-			for (var i = 0; i < nonExceptionParams.Length; i++)
-			{
-				context.CancellationToken.ThrowIfCancellationRequested();
-
-				builder
-					.Append(indent, $"case {i + 1}: return new " + kvpType + "(", withNewLine: false)
-					.Append(nonExceptionParams[i].Name.Wrap())
-					.Append(", _")
-					.Append(nonExceptionParams[i].UpperCasedName)
-					.AppendLine(");");
-			}
-
-			builder.Append(indent, "default: throw new global::System.IndexOutOfRangeException(nameof(index));");
-
-			indent--;
-			builder.Append(indent, '}');
-
-			indent--;
-			builder.Append(indent, '}').AppendLine();
-
-			indent--;
-			builder.Append(indent, '}').AppendLine();
-		}
-
-		EmitStructEnumerator(
-			builder,
-			ref indent,
-			structName,
-			kvpType,
-			ienumeratorType,
-			ienumerableType,
-			ienumerableKvpType,
-			emitNullable
-		);
-
-		indent--;
-		builder.Append(indent, '}').AppendLine();
+		writer.NewLine();
 	}
 
 	static void EmitStructEnumerator(
-		StringBuilder builder,
-		ref int indent,
+		CodeWriter writer,
 		string structName,
 		string kvpType,
 		string ienumeratorType,
@@ -1121,59 +1051,57 @@ partial class LoggerGenTargetClassEmitter
 		var currentPropertyType = emitNullable
 			? "object? global::System.Collections.IEnumerator.Current => Current;"
 			: "object global::System.Collections.IEnumerator.Current => Current;";
-		builder
-			.AppendLine()
-			.Append(indent, "public struct Enumerator : ", withNewLine: false)
-			.AppendLine(ienumeratorType)
-			.Append(indent, '{');
+		writer.NewLine().Write("public struct Enumerator : ").WriteLine(ienumeratorType);
 
-		indent++;
+		using (writer.OpenBlockScope())
+		{
+			writer
+				.Write("readonly ")
+				.Write(structName)
+				.WriteLine(" _state;")
+				.Write("int _index;")
+				.NewLine()
+				.Write("public Enumerator(")
+				.Write(structName)
+				.WriteLine(" state)");
 
-		builder
-			.Append(indent, "readonly ", withNewLine: false)
-			.Append(structName)
-			.AppendLine(" _state;")
-			.Append(indent, "int _index;")
-			.AppendLine()
-			.Append(indent, "public Enumerator(", withNewLine: false)
-			.Append(structName)
-			.AppendLine(" state)")
-			.Append(indent, '{')
-			.Append(indent + 1, "_state = state;")
-			.Append(indent + 1, "_index = -1;")
-			.Append(indent, '}')
-			.AppendLine()
-			.Append(indent, $"public {kvpType} Current => _state[_index];")
-			.AppendLine()
-			.Append(indent, currentPropertyType)
-			.AppendLine()
-			.Append(indent, "public bool MoveNext() => ++_index < _state.Count;")
-			.AppendLine()
-			.Append(indent, "public void Reset() => _index = -1;")
-			.AppendLine()
-			.Append(indent, "public void Dispose() { }");
+			using (writer.OpenBlockScope())
+			{
+				writer.Write("_state = state;").NewLine();
+				writer.Write("_index = -1;").NewLine();
+			}
 
-		indent--;
+			writer
+				.NewLine()
+				.Write($"public {kvpType} Current => _state[_index];")
+				.NewLine()
+				.NewLine()
+				.Write(currentPropertyType)
+				.NewLine()
+				.NewLine()
+				.Write("public bool MoveNext() => ++_index < _state.Count;")
+				.NewLine()
+				.NewLine()
+				.Write("public void Reset() => _index = -1;")
+				.NewLine()
+				.NewLine()
+				.Write("public void Dispose() { }");
+		}
 
-		builder
-			.Append(indent, '}')
-			.AppendLine()
-			.AppendLine()
-			.Append(indent, "public Enumerator GetEnumerator() => new Enumerator(this);")
-			.AppendLine()
-			.AppendLine()
-			.Append(indent, $"{ienumeratorType} {ienumerableKvpType}.GetEnumerator() => GetEnumerator();")
-			.AppendLine()
-			.AppendLine()
-			.Append(
-				indent,
-				$"{ienumerableType} global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();"
-			);
+		writer
+			.NewLine()
+			.NewLine()
+			.Write("public Enumerator GetEnumerator() => new Enumerator(this);")
+			.NewLine()
+			.NewLine()
+			.Write($"{ienumeratorType} {ienumerableKvpType}.GetEnumerator() => GetEnumerator();")
+			.NewLine()
+			.NewLine()
+			.Write($"{ienumerableType} global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();");
 	}
 
 	static void EmitScopeStateStruct(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		LogMethodTarget methodTarget,
 		SourceProductionContext context,
 		bool emitNullable
@@ -1181,7 +1109,7 @@ partial class LoggerGenTargetClassEmitter
 	{
 		var nonExceptionParams = methodTarget.ParametersSansException;
 		var structName = methodTarget.MethodName + "_ScopeState";
-		var count = nonExceptionParams.Length + 1; // +1 for {OriginalFormat}
+		var count = nonExceptionParams.Count + 1; // +1 for {OriginalFormat}
 
 		var kvpType = emitNullable
 			? "global::System.Collections.Generic.KeyValuePair<string, object?>"
@@ -1191,191 +1119,172 @@ partial class LoggerGenTargetClassEmitter
 		var ienumerableKvpType = $"global::System.Collections.Generic.IEnumerable<{kvpType}>";
 		const string ienumerableType = "global::System.Collections.IEnumerator";
 
-		builder
-			.AppendLine()
-			.CodeGen(indent)
-			.Append(indent, "private readonly struct ", withNewLine: false)
-			.Append(structName)
-			.AppendLine($" : {iReadOnlyListType}")
-			.Append(indent, '{');
+		writer
+			.NewLine()
+			.WriteLine(Constants.System.GeneratedCode.Value)
+			.Write("private readonly struct ")
+			.Write(structName)
+			.WriteLine($" : {iReadOnlyListType}");
 
-		indent++;
-
-		builder
-			.Append(indent, "static readonly string s_originalFormat = ", withNewLine: false)
-			.Append(methodTarget.MessageTemplate.Wrap())
-			.AppendLine(";");
-
-		if (nonExceptionParams.Length > 0)
+		using (writer.OpenBlockScope())
 		{
-			builder.AppendLine();
+			writer
+				.Write("static readonly string s_originalFormat = ")
+				.Write(methodTarget.MessageTemplate.Wrap())
+				.WriteLine(";");
 
-			foreach (var param in nonExceptionParams)
+			if (nonExceptionParams.Count > 0)
 			{
-				context.CancellationToken.ThrowIfCancellationRequested();
+				writer.NewLine();
 
-				builder
-					.Append(indent, "public readonly ", withNewLine: false)
-					.Append(param.ParameterType)
-					.Append(" _")
-					.Append(param.UpperCasedName)
-					.AppendLine(";");
+				foreach (var param in nonExceptionParams)
+				{
+					context.CancellationToken.ThrowIfCancellationRequested();
+
+					writer
+						.Write("public readonly ")
+						.Write(param.ParameterType)
+						.Write(" _")
+						.Write(param.UpperCasedName)
+						.WriteLine(";");
+				}
+
+				writer.NewLine().Write("public ").Write(structName).Write('(');
+
+				for (var i = 0; i < nonExceptionParams.Count; i++)
+				{
+					context.CancellationToken.ThrowIfCancellationRequested();
+
+					writer.Write(nonExceptionParams[i].ParameterType).Write(' ').Write(nonExceptionParams[i].Name);
+
+					if (i < nonExceptionParams.Count - 1)
+						writer.Write(", ");
+				}
+
+				writer.Write(")");
+
+				using (writer.OpenBlockScope())
+				{
+					foreach (var param in nonExceptionParams)
+					{
+						context.CancellationToken.ThrowIfCancellationRequested();
+
+						writer.Write("_").Write(param.UpperCasedName).Write(" = ").Write(param.Name).WriteLine(";");
+					}
+				}
 			}
 
-			builder.AppendLine().Append(indent, "public ", withNewLine: false).Append(structName).Append('(');
+			// Lazy ToString() — format is deferred until a provider actually needs the string.
+			var interpolatedMessage = GenerateTypedInterpolatedMessage(
+				methodTarget.MessageTemplate,
+				null, // null = direct field access (_FieldName instead of s._FieldName)
+				null, // scoped methods have no exception parameter
+				[.. methodTarget.Parameters]
+			);
 
-			for (var i = 0; i < nonExceptionParams.Length; i++)
+			writer
+				.NewLine()
+				.NewLine()
+				.WriteLine(Constants.System.GeneratedCode.Value)
+				.Write("public override string ToString()");
+
+			using (writer.OpenBlockScope())
 			{
-				context.CancellationToken.ThrowIfCancellationRequested();
-
-				builder.Append(nonExceptionParams[i].ParameterType).Append(' ').Append(nonExceptionParams[i].Name);
-
-				if (i < nonExceptionParams.Length - 1)
-					builder.Append(", ");
+				writer
+					.WriteLine("#if NET")
+					.Write("return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
+					.Write(interpolatedMessage.Wrap())
+					.WriteLine(");")
+					.WriteLine("#else")
+					.Write("return global::System.FormattableString.Invariant($")
+					.Write(interpolatedMessage.Wrap())
+					.WriteLine(");")
+					.WriteLine("#endif");
 			}
 
-			builder.AppendLine(")").Append(indent, '{');
-			indent++;
+			writer
+				.NewLine()
+				.NewLine()
+				.Write("public int Count => ")
+				.Write(count.ToString(CultureInfo.InvariantCulture))
+				.WriteLine(";")
+				.NewLine()
+				.Write($"public {kvpType} this[int index]");
 
-			foreach (var param in nonExceptionParams)
+			using (writer.OpenBlockScope())
 			{
-				context.CancellationToken.ThrowIfCancellationRequested();
+				writer.WriteLine(Constants.System.AggressiveInlining);
 
-				builder
-					.Append(indent, "_", withNewLine: false)
-					.Append(param.UpperCasedName)
-					.Append(" = ")
-					.Append(param.Name)
-					.AppendLine(";");
+				if (emitNullable)
+				{
+					writer.WriteLine("get => index switch {");
+					writer.Indent();
+					writer.WriteLine("0 => new(\"{OriginalFormat}\", s_originalFormat),");
+
+					for (var i = 0; i < nonExceptionParams.Count; i++)
+					{
+						context.CancellationToken.ThrowIfCancellationRequested();
+
+						writer
+							.Write($"{i + 1} => new(")
+							.Write(nonExceptionParams[i].Name.Wrap())
+							.Write(", _")
+							.Write(nonExceptionParams[i].UpperCasedName)
+							.WriteLine("),");
+					}
+
+					writer.WriteLine("_ => throw new global::System.IndexOutOfRangeException(nameof(index))");
+					writer.Unindent();
+					writer.WriteLine("};");
+				}
+				else
+				{
+					writer.Write("get");
+					using (writer.OpenBlockScope())
+					{
+						writer.Write("switch (index)");
+						using (writer.OpenBlockScope())
+						{
+							writer.WriteLine(
+								"case 0: return new " + kvpType + "(\"{OriginalFormat}\", s_originalFormat);"
+							);
+
+							for (var i = 0; i < nonExceptionParams.Count; i++)
+							{
+								context.CancellationToken.ThrowIfCancellationRequested();
+
+								writer
+									.Write($"case {i + 1}: return new " + kvpType + "(")
+									.Write(nonExceptionParams[i].Name.Wrap())
+									.Write(", _")
+									.Write(nonExceptionParams[i].UpperCasedName)
+									.WriteLine(");");
+							}
+
+							writer.WriteLine(
+								"default: throw new global::System.IndexOutOfRangeException(nameof(index));"
+							);
+						}
+					}
+				}
 			}
 
-			indent--;
-			builder.Append(indent, '}');
+			EmitStructEnumerator(
+				writer,
+				structName,
+				kvpType,
+				ienumeratorType,
+				ienumerableType,
+				ienumerableKvpType,
+				emitNullable
+			);
 		}
 
-		// Lazy ToString() — format is deferred until a provider actually needs the string.
-		var interpolatedMessage = GenerateTypedInterpolatedMessage(
-			methodTarget.MessageTemplate,
-			null, // null = direct field access (_FieldName instead of s._FieldName)
-			null, // scoped methods have no exception parameter
-			[.. methodTarget.Parameters]
-		);
-
-		builder
-			.AppendLine()
-			.AppendLine()
-			.CodeGen(indent)
-			.Append(indent, "public override string ToString()")
-			.Append(indent, '{')
-			.AppendLine("#if NET")
-			.Append(
-				indent + 1,
-				"return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $",
-				withNewLine: false
-			)
-			.Append(interpolatedMessage.Wrap())
-			.AppendLine(");")
-			.AppendLine("#else")
-			.Append(indent + 1, "return global::System.FormattableString.Invariant($", withNewLine: false)
-			.Append(interpolatedMessage.Wrap())
-			.AppendLine(");")
-			.AppendLine("#endif")
-			.Append(indent, '}')
-			.AppendLine()
-			.AppendLine()
-			.Append(indent, "public int Count => ", withNewLine: false)
-			.Append(count)
-			.AppendLine(";")
-			.AppendLine()
-			.Append(indent, $"public {kvpType} this[int index]")
-			.Append(indent, '{');
-
-		indent++;
-
-		builder.Append(indent, Constants.System.AggressiveInlining);
-
-		if (emitNullable)
-		{
-			builder.Append(indent, "get => index switch", withNewLine: false).AppendLine().Append(indent, '{');
-
-			indent++;
-
-			builder.Append(indent, "0 => new(\"{OriginalFormat}\", s_originalFormat),");
-
-			for (var i = 0; i < nonExceptionParams.Length; i++)
-			{
-				context.CancellationToken.ThrowIfCancellationRequested();
-
-				builder
-					.Append(indent, $"{i + 1} => new(", withNewLine: false)
-					.Append(nonExceptionParams[i].Name.Wrap())
-					.Append(", _")
-					.Append(nonExceptionParams[i].UpperCasedName)
-					.AppendLine("),");
-			}
-
-			builder.Append(indent, "_ => throw new global::System.IndexOutOfRangeException(nameof(index))");
-
-			indent--;
-			builder.Append(indent, "};");
-
-			indent--;
-			builder.Append(indent, '}').AppendLine();
-		}
-		else
-		{
-			builder.Append(indent, "get").Append(indent, '{');
-
-			indent++;
-
-			builder.Append(indent, "switch (index)").Append(indent, '{');
-
-			indent++;
-
-			builder.Append(indent, "case 0: return new " + kvpType + "(\"{OriginalFormat}\", s_originalFormat);");
-
-			for (var i = 0; i < nonExceptionParams.Length; i++)
-			{
-				context.CancellationToken.ThrowIfCancellationRequested();
-
-				builder
-					.Append(indent, $"case {i + 1}: return new " + kvpType + "(", withNewLine: false)
-					.Append(nonExceptionParams[i].Name.Wrap())
-					.Append(", _")
-					.Append(nonExceptionParams[i].UpperCasedName)
-					.AppendLine(");");
-			}
-
-			builder.Append(indent, "default: throw new global::System.IndexOutOfRangeException(nameof(index));");
-
-			indent--;
-			builder.Append(indent, '}');
-
-			indent--;
-			builder.Append(indent, '}').AppendLine();
-
-			indent--;
-			builder.Append(indent, '}').AppendLine();
-		}
-
-		EmitStructEnumerator(
-			builder,
-			ref indent,
-			structName,
-			kvpType,
-			ienumeratorType,
-			ienumerableType,
-			ienumerableKvpType,
-			emitNullable
-		);
-
-		indent--;
-		builder.Append(indent, '}').AppendLine();
+		writer.NewLine();
 	}
 
 	static void EmitPublicLoggingDelegatingMethod(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		LogMethodTarget methodTarget,
 		SourceProductionContext context,
 		GenerationLogger? logger,
@@ -1384,87 +1293,94 @@ partial class LoggerGenTargetClassEmitter
 	{
 		logger?.Debug($"Building public delegating logging method: {methodTarget.MethodName}");
 
-		builder.AppendLine().CodeGen(indent).AggressiveInlining(indent).Append(indent, "public ", withNewLine: false);
+		writer
+			.NewLine()
+			.WriteLine(Constants.System.GeneratedCode.Value)
+			.WriteLine(Constants.System.AggressiveInlining)
+			.Write("public ");
 
 		// When Logging owns the public method (with Metrics), return void
 		// (Logging without Activity means the return type is void or IDisposable for scoped)
 		if (methodTarget.IsScoped)
 		{
-			builder.Append(Constants.System.IDisposable);
+			writer.Write(Constants.System.IDisposable);
 			if (emitNullable)
-				builder.Append('?');
+				writer.Write('?');
 		}
 		else
 		{
-			builder.Append(Constants.System.VoidKeyword);
+			writer.Write(Constants.System.VoidKeyword);
 		}
 
-		builder.Append(' ').Append(methodTarget.MethodName).Append('(');
+		writer.Write(' ').Write(methodTarget.MethodName).Write('(');
 
-		EmitParametersAsMethodArgumentList(methodTarget, builder, context);
+		EmitParametersAsMethodArgumentList(methodTarget, writer, context);
 
-		builder.Append(')').AppendLine().Append(indent, '{');
+		writer.Write(")");
 
-		// Call the private Logging method
-		if (methodTarget.IsScoped)
+		using (writer.OpenBlockScope())
 		{
-			builder.Append(indent + 1, "var loggingResult = ", withNewLine: false);
-		}
-		else
-		{
-			builder.Append(indent + 1, methodTarget.MethodName, withNewLine: false).Append("_Logging(");
-		}
+			// Call the private Logging method
+			if (methodTarget.IsScoped)
+			{
+				writer.Write("var loggingResult = ");
+			}
+			else
+			{
+				writer.Write(methodTarget.MethodName).Write("_Logging(");
+			}
 
-		if (!methodTarget.IsScoped)
-		{
-			// Emit parameters
+			if (!methodTarget.IsScoped)
+			{
+				// Emit parameters
+				for (var i = 0; i < methodTarget.TotalParameterCount; i++)
+				{
+					context.CancellationToken.ThrowIfCancellationRequested();
+
+					writer.Write(methodTarget.Parameters[i].Name);
+
+					if (i < methodTarget.TotalParameterCount - 1)
+						writer.Write(", ");
+				}
+				writer.Write(");").NewLine();
+			}
+			else
+			{
+				// For scoped, we need special handling
+				writer.Write(methodTarget.MethodName).Write("_Logging(");
+				for (var i = 0; i < methodTarget.TotalParameterCount; i++)
+				{
+					context.CancellationToken.ThrowIfCancellationRequested();
+
+					writer.Write(methodTarget.Parameters[i].Name);
+
+					if (i < methodTarget.TotalParameterCount - 1)
+						writer.Write(", ");
+				}
+				writer.Write(");").NewLine();
+			}
+
+			// Call the private Metrics method
+			writer.Write(methodTarget.MethodName).Write("_Metrics(");
+
 			for (var i = 0; i < methodTarget.TotalParameterCount; i++)
 			{
 				context.CancellationToken.ThrowIfCancellationRequested();
 
-				builder.Append(methodTarget.Parameters[i].Name);
+				writer.Write(methodTarget.Parameters[i].Name);
 
 				if (i < methodTarget.TotalParameterCount - 1)
-					builder.Append(", ");
+					writer.Write(", ");
 			}
-			builder.AppendLine(");");
-		}
-		else
-		{
-			// For scoped, we need special handling
-			builder.Append(methodTarget.MethodName).Append("_Logging(");
-			for (var i = 0; i < methodTarget.TotalParameterCount; i++)
+			writer.Write(");").NewLine();
+
+			// Return if scoped
+			if (methodTarget.IsScoped)
 			{
-				context.CancellationToken.ThrowIfCancellationRequested();
-
-				builder.Append(methodTarget.Parameters[i].Name);
-
-				if (i < methodTarget.TotalParameterCount - 1)
-					builder.Append(", ");
+				writer.NewLine().Write("return loggingResult;");
 			}
-			builder.AppendLine(");");
 		}
 
-		// Call the private Metrics method
-		builder.Append(indent + 1, methodTarget.MethodName, withNewLine: false).Append("_Metrics(");
-
-		for (var i = 0; i < methodTarget.TotalParameterCount; i++)
-		{
-			context.CancellationToken.ThrowIfCancellationRequested();
-
-			builder.Append(methodTarget.Parameters[i].Name);
-
-			if (i < methodTarget.TotalParameterCount - 1)
-				builder.Append(", ");
-		}
-		builder.AppendLine(");");
-
-		// Return if scoped
-		if (methodTarget.IsScoped)
-		{
-			builder.AppendLine().Append(indent + 1, "return loggingResult;");
-		}
-
-		builder.Append(indent, '}').AppendLine();
+		writer.NewLine();
 	}
 }

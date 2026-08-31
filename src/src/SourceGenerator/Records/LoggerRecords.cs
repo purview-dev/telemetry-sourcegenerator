@@ -1,4 +1,4 @@
-﻿using Purview.Telemetry.SourceGenerator.Templates;
+using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator.Records;
 
@@ -40,9 +40,9 @@ record LogMethodTarget(
 	bool HasLogPropertiesAndExpandEnumerable = false
 )
 {
-	public int TotalParameterCount => Parameters.Length;
+	public int TotalParameterCount => Parameters.Count;
 
-	public int ParameterCountSansException => ParametersSansException.Length;
+	public int ParameterCountSansException => ParametersSansException.Count;
 }
 
 record LogParameterTarget(

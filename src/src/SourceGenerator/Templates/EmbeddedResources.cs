@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 
@@ -53,7 +53,7 @@ sealed class EmbeddedResources
 		const string nullableGuard =
 			"#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE\n#nullable enable\n#endif";
 
-		string nullableSection = emitNullable switch
+		var nullableSection = emitNullable switch
 		{
 			true => "#nullable enable\n\n",
 			false => string.Empty,

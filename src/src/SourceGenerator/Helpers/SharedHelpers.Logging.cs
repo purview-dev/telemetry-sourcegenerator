@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Records;
 
 namespace Purview.Telemetry.SourceGenerator.Helpers;
@@ -358,8 +358,8 @@ partial class SharedHelpers
 	public static int GetNonRandomizedHashCode(string methodName)
 	{
 		const int multiplier = 16_777_619;
-		uint result = 2_166_136_261u;
-		foreach (char c in methodName)
+		var result = 2_166_136_261u;
+		foreach (var c in methodName)
 			result = (c ^ result) * multiplier;
 
 		var ret = (int)result;

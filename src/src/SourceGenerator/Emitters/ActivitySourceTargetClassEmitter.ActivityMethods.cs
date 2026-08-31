@@ -1,4 +1,3 @@
-﻿using System.Text;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -8,8 +7,7 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 partial class ActivitySourceTargetClassEmitter
 {
 	static void EmitActivityMethodBody(
-		StringBuilder builder,
-		int indent,
+		CodeWriter writer,
 		ActivityBasedGenerationTarget methodTarget,
 		SourceProductionContext context,
 		GenerationLogger? logger,
@@ -51,17 +49,17 @@ partial class ActivitySourceTargetClassEmitter
 			return;
 		}
 
-		EmitHasListenersTest(builder, indent, methodTarget, emitNullable);
+		EmitHasListenersTest(writer, methodTarget, emitNullable);
 
 		var activityVariableName = "activity" + methodTarget.MethodName;
 
-		builder
-			.Append(indent, Constants.Activities.SystemDiagnostics.Activity, withNewLine: false)
-			.Append(emitNullable ? "? " : " ")
-			.Append(activityVariableName)
-			.Append(" = ")
-			.Append(Constants.Activities.ActivitySourceFieldName)
-			.Append('.');
+		writer
+			.Write(Constants.Activities.SystemDiagnostics.Activity)
+			.Write(emitNullable ? "? " : " ")
+			.Write(activityVariableName)
+			.Write(" = ")
+			.Write(Constants.Activities.ActivitySourceFieldName)
+			.Write('.');
 
 		var createOnly = methodTarget.ActivityAttribute?.CreateOnly.Value == true;
 		var createActivityMethod = createOnly ? "Create" : "Start";
@@ -93,127 +91,97 @@ partial class ActivitySourceTargetClassEmitter
 			parentContextOrIdParameterValue += " ?? default";
 		}
 
-		builder.Append(createActivityMethod).Append("Activity(");
+		writer.Write(createActivityMethod).Write("Activity(");
 
 		if (createOnly || !useParentContext)
 		{
 			// Only create the name always comes first.
 			// If it's start, and we're using an ActivityContext then the
 			// name comes last.
-			AddActivityNameParameter(builder, methodTarget, false);
-			builder.Append(", ");
+			AddActivityNameParameter(writer, methodTarget, false);
+			writer.Write(", ");
 		}
 
-		builder
+		writer
 			// kind: (un-named)
-			.Append(Constants.Activities.ActivityKindTypeMap[kind])
+			.Write(Constants.Activities.ActivityKindTypeMap[kind])
 			// parentContext/ parentId:
-			.Append(", ")
-			.Append(parentContextParameterName)
-			.Append(": ")
-			.Append(parentContextOrIdParameterValue)
+			.Write(", ")
+			.Write(parentContextParameterName)
+			.Write(": ")
+			.Write(parentContextOrIdParameterValue)
 			// tags:
-			.Append(", tags: ")
-			.Append(tagsParam?.ParameterName ?? "default")
+			.Write(", tags: ")
+			.Write(tagsParam?.ParameterName ?? "default")
 			// links:
-			.Append(", links: ")
-			.Append(linksParam?.ParameterName ?? "default");
+			.Write(", links: ")
+			.Write(linksParam?.ParameterName ?? "default");
 
 		if (!createOnly)
 		{
-			builder
+			writer
 				// startTime:
-				.Append(", startTime: ")
-				.Append(startTimeParam?.ParameterName ?? "default");
+				.Write(", startTime: ")
+				.Write(startTimeParam?.ParameterName ?? "default");
 
 			if (useParentContext)
 			{
 				// If it's a Start and we're using an ActivityContext,
 				// the name comes last.
-				builder.Append(", ");
-				AddActivityNameParameter(builder, methodTarget, true);
+				writer.Write(", ");
+				AddActivityNameParameter(writer, methodTarget, true);
 			}
 		}
 
-		builder.AppendLine(");");
+		writer.WriteLine(");");
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		if (methodTarget.Tags.Length > 0 || methodTarget.Baggage.Length > 0)
+		if (methodTarget.Tags.Count > 0 || methodTarget.Baggage.Count > 0)
 		{
-			builder
-				.AppendLine()
-				.Append(indent, "if (", withNewLine: false)
-				.Append(activityVariableName)
-				.AppendLine(" != null)")
-				.Append(indent, '{');
+			writer.NewLine().Write("if (").Write(activityVariableName).WriteLine(" != null)");
 
-			indent++;
-
-			EmitTagsOrBaggageParameters(
-				builder,
-				indent,
-				activityVariableName,
-				true,
-				methodTarget,
-				false,
-				context,
-				logger
-			);
-			EmitTagsOrBaggageParameters(
-				builder,
-				indent,
-				activityVariableName,
-				false,
-				methodTarget,
-				false,
-				context,
-				logger
-			);
-
-			builder.Append(--indent, '}');
+			using (writer.OpenBlockScope())
+			{
+				EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, context, logger);
+				EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, context, logger);
+			}
 		}
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
 		if (Constants.Activities.SystemDiagnostics.Activity.Equals(methodTarget.ReturnType))
 		{
-			builder
-				.AppendLine()
-				.Append(indent, "return ", withNewLine: false)
-				.Append(activityVariableName)
-				.Append(!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
-				.AppendLine(';');
+			writer
+				.NewLine()
+				.Write("return ")
+				.Write(activityVariableName)
+				.Write(!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
+				.Write(";")
+				.NewLine();
 		}
 
 		static void AddActivityNameParameter(
-			StringBuilder builder,
+			CodeWriter writer,
 			ActivityBasedGenerationTarget methodTarget,
 			bool useName
 		)
 		{
 			if (useName)
-				builder.Append("name: ");
+				writer.Write("name: ");
 
-			builder.Append(methodTarget.ActivityOrEventName.Wrap());
+			writer.Write(methodTarget.ActivityOrEventName.Wrap());
 		}
 	}
 
-	static void EmitHasListenersTest(
-		StringBuilder builder,
-		int indent,
-		ActivityBasedGenerationTarget methodTarget,
-		bool emitNullable
-	)
+	static void EmitHasListenersTest(CodeWriter writer, ActivityBasedGenerationTarget methodTarget, bool emitNullable)
 	{
 		var returnsVoid = methodTarget.ReturnType.SpecialType == SpecialType.System_Void;
-		builder
-			.Append(indent, "if (!", withNewLine: false)
-			.Append(Constants.Activities.ActivitySourceFieldName)
-			.AppendLine(".HasListeners())")
-			.Append(indent, '{')
-			.Append(
-				indent + 1,
+		writer.Write("if (!").Write(Constants.Activities.ActivitySourceFieldName).WriteLine(".HasListeners())");
+
+		using (writer.OpenBlockScope())
+		{
+			writer.WriteLine(
 				"return"
 					+ (
 						returnsVoid
@@ -221,8 +189,9 @@ partial class ActivitySourceTargetClassEmitter
 							: " null" + (!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
 					)
 					+ ";"
-			)
-			.Append(indent, '}')
-			.AppendLine();
+			);
+		}
+
+		writer.NewLine();
 	}
 }
