@@ -31,12 +31,7 @@ partial class LoggerGenTargetClassEmitter
 						context.ReportDiagnostic,
 						TelemetryDiagnostics.Logging.ExpandEnumerableAndLogPropertiesNotSupported
 					);
-					LoggerTargetClassEmitter.EmitThrowStub(
-						builder,
-						indent,
-						methodTarget,
-						emitNullable
-					);
+					LoggerTargetClassEmitter.EmitThrowStub(builder, indent, methodTarget, emitNullable);
 					continue;
 				}
 
@@ -48,12 +43,7 @@ partial class LoggerGenTargetClassEmitter
 					)
 				)
 				{
-					LoggerTargetClassEmitter.EmitThrowStub(
-						builder,
-						indent,
-						methodTarget,
-						emitNullable
-					);
+					LoggerTargetClassEmitter.EmitThrowStub(builder, indent, methodTarget, emitNullable);
 				}
 				continue;
 			}
@@ -106,8 +96,7 @@ partial class LoggerGenTargetClassEmitter
 			// Only use v1 if within param limits; otherwise fall through to v2 (diagnostic already emitted in EmitFields)
 			if (
 				!methodTarget.HasMultipleExceptions
-				&& methodTarget.ParameterCountSansException
-					<= Constants.Logging.MaxNonExceptionParameters
+				&& methodTarget.ParameterCountSansException <= Constants.Logging.MaxNonExceptionParameters
 			)
 			{
 				LoggerTargetClassEmitter.EmitLogActionMethod(
@@ -129,22 +118,18 @@ partial class LoggerGenTargetClassEmitter
 
 		// Determine ownership hierarchy: Activity > Logging > Metrics
 		var activityOwnsPublicMethod = methodTargets.HasFlag(GenerationType.Activities);
-		var loggingOwnsPublicMethod =
-			!activityOwnsPublicMethod && methodTargets.HasFlag(GenerationType.Logging);
+		var loggingOwnsPublicMethod = !activityOwnsPublicMethod && methodTargets.HasFlag(GenerationType.Logging);
 		var hasMetricsTarget = methodTargets.HasFlag(GenerationType.Metrics);
 
 		// For multi-target where Logging owns the public method, we need to:
 		// 1. Generate a private _Logging method
 		// 2. Generate a public delegating method
 		var generatePrivateLogging =
-			isMultiTarget
-			&& (activityOwnsPublicMethod || (loggingOwnsPublicMethod && hasMetricsTarget));
+			isMultiTarget && (activityOwnsPublicMethod || (loggingOwnsPublicMethod && hasMetricsTarget));
 		var generatePublicDelegator = isMultiTarget && loggingOwnsPublicMethod && hasMetricsTarget;
 
 		var accessModifier = generatePrivateLogging ? "private" : "public";
-		var methodName = generatePrivateLogging
-			? methodTarget.MethodName + "_Logging"
-			: methodTarget.MethodName;
+		var methodName = generatePrivateLogging ? methodTarget.MethodName + "_Logging" : methodTarget.MethodName;
 
 		builder
 			.AppendLine()
@@ -264,10 +249,7 @@ partial class LoggerGenTargetClassEmitter
 					builder.AppendLine();
 				}
 
-				var formattedMessageVarName = FindUniqueName(
-					"formattedMessage",
-					existingParamNames
-				);
+				var formattedMessageVarName = FindUniqueName("formattedMessage", existingParamNames);
 				builder
 					.Append(indent, "var ", withNewLine: false)
 					.AppendLine("formattedMessage = ")
@@ -280,11 +262,7 @@ partial class LoggerGenTargetClassEmitter
 					.Append(interpolatedMessage.Wrap())
 					.AppendLine(");")
 					.AppendLine("#else")
-					.Append(
-						indent + 1,
-						"global::System.FormattableString.Invariant($",
-						withNewLine: false
-					)
+					.Append(indent + 1, "global::System.FormattableString.Invariant($", withNewLine: false)
 					.Append(interpolatedMessage.Wrap())
 					.AppendLine(");")
 					.AppendLine("#endif")
@@ -327,9 +305,7 @@ partial class LoggerGenTargetClassEmitter
 					[.. methodTarget.Parameters]
 				);
 
-				var eventId =
-					methodTarget.EventId
-					?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
+				var eventId = methodTarget.EventId ?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
 
 				var nonExceptionParams = methodTarget.ParametersSansException;
 
@@ -339,9 +315,7 @@ partial class LoggerGenTargetClassEmitter
 					.Append(indent + 1, methodTarget.MSLevel.WithComma(andSpace: false))
 					.Append(
 						indent + 1,
-						emitNullable
-							? "new ("
-							: "new " + Constants.Logging.MicrosoftExtensions.EventId + "(",
+						emitNullable ? "new (" : "new " + Constants.Logging.MicrosoftExtensions.EventId + "(",
 						withNewLine: false
 					)
 					.Append(eventId)
@@ -360,10 +334,7 @@ partial class LoggerGenTargetClassEmitter
 				}
 
 				builder.AppendLine("),");
-				builder.Append(
-					indent + 1,
-					methodTarget.ExceptionParameter.OrNullKeyword().WithComma(andSpace: false)
-				);
+				builder.Append(indent + 1, methodTarget.ExceptionParameter.OrNullKeyword().WithComma(andSpace: false));
 
 				if (emitNullable)
 					builder.CodeGen(indent + 1);
@@ -383,11 +354,7 @@ partial class LoggerGenTargetClassEmitter
 					.Append(interpolatedMessage.Wrap())
 					.AppendLine(");")
 					.AppendLine("#else")
-					.Append(
-						indent + 2,
-						"return global::System.FormattableString.Invariant($",
-						withNewLine: false
-					)
+					.Append(indent + 2, "return global::System.FormattableString.Invariant($", withNewLine: false)
 					.Append(interpolatedMessage.Wrap())
 					.AppendLine(");")
 					.AppendLine("#endif")
@@ -407,9 +374,7 @@ partial class LoggerGenTargetClassEmitter
 				);
 
 				// Call the .Log method.
-				var eventId =
-					methodTarget.EventId
-					?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
+				var eventId = methodTarget.EventId ?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
 				builder
 					.Append(indent, Constants.Logging.LoggerFieldName, withNewLine: false)
 					.AppendLine(".Log(")
@@ -418,9 +383,7 @@ partial class LoggerGenTargetClassEmitter
 					// Event Id
 					.Append(
 						indent + 1,
-						emitNullable
-							? "new ("
-							: "new " + Constants.Logging.MicrosoftExtensions.EventId + "(",
+						emitNullable ? "new (" : "new " + Constants.Logging.MicrosoftExtensions.EventId + "(",
 						withNewLine: false
 					)
 					.Append(eventId)
@@ -430,10 +393,7 @@ partial class LoggerGenTargetClassEmitter
 					// State
 					.Append(indent + 1, stateVarName.WithComma(andSpace: false))
 					// Exception
-					.Append(
-						indent + 1,
-						methodTarget.ExceptionParameter.OrNullKeyword().WithComma(andSpace: false)
-					);
+					.Append(indent + 1, methodTarget.ExceptionParameter.OrNullKeyword().WithComma(andSpace: false));
 				// Message Template
 				if (emitNullable)
 					builder.CodeGen(indent + 1);
@@ -463,21 +423,14 @@ partial class LoggerGenTargetClassEmitter
 					.Append(interpolatedMessage.Wrap())
 					.AppendLine(");")
 					.AppendLine("#else")
-					.Append(
-						indent + 2,
-						"return global::System.FormattableString.Invariant($",
-						withNewLine: false
-					)
+					.Append(indent + 2, "return global::System.FormattableString.Invariant($", withNewLine: false)
 					.Append(interpolatedMessage.Wrap())
 					.AppendLine(");")
 					.AppendLine("#endif")
 					.Append(indent + 1, '}')
 					.Append(indent, ");");
 
-				builder
-					.AppendLine()
-					.Append(indent, stateVarName, withNewLine: false)
-					.AppendLine(".Clear();");
+				builder.AppendLine().Append(indent, stateVarName, withNewLine: false).AppendLine(".Clear();");
 			}
 		}
 
@@ -486,14 +439,7 @@ partial class LoggerGenTargetClassEmitter
 		// Generate public delegating method if Logging owns it
 		if (generatePublicDelegator)
 		{
-			EmitPublicLoggingDelegatingMethod(
-				builder,
-				indent,
-				methodTarget,
-				context,
-				logger,
-				emitNullable
-			);
+			EmitPublicLoggingDelegatingMethod(builder, indent, methodTarget, context, logger, emitNullable);
 		}
 	}
 
@@ -578,14 +524,7 @@ partial class LoggerGenTargetClassEmitter
 				{
 					postSetProperties ??= [];
 					postSetProperties.Add(
-						OutputExpandedEnumerable(
-							indent,
-							stateVarName,
-							parameter,
-							context,
-							existingParamNames,
-							logger
-						)
+						OutputExpandedEnumerable(indent, stateVarName, parameter, context, existingParamNames, logger)
 					);
 				}
 			}
@@ -637,8 +576,7 @@ partial class LoggerGenTargetClassEmitter
 				}
 
 				var shouldSkipNull =
-					(parameter.LogPropertiesAttribute.SkipNullProperties.Value ?? false)
-					&& logProperty.IsNullable;
+					(parameter.LogPropertiesAttribute.SkipNullProperties.Value ?? false) && logProperty.IsNullable;
 				if (shouldSkipNull)
 				{
 					var tmpVarName = FindUniqueName("tmp", existingParamNames);
@@ -699,11 +637,7 @@ partial class LoggerGenTargetClassEmitter
 				.Append("TagArray[")
 				.Append(index.Value)
 				.Append("] = ")
-				.Append(
-					emitNullable
-						? "new("
-						: "new global::System.Collections.Generic.KeyValuePair<string, object>("
-				);
+				.Append(emitNullable ? "new(" : "new global::System.Collections.Generic.KeyValuePair<string, object>(");
 		}
 		else
 		{
@@ -762,9 +696,7 @@ partial class LoggerGenTargetClassEmitter
 
 		if (maxCount > Constants.Logging.UnboundedIEnumerableMaxCountBeforeDiagnostic)
 		{
-			logger?.Diagnostic(
-				$"Identified {parameter.Name} that has a large unbounded ienumerable max."
-			);
+			logger?.Diagnostic($"Identified {parameter.Name} that has a large unbounded ienumerable max.");
 			TelemetryDiagnostics.Report(
 				context.ReportDiagnostic,
 				TelemetryDiagnostics.Logging.UnboundedIEnumerableMaxCount,
@@ -872,8 +804,7 @@ partial class LoggerGenTargetClassEmitter
 			var index = hole.IsPositional ? hole.Ordinal!.Value : holeIndexMap[hole];
 			string varName;
 
-			var isUsingExpressionException =
-				exceptionParameter?.ReferencedHoles.Contains(hole) == true;
+			var isUsingExpressionException = exceptionParameter?.ReferencedHoles.Contains(hole) == true;
 			if (isUsingExpressionException)
 			{
 				varName = expressionExceptionVarName!;
@@ -987,8 +918,7 @@ partial class LoggerGenTargetClassEmitter
 			if (
 				methodTarget.UseV1Generation
 				&& !methodTarget.HasMultipleExceptions
-				&& methodTarget.ParameterCountSansException
-					<= Constants.Logging.MaxNonExceptionParameters
+				&& methodTarget.ParameterCountSansException <= Constants.Logging.MaxNonExceptionParameters
 			)
 				continue;
 
@@ -1053,20 +983,13 @@ partial class LoggerGenTargetClassEmitter
 					.AppendLine(";");
 			}
 
-			builder
-				.AppendLine()
-				.Append(indent, "public ", withNewLine: false)
-				.Append(structName)
-				.Append('(');
+			builder.AppendLine().Append(indent, "public ", withNewLine: false).Append(structName).Append('(');
 
 			for (var i = 0; i < nonExceptionParams.Length; i++)
 			{
 				context.CancellationToken.ThrowIfCancellationRequested();
 
-				builder
-					.Append(nonExceptionParams[i].ParameterType)
-					.Append(' ')
-					.Append(nonExceptionParams[i].Name);
+				builder.Append(nonExceptionParams[i].ParameterType).Append(' ').Append(nonExceptionParams[i].Name);
 
 				if (i < nonExceptionParams.Length - 1)
 					builder.Append(", ");
@@ -1107,10 +1030,7 @@ partial class LoggerGenTargetClassEmitter
 
 		if (emitNullable)
 		{
-			builder
-				.Append(indent, "get => index switch", withNewLine: false)
-				.AppendLine()
-				.Append(indent, '{');
+			builder.Append(indent, "get => index switch", withNewLine: false).AppendLine().Append(indent, '{');
 
 			indent++;
 
@@ -1128,10 +1048,7 @@ partial class LoggerGenTargetClassEmitter
 					.AppendLine("),");
 			}
 
-			builder.Append(
-				indent,
-				"_ => throw new global::System.IndexOutOfRangeException(nameof(index))"
-			);
+			builder.Append(indent, "_ => throw new global::System.IndexOutOfRangeException(nameof(index))");
 
 			indent--;
 			builder.Append(indent, "};");
@@ -1149,31 +1066,21 @@ partial class LoggerGenTargetClassEmitter
 
 			indent++;
 
-			builder.Append(
-				indent,
-				"case 0: return new " + kvpType + "(\"{OriginalFormat}\", s_originalFormat);"
-			);
+			builder.Append(indent, "case 0: return new " + kvpType + "(\"{OriginalFormat}\", s_originalFormat);");
 
 			for (var i = 0; i < nonExceptionParams.Length; i++)
 			{
 				context.CancellationToken.ThrowIfCancellationRequested();
 
 				builder
-					.Append(
-						indent,
-						$"case {i + 1}: return new " + kvpType + "(",
-						withNewLine: false
-					)
+					.Append(indent, $"case {i + 1}: return new " + kvpType + "(", withNewLine: false)
 					.Append(nonExceptionParams[i].Name.Wrap())
 					.Append(", _")
 					.Append(nonExceptionParams[i].UpperCasedName)
 					.AppendLine(");");
 			}
 
-			builder.Append(
-				indent,
-				"default: throw new global::System.IndexOutOfRangeException(nameof(index));"
-			);
+			builder.Append(indent, "default: throw new global::System.IndexOutOfRangeException(nameof(index));");
 
 			indent--;
 			builder.Append(indent, '}');
@@ -1255,10 +1162,7 @@ partial class LoggerGenTargetClassEmitter
 			.Append(indent, "public Enumerator GetEnumerator() => new Enumerator(this);")
 			.AppendLine()
 			.AppendLine()
-			.Append(
-				indent,
-				$"{ienumeratorType} {ienumerableKvpType}.GetEnumerator() => GetEnumerator();"
-			)
+			.Append(indent, $"{ienumeratorType} {ienumerableKvpType}.GetEnumerator() => GetEnumerator();")
 			.AppendLine()
 			.AppendLine()
 			.Append(
@@ -1318,20 +1222,13 @@ partial class LoggerGenTargetClassEmitter
 					.AppendLine(";");
 			}
 
-			builder
-				.AppendLine()
-				.Append(indent, "public ", withNewLine: false)
-				.Append(structName)
-				.Append('(');
+			builder.AppendLine().Append(indent, "public ", withNewLine: false).Append(structName).Append('(');
 
 			for (var i = 0; i < nonExceptionParams.Length; i++)
 			{
 				context.CancellationToken.ThrowIfCancellationRequested();
 
-				builder
-					.Append(nonExceptionParams[i].ParameterType)
-					.Append(' ')
-					.Append(nonExceptionParams[i].Name);
+				builder.Append(nonExceptionParams[i].ParameterType).Append(' ').Append(nonExceptionParams[i].Name);
 
 				if (i < nonExceptionParams.Length - 1)
 					builder.Append(", ");
@@ -1379,11 +1276,7 @@ partial class LoggerGenTargetClassEmitter
 			.Append(interpolatedMessage.Wrap())
 			.AppendLine(");")
 			.AppendLine("#else")
-			.Append(
-				indent + 1,
-				"return global::System.FormattableString.Invariant($",
-				withNewLine: false
-			)
+			.Append(indent + 1, "return global::System.FormattableString.Invariant($", withNewLine: false)
 			.Append(interpolatedMessage.Wrap())
 			.AppendLine(");")
 			.AppendLine("#endif")
@@ -1403,10 +1296,7 @@ partial class LoggerGenTargetClassEmitter
 
 		if (emitNullable)
 		{
-			builder
-				.Append(indent, "get => index switch", withNewLine: false)
-				.AppendLine()
-				.Append(indent, '{');
+			builder.Append(indent, "get => index switch", withNewLine: false).AppendLine().Append(indent, '{');
 
 			indent++;
 
@@ -1424,10 +1314,7 @@ partial class LoggerGenTargetClassEmitter
 					.AppendLine("),");
 			}
 
-			builder.Append(
-				indent,
-				"_ => throw new global::System.IndexOutOfRangeException(nameof(index))"
-			);
+			builder.Append(indent, "_ => throw new global::System.IndexOutOfRangeException(nameof(index))");
 
 			indent--;
 			builder.Append(indent, "};");
@@ -1445,31 +1332,21 @@ partial class LoggerGenTargetClassEmitter
 
 			indent++;
 
-			builder.Append(
-				indent,
-				"case 0: return new " + kvpType + "(\"{OriginalFormat}\", s_originalFormat);"
-			);
+			builder.Append(indent, "case 0: return new " + kvpType + "(\"{OriginalFormat}\", s_originalFormat);");
 
 			for (var i = 0; i < nonExceptionParams.Length; i++)
 			{
 				context.CancellationToken.ThrowIfCancellationRequested();
 
 				builder
-					.Append(
-						indent,
-						$"case {i + 1}: return new " + kvpType + "(",
-						withNewLine: false
-					)
+					.Append(indent, $"case {i + 1}: return new " + kvpType + "(", withNewLine: false)
 					.Append(nonExceptionParams[i].Name.Wrap())
 					.Append(", _")
 					.Append(nonExceptionParams[i].UpperCasedName)
 					.AppendLine(");");
 			}
 
-			builder.Append(
-				indent,
-				"default: throw new global::System.IndexOutOfRangeException(nameof(index));"
-			);
+			builder.Append(indent, "default: throw new global::System.IndexOutOfRangeException(nameof(index));");
 
 			indent--;
 			builder.Append(indent, '}');
@@ -1507,11 +1384,7 @@ partial class LoggerGenTargetClassEmitter
 	{
 		logger?.Debug($"Building public delegating logging method: {methodTarget.MethodName}");
 
-		builder
-			.AppendLine()
-			.CodeGen(indent)
-			.AggressiveInlining(indent)
-			.Append(indent, "public ", withNewLine: false);
+		builder.AppendLine().CodeGen(indent).AggressiveInlining(indent).Append(indent, "public ", withNewLine: false);
 
 		// When Logging owns the public method (with Metrics), return void
 		// (Logging without Activity means the return type is void or IDisposable for scoped)
@@ -1539,9 +1412,7 @@ partial class LoggerGenTargetClassEmitter
 		}
 		else
 		{
-			builder
-				.Append(indent + 1, methodTarget.MethodName, withNewLine: false)
-				.Append("_Logging(");
+			builder.Append(indent + 1, methodTarget.MethodName, withNewLine: false).Append("_Logging(");
 		}
 
 		if (!methodTarget.IsScoped)
@@ -1575,9 +1446,7 @@ partial class LoggerGenTargetClassEmitter
 		}
 
 		// Call the private Metrics method
-		builder
-			.Append(indent + 1, methodTarget.MethodName, withNewLine: false)
-			.Append("_Metrics(");
+		builder.Append(indent + 1, methodTarget.MethodName, withNewLine: false).Append("_Metrics(");
 
 		for (var i = 0; i < methodTarget.TotalParameterCount; i++)
 		{

@@ -3,9 +3,7 @@ namespace Purview.Telemetry.SourceGenerator.Logging;
 partial class TelemetrySourceGeneratorLoggingTests
 {
 	[Test]
-	public async Task Generate_GivenAssemblyEnableDI_GeneratesLog(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenAssemblyEnableDI_GeneratesLog(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicLog =
@@ -25,7 +23,7 @@ public interface ITestLogger {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLog,
-			disableDependencyInjection: false,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 
@@ -34,9 +32,7 @@ public interface ITestLogger {
 	}
 
 	[Test]
-	public async Task Generate_GivenInterfaceEnableDI_GeneratesLog(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenInterfaceEnableDI_GeneratesLog(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicLog =
@@ -55,7 +51,7 @@ public interface ITestLogger {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLog,
-			disableDependencyInjection: false,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 
@@ -87,7 +83,7 @@ public interface ITestLogger {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLog,
-			disableDependencyInjection: false,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 
@@ -119,7 +115,7 @@ public interface ITestLogger {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLog,
-			disableDependencyInjection: false,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 

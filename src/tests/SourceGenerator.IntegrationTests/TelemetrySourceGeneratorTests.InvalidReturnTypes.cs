@@ -1,3 +1,5 @@
+using Purview.Telemetry.SourceGenerator.Infra;
+
 namespace Purview.Telemetry.SourceGenerator;
 
 /// <summary>
@@ -6,9 +8,7 @@ namespace Purview.Telemetry.SourceGenerator;
 public partial class TelemetrySourceGeneratorTests
 {
 	[Test]
-	public async Task Generate_GivenLogMethodReturningString_RaisesDiagnostic(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenLogMethodReturningString_RaisesDiagnostic(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string code =
@@ -25,12 +25,15 @@ public interface IInvalidTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG2021"],
@@ -39,9 +42,7 @@ public interface IInvalidTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenMetricMethodReturningInt_RaisesDiagnostic(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenMetricMethodReturningInt_RaisesDiagnostic(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string code = """
@@ -59,12 +60,15 @@ public interface IInvalidTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG4001"],
@@ -73,9 +77,7 @@ public interface IInvalidTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenActivityMethodReturningObject_RaisesDiagnostic(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenActivityMethodReturningObject_RaisesDiagnostic(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string code = """
@@ -93,12 +95,15 @@ public interface IInvalidTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG3002"],
@@ -107,9 +112,7 @@ public interface IInvalidTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenLogMethodReturningTaskOfInt_RaisesDiagnostic(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenLogMethodReturningTaskOfInt_RaisesDiagnostic(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string code =
@@ -127,12 +130,15 @@ public interface IInvalidTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG2021"],
@@ -141,9 +147,7 @@ public interface IInvalidTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenLogMethodReturningTask_RaisesDiagnostic(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenLogMethodReturningTask_RaisesDiagnostic(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string code =
@@ -161,12 +165,15 @@ public interface IInvalidTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG2021"],
@@ -175,9 +182,7 @@ public interface IInvalidTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenLogMethodReturningValueTask_RaisesDiagnostic(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenLogMethodReturningValueTask_RaisesDiagnostic(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string code =
@@ -195,12 +200,15 @@ public interface IInvalidTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG2021"],
@@ -209,9 +217,7 @@ public interface IInvalidTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenMetricMethodReturningTask_RaisesDiagnostic(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenMetricMethodReturningTask_RaisesDiagnostic(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string code = """
@@ -230,12 +236,15 @@ public interface IInvalidTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG4001"],
@@ -265,12 +274,15 @@ public interface IInvalidTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG3002"],
@@ -279,9 +291,7 @@ public interface IInvalidTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenScopedLogReturningVoid_RaisesDiagnostic(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenScopedLogReturningVoid_RaisesDiagnostic(CancellationToken cancellationToken)
 	{
 		// Arrange
 		// Note: Since v4.0, scoped logs are determined by return type only.
@@ -306,17 +316,11 @@ public interface IInvalidTelemetry
 		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
 
 		// Assert - this should succeed since void-returning logs are valid non-scoped logs
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			config: s => s.ScrubInlineGuids(),
-			cancellationToken: cancellationToken
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenObservableMetricReturningBool_RaisesDiagnostic(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenObservableMetricReturningBool_RaisesDiagnostic(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string code = """
@@ -334,12 +338,15 @@ public interface IInvalidTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG4007"],
@@ -348,9 +355,7 @@ public interface IInvalidTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenAutoCounterReturningBool_RaisesDiagnostic(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenAutoCounterReturningBool_RaisesDiagnostic(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string code = """
@@ -368,12 +373,15 @@ public interface IInvalidTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG4008"],
@@ -382,9 +390,7 @@ public interface IInvalidTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenEventMethodReturningActivity_RaisesDiagnostic(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenEventMethodReturningActivity_RaisesDiagnostic(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string code = """
@@ -408,12 +414,15 @@ public interface IInvalidTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG3002"],
@@ -422,9 +431,7 @@ public interface IInvalidTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenContextMethodReturningBool_RaisesDiagnostic(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenContextMethodReturningBool_RaisesDiagnostic(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string code = """
@@ -449,12 +456,15 @@ public interface IInvalidTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG3002"],
@@ -463,9 +473,7 @@ public interface IInvalidTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenLogMethodReturningBool_RaisesDiagnostic(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenLogMethodReturningBool_RaisesDiagnostic(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string code =
@@ -482,12 +490,15 @@ public interface IInvalidTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG2021"],
@@ -496,9 +507,7 @@ public interface IInvalidTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenLogMethodReturningActivity_RaisesDiagnostic(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenLogMethodReturningActivity_RaisesDiagnostic(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string code =
@@ -515,12 +524,15 @@ public interface IInvalidTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG2021"],
@@ -529,9 +541,7 @@ public interface IInvalidTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenScopedLogReturningTask_RaisesDiagnostic(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenScopedLogReturningTask_RaisesDiagnostic(CancellationToken cancellationToken)
 	{
 		// Arrange
 		// Note: Since v4.0, scoped logs are determined by return type only (IDisposable).
@@ -551,12 +561,15 @@ public interface IInvalidTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert - Task is not a valid return type for logging
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG2021"],
@@ -585,12 +598,15 @@ public interface IInvalidTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG2021"],
@@ -619,12 +635,15 @@ public interface IInvalidTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG4001"],

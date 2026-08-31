@@ -9,13 +9,7 @@ partial class SharedHelpers
 		SemanticModel semanticModel,
 		GenerationLogger? logger,
 		CancellationToken token
-	) =>
-		GetActivitySourceGenerationAttribute(
-			semanticModel.Compilation.Assembly,
-			semanticModel,
-			logger,
-			token
-		);
+	) => GetActivitySourceGenerationAttribute(semanticModel.Compilation.Assembly, semanticModel, logger, token);
 
 	public static ActivitySourceAttributeRecord? GetActivitySourceAttribute(
 		ISymbol symbol,
@@ -47,12 +41,7 @@ partial class SharedHelpers
 				attributeData!,
 				(name, value) =>
 				{
-					if (
-						name.Equals(
-							nameof(ActivitySourceAttributeRecord.Name),
-							StringComparison.OrdinalIgnoreCase
-						)
-					)
+					if (name.Equals(nameof(ActivitySourceAttributeRecord.Name), StringComparison.OrdinalIgnoreCase))
 					{
 						nameValue = new((string)value);
 					}
@@ -181,9 +170,7 @@ partial class SharedHelpers
 					}
 					else if (
 						name.Equals(
-							nameof(
-								ActivitySourceGenerationAttributeRecord.LowercaseBaggageAndTagKeys
-							),
+							nameof(ActivitySourceGenerationAttributeRecord.LowercaseBaggageAndTagKeys),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
@@ -192,9 +179,7 @@ partial class SharedHelpers
 					}
 					else if (
 						name.Equals(
-							nameof(
-								ActivitySourceGenerationAttributeRecord.GenerateDiagnosticsForMissingActivity
-							),
+							nameof(ActivitySourceGenerationAttributeRecord.GenerateDiagnosticsForMissingActivity),
 							StringComparison.OrdinalIgnoreCase
 						)
 					)
@@ -218,8 +203,7 @@ partial class SharedHelpers
 			BaggageAndTagPrefix: baggageAndTagPrefix ?? new(),
 			BaggageAndTagSeparator: baggageAndTagSeparator ?? new("."),
 			LowercaseBaggageAndTagKeys: lowercaseBaggageAndTagKeys ?? new(true),
-			GenerateDiagnosticsForMissingActivity: generateDiagnosticsForMissingActivity
-				?? new(true)
+			GenerateDiagnosticsForMissingActivity: generateDiagnosticsForMissingActivity ?? new(true)
 		);
 	}
 
@@ -251,29 +235,16 @@ partial class SharedHelpers
 				attributeData!,
 				(name, value) =>
 				{
-					if (
-						name.Equals(
-							nameof(ActivityAttributeRecord.Name),
-							StringComparison.OrdinalIgnoreCase
-						)
-					)
+					if (name.Equals(nameof(ActivityAttributeRecord.Name), StringComparison.OrdinalIgnoreCase))
 					{
 						nameValue = new((string)value);
 					}
-					else if (
-						name.Equals(
-							nameof(ActivityAttributeRecord.Kind),
-							StringComparison.OrdinalIgnoreCase
-						)
-					)
+					else if (name.Equals(nameof(ActivityAttributeRecord.Kind), StringComparison.OrdinalIgnoreCase))
 					{
 						kind = new((int)value);
 					}
 					else if (
-						name.Equals(
-							nameof(ActivityAttributeRecord.CreateOnly),
-							StringComparison.OrdinalIgnoreCase
-						)
+						name.Equals(nameof(ActivityAttributeRecord.CreateOnly), StringComparison.OrdinalIgnoreCase)
 					)
 					{
 						createOnly = new((bool)value);
@@ -303,14 +274,7 @@ partial class SharedHelpers
 		CancellationToken token
 	)
 	{
-		if (
-			!Utilities.TryContainsAttribute(
-				symbol,
-				Constants.Activities.EventAttribute,
-				token,
-				out var attributeData
-			)
-		)
+		if (!Utilities.TryContainsAttribute(symbol, Constants.Activities.EventAttribute, token, out var attributeData))
 		{
 			return null;
 		}
@@ -326,12 +290,7 @@ partial class SharedHelpers
 				attributeData!,
 				(name, value) =>
 				{
-					if (
-						name.Equals(
-							nameof(EventAttributeRecord.Name),
-							StringComparison.OrdinalIgnoreCase
-						)
-					)
+					if (name.Equals(nameof(EventAttributeRecord.Name), StringComparison.OrdinalIgnoreCase))
 					{
 						nameValue = new((string)value);
 					}
@@ -353,20 +312,12 @@ partial class SharedHelpers
 					{
 						recordExceptionEscape = new((bool)value);
 					}
-					else if (
-						name.Equals(
-							nameof(EventAttributeRecord.StatusCode),
-							StringComparison.OrdinalIgnoreCase
-						)
-					)
+					else if (name.Equals(nameof(EventAttributeRecord.StatusCode), StringComparison.OrdinalIgnoreCase))
 					{
 						statusCode = new((int)value);
 					}
 					else if (
-						name.Equals(
-							nameof(EventAttributeRecord.StatusDescription),
-							StringComparison.OrdinalIgnoreCase
-						)
+						name.Equals(nameof(EventAttributeRecord.StatusDescription), StringComparison.OrdinalIgnoreCase)
 					)
 					{
 						statusDescription = new((string)value);

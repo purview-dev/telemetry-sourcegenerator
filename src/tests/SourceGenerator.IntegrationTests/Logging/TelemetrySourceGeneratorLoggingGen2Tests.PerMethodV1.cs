@@ -1,3 +1,5 @@
+using Purview.Telemetry.SourceGenerator.Infra;
+
 namespace Purview.Telemetry.SourceGenerator.Logging;
 
 public partial class TelemetrySourceGeneratorLoggingGen2Tests
@@ -22,11 +24,7 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
-			source,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(source, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -52,11 +50,7 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
-			source,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(source, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -82,14 +76,13 @@ public interface ITestLogger {
 		// Act
 		var generationResult = await GenerateAsync(
 			source,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
 		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			expectedDiagnosticCodes: ["TSG2001"],
 			cancellationToken: cancellationToken

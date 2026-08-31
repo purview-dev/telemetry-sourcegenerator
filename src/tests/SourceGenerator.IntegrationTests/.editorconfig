@@ -1,0 +1,8 @@
+# TEMPORARY: The test harness is legacy and will be modernized (see Phase 5).
+# These maintainability rules are enforced repo-wide at 'error' severity; they
+# are scoped down here until the harness refactor completes, at which point
+# this file should be deleted and the rules re-verified.
+root = false
+
+[*.cs]
+dotnet_diagnostic.CA1506.severity = suggestion

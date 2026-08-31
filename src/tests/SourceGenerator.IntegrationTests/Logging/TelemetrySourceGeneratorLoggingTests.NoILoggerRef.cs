@@ -1,3 +1,5 @@
+using Purview.Telemetry.SourceGenerator.Infra;
+
 namespace Purview.Telemetry.SourceGenerator.Logging;
 
 partial class TelemetrySourceGeneratorLoggingTests
@@ -25,11 +27,7 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicActivity,
-			includeLoggerTypes: IncludeLoggerTypes.None,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -60,7 +58,7 @@ public interface ITestActivities {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicActivity,
-			includeLoggerTypes: IncludeLoggerTypes.None,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
 		);
 

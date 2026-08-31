@@ -9,9 +9,7 @@ public class UtilitiesNamespaceTests
 	{
 		var tree = CSharpSyntaxTree.ParseText(source);
 		var root = tree.GetRoot();
-		return root.DescendantNodes()
-			.OfType<TypeDeclarationSyntax>()
-			.First(t => t.Identifier.Text == typeName);
+		return root.DescendantNodes().OfType<TypeDeclarationSyntax>().First(t => t.Identifier.Text == typeName);
 	}
 
 	[Test]

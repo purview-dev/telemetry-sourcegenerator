@@ -5,8 +5,7 @@ namespace Purview.Telemetry.SourceGenerator.Refactorings;
 /// Each test defines a <em>before</em> scenario and the snapshot captures the <em>after</em> output.
 /// To regenerate snapshots: run <c>dotnet test</c>; <c>*.received.txt</c> files are auto-accepted.
 /// </summary>
-public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests
-	: CodeRefactoringTestBase
+public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : CodeRefactoringTestBase
 {
 	static readonly ConvertILoggerToTelemetryRefactoringProvider Provider = new();
 
@@ -279,9 +278,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests
 	// ─────────────────────────────────────────────────────────────────────────
 
 	[Test]
-	public async Task Verify_DuplicateMessageTemplate_Disambiguates(
-		CancellationToken cancellationToken
-	)
+	public async Task Verify_DuplicateMessageTemplate_Disambiguates(CancellationToken cancellationToken)
 	{
 		const string code = """
 			using Microsoft.Extensions.Logging;
@@ -339,7 +336,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests
 	// ─────────────────────────────────────────────────────────────────────────
 
 	[Test]
-	public async Task Verify_LogWithExplicitLogLevel(CancellationToken cancellationToken)
+	public async Task Verify_LogWithExplicitLogLevel_DoesNotRefactor(CancellationToken cancellationToken)
 	{
 		const string code = """
 			using Microsoft.Extensions.Logging;
@@ -359,7 +356,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests
 			}
 			""";
 
-		await VerifyRefactoringAsync(code, Provider, cancellationToken);
+		// A variable LogLevel cannot be mapped to a specific generated attribute, so no
+		// refactoring should be offered.
+		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
+		await Assert.That(actions).IsEmpty();
 	}
 
 	[Test]

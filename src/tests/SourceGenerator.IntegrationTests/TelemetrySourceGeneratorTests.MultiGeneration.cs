@@ -1,3 +1,5 @@
+using Purview.Telemetry.SourceGenerator.Infra;
+
 namespace Purview.Telemetry.SourceGenerator;
 
 /// <summary>
@@ -7,9 +9,7 @@ namespace Purview.Telemetry.SourceGenerator;
 public partial class TelemetrySourceGeneratorTests
 {
 	[Test]
-	public async Task Generate_GivenActivitiesAndLogging_GeneratesBothCorrectly(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenActivitiesAndLogging_GeneratesBothCorrectly(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string multiGen = """
@@ -38,9 +38,7 @@ public interface IMultiTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenActivitiesAndMetrics_GeneratesBothCorrectly(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenActivitiesAndMetrics_GeneratesBothCorrectly(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string multiGen = """
@@ -69,9 +67,7 @@ public interface IMultiTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenLoggingAndMetrics_GeneratesBothCorrectly(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenLoggingAndMetrics_GeneratesBothCorrectly(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string multiGen = """
@@ -100,9 +96,7 @@ public interface IMultiTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenAllThreeTypes_GeneratesAllCorrectly(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenAllThreeTypes_GeneratesAllCorrectly(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string multiGen = """
@@ -160,11 +154,7 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert - should generate both activity and logging for this method
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			config: s => s.ScrubInlineGuids(),
-			cancellationToken: cancellationToken
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
@@ -193,11 +183,7 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert - should generate both activity and counter for this method
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			config: s => s.ScrubInlineGuids(),
-			cancellationToken: cancellationToken
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
@@ -226,11 +212,7 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert - should generate both logging and counter for this method
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			config: s => s.ScrubInlineGuids(),
-			cancellationToken: cancellationToken
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
@@ -261,11 +243,7 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert - should generate activity, logging, and counter for this method
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			config: s => s.ScrubInlineGuids(),
-			cancellationToken: cancellationToken
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
@@ -302,12 +280,15 @@ partial class MultiTelemetryCore
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			multiGen,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			expectedDiagnosticCodes: ["TSG1001"],
 			cancellationToken: cancellationToken
@@ -538,9 +519,7 @@ public interface IMultiTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenExclusionInMultiTarget_ExcludesMethodCorrectly(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenExclusionInMultiTarget_ExcludesMethodCorrectly(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string multiGen = """
@@ -580,9 +559,7 @@ partial class MultiTelemetryCore
 	}
 
 	[Test]
-	public async Task Generate_GivenMultipleMethodsWithSameNames_RaisesDiagnostic(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenMultipleMethodsWithSameNames_RaisesDiagnostic(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string multiGen = """
@@ -604,12 +581,15 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			multiGen,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			expectedDiagnosticCodes: ["TSG1003"],
 			cancellationToken: cancellationToken
@@ -655,9 +635,7 @@ public interface IMultiTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenAsyncMethodsInMultiTarget_RaisesDiagnostics(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenAsyncMethodsInMultiTarget_RaisesDiagnostics(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string multiGen = """
@@ -683,12 +661,15 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			multiGen,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert - Task and ValueTask are not valid return types for logging
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG2021"], // Async return types are invalid
@@ -725,11 +706,7 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			config: s => s.ScrubInlineGuids(),
-			cancellationToken: cancellationToken
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
@@ -761,12 +738,15 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			multiGen,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			expectedDiagnosticCodes: ["TSG3012"],
 			cancellationToken: cancellationToken
@@ -797,12 +777,15 @@ public interface ITelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			expectedDiagnosticCodes: ["TSG1010"],
 			cancellationToken: cancellationToken
@@ -833,12 +816,15 @@ public interface ITelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			expectedDiagnosticCodes: ["TSG1010"],
 			cancellationToken: cancellationToken
@@ -869,12 +855,15 @@ public interface ITelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			expectedDiagnosticCodes: ["TSG1010"],
 			cancellationToken: cancellationToken
@@ -903,12 +892,15 @@ public interface ITelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(
+			code,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			expectedDiagnosticCodes: ["TSG1010"],
 			cancellationToken: cancellationToken

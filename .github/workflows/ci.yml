@@ -86,7 +86,7 @@ jobs:
 
     env:
       CONFIGURATION: Release
-      SOLUTION: ./src/Purview.Telemetry.SourceGenerator.slnx
+      SOLUTION: ./src/Telemetry.SourceGenerator.slnx
 
     steps:
       - name: Checkout code
@@ -95,7 +95,7 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v5
         with:
-          global-json-file: ./src/global.json
+          global-json-file: ./global.json
 
       - name: Restore dependencies
         run: dotnet restore ${{ env.SOLUTION }}

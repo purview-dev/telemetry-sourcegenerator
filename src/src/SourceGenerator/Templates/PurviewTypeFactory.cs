@@ -6,10 +6,7 @@ namespace Purview.Telemetry.SourceGenerator.Templates;
 
 static class PurviewTypeFactory
 {
-	static readonly ImmutableDictionary<SpecialType, string> AliasMap = new Dictionary<
-		SpecialType,
-		string
-	>
+	static readonly ImmutableDictionary<SpecialType, string> AliasMap = new Dictionary<SpecialType, string>
 	{
 		{ SpecialType.System_Void, Constants.System.VoidKeyword },
 		{ SpecialType.System_Object, "object" },
@@ -37,26 +34,14 @@ static class PurviewTypeFactory
 		var lastDotIndex = fullName.LastIndexOf('.');
 		if (lastDotIndex < 0)
 		{
-			throw new ArgumentException(
-				"Type name must contain a namespace and a type name.",
-				nameof(fullName)
-			);
+			throw new ArgumentException("Type name must contain a namespace and a type name.", nameof(fullName));
 		}
 
 		var typeName = fullName.Substring(lastDotIndex + 1);
 		var @namespace = fullName.Substring(0, lastDotIndex);
 		var isNullable = typeName[typeName.Length - 1] == '?';
 
-		return new(
-			typeName,
-			fullName,
-			@namespace,
-			null,
-			isNullable,
-			IsValueType: false,
-			SpecialType.None,
-			[]
-		);
+		return new(typeName, fullName, @namespace, null, isNullable, IsValueType: false, SpecialType.None, []);
 	}
 
 	public static PurviewTypeInfo Create(ITypeSymbol typeSymbol)
@@ -66,10 +51,7 @@ static class PurviewTypeFactory
 
 		var isNullable = typeSymbol.NullableAnnotation == NullableAnnotation.Annotated;
 		ImmutableArray<PurviewTypeInfo> typeArguments = [];
-		if (
-			typeSymbol as INamedTypeSymbol is
-			{ IsGenericType: true, IsValueType: false } genericType
-		)
+		if (typeSymbol as INamedTypeSymbol is { IsGenericType: true, IsValueType: false } genericType)
 		{
 			typeArguments = [.. genericType.TypeArguments.Select(Create)];
 		}

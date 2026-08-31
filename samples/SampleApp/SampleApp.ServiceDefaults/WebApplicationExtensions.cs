@@ -19,10 +19,7 @@ public static class WebApplicationExtensions
 			app.MapHealthChecks("/health");
 
 			// Only health checks tagged with the "live" tag must pass for app to be considered alive
-			app.MapHealthChecks(
-				"/alive",
-				new HealthCheckOptions { Predicate = r => r.Tags.Contains("live") }
-			);
+			app.MapHealthChecks("/alive", new HealthCheckOptions { Predicate = r => r.Tags.Contains("live") });
 
 			app.UseDefaultOpenAPI();
 

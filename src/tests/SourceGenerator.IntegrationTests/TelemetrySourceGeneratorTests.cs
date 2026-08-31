@@ -1,12 +1,9 @@
 namespace Purview.Telemetry.SourceGenerator;
 
-public partial class TelemetrySourceGeneratorTests
-	: IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>
+public partial class TelemetrySourceGeneratorTests : IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>
 {
 	[Test]
-	public async Task Generate_GivenGeneratedAttributes_GeneratesAsExpected(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenGeneratedAttributes_GeneratesAsExpected(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string empty =
@@ -20,11 +17,7 @@ namespace Testing;
 		var generationResult = await GenerateAsync(empty, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			autoVerifyTemplates: false,
-			cancellationToken: cancellationToken
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	public static IEnumerable<string> BasicGenericParameters
@@ -38,9 +31,7 @@ namespace Testing;
 					typeof(IEnumerable<>).MakeGenericType(typeof(string)),
 					useSystemType: false
 				),
-				TestHelpers.GetFriendlyTypeName(
-					typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(int))
-				),
+				TestHelpers.GetFriendlyTypeName(typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(int))),
 				TestHelpers.GetFriendlyTypeName(
 					typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(int)),
 					useSystemType: false

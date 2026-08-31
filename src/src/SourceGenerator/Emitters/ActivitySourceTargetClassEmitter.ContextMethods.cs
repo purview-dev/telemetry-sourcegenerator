@@ -38,14 +38,11 @@ partial class ActivitySourceTargetClassEmitter
 		}
 
 		var activityVariableName =
-			activityParam?.ParameterName
-			?? (Constants.Activities.SystemDiagnostics.Activity + ".Current");
+			activityParam?.ParameterName ?? (Constants.Activities.SystemDiagnostics.Activity + ".Current");
 
 		if (tagsParam != null)
 		{
-			logger?.Diagnostic(
-				"Tags parameter not allowed on context method, only activities or events."
-			);
+			logger?.Diagnostic("Tags parameter not allowed on context method, only activities or events.");
 
 			return;
 		}
@@ -67,26 +64,8 @@ partial class ActivitySourceTargetClassEmitter
 
 		indent++;
 
-		EmitTagsOrBaggageParameters(
-			builder,
-			indent,
-			activityVariableName,
-			true,
-			methodTarget,
-			false,
-			context,
-			logger
-		);
-		EmitTagsOrBaggageParameters(
-			builder,
-			indent,
-			activityVariableName,
-			false,
-			methodTarget,
-			false,
-			context,
-			logger
-		);
+		EmitTagsOrBaggageParameters(builder, indent, activityVariableName, true, methodTarget, false, context, logger);
+		EmitTagsOrBaggageParameters(builder, indent, activityVariableName, false, methodTarget, false, context, logger);
 
 		builder.Append(--indent, '}');
 

@@ -1,9 +1,34 @@
+using System.Text;
+using Microsoft.CodeAnalysis;
+using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
+using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 static class EmitterHelpers
 {
+	/// <summary>
+	/// Finalizes a generated target class: closes the class and namespace, injects the
+	/// auto-generated header, and adds the file to the compilation. Shared by all emitters.
+	/// </summary>
+	public static void EmitTargetSource(
+		string? classNamespace,
+		EquatableArray<string> parentClasses,
+		int indent,
+		StringBuilder builder,
+		string hintName,
+		SourceProductionContext context,
+		bool emitNullable
+	)
+	{
+		EmitHelpers.EmitClassEnd(builder, indent);
+		EmitHelpers.EmitNamespaceEnd(classNamespace, parentClasses, indent, builder, context.CancellationToken);
+
+		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString(), emitNullable);
+		context.AddSource(hintName, Microsoft.CodeAnalysis.Text.SourceText.From(sourceText, Encoding.UTF8));
+	}
+
 	/// <summary>
 	/// Determines whether the current emitter should generate a throw stub for an invalid method.
 	/// A throw stub is emitted to satisfy CS0535 (missing interface implementation) when no real
@@ -35,11 +60,8 @@ static class EmitterHelpers
 
 		// For all remaining cases we need canonical emitter priority (Activities > Logging > Metrics).
 		var isCanonical =
-			interfaceGenerationType.HasFlag(GenerationType.Activities)
-				? currentEmitterType == GenerationType.Activities
-			: interfaceGenerationType.HasFlag(GenerationType.Logging)
-				? currentEmitterType == GenerationType.Logging
-			: currentEmitterType == GenerationType.Metrics;
+			SharedHelpers.GetCanonicalTargetType(interfaceGenerationType, includeActivities: true)
+			== currentEmitterType;
 
 		// Case 2: Method has no telemetry attributes at all — only canonical emitter stubs.
 		if (methodTargets == GenerationType.None)

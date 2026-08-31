@@ -67,16 +67,8 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 			Constants.Activities.ActivitySourceAttribute,
 			token
 		);
-		var hasLogger = Utilities.ContainsAttribute(
-			interfaceSymbol,
-			Constants.Logging.LoggerAttribute,
-			token
-		);
-		var hasMeter = Utilities.ContainsAttribute(
-			interfaceSymbol,
-			Constants.Metrics.MeterAttribute,
-			token
-		);
+		var hasLogger = Utilities.ContainsAttribute(interfaceSymbol, Constants.Logging.LoggerAttribute, token);
+		var hasMeter = Utilities.ContainsAttribute(interfaceSymbol, Constants.Metrics.MeterAttribute, token);
 
 		if (!hasActivitySource && !hasLogger && !hasMeter)
 			return;
@@ -85,9 +77,7 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 		if (interfaceSymbol.Arity > 0)
 		{
 			foreach (var location in interfaceSymbol.Locations)
-				context.ReportDiagnostic(
-					Diagnostic.Create(GenericInterfacesNotSupported, location)
-				);
+				context.ReportDiagnostic(Diagnostic.Create(GenericInterfacesNotSupported, location));
 			return;
 		}
 
@@ -119,9 +109,7 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 			var primary = allLocations.Length > 0 ? allLocations[0] : null;
 			var additional = allLocations.Length > 1 ? allLocations.Skip(1).ToArray() : [];
 
-			context.ReportDiagnostic(
-				Diagnostic.Create(DuplicateMethodNames, primary, additional, kvp.Key)
-			);
+			context.ReportDiagnostic(Diagnostic.Create(DuplicateMethodNames, primary, additional, kvp.Key));
 		}
 
 		// TSG2003: MS Logging not referenced — report but do NOT return early so that
@@ -161,41 +149,29 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 			if (method.Arity > 0)
 			{
 				foreach (var location in method.Locations)
-					context.ReportDiagnostic(
-						Diagnostic.Create(GenericMethodsNotSupported, location)
-					);
+					context.ReportDiagnostic(Diagnostic.Create(GenericMethodsNotSupported, location));
 				continue;
 			}
 
 			// Multi-target validation (TSG1001, TSG1002, TSG1010)
-			var targetState = Utilities.IsValidGenerationTarget(
-				method,
-				generationType,
-				generationType
-			);
+			var targetState = Utilities.IsValidGenerationTarget(method, generationType, generationType);
 
 			if (targetState.RaiseInferenceNotSupportedWithMultiTargeting)
 			{
 				foreach (var location in method.Locations)
-					context.ReportDiagnostic(
-						Diagnostic.Create(InferenceNotSupportedWithMultiTargeting, location)
-					);
+					context.ReportDiagnostic(Diagnostic.Create(InferenceNotSupportedWithMultiTargeting, location));
 			}
 
 			if (targetState.RaiseMultiGenerationTargetsNotSupported)
 			{
 				foreach (var location in method.Locations)
-					context.ReportDiagnostic(
-						Diagnostic.Create(MultiGenerationTargetsNotSupported, location)
-					);
+					context.ReportDiagnostic(Diagnostic.Create(MultiGenerationTargetsNotSupported, location));
 			}
 
 			if (targetState.RaiseMissingInterfaceSource)
 			{
 				foreach (var location in method.Locations)
-					context.ReportDiagnostic(
-						Diagnostic.Create(MethodTargetNotRegisteredOnInterface, location)
-					);
+					context.ReportDiagnostic(Diagnostic.Create(MethodTargetNotRegisteredOnInterface, location));
 			}
 		}
 	}

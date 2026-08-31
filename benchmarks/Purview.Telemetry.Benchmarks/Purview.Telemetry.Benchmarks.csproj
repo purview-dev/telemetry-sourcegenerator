@@ -8,11 +8,13 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<Optimize>true</Optimize>
+		<!-- BenchmarkDotNet method names are underscore-separated by convention. -->
+		<NoWarn>$(NoWarn);CA1707</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<ProjectReference
-			Include="..\..\src\Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.csproj"
+			Include="..\..\src\src\SourceGenerator\SourceGenerator.csproj"
 			OutputItemType="Analyzer"
 			ReferenceOutputAssembly="false"
 		/>

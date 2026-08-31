@@ -50,11 +50,7 @@ namespace Test {
 		var validator = new TelemetryMethodValidator(compilation);
 
 		// Act
-		var result = validator.ValidateReturnType(
-			method.ReturnType,
-			GenerationType.Logging,
-			isScoped: false
-		);
+		var result = validator.ValidateReturnType(method.ReturnType, GenerationType.Logging, isScoped: false);
 
 		// Assert
 		await Assert.That(result.IsValid).IsTrue();
@@ -78,11 +74,7 @@ namespace Test {
 		var validator = new TelemetryMethodValidator(compilation);
 
 		// Act
-		var result = validator.ValidateReturnType(
-			method.ReturnType,
-			GenerationType.Logging,
-			isScoped: true
-		);
+		var result = validator.ValidateReturnType(method.ReturnType, GenerationType.Logging, isScoped: true);
 
 		// Assert
 		await Assert.That(result.IsValid).IsTrue();
@@ -106,11 +98,7 @@ namespace Test {
 		var validator = new TelemetryMethodValidator(compilation);
 
 		// Act
-		var result = validator.ValidateReturnType(
-			method.ReturnType,
-			GenerationType.Logging,
-			isScoped: true
-		);
+		var result = validator.ValidateReturnType(method.ReturnType, GenerationType.Logging, isScoped: true);
 
 		// Assert
 		await Assert.That(result.IsValid).IsFalse();
@@ -137,11 +125,7 @@ namespace Test {
 		var validator = new TelemetryMethodValidator(compilation);
 
 		// Act
-		var result = validator.ValidateReturnType(
-			method.ReturnType,
-			GenerationType.Activities,
-			isScoped: false
-		);
+		var result = validator.ValidateReturnType(method.ReturnType, GenerationType.Activities, isScoped: false);
 
 		// Assert
 		await Assert.That(result.IsValid).IsTrue();
@@ -165,11 +149,7 @@ namespace Test {
 		var validator = new TelemetryMethodValidator(compilation);
 
 		// Act
-		var result = validator.ValidateReturnType(
-			method.ReturnType,
-			GenerationType.Activities,
-			isScoped: false
-		);
+		var result = validator.ValidateReturnType(method.ReturnType, GenerationType.Activities, isScoped: false);
 
 		// Assert
 		await Assert.That(result.IsValid).IsTrue();
@@ -191,17 +171,11 @@ namespace Test {
 		var validator = new TelemetryMethodValidator(compilation);
 
 		// Act
-		var result = validator.ValidateReturnType(
-			method.ReturnType,
-			GenerationType.Activities,
-			isScoped: false
-		);
+		var result = validator.ValidateReturnType(method.ReturnType, GenerationType.Activities, isScoped: false);
 
 		// Assert
 		await Assert.That(result.IsValid).IsFalse();
-		await Assert
-			.That(result.Errors.First().Error)
-			.IsEqualTo(ReturnTypeValidationError.InvalidActivityReturnType);
+		await Assert.That(result.Errors.First().Error).IsEqualTo(ReturnTypeValidationError.InvalidActivityReturnType);
 	}
 
 	[Test]
@@ -220,11 +194,7 @@ namespace Test {
 		var validator = new TelemetryMethodValidator(compilation);
 
 		// Act
-		var result = validator.ValidateReturnType(
-			method.ReturnType,
-			GenerationType.Metrics,
-			isScoped: false
-		);
+		var result = validator.ValidateReturnType(method.ReturnType, GenerationType.Metrics, isScoped: false);
 
 		// Assert
 		await Assert.That(result.IsValid).IsTrue();
@@ -248,11 +218,7 @@ namespace Test {
 		var validator = new TelemetryMethodValidator(compilation);
 
 		// Act
-		var result = validator.ValidateReturnType(
-			method.ReturnType,
-			GenerationType.Logging,
-			isScoped: false
-		);
+		var result = validator.ValidateReturnType(method.ReturnType, GenerationType.Logging, isScoped: false);
 
 		// Assert
 		await Assert.That(result.IsValid).IsTrue();
@@ -275,11 +241,7 @@ namespace Test {
 		var validator = new TelemetryMethodValidator(compilation);
 
 		// Act
-		var result = validator.ValidateReturnType(
-			method.ReturnType,
-			GenerationType.Logging,
-			isScoped: false
-		);
+		var result = validator.ValidateReturnType(method.ReturnType, GenerationType.Logging, isScoped: false);
 
 		// Assert
 		await Assert.That(result.IsValid).IsTrue();
@@ -486,11 +448,7 @@ namespace Test {
 		var validator = new TelemetryMethodValidator(compilation);
 
 		// Act
-		var result = validator.ShouldExcludeParameter(
-			messageParam,
-			GenerationType.Logging,
-			GenerationType.Logging
-		);
+		var result = validator.ShouldExcludeParameter(messageParam, GenerationType.Logging, GenerationType.Logging);
 
 		// Assert
 		await Assert.That(result.IsExcludedFrom(GenerationType.Logging)).IsFalse();
@@ -524,8 +482,7 @@ namespace Test {
 			.That(
 				result.Exclusions.Any(e =>
 					e.Target == GenerationType.Logging
-					&& e.Reason
-						== ParameterExclusionReason.MetricsMeasurementParameterNotAllowedInLogging
+					&& e.Reason == ParameterExclusionReason.MetricsMeasurementParameterNotAllowedInLogging
 				)
 			)
 			.IsTrue();
@@ -549,16 +506,8 @@ namespace Test {
 		var validator = new TelemetryMethodValidator(compilation);
 
 		// Act - Check against both Logging and Metrics
-		var loggingResult = validator.ShouldExcludeParameter(
-			activityParam,
-			GenerationType.Logging,
-			GenerationType.All
-		);
-		var metricsResult = validator.ShouldExcludeParameter(
-			activityParam,
-			GenerationType.Metrics,
-			GenerationType.All
-		);
+		var loggingResult = validator.ShouldExcludeParameter(activityParam, GenerationType.Logging, GenerationType.All);
+		var metricsResult = validator.ShouldExcludeParameter(activityParam, GenerationType.Metrics, GenerationType.All);
 
 		// Assert
 		await Assert.That(loggingResult.IsExcludedFrom(GenerationType.Logging)).IsTrue();
@@ -585,11 +534,7 @@ namespace Test {{
 		var validator = new TelemetryMethodValidator(compilation);
 
 		// Act
-		var result = validator.ValidateReturnType(
-			method.ReturnType,
-			GenerationType.Metrics,
-			isScoped: false
-		);
+		var result = validator.ValidateReturnType(method.ReturnType, GenerationType.Metrics, isScoped: false);
 
 		// Assert
 		await Assert.That(result.IsValid).IsTrue();

@@ -24,17 +24,10 @@ public interface ITestLogger
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicLogger,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			cancellationToken: cancellationToken,
-			parameters: attribute
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
@@ -75,17 +68,10 @@ public interface ITestLogger
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicLogger,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			cancellationToken: cancellationToken,
-			parameters: attribute
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	public static IEnumerable<string> SpecificLogAttributeTypes

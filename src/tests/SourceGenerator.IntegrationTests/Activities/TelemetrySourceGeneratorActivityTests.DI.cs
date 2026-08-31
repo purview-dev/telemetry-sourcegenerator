@@ -3,9 +3,7 @@ namespace Purview.Telemetry.SourceGenerator.Activities;
 partial class TelemetrySourceGeneratorActivityTests
 {
 	[Test]
-	public async Task Generate_GivenAssemblyEnableDI_GeneratesActivity(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenAssemblyEnableDI_GeneratesActivity(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicActivity = """
@@ -30,7 +28,7 @@ public interface ITestActivities {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicActivity,
-			disableDependencyInjection: false,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 
@@ -39,9 +37,7 @@ public interface ITestActivities {
 	}
 
 	[Test]
-	public async Task Generate_GivenInterfaceEnableDI_GeneratesActivity(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenInterfaceEnableDI_GeneratesActivity(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicActivity = """
@@ -65,7 +61,7 @@ public interface ITestActivities {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicActivity,
-			disableDependencyInjection: false,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 
@@ -102,7 +98,7 @@ public interface ITestActivities {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicActivity,
-			disableDependencyInjection: false,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 
@@ -139,7 +135,7 @@ public interface ITestActivities {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicActivity,
-			disableDependencyInjection: false,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 
@@ -175,7 +171,7 @@ public interface ITestActivities {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicActivity,
-			disableDependencyInjection: false,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 

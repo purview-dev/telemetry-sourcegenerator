@@ -80,12 +80,7 @@ static class ConstructorEmitter
 		}
 	}
 
-	static void EmitBody(
-		GenerationType generationType,
-		int indent,
-		StringBuilder builder,
-		bool supportsIMeterFactory
-	)
+	static void EmitBody(GenerationType generationType, int indent, StringBuilder builder, bool supportsIMeterFactory)
 	{
 		if (generationType.HasFlag(GenerationType.Logging))
 		{
@@ -98,9 +93,7 @@ static class ConstructorEmitter
 
 		if (generationType.HasFlag(GenerationType.Metrics))
 		{
-			builder
-				.Append(indent + 1, Constants.Metrics.MeterInitializationMethod, withNewLine: false)
-				.Append('(');
+			builder.Append(indent + 1, Constants.Metrics.MeterInitializationMethod, withNewLine: false).Append('(');
 
 			if (supportsIMeterFactory)
 				builder.Append(Constants.Metrics.MeterFactoryParameterName);

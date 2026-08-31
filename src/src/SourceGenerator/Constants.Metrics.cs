@@ -27,9 +27,7 @@ partial class Constants
 		public static readonly TemplateInfo MeterGenerationAttribute = TemplateInfo.Create(
 			"Purview.Telemetry.MeterGenerationAttribute"
 		);
-		public static readonly TemplateInfo MeterAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.MeterAttribute"
-		);
+		public static readonly TemplateInfo MeterAttribute = TemplateInfo.Create("Purview.Telemetry.MeterAttribute");
 
 		public static readonly TemplateInfo MeterNameGenerationType = TemplateInfo.Create(
 			"Purview.Telemetry.MeterNameGenerationType"
@@ -95,10 +93,10 @@ partial class Constants
 			SpecialType.System_Decimal,
 		];
 
-		public static readonly ImmutableDictionary<
+		public static readonly ImmutableDictionary<InstrumentTypes, PurviewTypeInfo> InstrumentTypeMap = new Dictionary<
 			InstrumentTypes,
 			PurviewTypeInfo
-		> InstrumentTypeMap = new Dictionary<InstrumentTypes, PurviewTypeInfo>
+		>
 		{
 			{ InstrumentTypes.Counter, SystemDiagnostics.Counter },
 			{ InstrumentTypes.UpDownCounter, SystemDiagnostics.UpDownCounter },
@@ -129,15 +127,11 @@ partial class Constants
 			public const string ObservableGaugeNoun = "ObservableGauge";
 			public const string ObservableUpDownCounterNoun = "ObservableUpDownCounter";
 
-			const string SystemDiagnosticsMetricsNamespace =
-				SystemDiagnosticsNamespace + ".Metrics";
+			const string SystemDiagnosticsMetricsNamespace = SystemDiagnosticsNamespace + ".Metrics";
 
-			public const string CounterMetadataName =
-				SystemDiagnosticsMetricsNamespace + ".Counter`1";
-			public const string HistogramMetadataName =
-				SystemDiagnosticsMetricsNamespace + ".Histogram`1";
-			public const string UpDownCounterMetadataName =
-				SystemDiagnosticsMetricsNamespace + ".UpDownCounter`1";
+			public const string CounterMetadataName = SystemDiagnosticsMetricsNamespace + ".Counter`1";
+			public const string HistogramMetadataName = SystemDiagnosticsMetricsNamespace + ".Histogram`1";
+			public const string UpDownCounterMetadataName = SystemDiagnosticsMetricsNamespace + ".UpDownCounter`1";
 
 			public static readonly PurviewTypeInfo Meter = PurviewTypeFactory.Create(
 				SystemDiagnosticsMetricsNamespace + ".Meter"
@@ -165,10 +159,9 @@ partial class Constants
 			public static readonly PurviewTypeInfo ObservableGauge = PurviewTypeFactory.Create(
 				SystemDiagnosticsMetricsNamespace + "." + ObservableGaugeNoun
 			); // <>
-			public static readonly PurviewTypeInfo ObservableUpDownCounter =
-				PurviewTypeFactory.Create(
-					SystemDiagnosticsMetricsNamespace + "." + ObservableUpDownCounterNoun
-				); // <>
+			public static readonly PurviewTypeInfo ObservableUpDownCounter = PurviewTypeFactory.Create(
+				SystemDiagnosticsMetricsNamespace + "." + ObservableUpDownCounterNoun
+			); // <>
 
 			// Also supports IEnumerable<Measurement>.
 			public static readonly PurviewTypeInfo Measurement = PurviewTypeFactory.Create(

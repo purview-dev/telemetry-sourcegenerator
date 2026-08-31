@@ -85,14 +85,13 @@ public interface ICacheServiceProviderTelemetry
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
-			disableDependencyInjection: false,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			s => s.ScrubInlineGuids(),
 			whenValidatingDiagnosticsIgnoreNonErrors: true,
 			cancellationToken: cancellationToken
 		);

@@ -29,7 +29,4 @@ record LogPropertiesAttributeRecord(
 	AttributeValue<bool> Transitive
 );
 
-record ExpandEnumerableAttributeRecord(
-	AttributeValue<int> MaximumValueCount,
-	Location? ParamLocation = null
-);
+record ExpandEnumerableAttributeRecord(AttributeValue<int> MaximumValueCount, Location? ParamLocation = null);

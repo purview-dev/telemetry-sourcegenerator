@@ -17,11 +17,8 @@ partial class TelemetrySourceGenerator
 	)
 	{
 		context.RegisterImplementationSourceOutput(
-			source: meterTargets
-				.Collect()
-				.Combine(supportsNullableAnnotations.Combine(supportsIMeterFactory)),
-			action: (spc, pair) =>
-				GenerateMeterTargets(pair.Left, pair.Right.Left, pair.Right.Right, spc, logger)
+			source: meterTargets.Collect().Combine(supportsNullableAnnotations.Combine(supportsIMeterFactory)),
+			action: (spc, pair) => GenerateMeterTargets(pair.Left, pair.Right.Left, pair.Right.Right, spc, logger)
 		);
 	}
 
@@ -40,13 +37,7 @@ partial class TelemetrySourceGenerator
 		{
 			logger?.Debug($"Meter generation target: {target!.FullyQualifiedName}");
 
-			MeterTargetClassEmitter.GenerateImplementation(
-				target!,
-				spc,
-				logger,
-				emitNullable,
-				supportsIMeterFactory
-			);
+			MeterTargetClassEmitter.GenerateImplementation(target!, spc, logger, emitNullable, supportsIMeterFactory);
 		}
 	}
 }

@@ -115,19 +115,13 @@ partial class ActivitySourceTargetClassEmitter
 			.Parameters.Where(m => m.ParamDestination == ActivityParameterDestination.Activity)
 			.ToImmutableArray();
 		var parentContextOrIdParams = methodTarget
-			.Parameters.Where(m =>
-				m.ParamDestination == ActivityParameterDestination.ParentContextOrId
-			)
+			.Parameters.Where(m => m.ParamDestination == ActivityParameterDestination.ParentContextOrId)
 			.ToImmutableArray();
 		var tagsParams = methodTarget
-			.Parameters.Where(m =>
-				m.ParamDestination == ActivityParameterDestination.TagsEnumerable
-			)
+			.Parameters.Where(m => m.ParamDestination == ActivityParameterDestination.TagsEnumerable)
 			.ToImmutableArray();
 		var linksParams = methodTarget
-			.Parameters.Where(m =>
-				m.ParamDestination == ActivityParameterDestination.LinksEnumerable
-			)
+			.Parameters.Where(m => m.ParamDestination == ActivityParameterDestination.LinksEnumerable)
 			.ToImmutableArray();
 		var startTimeParams = methodTarget
 			.Parameters.Where(m => m.ParamDestination == ActivityParameterDestination.StartTime)
@@ -139,9 +133,7 @@ partial class ActivitySourceTargetClassEmitter
 			.Parameters.Where(m => m.ParamDestination == ActivityParameterDestination.Escape)
 			.ToImmutableArray();
 		var statusDescriptionParams = methodTarget
-			.Parameters.Where(m =>
-				m.ParamDestination == ActivityParameterDestination.StatusDescription
-			)
+			.Parameters.Where(m => m.ParamDestination == ActivityParameterDestination.StatusDescription)
 			.ToImmutableArray();
 
 		if (activityParams.Length > 1)
@@ -179,9 +171,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		if (linksParams.Length > 1)
 		{
-			logger?.Diagnostic(
-				"More than one ActivityLink/ IEnumerable of ActivityLink is defined."
-			);
+			logger?.Diagnostic("More than one ActivityLink/ IEnumerable of ActivityLink is defined.");
 
 			return false;
 		}

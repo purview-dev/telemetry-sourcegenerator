@@ -44,9 +44,7 @@ partial class LoggerTargetClassEmitter
 						$"Identified {target.InterfaceType.TypeName}.{methodTarget.MethodName} as problematic as it has another target types."
 					);
 				}
-				else if (
-					methodTarget.TargetGenerationState.RaiseInferenceNotSupportedWithMultiTargeting
-				)
+				else if (methodTarget.TargetGenerationState.RaiseInferenceNotSupportedWithMultiTargeting)
 				{
 					logger?.Debug(
 						$"Identified {target.InterfaceType.TypeName}.{methodTarget.MethodName} as problematic as it is inferred."
@@ -75,9 +73,7 @@ partial class LoggerTargetClassEmitter
 
 			if (methodTarget.HasMultipleExceptions)
 			{
-				logger?.Diagnostic(
-					"Method has multiple exception parameters, only a single one is permitted."
-				);
+				logger?.Diagnostic("Method has multiple exception parameters, only a single one is permitted.");
 				TelemetryDiagnostics.Report(
 					context.ReportDiagnostic,
 					TelemetryDiagnostics.Logging.MultipleExceptionsDefined
@@ -86,10 +82,7 @@ partial class LoggerTargetClassEmitter
 				continue;
 			}
 
-			if (
-				methodTarget.ParameterCountSansException
-				> Constants.Logging.MaxNonExceptionParameters
-			)
+			if (methodTarget.ParameterCountSansException > Constants.Logging.MaxNonExceptionParameters)
 			{
 				logger?.Diagnostic("Method has more than 6 parameters.");
 				TelemetryDiagnostics.Report(
@@ -179,9 +172,7 @@ partial class LoggerTargetClassEmitter
 		{
 			builder.Append(methodTarget.MSLevel).Append(", ");
 
-			var eventId =
-				methodTarget.EventId
-				?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
+			var eventId = methodTarget.EventId ?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
 			builder
 				.Append("new ")
 				.Append(Constants.Logging.MicrosoftExtensions.EventId)

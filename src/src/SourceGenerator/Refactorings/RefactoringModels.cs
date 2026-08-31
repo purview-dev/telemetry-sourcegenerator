@@ -20,11 +20,7 @@ sealed record LogCallInfo(
 	int? ExplicitEventId
 );
 
-sealed record LogParameterInfo(
-	string Name,
-	string TypeDisplayString,
-	ExpressionSyntax ArgumentExpression
-);
+sealed record LogParameterInfo(string Name, string TypeDisplayString, ExpressionSyntax ArgumentExpression);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ActivitySource models

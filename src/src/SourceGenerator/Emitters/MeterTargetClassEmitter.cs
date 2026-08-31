@@ -11,9 +11,7 @@ static partial class MeterTargetClassEmitter
 	static PurviewTypeInfo GetDictionaryType(bool emitNullable) =>
 		Constants.System.Dictionary.MakeGeneric(
 			Constants.System.BuiltInTypes.String,
-			emitNullable
-				? Constants.System.BuiltInTypes.Object.WithNullable()
-				: Constants.System.BuiltInTypes.Object
+			emitNullable ? Constants.System.BuiltInTypes.Object.WithNullable() : Constants.System.BuiltInTypes.Object
 		);
 
 	const string MeterFieldName = "_meter";
@@ -51,10 +49,7 @@ static partial class MeterTargetClassEmitter
 		// inline the initialisation directly into the constructor for JIT-optimisable code.
 		// When Logging owns the constructor, keep the InitializeMeters() helper method path
 		// so the Logging emitter can call it.
-		var metricsOwnsConstructor = SharedHelpers.ShouldEmitConstructor(
-			GenerationType.Metrics,
-			target.GenerationType
-		);
+		var metricsOwnsConstructor = SharedHelpers.ShouldEmitConstructor(GenerationType.Metrics, target.GenerationType);
 
 		indent = EmitFields(
 			target,
@@ -68,14 +63,7 @@ static partial class MeterTargetClassEmitter
 
 		if (metricsOwnsConstructor)
 		{
-			indent = EmitInlineConstructor(
-				target,
-				builder,
-				indent,
-				context,
-				emitNullable,
-				supportsIMeterFactory
-			);
+			indent = EmitInlineConstructor(target, builder, indent, context, emitNullable, supportsIMeterFactory);
 		}
 		else
 		{
@@ -91,32 +79,18 @@ static partial class MeterTargetClassEmitter
 				supportsIMeterFactory
 			);
 
-			indent = EmitInitializationMethod(
-				target,
-				builder,
-				indent,
-				context,
-				emitNullable,
-				supportsIMeterFactory
-			);
+			indent = EmitInitializationMethod(target, builder, indent, context, emitNullable, supportsIMeterFactory);
 		}
 		indent = EmitMethods(target, builder, indent, context, logger, emitNullable);
 
-		EmitHelpers.EmitClassEnd(builder, indent);
-		EmitHelpers.EmitNamespaceEnd(
+		EmitterHelpers.EmitTargetSource(
 			target.ClassNamespace,
 			target.ParentClasses,
 			indent,
 			builder,
-			context.CancellationToken
-		);
-
-		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString(), emitNullable);
-		var hintName = $"{target.FullyQualifiedName}.Metric.g.cs";
-
-		context.AddSource(
-			hintName,
-			Microsoft.CodeAnalysis.Text.SourceText.From(sourceText, Encoding.UTF8)
+			hintName: $"{target.FullyQualifiedName}.Metric.g.cs",
+			context,
+			emitNullable
 		);
 
 		DependencyInjectionClassEmitter.GenerateImplementation(

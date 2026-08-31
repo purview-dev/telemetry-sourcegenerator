@@ -14,18 +14,13 @@ namespace Purview.Telemetry.SourceGenerator.Refactorings;
 /// into a single <c>I{ClassName}Telemetry</c> interface decorated with
 /// <c>[Logger]</c>, <c>[ActivitySource]</c>, and/or <c>[Meter]</c> as appropriate.
 /// </summary>
-[ExportCodeRefactoringProvider(
-	LanguageNames.CSharp,
-	Name = nameof(ConvertAllTelemetryToInterfaceRefactoringProvider)
-)]
+[ExportCodeRefactoringProvider(LanguageNames.CSharp, Name = nameof(ConvertAllTelemetryToInterfaceRefactoringProvider))]
 [Shared]
 public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefactoringProvider
 {
 	public override async Task ComputeRefactoringsAsync(CodeRefactoringContext context)
 	{
-		var root = await context
-			.Document.GetSyntaxRootAsync(context.CancellationToken)
-			.ConfigureAwait(false);
+		var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
 		if (root is null)
 			return;
 
@@ -45,12 +40,11 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 			semanticModel,
 			context.CancellationToken
 		);
-		var activityFields =
-			ConvertActivitySourceToTelemetryRefactoringProvider.FindActivitySourceFields(
-				classDecl,
-				semanticModel,
-				context.CancellationToken
-			);
+		var activityFields = ConvertActivitySourceToTelemetryRefactoringProvider.FindActivitySourceFields(
+			classDecl,
+			semanticModel,
+			context.CancellationToken
+		);
 		var metricsFields = ConvertMetricsToTelemetryRefactoringProvider.FindMetricsFields(
 			classDecl,
 			semanticModel,
@@ -155,23 +149,16 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 		var interfaceName = "I" + className + "Telemetry";
 
 		var logCallsWithMethods =
-			logCalls.Count > 0
-				? ConvertILoggerToTelemetryRefactoringProvider.AssignMethodNames(logCalls)
-				: [];
+			logCalls.Count > 0 ? ConvertILoggerToTelemetryRefactoringProvider.AssignMethodNames(logCalls) : [];
 
 		var activityCallsWithMethods =
 			activityCalls.Count > 0
-				? ConvertActivitySourceToTelemetryRefactoringProvider.AssignMethodNamesInternal(
-					activityCalls
-				)
+				? ConvertActivitySourceToTelemetryRefactoringProvider.AssignMethodNamesInternal(activityCalls)
 				: [];
 
 		var metricsCallsWithMethods =
 			metricsCalls.Count > 0
-				? ConvertMetricsToTelemetryRefactoringProvider.AssignMethodNamesInternal(
-					metricsCalls,
-					metricsFields
-				)
+				? ConvertMetricsToTelemetryRefactoringProvider.AssignMethodNamesInternal(metricsCalls, metricsFields)
 				: [];
 
 		var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
@@ -201,14 +188,13 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 
 		if (activityFields.Count > 0 && activityCallsWithMethods.Count > 0)
 		{
-			rewrittenClass =
-				ConvertActivitySourceToTelemetryRefactoringProvider.RewriteClassInternal(
-					rewrittenClass,
-					activityFields,
-					activityCallsWithMethods,
-					interfaceName,
-					semanticModel
-				);
+			rewrittenClass = ConvertActivitySourceToTelemetryRefactoringProvider.RewriteClassInternal(
+				rewrittenClass,
+				activityFields,
+				activityCallsWithMethods,
+				interfaceName,
+				semanticModel
+			);
 		}
 
 		if (metricsFields.Count > 0 && metricsCallsWithMethods.Count > 0)
@@ -234,11 +220,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 		);
 
 		var compilationRoot = (CompilationUnitSyntax)newRoot;
-		if (
-			!compilationRoot.Usings.Any(u =>
-				u.Name?.ToString() == Constants.PurviewTelemetryNamespace
-			)
-		)
+		if (!compilationRoot.Usings.Any(u => u.Name?.ToString() == Constants.PurviewTelemetryNamespace))
 		{
 			var newUsing = SyntaxFactory
 				.UsingDirective(SyntaxFactory.ParseName(Constants.PurviewTelemetryNamespace))
@@ -249,9 +231,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 
 		if (
 			activityFields.Count > 0
-			&& !compilationRoot.Usings.Any(u =>
-				u.Name?.ToString() == Constants.SystemDiagnosticsNamespace
-			)
+			&& !compilationRoot.Usings.Any(u => u.Name?.ToString() == Constants.SystemDiagnosticsNamespace)
 		)
 		{
 			var newUsing = SyntaxFactory
@@ -267,10 +247,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 	// Document / project / solution scope helpers
 	// ─────────────────────────────────────────────────────────────────────────
 
-	static async Task<Document> ConvertDocumentAsync(
-		Document document,
-		CancellationToken cancellationToken
-	)
+	static async Task<Document> ConvertDocumentAsync(Document document, CancellationToken cancellationToken)
 	{
 		while (true)
 		{
@@ -278,9 +255,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 			if (root is null)
 				break;
 
-			var semanticModel = await document
-				.GetSemanticModelAsync(cancellationToken)
-				.ConfigureAwait(false);
+			var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 			if (semanticModel is null)
 				break;
 
@@ -299,12 +274,11 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 					semanticModel,
 					cancellationToken
 				);
-				var af =
-					ConvertActivitySourceToTelemetryRefactoringProvider.FindActivitySourceFields(
-						classDecl,
-						semanticModel,
-						cancellationToken
-					);
+				var af = ConvertActivitySourceToTelemetryRefactoringProvider.FindActivitySourceFields(
+					classDecl,
+					semanticModel,
+					cancellationToken
+				);
 				var mf = ConvertMetricsToTelemetryRefactoringProvider.FindMetricsFields(
 					classDecl,
 					semanticModel,
@@ -376,10 +350,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 		return document;
 	}
 
-	static async Task<Solution> ConvertProjectAsync(
-		Project project,
-		CancellationToken cancellationToken
-	)
+	static async Task<Solution> ConvertProjectAsync(Project project, CancellationToken cancellationToken)
 	{
 		var solution = project.Solution;
 		foreach (var documentId in project.DocumentIds)
@@ -388,18 +359,14 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 			if (document is null)
 				continue;
 
-			var updated = await ConvertDocumentAsync(document, cancellationToken)
-				.ConfigureAwait(false);
+			var updated = await ConvertDocumentAsync(document, cancellationToken).ConfigureAwait(false);
 			solution = updated.Project.Solution;
 		}
 
 		return solution;
 	}
 
-	static async Task<Solution> ConvertSolutionAsync(
-		Solution solution,
-		CancellationToken cancellationToken
-	)
+	static async Task<Solution> ConvertSolutionAsync(Solution solution, CancellationToken cancellationToken)
 	{
 		foreach (var projectId in solution.ProjectIds)
 		{
@@ -436,24 +403,14 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 
 		if (activityCallsWithMethods.Count > 0)
 			sb.Append(
-				ConvertActivitySourceToTelemetryRefactoringProvider.BuildInterfaceMembers(
-					activityCallsWithMethods
-				)
+				ConvertActivitySourceToTelemetryRefactoringProvider.BuildInterfaceMembers(activityCallsWithMethods)
 			);
 
 		if (logCallsWithMethods.Count > 0)
-			sb.Append(
-				ConvertILoggerToTelemetryRefactoringProvider.BuildInterfaceMembers(
-					logCallsWithMethods
-				)
-			);
+			sb.Append(ConvertILoggerToTelemetryRefactoringProvider.BuildInterfaceMembers(logCallsWithMethods));
 
 		if (metricsCallsWithMethods.Count > 0)
-			sb.Append(
-				ConvertMetricsToTelemetryRefactoringProvider.BuildInterfaceMembers(
-					metricsCallsWithMethods
-				)
-			);
+			sb.Append(ConvertMetricsToTelemetryRefactoringProvider.BuildInterfaceMembers(metricsCallsWithMethods));
 
 		sb.AppendLine("}");
 
@@ -466,8 +423,6 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 		var root = tree.GetCompilationUnitRoot();
 
 		return root.DescendantNodes().OfType<InterfaceDeclarationSyntax>().FirstOrDefault()
-			?? throw new InvalidOperationException(
-				"Could not parse generated interface from: " + code
-			);
+			?? throw new InvalidOperationException("Could not parse generated interface from: " + code);
 	}
 }

@@ -34,9 +34,7 @@ partial class PipelineHelpers
 
 		if (context.TargetNode is not InterfaceDeclarationSyntax interfaceDeclaration)
 		{
-			logger?.Error(
-				$"Could not find interface syntax from the target node '{context.TargetNode.Flatten()}'."
-			);
+			logger?.Error($"Could not find interface syntax from the target node '{context.TargetNode.Flatten()}'.");
 			return null;
 		}
 
@@ -55,12 +53,7 @@ partial class PipelineHelpers
 		}
 
 		var semanticModel = context.SemanticModel;
-		var loggerAttribute = SharedHelpers.GetLoggerAttribute(
-			context.TargetSymbol,
-			semanticModel,
-			logger,
-			token
-		);
+		var loggerAttribute = SharedHelpers.GetLoggerAttribute(context.TargetSymbol, semanticModel, logger, token);
 		if (loggerAttribute == null)
 		{
 			logger?.Error(
@@ -79,13 +72,8 @@ partial class PipelineHelpers
 			? telemetryGeneration.ClassName.Value!
 			: GenerateClassName(interfaceSymbol.Name);
 
-		var loggerGenerationAttribute = SharedHelpers.GetLoggerGenerationAttribute(
-			semanticModel,
-			logger,
-			token
-		);
-		var defaultLogLevel =
-			loggerGenerationAttribute?.DefaultLevel?.Value ?? Constants.Logging.DefaultLevel;
+		var loggerGenerationAttribute = SharedHelpers.GetLoggerGenerationAttribute(semanticModel, logger, token);
+		var defaultLogLevel = loggerGenerationAttribute?.DefaultLevel?.Value ?? Constants.Logging.DefaultLevel;
 		var defaultPrefixType =
 			loggerGenerationAttribute?.DefaultPrefixType.IsSet == true
 				? loggerGenerationAttribute.DefaultPrefixType.Value!.Value
@@ -148,15 +136,11 @@ partial class PipelineHelpers
 		token.ThrowIfCancellationRequested();
 
 		List<LogMethodTarget> methodTargets = [];
-		foreach (
-			var method in GetAllInterfaceMethods(interfaceSymbol, semanticModel.Compilation, token)
-		)
+		foreach (var method in GetAllInterfaceMethods(interfaceSymbol, semanticModel.Compilation, token))
 		{
 			if (Utilities.ContainsAttribute(method, Constants.Shared.ExcludeAttribute, token))
 			{
-				logger?.Debug(
-					$"Skipping {interfaceSymbol.Name}.{method.Name}, explicitly excluded."
-				);
+				logger?.Debug($"Skipping {interfaceSymbol.Name}.{method.Name}, explicitly excluded.");
 				continue;
 			}
 
@@ -166,8 +150,7 @@ partial class PipelineHelpers
 			if (generationType != GenerationType.Logging)
 			{
 				// Check if this method has an explicit logging attribute
-				var hasLoggingAttribute =
-					SharedHelpers.GetLogAttribute(method, semanticModel, logger, token) != null;
+				var hasLoggingAttribute = SharedHelpers.GetLogAttribute(method, semanticModel, logger, token) != null;
 
 				if (!hasLoggingAttribute)
 				{
@@ -186,12 +169,7 @@ partial class PipelineHelpers
 			logger?.Debug($"Found method {interfaceSymbol.Name}.{method.Name}.");
 
 			// Validate return type - don't skip; let through with UnknownReturnType flag so the emitter can report the diagnostic
-			var invalidReturnType = ValidateLogReturnType(
-				method,
-				semanticModel,
-				logger,
-				token
-			).HasValue;
+			var invalidReturnType = ValidateLogReturnType(method, semanticModel, logger, token).HasValue;
 
 			var isScoped = Constants.System.IDisposable.Equals(method.ReturnType);
 			var methodParameters = GetLogMethodParameters(
@@ -266,8 +244,7 @@ partial class PipelineHelpers
 				defaultPrefixType
 			);
 			var messageTemplate =
-				logAttribute?.MessageTemplate.Value
-				?? GenerateTemplateMessage(logName, isScoped, methodParameters);
+				logAttribute?.MessageTemplate.Value ?? GenerateTemplateMessage(logName, isScoped, methodParameters);
 			var hasMultipleExceptions = !isScoped && methodParameters.Count(m => m.IsException) > 1;
 			var exceptionParam =
 				hasMultipleExceptions ? null
@@ -310,9 +287,7 @@ partial class PipelineHelpers
 					continue;
 				}
 
-				var paramsBuilder = ImmutableArray.CreateBuilder<LogParameterTarget>(
-					methodParameters.Length
-				);
+				var paramsBuilder = ImmutableArray.CreateBuilder<LogParameterTarget>(methodParameters.Length);
 				for (var i = 0; i < methodParameters.Length; i++)
 				{
 					var param = methodParameters[i];
@@ -323,16 +298,11 @@ partial class PipelineHelpers
 					var holes = messageTemplateMatches
 						.Where(m =>
 							(m.IsPositional && m.Ordinal == i)
-							|| (
-								m.Name?.Equals(param.Name, StringComparison.OrdinalIgnoreCase)
-								== true
-							)
+							|| (m.Name?.Equals(param.Name, StringComparison.OrdinalIgnoreCase) == true)
 						)
 						.ToImmutableArray();
 
-					paramsBuilder.Add(
-						holes.Length > 0 ? param with { ReferencedHoles = holes } : param
-					);
+					paramsBuilder.Add(holes.Length > 0 ? param with { ReferencedHoles = holes } : param);
 				}
 
 				methodParameters = paramsBuilder.MoveToImmutable();
@@ -358,9 +328,7 @@ partial class PipelineHelpers
 			// Priority: method GenerationMode > interface/assembly GenerationMode > Auto (per-method param analysis).
 			bool useV1Generation;
 			var methodGenMode =
-				logAttribute?.GenerationMode.IsSet == true
-					? logAttribute.GenerationMode.Value!.Value
-					: 0; // Auto at method level - inherit from interface
+				logAttribute?.GenerationMode.IsSet == true ? logAttribute.GenerationMode.Value!.Value : 0; // Auto at method level - inherit from interface
 
 			if (methodGenMode == 1) // V1 forced at method level
 			{
@@ -384,8 +352,7 @@ partial class PipelineHelpers
 				// v1 requires: ≤6 non-exception parameters, single exception, no [ExpandEnumerable], no [LogProperties].
 				useV1Generation =
 					!hasMultipleExceptions
-					&& methodParameters.Count(p => !p.IsException)
-						<= Constants.Logging.MaxNonExceptionParameters
+					&& methodParameters.Count(p => !p.IsException) <= Constants.Logging.MaxNonExceptionParameters
 					&& !methodParameters.Any(p => p.ExpandEnumerableAttribute != null)
 					&& !methodParameters.Any(p => p.LogPropertiesAttribute != null);
 			}
@@ -423,10 +390,7 @@ partial class PipelineHelpers
 		{
 			var t = methodTargets[i];
 			if (!seenNames.Add(t.MethodName))
-				methodTargets[i] = t with
-				{
-					TargetGenerationState = t.TargetGenerationState with { IsValid = false },
-				};
+				methodTargets[i] = t with { TargetGenerationState = t.TargetGenerationState with { IsValid = false } };
 		}
 
 		return [.. methodTargets];
@@ -444,9 +408,7 @@ partial class PipelineHelpers
 		if (logAttribute?.Name.IsSet == true)
 			methodName = logAttribute!.Name.Value!;
 
-		var prefixType = loggerAttribute.PrefixType.IsSet
-			? loggerAttribute.PrefixType.Value
-			: defaultPrefixType; // Default as LoggerGeneration level, or Default (0)
+		var prefixType = loggerAttribute.PrefixType.IsSet ? loggerAttribute.PrefixType.Value : defaultPrefixType; // Default as LoggerGeneration level, or Default (0)
 
 		if (prefixType == 1)
 		{
@@ -472,15 +434,9 @@ partial class PipelineHelpers
 
 			foreach (var suffix in SuffixesToRemove)
 			{
-				if (
-					interfaceName.EndsWith(suffix, StringComparison.Ordinal)
-					&& interfaceName.Length > suffix.Length
-				)
+				if (interfaceName.EndsWith(suffix, StringComparison.Ordinal) && interfaceName.Length > suffix.Length)
 				{
-					interfaceName = interfaceName.Substring(
-						0,
-						interfaceName.Length - suffix.Length
-					);
+					interfaceName = interfaceName.Substring(0, interfaceName.Length - suffix.Length);
 					break;
 				}
 			}
@@ -558,9 +514,7 @@ partial class PipelineHelpers
 				|| Constants.System.TagList.Equals(parameterType)
 			)
 			{
-				logger?.Debug(
-					$"Skipping parameter '{parameter.Name}' of type '{parameterType}' from logging."
-				);
+				logger?.Debug($"Skipping parameter '{parameter.Name}' of type '{parameterType}' from logging.");
 				continue;
 			}
 
@@ -609,8 +563,7 @@ partial class PipelineHelpers
 
 					var isNullable =
 						property.Type.IsReferenceType
-						|| property.Type.OriginalDefinition.SpecialType
-							== SpecialType.System_Nullable_T;
+						|| property.Type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T;
 
 					logProperties ??= [];
 
@@ -632,9 +585,7 @@ partial class PipelineHelpers
 					IsComplexType: parameter.Type.IsComplexType(),
 					LogPropertiesAttribute: logPropertiesAttribute,
 					LogProperties: logProperties != null
-						? new EquatableArray<LogPropertiesParameterDetails>(
-							logProperties.ToImmutableArray()
-						)
+						? new EquatableArray<LogPropertiesParameterDetails>(logProperties.ToImmutableArray())
 						: null,
 					ExpandEnumerableAttribute: expandEnumerableAttribute,
 					ExcludedTargets: SharedHelpers
@@ -682,8 +633,7 @@ partial class PipelineHelpers
 			{
 				isIDisposable =
 					Constants.System.IDisposable.Equals(namedType.OriginalDefinition)
-					|| Constants.System.IDisposable.FullyQualifiedName
-						== namedType.ConstructedFrom.ToString();
+					|| Constants.System.IDisposable.FullyQualifiedName == namedType.ConstructedFrom.ToString();
 			}
 		}
 

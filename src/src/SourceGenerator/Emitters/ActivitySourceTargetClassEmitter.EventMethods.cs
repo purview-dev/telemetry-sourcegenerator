@@ -38,8 +38,7 @@ partial class ActivitySourceTargetClassEmitter
 		}
 
 		var activityVariableName =
-			activityParam?.ParameterName
-			?? (Constants.Activities.SystemDiagnostics.Activity + ".Current");
+			activityParam?.ParameterName ?? (Constants.Activities.SystemDiagnostics.Activity + ".Current");
 		if (parentContextOrId != null)
 		{
 			logger?.Diagnostic("Parent context/ Id not allowed on event method, only activities.");
@@ -56,9 +55,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		if (startTimeParam != null)
 		{
-			logger?.Diagnostic(
-				"Start time parameter not allowed on event method, only activities."
-			);
+			logger?.Diagnostic("Start time parameter not allowed on event method, only activities.");
 
 			return;
 		}
@@ -81,11 +78,7 @@ partial class ActivitySourceTargetClassEmitter
 		{
 			var tagsListVariableName = "tagsCollection" + methodTarget.MethodName;
 			builder
-				.Append(
-					indent,
-					Constants.Activities.SystemDiagnostics.ActivityTagsCollection,
-					withNewLine: false
-				)
+				.Append(indent, Constants.Activities.SystemDiagnostics.ActivityTagsCollection, withNewLine: false)
 				.Append(' ')
 				.Append(tagsListVariableName)
 				.Append(
@@ -100,24 +93,15 @@ partial class ActivitySourceTargetClassEmitter
 			builder.AppendLine(");");
 
 			var useRecordedExceptionRules = Constants.Activities.UseRecordExceptionRulesDefault;
-			var emitExceptionEscape =
-				escapeParam != null || Constants.Activities.RecordExceptionEscapedDefault;
+			var emitExceptionEscape = escapeParam != null || Constants.Activities.RecordExceptionEscapedDefault;
 			if (methodTarget.EventAttribute?.UseRecordExceptionRules.IsSet == true)
 			{
-				useRecordedExceptionRules = methodTarget
-					.EventAttribute
-					.UseRecordExceptionRules
-					.Value!
-					.Value;
+				useRecordedExceptionRules = methodTarget.EventAttribute.UseRecordExceptionRules.Value!.Value;
 			}
 
 			if (methodTarget.EventAttribute?.RecordExceptionEscape.IsSet == true)
 			{
-				emitExceptionEscape = methodTarget
-					.EventAttribute
-					.RecordExceptionEscape!
-					.Value!
-					.Value;
+				emitExceptionEscape = methodTarget.EventAttribute.RecordExceptionEscape!.Value!.Value;
 			}
 
 			var escapeValue = escapeParam?.ParameterName ?? "true";
@@ -136,10 +120,7 @@ partial class ActivitySourceTargetClassEmitter
 
 				if (tagParam.IsException)
 				{
-					if (
-						methodTarget.ActivityOrEventName
-						== Constants.Activities.Tag_ExceptionEventName
-					)
+					if (methodTarget.ActivityOrEventName == Constants.Activities.Tag_ExceptionEventName)
 					{
 						builder
 							.Append(indent, "if (", withNewLine: false)
@@ -164,11 +145,7 @@ partial class ActivitySourceTargetClassEmitter
 						{
 							builder
 								.AppendLine()
-								.Append(
-									indent,
-									Constants.Activities.RecordExceptionMethodName,
-									withNewLine: false
-								)
+								.Append(indent, Constants.Activities.RecordExceptionMethodName, withNewLine: false)
 								.Append("(activity: ")
 								.Append(activityVariableName)
 								.Append(", exception: ")
@@ -211,11 +188,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		builder
 			.AppendLine()
-			.Append(
-				indent,
-				Constants.Activities.SystemDiagnostics.ActivityEvent,
-				withNewLine: false
-			)
+			.Append(indent, Constants.Activities.SystemDiagnostics.ActivityEvent, withNewLine: false)
 			.Append(' ')
 			.Append(eventVariableName)
 			.Append(" = new ")
@@ -272,9 +245,7 @@ partial class ActivitySourceTargetClassEmitter
 				}
 				else if (methodTarget.EventAttribute!.StatusDescription.IsSet)
 				{
-					builder
-						.Append(", ")
-						.Append(methodTarget.EventAttribute!.StatusDescription.Value!.Wrap());
+					builder.Append(", ").Append(methodTarget.EventAttribute!.StatusDescription.Value!.Wrap());
 				}
 				else if (exceptionParam != null)
 				{

@@ -1,3 +1,5 @@
+using Purview.Telemetry.SourceGenerator.Infra;
+
 namespace Purview.Telemetry.SourceGenerator.Logging;
 
 partial class TelemetrySourceGeneratorLoggingGen2Tests
@@ -20,11 +22,7 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -50,11 +48,7 @@ public class BadLuckException : Exception { }
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -82,16 +76,11 @@ public class BadLuckException : Exception { }
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
-			includeLoggerTypes: IncludeLoggerTypes.Telemetry,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			c => c.ScrubInlineGuids(),
-			expectsDiagnostics: true,
-			cancellationToken: cancellationToken
-		);
+		await TestHelpers.VerifyAsync(generationResult, expectsDiagnostics: true, cancellationToken: cancellationToken);
 	}
 }

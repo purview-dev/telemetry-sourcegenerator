@@ -55,12 +55,7 @@ public class TagListBenchmarks
 	[Benchmark(Description = "3 tags (no TagList): histogram record")]
 	public void FewTags_Histogram_ThreeTags()
 	{
-		_fewTags.RecordRequestSize(
-			sizeBytes: 1024,
-			endpoint: "/api/data",
-			method: "GET",
-			statusCode: "200"
-		);
+		_fewTags.RecordRequestSize(sizeBytes: 1024, endpoint: "/api/data", method: "GET", statusCode: "200");
 	}
 
 	// --- Many tags (TagList path) ---
@@ -68,12 +63,7 @@ public class TagListBenchmarks
 	[Benchmark(Description = "4 tags (TagList): auto-counter add")]
 	public void ManyTags_AutoCounter_FourTags()
 	{
-		_manyTags.CountOperationWithFourTags(
-			endpoint: "/api/data",
-			method: "GET",
-			status: "200",
-			region: "us-east-1"
-		);
+		_manyTags.CountOperationWithFourTags(endpoint: "/api/data", method: "GET", status: "200", region: "us-east-1");
 	}
 
 	[Benchmark(Description = "5 tags (TagList): auto-counter add")]

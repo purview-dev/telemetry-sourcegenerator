@@ -17,7 +17,7 @@ This skill helps you bootstrap telemetry generation in a C# project using `Purvi
 Add the analyzer package to your project:
 
 ```xml
-<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="4.3.0">
+<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="4.5.0">
   <PrivateAssets>all</PrivateAssets>
   <IncludeAssets>analyzers</IncludeAssets>
 </PackageReference>

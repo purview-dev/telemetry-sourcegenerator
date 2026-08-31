@@ -30,9 +30,7 @@ static class DependencyInjectionClassEmitter
 
 		if (!SharedHelpers.ShouldEmitDIExtension(requestingType, generationType))
 		{
-			logger?.Debug(
-				$"Skipping dependency injection emit for {requestingType} ({generationType})."
-			);
+			logger?.Debug($"Skipping dependency injection emit for {requestingType} ({generationType}).");
 			return;
 		}
 
@@ -43,9 +41,7 @@ static class DependencyInjectionClassEmitter
 			classNameToGenerate = implementationClassName + "DIExtension";
 
 		var classAccessModifier =
-			(attribute.DependencyInjectionClassIsPublic.Value ?? false)
-				? "public static"
-				: "static";
+			(attribute.DependencyInjectionClassIsPublic.Value ?? false) ? "public static" : "static";
 
 		logger?.Debug(
 			$"Generating service dependency class {classNameToGenerate} for: {fullyQualifiedNamespace}{sourceInterfaceName}"
@@ -83,10 +79,7 @@ static class DependencyInjectionClassEmitter
 		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString(), emitNullable);
 		var hintName = $"{fullyQualifiedNamespace}{classNameToGenerate}.DependencyInjection.g.cs";
 
-		context.AddSource(
-			hintName,
-			Microsoft.CodeAnalysis.Text.SourceText.From(sourceText, Encoding.UTF8)
-		);
+		context.AddSource(hintName, Microsoft.CodeAnalysis.Text.SourceText.From(sourceText, Encoding.UTF8));
 	}
 
 	static void EmitMethod(

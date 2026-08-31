@@ -1,3 +1,5 @@
+using Purview.Telemetry.SourceGenerator.Infra;
+
 namespace Purview.Telemetry.SourceGenerator.Metrics;
 
 partial class TelemetrySourceGeneratorMetricsTests
@@ -23,10 +25,7 @@ public interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -55,13 +54,13 @@ public interface ITestMetrics
 		// Act
 		var generationResult = await GenerateAsync(
 			basicMetric,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
 		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			config: c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG4002"],
@@ -70,9 +69,7 @@ public interface ITestMetrics
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicAutoCounter_GeneratesMetrics(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenBasicAutoCounter_GeneratesMetrics(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicMetric = """
@@ -90,10 +87,7 @@ public interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -122,13 +116,13 @@ public interface ITestMetrics
 		// Act
 		var generationResult = await GenerateAsync(
 			basicMetric,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
 		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			expectedDiagnosticCodes: ["TSG4002"],
@@ -137,9 +131,7 @@ public interface ITestMetrics
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicCounters_GeneratesMetrics(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenBasicCounters_GeneratesMetrics(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicMetric = """
@@ -174,19 +166,14 @@ public interface ITestMetrics {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicCountersWithAutoIncrement_GeneratesMetrics(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenBasicCountersWithAutoIncrement_GeneratesMetrics(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicMetric = """
@@ -209,19 +196,14 @@ public interface ITestMetrics {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicObservableCounters_GeneratesMetrics(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenBasicObservableCounters_GeneratesMetrics(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicMetric = """
@@ -246,10 +228,7 @@ public interface ITestMetrics {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);

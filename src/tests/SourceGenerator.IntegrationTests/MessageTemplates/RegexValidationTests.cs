@@ -8,52 +8,38 @@ public class RegexValidationTests
 {
 	[Test]
 	[MethodDataSource(nameof(OrdinalTests))]
-	public async Task Match_GivenOrdinals_Matches(
-		string template,
-		[NotNull] TestMessageTemplateHole[] holes
-	) => await MatchAsync(template, holes);
+	public async Task Match_GivenOrdinals_Matches(string template, [NotNull] TestMessageTemplateHole[] holes) =>
+		await MatchAsync(template, holes);
 
 	[Test]
 	[MethodDataSource(nameof(NamedTests))]
-	public async Task Match_GivenNames_Matches(
-		string template,
-		[NotNull] TestMessageTemplateHole[] holes
-	) => await MatchAsync(template, holes);
+	public async Task Match_GivenNames_Matches(string template, [NotNull] TestMessageTemplateHole[] holes) =>
+		await MatchAsync(template, holes);
 
 	[Test]
 	[MethodDataSource(nameof(DestructureTests))]
-	public async Task Match_GivenDestructure_Matches(
-		string template,
-		[NotNull] TestMessageTemplateHole[] holes
-	) => await MatchAsync(template, holes);
+	public async Task Match_GivenDestructure_Matches(string template, [NotNull] TestMessageTemplateHole[] holes) =>
+		await MatchAsync(template, holes);
 
 	[Test]
 	[MethodDataSource(nameof(StringifyTests))]
-	public async Task Match_GivenStringify_Matches(
-		string template,
-		[NotNull] TestMessageTemplateHole[] holes
-	) => await MatchAsync(template, holes);
+	public async Task Match_GivenStringify_Matches(string template, [NotNull] TestMessageTemplateHole[] holes) =>
+		await MatchAsync(template, holes);
 
 	[Test]
 	[MethodDataSource(nameof(AlignmentTests))]
-	public async Task Match_GivenAlignment_Matches(
-		string template,
-		[NotNull] TestMessageTemplateHole[] holes
-	) => await MatchAsync(template, holes);
+	public async Task Match_GivenAlignment_Matches(string template, [NotNull] TestMessageTemplateHole[] holes) =>
+		await MatchAsync(template, holes);
 
 	[Test]
 	[MethodDataSource(nameof(FormattingTests))]
-	public async Task Match_GivenFormatting_Matches(
-		string template,
-		[NotNull] TestMessageTemplateHole[] holes
-	) => await MatchAsync(template, holes);
+	public async Task Match_GivenFormatting_Matches(string template, [NotNull] TestMessageTemplateHole[] holes) =>
+		await MatchAsync(template, holes);
 
 	[Test]
 	[MethodDataSource(nameof(AMixedBag))]
-	public async Task Match_GivenAMixOfParameters_Matches(
-		string template,
-		[NotNull] TestMessageTemplateHole[] holes
-	) => await MatchAsync(template, holes);
+	public async Task Match_GivenAMixOfParameters_Matches(string template, [NotNull] TestMessageTemplateHole[] holes) =>
+		await MatchAsync(template, holes);
 
 	[Test]
 	[MethodDataSource(nameof(DoubleCurlyBraces))]
@@ -116,10 +102,7 @@ public class RegexValidationTests
 				("Customer with ID {CustomerId}", [TestMessageTemplateHole.Create("CustomerId")]),
 				(
 					"Customer with ID {CustomerId} is named {CustomerName}",
-					[
-						TestMessageTemplateHole.Create("CustomerId"),
-						TestMessageTemplateHole.Create("CustomerName"),
-					]
+					[TestMessageTemplateHole.Create("CustomerId"), TestMessageTemplateHole.Create("CustomerName")]
 				),
 				(
 					"Customer with ID {CustomerId} is named {CustomerName}, and {Banana}. and {Apple}",
@@ -142,10 +125,7 @@ public class RegexValidationTests
 		{
 			List<(string, TestMessageTemplateHole[])> data =
 			[
-				(
-					"Customer with ID {@CustomerId}",
-					[TestMessageTemplateHole.Create("CustomerId", destructure: true)]
-				),
+				("Customer with ID {@CustomerId}", [TestMessageTemplateHole.Create("CustomerId", destructure: true)]),
 				(
 					"Customer with ID {@CustomerId} is named {@CustomerName}",
 					[
@@ -209,10 +189,7 @@ public class RegexValidationTests
 		{
 			List<(string, TestMessageTemplateHole[])> data =
 			[
-				(
-					"Customer with ID {$CustomerId}",
-					[TestMessageTemplateHole.Create("CustomerId", stringify: true)]
-				),
+				("Customer with ID {$CustomerId}", [TestMessageTemplateHole.Create("CustomerId", stringify: true)]),
 				(
 					"Customer with ID {$CustomerId} is named {$CustomerName}",
 					[
@@ -276,10 +253,7 @@ public class RegexValidationTests
 		{
 			List<(string, TestMessageTemplateHole[])> data =
 			[
-				(
-					"Customer with ID {CustomerId,10}",
-					[TestMessageTemplateHole.Create("CustomerId", alignment: 10)]
-				),
+				("Customer with ID {CustomerId,10}", [TestMessageTemplateHole.Create("CustomerId", alignment: 10)]),
 				(
 					"Customer with ID {CustomerId,-10} is named {CustomerName,10}",
 					[
@@ -343,10 +317,7 @@ public class RegexValidationTests
 		{
 			List<(string, TestMessageTemplateHole[])> data =
 			[
-				(
-					"Customer with ID {CustomerId:ff}",
-					[TestMessageTemplateHole.Create("CustomerId", format: "ff")]
-				),
+				("Customer with ID {CustomerId:ff}", [TestMessageTemplateHole.Create("CustomerId", format: "ff")]),
 				(
 					"Customer with ID {CustomerId:-10} is named {CustomerName:pies}",
 					[
@@ -410,40 +381,20 @@ public class RegexValidationTests
 		{
 			List<(string, TestMessageTemplateHole[])> data =
 			[
-				(
-					"Customer with ID {CustomerId:ff}",
-					[TestMessageTemplateHole.Create("CustomerId", format: "ff")]
-				),
+				("Customer with ID {CustomerId:ff}", [TestMessageTemplateHole.Create("CustomerId", format: "ff")]),
 				(
 					"Customer with ID {CustomerId,0101:-10} is named {$CustomerName:pies}",
 					[
-						TestMessageTemplateHole.Create(
-							"CustomerId",
-							alignment: 0101,
-							format: "-10"
-						),
-						TestMessageTemplateHole.Create(
-							"CustomerName",
-							format: "pies",
-							stringify: true
-						),
+						TestMessageTemplateHole.Create("CustomerId", alignment: 0101, format: "-10"),
+						TestMessageTemplateHole.Create("CustomerName", format: "pies", stringify: true),
 					]
 				),
 				(
 					"Customer with ID {@CustomerId} is named {$CustomerName:ice-cream}, and {$Banana,100:110}. and {@Apple:p000p}",
 					[
 						TestMessageTemplateHole.Create("CustomerId", destructure: true),
-						TestMessageTemplateHole.Create(
-							"CustomerName",
-							format: "ice-cream",
-							stringify: true
-						),
-						TestMessageTemplateHole.Create(
-							"Banana",
-							alignment: 100,
-							format: "110",
-							stringify: true
-						),
+						TestMessageTemplateHole.Create("CustomerName", format: "ice-cream", stringify: true),
+						TestMessageTemplateHole.Create("Banana", alignment: 100, format: "110", stringify: true),
 						TestMessageTemplateHole.Create("Apple", format: "p000p", destructure: true),
 					]
 				),
@@ -457,12 +408,7 @@ public class RegexValidationTests
 							format: "pies",
 							destructure: true
 						),
-						TestMessageTemplateHole.Create(
-							"Banana",
-							alignment: 1010101,
-							format: "-111",
-							destructure: true
-						),
+						TestMessageTemplateHole.Create("Banana", alignment: 1010101, format: "-111", destructure: true),
 						TestMessageTemplateHole.Create("Apple"),
 					]
 				),
@@ -479,12 +425,7 @@ public class RegexValidationTests
 					[
 						TestMessageTemplateHole.Create(0, destructure: true),
 						TestMessageTemplateHole.Create(1, format: "ice-cream", stringify: true),
-						TestMessageTemplateHole.Create(
-							2,
-							alignment: 100,
-							format: "110",
-							stringify: true
-						),
+						TestMessageTemplateHole.Create(2, alignment: 100, format: "110", stringify: true),
 						TestMessageTemplateHole.Create(3, format: "p000p", destructure: true),
 					]
 				),
@@ -492,18 +433,8 @@ public class RegexValidationTests
 					"Customer with ID {$0} is named {@1,100:pies}, and {@2,1010101:-111}. and {3}",
 					[
 						TestMessageTemplateHole.Create(0, stringify: true),
-						TestMessageTemplateHole.Create(
-							1,
-							alignment: 100,
-							format: "pies",
-							destructure: true
-						),
-						TestMessageTemplateHole.Create(
-							2,
-							alignment: 1010101,
-							format: "-111",
-							destructure: true
-						),
+						TestMessageTemplateHole.Create(1, alignment: 100, format: "pies", destructure: true),
+						TestMessageTemplateHole.Create(2, alignment: 1010101, format: "-111", destructure: true),
 						TestMessageTemplateHole.Create(3),
 					]
 				),
@@ -519,40 +450,20 @@ public class RegexValidationTests
 		{
 			List<(string, TestMessageTemplateHole[])> data =
 			[
-				(
-					"Customer with ID {{CustomerId:ff}}",
-					[TestMessageTemplateHole.Create("CustomerId", format: "ff")]
-				),
+				("Customer with ID {{CustomerId:ff}}", [TestMessageTemplateHole.Create("CustomerId", format: "ff")]),
 				(
 					"Customer with ID {{CustomerId,0101:-10}} is named {{$CustomerName:pies}}",
 					[
-						TestMessageTemplateHole.Create(
-							"CustomerId",
-							alignment: 0101,
-							format: "-10"
-						),
-						TestMessageTemplateHole.Create(
-							"CustomerName",
-							format: "pies",
-							stringify: true
-						),
+						TestMessageTemplateHole.Create("CustomerId", alignment: 0101, format: "-10"),
+						TestMessageTemplateHole.Create("CustomerName", format: "pies", stringify: true),
 					]
 				),
 				(
 					"Customer with ID {{@CustomerId}} is named {{$CustomerName:ice-cream}}, and {{$Banana,100:110}}. and {{@Apple:p000p}}",
 					[
 						TestMessageTemplateHole.Create("CustomerId", destructure: true),
-						TestMessageTemplateHole.Create(
-							"CustomerName",
-							format: "ice-cream",
-							stringify: true
-						),
-						TestMessageTemplateHole.Create(
-							"Banana",
-							alignment: 100,
-							format: "110",
-							stringify: true
-						),
+						TestMessageTemplateHole.Create("CustomerName", format: "ice-cream", stringify: true),
+						TestMessageTemplateHole.Create("Banana", alignment: 100, format: "110", stringify: true),
 						TestMessageTemplateHole.Create("Apple", format: "p000p", destructure: true),
 					]
 				),
@@ -566,12 +477,7 @@ public class RegexValidationTests
 							format: "pies",
 							destructure: true
 						),
-						TestMessageTemplateHole.Create(
-							"Banana",
-							alignment: 1010101,
-							format: "-111",
-							destructure: true
-						),
+						TestMessageTemplateHole.Create("Banana", alignment: 1010101, format: "-111", destructure: true),
 						TestMessageTemplateHole.Create("Apple"),
 					]
 				),
@@ -588,12 +494,7 @@ public class RegexValidationTests
 					[
 						TestMessageTemplateHole.Create(0, destructure: true),
 						TestMessageTemplateHole.Create(1, format: "ice-cream", stringify: true),
-						TestMessageTemplateHole.Create(
-							2,
-							alignment: 100,
-							format: "110",
-							stringify: true
-						),
+						TestMessageTemplateHole.Create(2, alignment: 100, format: "110", stringify: true),
 						TestMessageTemplateHole.Create(3, format: "p000p", destructure: true),
 					]
 				),
@@ -601,18 +502,8 @@ public class RegexValidationTests
 					"Customer with ID {{$0}} is named {{@1,100:pies}}, and {{@2,1010101:-111}}. and {{3}}",
 					[
 						TestMessageTemplateHole.Create(0, stringify: true),
-						TestMessageTemplateHole.Create(
-							1,
-							alignment: 100,
-							format: "pies",
-							destructure: true
-						),
-						TestMessageTemplateHole.Create(
-							2,
-							alignment: 1010101,
-							format: "-111",
-							destructure: true
-						),
+						TestMessageTemplateHole.Create(1, alignment: 100, format: "pies", destructure: true),
+						TestMessageTemplateHole.Create(2, alignment: 1010101, format: "-111", destructure: true),
 						TestMessageTemplateHole.Create(3),
 					]
 				),

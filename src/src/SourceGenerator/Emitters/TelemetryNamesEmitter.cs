@@ -41,11 +41,7 @@ static class TelemetryNamesEmitter
 			.Append(indent, "{");
 
 		// Meter names array
-		builder.Append(
-			indent + 1,
-			"public static readonly string[] MeterNames = ",
-			withNewLine: false
-		);
+		builder.Append(indent + 1, "public static readonly string[] MeterNames = ", withNewLine: false);
 		if (meterNames.Length == 0)
 		{
 			builder.AppendLine("global::System.Array.Empty<string>();");
@@ -68,11 +64,7 @@ static class TelemetryNamesEmitter
 		builder.AppendLine();
 
 		// ActivitySource names array
-		builder.Append(
-			indent + 1,
-			"public static readonly string[] ActivitySourceNames = ",
-			withNewLine: false
-		);
+		builder.Append(indent + 1, "public static readonly string[] ActivitySourceNames = ", withNewLine: false);
 		if (activitySourceNames.Length == 0)
 		{
 			builder.AppendLine("global::System.Array.Empty<string>();");
@@ -106,9 +98,6 @@ static class TelemetryNamesEmitter
 			hintName = $"{rootNamespace}.{hintName}";
 
 		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString(), emitNullable);
-		spc.AddSource(
-			hintName,
-			Microsoft.CodeAnalysis.Text.SourceText.From(sourceText, Encoding.UTF8)
-		);
+		spc.AddSource(hintName, Microsoft.CodeAnalysis.Text.SourceText.From(sourceText, Encoding.UTF8));
 	}
 }

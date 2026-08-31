@@ -64,14 +64,13 @@ partial class TelemetryDiagnostics
 			Category: Constants.Diagnostics.Activity.Usage
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor ParentContextOrIdParameterNotAllowed =
-			new(
-				Id: "TSG3007",
-				Title: "Parent context or Parent Id parameter is not valid on event",
-				Description: "The {0} parameter is not allowed when defining an activity event, only on the activity start/ create method.",
-				Severity: DiagnosticSeverity.Error,
-				Category: Constants.Diagnostics.Activity.Usage
-			);
+		public static readonly TelemetryDiagnosticDescriptor ParentContextOrIdParameterNotAllowed = new(
+			Id: "TSG3007",
+			Title: "Parent context or Parent Id parameter is not valid on event",
+			Description: "The {0} parameter is not allowed when defining an activity event, only on the activity start/ create method.",
+			Severity: DiagnosticSeverity.Error,
+			Category: Constants.Diagnostics.Activity.Usage
+		);
 
 		public static readonly TelemetryDiagnosticDescriptor LinksParameterNotAllowed = new(
 			Id: "TSG3008",
@@ -97,14 +96,13 @@ partial class TelemetryDiagnostics
 			Category: Constants.Diagnostics.Activity.Usage
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor EscapedParameterIsOnlyValidOnEvent =
-			new(
-				Id: "TSG3011",
-				Title: "Escaped parameters are only valid on Events, not Activity or Context methods",
-				Description: "The parameters {0} is not valid on Activity or Context methods, only on Events.",
-				Severity: DiagnosticSeverity.Error,
-				Category: Constants.Diagnostics.Activity.Usage
-			);
+		public static readonly TelemetryDiagnosticDescriptor EscapedParameterIsOnlyValidOnEvent = new(
+			Id: "TSG3011",
+			Title: "Escaped parameters are only valid on Events, not Activity or Context methods",
+			Description: "The parameters {0} is not valid on Activity or Context methods, only on Events.",
+			Severity: DiagnosticSeverity.Error,
+			Category: Constants.Diagnostics.Activity.Usage
+		);
 
 		public static readonly TelemetryDiagnosticDescriptor NoActivityMethodsDefined = new(
 			Id: "TSG3012",
@@ -130,14 +128,13 @@ partial class TelemetryDiagnostics
 			Category: Constants.Diagnostics.Activity.Usage
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor ActivityShouldBeTheFirstParameter =
-			new(
-				Id: "TSG3015",
-				Title: "Activity should be the first parameter",
-				Description: "For readability, ensure the Activity parameter is the first one defined.",
-				Severity: DiagnosticSeverity.Info,
-				Category: Constants.Diagnostics.Activity.Usage
-			);
+		public static readonly TelemetryDiagnosticDescriptor ActivityShouldBeTheFirstParameter = new(
+			Id: "TSG3015",
+			Title: "Activity should be the first parameter",
+			Description: "For readability, ensure the Activity parameter is the first one defined.",
+			Severity: DiagnosticSeverity.Info,
+			Category: Constants.Diagnostics.Activity.Usage
+		);
 
 		public static readonly TelemetryDiagnosticDescriptor StatusDescriptionMustBeString = new(
 			Id: "TSG3016",
@@ -147,14 +144,13 @@ partial class TelemetryDiagnostics
 			Category: Constants.Diagnostics.Activity.Usage
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor StatusDescriptionParameterInvalidType =
-			new(
-				Id: "TSG3017",
-				Title: "Status Description parameters are only valid on Events, not Activity or Context methods",
-				Description: "The parameters {0} is not valid on Activity or Context methods, only on Events.",
-				Severity: DiagnosticSeverity.Error,
-				Category: Constants.Diagnostics.Activity.Usage
-			);
+		public static readonly TelemetryDiagnosticDescriptor StatusDescriptionParameterInvalidType = new(
+			Id: "TSG3017",
+			Title: "Status Description parameters are only valid on Events, not Activity or Context methods",
+			Description: "The parameters {0} is not valid on Activity or Context methods, only on Events.",
+			Severity: DiagnosticSeverity.Error,
+			Category: Constants.Diagnostics.Activity.Usage
+		);
 
 		public static readonly TelemetryDiagnosticDescriptor GenericOrReservedSpanName = new(
 			Id: "TSG3018",
@@ -164,14 +160,13 @@ partial class TelemetryDiagnostics
 			Category: Constants.Diagnostics.Activity.Usage
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor ActivitySourceNameDefaultsToAssembly =
-			new(
-				Id: "TSG3019",
-				Title: "ActivitySource name is defaulting to assembly name",
-				Description: "ActivitySource name is defaulting to the assembly name '{0}'. Consider specifying an explicit name using [ActivitySource(Name = \"...\")] for better control.",
-				Severity: DiagnosticSeverity.Info,
-				Category: Constants.Diagnostics.Activity.Usage
-			);
+		public static readonly TelemetryDiagnosticDescriptor ActivitySourceNameDefaultsToAssembly = new(
+			Id: "TSG3019",
+			Title: "ActivitySource name is defaulting to assembly name",
+			Description: "ActivitySource name is defaulting to the assembly name '{0}'. Consider specifying an explicit name using [ActivitySource(Name = \"...\")] for better control.",
+			Severity: DiagnosticSeverity.Info,
+			Category: Constants.Diagnostics.Activity.Usage
+		);
 
 		public static readonly TelemetryDiagnosticDescriptor ActivitySourceNameIsEmpty = new(
 			Id: "TSG3020",
@@ -181,14 +176,13 @@ partial class TelemetryDiagnostics
 			Category: Constants.Diagnostics.Activity.Usage
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor ActivityReturnTypeShouldBeNullable =
-			new(
-				Id: "TSG3022",
-				Title: "Activity return type should be nullable",
-				Description: "Activity can be null when no listeners are active. Consider using 'Activity?' as the return type to make this explicit.",
-				Severity: DiagnosticSeverity.Warning,
-				Category: Constants.Diagnostics.Activity.Usage
-			);
+		public static readonly TelemetryDiagnosticDescriptor ActivityReturnTypeShouldBeNullable = new(
+			Id: "TSG3022",
+			Title: "Activity return type should be nullable",
+			Description: "Activity can be null when no listeners are active. Consider using 'Activity?' as the return type to make this explicit.",
+			Severity: DiagnosticSeverity.Warning,
+			Category: Constants.Diagnostics.Activity.Usage
+		);
 
 		public static readonly TelemetryDiagnosticDescriptor ExceptionEventNotStandardName = new(
 			Id: "TSG3021",

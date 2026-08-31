@@ -22,10 +22,7 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicActivity,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -51,19 +48,14 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicActivity,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenParentId_GeneratesActivityAndSetsParentId(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenParentId_GeneratesActivityAndSetsParentId(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicActivity = """
@@ -80,10 +72,7 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicActivity,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -109,10 +98,7 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicActivity,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);

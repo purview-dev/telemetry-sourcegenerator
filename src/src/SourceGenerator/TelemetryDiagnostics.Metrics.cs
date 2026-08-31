@@ -24,23 +24,21 @@ partial class TelemetryDiagnostics
 			Category: Constants.Diagnostics.Metrics.Usage
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor AutoIncrementCountAndMeasurementParam =
-			new(
-				Id: "TSG4002",
-				Title: "Auto increment counter and measurement defined",
-				Description: "Auto increment counter and a measurement parameter are defined, either remove the parameter/ attribute or change to a normal counter.",
-				Severity: DiagnosticSeverity.Error,
-				Category: Constants.Diagnostics.Metrics.Usage
-			);
+		public static readonly TelemetryDiagnosticDescriptor AutoIncrementCountAndMeasurementParam = new(
+			Id: "TSG4002",
+			Title: "Auto increment counter and measurement defined",
+			Description: "Auto increment counter and a measurement parameter are defined, either remove the parameter/ attribute or change to a normal counter.",
+			Severity: DiagnosticSeverity.Error,
+			Category: Constants.Diagnostics.Metrics.Usage
+		);
 
-		public static readonly TelemetryDiagnosticDescriptor MoreThanOneMeasurementValueDefined =
-			new(
-				Id: "TSG4003",
-				Title: "Multiple measurement values defined",
-				Description: "More than one measurement parameters are defined.",
-				Severity: DiagnosticSeverity.Error,
-				Category: Constants.Diagnostics.Metrics.Usage
-			);
+		public static readonly TelemetryDiagnosticDescriptor MoreThanOneMeasurementValueDefined = new(
+			Id: "TSG4003",
+			Title: "Multiple measurement values defined",
+			Description: "More than one measurement parameters are defined.",
+			Severity: DiagnosticSeverity.Error,
+			Category: Constants.Diagnostics.Metrics.Usage
+		);
 
 		public static readonly TelemetryDiagnosticDescriptor NoMeasurementValueDefined = new(
 			Id: "TSG4004",

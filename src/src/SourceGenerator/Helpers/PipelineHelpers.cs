@@ -15,16 +15,8 @@ static partial class PipelineHelpers
 		return name + "Core";
 	}
 
-	[System.Diagnostics.CodeAnalysis.SuppressMessage(
-		"Globalization",
-		"CA1308:Normalize strings to uppercase"
-	)]
-	static string GenerateParameterName(
-		string name,
-		string? prefix,
-		bool lowercase,
-		int namingConvention = 1
-	)
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase")]
+	static string GenerateParameterName(string name, string? prefix, bool lowercase, int namingConvention = 1)
 	{
 		// NamingConvention: 0 = Legacy, 1 = OpenTelemetry
 		var isLegacy = namingConvention == 0;
@@ -49,8 +41,7 @@ static partial class PipelineHelpers
 		Justification = "Don't 'simplify' this as changing the default value of the skipOnNullOrEmpty parameter will change the behaviour"
 	)]
 	static bool GetSkipOnNullOrEmptyValue(TagOrBaggageAttributeRecord? tagOrBaggageAttribute) =>
-		tagOrBaggageAttribute?.SkipOnNullOrEmpty.IsSet == true
-		&& tagOrBaggageAttribute.SkipOnNullOrEmpty.Value!.Value;
+		tagOrBaggageAttribute?.SkipOnNullOrEmpty.IsSet == true && tagOrBaggageAttribute.SkipOnNullOrEmpty.Value!.Value;
 
 	static IEnumerable<IMethodSymbol> GetAllInterfaceMethods(
 		INamedTypeSymbol interfaceSymbol,
@@ -94,8 +85,7 @@ static partial class PipelineHelpers
 			else
 				dict[method.Name] = [.. method.Locations];
 		}
-		return dict.Where(m => m.Value.Count > 1)
-			.ToImmutableDictionary(m => m.Key, m => m.Value.ToArray());
+		return dict.Where(m => m.Value.Count > 1).ToImmutableDictionary(m => m.Key, m => m.Value.ToArray());
 	}
 
 	static ImmutableDictionary<string, Location[]> BuildDuplicateMethods(

@@ -1,5 +1,3 @@
-using Microsoft.CodeAnalysis.CSharp;
-
 namespace Purview.Telemetry.SourceGenerator.Activities;
 
 partial class TelemetrySourceGeneratorActivityTests
@@ -29,15 +27,11 @@ public interface ITestActivities {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicActivity,
-			languageVersion: LanguageVersion.CSharp7_3,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
-		// Assert: validationCompilation=true (default) verifies generated code compiles under C# 7.3.
-		// TSG3022 (non-nullable Activity return type) is a warning — suppress non-errors since C# 7.3
-		// users cannot use 'Activity?' anyway.
+		// Assert: validates the generated code compiles. The source uses C# 7.3-style syntax
+		// (block namespaces, no nullable annotations). TSG3022 (non-nullable Activity return
+		// type) is a warning, so ignore non-errors.
 		await TestHelpers.VerifyAsync(
 			generationResult,
 			whenValidatingDiagnosticsIgnoreNonErrors: true,

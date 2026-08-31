@@ -25,11 +25,8 @@ static class StringBuilderExtensions
 	public static StringBuilder CodeGen(this StringBuilder builder, int indent) =>
 		builder.Append(indent, Constants.System.GeneratedCode.Value);
 
-	public static StringBuilder IfDefines(
-		this StringBuilder builder,
-		string condition,
-		params string[] values
-	) => builder.IfDefines(condition, 0, values);
+	public static StringBuilder IfDefines(this StringBuilder builder, string condition, params string[] values) =>
+		builder.IfDefines(condition, 0, values);
 
 	public static StringBuilder IfDefines(
 		this StringBuilder builder,
@@ -63,12 +60,7 @@ static class StringBuilderExtensions
 		return builder;
 	}
 
-	public static StringBuilder Append(
-		this StringBuilder builder,
-		int tabs,
-		char value,
-		bool withNewLine = true
-	)
+	public static StringBuilder Append(this StringBuilder builder, int tabs, char value, bool withNewLine = true)
 	{
 		builder.WithIndent(tabs).Append(value);
 
@@ -78,12 +70,7 @@ static class StringBuilderExtensions
 		return builder;
 	}
 
-	public static StringBuilder Append(
-		this StringBuilder builder,
-		int tabs,
-		string value,
-		bool withNewLine = true
-	)
+	public static StringBuilder Append(this StringBuilder builder, int tabs, string value, bool withNewLine = true)
 	{
 		builder.WithIndent(tabs).Append(value);
 

@@ -9,10 +9,7 @@ partial class MeterTargetClassEmitter
 {
 	static void EmitThrowStub(StringBuilder builder, int indent, InstrumentTarget methodTarget)
 	{
-		builder
-			.AppendLine()
-			.Append(indent, "public ", withNewLine: false)
-			.Append(methodTarget.ReturnType);
+		builder.AppendLine().Append(indent, "public ", withNewLine: false).Append(methodTarget.ReturnType);
 
 		builder.Append(' ').Append(methodTarget.MethodName).Append('(');
 
@@ -135,18 +132,14 @@ partial class MeterTargetClassEmitter
 		var isMultiTarget = methodTarget.TargetGenerationState.IsMultiTarget;
 		var methodTargets = methodTarget.TargetGenerationState.MethodTargets;
 		var activityOwnsPublicMethod = methodTargets.HasFlag(GenerationType.Activities);
-		var loggingOwnsPublicMethod =
-			!activityOwnsPublicMethod && methodTargets.HasFlag(GenerationType.Logging);
+		var loggingOwnsPublicMethod = !activityOwnsPublicMethod && methodTargets.HasFlag(GenerationType.Logging);
 		var metricsOwnsPublicMethod = !activityOwnsPublicMethod && !loggingOwnsPublicMethod;
 
 		// Validate return type: must be void or bool (for metrics-owned public methods)
 		var isVoidReturn = methodTarget.ReturnType.SpecialType == SpecialType.System_Void;
 		if (metricsOwnsPublicMethod && !isVoidReturn && !methodTarget.ReturnsBool)
 		{
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Metrics.DoesNotReturnVoid
-			);
+			TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Metrics.DoesNotReturnVoid);
 			return;
 		}
 
@@ -171,10 +164,7 @@ partial class MeterTargetClassEmitter
 		}
 
 		// Auto-counter cannot also have a measurement parameter
-		if (
-			methodTarget.InstrumentAttribute.IsAutoIncrement
-			&& methodTarget.MeasurementParameter != null
-		)
+		if (methodTarget.InstrumentAttribute.IsAutoIncrement && methodTarget.MeasurementParameter != null)
 		{
 			TelemetryDiagnostics.Report(
 				context.ReportDiagnostic,
@@ -183,10 +173,7 @@ partial class MeterTargetClassEmitter
 			return;
 		}
 
-		if (
-			!methodTarget.InstrumentAttribute!.IsAutoIncrement
-			&& methodTarget.MeasurementParameter == null
-		)
+		if (!methodTarget.InstrumentAttribute!.IsAutoIncrement && methodTarget.MeasurementParameter == null)
 		{
 			return;
 		}
@@ -196,14 +183,9 @@ partial class MeterTargetClassEmitter
 		// For multi-target where Activity or Logging owns public method, generate private method
 		var accessModifier = isMultiTarget && !metricsOwnsPublicMethod ? "private" : "public";
 		var methodName =
-			isMultiTarget && !metricsOwnsPublicMethod
-				? methodTarget.MethodName + "_Metrics"
-				: methodTarget.MethodName;
+			isMultiTarget && !metricsOwnsPublicMethod ? methodTarget.MethodName + "_Metrics" : methodTarget.MethodName;
 
-		builder
-			.CodeGen(indent)
-			.AggressiveInlining(indent)
-			.Append(indent, accessModifier + " ", withNewLine: false);
+		builder.CodeGen(indent).AggressiveInlining(indent).Append(indent, accessModifier + " ", withNewLine: false);
 
 		// For multi-target private methods, always return void
 		if (isMultiTarget && !metricsOwnsPublicMethod)
@@ -265,11 +247,7 @@ partial class MeterTargetClassEmitter
 		builder.Append(indent, '}');
 	}
 
-	static void EmitObservableInstrumentBodyTest(
-		StringBuilder builder,
-		int indent,
-		InstrumentTarget method
-	)
+	static void EmitObservableInstrumentBodyTest(StringBuilder builder, int indent, InstrumentTarget method)
 	{
 		indent++;
 
@@ -358,9 +336,7 @@ partial class MeterTargetClassEmitter
 		indent++;
 
 		var instrumentMeasureMethodName =
-			methodTarget.InstrumentAttribute!.InstrumentType == InstrumentTypes.Histogram
-				? "Record"
-				: "Add";
+			methodTarget.InstrumentAttribute!.InstrumentType == InstrumentTypes.Histogram ? "Record" : "Add";
 
 		var tagCount = methodTarget.Tags.Length;
 		var hasConditionalTags = methodTarget.Tags.Any(t => t.SkipOnNullOrEmpty);

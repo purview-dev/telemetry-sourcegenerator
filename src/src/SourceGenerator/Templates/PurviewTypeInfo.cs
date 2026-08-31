@@ -15,8 +15,7 @@ sealed record PurviewTypeInfo(
 	EquatableArray<PurviewTypeInfo> GenericTypeArguments
 ) : IEquatable<PurviewTypeInfo>, IEquatable<ITypeSymbol>, IEquatable<string>
 {
-	public bool Equals(PurviewTypeInfo? other) =>
-		other != null && other.FullyQualifiedName == FullyQualifiedName;
+	public bool Equals(PurviewTypeInfo? other) => other != null && other.FullyQualifiedName == FullyQualifiedName;
 
 	public bool Equals(ITypeSymbol? typeSymbol)
 	{
@@ -74,8 +73,7 @@ sealed record PurviewTypeInfo(
 
 	public override string ToString() => ToString(includeGlobal: true);
 
-	public string ToString(bool includeGlobal) =>
-		ToString(includeGlobal, emitNullableAnnotations: true);
+	public string ToString(bool includeGlobal) => ToString(includeGlobal, emitNullableAnnotations: true);
 
 	public string ToString(bool includeGlobal, bool emitNullableAnnotations)
 	{
@@ -89,9 +87,7 @@ sealed record PurviewTypeInfo(
 				"<"
 				+ string.Join(
 					", ",
-					GenericTypeArguments.Select(m =>
-						m.ToString(includeGlobal, emitNullableAnnotations)
-					)
+					GenericTypeArguments.Select(m => m.ToString(includeGlobal, emitNullableAnnotations))
 				)
 				+ ">";
 		}

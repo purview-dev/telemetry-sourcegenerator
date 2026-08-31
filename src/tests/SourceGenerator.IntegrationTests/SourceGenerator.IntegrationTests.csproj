@@ -2,24 +2,20 @@
 	<ItemGroup>
 		<Compile Remove="Resources/**/*" />
 		<EmbeddedResource Include="Resources/**/*" />
-		<None Update="Snapshots/**/*" Visible="false" />
-		<Compile Update="Snapshots/**/*" Visible="false" />
-		<Content Update="Snapshots/**/*" Visible="false" />
-		<None Update="Refactorings/Snapshots/**/*" Visible="false" />
-		<Compile Update="Refactorings/Snapshots/**/*" Visible="false" />
-		<Content Update="Refactorings/Snapshots/**/*" Visible="false" />
 	</ItemGroup>
 	<ItemGroup>
 		<Using Include="Microsoft.CodeAnalysis" />
 		<Using Include="System.Collections.Immutable" />
 	</ItemGroup>
 	<ItemGroup>
+		<!-- The harness instantiates the generator types directly and drives Roslyn itself. -->
+		<ProjectReference Include="..\..\src\SourceGenerator\SourceGenerator.csproj" />
+	</ItemGroup>
+	<ItemGroup>
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
 		<PackageReference Include="Microsoft.Extensions.Logging" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" />
 		<PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" />
-		<PackageReference Include="Verify.DiffPlex" />
-		<PackageReference Include="Verify.SourceGenerators" />
-		<PackageReference Include="Verify.TUnit" />
+		<PackageReference Include="Purview.SourceGeneratorFramework.Testing.TUnit" />
 	</ItemGroup>
 </Project>

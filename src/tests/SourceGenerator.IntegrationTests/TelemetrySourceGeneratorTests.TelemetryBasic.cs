@@ -1,11 +1,11 @@
+using Purview.Telemetry.SourceGenerator.Infra;
+
 namespace Purview.Telemetry.SourceGenerator;
 
 partial class TelemetrySourceGeneratorTests
 {
 	[Test]
-	public async Task Generate_GivenPartialInterface_GeneratesTelemetry(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenPartialInterface_GeneratesTelemetry(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string partialInterfaceDef = """
@@ -62,13 +62,7 @@ partial interface ITestTelemetry
 
 		// Act
 		var generationResult = await GenerateAsync(
-			csharpDocuments:
-			[
-				Text(partialInterfaceDef),
-				Text(partialInterfaceActivities),
-				Text(partialInterfaceLogging),
-				Text(partialInterfaceMetric),
-			],
+			[partialInterfaceDef, partialInterfaceActivities, partialInterfaceLogging, partialInterfaceMetric],
 			cancellationToken: cancellationToken
 		);
 
@@ -77,9 +71,7 @@ partial interface ITestTelemetry
 	}
 
 	[Test]
-	public async Task Generate_GivenNoNamespace_GeneratesTelemetry(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenNoNamespace_GeneratesTelemetry(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicTelemetry = """
@@ -112,19 +104,14 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicTelemetry,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicTelemetryGen_GeneratesTelemetry(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenBasicTelemetryGen_GeneratesTelemetry(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicTelemetry = """
@@ -159,19 +146,14 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicTelemetry,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicEventWithException_GeneratesTelemetry(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenBasicEventWithException_GeneratesTelemetry(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicTelemetry = """
@@ -192,10 +174,7 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicTelemetry,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -225,10 +204,7 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicTelemetry,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -258,10 +234,7 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicTelemetry,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -291,10 +264,7 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicTelemetry,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -324,19 +294,14 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicTelemetry,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenDuplicateTelemetryGen_GeneratesDiagnostics(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenDuplicateTelemetryGen_GeneratesDiagnostics(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicTelemetry = """
@@ -380,13 +345,13 @@ public interface ITestTelemetry
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
 		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			s => s.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			cancellationToken: cancellationToken

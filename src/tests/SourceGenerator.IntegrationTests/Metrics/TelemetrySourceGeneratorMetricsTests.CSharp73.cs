@@ -1,5 +1,3 @@
-using Microsoft.CodeAnalysis.CSharp;
-
 namespace Purview.Telemetry.SourceGenerator.Metrics;
 
 partial class TelemetrySourceGeneratorMetricsTests
@@ -38,11 +36,7 @@ public interface ITestMetrics {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetrics,
-			languageVersion: LanguageVersion.CSharp7_3,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetrics, cancellationToken: cancellationToken);
 
 		// Assert: validationCompilation=true (default) verifies generated code compiles under C# 7.3.
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);

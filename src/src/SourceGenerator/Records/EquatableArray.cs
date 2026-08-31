@@ -3,9 +3,7 @@ using System.Collections.Immutable;
 
 namespace Purview.Telemetry.SourceGenerator.Records;
 
-public readonly struct EquatableArray<T>(ImmutableArray<T> array)
-	: IEquatable<EquatableArray<T>>,
-		IEnumerable<T>
+public readonly struct EquatableArray<T>(ImmutableArray<T> array) : IEquatable<EquatableArray<T>>, IEnumerable<T>
 	where T : IEquatable<T>
 {
 	readonly ImmutableArray<T> _array = array;
@@ -59,14 +57,11 @@ public readonly struct EquatableArray<T>(ImmutableArray<T> array)
 
 	IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-	public static bool operator ==(EquatableArray<T> left, EquatableArray<T> right) =>
-		left.Equals(right);
+	public static bool operator ==(EquatableArray<T> left, EquatableArray<T> right) => left.Equals(right);
 
-	public static bool operator !=(EquatableArray<T> left, EquatableArray<T> right) =>
-		!left.Equals(right);
+	public static bool operator !=(EquatableArray<T> left, EquatableArray<T> right) => !left.Equals(right);
 
 	public static implicit operator EquatableArray<T>(ImmutableArray<T> array) => new(array);
 
-	public static implicit operator ImmutableArray<T>(EquatableArray<T> array) =>
-		array.AsImmutableArray();
+	public static implicit operator ImmutableArray<T>(EquatableArray<T> array) => array.AsImmutableArray();
 }

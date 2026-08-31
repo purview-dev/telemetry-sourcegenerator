@@ -43,39 +43,33 @@ partial class Constants
 		public static readonly TemplateInfo ActivityAttribute = TemplateInfo.Create(
 			"Purview.Telemetry.ActivityAttribute"
 		);
-		public static readonly TemplateInfo EventAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.EventAttribute"
-		);
+		public static readonly TemplateInfo EventAttribute = TemplateInfo.Create("Purview.Telemetry.EventAttribute");
 		public static readonly TemplateInfo ContextAttribute = TemplateInfo.Create(
 			"Purview.Telemetry.ContextAttribute"
 		);
 		public static readonly TemplateInfo BaggageAttribute = TemplateInfo.Create(
 			"Purview.Telemetry.BaggageAttribute"
 		);
-		public static readonly TemplateInfo EscapeAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.EscapeAttribute"
-		);
+		public static readonly TemplateInfo EscapeAttribute = TemplateInfo.Create("Purview.Telemetry.EscapeAttribute");
 		public static readonly TemplateInfo StatusDescriptionAttribute = TemplateInfo.Create(
 			"Purview.Telemetry.StatusDescriptionAttribute"
 		);
 
-		public static readonly ImmutableDictionary<int, string> ActivityKindTypeMap =
-			new Dictionary<int, string>
-			{
-				{ 0, SystemDiagnostics.ActivityKind_Internal },
-				{ 1, SystemDiagnostics.ActivityKind_Server },
-				{ 2, SystemDiagnostics.ActivityKind_Client },
-				{ 3, SystemDiagnostics.ActivityKind_Producer },
-				{ 4, SystemDiagnostics.ActivityKind_Consumer },
-			}.ToImmutableDictionary();
+		public static readonly ImmutableDictionary<int, string> ActivityKindTypeMap = new Dictionary<int, string>
+		{
+			{ 0, SystemDiagnostics.ActivityKind_Internal },
+			{ 1, SystemDiagnostics.ActivityKind_Server },
+			{ 2, SystemDiagnostics.ActivityKind_Client },
+			{ 3, SystemDiagnostics.ActivityKind_Producer },
+			{ 4, SystemDiagnostics.ActivityKind_Consumer },
+		}.ToImmutableDictionary();
 
-		public static readonly ImmutableDictionary<int, string> ActivityStatusCodeMap =
-			new Dictionary<int, string>
-			{
-				{ 0, SystemDiagnostics.ActivityStatusCode_Unset },
-				{ 1, SystemDiagnostics.ActivityStatusCode_Ok },
-				{ 2, SystemDiagnostics.ActivityStatusCode_Error },
-			}.ToImmutableDictionary();
+		public static readonly ImmutableDictionary<int, string> ActivityStatusCodeMap = new Dictionary<int, string>
+		{
+			{ 0, SystemDiagnostics.ActivityStatusCode_Unset },
+			{ 1, SystemDiagnostics.ActivityStatusCode_Ok },
+			{ 2, SystemDiagnostics.ActivityStatusCode_Error },
+		}.ToImmutableDictionary();
 
 		public static TemplateInfo[] GetTemplates() =>
 			[
@@ -115,24 +109,21 @@ partial class Constants
 				SystemDiagnosticsNamespace + ".ActivityStatusCode"
 			);
 
-			public static readonly PurviewTypeInfo ActivityTagsCollection =
-				PurviewTypeFactory.Create(SystemDiagnosticsNamespace + ".ActivityTagsCollection");
+			public static readonly PurviewTypeInfo ActivityTagsCollection = PurviewTypeFactory.Create(
+				SystemDiagnosticsNamespace + ".ActivityTagsCollection"
+			);
 
-			public static readonly PurviewTypeInfo ActivityTagIEnumerable =
-				System.IEnumerable.MakeGeneric(
-					PurviewTypeFactory.Create(
-						"System.Collections.Generic.KeyValuePair<string, object?>"
-					)
-				);
+			public static readonly PurviewTypeInfo ActivityTagIEnumerable = System.IEnumerable.MakeGeneric(
+				PurviewTypeFactory.Create("System.Collections.Generic.KeyValuePair<string, object?>")
+			);
 
 			public static readonly PurviewTypeInfo ActivityLink = PurviewTypeFactory.Create(
 				SystemDiagnosticsNamespace + ".ActivityLink"
 			);
 
-			public static readonly PurviewTypeInfo ActivityLinkIEnumerable =
-				PurviewTypeFactory.Create(
-					$"System.Collections.Generic.IEnumerable<{ActivityLink}>"
-				);
+			public static readonly PurviewTypeInfo ActivityLinkIEnumerable = PurviewTypeFactory.Create(
+				$"System.Collections.Generic.IEnumerable<{ActivityLink}>"
+			);
 
 			public static readonly PurviewTypeInfo ActivityLinkArray = PurviewTypeFactory.Create(
 				SystemDiagnosticsNamespace + ".ActivityLink[]"

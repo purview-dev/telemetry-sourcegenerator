@@ -42,9 +42,7 @@ static partial class Constants
 		];
 	}
 
-	public static readonly PurviewTypeInfo Empty = PurviewTypeFactory.Create(
-		"Fake.Fake.Fake.Fake.Empty"
-	);
+	public static readonly PurviewTypeInfo Empty = PurviewTypeFactory.Create("Fake.Fake.Fake.Fake.Empty");
 
 	/// <summary>
 	/// Naming convention strategies for generated telemetry names.
@@ -65,18 +63,14 @@ static partial class Constants
 
 	public static partial class Shared
 	{
-		public static readonly TemplateInfo TagAttribute = TemplateInfo.Create(
-			"Purview.Telemetry.TagAttribute"
-		);
+		public static readonly TemplateInfo TagAttribute = TemplateInfo.Create("Purview.Telemetry.TagAttribute");
 		public static readonly TemplateInfo ExcludeAttribute = TemplateInfo.Create(
 			"Purview.Telemetry.ExcludeAttribute"
 		);
 		public static readonly TemplateInfo TelemetryGenerationAttribute = TemplateInfo.Create(
 			"Purview.Telemetry.TelemetryGenerationAttribute"
 		);
-		public static readonly TemplateInfo TargetsEnum = TemplateInfo.Create(
-			"Purview.Telemetry.Targets"
-		);
+		public static readonly TemplateInfo TargetsEnum = TemplateInfo.Create("Purview.Telemetry.Targets");
 		public static readonly TemplateInfo NamingConventionEnum = TemplateInfo.Create(
 			"Purview.Telemetry.NamingConvention"
 		);
@@ -97,8 +91,7 @@ static partial class Constants
 
 	public static partial class DependencyInjection
 	{
-		public const string DependencyInjectionNamespace =
-			"Microsoft.Extensions.DependencyInjection";
+		public const string DependencyInjectionNamespace = "Microsoft.Extensions.DependencyInjection";
 
 		public static readonly PurviewTypeInfo IServiceCollection = PurviewTypeFactory.Create(
 			DependencyInjectionNamespace + ".IServiceCollection"

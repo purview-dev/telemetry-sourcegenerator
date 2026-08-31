@@ -1,7 +1,6 @@
 ﻿namespace Purview.Telemetry.SourceGenerator.Templates;
 
-record TemplateInfo(PurviewTypeInfo TypeInfo, string? Source, string TemplateData)
-	: IEquatable<PurviewTypeInfo>
+record TemplateInfo(PurviewTypeInfo TypeInfo, string? Source, string TemplateData) : IEquatable<PurviewTypeInfo>
 {
 	public string Name => TypeInfo.TypeName;
 

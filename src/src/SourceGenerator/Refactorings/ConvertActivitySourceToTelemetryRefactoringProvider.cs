@@ -24,9 +24,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 
 	public override async Task ComputeRefactoringsAsync(CodeRefactoringContext context)
 	{
-		var root = await context
-			.Document.GetSyntaxRootAsync(context.CancellationToken)
-			.ConfigureAwait(false);
+		var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
 		if (root is null)
 			return;
 
@@ -41,11 +39,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		if (semanticModel is null)
 			return;
 
-		var activitySourceFields = FindActivitySourceFields(
-			classDecl,
-			semanticModel,
-			context.CancellationToken
-		);
+		var activitySourceFields = FindActivitySourceFields(classDecl, semanticModel, context.CancellationToken);
 		if (activitySourceFields.Count == 0)
 			return;
 
@@ -67,15 +61,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 				[
 					CodeAction.Create(
 						"In this class",
-						ct =>
-							ConvertAsync(
-								doc,
-								classDecl,
-								activitySourceFields,
-								activityCalls,
-								semanticModel,
-								ct
-							),
+						ct => ConvertAsync(doc, classDecl, activitySourceFields, activityCalls, semanticModel, ct),
 						equivalenceKey: "Purview.Telemetry.ConvertActivitySourceToTelemetry.Class"
 					),
 					CodeAction.Create(
@@ -141,11 +127,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 
 		// Add using Purview.Telemetry; and using System.Diagnostics; if not already present.
 		var compilationRoot = (CompilationUnitSyntax)newRoot;
-		if (
-			!compilationRoot.Usings.Any(u =>
-				u.Name?.ToString() == Constants.PurviewTelemetryNamespace
-			)
-		)
+		if (!compilationRoot.Usings.Any(u => u.Name?.ToString() == Constants.PurviewTelemetryNamespace))
 		{
 			var newUsing = SyntaxFactory
 				.UsingDirective(SyntaxFactory.ParseName(Constants.PurviewTelemetryNamespace))
@@ -154,11 +136,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 			compilationRoot = (CompilationUnitSyntax)newRoot;
 		}
 
-		if (
-			!compilationRoot.Usings.Any(u =>
-				u.Name?.ToString() == Constants.SystemDiagnosticsNamespace
-			)
-		)
+		if (!compilationRoot.Usings.Any(u => u.Name?.ToString() == Constants.SystemDiagnosticsNamespace))
 		{
 			var newUsing = SyntaxFactory
 				.UsingDirective(SyntaxFactory.ParseName(Constants.SystemDiagnosticsNamespace))
@@ -173,10 +151,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 	// Document / project / solution scope helpers
 	// ─────────────────────────────────────────────────────────────────────────
 
-	static async Task<Document> ConvertDocumentAsync(
-		Document document,
-		CancellationToken cancellationToken
-	)
+	static async Task<Document> ConvertDocumentAsync(Document document, CancellationToken cancellationToken)
 	{
 		while (true)
 		{
@@ -184,9 +159,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 			if (root is null)
 				break;
 
-			var semanticModel = await document
-				.GetSemanticModelAsync(cancellationToken)
-				.ConfigureAwait(false);
+			var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 			if (semanticModel is null)
 				break;
 
@@ -213,24 +186,14 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 			if (targetClass is null)
 				break;
 
-			document = await ConvertAsync(
-					document,
-					targetClass,
-					fields!,
-					calls!,
-					semanticModel,
-					cancellationToken
-				)
+			document = await ConvertAsync(document, targetClass, fields!, calls!, semanticModel, cancellationToken)
 				.ConfigureAwait(false);
 		}
 
 		return document;
 	}
 
-	static async Task<Solution> ConvertProjectAsync(
-		Project project,
-		CancellationToken cancellationToken
-	)
+	static async Task<Solution> ConvertProjectAsync(Project project, CancellationToken cancellationToken)
 	{
 		var solution = project.Solution;
 		foreach (var documentId in project.DocumentIds)
@@ -239,18 +202,14 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 			if (document is null)
 				continue;
 
-			var updated = await ConvertDocumentAsync(document, cancellationToken)
-				.ConfigureAwait(false);
+			var updated = await ConvertDocumentAsync(document, cancellationToken).ConfigureAwait(false);
 			solution = updated.Project.Solution;
 		}
 
 		return solution;
 	}
 
-	static async Task<Solution> ConvertSolutionAsync(
-		Solution solution,
-		CancellationToken cancellationToken
-	)
+	static async Task<Solution> ConvertSolutionAsync(Solution solution, CancellationToken cancellationToken)
 	{
 		foreach (var projectId in solution.ProjectIds)
 		{
@@ -289,10 +248,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 			{
 				cancellationToken.ThrowIfCancellationRequested();
 
-				if (
-					semanticModel.GetDeclaredSymbol(variable, cancellationToken)
-					is not IFieldSymbol fieldSymbol
-				)
+				if (semanticModel.GetDeclaredSymbol(variable, cancellationToken) is not IFieldSymbol fieldSymbol)
 					continue;
 
 				if (!SymbolEqualityComparer.Default.Equals(fieldSymbol.Type, activitySourceType))
@@ -316,10 +272,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 			{
 				cancellationToken.ThrowIfCancellationRequested();
 
-				if (
-					semanticModel.GetDeclaredSymbol(param, cancellationToken)
-					is not IParameterSymbol paramSymbol
-				)
+				if (semanticModel.GetDeclaredSymbol(param, cancellationToken) is not IParameterSymbol paramSymbol)
 					continue;
 
 				if (!SymbolEqualityComparer.Default.Equals(paramSymbol.Type, activitySourceType))
@@ -341,10 +294,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 
-			if (
-				semanticModel.GetDeclaredSymbol(member, cancellationToken)
-				is not IPropertySymbol propSymbol
-			)
+			if (semanticModel.GetDeclaredSymbol(member, cancellationToken) is not IPropertySymbol propSymbol)
 				continue;
 
 			if (!SymbolEqualityComparer.Default.Equals(propSymbol.Type, activitySourceType))
@@ -370,10 +320,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		CancellationToken cancellationToken
 	)
 	{
-		var fieldNames = new HashSet<string>(
-			sourceFields.Select(f => f.FieldName),
-			StringComparer.Ordinal
-		);
+		var fieldNames = new HashSet<string>(sourceFields.Select(f => f.FieldName), StringComparer.Ordinal);
 		var result = new List<ActivitySourceCallInfo>();
 
 		foreach (var invocation in classDecl.DescendantNodes().OfType<InvocationExpressionSyntax>())
@@ -412,23 +359,17 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 			for (var i = 0; i < args.Count; i++)
 			{
 				var arg = args[i];
-				var isKindArg =
-					(i == 1 && arg.NameColon is null)
-					|| arg.NameColon?.Name.Identifier.Text == "kind";
+				var isKindArg = (i == 1 && arg.NameColon is null) || arg.NameColon?.Name.Identifier.Text == "kind";
 				if (!isKindArg)
 					continue;
 
-				var kindSymbol = semanticModel
-					.GetSymbolInfo(arg.Expression, cancellationToken)
-					.Symbol;
+				var kindSymbol = semanticModel.GetSymbolInfo(arg.Expression, cancellationToken).Symbol;
 				if (kindSymbol is IFieldSymbol { ContainingType.Name: "ActivityKind" } kindField)
 					activityKind = kindField.Name;
 				break;
 			}
 
-			result.Add(
-				new ActivitySourceCallInfo(invocation, activityName, activityKind, receiverName)
-			);
+			result.Add(new ActivitySourceCallInfo(invocation, activityName, activityKind, receiverName));
 		}
 
 		return result;
@@ -438,9 +379,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 	// Method name assignment
 	// ─────────────────────────────────────────────────────────────────────────
 
-	static List<(ActivitySourceCallInfo Call, string MethodName)> AssignMethodNames(
-		List<ActivitySourceCallInfo> calls
-	)
+	static List<(ActivitySourceCallInfo Call, string MethodName)> AssignMethodNames(List<ActivitySourceCallInfo> calls)
 	{
 		var signatureToName = new Dictionary<string, string>(StringComparer.Ordinal);
 		var usedNames = new HashSet<string>(StringComparer.Ordinal);
@@ -538,9 +477,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 	}
 
 	static string BuildActivityAttribute(ActivitySourceCallInfo call) =>
-		call.ActivityKind is null or "Internal"
-			? "Activity"
-			: $"Activity(ActivityKind.{call.ActivityKind})";
+		call.ActivityKind is null or "Internal" ? "Activity" : $"Activity(ActivityKind.{call.ActivityKind})";
 
 	static InterfaceDeclarationSyntax ParseInterfaceNode(string code)
 	{
@@ -548,18 +485,14 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		var root = tree.GetCompilationUnitRoot();
 
 		return root.DescendantNodes().OfType<InterfaceDeclarationSyntax>().FirstOrDefault()
-			?? throw new InvalidOperationException(
-				"Could not parse generated interface from: " + code
-			);
+			?? throw new InvalidOperationException("Could not parse generated interface from: " + code);
 	}
 
-	internal static List<(
-		ActivitySourceCallInfo Call,
-		string MethodName
-	)> AssignMethodNamesInternal(List<ActivitySourceCallInfo> calls) => AssignMethodNames(calls);
+	internal static List<(ActivitySourceCallInfo Call, string MethodName)> AssignMethodNamesInternal(
+		List<ActivitySourceCallInfo> calls
+	) => AssignMethodNames(calls);
 
-	internal static string BuildActivityAttributeInternal(ActivitySourceCallInfo call) =>
-		BuildActivityAttribute(call);
+	internal static string BuildActivityAttributeInternal(ActivitySourceCallInfo call) => BuildActivityAttribute(call);
 
 	internal static ClassDeclarationSyntax RewriteClassInternal(
 		ClassDeclarationSyntax classDecl,
@@ -567,14 +500,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		List<(ActivitySourceCallInfo Call, string MethodName)> callsWithMethods,
 		string interfaceName,
 		SemanticModel semanticModel
-	) =>
-		RewriteClass(
-			classDecl,
-			activitySourceFields,
-			callsWithMethods,
-			interfaceName,
-			semanticModel
-		);
+	) => RewriteClass(classDecl, activitySourceFields, callsWithMethods, interfaceName, semanticModel);
 
 	internal static string BuildInterfaceMembers(
 		List<(ActivitySourceCallInfo Call, string MethodName)> callsWithMethods
@@ -631,10 +557,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 			if (field.FieldDeclaration is null)
 				continue;
 
-			fieldMap[field.FieldDeclaration] = RewriteFieldDeclaration(
-				field.FieldDeclaration,
-				interfaceName
-			);
+			fieldMap[field.FieldDeclaration] = RewriteFieldDeclaration(field.FieldDeclaration, interfaceName);
 		}
 
 		// Build property map
@@ -653,12 +576,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		}
 
 		// Build parameter map
-		var paramMap = BuildParamRewriteMap(
-			classDecl,
-			activitySourceFields,
-			interfaceName,
-			semanticModel
-		);
+		var paramMap = BuildParamRewriteMap(classDecl, activitySourceFields, interfaceName, semanticModel);
 
 		return classDecl.ReplaceNodes(
 			invocationMap
@@ -667,25 +585,15 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 				.Concat(propertyMap.Keys.Cast<SyntaxNode>())
 				.Concat(paramMap.Keys.Cast<SyntaxNode>()),
 			(original, _) =>
-				original is InvocationExpressionSyntax inv
-				&& invocationMap.TryGetValue(inv, out var newInv)
-					? newInv
-				: original is FieldDeclarationSyntax fld
-				&& fieldMap.TryGetValue(fld, out var newFld)
-					? newFld
-				: original is PropertyDeclarationSyntax prop
-				&& propertyMap.TryGetValue(prop, out var newProp)
-					? newProp
-				: original is ParameterSyntax param && paramMap.TryGetValue(param, out var newParam)
-					? newParam
+				original is InvocationExpressionSyntax inv && invocationMap.TryGetValue(inv, out var newInv) ? newInv
+				: original is FieldDeclarationSyntax fld && fieldMap.TryGetValue(fld, out var newFld) ? newFld
+				: original is PropertyDeclarationSyntax prop && propertyMap.TryGetValue(prop, out var newProp) ? newProp
+				: original is ParameterSyntax param && paramMap.TryGetValue(param, out var newParam) ? newParam
 				: original
 		);
 	}
 
-	static InvocationExpressionSyntax RewriteInvocation(
-		ActivitySourceCallInfo call,
-		string newMethodName
-	)
+	static InvocationExpressionSyntax RewriteInvocation(ActivitySourceCallInfo call, string newMethodName)
 	{
 		var memberAccess = (MemberAccessExpressionSyntax)call.Invocation.Expression;
 
@@ -694,19 +602,12 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 
 		return call
 			.Invocation.WithExpression(newMemberAccess)
-			.WithArgumentList(
-				SyntaxFactory.ArgumentList().WithTriviaFrom(call.Invocation.ArgumentList)
-			);
+			.WithArgumentList(SyntaxFactory.ArgumentList().WithTriviaFrom(call.Invocation.ArgumentList));
 	}
 
-	static FieldDeclarationSyntax RewriteFieldDeclaration(
-		FieldDeclarationSyntax fieldDecl,
-		string interfaceName
-	)
+	static FieldDeclarationSyntax RewriteFieldDeclaration(FieldDeclarationSyntax fieldDecl, string interfaceName)
 	{
-		var newType = SyntaxFactory
-			.IdentifierName(interfaceName)
-			.WithTriviaFrom(fieldDecl.Declaration.Type);
+		var newType = SyntaxFactory.IdentifierName(interfaceName).WithTriviaFrom(fieldDecl.Declaration.Type);
 
 		return fieldDecl.WithDeclaration(fieldDecl.Declaration.WithType(newType));
 	}
@@ -805,16 +706,13 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 				// Node is not in the semantic tree (e.g., already rewritten).
 				// Fall back to matching by short name from source text.
 				var typeName = param.Type.ToString().TrimEnd('?');
-				matched =
-					fieldTypeShortNames.Contains(typeName) || fieldTypeNames.Contains(typeName);
+				matched = fieldTypeShortNames.Contains(typeName) || fieldTypeNames.Contains(typeName);
 			}
 
 			if (!matched)
 				continue;
 
-			result[param] = param.WithType(
-				SyntaxFactory.IdentifierName(interfaceName).WithTriviaFrom(param.Type)
-			);
+			result[param] = param.WithType(SyntaxFactory.IdentifierName(interfaceName).WithTriviaFrom(param.Type));
 		}
 	}
 

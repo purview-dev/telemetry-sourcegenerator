@@ -43,10 +43,7 @@ static class BenchmarkHelpers
 	/// and the hand-written <see cref="ManualMultiTargetTelemetry"/>, using a shared DI container
 	/// so that ILogger and IMeterFactory are wired up identically for a fair comparison.
 	/// </summary>
-	public static (
-		IMultiTargetTelemetry Generated,
-		ManualMultiTargetTelemetry Manual
-	) CreateMultiTargetTelemetry()
+	public static (IMultiTargetTelemetry Generated, ManualMultiTargetTelemetry Manual) CreateMultiTargetTelemetry()
 	{
 		var logger = CreateEnabledLogger<IMultiTargetTelemetry>();
 		var meterFactory = new SimpleMeterFactory();
@@ -60,10 +57,7 @@ static class BenchmarkHelpers
 	/// <summary>
 	/// Creates both the source-generator-produced metrics-only implementations.
 	/// </summary>
-	public static (
-		IMetricsFewTagsTelemetry FewTags,
-		IMetricsManyTagsTelemetry ManyTags
-	) CreateMetricsTelemetry()
+	public static (IMetricsFewTagsTelemetry FewTags, IMetricsManyTagsTelemetry ManyTags) CreateMetricsTelemetry()
 	{
 		var meterFactory = new SimpleMeterFactory();
 		var fewTags = new MetricsFewTagsTelemetryCore(meterFactory);

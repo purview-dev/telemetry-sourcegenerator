@@ -7,9 +7,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 	// ─────────────────────────────────────────────────────────────────────────
 
 	[Test]
-	public async Task ComputeRefactorings_GivenClassWithoutILogger_ReturnsNoActions(
-		CancellationToken cancellationToken
-	)
+	public async Task ComputeRefactorings_GivenClassWithoutILogger_ReturnsNoActions(CancellationToken cancellationToken)
 	{
 		const string code = """
 			using Microsoft.Extensions.Logging;
@@ -361,9 +359,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 	}
 
 	[Test]
-	public async Task ApplyRefactoring_GivenGenericLogMethod_MapsToCorrectAttribute(
-		CancellationToken cancellationToken
-	)
+	public async Task ApplyRefactoring_GivenGenericLogMethod_MapsToCorrectAttribute(CancellationToken cancellationToken)
 	{
 		const string code = """
 			using Microsoft.Extensions.Logging;
@@ -391,9 +387,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 	}
 
 	[Test]
-	public async Task ApplyRefactoring_GivenNamespace_IncludesNamespaceInInterface(
-		CancellationToken cancellationToken
-	)
+	public async Task ApplyRefactoring_GivenNamespace_IncludesNamespaceInInterface(CancellationToken cancellationToken)
 	{
 		const string code = """
 			using Microsoft.Extensions.Logging;
@@ -456,9 +450,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 	// ─────────────────────────────────────────────────────────────────────────
 
 	[Test]
-	public async Task ApplyRefactoring_GivenLogCallWithEventId_SkipsEventIdArgument(
-		CancellationToken cancellationToken
-	)
+	public async Task ApplyRefactoring_GivenLogCallWithEventId_SkipsEventIdArgument(CancellationToken cancellationToken)
 	{
 		const string code = """
 			using Microsoft.Extensions.Logging;
@@ -530,9 +522,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 	// ─────────────────────────────────────────────────────────────────────────
 
 	[Test]
-	public async Task ApplyRefactoring_GivenLogLevelInformation_MapsToInfoAttribute(
-		CancellationToken cancellationToken
-	)
+	public async Task ApplyRefactoring_GivenLogLevelInformation_MapsToInfoAttribute(CancellationToken cancellationToken)
 	{
 		const string code = """
 			using Microsoft.Extensions.Logging;
@@ -560,9 +550,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 	}
 
 	[Test]
-	public async Task ApplyRefactoring_GivenLogLevelNone_EmitsFallbackLogAttribute(
-		CancellationToken cancellationToken
-	)
+	public async Task ApplyRefactoring_GivenLogLevelNone_EmitsFallbackLogAttribute(CancellationToken cancellationToken)
 	{
 		const string code = """
 			using Microsoft.Extensions.Logging;
@@ -1037,9 +1025,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 	}
 
 	[Test]
-	public async Task ApplyRefactoring_GivenILoggerProperty_ReplacesPropertyType(
-		CancellationToken cancellationToken
-	)
+	public async Task ApplyRefactoring_GivenILoggerProperty_ReplacesPropertyType(CancellationToken cancellationToken)
 	{
 		const string code = """
 			using Microsoft.Extensions.Logging;
@@ -1125,9 +1111,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 	}
 
 	[Test]
-	public async Task ApplyRefactoring_GivenILoggerMethodParam_ReplacesParamType(
-		CancellationToken cancellationToken
-	)
+	public async Task ApplyRefactoring_GivenILoggerMethodParam_ReplacesParamType(CancellationToken cancellationToken)
 	{
 		const string code = """
 			using Microsoft.Extensions.Logging;

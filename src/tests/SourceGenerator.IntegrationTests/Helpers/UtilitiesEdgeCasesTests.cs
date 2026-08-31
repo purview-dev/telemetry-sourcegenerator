@@ -100,19 +100,7 @@ public class UtilitiesEdgeCasesTests
 	public async Task IsLikelyCompoundWord_GivenAllCommonSuffixes_ReturnsTrue()
 	{
 		// Arrange
-		string[] suffixes =
-		[
-			"id",
-			"key",
-			"name",
-			"type",
-			"count",
-			"value",
-			"time",
-			"date",
-			"code",
-			"number",
-		];
+		string[] suffixes = ["id", "key", "name", "type", "count", "value", "time", "date", "code", "number"];
 
 		foreach (var suffix in suffixes)
 		{

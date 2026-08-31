@@ -23,19 +23,14 @@ static class WeatherAPI
 		return api;
 	}
 
-	static async Task<
-		Results<Ok<WeatherForecast[]>, NoContent, ProblemHttpResult>
-	> GetDefaultWeatherRequestAsync(
+	static async Task<Results<Ok<WeatherForecast[]>, NoContent, ProblemHttpResult>> GetDefaultWeatherRequestAsync(
 		[FromServices] IWeatherService weatherService,
 		CancellationToken cancellationToken
 	)
 	{
 		try
 		{
-			var results = await weatherService.GetWeatherForecastsAsync(
-				DefaultRequestCount,
-				cancellationToken
-			);
+			var results = await weatherService.GetWeatherForecastsAsync(DefaultRequestCount, cancellationToken);
 
 			return ConvertResults(results);
 		}
@@ -45,9 +40,7 @@ static class WeatherAPI
 		}
 	}
 
-	static async Task<
-		Results<Ok<WeatherForecast[]>, NoContent, ProblemHttpResult>
-	> GetWeatherRequestAsync(
+	static async Task<Results<Ok<WeatherForecast[]>, NoContent, ProblemHttpResult>> GetWeatherRequestAsync(
 		int requestCount,
 		[FromServices] IWeatherService weatherService,
 		CancellationToken cancellationToken
@@ -55,10 +48,7 @@ static class WeatherAPI
 	{
 		try
 		{
-			var results = await weatherService.GetWeatherForecastsAsync(
-				requestCount,
-				cancellationToken
-			);
+			var results = await weatherService.GetWeatherForecastsAsync(requestCount, cancellationToken);
 
 			return ConvertResults(results);
 		}
@@ -75,8 +65,6 @@ static class WeatherAPI
 		if (results.IsError)
 			return TypedResults.Problem(results.FirstError.ToProblemDetails());
 
-		return results.Value?.Any() == true
-			? TypedResults.Ok(results.Value.ToArray())
-			: TypedResults.NoContent();
+		return results.Value?.Any() == true ? TypedResults.Ok(results.Value.ToArray()) : TypedResults.NoContent();
 	}
 }

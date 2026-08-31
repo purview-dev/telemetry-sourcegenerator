@@ -10,13 +10,7 @@ partial class SharedHelpers
 		SemanticModel semanticModel,
 		GenerationLogger? logger,
 		CancellationToken token
-	) =>
-		GetMeterGenerationAttribute(
-			semanticModel.Compilation.Assembly,
-			semanticModel,
-			logger,
-			token
-		);
+	) => GetMeterGenerationAttribute(semanticModel.Compilation.Assembly, semanticModel, logger, token);
 
 	public static MeterAttributeRecord? GetMeterAttribute(
 		ISymbol symbol,
@@ -25,14 +19,7 @@ partial class SharedHelpers
 		CancellationToken token
 	)
 	{
-		if (
-			!Utilities.TryContainsAttribute(
-				symbol,
-				Constants.Metrics.MeterAttribute,
-				token,
-				out var attributeData
-			)
-		)
+		if (!Utilities.TryContainsAttribute(symbol, Constants.Metrics.MeterAttribute, token, out var attributeData))
 		{
 			return null;
 		}
@@ -48,20 +35,12 @@ partial class SharedHelpers
 				attributeData!,
 				(name, value) =>
 				{
-					if (
-						name.Equals(
-							nameof(MeterAttributeRecord.Name),
-							StringComparison.OrdinalIgnoreCase
-						)
-					)
+					if (name.Equals(nameof(MeterAttributeRecord.Name), StringComparison.OrdinalIgnoreCase))
 					{
 						nameValue = new((string)value);
 					}
 					else if (
-						name.Equals(
-							nameof(MeterAttributeRecord.InstrumentPrefix),
-							StringComparison.OrdinalIgnoreCase
-						)
+						name.Equals(nameof(MeterAttributeRecord.InstrumentPrefix), StringComparison.OrdinalIgnoreCase)
 					)
 					{
 						instrumentPrefix = new((string)value);
@@ -85,10 +64,7 @@ partial class SharedHelpers
 						lowercaseInstrumentName = new((bool)value);
 					}
 					else if (
-						name.Equals(
-							nameof(MeterAttributeRecord.LowercaseTagKeys),
-							StringComparison.OrdinalIgnoreCase
-						)
+						name.Equals(nameof(MeterAttributeRecord.LowercaseTagKeys), StringComparison.OrdinalIgnoreCase)
 					)
 					{
 						lowercaseTagKeys = new((bool)value);
@@ -108,8 +84,7 @@ partial class SharedHelpers
 			Name: nameValue ?? new(),
 			InstrumentPrefix: instrumentPrefix ?? new(),
 			IncludeAssemblyInstrumentPrefix: includeAssemblyInstrumentPrefix ?? new(true),
-			LowercaseInstrumentName: lowercaseInstrumentName
-				?? new(Constants.Metrics.LowercaseInstrumentNameDefault),
+			LowercaseInstrumentName: lowercaseInstrumentName ?? new(Constants.Metrics.LowercaseInstrumentNameDefault),
 			LowercaseTagKeys: lowercaseTagKeys ?? new(Constants.Metrics.LowercaseTagKeysDefault)
 		);
 	}
@@ -212,10 +187,8 @@ partial class SharedHelpers
 
 		return new(
 			InstrumentPrefix: instrumentPrefix ?? new(),
-			InstrumentSeparator: instrumentSeparator
-				?? new(Constants.Metrics.InstrumentSeparatorDefault),
-			LowercaseInstrumentName: lowercaseInstrumentName
-				?? new(Constants.Metrics.LowercaseInstrumentNameDefault),
+			InstrumentSeparator: instrumentSeparator ?? new(Constants.Metrics.InstrumentSeparatorDefault),
+			LowercaseInstrumentName: lowercaseInstrumentName ?? new(Constants.Metrics.LowercaseInstrumentNameDefault),
 			LowercaseTagKeys: lowercaseTagKeys ?? new(Constants.Metrics.LowercaseTagKeysDefault),
 			MeterName: meterName ?? new(),
 			MeterNameGenerationType: meterNameGenerationType ?? new(1) // Default to DotNet
@@ -232,14 +205,7 @@ partial class SharedHelpers
 		AttributeData? attributeData = null;
 		foreach (var instrumentAttribute in Constants.Metrics.ValidInstrumentAttributes)
 		{
-			if (
-				Utilities.TryContainsAttribute(
-					symbol,
-					instrumentAttribute,
-					token,
-					out attributeData
-				)
-			)
+			if (Utilities.TryContainsAttribute(symbol, instrumentAttribute, token, out attributeData))
 			{
 				break;
 			}
@@ -259,38 +225,22 @@ partial class SharedHelpers
 				attributeData,
 				(name, value) =>
 				{
-					if (
-						name.Equals(
-							nameof(InstrumentAttributeRecord.Name),
-							StringComparison.OrdinalIgnoreCase
-						)
-					)
+					if (name.Equals(nameof(InstrumentAttributeRecord.Name), StringComparison.OrdinalIgnoreCase))
 					{
 						nameValue = new((string)value);
 					}
-					else if (
-						name.Equals(
-							nameof(InstrumentAttributeRecord.Unit),
-							StringComparison.OrdinalIgnoreCase
-						)
-					)
+					else if (name.Equals(nameof(InstrumentAttributeRecord.Unit), StringComparison.OrdinalIgnoreCase))
 					{
 						unit = new((string)value);
 					}
 					else if (
-						name.Equals(
-							nameof(InstrumentAttributeRecord.Description),
-							StringComparison.OrdinalIgnoreCase
-						)
+						name.Equals(nameof(InstrumentAttributeRecord.Description), StringComparison.OrdinalIgnoreCase)
 					)
 					{
 						description = new((string)value);
 					}
 					else if (
-						name.Equals(
-							nameof(InstrumentAttributeRecord.AutoIncrement),
-							StringComparison.OrdinalIgnoreCase
-						)
+						name.Equals(nameof(InstrumentAttributeRecord.AutoIncrement), StringComparison.OrdinalIgnoreCase)
 					)
 					{
 						autoIncrement = new((bool)value);

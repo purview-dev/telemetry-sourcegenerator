@@ -21,11 +21,7 @@ public class UtilitiesTypeCheckingTests
 		);
 	}
 
-	static ITypeSymbol GetPropertyType(
-		Compilation compilation,
-		string typeName,
-		string propertyName
-	)
+	static ITypeSymbol GetPropertyType(Compilation compilation, string typeName, string propertyName)
 	{
 		var typeSymbol = compilation.GetTypeByMetadataName(typeName)!;
 		var propertySymbol = typeSymbol.GetMembers(propertyName).OfType<IPropertySymbol>().First();

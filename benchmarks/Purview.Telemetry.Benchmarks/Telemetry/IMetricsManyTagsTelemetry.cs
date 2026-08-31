@@ -17,13 +17,7 @@ public interface IMetricsManyTagsTelemetry
 
 	// 5 tags – above the TagList threshold
 	[AutoCounter]
-	void CountOperationWithFiveTags(
-		string endpoint,
-		string method,
-		string status,
-		string region,
-		string environment
-	);
+	void CountOperationWithFiveTags(string endpoint, string method, string status, string region, string environment);
 
 	// 6 tags – well above the TagList threshold (measurement + 5 tag parameters)
 	[Histogram]

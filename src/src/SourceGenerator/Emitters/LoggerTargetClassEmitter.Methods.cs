@@ -18,9 +18,7 @@ partial class LoggerTargetClassEmitter
 
 		if (methodTarget.IsScoped)
 			builder.Append(
-				emitNullable
-					? Constants.System.IDisposable.WithNullable()
-					: (string)Constants.System.IDisposable
+				emitNullable ? Constants.System.IDisposable.WithNullable() : (string)Constants.System.IDisposable
 			);
 		else
 			builder.Append(Constants.System.VoidKeyword);
@@ -82,10 +80,7 @@ partial class LoggerTargetClassEmitter
 				continue;
 			}
 
-			if (
-				methodTarget.ParameterCountSansException
-				> Constants.Logging.MaxNonExceptionParameters
-			)
+			if (methodTarget.ParameterCountSansException > Constants.Logging.MaxNonExceptionParameters)
 			{
 				EmitThrowStub(builder, indent, methodTarget, emitNullable);
 				continue;
@@ -115,22 +110,18 @@ partial class LoggerTargetClassEmitter
 
 		// Determine ownership hierarchy: Activity > Logging > Metrics
 		var activityOwnsPublicMethod = methodTargets.HasFlag(GenerationType.Activities);
-		var loggingOwnsPublicMethod =
-			!activityOwnsPublicMethod && methodTargets.HasFlag(GenerationType.Logging);
+		var loggingOwnsPublicMethod = !activityOwnsPublicMethod && methodTargets.HasFlag(GenerationType.Logging);
 		var hasMetricsTarget = methodTargets.HasFlag(GenerationType.Metrics);
 
 		// For multi-target where Logging owns the public method, we need to:
 		// 1. Generate a private _Logging method
 		// 2. Generate a public delegating method
 		var generatePrivateLogging =
-			isMultiTarget
-			&& (activityOwnsPublicMethod || (loggingOwnsPublicMethod && hasMetricsTarget));
+			isMultiTarget && (activityOwnsPublicMethod || (loggingOwnsPublicMethod && hasMetricsTarget));
 		var generatePublicDelegator = isMultiTarget && loggingOwnsPublicMethod && hasMetricsTarget;
 
 		var accessModifier = generatePrivateLogging ? "private" : "public";
-		var methodName = generatePrivateLogging
-			? methodTarget.MethodName + "_Logging"
-			: methodTarget.MethodName;
+		var methodName = generatePrivateLogging ? methodTarget.MethodName + "_Logging" : methodTarget.MethodName;
 
 		builder
 			.AppendLine()
@@ -209,14 +200,7 @@ partial class LoggerTargetClassEmitter
 		// Generate public delegating method if Logging owns it
 		if (generatePublicDelegator)
 		{
-			EmitPublicLoggingDelegatingMethod(
-				builder,
-				indent,
-				methodTarget,
-				context,
-				logger,
-				emitNullable
-			);
+			EmitPublicLoggingDelegatingMethod(builder, indent, methodTarget, context, logger, emitNullable);
 		}
 	}
 
@@ -231,11 +215,7 @@ partial class LoggerTargetClassEmitter
 	{
 		logger?.Debug($"Building public delegating logging method: {methodTarget.MethodName}");
 
-		builder
-			.AppendLine()
-			.CodeGen(indent)
-			.AggressiveInlining(indent)
-			.Append(indent, "public ", withNewLine: false);
+		builder.AppendLine().CodeGen(indent).AggressiveInlining(indent).Append(indent, "public ", withNewLine: false);
 
 		// When Logging owns the public method (with Metrics), return void
 		// (Logging without Activity means the return type is void or IDisposable for scoped)
@@ -263,9 +243,7 @@ partial class LoggerTargetClassEmitter
 		}
 		else
 		{
-			builder
-				.Append(indent + 1, methodTarget.MethodName, withNewLine: false)
-				.Append("_Logging(");
+			builder.Append(indent + 1, methodTarget.MethodName, withNewLine: false).Append("_Logging(");
 		}
 
 		if (!methodTarget.IsScoped)
@@ -299,9 +277,7 @@ partial class LoggerTargetClassEmitter
 		}
 
 		// Call the private Metrics method
-		builder
-			.Append(indent + 1, methodTarget.MethodName, withNewLine: false)
-			.Append("_Metrics(");
+		builder.Append(indent + 1, methodTarget.MethodName, withNewLine: false).Append("_Metrics(");
 
 		for (var i = 0; i < methodTarget.TotalParameterCount; i++)
 		{

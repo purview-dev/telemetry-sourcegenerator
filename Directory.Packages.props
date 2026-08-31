@@ -1,36 +1,33 @@
 <Project>
-  <PropertyGroup>
-    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
-    <!-- Minimum Roslyn version required to compile this generator:
+	<PropertyGroup>
+		<CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+		<!-- Minimum Roslyn version required to compile this generator:
          - ForAttributeWithMetadataName requires 4.3.1+
          - ImmutableArray<T> collection expression support (CS9210) requires System.Collections.Immutable 9.0,
            which ships with Roslyn 4.9.x (VS 2022 17.9 / .NET 9 SDK).
          - IncrementalGeneratorPostInitializationContext.AddEmbeddedAttributeDefinition() requires Roslyn 4.14.0+,
            which ships with VS 2022 17.14 / .NET 10 SDK.
          Consumers on net48 or net8+ built with VS 2022 17.14+ or .NET 10+ SDK are fully supported. -->
-    <RoslynVersion>4.14.0</RoslynVersion>
-    <TUnitVersion>1.63.0</TUnitVersion>
-  </PropertyGroup>
-  <ItemGroup Label="NuGet Package References">
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.301" />
-  </ItemGroup>
-  <ItemGroup Label=".NET Packages">
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="$(RoslynVersion)" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)" />
-    <!-- Analyzers uses independent versioning (3.x series covers all Roslyn 4.x builds) -->
-    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Telemetry.Abstractions" Version="10.8.0" />
-  </ItemGroup>
-  <ItemGroup Label="Testing">
-    <PackageVersion Include="TUnit" Version="$(TUnitVersion)" />
-    <PackageVersion Include="TUnit.Mocks" Version="$(TUnitVersion)" />
-    <PackageVersion Include="Verify.SourceGenerators" Version="2.5.0" />
-    <PackageVersion Include="Bogus" Version="35.6.5" />
-    <PackageVersion Include="Verify.TUnit" Version="31.28.0" />
-    <PackageVersion Include="Verify.DiffPlex" Version="3.3.1" />
-  </ItemGroup>
+		<RoslynVersion>4.14.0</RoslynVersion>
+		<TUnitVersion>1.65.51</TUnitVersion>
+		<PurviewSGFVersion>1.0.0-prerelease.26</PurviewSGFVersion>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageVersion Include="Purview.SourceGeneratorFramework" Version="$(PurviewSGFVersion)" />
+		<PackageVersion Include="Purview.SourceGeneratorFramework.Testing.TUnit" Version="$(PurviewSGFVersion)" />
+		<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.301" />
+		<PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" />
+		<PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="$(RoslynVersion)" />
+		<PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
+		<PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)" />
+		<PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" />
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.10" />
+		<PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.10" />
+		<PackageVersion Include="Microsoft.Extensions.Telemetry.Abstractions" Version="10.8.0" />
+	</ItemGroup>
+	<ItemGroup Label="Testing">
+		<PackageVersion Include="TUnit" Version="$(TUnitVersion)" />
+		<PackageVersion Include="TUnit.Mocks" Version="$(TUnitVersion)" />
+		<PackageVersion Include="Bogus" Version="35.6.5" />
+	</ItemGroup>
 </Project>

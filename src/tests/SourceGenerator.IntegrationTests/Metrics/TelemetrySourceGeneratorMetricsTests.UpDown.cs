@@ -3,9 +3,7 @@ namespace Purview.Telemetry.SourceGenerator.Metrics;
 partial class TelemetrySourceGeneratorMetricsTests
 {
 	[Test]
-	public async Task Generate_GivenBasicUpDown_GeneratesMetrics(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenBasicUpDown_GeneratesMetrics(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicMetric = """
@@ -25,19 +23,14 @@ public interface ITestMetrics {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicObservableUpDown_GeneratesMetrics(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenBasicObservableUpDown_GeneratesMetrics(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicMetric = """
@@ -62,10 +55,7 @@ public interface ITestMetrics {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);

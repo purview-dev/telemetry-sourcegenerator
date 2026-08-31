@@ -3,9 +3,7 @@ namespace Purview.Telemetry.SourceGenerator.Activities;
 partial class TelemetrySourceGeneratorActivityTests
 {
 	[Test]
-	public async Task Generate_GivenBasicContextGen_GeneratesActivity(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenBasicContextGen_GeneratesActivity(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicActivity = """
@@ -25,10 +23,7 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicActivity,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -59,10 +54,7 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicActivity,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -95,10 +87,7 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicActivity,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -132,19 +121,14 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicActivity,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenBasicContextGenWithActivity_GeneratesActivity(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenBasicContextGenWithActivity_GeneratesActivity(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicActivity = """
@@ -169,10 +153,7 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicActivity,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -206,10 +187,7 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicActivity,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);

@@ -1,5 +1,3 @@
-using Microsoft.CodeAnalysis.CSharp;
-
 namespace Purview.Telemetry.SourceGenerator.Logging;
 
 partial class TelemetrySourceGeneratorLoggingTests
@@ -25,11 +23,7 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicLogger,
-			languageVersion: LanguageVersion.CSharp7_3,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert: validationCompilation=true (default) verifies generated code compiles under C# 7.3.
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);

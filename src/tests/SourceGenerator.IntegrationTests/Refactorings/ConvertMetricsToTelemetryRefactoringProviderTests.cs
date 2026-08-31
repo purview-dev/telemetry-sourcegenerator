@@ -9,9 +9,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 	// ─────────────────────────────────────────────────────────────────────────
 
 	[Test]
-	public async Task ComputeRefactorings_GivenClassWithoutMetrics_ReturnsNoActions(
-		CancellationToken cancellationToken
-	)
+	public async Task ComputeRefactorings_GivenClassWithoutMetrics_ReturnsNoActions(CancellationToken cancellationToken)
 	{
 		const string code = """
 			using System.Diagnostics.Metrics;
@@ -24,11 +22,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
-		var actions = await GetRefactoringActionsAsync(
-			code,
-			Provider,
-			cancellationToken: cancellationToken
-		);
+		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
 
 		await Assert.That(actions).IsEmpty();
 	}
@@ -51,11 +45,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
-		var actions = await GetRefactoringActionsAsync(
-			code,
-			Provider,
-			cancellationToken: cancellationToken
-		);
+		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
 
 		await Assert.That(actions).IsEmpty();
 	}
@@ -65,9 +55,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 	// ─────────────────────────────────────────────────────────────────────────
 
 	[Test]
-	public async Task ComputeRefactorings_GivenClassWithCounter_ReturnsAction(
-		CancellationToken cancellationToken
-	)
+	public async Task ComputeRefactorings_GivenClassWithCounter_ReturnsAction(CancellationToken cancellationToken)
 	{
 		const string code = """
 			using System.Diagnostics.Metrics;
@@ -90,11 +78,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
-		var actions = await GetRefactoringActionsAsync(
-			code,
-			Provider,
-			cancellationToken: cancellationToken
-		);
+		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
 
 		await Assert.That(actions).IsNotEmpty();
 		await Assert.That(actions[0].Title).IsEqualTo("Convert Metrics to IWeatherServiceMetrics");
@@ -130,11 +114,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
-		var result = await ApplyRefactoringAsync(
-			code,
-			Provider,
-			cancellationToken: cancellationToken
-		);
+		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Meter]");
@@ -169,11 +149,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
-		var result = await ApplyRefactoringAsync(
-			code,
-			Provider,
-			cancellationToken: cancellationToken
-		);
+		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Meter]");
@@ -208,11 +184,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
-		var result = await ApplyRefactoringAsync(
-			code,
-			Provider,
-			cancellationToken: cancellationToken
-		);
+		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Histogram]");
@@ -244,11 +216,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
-		var result = await ApplyRefactoringAsync(
-			code,
-			Provider,
-			cancellationToken: cancellationToken
-		);
+		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[UpDownCounter]");
@@ -281,11 +249,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
-		var result = await ApplyRefactoringAsync(
-			code,
-			Provider,
-			cancellationToken: cancellationToken
-		);
+		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("IOrderServiceMetrics _orderCounter");

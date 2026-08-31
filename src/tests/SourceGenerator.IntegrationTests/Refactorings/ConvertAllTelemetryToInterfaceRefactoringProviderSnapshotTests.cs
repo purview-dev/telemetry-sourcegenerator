@@ -5,8 +5,7 @@ namespace Purview.Telemetry.SourceGenerator.Refactorings;
 /// Each test defines a <em>before</em> scenario and the snapshot captures the <em>after</em> output.
 /// To regenerate snapshots: run <c>dotnet test</c>; <c>*.received.txt</c> files are auto-accepted.
 /// </summary>
-public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderSnapshotTests
-	: CodeRefactoringTestBase
+public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderSnapshotTests : CodeRefactoringTestBase
 {
 	static readonly ConvertAllTelemetryToInterfaceRefactoringProvider Provider = new();
 

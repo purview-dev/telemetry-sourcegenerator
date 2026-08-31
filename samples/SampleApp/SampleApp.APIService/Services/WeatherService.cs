@@ -3,8 +3,7 @@ using System.Security.Cryptography;
 
 namespace SampleApp.APIService.Services;
 
-sealed class WeatherService(IWeatherServiceTelemetry telemetry, Func<int>? rng = null)
-	: IWeatherService
+sealed class WeatherService(IWeatherServiceTelemetry telemetry, Func<int>? rng = null) : IWeatherService
 {
 	const int TooColdTempInC = -10;
 
@@ -55,19 +54,14 @@ sealed class WeatherService(IWeatherServiceTelemetry telemetry, Func<int>? rng =
 		{
 			try
 			{
-				throw new Exception(
-					"Simulated failure - maybe a database or something went ~{fizz-bang}~."
-				);
+				throw new Exception("Simulated failure - maybe a database or something went ~{fizz-bang}~.");
 			}
 			catch (Exception ex)
 			{
 				// MULTI-TARGET: This single call adds error event to activity + logs critical
 				telemetry.FailedToRetrieveForecast(activity, ex);
 
-				return Error.Failure(
-					"WeatherForecast.RetrievalFailed",
-					"Failed to retrieve weather forecast data."
-				);
+				return Error.Failure("WeatherForecast.RetrievalFailed", "Failed to retrieve weather forecast data.");
 			}
 		}
 
@@ -92,11 +86,7 @@ sealed class WeatherService(IWeatherServiceTelemetry telemetry, Func<int>? rng =
 		if (minTempInC < TooColdTempInC)
 		{
 			// MULTI-TARGET: This single call increments counter + logs warning
-			telemetry.ItsTooCold(
-				activity,
-				minTempInC,
-				results.Count(wf => wf.TemperatureC < TooColdTempInC)
-			);
+			telemetry.ItsTooCold(activity, minTempInC, results.Count(wf => wf.TemperatureC < TooColdTempInC));
 		}
 		else
 		{

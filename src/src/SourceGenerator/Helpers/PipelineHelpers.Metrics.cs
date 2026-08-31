@@ -20,9 +20,7 @@ partial class PipelineHelpers
 
 		if (context.TargetNode is not InterfaceDeclarationSyntax interfaceDeclaration)
 		{
-			logger?.Error(
-				$"Could not find interface syntax from the target node '{context.TargetNode.Flatten()}'."
-			);
+			logger?.Error($"Could not find interface syntax from the target node '{context.TargetNode.Flatten()}'.");
 			return null;
 		}
 
@@ -41,12 +39,7 @@ partial class PipelineHelpers
 		}
 
 		var semanticModel = context.SemanticModel;
-		var meterAttribute = SharedHelpers.GetMeterAttribute(
-			context.TargetSymbol,
-			semanticModel,
-			logger,
-			token
-		);
+		var meterAttribute = SharedHelpers.GetMeterAttribute(context.TargetSymbol, semanticModel, logger, token);
 		if (meterAttribute == null)
 		{
 			logger?.Error(
@@ -63,11 +56,7 @@ partial class PipelineHelpers
 		);
 		var className = telemetryGeneration.ClassName.Or(GenerateClassName(interfaceSymbol.Name));
 		var generationType = SharedHelpers.GetGenerationTypes(interfaceSymbol, token);
-		var meterGenerationAttribute = SharedHelpers.GetMeterGenerationAttribute(
-			semanticModel,
-			logger,
-			token
-		);
+		var meterGenerationAttribute = SharedHelpers.GetMeterGenerationAttribute(semanticModel, logger, token);
 		var fullNamespace = Utilities.GetFullNamespace(interfaceDeclaration, true);
 
 		var meterName = meterAttribute.Name.Value;
@@ -146,28 +135,18 @@ partial class PipelineHelpers
 			: (meterGenerationAttribute?.LowercaseInstrumentName?.IsSet) != true
 				|| meterGenerationAttribute.LowercaseInstrumentName.Value!.Value;
 
-		var prefix = GeneratePrefix(
-			meterGenerationAttribute,
-			meterAttribute,
-			interfaceSymbol.Name,
-			token
-		);
+		var prefix = GeneratePrefix(meterGenerationAttribute, meterAttribute, interfaceSymbol.Name, token);
 		var lowercaseTagKeys =
-			meterAttribute.LowercaseTagKeys?.IsSet == true
-			&& meterAttribute.LowercaseTagKeys.Value!.Value;
+			meterAttribute.LowercaseTagKeys?.IsSet == true && meterAttribute.LowercaseTagKeys.Value!.Value;
 
 		List<InstrumentTarget> methodTargets = [];
-		foreach (
-			var method in GetAllInterfaceMethods(interfaceSymbol, semanticModel.Compilation, token)
-		)
+		foreach (var method in GetAllInterfaceMethods(interfaceSymbol, semanticModel.Compilation, token))
 		{
 			token.ThrowIfCancellationRequested();
 
 			if (Utilities.ContainsAttribute(method, Constants.Shared.ExcludeAttribute, token))
 			{
-				logger?.Debug(
-					$"Skipping {interfaceSymbol.Name}.{method.Name}, explicitly excluded."
-				);
+				logger?.Debug($"Skipping {interfaceSymbol.Name}.{method.Name}, explicitly excluded.");
 				continue;
 			}
 
@@ -176,19 +155,11 @@ partial class PipelineHelpers
 				continue;
 			}
 
-			logger?.Debug(
-				$"Found possible instrument method {interfaceSymbol.Name}.{method.Name}."
-			);
+			logger?.Debug($"Found possible instrument method {interfaceSymbol.Name}.{method.Name}.");
 
-			var instrumentAttribute = SharedHelpers.GetInstrumentAttribute(
-				method,
-				semanticModel,
-				logger,
-				token
-			);
+			var instrumentAttribute = SharedHelpers.GetInstrumentAttribute(method, semanticModel, logger, token);
 			var validAutoCounter =
-				instrumentAttribute?.InstrumentType is InstrumentTypes.Counter
-				&& instrumentAttribute.IsAutoIncrement;
+				instrumentAttribute?.InstrumentType is InstrumentTypes.Counter && instrumentAttribute.IsAutoIncrement;
 
 			var parameters = GetInstrumentParameters(
 				method,
@@ -234,8 +205,7 @@ partial class PipelineHelpers
 					// Check if we're using OpenTelemetry meter name generation (lowercase assembly name)
 					// e.g., meter "myapp.products" + instrument "pricing_page_requests"
 					//       -> "myapp_products.pricing_page_requests"
-					var meterNameGenType =
-						meterGenerationAttribute?.MeterNameGenerationType.Value ?? 1; // Default to DotNet
+					var meterNameGenType = meterGenerationAttribute?.MeterNameGenerationType.Value ?? 1; // Default to DotNet
 					if (meterNameGenType == 0 && !string.IsNullOrWhiteSpace(meterName)) // OpenTelemetry only
 					{
 						var meterPrefix = Utilities.ConvertToSeparatedLowercase(meterName, '_');
@@ -268,9 +238,7 @@ partial class PipelineHelpers
 				}
 				else if (targetGenerationState.RaiseInferenceNotSupportedWithMultiTargeting)
 				{
-					logger?.Debug(
-						$"Identified {interfaceSymbol.Name}.{method.Name} as problematic as it is inferred."
-					);
+					logger?.Debug($"Identified {interfaceSymbol.Name}.{method.Name} as problematic as it is inferred.");
 				}
 				else if (targetGenerationState.RaiseMissingInterfaceSource)
 				{
@@ -304,24 +272,20 @@ partial class PipelineHelpers
 					var isMultiTargetWithActivity =
 						targetGenerationState.IsMultiTarget
 						&& targetGenerationState.MethodTargets.HasFlag(GenerationType.Activities);
-					var returnsActivity = Constants.Activities.SystemDiagnostics.Activity.Equals(
-						method.ReturnType
-					);
+					var returnsActivity = Constants.Activities.SystemDiagnostics.Activity.Equals(method.ReturnType);
 					_ = isMultiTargetWithActivity;
 					_ = returnsActivity;
 				}
 			}
 
-			var instrumentMeasurementType =
-				measurementParameter?.InstrumentType ?? Constants.System.BuiltInTypes.Int32;
+			var instrumentMeasurementType = measurementParameter?.InstrumentType ?? Constants.System.BuiltInTypes.Int32;
 
 			methodTargets.Add(
 				new(
 					MethodName: method.Name,
 					ReturnType: PurviewTypeFactory.Create(method.ReturnType),
 					ReturnsBool: returnsBool,
-					IsNullableReturn: method.ReturnType.NullableAnnotation
-						== NullableAnnotation.Annotated,
+					IsNullableReturn: method.ReturnType.NullableAnnotation == NullableAnnotation.Annotated,
 					FieldName: fieldName,
 					InstrumentMeasurementType: instrumentMeasurementType,
 					IsObservable: instrumentAttribute?.IsObservable == true,
@@ -341,10 +305,7 @@ partial class PipelineHelpers
 		{
 			var t = methodTargets[i];
 			if (!seenNames.Add(t.MethodName))
-				methodTargets[i] = t with
-				{
-					TargetGenerationState = t.TargetGenerationState with { IsValid = false },
-				};
+				methodTargets[i] = t with { TargetGenerationState = t.TargetGenerationState with { IsValid = false } };
 		}
 
 		return [.. methodTargets];
@@ -374,40 +335,20 @@ partial class PipelineHelpers
 				|| Constants.Activities.SystemDiagnostics.ActivityLinkArray.Equals(paramType)
 			)
 			{
-				logger?.Debug(
-					$"Skipping Activity-related parameter '{parameter.Name}' from metrics."
-				);
+				logger?.Debug($"Skipping Activity-related parameter '{parameter.Name}' from metrics.");
 				continue;
 			}
 
 			TagOrBaggageAttributeRecord? tagAttribute = null;
 			var destination = InstrumentParameterDestination.Unknown;
-			if (
-				Utilities.TryContainsAttribute(
-					parameter,
-					Constants.Shared.TagAttribute,
-					token,
-					out var attribute
-				)
-			)
+			if (Utilities.TryContainsAttribute(parameter, Constants.Shared.TagAttribute, token, out var attribute))
 			{
 				logger?.Debug($"Found explicit tag: {parameter.Name}.");
 				destination = InstrumentParameterDestination.Tag;
 
-				tagAttribute = SharedHelpers.GetTagOrBaggageAttribute(
-					attribute!,
-					semanticModel,
-					logger,
-					token
-				);
+				tagAttribute = SharedHelpers.GetTagOrBaggageAttribute(attribute!, semanticModel, logger, token);
 			}
-			else if (
-				Utilities.ContainsAttribute(
-					parameter,
-					Constants.Metrics.InstrumentMeasurementAttribute,
-					token
-				)
-			)
+			else if (Utilities.ContainsAttribute(parameter, Constants.Metrics.InstrumentMeasurementAttribute, token))
 			{
 				logger?.Debug($"Found explicit instrument measurement: {parameter.Name}.");
 				destination = InstrumentParameterDestination.Measurement;
@@ -424,22 +365,16 @@ partial class PipelineHelpers
 				if (parameter.Type is INamedTypeSymbol parameterType)
 				{
 					isFuncType =
-						parameterType.ConstructedFrom.ToString()
-						== Constants.System.Func.MakeGeneric(false, "TResult");
+						parameterType.ConstructedFrom.ToString() == Constants.System.Func.MakeGeneric(false, "TResult");
 					if (isFuncType)
 					{
 						// For observable instruments.
 						if (parameterType.TypeArguments[0] is INamedTypeSymbol typeArg)
 						{
-							isIEnumerableType = Constants.System.GenericIEnumerable.Equals(
-								typeArg.ConstructedFrom
-							);
+							isIEnumerableType = Constants.System.GenericIEnumerable.Equals(typeArg.ConstructedFrom);
 							if (isIEnumerableType)
 							{
-								if (
-									parameterType.TypeArguments[0]
-									is INamedTypeSymbol enumerableType
-								)
+								if (parameterType.TypeArguments[0] is INamedTypeSymbol enumerableType)
 								{
 									if (
 										Constants.Metrics.SystemDiagnostics.Measurement.Equals(
@@ -447,23 +382,18 @@ partial class PipelineHelpers
 										)
 									)
 									{
-										if (
-											enumerableType.TypeArguments[0]
-											is INamedTypeSymbol measurementType
-										)
+										if (enumerableType.TypeArguments[0] is INamedTypeSymbol measurementType)
 										{
 											isMeasurementType = true;
-											isValidInstrumentType =
-												SharedHelpers.IsValidMeasurementValueType(
-													measurementType.TypeArguments[0]
-												);
+											isValidInstrumentType = SharedHelpers.IsValidMeasurementValueType(
+												measurementType.TypeArguments[0]
+											);
 											if (isValidInstrumentType)
 											{
 												instrumentType = PurviewTypeFactory.Create(
 													measurementType.TypeArguments[0]
 												);
-												destination =
-													InstrumentParameterDestination.Measurement;
+												destination = InstrumentParameterDestination.Measurement;
 
 												logger?.Debug(
 													$"Found valid instrument type: Func -> IEnumerable -> Measurement -> {instrumentType}"
@@ -473,11 +403,7 @@ partial class PipelineHelpers
 									}
 								}
 							}
-							else if (
-								Constants.Metrics.SystemDiagnostics.Measurement.Equals(
-									typeArg.ConstructedFrom
-								)
-							)
+							else if (Constants.Metrics.SystemDiagnostics.Measurement.Equals(typeArg.ConstructedFrom))
 							{
 								isMeasurementType = true;
 								isValidInstrumentType = SharedHelpers.IsValidMeasurementValueType(
@@ -485,9 +411,7 @@ partial class PipelineHelpers
 								);
 								if (isValidInstrumentType)
 								{
-									instrumentType = PurviewTypeFactory.Create(
-										typeArg.TypeArguments[0]
-									);
+									instrumentType = PurviewTypeFactory.Create(typeArg.TypeArguments[0]);
 									destination = InstrumentParameterDestination.Measurement;
 
 									logger?.Debug(
@@ -502,9 +426,7 @@ partial class PipelineHelpers
 								instrumentType = PurviewTypeFactory.Create(typeArg);
 								destination = InstrumentParameterDestination.Measurement;
 
-								logger?.Debug(
-									$"Found valid instrument type: Func -> {instrumentType}"
-								);
+								logger?.Debug($"Found valid instrument type: Func -> {instrumentType}");
 							}
 						}
 						else
@@ -514,23 +436,17 @@ partial class PipelineHelpers
 							);
 							if (isValidInstrumentType)
 							{
-								instrumentType = PurviewTypeFactory.Create(
-									parameterType.TypeArguments[0]
-								);
+								instrumentType = PurviewTypeFactory.Create(parameterType.TypeArguments[0]);
 								destination = InstrumentParameterDestination.Measurement;
 
-								logger?.Debug(
-									$"Found valid instrument type: Func -> {instrumentType}"
-								);
+								logger?.Debug($"Found valid instrument type: Func -> {instrumentType}");
 							}
 						}
 					}
 					else
 					{
 						// For non-observable instruments.
-						isValidInstrumentType = SharedHelpers.IsValidMeasurementValueType(
-							parameterType
-						);
+						isValidInstrumentType = SharedHelpers.IsValidMeasurementValueType(parameterType);
 						if (isValidInstrumentType && !isAutoCounter)
 						{
 							instrumentType = PurviewTypeFactory.Create(parameterType);
@@ -557,12 +473,7 @@ partial class PipelineHelpers
 			);
 
 			// Check for ExcludeTargetsAttribute
-			var excludeTargets = SharedHelpers.GetExcludeTargetsAttribute(
-				parameter,
-				semanticModel,
-				logger,
-				token
-			);
+			var excludeTargets = SharedHelpers.GetExcludeTargetsAttribute(parameter, semanticModel, logger, token);
 
 			parameterTargets.Add(
 				new(
@@ -595,9 +506,8 @@ partial class PipelineHelpers
 
 		string? prefix = null;
 		var separator =
-			meterGenerationAttribute?.InstrumentSeparator.Or(
-				Constants.Metrics.InstrumentSeparatorDefault
-			) ?? Constants.Metrics.InstrumentSeparatorDefault;
+			meterGenerationAttribute?.InstrumentSeparator.Or(Constants.Metrics.InstrumentSeparatorDefault)
+			?? Constants.Metrics.InstrumentSeparatorDefault;
 
 		if (meterAttribute.IncludeAssemblyInstrumentPrefix.Value == true)
 		{

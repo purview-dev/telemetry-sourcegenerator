@@ -38,21 +38,14 @@ static partial class ActivitySourceTargetClassEmitter
 		indent = EmitFields(target, builder, indent, context, logger);
 		indent = EmitMethods(target, builder, indent, context, logger, emitNullable);
 
-		EmitHelpers.EmitClassEnd(builder, indent);
-		EmitHelpers.EmitNamespaceEnd(
+		EmitterHelpers.EmitTargetSource(
 			target.ClassNamespace,
 			target.ParentClasses,
 			indent,
 			builder,
-			context.CancellationToken
-		);
-
-		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString(), emitNullable);
-		var hintName = $"{target.FullyQualifiedName}.Activity.g.cs";
-
-		context.AddSource(
-			hintName,
-			Microsoft.CodeAnalysis.Text.SourceText.From(sourceText, Encoding.UTF8)
+			hintName: $"{target.FullyQualifiedName}.Activity.g.cs",
+			context,
+			emitNullable
 		);
 
 		DependencyInjectionClassEmitter.GenerateImplementation(

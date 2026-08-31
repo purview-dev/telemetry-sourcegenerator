@@ -17,12 +17,7 @@ public abstract class CodeRefactoringTestBase
 	)
 	{
 		var provider = CreateDefaultProvider();
-		return await ApplyRefactoringAsync(
-			codeWithMarker,
-			provider,
-			equivalenceKey,
-			cancellationToken
-		);
+		return await ApplyRefactoringAsync(codeWithMarker, provider, equivalenceKey, cancellationToken);
 	}
 
 	protected static async Task<string?> ApplyRefactoringAsync(
@@ -32,11 +27,7 @@ public abstract class CodeRefactoringTestBase
 		CancellationToken cancellationToken = default
 	)
 	{
-		var actions = await GetRefactoringActionsAsync(
-			codeWithMarker,
-			provider,
-			cancellationToken: cancellationToken
-		);
+		var actions = await GetRefactoringActionsAsync(codeWithMarker, provider, cancellationToken: cancellationToken);
 
 		if (actions.Count == 0)
 			return null;
@@ -50,9 +41,7 @@ public abstract class CodeRefactoringTestBase
 			{
 				foreach (var topLevel in actions)
 				{
-					action = topLevel.NestedActions.FirstOrDefault(a =>
-						a.EquivalenceKey == equivalenceKey
-					);
+					action = topLevel.NestedActions.FirstOrDefault(a => a.EquivalenceKey == equivalenceKey);
 					if (action is not null)
 						break;
 				}
@@ -99,12 +88,7 @@ public abstract class CodeRefactoringTestBase
 	)
 	{
 		var provider = CreateDefaultProvider();
-		return await GetRefactoringActionsAsync(
-			codeWithMarker,
-			provider,
-			equivalenceKey,
-			cancellationToken
-		);
+		return await GetRefactoringActionsAsync(codeWithMarker, provider, equivalenceKey, cancellationToken);
 	}
 
 	protected static async Task<IReadOnlyList<CodeAction>> GetRefactoringActionsAsync(
@@ -121,10 +105,7 @@ public abstract class CodeRefactoringTestBase
 
 		var cursorIndex = codeWithMarker.IndexOf(marker, StringComparison.Ordinal);
 		if (cursorIndex < 0)
-			throw new ArgumentException(
-				$"Code must contain the cursor marker '{marker}'.",
-				nameof(codeWithMarker)
-			);
+			throw new ArgumentException($"Code must contain the cursor marker '{marker}'.", nameof(codeWithMarker));
 
 		var code = codeWithMarker.Remove(cursorIndex, marker.Length);
 
@@ -144,23 +125,12 @@ public abstract class CodeRefactoringTestBase
 		return actions;
 	}
 
-	static async Task<(Project, Compilation)> CreateProjectAsync(
-		string code,
-		CancellationToken cancellationToken
-	)
+	static async Task<(Project, Compilation)> CreateProjectAsync(string code, CancellationToken cancellationToken)
 	{
 		using var workspace = new AdhocWorkspace();
 		var projectInfo = ProjectInfo
-			.Create(
-				ProjectId.CreateNewId(),
-				VersionStamp.Default,
-				"TestProject",
-				"TestProject",
-				LanguageNames.CSharp
-			)
-			.WithCompilationOptions(
-				new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
-			)
+			.Create(ProjectId.CreateNewId(), VersionStamp.Default, "TestProject", "TestProject", LanguageNames.CSharp)
+			.WithCompilationOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
 			.WithMetadataReferences(GetDefaultReferences());
 
 		var project = workspace.AddProject(projectInfo);
@@ -176,95 +146,48 @@ public abstract class CodeRefactoringTestBase
 		yield return MetadataReference.CreateFromFile(
 			System.Reflection.Assembly.Load("netstandard, Version=2.0.0.0").Location
 		);
-		yield return MetadataReference.CreateFromFile(
-			System.Reflection.Assembly.Load("System.Runtime").Location
-		);
-		yield return MetadataReference.CreateFromFile(
-			typeof(Microsoft.Extensions.Logging.ILogger).Assembly.Location
-		);
-		yield return MetadataReference.CreateFromFile(
-			typeof(Microsoft.Extensions.Logging.LogLevel).Assembly.Location
-		);
-		yield return MetadataReference.CreateFromFile(
-			typeof(System.Diagnostics.ActivitySource).Assembly.Location
-		);
-		yield return MetadataReference.CreateFromFile(
-			typeof(System.Diagnostics.Metrics.Counter<>).Assembly.Location
-		);
+		yield return MetadataReference.CreateFromFile(System.Reflection.Assembly.Load("System.Runtime").Location);
+		yield return MetadataReference.CreateFromFile(typeof(Microsoft.Extensions.Logging.ILogger).Assembly.Location);
+		yield return MetadataReference.CreateFromFile(typeof(Microsoft.Extensions.Logging.LogLevel).Assembly.Location);
+		yield return MetadataReference.CreateFromFile(typeof(System.Diagnostics.ActivitySource).Assembly.Location);
+		yield return MetadataReference.CreateFromFile(typeof(System.Diagnostics.Metrics.Counter<>).Assembly.Location);
 	}
 
 	/// <summary>
-	/// Applies the refactoring to <paramref name="codeWithMarker"/> and verifies
-	/// a snapshot containing both the original (before) and the rewritten (after) code.
-	/// The snapshot is stored in <c>Snapshots/</c> and auto-accepted on first run.
+	/// Applies the refactoring to <paramref name="codeWithMarker"/> and asserts that a
+	/// rewritten result is produced which is valid C#.
 	/// </summary>
 	protected static async Task VerifyRefactoringAsync(
 		string codeWithMarker,
 		CodeRefactoringProvider provider,
+		CancellationToken cancellationToken = default
+	) => await VerifyRefactoringAsync(codeWithMarker, provider, equivalenceKey: null, cancellationToken);
+
+	/// <summary>
+	/// Applies the named nested-scope refactoring (e.g. "In this document") and asserts that a
+	/// rewritten result is produced which is valid C#.
+	/// </summary>
+	protected static async Task VerifyRefactoringAsync(
+		string codeWithMarker,
+		CodeRefactoringProvider provider,
+		string? equivalenceKey,
 		CancellationToken cancellationToken = default
 	)
 	{
 		ArgumentNullException.ThrowIfNull(codeWithMarker);
 		ArgumentNullException.ThrowIfNull(provider);
 
-		var before = codeWithMarker
-			.Replace("$$", string.Empty, StringComparison.Ordinal)
-			.TrimStart();
-		var after = await ApplyRefactoringAsync(
-			codeWithMarker,
-			provider,
-			cancellationToken: cancellationToken
-		);
+		var after = await ApplyRefactoringAsync(codeWithMarker, provider, equivalenceKey, cancellationToken);
 
-		var snapshot = new
-		{
-			Before = before,
-			After = after?.TrimStart() ?? "(no refactoring applied)",
-		};
+		await Assert.That(after).IsNotNull().Because("Expected the refactoring to apply.");
 
-		await Verify(snapshot)
-			.UseDirectory("Snapshots")
-			.DisableRequireUniquePrefix()
-			.DisableDateCounting()
-			.AutoVerify();
-	}
+		await Assert
+			.That(after)
+			.IsNotEqualTo(codeWithMarker.Replace("$$", string.Empty, StringComparison.Ordinal).TrimStart())
+			.Because("Expected the refactoring to change the source.");
 
-	/// <summary>
-	/// Applies the named nested-scope refactoring (e.g. "In this document") and verifies
-	/// a snapshot containing both the original (before) and the rewritten (after) code.
-	/// </summary>
-	protected static async Task VerifyRefactoringAsync(
-		string codeWithMarker,
-		CodeRefactoringProvider provider,
-		string nestedActionEquivalenceKey,
-		CancellationToken cancellationToken = default
-	)
-	{
-		ArgumentNullException.ThrowIfNull(codeWithMarker);
-		ArgumentNullException.ThrowIfNull(provider);
-		ArgumentNullException.ThrowIfNull(nestedActionEquivalenceKey);
-
-		var before = codeWithMarker
-			.Replace("$$", string.Empty, StringComparison.Ordinal)
-			.TrimStart();
-		var after = await ApplyRefactoringAsync(
-			codeWithMarker,
-			provider,
-			equivalenceKey: nestedActionEquivalenceKey,
-			cancellationToken: cancellationToken
-		);
-
-		var snapshot = new
-		{
-			Before = before,
-			After = after?.TrimStart() ?? "(no refactoring applied)",
-		};
-
-		await Verify(snapshot)
-			.UseDirectory("Snapshots")
-			.DisableRequireUniquePrefix()
-			.DisableDateCounting()
-			.AutoVerify();
+		var parseResult = Microsoft.CodeAnalysis.CSharp.SyntaxFactory.ParseSyntaxTree(after!);
+		await Assert.That(parseResult.GetDiagnostics()).IsEmpty().Because("The rewritten source should be valid C#.");
 	}
 
 	/// <summary>

@@ -24,17 +24,10 @@ public interface ITestLogger {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicLogger,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			cancellationToken: cancellationToken,
-			parameters: logTargetName
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
@@ -66,17 +59,10 @@ public interface ITestLogger {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicLogger,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			cancellationToken: cancellationToken,
-			parameters: [prefixType, logTargetName]
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	public static IEnumerable<(string, string)> GetPrefixAndEntryNames()

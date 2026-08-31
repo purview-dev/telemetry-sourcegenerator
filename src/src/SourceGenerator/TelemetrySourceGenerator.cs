@@ -15,18 +15,18 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator, IL
 		// C# 8+ feature detection: controls nullable annotations and null-forgiving operators.
 		var supportsNullableAnnotations = context.ParseOptionsProvider.Select(
 			static (opts, _) =>
-				opts is not CSharpParseOptions csOpts
-				|| csOpts.LanguageVersion >= LanguageVersion.CSharp8
+				opts is not CSharpParseOptions csOpts || csOpts.LanguageVersion >= LanguageVersion.CSharp8
 		);
 
 		// IMeterFactory is .NET 8+ only — never available on .NET Framework 4.8.
 		var supportsIMeterFactory = context.ParseOptionsProvider.Select(
 			static (opts, _) =>
-				opts is not CSharpParseOptions csOpts
-				|| !csOpts.PreprocessorSymbolNames.Contains("NET48_OR_GREATER")
+				opts is not CSharpParseOptions csOpts || !csOpts.PreprocessorSymbolNames.Contains("NET48_OR_GREATER")
 		);
 
 		// Only .NET 8+ and .NET Framework 4.8+ are supported; fail fast for anything else.
+		// A compilation with no target-framework symbols at all (e.g. an in-memory test
+		// compilation) is treated as .NET 8+.
 		var frameworkSupported = context.ParseOptionsProvider.Select(
 			static (opts, _) =>
 			{
@@ -35,7 +35,8 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator, IL
 
 				var symbols = csOpts.PreprocessorSymbolNames;
 				return symbols.Contains("NET8_0_OR_GREATER")
-					|| symbols.Contains("NET48_OR_GREATER");
+					|| symbols.Contains("NET48_OR_GREATER")
+					|| symbols.All(static s => !s.StartsWith("NET", StringComparison.Ordinal));
 			}
 		);
 		context.RegisterSourceOutput(
@@ -76,8 +77,7 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator, IL
 			.SyntaxProvider.ForAttributeWithMetadataName(
 				Constants.Activities.ActivitySourceAttribute.TypeInfo.FullyQualifiedName,
 				static (node, token) => PipelineHelpers.HasActivityTargetAttribute(node, token),
-				(ctx, cancellationToken) =>
-					PipelineHelpers.BuildActivityTransform(ctx, _logger, cancellationToken)
+				(ctx, cancellationToken) => PipelineHelpers.BuildActivityTransform(ctx, _logger, cancellationToken)
 			)
 			.WhereNotNull()
 			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_Activities");
@@ -86,31 +86,14 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator, IL
 			.SyntaxProvider.ForAttributeWithMetadataName(
 				Constants.Metrics.MeterAttribute.TypeInfo.FullyQualifiedName,
 				static (node, token) => PipelineHelpers.HasMeterTargetAttribute(node, token),
-				(ctx, cancellationToken) =>
-					PipelineHelpers.BuildMeterTransform(ctx, _logger, cancellationToken)
+				(ctx, cancellationToken) => PipelineHelpers.BuildMeterTransform(ctx, _logger, cancellationToken)
 			)
 			.WhereNotNull()
 			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_Meters");
 
-		RegisterActivitiesGeneration(
-			context,
-			activityProvider,
-			supportsNullableAnnotations,
-			_logger
-		);
-		RegisterLoggerGeneration(
-			context,
-			supportsNullableAnnotations,
-			supportsIMeterFactory,
-			_logger
-		);
-		RegisterMetricsGeneration(
-			context,
-			meterProvider,
-			supportsNullableAnnotations,
-			supportsIMeterFactory,
-			_logger
-		);
+		RegisterActivitiesGeneration(context, activityProvider, supportsNullableAnnotations, _logger);
+		RegisterLoggerGeneration(context, supportsNullableAnnotations, supportsIMeterFactory, _logger);
+		RegisterMetricsGeneration(context, meterProvider, supportsNullableAnnotations, supportsIMeterFactory, _logger);
 		RegisterTelemetryNamesGeneration(
 			context,
 			activityProvider,

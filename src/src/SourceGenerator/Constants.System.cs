@@ -14,8 +14,7 @@ partial class Constants
 		public const string NullKeyword = "null";
 		public const string DefaultKeyword = "default";
 
-		public static readonly PurviewTypeInfo DateTimeOffset =
-			PurviewTypeFactory.Create<DateTimeOffset>();
+		public static readonly PurviewTypeInfo DateTimeOffset = PurviewTypeFactory.Create<DateTimeOffset>();
 		public static readonly PurviewTypeInfo Func = PurviewTypeFactory.Create("System.Func"); // <T>
 		public static readonly PurviewTypeInfo Action = PurviewTypeFactory.Create("System.Action"); // <T>
 
@@ -25,9 +24,7 @@ partial class Constants
 		public static readonly PurviewTypeInfo GenericIEnumerable = PurviewTypeFactory.Create(
 			"System.Collections.Generic.IEnumerable"
 		); // <>
-		public static readonly PurviewTypeInfo List = PurviewTypeFactory.Create(
-			"System.Collections.Generic.List"
-		); // <>
+		public static readonly PurviewTypeInfo List = PurviewTypeFactory.Create("System.Collections.Generic.List"); // <>
 		public static readonly PurviewTypeInfo Dictionary = PurviewTypeFactory.Create(
 			"System.Collections.Generic.Dictionary"
 		); // <>
@@ -35,8 +32,7 @@ partial class Constants
 			"System.Collections.Concurrent.ConcurrentDictionary"
 		); // <>
 
-		public static readonly PurviewTypeInfo IDisposable =
-			PurviewTypeFactory.Create<IDisposable>();
+		public static readonly PurviewTypeInfo IDisposable = PurviewTypeFactory.Create<IDisposable>();
 		public static readonly PurviewTypeInfo Exception = PurviewTypeFactory.Create<Exception>();
 
 		public static readonly PurviewTypeInfo TagList = PurviewTypeFactory.Create(
@@ -89,61 +85,31 @@ partial class Constants
 			public const string CharKeyword = "char";
 
 			// Reference types
-			public static readonly PurviewTypeInfo String = PurviewTypeFactory.Create(
-				SpecialType.System_String
-			);
-			public static readonly PurviewTypeInfo Object = PurviewTypeFactory.Create(
-				SpecialType.System_Object
-			);
+			public static readonly PurviewTypeInfo String = PurviewTypeFactory.Create(SpecialType.System_String);
+			public static readonly PurviewTypeInfo Object = PurviewTypeFactory.Create(SpecialType.System_Object);
 
 			// Boolean types
-			public static readonly PurviewTypeInfo Boolean = PurviewTypeFactory.Create(
-				SpecialType.System_Boolean
-			);
+			public static readonly PurviewTypeInfo Boolean = PurviewTypeFactory.Create(SpecialType.System_Boolean);
 
 			// Signed integers
-			public static readonly PurviewTypeInfo Byte = PurviewTypeFactory.Create(
-				SpecialType.System_Byte
-			);
-			public static readonly PurviewTypeInfo Int16 = PurviewTypeFactory.Create(
-				SpecialType.System_Int16
-			);
-			public static readonly PurviewTypeInfo Int32 = PurviewTypeFactory.Create(
-				SpecialType.System_Int32
-			);
-			public static readonly PurviewTypeInfo Int64 = PurviewTypeFactory.Create(
-				SpecialType.System_Int64
-			);
+			public static readonly PurviewTypeInfo Byte = PurviewTypeFactory.Create(SpecialType.System_Byte);
+			public static readonly PurviewTypeInfo Int16 = PurviewTypeFactory.Create(SpecialType.System_Int16);
+			public static readonly PurviewTypeInfo Int32 = PurviewTypeFactory.Create(SpecialType.System_Int32);
+			public static readonly PurviewTypeInfo Int64 = PurviewTypeFactory.Create(SpecialType.System_Int64);
 
 			// Unsigned integers
-			public static readonly PurviewTypeInfo SByte = PurviewTypeFactory.Create(
-				SpecialType.System_SByte
-			);
-			public static readonly PurviewTypeInfo UInt16 = PurviewTypeFactory.Create(
-				SpecialType.System_UInt16
-			);
-			public static readonly PurviewTypeInfo UInt32 = PurviewTypeFactory.Create(
-				SpecialType.System_UInt32
-			);
-			public static readonly PurviewTypeInfo UInt64 = PurviewTypeFactory.Create(
-				SpecialType.System_UInt64
-			);
+			public static readonly PurviewTypeInfo SByte = PurviewTypeFactory.Create(SpecialType.System_SByte);
+			public static readonly PurviewTypeInfo UInt16 = PurviewTypeFactory.Create(SpecialType.System_UInt16);
+			public static readonly PurviewTypeInfo UInt32 = PurviewTypeFactory.Create(SpecialType.System_UInt32);
+			public static readonly PurviewTypeInfo UInt64 = PurviewTypeFactory.Create(SpecialType.System_UInt64);
 
 			// Floating‑point & decimal
-			public static readonly PurviewTypeInfo Single = PurviewTypeFactory.Create(
-				SpecialType.System_Single
-			);
-			public static readonly PurviewTypeInfo Double = PurviewTypeFactory.Create(
-				SpecialType.System_Double
-			);
-			public static readonly PurviewTypeInfo Decimal = PurviewTypeFactory.Create(
-				SpecialType.System_Decimal
-			);
+			public static readonly PurviewTypeInfo Single = PurviewTypeFactory.Create(SpecialType.System_Single);
+			public static readonly PurviewTypeInfo Double = PurviewTypeFactory.Create(SpecialType.System_Double);
+			public static readonly PurviewTypeInfo Decimal = PurviewTypeFactory.Create(SpecialType.System_Decimal);
 
 			// Other types
-			public static readonly PurviewTypeInfo Char = PurviewTypeFactory.Create(
-				SpecialType.System_Char
-			);
+			public static readonly PurviewTypeInfo Char = PurviewTypeFactory.Create(SpecialType.System_Char);
 		}
 	}
 }

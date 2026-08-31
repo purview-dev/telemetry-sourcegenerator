@@ -74,7 +74,7 @@ When creating a new project:
 
 When working in a Purview-based repo, also assume:
 
-- `TargetFramework` defaults to `net10.0` if not otherwise set.
+- `TargetFramework` defaults to `net10.0` if not otherwise set, or `netstandard2.0` when the project explicitly declares `IsRoslynComponent=true`.
 - Test projects receive framework packages and coverage defaults from the SDK.
 - Non-test projects receive SourceLink and telemetry defaults unless explicitly opted out.
 

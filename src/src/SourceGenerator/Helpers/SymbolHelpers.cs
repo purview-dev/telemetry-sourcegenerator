@@ -53,10 +53,7 @@ static class SymbolHelpers
 	static ITypeSymbol StripNullable(ITypeSymbol type)
 	{
 		// Removes value‑type "int?" and erroneous "Dictionary<int,string>?".
-		if (
-			type is INamedTypeSymbol named
-			&& named.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T
-		)
+		if (type is INamedTypeSymbol named && named.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
 		{
 			// Unwraps to the underlying T
 			return named.TypeArguments[0];

@@ -34,10 +34,7 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 	/// <summary>
 	/// Determines if a parameter should be excluded from a specific target generation.
 	/// </summary>
-	[System.Diagnostics.CodeAnalysis.SuppressMessage(
-		"Performance",
-		"CA1822:Mark members as static"
-	)]
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static")]
 	public ParameterExclusionResult ShouldExcludeParameter(
 		IParameterSymbol parameter,
 		GenerationType currentTarget,
@@ -165,10 +162,7 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		if (isScoped)
 		{
 			return Constants.System.IDisposable.Equals(returnType)
-				? ReturnTypeValidation.Valid(
-					GenerationType.Logging,
-					"Scoped logger correctly returns IDisposable."
-				)
+				? ReturnTypeValidation.Valid(GenerationType.Logging, "Scoped logger correctly returns IDisposable.")
 				: ReturnTypeValidation.Invalid(
 					GenerationType.Logging,
 					ReturnTypeValidationError.ScopedLoggerMustReturnIDisposable,
@@ -179,10 +173,7 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		// Non-scoped logger should return void or Task/ValueTask
 		if (returnType.SpecialType == SpecialType.System_Void)
 		{
-			return ReturnTypeValidation.Valid(
-				GenerationType.Logging,
-				"Logger method correctly returns void."
-			);
+			return ReturnTypeValidation.Valid(GenerationType.Logging, "Logger method correctly returns void.");
 		}
 
 		// Check for Task or ValueTask
@@ -202,15 +193,9 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 	{
 		// Activity methods can return Activity or void
 		return Constants.Activities.SystemDiagnostics.Activity.Equals(returnType)
-				? ReturnTypeValidation.Valid(
-					GenerationType.Activities,
-					"Activity method correctly returns Activity."
-				)
+				? ReturnTypeValidation.Valid(GenerationType.Activities, "Activity method correctly returns Activity.")
 			: returnType.SpecialType == SpecialType.System_Void
-				? ReturnTypeValidation.Valid(
-					GenerationType.Activities,
-					"Activity method correctly returns void."
-				)
+				? ReturnTypeValidation.Valid(GenerationType.Activities, "Activity method correctly returns void.")
 			: ReturnTypeValidation.Invalid(
 				GenerationType.Activities,
 				ReturnTypeValidationError.InvalidActivityReturnType,
@@ -223,10 +208,7 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		// Metrics methods should return void or observable types
 		if (returnType.SpecialType == SpecialType.System_Void)
 		{
-			return ReturnTypeValidation.Valid(
-				GenerationType.Metrics,
-				"Metrics method correctly returns void."
-			);
+			return ReturnTypeValidation.Valid(GenerationType.Metrics, "Metrics method correctly returns void.");
 		}
 
 		// Observable metrics can return various types
@@ -251,10 +233,7 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
 		{
 			var typeArg = namedType.TypeArguments.FirstOrDefault();
-			if (
-				typeArg != null
-				&& Constants.Activities.SystemDiagnostics.ActivityLink.Equals(typeArg)
-			)
+			if (typeArg != null && Constants.Activities.SystemDiagnostics.ActivityLink.Equals(typeArg))
 			{
 				return true;
 			}
@@ -269,10 +248,7 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 			return false;
 
 		var taskType = compilation.GetTypeByMetadataName("System.Threading.Tasks.Task");
-		if (
-			taskType != null
-			&& SymbolEqualityComparer.Default.Equals(namedType.ConstructedFrom, taskType)
-		)
+		if (taskType != null && SymbolEqualityComparer.Default.Equals(namedType.ConstructedFrom, taskType))
 		{
 			return true;
 		}
@@ -288,22 +264,14 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 			return false;
 
 		var valueTaskType = compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask");
-		if (
-			valueTaskType != null
-			&& SymbolEqualityComparer.Default.Equals(namedType, valueTaskType)
-		)
+		if (valueTaskType != null && SymbolEqualityComparer.Default.Equals(namedType, valueTaskType))
 		{
 			return true;
 		}
 
-		var genericValueTaskType = compilation.GetTypeByMetadataName(
-			"System.Threading.Tasks.ValueTask`1"
-		);
+		var genericValueTaskType = compilation.GetTypeByMetadataName("System.Threading.Tasks.ValueTask`1");
 		return genericValueTaskType != null
-			&& SymbolEqualityComparer.Default.Equals(
-				namedType.ConstructedFrom,
-				genericValueTaskType
-			);
+			&& SymbolEqualityComparer.Default.Equals(namedType.ConstructedFrom, genericValueTaskType);
 	}
 
 	static bool IsObservableMetricsReturnType(ITypeSymbol type)
@@ -315,15 +283,11 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		// Check for Func<T> where T is numeric or Measurement<T>
 		if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
 		{
-			var funcFullName =
-				$"{namedType.ContainingNamespace?.ToDisplayString()}.{namedType.Name}";
+			var funcFullName = $"{namedType.ContainingNamespace?.ToDisplayString()}.{namedType.Name}";
 			if (funcFullName == "System.Func")
 			{
 				var returnType = namedType.TypeArguments.LastOrDefault();
-				if (
-					returnType != null
-					&& (IsNumericType(returnType) || IsMeasurementType(returnType))
-				)
+				if (returnType != null && (IsNumericType(returnType) || IsMeasurementType(returnType)))
 				{
 					return true;
 				}
@@ -432,8 +396,7 @@ sealed record ReturnTypeValidation(
 	string Message
 )
 {
-	public static ReturnTypeValidation Valid(GenerationType target, string message) =>
-		new(target, true, null, message);
+	public static ReturnTypeValidation Valid(GenerationType target, string message) => new(target, true, null, message);
 
 	public static ReturnTypeValidation Invalid(
 		GenerationType target,
@@ -469,11 +432,7 @@ sealed record ParameterExclusionResult(IReadOnlyList<ParameterExclusion> Exclusi
 /// <summary>
 /// Specific exclusion for a parameter from a target.
 /// </summary>
-sealed record ParameterExclusion(
-	GenerationType Target,
-	ParameterExclusionReason Reason,
-	string Message
-);
+sealed record ParameterExclusion(GenerationType Target, ParameterExclusionReason Reason, string Message);
 
 /// <summary>
 /// Reasons why a parameter might be excluded from generation.

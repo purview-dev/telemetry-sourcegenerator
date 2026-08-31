@@ -5,8 +5,7 @@ namespace Purview.Telemetry.SourceGenerator.Refactorings;
 /// Each test defines a <em>before</em> scenario and the snapshot captures the <em>after</em> output.
 /// To regenerate snapshots: run <c>dotnet test</c>; <c>*.received.txt</c> files are auto-accepted.
 /// </summary>
-public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotTests
-	: CodeRefactoringTestBase
+public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotTests : CodeRefactoringTestBase
 {
 	static readonly ConvertActivitySourceToTelemetryRefactoringProvider Provider = new();
 
@@ -59,9 +58,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotT
 	}
 
 	[Test]
-	public async Task Verify_SingleStartActivity_WithActivityKind(
-		CancellationToken cancellationToken
-	)
+	public async Task Verify_SingleStartActivity_WithActivityKind(CancellationToken cancellationToken)
 	{
 		const string code = """
 			using System.Diagnostics;
@@ -189,9 +186,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotT
 	}
 
 	[Test]
-	public async Task Verify_ActivityName_FromLiteral_WithSeparator(
-		CancellationToken cancellationToken
-	)
+	public async Task Verify_ActivityName_FromLiteral_WithSeparator(CancellationToken cancellationToken)
 	{
 		const string code = """
 			using System.Diagnostics;

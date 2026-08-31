@@ -3,12 +3,7 @@ namespace Purview.Telemetry.SourceGenerator;
 partial class TelemetrySourceGeneratorTests
 {
 	[Test]
-	[Arguments(IncludeLoggerTypes.LoggerOnly)]
-	[Arguments(IncludeLoggerTypes.Telemetry)]
-	public async Task Generate_FromREADMESection_GeneratesTelemetry(
-		IncludeLoggerTypes loggerTypes,
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_FromREADMESection_GeneratesTelemetry(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicTelemetry = """
@@ -74,23 +69,16 @@ interface IEntityStoreTelemetry
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
-			disableDependencyInjection: false,
-			includeLoggerTypes: loggerTypes,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			cancellationToken: cancellationToken,
-			parameters: loggerTypes
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_FromWikiActivitiesSection_GeneratesTelemetry(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_FromWikiActivitiesSection_GeneratesTelemetry(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicTelemetry = """
@@ -121,7 +109,7 @@ interface IActivityTelemetry
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
-			disableDependencyInjection: false,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 
@@ -130,9 +118,7 @@ interface IActivityTelemetry
 	}
 
 	[Test]
-	public async Task Generate_FromWikiLoggingSection_GeneratesTelemetry(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_FromWikiLoggingSection_GeneratesTelemetry(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicTelemetry =
@@ -167,7 +153,7 @@ enum ItemTypes
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
-			disableDependencyInjection: false,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 
@@ -176,9 +162,7 @@ enum ItemTypes
 	}
 
 	[Test]
-	public async Task Generate_FromWikiMetricsSection_GeneratesTelemetry(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_FromWikiMetricsSection_GeneratesTelemetry(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicTelemetry =
@@ -218,7 +202,7 @@ interface IMeterTelemetry
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
-			disableDependencyInjection: false,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 
@@ -227,9 +211,7 @@ interface IMeterTelemetry
 	}
 
 	[Test]
-	public async Task Generate_FromWikiMultiTargetingSection_GeneratesTelemetry(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_FromWikiMultiTargetingSection_GeneratesTelemetry(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicTelemetry = """
@@ -262,7 +244,7 @@ interface IServiceTelemetry
 		// Act
 		var generationResult = await GenerateAsync(
 			basicTelemetry,
-			disableDependencyInjection: false,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 

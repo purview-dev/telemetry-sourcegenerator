@@ -20,9 +20,7 @@ partial class PipelineHelpers
 
 		if (context.TargetNode is not InterfaceDeclarationSyntax interfaceDeclaration)
 		{
-			logger?.Error(
-				$"Could not find interface syntax from the target node '{context.TargetNode.Flatten()}'."
-			);
+			logger?.Error($"Could not find interface syntax from the target node '{context.TargetNode.Flatten()}'.");
 			return null;
 		}
 
@@ -71,8 +69,7 @@ partial class PipelineHelpers
 			token
 		);
 		var activitySourceName =
-			activitySourceGenerationAttribute?.Name.IsSet == true
-				? activitySourceGenerationAttribute.Name.Value!
+			activitySourceGenerationAttribute?.Name.IsSet == true ? activitySourceGenerationAttribute.Name.Value!
 			: activitySourceAttribute.Name.IsSet ? activitySourceAttribute.Name.Value!
 			: null;
 
@@ -138,11 +135,7 @@ partial class PipelineHelpers
 		// Get naming convention from TelemetryGenerationAttribute (default to OpenTelemetry = 1)
 		var namingConvention = telemetryGeneration?.NamingConvention.Value ?? 1;
 
-		var prefix = GeneratePrefix(
-			activitySourceGenerationAttribute,
-			activitySourceAttribute,
-			token
-		);
+		var prefix = GeneratePrefix(activitySourceGenerationAttribute, activitySourceAttribute, token);
 		var defaultToTags =
 			activitySourceGenerationAttribute?.DefaultToTags.IsSet == true
 				? activitySourceGenerationAttribute.DefaultToTags.Value!.Value
@@ -154,9 +147,7 @@ partial class PipelineHelpers
 			|| activitySourceAttribute.LowercaseBaggageAndTagKeys.Value!.Value; // Default value
 
 		List<ActivityBasedGenerationTarget> methodTargets = [];
-		foreach (
-			var method in GetAllInterfaceMethods(interfaceSymbol, semanticModel.Compilation, token)
-		)
+		foreach (var method in GetAllInterfaceMethods(interfaceSymbol, semanticModel.Compilation, token))
 		{
 			token.ThrowIfCancellationRequested();
 
@@ -179,10 +170,7 @@ partial class PipelineHelpers
 							RaiseInferenceNotSupportedWithMultiTargeting: false,
 							RaiseMultiGenerationTargetsNotSupported: false
 						),
-						TypeParameters: ImmutableArray.CreateRange(
-							method.TypeParameters,
-							tp => tp.Name
-						)
+						TypeParameters: ImmutableArray.CreateRange(method.TypeParameters, tp => tp.Name)
 					)
 				);
 				continue;
@@ -190,9 +178,7 @@ partial class PipelineHelpers
 
 			if (Utilities.ContainsAttribute(method, Constants.Shared.ExcludeAttribute, token))
 			{
-				logger?.Debug(
-					$"Skipping {interfaceSymbol.Name}.{method.Name}, explicitly excluded."
-				);
+				logger?.Debug($"Skipping {interfaceSymbol.Name}.{method.Name}, explicitly excluded.");
 				continue;
 			}
 
@@ -205,9 +191,7 @@ partial class PipelineHelpers
 				out var eventAttribute
 			);
 			var activityOrEventName =
-				activityAttribute?.Name.IsSet == true
-					? activityAttribute.Value.Name.Value
-					: eventAttribute?.Name.Value;
+				activityAttribute?.Name.IsSet == true ? activityAttribute.Value.Name.Value : eventAttribute?.Name.Value;
 
 			if (string.IsNullOrWhiteSpace(activityOrEventName))
 				activityOrEventName = method.Name;
@@ -282,47 +266,25 @@ partial class PipelineHelpers
 			token.ThrowIfCancellationRequested();
 
 			var parameterType = PurviewTypeFactory.Create(parameter.Type);
-			var destination = defaultToTags
-				? ActivityParameterDestination.Tag
-				: ActivityParameterDestination.Baggage;
-			if (
-				Utilities.TryContainsAttribute(
-					parameter,
-					Constants.Shared.TagAttribute,
-					token,
-					out var attribute
-				)
-			)
+			var destination = defaultToTags ? ActivityParameterDestination.Tag : ActivityParameterDestination.Baggage;
+			if (Utilities.TryContainsAttribute(parameter, Constants.Shared.TagAttribute, token, out var attribute))
 			{
 				logger?.Debug($"Found explicit tag: {parameter.Name}.");
 				destination = ActivityParameterDestination.Tag;
 			}
 			else if (
-				Utilities.TryContainsAttribute(
-					parameter,
-					Constants.Activities.BaggageAttribute,
-					token,
-					out attribute
-				)
+				Utilities.TryContainsAttribute(parameter, Constants.Activities.BaggageAttribute, token, out attribute)
 			)
 			{
 				logger?.Debug($"Found explicit baggage: {parameter.Name}.");
 				destination = ActivityParameterDestination.Baggage;
 			}
-			else if (
-				Utilities.ContainsAttribute(parameter, Constants.Activities.EscapeAttribute, token)
-			)
+			else if (Utilities.ContainsAttribute(parameter, Constants.Activities.EscapeAttribute, token))
 			{
 				logger?.Debug($"Found escape parameter: {parameter.Name}.");
 				destination = ActivityParameterDestination.Escape;
 			}
-			else if (
-				Utilities.ContainsAttribute(
-					parameter,
-					Constants.Activities.StatusDescriptionAttribute,
-					token
-				)
-			)
+			else if (Utilities.ContainsAttribute(parameter, Constants.Activities.StatusDescriptionAttribute, token))
 			{
 				logger?.Debug($"Found status description parameter: {parameter.Name}.");
 				destination = ActivityParameterDestination.StatusDescription;
@@ -333,9 +295,7 @@ partial class PipelineHelpers
 			}
 			else if (
 				Constants.Activities.SystemDiagnostics.ActivityTagsCollection.Equals(parameterType)
-				|| Constants.Activities.SystemDiagnostics.ActivityTagIEnumerable.Equals(
-					parameterType
-				)
+				|| Constants.Activities.SystemDiagnostics.ActivityTagIEnumerable.Equals(parameterType)
 				|| Constants.System.TagList.Equals(parameterType)
 			)
 			{
@@ -353,9 +313,7 @@ partial class PipelineHelpers
 			}
 			else if (
 				Constants.Activities.SystemDiagnostics.ActivityLinkArray.Equals(parameterType)
-				|| Constants.Activities.SystemDiagnostics.ActivityLinkIEnumerable.Equals(
-					parameterType
-				)
+				|| Constants.Activities.SystemDiagnostics.ActivityLinkIEnumerable.Equals(parameterType)
 			)
 			{
 				destination = ActivityParameterDestination.LinksEnumerable;
@@ -377,29 +335,17 @@ partial class PipelineHelpers
 			else
 			{
 				// destination is already set to default.
-				logger?.Debug(
-					$"Inferring {(defaultToTags ? "tag" : "baggage")}: {parameter.Name}."
-				);
+				logger?.Debug($"Inferring {(defaultToTags ? "tag" : "baggage")}: {parameter.Name}.");
 			}
 
 			TagOrBaggageAttributeRecord? tagOrBaggageAttribute = null;
 			if (attribute != null)
 			{
-				tagOrBaggageAttribute = SharedHelpers.GetTagOrBaggageAttribute(
-					attribute,
-					semanticModel,
-					logger,
-					token
-				);
+				tagOrBaggageAttribute = SharedHelpers.GetTagOrBaggageAttribute(attribute, semanticModel, logger, token);
 			}
 
 			// Check for ExcludeTargetsAttribute
-			var excludeTargets = SharedHelpers.GetExcludeTargetsAttribute(
-				parameter,
-				semanticModel,
-				logger,
-				token
-			);
+			var excludeTargets = SharedHelpers.GetExcludeTargetsAttribute(parameter, semanticModel, logger, token);
 
 			var parameterName = parameter.Name;
 			var generatedName = GenerateParameterName(
@@ -438,24 +384,14 @@ partial class PipelineHelpers
 
 		token.ThrowIfCancellationRequested();
 
-		activityAttribute = SharedHelpers.GetActivityGenAttribute(
-			method,
-			semanticModel,
-			logger,
-			token
-		);
+		activityAttribute = SharedHelpers.GetActivityGenAttribute(method, semanticModel, logger, token);
 		if (activityAttribute != null)
 		{
 			logger?.Debug($"Found explicit activity: {method.Name}.");
 			return (ActivityMethodType.Activity, false);
 		}
 
-		eventAttribute = SharedHelpers.GetActivityEventAttribute(
-			method,
-			semanticModel,
-			logger,
-			token
-		);
+		eventAttribute = SharedHelpers.GetActivityEventAttribute(method, semanticModel, logger, token);
 		if (eventAttribute != null)
 		{
 			logger?.Debug($"Found explicit event: {method.Name}.");
@@ -471,9 +407,7 @@ partial class PipelineHelpers
 		var returnType = method.ReturnType;
 		if (Constants.Activities.SystemDiagnostics.Activity.Equals(returnType))
 		{
-			logger?.Debug(
-				$"Inferring activity due to return type ({returnType.ToDisplayString()}): {method.Name}."
-			);
+			logger?.Debug($"Inferring activity due to return type ({returnType.ToDisplayString()}): {method.Name}.");
 			return (ActivityMethodType.Activity, true);
 		}
 
@@ -489,9 +423,7 @@ partial class PipelineHelpers
 				&& Constants.Activities.SystemDiagnostics.Activity.Equals(method.Parameters[0].Type)
 			)
 			{
-				logger?.Debug(
-					$"Inferring event as the method's first parameter is an Activity: {method.Name}."
-				);
+				logger?.Debug($"Inferring event as the method's first parameter is an Activity: {method.Name}.");
 
 				return (ActivityMethodType.Event, true);
 			}
@@ -499,9 +431,7 @@ partial class PipelineHelpers
 
 		if (method.Name.EndsWith("Context", StringComparison.Ordinal))
 		{
-			logger?.Debug(
-				$"Inferring context as the method name ends in 'Context': {method.Name}."
-			);
+			logger?.Debug($"Inferring context as the method name ends in 'Context': {method.Name}.");
 			return (ActivityMethodType.Context, true);
 		}
 

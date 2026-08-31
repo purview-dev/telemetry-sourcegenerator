@@ -23,10 +23,7 @@ interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -55,10 +52,7 @@ interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -87,10 +81,7 @@ interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -119,10 +110,7 @@ interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -149,10 +137,7 @@ interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -179,10 +164,7 @@ interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -209,10 +191,7 @@ interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -239,19 +218,14 @@ interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenAssemblyMeterName_UsesAssemblyMeterName(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenAssemblyMeterName_UsesAssemblyMeterName(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicMetric = """
@@ -271,10 +245,7 @@ interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -303,19 +274,14 @@ interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenInterfaceMeterNameOverridesAssemblyDefault(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenInterfaceMeterNameOverridesAssemblyDefault(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicMetric = """
@@ -335,10 +301,7 @@ interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);

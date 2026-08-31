@@ -27,17 +27,10 @@ public interface ITestMetrics {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicMetric,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			cancellationToken: cancellationToken,
-			parameters: [attribute, measurementParameter]
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	public static IEnumerable<(string, string)> NameUnitsDescriptorData

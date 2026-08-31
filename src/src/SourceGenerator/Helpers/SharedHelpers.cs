@@ -13,9 +13,7 @@ static partial class SharedHelpers
 
 		var generationType = GenerationType.None;
 
-		if (
-			Utilities.ContainsAttribute(symbol, Constants.Activities.ActivitySourceAttribute, token)
-		)
+		if (Utilities.ContainsAttribute(symbol, Constants.Activities.ActivitySourceAttribute, token))
 			generationType |= GenerationType.Activities;
 
 		if (Utilities.ContainsAttribute(symbol, Constants.Logging.LoggerAttribute, token))
@@ -35,61 +33,54 @@ static partial class SharedHelpers
 	}
 
 	/// <summary>
+	/// Returns the single target that "owns" shared emission (DI extension, class attributes,
+	/// constructor, throw stubs) for a multi-target interface. Only one target emits these to
+	/// avoid duplicate definitions across the generated partial classes.
+	/// </summary>
+	/// <param name="generationType">The registered telemetry types for the interface.</param>
+	/// <param name="includeActivities">
+	/// Whether Activities participate in the priority. Activities never own the constructor,
+	/// so constructor logic passes <see langword="false"/>.
+	/// </param>
+	public static GenerationType GetCanonicalTargetType(GenerationType generationType, bool includeActivities)
+	{
+		// Priority: Activities > Logging > Metrics
+		if (includeActivities && generationType.HasFlag(GenerationType.Activities))
+			return GenerationType.Activities;
+
+		if (generationType.HasFlag(GenerationType.Logging))
+			return GenerationType.Logging;
+
+		if (generationType.HasFlag(GenerationType.Metrics))
+			return GenerationType.Metrics;
+
+		return GenerationType.None;
+	}
+
+	/// <summary>
 	/// Determines if the DI extension should be generated for this requesting type.
 	/// Only one target should generate the DI extension to avoid duplicate files.
 	/// </summary>
-	public static bool ShouldEmitDIExtension(
-		GenerationType requestingType,
-		GenerationType generationType
-	)
-	{
-		// Only emit DI extension from one target to avoid duplicates
-		// Priority: Activities > Logging > Metrics
-		return generationType.HasFlag(GenerationType.Activities)
-				? requestingType == GenerationType.Activities
-			: generationType.HasFlag(GenerationType.Logging)
-				? requestingType == GenerationType.Logging
-			: generationType.HasFlag(GenerationType.Metrics)
-				&& requestingType == GenerationType.Metrics;
-	}
+	public static bool ShouldEmitDIExtension(GenerationType requestingType, GenerationType generationType) =>
+		requestingType != GenerationType.None
+		&& GetCanonicalTargetType(generationType, includeActivities: true) == requestingType;
 
 	/// <summary>
 	/// Determines if class-level attributes should be emitted for this requesting type.
 	/// Only one target should emit class attributes to avoid duplicate attributes on partial classes.
 	/// </summary>
-	public static bool ShouldEmitClassAttributes(
-		GenerationType requestingType,
-		GenerationType generationType
-	)
-	{
-		// Only emit class attributes from one target to avoid duplicates
-		// Priority: Activities > Logging > Metrics
-		return generationType.HasFlag(GenerationType.Activities)
-				? requestingType == GenerationType.Activities
-			: generationType.HasFlag(GenerationType.Logging)
-				? requestingType == GenerationType.Logging
-			: generationType.HasFlag(GenerationType.Metrics)
-				&& requestingType == GenerationType.Metrics;
-	}
+	public static bool ShouldEmitClassAttributes(GenerationType requestingType, GenerationType generationType) =>
+		requestingType != GenerationType.None
+		&& GetCanonicalTargetType(generationType, includeActivities: true) == requestingType;
 
 	/// <summary>
 	/// Determines if the constructor should be emitted for this requesting type.
 	/// Only one target should emit the constructor to avoid duplicate definitions.
 	/// Constructor is emitted by the first target that needs one (Logging or Metrics).
 	/// </summary>
-	public static bool ShouldEmitConstructor(
-		GenerationType requestingType,
-		GenerationType generationType
-	)
-	{
-		// Activities don't use the constructor (no injected dependencies)
-		// Only Logging and Metrics need constructor
-		// Priority: Logging > Metrics
-		return generationType.HasFlag(GenerationType.Logging)
-			? requestingType == GenerationType.Logging
-			: generationType.HasFlag(GenerationType.Metrics)
-				&& requestingType == GenerationType.Metrics;
-	}
+	public static bool ShouldEmitConstructor(GenerationType requestingType, GenerationType generationType) =>
+		requestingType != GenerationType.None
+		&& GetCanonicalTargetType(generationType, includeActivities: false) == requestingType;
 
 	public static bool AttributeParser(
 		AttributeData attributeData,
@@ -101,10 +92,7 @@ static partial class SharedHelpers
 	{
 		logger?.Debug($"Found attribute: {attributeData}");
 
-		if (
-			semanticModel != null
-			&& HasErrors(attributeData, semanticModel, logger, cancellationToken)
-		)
+		if (semanticModel != null && HasErrors(attributeData, semanticModel, logger, cancellationToken))
 		{
 			logger?.Warning($"Attribute has error: {attributeData}");
 			return false;
@@ -161,9 +149,7 @@ static partial class SharedHelpers
 				var value = Utilities.GetTypedConstantValue(namedArgument.Value)!;
 				if (namedArgument.Value.Type == null)
 				{
-					logger?.Error(
-						$"Named argument {namedArgument.Key}'s type could not be determined."
-					);
+					logger?.Error($"Named argument {namedArgument.Key}'s type could not be determined.");
 					continue;
 				}
 
@@ -198,11 +184,7 @@ static partial class SharedHelpers
 				cancellationToken.ThrowIfCancellationRequested();
 				var name =
 					argument.NameEquals?.Name.ToString()
-					?? argument
-						.DescendantNodes()
-						.OfType<IdentifierNameSyntax>()
-						.FirstOrDefault()
-						?.ToString();
+					?? argument.DescendantNodes().OfType<IdentifierNameSyntax>().FirstOrDefault()?.ToString();
 				var value = argument.Expression.ToString();
 				if (name == null || value == null)
 					continue;
@@ -244,9 +226,7 @@ static partial class SharedHelpers
 		{
 			// For partial interfaces or other cases where the span might be invalid,
 			// fall back to getting diagnostics without a span
-			logger?.Debug(
-				"Span invalid for GetDiagnostics, falling back to full syntax tree diagnostics"
-			);
+			logger?.Debug("Span invalid for GetDiagnostics, falling back to full syntax tree diagnostics");
 
 			var diagnostics = semanticModel.GetDiagnostics(cancellationToken: cancellationToken);
 			if (diagnostics.Length > 0 && logger != null)
@@ -274,12 +254,7 @@ static partial class SharedHelpers
 				attributeData,
 				(name, value) =>
 				{
-					if (
-						name.Equals(
-							nameof(TagOrBaggageAttributeRecord.Name),
-							StringComparison.OrdinalIgnoreCase
-						)
-					)
+					if (name.Equals(nameof(TagOrBaggageAttributeRecord.Name), StringComparison.OrdinalIgnoreCase))
 						nameValue = new((string)value);
 					else if (
 						name.Equals(
@@ -339,9 +314,7 @@ static partial class SharedHelpers
 				? null
 				: GetTelemetryGenerationAttribute(assemblyAttribute, semanticModel, logger, token);
 		var typeGeneration =
-			typeAttribute == null
-				? null
-				: GetTelemetryGenerationAttribute(typeAttribute, semanticModel, logger, token);
+			typeAttribute == null ? null : GetTelemetryGenerationAttribute(typeAttribute, semanticModel, logger, token);
 
 		return assemblyAttribute == null && typeGeneration == null
 			? CreateDefault()
@@ -349,9 +322,7 @@ static partial class SharedHelpers
 				GenerateDependencyExtension: typeGeneration?.GenerateDependencyExtension
 					?? assemblyTelemetryGeneration?.GenerateDependencyExtension
 					?? new(true),
-				ClassName: typeGeneration?.ClassName
-					?? assemblyTelemetryGeneration?.ClassName
-					?? new(),
+				ClassName: typeGeneration?.ClassName ?? assemblyTelemetryGeneration?.ClassName ?? new(),
 				DependencyInjectionClassName: typeGeneration?.DependencyInjectionClassName
 					?? assemblyTelemetryGeneration?.DependencyInjectionClassName
 					?? new(),

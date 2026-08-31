@@ -18,9 +18,7 @@ partial class TelemetrySourceGenerator
 	{
 		// Extract only AssemblyName from Compilation — a stable string that rarely changes —
 		// so we don't re-run TelemetryNames generation on every compilation change.
-		var assemblyNameProvider = context.CompilationProvider.Select(
-			static (c, _) => c.AssemblyName ?? string.Empty
-		);
+		var assemblyNameProvider = context.CompilationProvider.Select(static (c, _) => c.AssemblyName ?? string.Empty);
 
 		var combined = assemblyNameProvider
 			.Combine(meterTargets.Collect())
@@ -69,10 +67,7 @@ partial class TelemetrySourceGenerator
 				return;
 			}
 
-			if (
-				target.TelemetryGeneration?.TelemetryNamesClassName.Value != null
-				&& customClassName == null
-			)
+			if (target.TelemetryGeneration?.TelemetryNamesClassName.Value != null && customClassName == null)
 			{
 				customClassName = target.TelemetryGeneration.TelemetryNamesClassName.Value;
 			}
@@ -87,10 +82,7 @@ partial class TelemetrySourceGenerator
 				return;
 			}
 
-			if (
-				target.TelemetryGeneration?.TelemetryNamesClassName.Value != null
-				&& customClassName == null
-			)
+			if (target.TelemetryGeneration?.TelemetryNamesClassName.Value != null && customClassName == null)
 			{
 				customClassName = target.TelemetryGeneration.TelemetryNamesClassName.Value;
 			}
@@ -118,9 +110,7 @@ partial class TelemetrySourceGenerator
 			.ToImmutableArray();
 
 		// Use custom class name if provided, otherwise default to "TelemetryNames"
-		var className = string.IsNullOrWhiteSpace(customClassName)
-			? "TelemetryNames"
-			: customClassName;
+		var className = string.IsNullOrWhiteSpace(customClassName) ? "TelemetryNames" : customClassName;
 
 		TelemetryNamesEmitter.GenerateClass(
 			meterNames,

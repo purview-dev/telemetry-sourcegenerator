@@ -25,9 +25,7 @@ public static class HostApplicationBuilderExtensions
 		{
 			builder.ConfigureOpenTelemetry(meterNames, activitySourceNames);
 
-			builder
-				.AddDefaultHealthChecks()
-				.AddDefaultOpenAPI(throwOnMissing: throwOnMissingOpenApiConfig);
+			builder.AddDefaultHealthChecks().AddDefaultOpenAPI(throwOnMissing: throwOnMissingOpenApiConfig);
 
 			builder.Services.AddServiceDiscovery();
 
@@ -104,17 +102,13 @@ public static class HostApplicationBuilderExtensions
 			if (!openApiSection.Exists())
 			{
 				return throwOnMissing
-					? throw new InvalidOperationException(
-						"OpenAPI configuration section is missing."
-					)
+					? throw new InvalidOperationException("OpenAPI configuration section is missing.")
 					: builder;
 			}
 
 			// the default format will just be ApiVersion.ToString(); for example, 1.0.
 			// this will format the version as "'v'major[.minor][-status]"
-			var versioned = apiVersioning?.AddApiExplorer(options =>
-				options.GroupNameFormat = "'v'VVV"
-			);
+			var versioned = apiVersioning?.AddApiExplorer(options => options.GroupNameFormat = "'v'VVV");
 			string[] versions = ["v1"];
 			foreach (var description in versions)
 			{
@@ -145,21 +139,13 @@ public static class HostApplicationBuilderExtensions
 
 		IHostApplicationBuilder AddOpenTelemetryExporters()
 		{
-			var useOtlpExporter = !string.IsNullOrWhiteSpace(
-				builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]
-			);
+			var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
 
 			if (useOtlpExporter)
 			{
-				builder.Services.Configure<OpenTelemetryLoggerOptions>(logging =>
-					logging.AddOtlpExporter()
-				);
-				builder.Services.ConfigureOpenTelemetryMeterProvider(metrics =>
-					metrics.AddOtlpExporter()
-				);
-				builder.Services.ConfigureOpenTelemetryTracerProvider(tracing =>
-					tracing.AddOtlpExporter()
-				);
+				builder.Services.Configure<OpenTelemetryLoggerOptions>(logging => logging.AddOtlpExporter());
+				builder.Services.ConfigureOpenTelemetryMeterProvider(metrics => metrics.AddOtlpExporter());
+				builder.Services.ConfigureOpenTelemetryTracerProvider(tracing => tracing.AddOtlpExporter());
 			}
 
 			// Uncomment the following lines to enable the Prometheus exporter (requires the OpenTelemetry.Exporter.Prometheus.AspNetCore package)

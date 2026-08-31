@@ -1,18 +1,11 @@
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
+using Purview.SourceGeneratorFramework.Testing;
 
 namespace Purview.Telemetry.SourceGenerator;
 
 static class TestHelpers
 {
-	static readonly JsonSerializerOptions JsonOptions = new()
-	{
-		WriteIndented = false,
-		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-	};
-
 	static readonly Assembly OwnerAssembly = typeof(TestHelpers).Assembly;
 	static readonly string NamespaceRoot = typeof(TestHelpers).Namespace!;
 
@@ -61,12 +54,8 @@ using Purview.Telemetry;
 		{
 			foreach (var s in remainderPermutations)
 			{
-				result.Add(
-					char.ToLower(currentChar, System.Globalization.CultureInfo.InvariantCulture) + s
-				);
-				result.Add(
-					char.ToUpper(currentChar, System.Globalization.CultureInfo.InvariantCulture) + s
-				);
+				result.Add(char.ToLower(currentChar, System.Globalization.CultureInfo.InvariantCulture) + s);
+				result.Add(char.ToUpper(currentChar, System.Globalization.CultureInfo.InvariantCulture) + s);
 			}
 		}
 		else
@@ -146,64 +135,15 @@ using Purview.Telemetry;
 	}
 
 	public static async Task VerifyAsync(
-		GenerationResult generationResult,
-		Action<SettingsTask>? config = null,
+		DriverRunResult result,
 		bool expectsDiagnostics = false,
 		bool whenValidatingDiagnosticsIgnoreNonErrors = false,
 		bool validationCompilation = true,
-		bool autoVerifyTemplates = true,
 		string[]? expectedDiagnosticCodes = null,
-		CancellationToken cancellationToken = default,
-		params object[] parameters
+		CancellationToken cancellationToken = default
 	)
 	{
-		var verifierTask = Verifier
-			.Verify(generationResult.Result)
-			.UseDirectory("Snapshots")
-			.DisableRequireUniquePrefix()
-			.DisableDateCounting()
-			//.UniqueForTargetFrameworkAndVersion(typeof(TestHelpers).Assembly)
-			.ScrubInlineDateTimeOffsets("yyyy-MM-dd HH:mm:ss zzzz") // 2024-22-02 14:43:22 +00:00
-			.AutoVerify(file =>
-			{
-				if (autoVerifyTemplates)
-				{
-					foreach (var template in Constants.GetAllTemplates())
-					{
-						var potentialName = $"#{template.Name}.g.";
-						if (file.IndexOf(potentialName, StringComparison.Ordinal) > -1)
-							return true;
-					}
-				}
-
-				return false;
-			});
-
-		if (parameters.Length > 0)
-		{
-			verifierTask = verifierTask.UseTextForParameters(
-				ComputeParameterFilenameHash(parameters)
-			);
-		}
-
-		config?.Invoke(verifierTask);
-
-		verifierTask = verifierTask.AutoVerify();
-
-		// Check if snapshot verification should be skipped
-		var ignoreVerify = Environment.GetEnvironmentVariable("PURVIEW_IGNORE_VERIFY");
-		if (
-			string.IsNullOrEmpty(ignoreVerify)
-			|| (
-				!ignoreVerify.Equals("true", StringComparison.OrdinalIgnoreCase)
-				&& !ignoreVerify.Equals("1", StringComparison.Ordinal)
-			)
-		)
-		{
-			await verifierTask;
-		}
-
-		var diag = generationResult.Diagnostics.ToArray();
+		var diag = result.DriverResult.Diagnostics.AddRange(result.AnalyzerResult?.Diagnostics ?? []).ToArray();
 		if (whenValidatingDiagnosticsIgnoreNonErrors)
 			diag = [.. diag.Where(m => m.Severity == DiagnosticSeverity.Error)];
 
@@ -211,7 +151,6 @@ using Purview.Telemetry;
 		{
 			await Assert.That(diag).IsNotEmpty();
 
-			// Assert on expected diagnostic codes if provided
 			if (expectedDiagnosticCodes?.Length > 0)
 			{
 				var actualDiagnosticCodes = diag.Select(d => d.Id).Distinct().ToArray();
@@ -236,35 +175,20 @@ using Purview.Telemetry;
 
 		await using MemoryStream ms = new();
 
-		var result = generationResult.Compilation.Emit(ms, cancellationToken: cancellationToken);
-		if (!result.Success)
+		var emitResult = result.CompilationResult.Compilation.Emit(ms, cancellationToken: cancellationToken);
+		if (!emitResult.Success)
 		{
 			await Assert
-				.That(
-					result.Diagnostics.Where(m => !m.Id.StartsWith("TSG", StringComparison.Ordinal))
-				)
+				.That(emitResult.Diagnostics.Where(m => !m.Id.StartsWith("TSG", StringComparison.Ordinal)))
 				.IsEmpty()
 				.Because(
 					string.Join(
 						Environment.NewLine,
-						result.Diagnostics.Select(d =>
+						emitResult.Diagnostics.Select(d =>
 							$"{d}{Environment.NewLine}-----------------------------------------------------"
 						)
 					)
 				);
 		}
-	}
-
-	static string ComputeParameterFilenameHash(IEnumerable<object> items)
-	{
-		var json = JsonSerializer.Serialize(items, JsonOptions);
-		var digest = SHA256.HashData(Encoding.UTF8.GetBytes(json));
-		var base64 = Convert
-			.ToBase64String(digest)
-			.TrimEnd('=') // remove padding
-			.Replace('+', '-') // URL-safe
-			.Replace('/', '_');
-
-		return base64;
 	}
 }

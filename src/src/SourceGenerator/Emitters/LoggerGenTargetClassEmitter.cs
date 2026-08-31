@@ -66,10 +66,7 @@ static partial class LoggerGenTargetClassEmitter
 		var sourceText = EmbeddedResources.Instance.AddHeader(builder.ToString(), emitNullable);
 		var hintName = $"{target.FullyQualifiedName}.Logging.g.cs";
 
-		context.AddSource(
-			hintName,
-			Microsoft.CodeAnalysis.Text.SourceText.From(sourceText, Encoding.UTF8)
-		);
+		context.AddSource(hintName, Microsoft.CodeAnalysis.Text.SourceText.From(sourceText, Encoding.UTF8));
 
 		DependencyInjectionClassEmitter.GenerateImplementation(
 			GenerationType.Logging,
@@ -125,9 +122,7 @@ static partial class LoggerGenTargetClassEmitter
 			// Multiple exceptions is always invalid, regardless of v1 or v2 generation.
 			if (methodTarget.HasMultipleExceptions)
 			{
-				logger?.Diagnostic(
-					"Method has multiple exception parameters, only a single one is permitted."
-				);
+				logger?.Diagnostic("Method has multiple exception parameters, only a single one is permitted.");
 				TelemetryDiagnostics.Report(
 					context.ReportDiagnostic,
 					TelemetryDiagnostics.Logging.MultipleExceptionsDefined
@@ -138,10 +133,7 @@ static partial class LoggerGenTargetClassEmitter
 			if (!methodTarget.UseV1Generation)
 				continue;
 
-			if (
-				methodTarget.ParameterCountSansException
-				> Constants.Logging.MaxNonExceptionParameters
-			)
+			if (methodTarget.ParameterCountSansException > Constants.Logging.MaxNonExceptionParameters)
 			{
 				logger?.Diagnostic("Method has more than 6 parameters.");
 				TelemetryDiagnostics.Report(
@@ -160,12 +152,7 @@ static partial class LoggerGenTargetClassEmitter
 				);
 			}
 
-			LoggerTargetClassEmitter.EmitLogActionField(
-				builder,
-				indent + 1,
-				methodTarget,
-				emitNullable
-			);
+			LoggerTargetClassEmitter.EmitLogActionField(builder, indent + 1, methodTarget, emitNullable);
 		}
 	}
 }

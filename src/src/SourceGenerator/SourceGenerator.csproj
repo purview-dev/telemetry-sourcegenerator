@@ -22,13 +22,9 @@
 		<DevelopmentDependency>true</DevelopmentDependency>
 		<SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
 		<CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
-		<Version>0.1.0.0</Version>
 		<!-- RS1038: The source generator itself does not use workspace APIs; only the
 		     CodeRefactoringProvider does, which is the expected usage pattern. -->
 		<NoWarn>$(NoWarn);RS1038</NoWarn>
-		<!-- Enable our own agent skills to be packed with the NuGet package -->
-		<EnabledAgentFolderInPackage>true</EnabledAgentFolderInPackage>
-		<ProjectAgentFolder>src/ProjectAgent</ProjectAgentFolder>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
@@ -61,5 +57,14 @@
 			Visible="false"
 		/>
 	</ItemGroup>
+	<!-- Ship the product agent skills in the package's .agents folder so that
+	     consumers using Purview.DotNetProjectSdk get them copied into their .agents/ -->
+	<ItemGroup>
+		<None
+			Include="..\..\ProjectAgent\**\*"
+			Pack="true"
+			PackagePath=".agents/%(RecursiveDir)%(Filename)%(Extension)"
+			Visible="false"
+		/>
+	</ItemGroup>
 </Project>
-

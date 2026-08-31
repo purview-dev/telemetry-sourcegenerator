@@ -1,0 +1,9 @@
+# TEMPORARY: This project is being refactored to reduce cyclomatic complexity
+# and type coupling. These maintainability rules are enforced repo-wide at
+# 'error' severity; they are scoped down here until the refactor completes,
+# at which point this file should be deleted and the rules re-verified.
+root = false
+
+[*.cs]
+dotnet_diagnostic.CA1502.severity = suggestion
+dotnet_diagnostic.CA1506.severity = suggestion

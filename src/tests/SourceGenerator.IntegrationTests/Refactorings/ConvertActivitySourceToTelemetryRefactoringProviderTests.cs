@@ -1,7 +1,6 @@
 namespace Purview.Telemetry.SourceGenerator.Refactorings;
 
-public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests
-	: CodeRefactoringTestBase
+public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests : CodeRefactoringTestBase
 {
 	static readonly ConvertActivitySourceToTelemetryRefactoringProvider Provider = new();
 
@@ -25,11 +24,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests
 			}
 			""";
 
-		var actions = await GetRefactoringActionsAsync(
-			code,
-			Provider,
-			cancellationToken: cancellationToken
-		);
+		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
 
 		await Assert.That(actions).IsEmpty();
 	}
@@ -52,11 +47,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests
 			}
 			""";
 
-		var actions = await GetRefactoringActionsAsync(
-			code,
-			Provider,
-			cancellationToken: cancellationToken
-		);
+		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
 
 		await Assert.That(actions).IsEmpty();
 	}
@@ -86,16 +77,10 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests
 			}
 			""";
 
-		var actions = await GetRefactoringActionsAsync(
-			code,
-			Provider,
-			cancellationToken: cancellationToken
-		);
+		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
 
 		await Assert.That(actions).IsNotEmpty();
-		await Assert
-			.That(actions[0].Title)
-			.IsEqualTo("Convert ActivitySource to IWeatherServiceTracing");
+		await Assert.That(actions[0].Title).IsEqualTo("Convert ActivitySource to IWeatherServiceTracing");
 	}
 
 	// ─────────────────────────────────────────────────────────────────────────
@@ -123,11 +108,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests
 			}
 			""";
 
-		var result = await ApplyRefactoringAsync(
-			code,
-			Provider,
-			cancellationToken: cancellationToken
-		);
+		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[ActivitySource]");
@@ -158,11 +139,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests
 			}
 			""";
 
-		var result = await ApplyRefactoringAsync(
-			code,
-			Provider,
-			cancellationToken: cancellationToken
-		);
+		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[ActivitySource]");
@@ -191,11 +168,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests
 			}
 			""";
 
-		var result = await ApplyRefactoringAsync(
-			code,
-			Provider,
-			cancellationToken: cancellationToken
-		);
+		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("IOrderServiceTracing _activitySource");
@@ -223,11 +196,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests
 			}
 			""";
 
-		var result = await ApplyRefactoringAsync(
-			code,
-			Provider,
-			cancellationToken: cancellationToken
-		);
+		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("_activitySource.ShipOrder(");

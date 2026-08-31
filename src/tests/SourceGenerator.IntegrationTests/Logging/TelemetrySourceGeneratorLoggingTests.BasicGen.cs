@@ -1,3 +1,5 @@
+using Purview.Telemetry.SourceGenerator.Infra;
+
 namespace Purview.Telemetry.SourceGenerator.Logging;
 
 partial class TelemetrySourceGeneratorLoggingTests
@@ -21,10 +23,7 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicLogger,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -48,10 +47,7 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicLogger,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
@@ -80,18 +76,10 @@ public interface ITestLogger {{
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicLogger,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			c => c.ScrubInlineGuids(),
-			cancellationToken: cancellationToken,
-			parameters: level
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
@@ -114,22 +102,16 @@ public interface ITestLogger {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			c => c.ScrubInlineGuids(),
-			expectsDiagnostics: true,
-			cancellationToken: cancellationToken
-		);
+		await TestHelpers.VerifyAsync(generationResult, expectsDiagnostics: true, cancellationToken: cancellationToken);
 	}
 
 	[Test]
-	public async Task Generate_GivenInterfaceMoreThanSixParameters_RaisesDiagnostic(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenInterfaceMoreThanSixParameters_RaisesDiagnostic(CancellationToken cancellationToken)
 	{
 		// Arrange: explicit V1 mode with 9 params — exceeds the 6-param v1 limit, raises TSG2001.
 		const string basicLogger =
@@ -146,13 +128,13 @@ public interface ITestLogger {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
 		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			cancellationToken: cancellationToken
@@ -179,13 +161,13 @@ public interface ITestLogger {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicLogger,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
 		);
 
 		// Assert
 		await TestHelpers.VerifyAsync(
 			generationResult,
-			c => c.ScrubInlineGuids(),
 			expectsDiagnostics: true,
 			validationCompilation: false,
 			cancellationToken: cancellationToken
@@ -210,17 +192,10 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicLogger,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			c => c.ScrubInlineGuids(),
-			cancellationToken: cancellationToken
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
@@ -241,17 +216,10 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicLogger,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			c => c.ScrubInlineGuids(),
-			cancellationToken: cancellationToken
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
@@ -272,16 +240,9 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicLogger,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			c => c.ScrubInlineGuids(),
-			cancellationToken: cancellationToken
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

@@ -20,8 +20,7 @@ partial class TelemetrySourceGenerator
 			.SyntaxProvider.ForAttributeWithMetadataName(
 				Constants.Logging.LoggerAttribute.TypeInfo.FullyQualifiedName,
 				static (node, token) => PipelineHelpers.HasLoggerTargetAttribute(node, token),
-				(context, cancellationToken) =>
-					PipelineHelpers.BuildLoggerTransform(context, logger, cancellationToken)
+				(context, cancellationToken) => PipelineHelpers.BuildLoggerTransform(context, logger, cancellationToken)
 			)
 			.WhereNotNull()
 			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_Logging");
@@ -31,8 +30,7 @@ partial class TelemetrySourceGenerator
 			source: loggerTargetsPredicate
 				.Collect()
 				.Combine(supportsNullableAnnotations.Combine(supportsIMeterFactory)),
-			action: (spc, pair) =>
-				GenerateLoggerTargets(pair.Left, pair.Right.Left, pair.Right.Right, spc, logger)
+			action: (spc, pair) => GenerateLoggerTargets(pair.Left, pair.Right.Left, pair.Right.Right, spc, logger)
 		);
 	}
 

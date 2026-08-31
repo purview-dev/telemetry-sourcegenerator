@@ -22,18 +22,14 @@ partial class ActivitySourceTargetClassEmitter
 
 		// Filter to only methods that are valid for Activities target
 		// (have explicit Activity/Event/Context attributes, or valid inference in single-target)
-		var validActivityMethods = target
-			.ActivityMethods.Where(m => m.TargetGenerationState.IsValid)
-			.ToArray();
+		var validActivityMethods = target.ActivityMethods.Where(m => m.TargetGenerationState.IsValid).ToArray();
 
 		// Check for TSG3012: Event/Context methods exist but no Activity method
 		if (!validActivityMethods.Any(m => m.MethodType == ActivityMethodType.Activity))
 		{
 			if (validActivityMethods.Any(m => m.MethodType != ActivityMethodType.Activity))
 			{
-				logger?.Diagnostic(
-					"There are no Activity methods defined, however there are Events/ Context methods."
-				);
+				logger?.Diagnostic("There are no Activity methods defined, however there are Events/ Context methods.");
 				TelemetryDiagnostics.Report(
 					context.ReportDiagnostic,
 					TelemetryDiagnostics.Activities.NoActivityMethodsDefined
@@ -88,11 +84,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		const string tagsListVariableName = "tagsCollection";
 		builder
-			.Append(
-				indent,
-				Constants.Activities.SystemDiagnostics.ActivityTagsCollection,
-				withNewLine: false
-			)
+			.Append(indent, Constants.Activities.SystemDiagnostics.ActivityTagsCollection, withNewLine: false)
 			.Append(' ')
 			.Append(tagsListVariableName)
 			.Append(" = new ")
@@ -105,11 +97,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		builder
 			.AppendLine()
-			.Append(
-				indent,
-				Constants.Activities.SystemDiagnostics.ActivityEvent,
-				withNewLine: false
-			)
+			.Append(indent, Constants.Activities.SystemDiagnostics.ActivityEvent, withNewLine: false)
 			.Append(' ')
 			.Append(eventVariableName)
 			.Append(" = new ")
@@ -174,16 +162,9 @@ partial class ActivitySourceTargetClassEmitter
 			.AppendLine(".StackTrace);");
 	}
 
-	static void EmitThrowStub(
-		StringBuilder builder,
-		int indent,
-		ActivityBasedGenerationTarget methodTarget
-	)
+	static void EmitThrowStub(StringBuilder builder, int indent, ActivityBasedGenerationTarget methodTarget)
 	{
-		builder
-			.AppendLine()
-			.Append(indent, "public ", withNewLine: false)
-			.Append(methodTarget.ReturnType);
+		builder.AppendLine().Append(indent, "public ", withNewLine: false).Append(methodTarget.ReturnType);
 
 		builder.Append(' ').Append(methodTarget.MethodName);
 
@@ -252,26 +233,10 @@ partial class ActivitySourceTargetClassEmitter
 		if (isMultiTarget)
 		{
 			// Generate private activity implementation method
-			EmitPrivateActivityMethod(
-				builder,
-				indent,
-				methodTarget,
-				target,
-				context,
-				logger,
-				emitNullable
-			);
+			EmitPrivateActivityMethod(builder, indent, methodTarget, target, context, logger, emitNullable);
 
 			// Generate public delegating method (Activity emitter owns this for multi-target)
-			EmitPublicDelegatingMethod(
-				builder,
-				indent,
-				methodTarget,
-				methodTargets,
-				context,
-				logger,
-				emitNullable
-			);
+			EmitPublicDelegatingMethod(builder, indent, methodTarget, methodTargets, context, logger, emitNullable);
 		}
 		else
 		{
@@ -365,9 +330,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		indent++;
 
-		var returnsActivity = Constants.Activities.SystemDiagnostics.Activity.Equals(
-			methodTarget.ReturnType
-		);
+		var returnsActivity = Constants.Activities.SystemDiagnostics.Activity.Equals(methodTarget.ReturnType);
 		var paramList = string.Join(", ", methodTarget.Parameters.Select(p => p.ParameterName));
 
 		// Create filtered parameter list for Logging/Metrics (excludes Activity-related types)
@@ -376,13 +339,9 @@ partial class ActivitySourceTargetClassEmitter
 			methodTarget
 				.Parameters.Where(p =>
 					!Constants.Activities.SystemDiagnostics.Activity.Equals(p.ParameterType)
-					&& !Constants.Activities.SystemDiagnostics.ActivityContext.Equals(
-						p.ParameterType
-					)
+					&& !Constants.Activities.SystemDiagnostics.ActivityContext.Equals(p.ParameterType)
 					&& !Constants.Activities.SystemDiagnostics.ActivityLink.Equals(p.ParameterType)
-					&& !Constants.Activities.SystemDiagnostics.ActivityLinkArray.Equals(
-						p.ParameterType
-					)
+					&& !Constants.Activities.SystemDiagnostics.ActivityLinkArray.Equals(p.ParameterType)
 					&& !Constants.System.TagList.Equals(p.ParameterType)
 				)
 				.Select(p => p.ParameterName)
@@ -437,9 +396,7 @@ partial class ActivitySourceTargetClassEmitter
 				.AppendLine()
 				.Append(
 					indent,
-					"return activityResult"
-						+ (!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
-						+ ";"
+					"return activityResult" + (!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!") + ";"
 				);
 		}
 
@@ -505,9 +462,7 @@ partial class ActivitySourceTargetClassEmitter
 					$"Identified {target.InterfaceType.TypeName}.{methodTarget.MethodName} as problematic as it has another target types."
 				);
 			}
-			else if (
-				methodTarget.TargetGenerationState.RaiseInferenceNotSupportedWithMultiTargeting
-			)
+			else if (methodTarget.TargetGenerationState.RaiseInferenceNotSupportedWithMultiTargeting)
 			{
 				logger?.Debug(
 					$"Identified {target.InterfaceType.TypeName}.{methodTarget.MethodName} as problematic as it is inferred."
@@ -532,25 +487,17 @@ partial class ActivitySourceTargetClassEmitter
 				$"The return type {methodTarget.ReturnType} isn't valid for an activity, event, or context method."
 			);
 
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.InvalidReturnType
-			);
+			TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Activities.InvalidReturnType);
 
 			return false;
 		}
 
-		if (
-			target.ActivitySourceGenerationAttribute?.GenerateDiagnosticsForMissingActivity.Value
-			?? true
-		)
+		if (target.ActivitySourceGenerationAttribute?.GenerateDiagnosticsForMissingActivity.Value ?? true)
 		{
 			// Here we're opting in to generate diagnostics for missing activity return/ params.
 			if (methodTarget.MethodType == ActivityMethodType.Activity)
 			{
-				if (
-					!Constants.Activities.SystemDiagnostics.Activity.Equals(methodTarget.ReturnType)
-				)
+				if (!Constants.Activities.SystemDiagnostics.Activity.Equals(methodTarget.ReturnType))
 				{
 					logger?.Diagnostic($"No Activity returned for {methodTarget.MethodName}.");
 					TelemetryDiagnostics.Report(
@@ -560,9 +507,7 @@ partial class ActivitySourceTargetClassEmitter
 				}
 				else if (!methodTarget.ReturnType.IsNullable)
 				{
-					logger?.Diagnostic(
-						$"Activity return type is not nullable for {methodTarget.MethodName}."
-					);
+					logger?.Diagnostic($"Activity return type is not nullable for {methodTarget.MethodName}.");
 					TelemetryDiagnostics.Report(
 						context.ReportDiagnostic,
 						TelemetryDiagnostics.Activities.ActivityReturnTypeShouldBeNullable
@@ -573,14 +518,10 @@ partial class ActivitySourceTargetClassEmitter
 			{
 				if (!methodTarget.HasActivityParameter)
 				{
-					logger?.Diagnostic(
-						$"No Activity parameter is defined on {methodTarget.MethodName}."
-					);
+					logger?.Diagnostic($"No Activity parameter is defined on {methodTarget.MethodName}.");
 				}
 				else if (
-					!Constants.Activities.SystemDiagnostics.Activity.Equals(
-						methodTarget.Parameters[0].ParameterType
-					)
+					!Constants.Activities.SystemDiagnostics.Activity.Equals(methodTarget.Parameters[0].ParameterType)
 				)
 				{
 					logger?.Diagnostic(

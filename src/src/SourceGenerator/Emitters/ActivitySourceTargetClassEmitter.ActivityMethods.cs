@@ -39,18 +39,14 @@ partial class ActivitySourceTargetClassEmitter
 
 		if (activityParam != null)
 		{
-			logger?.Diagnostic(
-				"Activity parameter not allowed on Activity start/ create method, only event."
-			);
+			logger?.Diagnostic("Activity parameter not allowed on Activity start/ create method, only event.");
 
 			return;
 		}
 
 		if (timestampParam != null)
 		{
-			logger?.Diagnostic(
-				"Timestamp parameter not allowed on Activity start/ create method, only events."
-			);
+			logger?.Diagnostic("Timestamp parameter not allowed on Activity start/ create method, only events.");
 
 			return;
 		}
@@ -222,8 +218,7 @@ partial class ActivitySourceTargetClassEmitter
 					+ (
 						returnsVoid
 							? null
-							: " null"
-								+ (!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
+							: " null" + (!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
 					)
 					+ ";"
 			)

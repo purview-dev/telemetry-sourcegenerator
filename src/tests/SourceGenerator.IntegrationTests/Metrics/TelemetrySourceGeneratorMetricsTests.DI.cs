@@ -3,9 +3,7 @@ namespace Purview.Telemetry.SourceGenerator.Metrics;
 partial class TelemetrySourceGeneratorMetricsTests
 {
 	[Test]
-	public async Task Generate_GivenAssemblyEnableDI_GeneratesMetrics(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenAssemblyEnableDI_GeneratesMetrics(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicMetric = """
@@ -26,7 +24,7 @@ public interface ITestMetrics {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicMetric,
-			disableDependencyInjection: false,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 
@@ -35,9 +33,7 @@ public interface ITestMetrics {
 	}
 
 	[Test]
-	public async Task Generate_GivenInterfaceEnableDI_GeneratesMetrics(
-		CancellationToken cancellationToken
-	)
+	public async Task Generate_GivenInterfaceEnableDI_GeneratesMetrics(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicMetric = """
@@ -57,7 +53,7 @@ public interface ITestMetrics {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicMetric,
-			disableDependencyInjection: false,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 
@@ -90,7 +86,7 @@ public interface ITestMetrics {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicMetric,
-			disableDependencyInjection: false,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 
@@ -123,7 +119,7 @@ public interface ITestMetrics {
 		// Act
 		var generationResult = await GenerateAsync(
 			basicMetric,
-			disableDependencyInjection: false,
+			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
 

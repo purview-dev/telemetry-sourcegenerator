@@ -18,9 +18,9 @@ jobs:
 
     env:
       CONFIGURATION: Release
-      MAIN_SOLUTION: ./src/Purview.Telemetry.SourceGenerator.slnx
+      MAIN_SOLUTION: ./src/Telemetry.SourceGenerator.slnx
       SAMPLE_SOLUTION: ./samples/SampleApp/SampleApp.slnx
-      PACKAGE_PROJECT: ./src/Purview.Telemetry.SourceGenerator/Purview.Telemetry.SourceGenerator.csproj
+      PACKAGE_PROJECT: ./src/SourceGenerator/SourceGenerator.csproj
       ARTIFACTS_DIR: ./artifacts/nuget
 
     steps:

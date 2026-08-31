@@ -24,18 +24,10 @@ public interface ITestLogger {{
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicLogger,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			c => c.ScrubInlineGuids(),
-			cancellationToken: cancellationToken,
-			parameters: @namespace
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
@@ -62,18 +54,10 @@ public partial class TestClass1 {{
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicLogger,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			c => c.ScrubInlineGuids(),
-			cancellationToken: cancellationToken,
-			parameters: @namespace
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 
 	[Test]
@@ -104,17 +88,9 @@ public partial class TestClass1 {{
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
-			basicLogger,
-			cancellationToken: cancellationToken
-		);
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			c => c.ScrubInlineGuids(),
-			cancellationToken: cancellationToken,
-			parameters: @namespace
-		);
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

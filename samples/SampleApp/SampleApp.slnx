@@ -7,9 +7,6 @@
 	<Project Path="SampleApp.APIService/SampleApp.APIService.csproj" />
 	<Project Path="SampleApp.AppHost/SampleApp.AppHost.csproj" />
 	<Project Path="SampleApp.ServiceDefaults/SampleApp.ServiceDefaults.csproj" />
-	<Project
-		Path="SampleApp.Shared/SampleApp.Shared.csproj"
-		Id="01c46589-63a0-4fa2-ac8c-366a384879eb"
-	/>
+	<Project Path="SampleApp.Shared/SampleApp.Shared.csproj" Id="01c46589-63a0-4fa2-ac8c-366a384879eb" />
 	<Project Path="SampleApp.Web/SampleApp.Web.csproj" />
 </Solution>

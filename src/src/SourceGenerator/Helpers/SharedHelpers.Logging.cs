@@ -39,48 +39,25 @@ partial class SharedHelpers
 				attributeData!,
 				(name, value) =>
 				{
-					if (
-						name.Equals(
-							nameof(LogAttributeRecord.Level),
-							StringComparison.OrdinalIgnoreCase
-						)
-					)
+					if (name.Equals(nameof(LogAttributeRecord.Level), StringComparison.OrdinalIgnoreCase))
 					{
 						level = new((int)value);
 					}
 					else if (
-						name.Equals(
-							nameof(LogAttributeRecord.MessageTemplate),
-							StringComparison.OrdinalIgnoreCase
-						)
+						name.Equals(nameof(LogAttributeRecord.MessageTemplate), StringComparison.OrdinalIgnoreCase)
 					)
 					{
 						messageTemplate = new((string)value);
 					}
-					else if (
-						name.Equals(
-							nameof(LogAttributeRecord.EventId),
-							StringComparison.OrdinalIgnoreCase
-						)
-					)
+					else if (name.Equals(nameof(LogAttributeRecord.EventId), StringComparison.OrdinalIgnoreCase))
 					{
 						eventId = new((int)value);
 					}
-					else if (
-						name.Equals(
-							nameof(LogAttributeRecord.Name),
-							StringComparison.OrdinalIgnoreCase
-						)
-					)
+					else if (name.Equals(nameof(LogAttributeRecord.Name), StringComparison.OrdinalIgnoreCase))
 					{
 						nameValue = new((string)value);
 					}
-					else if (
-						name.Equals(
-							nameof(LogAttributeRecord.GenerationMode),
-							StringComparison.OrdinalIgnoreCase
-						)
-					)
+					else if (name.Equals(nameof(LogAttributeRecord.GenerationMode), StringComparison.OrdinalIgnoreCase))
 					{
 						generationMode = new((int)value);
 					}
@@ -111,14 +88,7 @@ partial class SharedHelpers
 		CancellationToken token
 	)
 	{
-		if (
-			!Utilities.TryContainsAttribute(
-				symbol,
-				Constants.Logging.LoggerAttribute,
-				token,
-				out var attributeData
-			)
-		)
+		if (!Utilities.TryContainsAttribute(symbol, Constants.Logging.LoggerAttribute, token, out var attributeData))
 		{
 			return null;
 		}
@@ -133,38 +103,22 @@ partial class SharedHelpers
 				attributeData!,
 				(name, value) =>
 				{
-					if (
-						name.Equals(
-							nameof(LoggerAttributeRecord.DefaultLevel),
-							StringComparison.OrdinalIgnoreCase
-						)
-					)
+					if (name.Equals(nameof(LoggerAttributeRecord.DefaultLevel), StringComparison.OrdinalIgnoreCase))
 					{
 						defaultLevel = new((int)value);
 					}
 					else if (
-						name.Equals(
-							nameof(LoggerAttributeRecord.CustomPrefix),
-							StringComparison.OrdinalIgnoreCase
-						)
+						name.Equals(nameof(LoggerAttributeRecord.CustomPrefix), StringComparison.OrdinalIgnoreCase)
 					)
 					{
 						customPrefix = new((string)value);
 					}
-					else if (
-						name.Equals(
-							nameof(LoggerAttributeRecord.PrefixType),
-							StringComparison.OrdinalIgnoreCase
-						)
-					)
+					else if (name.Equals(nameof(LoggerAttributeRecord.PrefixType), StringComparison.OrdinalIgnoreCase))
 					{
 						prefixType = new((int)value);
 					}
 					else if (
-						name.Equals(
-							nameof(LoggerAttributeRecord.GenerationMode),
-							StringComparison.OrdinalIgnoreCase
-						)
+						name.Equals(nameof(LoggerAttributeRecord.GenerationMode), StringComparison.OrdinalIgnoreCase)
 					)
 					{
 						generationMode = new((int)value);
@@ -308,10 +262,7 @@ partial class SharedHelpers
 						skipNullProperties = new((bool)value);
 					}
 					else if (
-						name.Equals(
-							nameof(LogPropertiesAttributeRecord.Transitive),
-							StringComparison.OrdinalIgnoreCase
-						)
+						name.Equals(nameof(LogPropertiesAttributeRecord.Transitive), StringComparison.OrdinalIgnoreCase)
 					)
 					{
 						transitive = new((bool)value);
@@ -380,23 +331,14 @@ partial class SharedHelpers
 			return null;
 		}
 
-		return new(
-			MaximumValueCount: maximumValueCount ?? new(5),
-			ParamLocation: symbol.Locations.FirstOrDefault()
-		);
+		return new(MaximumValueCount: maximumValueCount ?? new(5), ParamLocation: symbol.Locations.FirstOrDefault());
 	}
 
 	public static LoggerGenerationAttributeRecord? GetLoggerGenerationAttribute(
 		SemanticModel semanticModel,
 		GenerationLogger? logger,
 		CancellationToken token
-	) =>
-		GetLoggerGenerationAttribute(
-			semanticModel.Compilation.Assembly,
-			semanticModel,
-			logger,
-			token
-		);
+	) => GetLoggerGenerationAttribute(semanticModel.Compilation.Assembly, semanticModel, logger, token);
 
 	public static bool IsLogMethod(IMethodSymbol method, CancellationToken token) =>
 		Utilities.ContainsAttribute(

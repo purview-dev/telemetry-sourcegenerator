@@ -15,9 +15,7 @@ partial class WeatherServiceTests
 		var service = CreateService(telemetry, throwOnRNG: true);
 
 		using Activity activity = new(
-			nameof(
-				GetWeatherForecastsAsync_GivenSimulatedUpstreamFails_CallsFailureActivityEventAndLog
-			)
+			nameof(GetWeatherForecastsAsync_GivenSimulatedUpstreamFails_CallsFailureActivityEventAndLog)
 		);
 
 		telemetry.GettingWeatherForecast(Arg.Any<string>(), requestCount).Returns(activity);
