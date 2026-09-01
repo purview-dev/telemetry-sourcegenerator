@@ -5,13 +5,39 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   release-pr:
-    uses: kjldev/.github/.github/workflows/release-pr.yml@main
-    with:
-      install-command: bun install
-      version-command: bun run version-packages
-    secrets:
-      APP_ID: ${{ secrets.APP_ID }}
-      APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
-      CHANGESET_TOKEN: ${{ secrets.CHANGESET_TOKEN }}
+    name: Create Release PR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate a GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Create Release Pull Request
+        uses: changesets/action@v1
+        with:
+          install: bun install
+          version: bun run version-packages
+          title: "chore: version packages"
+          commit: "chore: version packages"
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
