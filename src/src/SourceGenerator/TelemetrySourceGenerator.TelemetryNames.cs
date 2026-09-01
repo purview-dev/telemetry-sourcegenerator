@@ -69,13 +69,13 @@ partial class TelemetrySourceGenerator
 		// Check meter targets for TelemetryGeneration settings
 		foreach (var target in processedMeters)
 		{
-			if (target!.TelemetryGeneration?.GenerateTelemetryNamesClass == false)
+			if (target!.TelemetryGeneration.GenerateTelemetryNamesClass == false)
 			{
 				generateClass = false;
 				return;
 			}
 
-			if (target.TelemetryGeneration?.TelemetryNamesClassName != null && customClassName == null)
+			if (target.TelemetryGeneration.TelemetryNamesClassName != null && customClassName == null)
 			{
 				customClassName = target.TelemetryGeneration.TelemetryNamesClassName;
 			}
@@ -84,13 +84,13 @@ partial class TelemetrySourceGenerator
 		// Check activity targets for TelemetryGeneration settings
 		foreach (var target in processedActivities)
 		{
-			if (target!.TelemetryGeneration?.GenerateTelemetryNamesClass == false)
+			if (target!.TelemetryGeneration.GenerateTelemetryNamesClass == false)
 			{
 				generateClass = false;
 				return;
 			}
 
-			if (target.TelemetryGeneration?.TelemetryNamesClassName != null && customClassName == null)
+			if (target.TelemetryGeneration.TelemetryNamesClassName != null && customClassName == null)
 			{
 				customClassName = target.TelemetryGeneration.TelemetryNamesClassName;
 			}

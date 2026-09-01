@@ -6,9 +6,7 @@ namespace Purview.Telemetry.SourceGenerator.Helpers;
 
 partial class SharedHelpers
 {
-	const int UnsetValue = 99;
-
-	public static LogAttributeRecord? GetLogAttribute(ISymbol symbol, CancellationToken token)
+	public static LogAttributeData? GetLogAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -26,13 +24,13 @@ partial class SharedHelpers
 		if (matchingTemplate == TemplateLibrary.Logging.LogAttribute)
 		{
 			var data = LogAttributeData.FromAttributeData(attributeData!);
-			return new(
-				Level: data.Level == UnsetValue ? null : data.Level,
-				MessageTemplate: NullIfWhitespace(data.MessageTemplate),
-				EventId: data.EventId < 0 ? null : data.EventId,
-				Name: NullIfWhitespace(data.Name),
-				GenerationMode: data.GenerationMode
-			);
+			return data.Exists
+				? data with
+				{
+					MessageTemplate = NullIfWhitespace(data.MessageTemplate),
+					Name = NullIfWhitespace(data.Name),
+				}
+				: null;
 		}
 
 		// A specific level attribute (Trace/Debug/Info/Warning/Error/Critical) forces its level.
@@ -42,9 +40,10 @@ partial class SharedHelpers
 		);
 
 		return new(
+			exists: true,
 			Level: TemplateLibrary.Logging.SpecificLogAttributesToLevel[matchingTemplate!],
 			MessageTemplate: messageTemplate,
-			EventId: eventId < 0 ? null : eventId,
+			EventId: eventId,
 			Name: name,
 			GenerationMode: generationMode
 		);
@@ -119,7 +118,7 @@ partial class SharedHelpers
 		);
 	}
 
-	public static LoggerAttributeRecord? GetLoggerAttribute(ISymbol symbol, CancellationToken token)
+	public static LoggerAttributeData? GetLoggerAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -134,17 +133,10 @@ partial class SharedHelpers
 		}
 
 		var data = LoggerAttributeData.FromAttributeData(attributeData!);
-		return data.Exists
-			? new(
-				DefaultLevel: data.DefaultLevel == UnsetValue ? null : data.DefaultLevel,
-				CustomPrefix: NullIfWhitespace(data.CustomPrefix),
-				PrefixType: data.PrefixType == UnsetValue ? null : data.PrefixType,
-				GenerationMode: data.GenerationMode == UnsetValue ? null : data.GenerationMode
-			)
-			: null;
+		return data.Exists ? data with { CustomPrefix = NullIfWhitespace(data.CustomPrefix) } : null;
 	}
 
-	public static LoggerGenerationAttributeRecord? GetLoggerGenerationAttribute(ISymbol symbol, CancellationToken token)
+	public static LoggerGenerationAttributeData? GetLoggerGenerationAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -159,16 +151,10 @@ partial class SharedHelpers
 		}
 
 		var data = LoggerGenerationAttributeData.FromAttributeData(attributeData!);
-		return data.Exists
-			? new(
-				DefaultLevel: data.DefaultLevel == UnsetValue ? null : data.DefaultLevel,
-				GenerationMode: data.GenerationMode == UnsetValue ? null : data.GenerationMode,
-				DefaultPrefixType: data.DefaultPrefixType == UnsetValue ? null : data.DefaultPrefixType
-			)
-			: null;
+		return data.Exists ? data : null;
 	}
 
-	public static LogPropertiesAttributeRecord? GetLogPropertiesAttribute(ISymbol symbol, CancellationToken token)
+	public static LogPropertiesAttributeData? GetLogPropertiesAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -183,16 +169,10 @@ partial class SharedHelpers
 		}
 
 		var data = LogPropertiesAttributeData.FromAttributeData(attributeData!);
-		return data.Exists
-			? new(
-				OmitReferenceName: data.OmitReferenceName,
-				SkipNullProperties: data.SkipNullProperties,
-				Transitive: data.Transitive
-			)
-			: null;
+		return data.Exists ? data : null;
 	}
 
-	public static ExpandEnumerableAttributeRecord? GetExpandEnumerableAttribute(ISymbol symbol, CancellationToken token)
+	public static ExpandEnumerableAttributeData? GetExpandEnumerableAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -207,10 +187,10 @@ partial class SharedHelpers
 		}
 
 		var data = ExpandEnumerableAttributeData.FromAttributeData(attributeData!);
-		return data.Exists ? new(MaximumValueCount: data.MaximumValueCount) : null;
+		return data.Exists ? data : null;
 	}
 
-	public static LoggerGenerationAttributeRecord? GetLoggerGenerationAttribute(
+	public static LoggerGenerationAttributeData? GetLoggerGenerationAttribute(
 		Compilation compilation,
 		CancellationToken token
 	) => GetLoggerGenerationAttribute(compilation.Assembly, token);

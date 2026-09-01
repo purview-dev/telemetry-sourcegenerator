@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
 	<PropertyGroup>
 		<NamespacePrefix>Purview.Telemetry</NamespacePrefix>
 		<IsPackable>false</IsPackable>
@@ -11,10 +11,4 @@
 	</PropertyGroup>
 
 	<Import Sdk="Purview.DotNetProjectSdk" Project="Sdk.props" />
-
-	<PropertyGroup>
-		<DefineConstants Condition="'$(Configuration)' == 'DEBUG'">DEBUG_SG</DefineConstants>
-		<NoWarn>$(NoWarn);CA1031;</NoWarn>
-		<NoWarn>$(NoWarn);CS1591;</NoWarn>
-	</PropertyGroup>
 </Project>

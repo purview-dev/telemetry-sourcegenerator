@@ -249,7 +249,7 @@ partial class ActivitySourceTargetClassEmitter
 			}
 			else if (!string.IsNullOrWhiteSpace(methodTarget.EventAttribute?.StatusDescription))
 			{
-				writer.Write(", ").Write(methodTarget.EventAttribute!.StatusDescription!.Wrap());
+				writer.Write(", ").Write(methodTarget.EventAttribute!.Value.StatusDescription!.Wrap());
 			}
 			else if (exceptionParam != null)
 			{

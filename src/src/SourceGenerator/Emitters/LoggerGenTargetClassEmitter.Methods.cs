@@ -559,12 +559,13 @@ partial class LoggerGenTargetClassEmitter
 
 				var logPropertyValue = $"{parameter.Name}?.{logProperty.PropertyName}";
 				var logPropertyName = logProperty.PropertyName;
-				if (!parameter.LogPropertiesAttribute!.OmitReferenceName)
+				if (!parameter.LogPropertiesAttribute!.Value.OmitReferenceName)
 				{
 					logPropertyName = $"{parameter.Name}.{logPropertyName}";
 				}
 
-				var shouldSkipNull = parameter.LogPropertiesAttribute.SkipNullProperties && logProperty.IsNullable;
+				var shouldSkipNull =
+					parameter.LogPropertiesAttribute!.Value.SkipNullProperties && logProperty.IsNullable;
 				if (shouldSkipNull)
 				{
 					var tmpVarName = FindUniqueName("tmp", existingParamNames);
@@ -667,7 +668,7 @@ partial class LoggerGenTargetClassEmitter
 		snippet.Indent();
 		snippet.Write("var ").Write(iteratorVarName).WriteLine(" = 0;");
 
-		var maxCount = parameter.ExpandEnumerableAttribute!.MaximumValueCount;
+		var maxCount = parameter.ExpandEnumerableAttribute!.Value.MaximumValueCount;
 
 		if (maxCount < 1)
 			maxCount = 1;

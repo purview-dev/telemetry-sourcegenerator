@@ -1,11 +1,8 @@
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Purview.Telemetry.SourceGenerator;
 

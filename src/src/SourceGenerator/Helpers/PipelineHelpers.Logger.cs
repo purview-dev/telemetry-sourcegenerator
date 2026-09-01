@@ -52,8 +52,8 @@ partial class PipelineHelpers
 			);
 		}
 
-		var loggerAttribute = SharedHelpers.GetLoggerAttribute(interfaceSymbol, token);
-		if (loggerAttribute == null)
+		var loggerData = SharedHelpers.GetLoggerAttribute(interfaceSymbol, token);
+		if (loggerData is not { } loggerAttribute)
 		{
 			logger?.Fatal(
 				$"Could not find {TemplateLibrary.Logging.LoggerAttribute} when one was expected '{interfaceSymbol.Name}'."
@@ -65,12 +65,13 @@ partial class PipelineHelpers
 		var className = telemetryGeneration.ClassName ?? GenerateClassName(interfaceSymbol.Name);
 
 		var loggerGenerationAttribute = SharedHelpers.GetLoggerGenerationAttribute(compilation, token);
-		var defaultLogLevel = loggerGenerationAttribute?.DefaultLevel ?? PropertyLibrary.Logging.DefaultLevel;
-		var defaultPrefixType = loggerGenerationAttribute?.DefaultPrefixType ?? 0;
+		var defaultLogLevel = loggerGenerationAttribute?.DefaultLevelOrNull ?? PropertyLibrary.Logging.DefaultLevel;
+		var defaultPrefixType = loggerGenerationAttribute?.DefaultPrefixTypeOrNull ?? 0;
 
 		// Resolve the effective generation mode using priority:
 		// interface GenerationMode > assembly GenerationMode > Auto (per-method decision)
-		var interfaceGenerationMode = loggerAttribute.GenerationMode ?? loggerGenerationAttribute?.GenerationMode ?? 0; // Auto
+		var interfaceGenerationMode =
+			loggerAttribute.GenerationModeOrNull ?? loggerGenerationAttribute?.GenerationModeOrNull ?? 0; // Auto
 
 		var generationType = SharedHelpers.GetGenerationTypes(interfaceSymbol, token);
 		if (

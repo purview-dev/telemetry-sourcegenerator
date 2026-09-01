@@ -1,7 +1,7 @@
 namespace Purview.Telemetry.SourceGenerator.Records;
 
 sealed record LoggerTarget(
-	TelemetryGenerationAttributeRecord TelemetryGeneration,
+	TelemetryGenerationAttributeData TelemetryGeneration,
 	GenerationType GenerationType,
 	string ClassNameToGenerate,
 	string? ClassNamespace,
@@ -9,7 +9,7 @@ sealed record LoggerTarget(
 	string? FullNamespace,
 	string FullyQualifiedName,
 	TypeReference InterfaceType,
-	LoggerAttributeRecord LoggerAttribute,
+	LoggerAttributeData LoggerAttribute,
 	int DefaultLevel,
 	EquatableArray<LogMethodTarget> LogMethods,
 	bool UseMSLoggingTelemetryBasedGeneration
@@ -52,9 +52,9 @@ sealed record LogParameterTarget(
 	bool IsIEnumerable,
 	bool IsArray,
 	bool IsComplexType,
-	LogPropertiesAttributeRecord? LogPropertiesAttribute,
+	LogPropertiesAttributeData? LogPropertiesAttribute,
 	EquatableArray<LogPropertiesParameterDetails>? LogProperties,
-	ExpandEnumerableAttributeRecord? ExpandEnumerableAttribute,
+	ExpandEnumerableAttributeData? ExpandEnumerableAttribute,
 	GenerationType ExcludedTargets,
 	EquatableArray<MessageTemplateHole> ReferencedHoles = default
 )

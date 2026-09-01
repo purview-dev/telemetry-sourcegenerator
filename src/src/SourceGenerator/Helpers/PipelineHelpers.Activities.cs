@@ -43,8 +43,8 @@ partial class PipelineHelpers
 			);
 		}
 
-		var activitySourceAttribute = SharedHelpers.GetActivitySourceAttribute(interfaceSymbol, token);
-		if (activitySourceAttribute == null)
+		var activitySourceData = SharedHelpers.GetActivitySourceAttribute(interfaceSymbol, token);
+		if (activitySourceData is not { } activitySourceAttribute)
 		{
 			logger?.Fatal(
 				$"Could not find {TemplateLibrary.Activities.ActivitySourceAttribute} when one was expected '{interfaceSymbol.Name}'."
@@ -117,9 +117,9 @@ partial class PipelineHelpers
 
 	static ImmutableArray<ActivityBasedGenerationTarget> BuildActivityMethods(
 		GenerationType generationType,
-		ActivitySourceAttributeRecord activitySourceAttribute,
-		ActivitySourceGenerationAttributeRecord? activitySourceGenerationAttribute,
-		TelemetryGenerationAttributeRecord telemetryGeneration,
+		ActivitySourceAttributeData activitySourceAttribute,
+		ActivitySourceGenerationAttributeData? activitySourceGenerationAttribute,
+		TelemetryGenerationAttributeData telemetryGeneration,
 		INamedTypeSymbol interfaceSymbol,
 		ISourceGenLogger? logger,
 		CancellationToken token
@@ -296,8 +296,8 @@ partial class PipelineHelpers
 		IMethodSymbol method,
 		ISourceGenLogger? logger,
 		CancellationToken token,
-		out ActivityAttributeRecord? activityAttribute,
-		out EventAttributeRecord? eventAttribute
+		out ActivityAttributeData? activityAttribute,
+		out EventAttributeData? eventAttribute
 	)
 	{
 		eventAttribute = null;
@@ -438,8 +438,8 @@ partial class PipelineHelpers
 	}
 
 	static string? GeneratePrefix(
-		ActivitySourceGenerationAttributeRecord? activitySourceGenerationRecord,
-		ActivitySourceAttributeRecord activitySourceRecord,
+		ActivitySourceGenerationAttributeData? activitySourceGenerationRecord,
+		ActivitySourceAttributeData activitySourceRecord,
 		CancellationToken token
 	)
 	{

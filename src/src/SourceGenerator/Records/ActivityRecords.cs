@@ -1,7 +1,7 @@
 namespace Purview.Telemetry.SourceGenerator.Records;
 
 sealed record ActivitySourceTarget(
-	TelemetryGenerationAttributeRecord TelemetryGeneration,
+	TelemetryGenerationAttributeData TelemetryGeneration,
 	GenerationType GenerationType,
 	string ClassNameToGenerate,
 	string? ClassNamespace,
@@ -9,10 +9,10 @@ sealed record ActivitySourceTarget(
 	string? FullNamespace,
 	string? FullyQualifiedName,
 	TypeReference InterfaceType,
-	ActivitySourceGenerationAttributeRecord? ActivitySourceGenerationAttribute,
+	ActivitySourceGenerationAttributeData? ActivitySourceGenerationAttribute,
 	string? ActivitySourceName,
 	EquatableArray<ActivityBasedGenerationTarget> ActivityMethods,
-	ActivitySourceAttributeRecord ActivityTargetAttributeRecord
+	ActivitySourceAttributeData ActivityTargetAttributeRecord
 );
 
 sealed record ActivityBasedGenerationTarget(
@@ -20,8 +20,8 @@ sealed record ActivityBasedGenerationTarget(
 	TypeReference ReturnType,
 	string ActivityOrEventName,
 	bool HasActivityParameter,
-	ActivityAttributeRecord? ActivityAttribute,
-	EventAttributeRecord? EventAttribute,
+	ActivityAttributeData? ActivityAttribute,
+	EventAttributeData? EventAttribute,
 	ActivityMethodType MethodType,
 	EquatableArray<ActivityBasedParameterTarget> Parameters,
 	EquatableArray<ActivityBasedParameterTarget> Baggage,

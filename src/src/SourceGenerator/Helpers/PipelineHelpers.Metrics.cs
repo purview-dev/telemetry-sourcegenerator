@@ -41,8 +41,8 @@ partial class PipelineHelpers
 			);
 		}
 
-		var meterAttribute = SharedHelpers.GetMeterAttribute(interfaceSymbol, token);
-		if (meterAttribute == null)
+		var meterData = SharedHelpers.GetMeterAttribute(interfaceSymbol, token);
+		if (meterData is not { } meterAttribute)
 		{
 			logger?.Fatal(
 				$"Could not find {TemplateLibrary.Metrics.MeterAttribute} when one was expected '{interfaceSymbol.Name}'."

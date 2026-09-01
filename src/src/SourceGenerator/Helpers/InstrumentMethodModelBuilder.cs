@@ -11,9 +11,9 @@ static class InstrumentMethodModelBuilder
 {
 	public static ImmutableArray<InstrumentTarget> BuildInstrumentationMethods(
 		GenerationType generationType,
-		MeterAttributeRecord meterAttribute,
-		MeterGenerationAttributeRecord? meterGenerationAttribute,
-		TelemetryGenerationAttributeRecord telemetryGeneration,
+		MeterAttributeData meterAttribute,
+		MeterGenerationAttributeData? meterGenerationAttribute,
+		TelemetryGenerationAttributeData telemetryGeneration,
 		string meterName,
 		INamedTypeSymbol interfaceSymbol,
 		ISourceGenLogger? logger,
@@ -130,7 +130,7 @@ static class InstrumentMethodModelBuilder
 		string? prefix,
 		bool lowercaseInstrumentName,
 		bool isLegacy,
-		MeterGenerationAttributeRecord? meterGenerationAttribute,
+		MeterGenerationAttributeData? meterGenerationAttribute,
 		string meterName
 	)
 	{
@@ -376,8 +376,8 @@ static class InstrumentMethodModelBuilder
 	}
 
 	static string? GeneratePrefix(
-		MeterGenerationAttributeRecord? meterGenerationAttribute,
-		MeterAttributeRecord meterAttribute,
+		MeterGenerationAttributeData? meterGenerationAttribute,
+		MeterAttributeData meterAttribute,
 		string interfaceName,
 		CancellationToken token
 	)
@@ -392,7 +392,7 @@ static class InstrumentMethodModelBuilder
 			meterAttribute.IncludeAssemblyInstrumentPrefix
 			&& !string.IsNullOrWhiteSpace(meterGenerationAttribute?.InstrumentPrefix)
 		)
-			prefix = meterGenerationAttribute!.InstrumentPrefix! + separator;
+			prefix = meterGenerationAttribute!.Value.InstrumentPrefix! + separator;
 
 		// Check if interface-level prefix is explicitly set
 		if (!string.IsNullOrWhiteSpace(meterAttribute.InstrumentPrefix))

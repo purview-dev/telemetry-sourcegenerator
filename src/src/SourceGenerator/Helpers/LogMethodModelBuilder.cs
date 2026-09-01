@@ -17,7 +17,7 @@ static class LogMethodModelBuilder
 		string className,
 		int defaultLogLevel,
 		int defaultPrefixType,
-		LoggerAttributeRecord loggerTarget,
+		LoggerAttributeData loggerTarget,
 		Compilation compilation,
 		INamedTypeSymbol interfaceSymbol,
 		ISourceGenLogger? logger,
@@ -79,7 +79,7 @@ static class LogMethodModelBuilder
 			}
 
 			var logAttribute = SharedHelpers.GetLogAttribute(method, token);
-			var hasExplicitLevel = logAttribute?.Level != null;
+			var hasExplicitLevel = logAttribute?.LevelOrNull != null;
 
 			var isKnownReturnType = !invalidReturnType;
 			var loggerActionFieldName = $"_{Utilities.LowercaseFirstChar(method.Name)}Action";
@@ -142,7 +142,7 @@ static class LogMethodModelBuilder
 					LoggerActionFieldName: loggerActionFieldName,
 					UnknownReturnType: !isKnownReturnType,
 					LogName: logName, // This includes any prefix information
-					EventId: logAttribute?.EventId,
+					EventId: logAttribute?.EventIdOrNull,
 					MessageTemplate: messageTemplate,
 					TemplateProperties: messageTemplateMatches,
 					TemplateIsOrdinalBased: templateIsOrdinalBased,
@@ -184,8 +184,8 @@ static class LogMethodModelBuilder
 	) ResolveLogMethodDetails(
 		string interfaceName,
 		string className,
-		LoggerAttributeRecord loggerTarget,
-		LogAttributeRecord? logAttribute,
+		LoggerAttributeData loggerTarget,
+		LogAttributeData? logAttribute,
 		string methodName,
 		int defaultPrefixType,
 		int defaultLogLevel,
@@ -202,8 +202,8 @@ static class LogMethodModelBuilder
 			: isScoped ? null
 			: methodParameters.FirstOrDefault(m => m.IsException);
 
-		var inferredErrorLevel = exceptionParam != null && logAttribute?.Level == null;
-		var level = logAttribute?.Level ?? (exceptionParam == null ? defaultLogLevel : 4); // Error
+		var inferredErrorLevel = exceptionParam != null && logAttribute?.LevelOrNull == null;
+		var level = logAttribute?.LevelOrNull ?? (exceptionParam == null ? defaultLogLevel : 4); // Error
 
 		return (logName, messageTemplate, hasMultipleExceptions, exceptionParam, inferredErrorLevel, level);
 	}
@@ -338,16 +338,16 @@ static class LogMethodModelBuilder
 	static string GetLogName(
 		string interfaceName,
 		string className,
-		LoggerAttributeRecord loggerAttribute,
-		LogAttributeRecord? logAttribute,
+		LoggerAttributeData loggerAttribute,
+		LogAttributeData? logAttribute,
 		string methodName,
 		int defaultPrefixType
 	)
 	{
-		if (logAttribute?.Name != null)
-			methodName = logAttribute.Name;
+		if (logAttribute?.Name is { } name)
+			methodName = name;
 
-		var prefixType = loggerAttribute.PrefixType ?? defaultPrefixType; // Default as LoggerGeneration level, or Default (0)
+		var prefixType = loggerAttribute.PrefixTypeOrNull ?? defaultPrefixType; // Default as LoggerGeneration level, or Default (0)
 
 		if (prefixType == 1)
 		{

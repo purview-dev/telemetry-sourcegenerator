@@ -26,7 +26,8 @@ static partial class TelemetryRules
 		var loggerAttribute = SharedHelpers.GetLoggerAttribute(interfaceSymbol, token);
 		var loggerGenerationAttribute = SharedHelpers.GetLoggerGenerationAttribute(compilation.Assembly, token);
 
-		var interfaceGenerationMode = loggerAttribute?.GenerationMode ?? loggerGenerationAttribute?.GenerationMode ?? 0;
+		var interfaceGenerationMode =
+			loggerAttribute?.GenerationModeOrNull ?? loggerGenerationAttribute?.GenerationModeOrNull ?? 0;
 
 		var methods = interfaceSymbol
 			.GetMembers()
@@ -116,13 +117,13 @@ static partial class TelemetryRules
 			);
 
 		// TSG2002: inferred error level (exception present, no explicit level).
-		if (useV1Generation && !isScoped && exceptionParameters.Length == 1 && logAttribute?.Level == null)
+		if (useV1Generation && !isScoped && exceptionParameters.Length == 1 && logAttribute?.LevelOrNull == null)
 			diagnostics.Add(
 				DiagnosticInfo.Create(ToDescriptor(DiagnosticLibrary.Logging.InferringErrorLogLevel), method)
 			);
 
 		// TSG2007: scoped method must not have an explicit level.
-		if (isScoped && logAttribute?.Level != null)
+		if (isScoped && logAttribute?.LevelOrNull != null)
 			diagnostics.Add(
 				DiagnosticInfo.Create(ToDescriptor(DiagnosticLibrary.Logging.ScopedMethodShouldNotHaveLevel), method)
 			);
@@ -162,7 +163,7 @@ static partial class TelemetryRules
 		// TSG2008: unbounded enumeration with a high max count.
 		if (
 			expandEnumerableAttribute != null
-			&& expandEnumerableAttribute.MaximumValueCount
+			&& expandEnumerableAttribute.Value.MaximumValueCount
 				> PropertyLibrary.Logging.UnboundedIEnumerableMaxCountBeforeDiagnostic
 		)
 		{

@@ -5,12 +5,12 @@ namespace Purview.Telemetry.SourceGenerator.Helpers;
 
 partial class SharedHelpers
 {
-	public static ActivitySourceGenerationAttributeRecord? GetActivitySourceGenerationAttribute(
+	public static ActivitySourceGenerationAttributeData? GetActivitySourceGenerationAttribute(
 		Compilation compilation,
 		CancellationToken token
 	) => GetActivitySourceGenerationAttribute(compilation.Assembly, token);
 
-	public static ActivitySourceAttributeRecord? GetActivitySourceAttribute(ISymbol symbol, CancellationToken token)
+	public static ActivitySourceAttributeData? GetActivitySourceAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -26,17 +26,15 @@ partial class SharedHelpers
 
 		var data = ActivitySourceAttributeData.FromAttributeData(attributeData!);
 		return data.Exists
-			? new(
-				Name: NullIfWhitespace(data.Name),
-				DefaultToTags: data.DefaultToTags,
-				BaggageAndTagPrefix: NullIfWhitespace(data.BaggageAndTagPrefix),
-				IncludeActivitySourcePrefix: data.IncludeActivitySourcePrefix,
-				LowercaseBaggageAndTagKeys: data.LowercaseBaggageAndTagKeys
-			)
+			? data with
+			{
+				Name = NullIfWhitespace(data.Name),
+				BaggageAndTagPrefix = NullIfWhitespace(data.BaggageAndTagPrefix),
+			}
 			: null;
 	}
 
-	public static ActivitySourceGenerationAttributeRecord? GetActivitySourceGenerationAttribute(
+	public static ActivitySourceGenerationAttributeData? GetActivitySourceGenerationAttribute(
 		ISymbol symbol,
 		CancellationToken token
 	)
@@ -55,18 +53,16 @@ partial class SharedHelpers
 
 		var data = ActivitySourceGenerationAttributeData.FromAttributeData(attributeData!);
 		return data.Exists
-			? new(
-				Name: NullIfWhitespace(data.Name),
-				DefaultToTags: data.DefaultToTags,
-				BaggageAndTagPrefix: NullIfWhitespace(data.BaggageAndTagPrefix),
-				BaggageAndTagSeparator: NullIfWhitespace(data.BaggageAndTagSeparator),
-				LowercaseBaggageAndTagKeys: data.LowercaseBaggageAndTagKeys,
-				GenerateDiagnosticsForMissingActivity: data.GenerateDiagnosticsForMissingActivity
-			)
+			? data with
+			{
+				Name = NullIfWhitespace(data.Name),
+				BaggageAndTagPrefix = NullIfWhitespace(data.BaggageAndTagPrefix),
+				BaggageAndTagSeparator = NullIfWhitespace(data.BaggageAndTagSeparator),
+			}
 			: null;
 	}
 
-	public static ActivityAttributeRecord? GetActivityGenAttribute(ISymbol symbol, CancellationToken token)
+	public static ActivityAttributeData? GetActivityGenAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -81,12 +77,10 @@ partial class SharedHelpers
 		}
 
 		var data = ActivityAttributeData.FromAttributeData(attributeData!);
-		return data.Exists
-			? new(Name: NullIfWhitespace(data.Name), Kind: data.Kind, CreateOnly: data.CreateOnly)
-			: null;
+		return data.Exists ? data with { Name = NullIfWhitespace(data.Name) } : null;
 	}
 
-	public static EventAttributeRecord? GetActivityEventAttribute(ISymbol symbol, CancellationToken token)
+	public static EventAttributeData? GetActivityEventAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -102,13 +96,11 @@ partial class SharedHelpers
 
 		var data = EventAttributeData.FromAttributeData(attributeData!);
 		return data.Exists
-			? new(
-				Name: NullIfWhitespace(data.Name),
-				UseRecordExceptionRules: data.UseRecordExceptionRules,
-				RecordExceptionEscape: data.RecordExceptionEscape,
-				StatusCode: data.StatusCode,
-				StatusDescription: NullIfWhitespace(data.StatusDescription)
-			)
+			? data with
+			{
+				Name = NullIfWhitespace(data.Name),
+				StatusDescription = NullIfWhitespace(data.StatusDescription),
+			}
 			: null;
 	}
 

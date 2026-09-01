@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
 	<Import Sdk="Purview.DotNetProjectSdk" Project="Sdk.targets" />
 
 	<Target Name="CopyProjectReferencesToPackage" DependsOnTargets="BuildOnlySettings;ResolveReferences">

@@ -52,7 +52,7 @@ static partial class SharedHelpers
 		if (generationType.HasFlag(GenerationType.Metrics))
 			return GenerationType.Metrics;
 
-		// If no targets are registered, return None
+		// If no targets are registered, return None. This should not happen in practice, but we handle it gracefully.
 		return GenerationType.None;
 	}
 
@@ -85,7 +85,7 @@ static partial class SharedHelpers
 	/// Matches the previous whitespace-skipping string-argument behaviour:
 	/// a string argument that is null, empty or whitespace is treated as not-specified.
 	/// </summary>
-	static string? NullIfWhitespace(string? value) => string.IsNullOrWhiteSpace(value) ? null : value;
+	public static string? NullIfWhitespace(string? value) => string.IsNullOrWhiteSpace(value) ? null : value;
 
 	public static TagOrBaggageAttributeRecord? GetTagOrBaggageAttribute(
 		AttributeData attributeData,
@@ -102,11 +102,12 @@ static partial class SharedHelpers
 		if (baggage.Exists)
 			return new(Name: NullIfWhitespace(baggage.Name), SkipOnNullOrEmpty: baggage.SkipOnNullOrEmpty);
 
-		// If neither attribute is present, return null
+		// If neither Tag nor Baggage attribute is found, return null
 		return null;
 	}
 
-	static readonly TelemetryGenerationAttributeRecord DefaultTelemetryGeneration = new(
+	static readonly TelemetryGenerationAttributeData DefaultTelemetryGeneration = new(
+		exists: true,
 		GenerateDependencyExtension: true,
 		ClassName: null,
 		DependencyInjectionClassName: null,
@@ -116,7 +117,7 @@ static partial class SharedHelpers
 		TelemetryNamesClassName: null
 	);
 
-	public static TelemetryGenerationAttributeRecord GetTelemetryGenerationAttribute(
+	public static TelemetryGenerationAttributeData GetTelemetryGenerationAttribute(
 		ISymbol type,
 		Compilation compilation,
 		CancellationToken token
@@ -126,22 +127,19 @@ static partial class SharedHelpers
 
 		var typeData = TelemetryGenerationAttributeData.FromAttributeData(type);
 		if (typeData.Exists)
-			return ToRecord(typeData);
+			return Normalize(typeData);
 
 		var assemblyData = TelemetryGenerationAttributeData.FromAttributeData(compilation.Assembly);
-		return assemblyData.Exists ? ToRecord(assemblyData) : DefaultTelemetryGeneration;
+		return assemblyData.Exists ? Normalize(assemblyData) : DefaultTelemetryGeneration;
 	}
 
-	static TelemetryGenerationAttributeRecord ToRecord(TelemetryGenerationAttributeData data) =>
-		new(
-			GenerateDependencyExtension: data.GenerateDependencyExtension,
-			ClassName: NullIfWhitespace(data.ClassName),
-			DependencyInjectionClassName: NullIfWhitespace(data.DependencyInjectionClassName),
-			DependencyInjectionClassIsPublic: data.DependencyInjectionClassIsPublic,
-			NamingConvention: data.NamingConvention,
-			GenerateTelemetryNamesClass: data.GenerateTelemetryNamesClass,
-			TelemetryNamesClassName: NullIfWhitespace(data.TelemetryNamesClassName)
-		);
+	static TelemetryGenerationAttributeData Normalize(TelemetryGenerationAttributeData data) =>
+		data with
+		{
+			ClassName = NullIfWhitespace(data.ClassName),
+			DependencyInjectionClassName = NullIfWhitespace(data.DependencyInjectionClassName),
+			TelemetryNamesClassName = NullIfWhitespace(data.TelemetryNamesClassName),
+		};
 
 	/// <summary>
 	/// Gets the ExcludeTargetsAttribute from a parameter, if present.

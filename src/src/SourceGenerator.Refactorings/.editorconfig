@@ -1,9 +1,0 @@
-# These refactoring providers are intentionally large, self-contained Roslyn
-# workspace operations; maintainability rules are scoped down to match the
-# source-generator project's temporary guidance.
-root = false
-
-[*.cs]
-dotnet_diagnostic.CA1502.severity = suggestion
-dotnet_diagnostic.CA1506.severity = suggestion
-dotnet_diagnostic.IDE0040.severity = suggestion

@@ -1,16 +1,9 @@
 namespace Purview.Telemetry.SourceGenerator.Records;
 
+/// <summary>
+/// A parameter that carries either a <c>[Tag]</c> or <c>[Baggage]</c> marker attribute.
+/// </summary>
 sealed record TagOrBaggageAttributeRecord(string? Name, bool SkipOnNullOrEmpty);
-
-sealed record TelemetryGenerationAttributeRecord(
-	bool GenerateDependencyExtension,
-	string? ClassName,
-	string? DependencyInjectionClassName,
-	bool DependencyInjectionClassIsPublic,
-	int NamingConvention,
-	bool GenerateTelemetryNamesClass,
-	string? TelemetryNamesClassName
-);
 
 /// <summary>
 /// sealed record for ExcludeTargetsAttribute on parameters.

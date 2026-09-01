@@ -1,7 +1,7 @@
 namespace Purview.Telemetry.SourceGenerator.Records;
 
 sealed record MeterTarget(
-	TelemetryGenerationAttributeRecord TelemetryGeneration,
+	TelemetryGenerationAttributeData TelemetryGeneration,
 	GenerationType GenerationType,
 	string ClassNameToGenerate,
 	string? ClassNamespace,
@@ -10,7 +10,7 @@ sealed record MeterTarget(
 	string? FullyQualifiedName,
 	TypeReference InterfaceType,
 	string? MeterName,
-	MeterGenerationAttributeRecord? MeterGeneration,
+	MeterGenerationAttributeData? MeterGeneration,
 	EquatableArray<InstrumentTarget> InstrumentationMethods
 );
 

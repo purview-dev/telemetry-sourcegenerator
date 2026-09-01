@@ -1,22 +1,5 @@
 namespace Purview.Telemetry.SourceGenerator.Records;
 
-sealed record MeterGenerationAttributeRecord(
-	string? InstrumentPrefix,
-	string? InstrumentSeparator,
-	bool LowercaseInstrumentName,
-	bool LowercaseTagKeys,
-	string? MeterName,
-	int MeterNameGenerationType
-);
-
-sealed record MeterAttributeRecord(
-	string? Name,
-	string? InstrumentPrefix,
-	bool IncludeAssemblyInstrumentPrefix,
-	bool LowercaseInstrumentName,
-	bool LowercaseTagKeys
-);
-
 sealed record InstrumentAttributeRecord(
 	string? Name,
 	string? Unit,

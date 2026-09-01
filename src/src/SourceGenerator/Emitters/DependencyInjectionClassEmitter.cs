@@ -8,7 +8,7 @@ static class DependencyInjectionClassEmitter
 {
 	public static void GenerateImplementation(
 		GenerationType requestingType,
-		TelemetryGenerationAttributeRecord attribute,
+		TelemetryGenerationAttributeData attribute,
 		GenerationType generationType,
 		string implementationClassName,
 		string sourceInterfaceName,

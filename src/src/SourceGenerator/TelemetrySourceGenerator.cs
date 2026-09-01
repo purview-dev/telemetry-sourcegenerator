@@ -13,6 +13,11 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator
 	/// the one diagnostic the generator raises directly (an execution-failure safety net, not a validation
 	/// diagnostic — the analyzer owns those).
 	/// </summary>
+	[System.Diagnostics.CodeAnalysis.SuppressMessage(
+		"Design",
+		"CA1031:Do not catch general exception types",
+		Justification = "The generator must not fail the build; unexpected exceptions are surfaced as TSG1000."
+	)]
 	static void RunSafely(SourceProductionContext spc, Action generate)
 	{
 		try

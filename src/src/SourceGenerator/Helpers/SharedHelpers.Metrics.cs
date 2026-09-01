@@ -5,12 +5,12 @@ namespace Purview.Telemetry.SourceGenerator.Helpers;
 
 partial class SharedHelpers
 {
-	public static MeterGenerationAttributeRecord? GetMeterGenerationAttribute(
+	public static MeterGenerationAttributeData? GetMeterGenerationAttribute(
 		Compilation compilation,
 		CancellationToken token
 	) => GetMeterGenerationAttribute(compilation.Assembly, token);
 
-	public static MeterAttributeRecord? GetMeterAttribute(ISymbol symbol, CancellationToken token)
+	public static MeterAttributeData? GetMeterAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -26,17 +26,15 @@ partial class SharedHelpers
 
 		var data = MeterAttributeData.FromAttributeData(attributeData!);
 		return data.Exists
-			? new(
-				Name: NullIfWhitespace(data.Name),
-				InstrumentPrefix: NullIfWhitespace(data.InstrumentPrefix),
-				IncludeAssemblyInstrumentPrefix: data.IncludeAssemblyInstrumentPrefix,
-				LowercaseInstrumentName: data.LowercaseInstrumentName,
-				LowercaseTagKeys: data.LowercaseTagKeys
-			)
+			? data with
+			{
+				Name = NullIfWhitespace(data.Name),
+				InstrumentPrefix = NullIfWhitespace(data.InstrumentPrefix),
+			}
 			: null;
 	}
 
-	public static MeterGenerationAttributeRecord? GetMeterGenerationAttribute(ISymbol symbol, CancellationToken token)
+	public static MeterGenerationAttributeData? GetMeterGenerationAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -52,14 +50,12 @@ partial class SharedHelpers
 
 		var data = MeterGenerationAttributeData.FromAttributeData(attributeData!);
 		return data.Exists
-			? new(
-				InstrumentPrefix: NullIfWhitespace(data.InstrumentPrefix),
-				InstrumentSeparator: NullIfWhitespace(data.InstrumentSeparator),
-				LowercaseInstrumentName: data.LowercaseInstrumentName,
-				LowercaseTagKeys: data.LowercaseTagKeys,
-				MeterName: NullIfWhitespace(data.MeterName),
-				MeterNameGenerationType: data.MeterNameGenerationType
-			)
+			? data with
+			{
+				InstrumentPrefix = NullIfWhitespace(data.InstrumentPrefix),
+				InstrumentSeparator = NullIfWhitespace(data.InstrumentSeparator),
+				MeterName = NullIfWhitespace(data.MeterName),
+			}
 			: null;
 	}
 
