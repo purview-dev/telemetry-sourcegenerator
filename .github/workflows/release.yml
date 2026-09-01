@@ -46,5 +46,7 @@ jobs:
         if: steps.version.outputs.should_publish == 'true'
         env:
           Release__ShouldPublish: true
+          Release__Mode: NuGet
+          Build__RunPack: true
           NuGet__ApiKey: ${{ secrets.NUGET__APIKEY }}
         run: dotnet run --project build/PipelineCLI/PipelineCLI.csproj --configuration Release
