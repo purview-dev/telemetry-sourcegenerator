@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace Purview.Aspire.ResourceKit.PipelineCLI;
+namespace Purview.Telemetry.SourceGeneratorPipelineCLI;
 
 static class PipelineProjectDirectory
 {

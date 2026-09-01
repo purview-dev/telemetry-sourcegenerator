@@ -1,4 +1,4 @@
-namespace Purview.Aspire.ResourceKit.PipelineCLI.Helpers;
+namespace Purview.Telemetry.SourceGeneratorPipelineCLI.Helpers;
 
 static class PathHelpers
 {

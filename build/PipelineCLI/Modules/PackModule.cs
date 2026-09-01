@@ -6,7 +6,7 @@ using ModularPipelines.DotNet.Options;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
 
-namespace Purview.Aspire.ResourceKit.PipelineCLI.Modules;
+namespace Purview.Telemetry.SourceGeneratorPipelineCLI.Modules;
 
 [ModuleCategory("Build")]
 [DependsOn<RunTestsModule>]

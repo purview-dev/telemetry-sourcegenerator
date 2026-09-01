@@ -5,7 +5,7 @@ using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
 
-namespace Purview.Aspire.ResourceKit.PipelineCLI.Modules;
+namespace Purview.Telemetry.SourceGeneratorPipelineCLI.Modules;
 
 [ModuleCategory("Build")]
 public sealed class LintModule(IOptions<BuildSettings> settings) : Module<CommandResult>

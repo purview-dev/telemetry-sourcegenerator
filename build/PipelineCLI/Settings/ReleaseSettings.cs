@@ -1,4 +1,4 @@
-namespace Purview.Aspire.ResourceKit.PipelineCLI.Settings;
+namespace Purview.Telemetry.SourceGeneratorPipelineCLI.Settings;
 
 public enum ReleaseMode
 {

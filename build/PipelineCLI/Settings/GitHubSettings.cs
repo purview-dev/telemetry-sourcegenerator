@@ -1,6 +1,6 @@
 using ModularPipelines.Attributes;
 
-namespace Purview.Aspire.ResourceKit.PipelineCLI.Settings;
+namespace Purview.Telemetry.SourceGeneratorPipelineCLI.Settings;
 
 public sealed record GitHubSettings
 {
