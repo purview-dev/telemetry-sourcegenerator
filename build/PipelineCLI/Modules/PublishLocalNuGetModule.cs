@@ -6,7 +6,7 @@ using ModularPipelines.Models;
 using ModularPipelines.Modules;
 using NuGet.Versioning;
 
-namespace Purview.Telemetry.SourceGeneratorPipelineCLI.Modules;
+namespace Purview.Telemetry.SourceGenerator.PipelineCLI.Modules;
 
 [ModuleCategory("Build")]
 [DependsOn<PackModule>]

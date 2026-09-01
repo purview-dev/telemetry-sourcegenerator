@@ -1,4 +1,4 @@
-namespace Purview.Telemetry.SourceGeneratorPipelineCLI.Helpers;
+namespace Purview.Telemetry.SourceGenerator.PipelineCLI.Helpers;
 
 static class TestHelpers
 {

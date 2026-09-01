@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Purview.Telemetry.SourceGeneratorPipelineCLI.Settings;
+namespace Purview.Telemetry.SourceGenerator.PipelineCLI.Settings;
 
 public sealed class BuildSettings
 {

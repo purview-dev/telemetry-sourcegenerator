@@ -5,7 +5,7 @@ using ModularPipelines.DotNet.Options;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
 
-namespace Purview.Telemetry.SourceGeneratorPipelineCLI.Modules;
+namespace Purview.Telemetry.SourceGenerator.PipelineCLI.Modules;
 
 [ModuleCategory("Build")]
 public class RestoreModule(IOptions<BuildSettings> settings) : Module<CommandResult>

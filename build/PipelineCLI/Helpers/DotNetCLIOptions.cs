@@ -1,6 +1,6 @@
 using ModularPipelines.Options;
 
-namespace Purview.Telemetry.SourceGeneratorPipelineCLI.Helpers;
+namespace Purview.Telemetry.SourceGenerator.PipelineCLI.Helpers;
 
 public sealed record DotNetCLIOptions : CommandLineToolOptions
 {

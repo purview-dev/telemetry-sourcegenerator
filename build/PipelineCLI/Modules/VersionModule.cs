@@ -4,7 +4,7 @@ using ModularPipelines.Context;
 using ModularPipelines.Modules;
 using NuGet.Versioning;
 
-namespace Purview.Telemetry.SourceGeneratorPipelineCLI.Modules;
+namespace Purview.Telemetry.SourceGenerator.PipelineCLI.Modules;
 
 [ModuleCategory("Build")]
 public class VersionModule : Module<NuGetVersion>

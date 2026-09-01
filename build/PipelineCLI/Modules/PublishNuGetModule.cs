@@ -5,7 +5,7 @@ using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
 
-namespace Purview.Telemetry.SourceGeneratorPipelineCLI.Modules;
+namespace Purview.Telemetry.SourceGenerator.PipelineCLI.Modules;
 
 [ModuleCategory("Release")]
 [DependsOn<PackModule>]
