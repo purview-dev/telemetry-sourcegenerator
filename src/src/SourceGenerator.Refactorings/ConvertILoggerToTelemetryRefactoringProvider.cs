@@ -11,6 +11,11 @@ namespace Purview.Telemetry.SourceGenerator.Refactorings;
 
 [Shared]
 [ExportCodeRefactoringProvider(LanguageNames.CSharp, Name = nameof(ConvertILoggerToTelemetryRefactoringProvider))]
+[System.Diagnostics.CodeAnalysis.SuppressMessage(
+	"Design",
+	"CA1506:Avoid excessive class coupling",
+	Justification = "Legacy code-refactoring provider that inspects many Roslyn/telemetry types."
+)]
 public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactoringProvider
 {
 	// Matches structured-logging template placeholders: {Name}, {@Name} (destructure), {$Name} (stringify).

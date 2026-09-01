@@ -13,57 +13,32 @@ partial class TelemetrySourceGenerator
 	)
 	{
 		// Register
-		var loggerTargetsPredicate = IncrementalPipeline
-			.ForAttributeWithMetadataName(
-				context,
-				TemplateLibrary.Logging.LoggerAttribute.TypeInfo,
-				transform: static (context, cancellationToken) =>
-					PipelineHelpers.BuildLoggerTransform(context, null, cancellationToken),
-				predicate: static (node, token) => PipelineHelpers.HasLoggerTargetAttribute(node, token),
-				trackingName: $"{nameof(TelemetrySourceGenerator)}_Logging"
-			)
-			.Where(static m => m.HasValue);
+		var loggerTargetsPredicate = IncrementalPipeline.ForAttributeWithMetadataName(
+			context,
+			TemplateLibrary.Logging.LoggerAttribute.TypeInfo,
+			transform: static (context, cancellationToken) =>
+				PipelineHelpers.BuildLoggerTransform(context, null, cancellationToken),
+			predicate: static (node, token) => PipelineHelpers.HasLoggerTargetAttribute(node, token),
+			trackingName: $"{nameof(TelemetrySourceGenerator)}_Logging"
+		);
+
+		var outputContexts = loggerTargetsPredicate
+			.Where(static m => m.ShouldProcess)
+			.Combine(generationContext)
+			.Select(static (pair, _) => new LoggerOutputContext(pair.Left.Value!, pair.Right))
+			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_LoggerOutputs");
 
 		// Register with the source generator.
 		context.RegisterSourceOutput(
-			source: loggerTargetsPredicate.Combine(generationContext),
-			action: (spc, pair) =>
+			source: outputContexts,
+			action: static (spc, output) =>
 			{
-				var (result, genContext) = pair;
+				output.Context.Logger?.Debug($"Logger generation target: {output.Target.FullyQualifiedName}");
 
-				if (!result.ShouldProcess || result.Value is not { } target)
-					return;
-
-				var logger = genContext.Logger;
-				logger?.Debug($"Logger generation target: {target.FullyQualifiedName}");
-
-				var emitNullable = genContext.Capabilities.SupportsNullableAnnotations;
-				var supportsIMeterFactory = genContext.Capabilities.SupportsIMeterFactory;
-
-				if (target.UseMSLoggingTelemetryBasedGeneration)
-					RunSafely(
-						spc,
-						() =>
-							LoggerGenTargetClassEmitter.GenerateImplementation(
-								target,
-								spc,
-								logger,
-								emitNullable,
-								supportsIMeterFactory
-							)
-					);
+				if (output.Target.UseMSLoggingTelemetryBasedGeneration)
+					RunSafely(spc, () => LoggerGenTargetClassEmitter.GenerateImplementation(output, spc));
 				else
-					RunSafely(
-						spc,
-						() =>
-							LoggerTargetClassEmitter.GenerateImplementation(
-								target,
-								spc,
-								logger,
-								emitNullable,
-								supportsIMeterFactory
-							)
-					);
+					RunSafely(spc, () => LoggerTargetClassEmitter.GenerateImplementation(output, spc));
 			}
 		);
 	}

@@ -18,47 +18,44 @@ partial class TelemetrySourceGenerator
 		// so we don't re-run TelemetryNames generation on every compilation change.
 		var assemblyNameProvider = context.CompilationProvider.Select(static (c, _) => c.AssemblyName ?? string.Empty);
 
-		var combined = assemblyNameProvider
+		var outputContext = assemblyNameProvider
 			.Combine(meterTargets.Collect())
 			.Combine(activityTargets.Collect())
-			.Combine(generationContext);
+			.Combine(generationContext)
+			.Select(
+				static (tuple, _) =>
+					new TelemetryNamesOutputContext(
+						tuple.Left.Left.Left,
+						new(tuple.Left.Left.Right),
+						new(tuple.Left.Right),
+						tuple.Right
+					)
+			)
+			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_TelemetryNamesOutput");
 
 		context.RegisterSourceOutput(
-			source: combined,
-			action: (spc, source) =>
-				GenerateTelemetryNames(
-					source.Left.Left.Left,
-					source.Left.Left.Right,
-					source.Left.Right,
-					source.Right.Capabilities.SupportsNullableAnnotations,
-					spc,
-					source.Right.Logger
-				)
+			source: outputContext,
+			action: static (spc, output) => GenerateTelemetryNames(output, spc)
 		);
 	}
 
-	static void GenerateTelemetryNames(
-		string assemblyName,
-		ImmutableArray<GeneratorResult<MeterTarget?>> meterTargets,
-		ImmutableArray<GeneratorResult<ActivitySourceTarget?>> activityTargets,
-		bool emitNullable,
-		SourceProductionContext spc,
-		ISourceGenLogger? logger
-	)
+	static void GenerateTelemetryNames(TelemetryNamesOutputContext output, SourceProductionContext spc)
 	{
+		var logger = output.Context.Logger;
+
 		// Only generate if we have at least one target
-		if (meterTargets.Length == 0 && activityTargets.Length == 0)
+		if (output.MeterTargets.IsEmpty && output.ActivityTargets.IsEmpty)
 		{
 			return;
 		}
 
 		// Only consider targets that are being processed (no interface-level errors).
-		var processedMeters = meterTargets
-			.Where(m => m.ShouldProcess && m.Value is { })
+		var processedMeters = output
+			.MeterTargets.Where(m => m.ShouldProcess && m.Value is { })
 			.Select(m => m.Value!)
 			.ToImmutableArray();
-		var processedActivities = activityTargets
-			.Where(m => m.ShouldProcess && m.Value is { })
+		var processedActivities = output
+			.ActivityTargets.Where(m => m.ShouldProcess && m.Value is { })
 			.Select(m => m.Value!)
 			.ToImmutableArray();
 
@@ -127,8 +124,8 @@ partial class TelemetrySourceGenerator
 					meterNames,
 					activitySourceNames,
 					className!,
-					assemblyName,
-					emitNullable,
+					output.AssemblyName,
+					output.Context.Capabilities.SupportsNullableAnnotations,
 					spc,
 					logger
 				)

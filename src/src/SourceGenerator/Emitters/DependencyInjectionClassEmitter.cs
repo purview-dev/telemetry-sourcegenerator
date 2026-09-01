@@ -14,11 +14,13 @@ static class DependencyInjectionClassEmitter
 		string sourceInterfaceName,
 		string? fullyQualifiedNamespace,
 		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool emitNullable = true
+		GenerationContext<TelemetryCapabilities> generationContext
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
+
+		var logger = generationContext.Logger;
+		var emitNullable = generationContext.Capabilities.SupportsNullableAnnotations;
 
 		if (!attribute.GenerateDependencyExtension)
 		{

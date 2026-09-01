@@ -12,28 +12,18 @@ partial class TelemetrySourceGenerator
 		IncrementalValueProvider<GenerationContext<TelemetryCapabilities>> generationContext
 	)
 	{
+		var outputContexts = activityTargets
+			.Where(static m => m.ShouldProcess)
+			.Combine(generationContext)
+			.Select(static (pair, _) => new ActivityOutputContext(pair.Left.Value!, pair.Right))
+			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_ActivityOutputs");
+
 		context.RegisterSourceOutput(
-			source: activityTargets.Combine(generationContext),
-			action: (spc, pair) =>
+			source: outputContexts,
+			action: static (spc, output) =>
 			{
-				var (result, genContext) = pair;
-
-				if (!result.ShouldProcess || result.Value is not { } target)
-					return;
-
-				var logger = genContext.Logger;
-				logger?.Debug($"Activity generation target: {target.FullyQualifiedName}");
-
-				RunSafely(
-					spc,
-					() =>
-						ActivitySourceTargetClassEmitter.GenerateImplementation(
-							target,
-							spc,
-							logger,
-							genContext.Capabilities.SupportsNullableAnnotations
-						)
-				);
+				output.Context.Logger?.Debug($"Activity generation target: {output.Target.FullyQualifiedName}");
+				RunSafely(spc, () => ActivitySourceTargetClassEmitter.GenerateImplementation(output, spc));
 			}
 		);
 	}
