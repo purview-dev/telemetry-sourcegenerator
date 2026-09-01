@@ -2,45 +2,19 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Purview.Telemetry.SourceGenerator.Helpers;
-using Purview.Telemetry.SourceGenerator.Records;
 
 namespace Purview.Telemetry.SourceGenerator;
 
+/// <summary>
+/// Raises all telemetry diagnostics. The generator only collects interface-level diagnostics to decide
+/// <see cref="Purview.SourceGeneratorFramework.GeneratorResult{T}.ShouldProcess"/>; this analyzer is the
+/// single source that reports them to the user.
+/// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 {
-	static readonly DiagnosticDescriptor GenericInterfacesNotSupported = ToDescriptor(
-		TelemetryDiagnostics.General.GenericInterfacesNotSupported
-	);
-	static readonly DiagnosticDescriptor GenericMethodsNotSupported = ToDescriptor(
-		TelemetryDiagnostics.General.GenericMethodsNotSupported
-	);
-	static readonly DiagnosticDescriptor DuplicateMethodNames = ToDescriptor(
-		TelemetryDiagnostics.General.DuplicateMethodNamesAreNotSupported
-	);
-	static readonly DiagnosticDescriptor InferenceNotSupportedWithMultiTargeting = ToDescriptor(
-		TelemetryDiagnostics.General.InferenceNotSupportedWithMultiTargeting
-	);
-	static readonly DiagnosticDescriptor MultiGenerationTargetsNotSupported = ToDescriptor(
-		TelemetryDiagnostics.General.MultiGenerationTargetsNotSupported
-	);
-	static readonly DiagnosticDescriptor MethodTargetNotRegisteredOnInterface = ToDescriptor(
-		TelemetryDiagnostics.General.MethodTargetNotRegisteredOnInterface
-	);
-	static readonly DiagnosticDescriptor MsLoggingNotReferenced = ToDescriptor(
-		TelemetryDiagnostics.Logging.MSLoggingNotReferenced
-	);
-
 	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-	[
-		GenericInterfacesNotSupported,
-		GenericMethodsNotSupported,
-		DuplicateMethodNames,
-		InferenceNotSupportedWithMultiTargeting,
-		MultiGenerationTargetsNotSupported,
-		MethodTargetNotRegisteredOnInterface,
-		MsLoggingNotReferenced,
-	];
+		TelemetryRules.GetAllSupportedDescriptors();
 
 	[System.Diagnostics.CodeAnalysis.SuppressMessage(
 		"Design",
@@ -64,125 +38,71 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 
 		var hasActivitySource = Utilities.ContainsAttribute(
 			interfaceSymbol,
-			Constants.Activities.ActivitySourceAttribute,
+			TemplateLibrary.Activities.ActivitySourceAttribute,
 			token
 		);
-		var hasLogger = Utilities.ContainsAttribute(interfaceSymbol, Constants.Logging.LoggerAttribute, token);
-		var hasMeter = Utilities.ContainsAttribute(interfaceSymbol, Constants.Metrics.MeterAttribute, token);
+		var hasLogger = Utilities.ContainsAttribute(interfaceSymbol, TemplateLibrary.Logging.LoggerAttribute, token);
+		var hasMeter = Utilities.ContainsAttribute(interfaceSymbol, TemplateLibrary.Metrics.MeterAttribute, token);
 
 		if (!hasActivitySource && !hasLogger && !hasMeter)
 			return;
 
-		// TSG1004: Generic interface — report and bail; nothing further is meaningful
-		if (interfaceSymbol.Arity > 0)
-		{
-			foreach (var location in interfaceSymbol.Locations)
-				context.ReportDiagnostic(Diagnostic.Create(GenericInterfacesNotSupported, location));
-			return;
-		}
+		var compilation = context.Compilation;
 
-		// Gather all methods grouped by name (needed by TSG1003 and per-method checks below)
-		var methodsByName = new Dictionary<string, List<IMethodSymbol>>(StringComparer.Ordinal);
-		foreach (var member in interfaceSymbol.GetMembers())
-		{
-			if (member is not IMethodSymbol method)
-				continue;
+		// Structural diagnostics (interface + method level).
+		var structural = TelemetryRules.GetStructuralDiagnostics(interfaceSymbol, compilation, token);
+		foreach (var diagnostic in structural)
+			context.ReportDiagnostic(diagnostic.ToDiagnostic());
 
-			if (!methodsByName.TryGetValue(method.Name, out var list))
-			{
-				list = [];
-				methodsByName[method.Name] = list;
-			}
-
-			list.Add(method);
-		}
-
-		// TSG1003: Duplicate method names (structural, independent of ILogger availability)
-		foreach (var kvp in methodsByName)
-		{
-			var methods = kvp.Value;
-
-			if (methods.Count <= 1)
-				continue;
-
-			var allLocations = methods.SelectMany(m => m.Locations).ToArray();
-			var primary = allLocations.Length > 0 ? allLocations[0] : null;
-			var additional = allLocations.Length > 1 ? allLocations.Skip(1).ToArray() : [];
-
-			context.ReportDiagnostic(Diagnostic.Create(DuplicateMethodNames, primary, additional, kvp.Key));
-		}
-
-		// TSG2003: MS Logging not referenced — report but do NOT return early so that
-		// structural diagnostics (TSG1003, TSG1005, etc.) are still produced.
+		// Domain diagnostics. The activity and meter rules reuse the pipeline transforms so the
+		// parameter/instrument inference matches generation exactly.
 		if (hasLogger)
 		{
-			var iLoggerSymbol = context.Compilation.GetTypeByMetadataName(
-				Constants.Logging.MicrosoftExtensions.ILogger.FullyQualifiedName
-			);
-			if (iLoggerSymbol is null)
+			var loggerDiagnostics = TelemetryRules.GetLoggerDiagnostics(interfaceSymbol, compilation, token);
+			foreach (var diagnostic in loggerDiagnostics)
+				context.ReportDiagnostic(diagnostic.ToDiagnostic());
+		}
+
+		var semanticModel = GetSemanticModel(interfaceSymbol, compilation, token);
+		if (semanticModel is null)
+			return;
+
+		if (hasActivitySource)
+		{
+			var result = PipelineHelpers.BuildActivityTarget(interfaceSymbol, semanticModel, null, token);
+			if (result.HasValue && result.Value is { } activityTarget)
 			{
-				foreach (var location in interfaceSymbol.Locations)
-					context.ReportDiagnostic(Diagnostic.Create(MsLoggingNotReferenced, location));
+				var diagnostics = TelemetryRules.GetActivityDiagnostics(activityTarget, interfaceSymbol, token);
+				foreach (var diagnostic in diagnostics)
+					context.ReportDiagnostic(diagnostic.ToDiagnostic());
 			}
 		}
 
-		// Determine interface generation type for multi-target validation
-		var generationType =
-			(hasActivitySource ? GenerationType.Activities : GenerationType.None)
-			| (hasLogger ? GenerationType.Logging : GenerationType.None)
-			| (hasMeter ? GenerationType.Metrics : GenerationType.None);
-
-		// Per-method validation
-		foreach (var kvp in methodsByName)
+		if (hasMeter)
 		{
-			var methods = kvp.Value;
-
-			// Use first method for validation (duplicates already reported above)
-			var method = methods[0];
-
-			token.ThrowIfCancellationRequested();
-
-			if (Utilities.ContainsAttribute(method, Constants.Shared.ExcludeAttribute, token))
-				continue;
-
-			// TSG1005: Generic method
-			if (method.Arity > 0)
+			var result = PipelineHelpers.BuildMeterTarget(interfaceSymbol, semanticModel, null, token);
+			if (result.HasValue && result.Value is { } meterTarget)
 			{
-				foreach (var location in method.Locations)
-					context.ReportDiagnostic(Diagnostic.Create(GenericMethodsNotSupported, location));
-				continue;
-			}
-
-			// Multi-target validation (TSG1001, TSG1002, TSG1010)
-			var targetState = Utilities.IsValidGenerationTarget(method, generationType, generationType);
-
-			if (targetState.RaiseInferenceNotSupportedWithMultiTargeting)
-			{
-				foreach (var location in method.Locations)
-					context.ReportDiagnostic(Diagnostic.Create(InferenceNotSupportedWithMultiTargeting, location));
-			}
-
-			if (targetState.RaiseMultiGenerationTargetsNotSupported)
-			{
-				foreach (var location in method.Locations)
-					context.ReportDiagnostic(Diagnostic.Create(MultiGenerationTargetsNotSupported, location));
-			}
-
-			if (targetState.RaiseMissingInterfaceSource)
-			{
-				foreach (var location in method.Locations)
-					context.ReportDiagnostic(Diagnostic.Create(MethodTargetNotRegisteredOnInterface, location));
+				var diagnostics = TelemetryRules.GetMeterDiagnostics(meterTarget, interfaceSymbol, token);
+				foreach (var diagnostic in diagnostics)
+					context.ReportDiagnostic(diagnostic.ToDiagnostic());
 			}
 		}
 	}
 
-	static DiagnosticDescriptor ToDescriptor(TelemetryDiagnosticDescriptor descriptor) =>
-		new(
-			id: descriptor.Id,
-			title: descriptor.Title,
-			messageFormat: descriptor.Description,
-			category: descriptor.Category,
-			defaultSeverity: descriptor.Severity,
-			isEnabledByDefault: descriptor.EnabledByDefault
-		);
+	static SemanticModel? GetSemanticModel(
+		INamedTypeSymbol interfaceSymbol,
+		Compilation compilation,
+		CancellationToken token
+	)
+	{
+		var reference = interfaceSymbol.DeclaringSyntaxReferences.FirstOrDefault();
+		if (reference is null)
+			return null;
+
+		var tree = reference.SyntaxTree;
+		token.ThrowIfCancellationRequested();
+
+		return compilation.GetSemanticModel(tree);
+	}
 }

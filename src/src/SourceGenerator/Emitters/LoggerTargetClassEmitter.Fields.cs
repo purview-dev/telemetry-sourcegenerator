@@ -11,7 +11,7 @@ partial class LoggerTargetClassEmitter
 		LoggerTarget target,
 		CodeWriter writer,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable
 	)
 	{
@@ -19,12 +19,12 @@ partial class LoggerTargetClassEmitter
 
 		writer
 			.Write("readonly ")
-			.Write(Constants.Logging.MicrosoftExtensions.ILogger)
+			.Write(TypeLibrary.Logging.MicrosoftExtensions.ILogger)
 			.Write('<')
 			.Write(target.InterfaceType)
 			.Write('>')
 			.Write(' ')
-			.Write(Constants.Logging.LoggerFieldName)
+			.Write(PropertyLibrary.Logging.LoggerFieldName)
 			.Write(';')
 			.NewLine()
 			.NewLine();
@@ -38,13 +38,13 @@ partial class LoggerTargetClassEmitter
 				if (methodTarget.TargetGenerationState.RaiseMultiGenerationTargetsNotSupported)
 				{
 					logger?.Debug(
-						$"Identified {target.InterfaceType.TypeName}.{methodTarget.MethodName} as problematic as it has another target types."
+						$"Identified {target.InterfaceType.Identity.Name}.{methodTarget.MethodName} as problematic as it has another target types."
 					);
 				}
 				else if (methodTarget.TargetGenerationState.RaiseInferenceNotSupportedWithMultiTargeting)
 				{
 					logger?.Debug(
-						$"Identified {target.InterfaceType.TypeName}.{methodTarget.MethodName} as problematic as it is inferred."
+						$"Identified {target.InterfaceType.Identity.Name}.{methodTarget.MethodName} as problematic as it is inferred."
 					);
 				}
 
@@ -61,31 +61,19 @@ partial class LoggerTargetClassEmitter
 
 			if (methodTarget.UnknownReturnType)
 			{
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.Logging.LogMustReturnVoidOrAsync
-				);
 				continue;
 			}
 
 			if (methodTarget.HasMultipleExceptions)
 			{
 				logger?.Diagnostic("Method has multiple exception parameters, only a single one is permitted.");
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.Logging.MultipleExceptionsDefined
-				);
 
 				continue;
 			}
 
-			if (methodTarget.ParameterCountSansException > Constants.Logging.MaxNonExceptionParameters)
+			if (methodTarget.ParameterCountSansException > PropertyLibrary.Logging.MaxNonExceptionParameters)
 			{
 				logger?.Diagnostic("Method has more than 6 parameters.");
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.Logging.MaximumLogEntryParametersExceeded
-				);
 
 				continue;
 			}
@@ -93,10 +81,6 @@ partial class LoggerTargetClassEmitter
 			if (methodTarget.InferredErrorLevel)
 			{
 				logger?.Diagnostic("Inferring error log level.");
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.Logging.InferringErrorLogLevel
-				);
 			}
 
 			EmitLogActionField(writer, methodTarget, emitNullable);
@@ -107,9 +91,9 @@ partial class LoggerTargetClassEmitter
 	{
 		writer
 			.Write("static readonly ")
-			.Write(methodTarget.IsScoped ? Constants.System.Func : Constants.System.Action)
+			.Write(methodTarget.IsScoped ? TypeLibrary.System.Func : TypeLibrary.System.Action)
 			.Write('<')
-			.Write(Constants.Logging.MicrosoftExtensions.ILogger)
+			.Write(TypeLibrary.Logging.MicrosoftExtensions.ILogger)
 			.Write(", ");
 
 		foreach (var parameter in methodTarget.ParametersSansException)
@@ -117,14 +101,14 @@ partial class LoggerTargetClassEmitter
 
 		if (methodTarget.IsScoped)
 		{
-			writer.Write(Constants.System.IDisposable);
+			writer.Write(TypeLibrary.System.IDisposable);
 			if (emitNullable)
 				writer.Write('?');
 			writer.Write("> ");
 		}
 		else
 		{
-			writer.Write(Constants.System.Exception);
+			writer.Write(TypeLibrary.System.Exception);
 			if (emitNullable)
 				writer.Write('?');
 			writer.Write("> ");
@@ -133,7 +117,7 @@ partial class LoggerTargetClassEmitter
 		writer
 			.Write(methodTarget.LoggerActionFieldName)
 			.Write(" = ")
-			.Write(Constants.Logging.MicrosoftExtensions.LoggerMessage)
+			.Write(TypeLibrary.Logging.MicrosoftExtensions.LoggerMessage)
 			.Write(".Define");
 
 		if (methodTarget.IsScoped)
@@ -165,7 +149,7 @@ partial class LoggerTargetClassEmitter
 			var eventId = methodTarget.EventId ?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
 			writer
 				.Write("new ")
-				.Write(Constants.Logging.MicrosoftExtensions.EventId)
+				.Write(TypeLibrary.Logging.MicrosoftExtensions.EventId)
 				.Write('(')
 				.Write(eventId.ToString(CultureInfo.InvariantCulture))
 				.Write(", \"")

@@ -9,7 +9,7 @@ static partial class ActivitySourceTargetClassEmitter
 	public static void GenerateImplementation(
 		ActivitySourceTarget target,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable = true
 	)
 	{
@@ -36,7 +36,7 @@ static partial class ActivitySourceTargetClassEmitter
 					GenerationType.Activities,
 					target.GenerationType,
 					target.ClassNameToGenerate,
-					EmitterHelpers.AsTypeReference(target.InterfaceType),
+					target.InterfaceType,
 					TypeDeclarationAccessibility.Internal
 				)
 			)
@@ -56,7 +56,7 @@ static partial class ActivitySourceTargetClassEmitter
 			target.TelemetryGeneration,
 			target.GenerationType,
 			target.ClassNameToGenerate,
-			target.InterfaceType.TypeName,
+			target.InterfaceType.Identity.Name,
 			target.FullNamespace,
 			context,
 			logger,

@@ -97,6 +97,8 @@ Key behavior:
 2. `RootNamespace` defaults to `PurviewLogicalProjectName`.
 3. Known suffixes are stripped from `RootNamespace`, including shared/shared-testing names and common segments like `Core`, `EF`, `Shared`, `ClientShared`, and `ServiceDefaults`.
 4. Test suffixes are removed from `RootNamespace`, so `Acme.Api.UnitTests` still maps back to `Acme.Api`.
+5. `AssemblyName` and `PackageId` default to the fully evaluated `RootNamespace` (the canonical default public name). Test/shared-testing projects keep their detected suffix in `AssemblyName`/`PackageId` so test assemblies stay distinct. Explicit `AssemblyName`/`PackageId` values always win.
+6. The naming defaults are applied during `Sdk.props` evaluation (before the Microsoft SDK computes `TargetName`), so the compiled output name always matches `AssemblyName`.
 
 Do not hand-author alternate namespace conventions unless the repository explicitly opts out of the SDK defaults.
 
@@ -133,8 +135,15 @@ This is why consistent naming and placement matter so much in repos that use the
 
 - Adds SourceLink unless `DisableSourceLink=true`
 - Adds Purview telemetry packages unless `ExcludePurviewTelemetry=true`
-- Generates documentation files for non-test, non-shared-testing library projects
+- Generates documentation files (`GenerateDocumentationFile=true`) unless explicitly disabled
 - Generates `InternalsVisibleTo` attributes unless `DisableAutoInternalsVisibleTo=true`
+
+### For packable projects
+
+- Defaults `GenerateDocumentationFile`, `IncludeSymbols`, `SymbolPackageFormat=snupkg`, `PublishRepositoryUrl`, `EmbedUntrackedSources`, `IncludeSource`, and `DebugType=portable` — only when the consuming project has not supplied a value
+- Delivers portable PDBs via the `.snupkg`; the normal `.nupkg` does not receive PDBs unless the project opts in explicitly
+- Packs the repository-root `README.md` (registered via `PackageReadmeFile`) when the file exists and `PackageReadmeFile` is unset; skips when a README is already being packed
+- Non-packable projects (including web apps) default `WarnOnPackingNonPackableProject=false` so solution-wide pack operations skip them silently
 
 ### For test and shared-testing projects
 

@@ -10,10 +10,10 @@ partial class TelemetrySourceGenerator
 {
 	static void RegisterTelemetryNamesGeneration(
 		IncrementalGeneratorInitializationContext context,
-		IncrementalValuesProvider<ActivitySourceTarget?> activityTargets,
-		IncrementalValuesProvider<MeterTarget?> meterTargets,
+		IncrementalValuesProvider<GeneratorResult<ActivitySourceTarget?>> activityTargets,
+		IncrementalValuesProvider<GeneratorResult<MeterTarget?>> meterTargets,
 		IncrementalValueProvider<bool> supportsNullableAnnotations,
-		GenerationLogger? logger
+		IncrementalValueProvider<GenerationContext<TelemetryCapabilities>> generationContext
 	)
 	{
 		// Extract only AssemblyName from Compilation — a stable string that rarely changes —
@@ -23,29 +23,30 @@ partial class TelemetrySourceGenerator
 		var combined = assemblyNameProvider
 			.Combine(meterTargets.Collect())
 			.Combine(activityTargets.Collect())
-			.Combine(supportsNullableAnnotations);
+			.Combine(supportsNullableAnnotations)
+			.Combine(generationContext);
 
 		context.RegisterImplementationSourceOutput(
 			source: combined,
 			action: (spc, source) =>
 				GenerateTelemetryNames(
-					source.Left.Left.Left,
+					source.Left.Left.Left.Left,
+					source.Left.Left.Left.Right,
 					source.Left.Left.Right,
 					source.Left.Right,
-					source.Right,
 					spc,
-					logger
+					source.Right.Logger
 				)
 		);
 	}
 
 	static void GenerateTelemetryNames(
 		string assemblyName,
-		ImmutableArray<MeterTarget?> meterTargets,
-		ImmutableArray<ActivitySourceTarget?> activityTargets,
+		ImmutableArray<GeneratorResult<MeterTarget?>> meterTargets,
+		ImmutableArray<GeneratorResult<ActivitySourceTarget?>> activityTargets,
 		bool emitNullable,
 		SourceProductionContext spc,
-		GenerationLogger? logger
+		ISourceGenLogger? logger
 	)
 	{
 		// Only generate if we have at least one target
@@ -54,12 +55,22 @@ partial class TelemetrySourceGenerator
 			return;
 		}
 
+		// Only consider targets that are being processed (no interface-level errors).
+		var processedMeters = meterTargets
+			.Where(m => m.ShouldProcess && m.Value is { })
+			.Select(m => m.Value!)
+			.ToImmutableArray();
+		var processedActivities = activityTargets
+			.Where(m => m.ShouldProcess && m.Value is { })
+			.Select(m => m.Value!)
+			.ToImmutableArray();
+
 		// Check if any target has GenerateTelemetryNamesClass set to false
 		var generateClass = true;
 		string? customClassName = null;
 
 		// Check meter targets for TelemetryGeneration settings
-		foreach (var target in meterTargets.Where(t => t != null))
+		foreach (var target in processedMeters)
 		{
 			if (target!.TelemetryGeneration?.GenerateTelemetryNamesClass.Value == false)
 			{
@@ -74,7 +85,7 @@ partial class TelemetrySourceGenerator
 		}
 
 		// Check activity targets for TelemetryGeneration settings
-		foreach (var target in activityTargets.Where(t => t != null))
+		foreach (var target in processedActivities)
 		{
 			if (target!.TelemetryGeneration?.GenerateTelemetryNamesClass.Value == false)
 			{
@@ -94,16 +105,16 @@ partial class TelemetrySourceGenerator
 		}
 
 		// Collect unique meter names
-		var meterNames = meterTargets
-			.Where(t => t != null && !string.IsNullOrEmpty(t.MeterName))
+		var meterNames = processedMeters
+			.Where(t => !string.IsNullOrEmpty(t.MeterName))
 			.Select(t => t!.MeterName!)
 			.Distinct(StringComparer.Ordinal)
 			.OrderBy(n => n, StringComparer.Ordinal)
 			.ToImmutableArray();
 
 		// Collect unique activity source names
-		var activitySourceNames = activityTargets
-			.Where(t => t != null && !string.IsNullOrEmpty(t.ActivitySourceName))
+		var activitySourceNames = processedActivities
+			.Where(t => !string.IsNullOrEmpty(t.ActivitySourceName))
 			.Select(t => t!.ActivitySourceName!)
 			.Distinct(StringComparer.Ordinal)
 			.OrderBy(n => n, StringComparer.Ordinal)
@@ -112,14 +123,18 @@ partial class TelemetrySourceGenerator
 		// Use custom class name if provided, otherwise default to "TelemetryNames"
 		var className = string.IsNullOrWhiteSpace(customClassName) ? "TelemetryNames" : customClassName;
 
-		TelemetryNamesEmitter.GenerateClass(
-			meterNames,
-			activitySourceNames,
-			className!,
-			assemblyName,
-			emitNullable,
+		RunSafely(
 			spc,
-			logger
+			() =>
+				TelemetryNamesEmitter.GenerateClass(
+					meterNames,
+					activitySourceNames,
+					className!,
+					assemblyName,
+					emitNullable,
+					spc,
+					logger
+				)
 		);
 	}
 }

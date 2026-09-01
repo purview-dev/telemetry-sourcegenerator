@@ -66,73 +66,6 @@ using Purview.Telemetry;
 		return result;
 	}
 
-	public static string GetFriendlyTypeName(Type type, bool useSystemType = true)
-	{
-		if (type.IsGenericParameter)
-			return type.Name;
-
-		if (!type.IsGenericType)
-		{
-			if (useSystemType)
-			{
-				switch (type.FullName)
-				{
-					case "System.String":
-						return "string";
-					case "System.Int32":
-						return "int";
-					case "System.Int64":
-						return "long";
-					case "System.Int16":
-						return "short";
-					case "System.Boolean":
-						return "bool";
-					case "System.Single":
-						return "float";
-					case "System.Double":
-						return "double";
-					case "System.Decimal":
-						return "decimal";
-					case "System.Byte":
-						return "byte";
-					case "System.SByte":
-						return "sbyte";
-					case "System.UInt16":
-						return "ushort";
-					case "System.UInt32":
-						return "uint";
-					case "System.UInt64":
-						return "ulong";
-					case "System.Char":
-						return "char";
-					case "System.Object":
-						return "object";
-				}
-			}
-
-			return type.FullName ?? type.Name;
-		}
-
-		var name = type.Name;
-		var index = name.IndexOf('`', StringComparison.OrdinalIgnoreCase);
-
-		StringBuilder builder = new();
-		builder.Append(type.Namespace).Append('.').Append(name[..index]).Append('<');
-
-		var first = true;
-		foreach (var arg in type.GetGenericArguments())
-		{
-			if (!first)
-				builder.Append(',');
-
-			builder.Append(GetFriendlyTypeName(arg));
-			first = false;
-		}
-
-		builder.Append('>');
-		return builder.ToString();
-	}
-
 	public static async Task VerifyAsync(
 		DriverRunResult result,
 		bool expectsDiagnostics = false,
@@ -166,7 +99,12 @@ using Purview.Telemetry;
 		}
 		else
 		{
-			await Assert.That(diag).IsEmpty();
+			await Assert
+				.That(diag)
+				.IsEmpty()
+				.Because(
+					$"Expected no diagnostics, but found: [{string.Join(", ", diag.Select(d => d.Id).Distinct())}]"
+				);
 		}
 
 		if (!validationCompilation)

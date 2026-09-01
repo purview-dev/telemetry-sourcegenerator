@@ -1,8 +1,8 @@
-﻿using Purview.Telemetry.SourceGenerator.Templates;
+using Purview.SourceGeneratorFramework;
 
 namespace Purview.Telemetry.SourceGenerator.Records;
 
-record ActivitySourceTarget(
+sealed record ActivitySourceTarget(
 	TelemetryGenerationAttributeRecord TelemetryGeneration,
 	GenerationType GenerationType,
 	string ClassNameToGenerate,
@@ -10,16 +10,16 @@ record ActivitySourceTarget(
 	EquatableArray<string> ParentClasses,
 	string? FullNamespace,
 	string? FullyQualifiedName,
-	PurviewTypeInfo InterfaceType,
+	TypeReference InterfaceType,
 	ActivitySourceGenerationAttributeRecord? ActivitySourceGenerationAttribute,
 	string? ActivitySourceName,
 	EquatableArray<ActivityBasedGenerationTarget> ActivityMethods,
 	ActivitySourceAttributeRecord ActivityTargetAttributeRecord
 );
 
-record ActivityBasedGenerationTarget(
+sealed record ActivityBasedGenerationTarget(
 	string MethodName,
-	PurviewTypeInfo ReturnType,
+	TypeReference ReturnType,
 	string ActivityOrEventName,
 	bool HasActivityParameter,
 	ActivityAttributeRecord? ActivityAttribute,
@@ -32,9 +32,9 @@ record ActivityBasedGenerationTarget(
 	EquatableArray<string> TypeParameters = default
 );
 
-record ActivityBasedParameterTarget(
+sealed record ActivityBasedParameterTarget(
 	string ParameterName,
-	PurviewTypeInfo ParameterType,
+	TypeReference ParameterType,
 	string GeneratedName,
 	ActivityParameterDestination ParamDestination,
 	bool SkipOnNullOrEmpty,

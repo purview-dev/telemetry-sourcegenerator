@@ -1,26 +1,26 @@
+using System.Composition;
+using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeRefactorings;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Composition;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Purview.Telemetry.SourceGenerator.Refactorings;
 
-[ExportCodeRefactoringProvider(LanguageNames.CSharp, Name = nameof(ConvertMetricsToTelemetryRefactoringProvider))]
+[ExportCodeRefactoringProvider(
+	LanguageNames.CSharp,
+	Name = nameof(ConvertActivitySourceToTelemetryRefactoringProvider)
+)]
 [Shared]
-public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactoringProvider
+public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRefactoringProvider
 {
 	static readonly Regex WordSplitterRegex = new(@"[\s\-_./\\]+", RegexOptions.Compiled);
 	static readonly Regex CamelCaseSplitRegex = new(
 		@"(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])",
 		RegexOptions.Compiled
 	);
-
-	// Suffixes stripped when deriving method names from field names
-	static readonly string[] InstrumentSuffixes = ["UpDownCounter", "Histogram", "Counter", "Gauge", "Meter"];
 
 	public override async Task ComputeRefactoringsAsync(CodeRefactoringContext context)
 	{
@@ -39,40 +39,45 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		if (semanticModel is null)
 			return;
 
-		var metricsFields = FindMetricsFields(classDecl, semanticModel, context.CancellationToken);
-		if (metricsFields.Count == 0)
+		var activitySourceFields = FindActivitySourceFields(classDecl, semanticModel, context.CancellationToken);
+		if (activitySourceFields.Count == 0)
 			return;
 
-		var metricsCalls = FindMetricsCalls(classDecl, metricsFields, semanticModel, context.CancellationToken);
-		if (metricsCalls.Count == 0)
+		var activityCalls = FindActivityCalls(
+			classDecl,
+			activitySourceFields,
+			semanticModel,
+			context.CancellationToken
+		);
+		if (activityCalls.Count == 0)
 			return;
 
 		var className = classDecl.Identifier.ValueText;
 		var doc = context.Document;
 		context.RegisterRefactoring(
 			CodeAction.Create(
-				$"Convert Metrics to I{className}Metrics",
+				$"Convert ActivitySource to I{className}Tracing",
 				nestedActions:
 				[
 					CodeAction.Create(
 						"In this class",
-						ct => ConvertAsync(doc, classDecl, metricsFields, metricsCalls, semanticModel, ct),
-						equivalenceKey: "Purview.Telemetry.ConvertMetricsToTelemetry.Class"
+						ct => ConvertAsync(doc, classDecl, activitySourceFields, activityCalls, semanticModel, ct),
+						equivalenceKey: "Purview.Telemetry.ConvertActivitySourceToTelemetry.Class"
 					),
 					CodeAction.Create(
 						"In this document",
 						ct => ConvertDocumentAsync(doc, ct),
-						equivalenceKey: "Purview.Telemetry.ConvertMetricsToTelemetry.Document"
+						equivalenceKey: "Purview.Telemetry.ConvertActivitySourceToTelemetry.Document"
 					),
 					CodeAction.Create(
 						"In this project",
 						ct => ConvertProjectAsync(doc.Project, ct),
-						equivalenceKey: "Purview.Telemetry.ConvertMetricsToTelemetry.Project"
+						equivalenceKey: "Purview.Telemetry.ConvertActivitySourceToTelemetry.Project"
 					),
 					CodeAction.Create(
 						"In this solution",
 						ct => ConvertSolutionAsync(doc.Project.Solution, ct),
-						equivalenceKey: "Purview.Telemetry.ConvertMetricsToTelemetry.Solution"
+						equivalenceKey: "Purview.Telemetry.ConvertActivitySourceToTelemetry.Solution"
 					),
 				],
 				isInlinable: false
@@ -83,25 +88,31 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 	static async Task<Document> ConvertAsync(
 		Document document,
 		ClassDeclarationSyntax classDecl,
-		List<MetricsFieldInfo> metricsFields,
-		List<MetricsCallInfo> metricsCalls,
+		List<ActivitySourceFieldInfo> activitySourceFields,
+		List<ActivitySourceCallInfo> activityCalls,
 		SemanticModel semanticModel,
 		CancellationToken cancellationToken
 	)
 	{
 		var className = classDecl.Identifier.ValueText;
-		var interfaceName = "I" + className + "Metrics";
+		var interfaceName = "I" + className + "Tracing";
 
-		var callsWithMethods = AssignMethodNames(metricsCalls, metricsFields);
+		var callsWithMethods = AssignMethodNames(activityCalls);
 
 		var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
 		if (root is null)
 			return document;
 
-		var interfaceCode = BuildInterfaceCode(interfaceName, callsWithMethods, metricsFields);
+		var interfaceCode = BuildInterfaceCode(interfaceName, callsWithMethods);
 		var interfaceSyntax = ParseInterfaceNode(interfaceCode);
 
-		var newClassDecl = RewriteClass(classDecl, metricsFields, callsWithMethods, interfaceName, semanticModel);
+		var newClassDecl = RewriteClass(
+			classDecl,
+			activitySourceFields,
+			callsWithMethods,
+			interfaceName,
+			semanticModel
+		);
 
 		var newRoot = root.ReplaceNode(classDecl, newClassDecl);
 		var replacedClass = newRoot
@@ -114,11 +125,21 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 			[interfaceSyntax.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed)]
 		);
 
+		// Add using Purview.Telemetry; and using System.Diagnostics; if not already present.
 		var compilationRoot = (CompilationUnitSyntax)newRoot;
-		if (!compilationRoot.Usings.Any(u => u.Name?.ToString() == Constants.PurviewTelemetryNamespace))
+		if (!compilationRoot.Usings.Any(u => u.Name?.ToString() == TelemetryAttributeNames.PurviewTelemetryNamespace))
 		{
 			var newUsing = SyntaxFactory
-				.UsingDirective(SyntaxFactory.ParseName(Constants.PurviewTelemetryNamespace))
+				.UsingDirective(SyntaxFactory.ParseName(TelemetryAttributeNames.PurviewTelemetryNamespace))
+				.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+			newRoot = compilationRoot.AddUsings(newUsing);
+			compilationRoot = (CompilationUnitSyntax)newRoot;
+		}
+
+		if (!compilationRoot.Usings.Any(u => u.Name?.ToString() == TelemetryAttributeNames.SystemDiagnosticsNamespace))
+		{
+			var newUsing = SyntaxFactory
+				.UsingDirective(SyntaxFactory.ParseName(TelemetryAttributeNames.SystemDiagnosticsNamespace))
 				.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
 			newRoot = compilationRoot.AddUsings(newUsing);
 		}
@@ -143,16 +164,16 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 				break;
 
 			ClassDeclarationSyntax? targetClass = null;
-			List<MetricsFieldInfo>? fields = null;
-			List<MetricsCallInfo>? calls = null;
+			List<ActivitySourceFieldInfo>? fields = null;
+			List<ActivitySourceCallInfo>? calls = null;
 
 			foreach (var classDecl in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
 			{
-				var f = FindMetricsFields(classDecl, semanticModel, cancellationToken);
+				var f = FindActivitySourceFields(classDecl, semanticModel, cancellationToken);
 				if (f.Count == 0)
 					continue;
 
-				var c = FindMetricsCalls(classDecl, f, semanticModel, cancellationToken);
+				var c = FindActivityCalls(classDecl, f, semanticModel, cancellationToken);
 				if (c.Count == 0)
 					continue;
 
@@ -206,24 +227,21 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 	// Detection
 	// ─────────────────────────────────────────────────────────────────────────
 
-	internal static List<MetricsFieldInfo> FindMetricsFields(
+	internal static List<ActivitySourceFieldInfo> FindActivitySourceFields(
 		ClassDeclarationSyntax classDecl,
 		SemanticModel semanticModel,
 		CancellationToken cancellationToken
 	)
 	{
-		var counterType = semanticModel.Compilation.GetTypeByMetadataName(
-			Constants.Metrics.SystemDiagnostics.CounterMetadataName
+		var activitySourceType = semanticModel.Compilation.GetTypeByMetadataName(
+			TelemetryAttributeNames.Activities.ActivitySource.MetadataFullName
 		);
-		var histogramType = semanticModel.Compilation.GetTypeByMetadataName(
-			Constants.Metrics.SystemDiagnostics.HistogramMetadataName
-		);
-		var upDownCounterType = semanticModel.Compilation.GetTypeByMetadataName(
-			Constants.Metrics.SystemDiagnostics.UpDownCounterMetadataName
-		);
+		if (activitySourceType is null)
+			return [];
 
-		var result = new List<MetricsFieldInfo>();
+		var result = new List<ActivitySourceFieldInfo>();
 
+		// Fields
 		foreach (var member in classDecl.Members.OfType<FieldDeclarationSyntax>())
 		{
 			foreach (var variable in member.Declaration.Variables)
@@ -233,18 +251,39 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 				if (semanticModel.GetDeclaredSymbol(variable, cancellationToken) is not IFieldSymbol fieldSymbol)
 					continue;
 
-				var kind = ClassifyInstrumentType(fieldSymbol.Type, counterType, histogramType, upDownCounterType);
-				if (kind is null)
+				if (!SymbolEqualityComparer.Default.Equals(fieldSymbol.Type, activitySourceType))
 					continue;
 
 				result.Add(
-					new MetricsFieldInfo(
+					new ActivitySourceFieldInfo(
 						FieldName: fieldSymbol.Name,
-						InstrumentKind: kind.Value,
-						MeasurementTypeDisplayString: GetMeasurementType(fieldSymbol.Type),
 						FieldDeclaration: member,
 						PropertyDeclaration: null,
 						TypeSymbol: fieldSymbol.Type
+					)
+				);
+			}
+		}
+
+		// Primary constructor parameters
+		if (classDecl.ParameterList is { } primaryCtorParams)
+		{
+			foreach (var param in primaryCtorParams.Parameters)
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+
+				if (semanticModel.GetDeclaredSymbol(param, cancellationToken) is not IParameterSymbol paramSymbol)
+					continue;
+
+				if (!SymbolEqualityComparer.Default.Equals(paramSymbol.Type, activitySourceType))
+					continue;
+
+				result.Add(
+					new ActivitySourceFieldInfo(
+						FieldName: param.Identifier.Text,
+						FieldDeclaration: null,
+						PropertyDeclaration: null,
+						TypeSymbol: paramSymbol.Type
 					)
 				);
 			}
@@ -258,15 +297,12 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 			if (semanticModel.GetDeclaredSymbol(member, cancellationToken) is not IPropertySymbol propSymbol)
 				continue;
 
-			var kind = ClassifyInstrumentType(propSymbol.Type, counterType, histogramType, upDownCounterType);
-			if (kind is null)
+			if (!SymbolEqualityComparer.Default.Equals(propSymbol.Type, activitySourceType))
 				continue;
 
 			result.Add(
-				new MetricsFieldInfo(
+				new ActivitySourceFieldInfo(
 					FieldName: propSymbol.Name,
-					InstrumentKind: kind.Value,
-					MeasurementTypeDisplayString: GetMeasurementType(propSymbol.Type),
 					FieldDeclaration: null,
 					PropertyDeclaration: member,
 					TypeSymbol: propSymbol.Type
@@ -277,43 +313,15 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		return result;
 	}
 
-	static MetricsInstrumentKind? ClassifyInstrumentType(
-		ITypeSymbol type,
-		INamedTypeSymbol? counterType,
-		INamedTypeSymbol? histogramType,
-		INamedTypeSymbol? upDownCounterType
-	)
-	{
-		if (type is not INamedTypeSymbol namedType || !namedType.IsGenericType)
-			return null;
-
-		var constructedFrom = namedType.ConstructedFrom;
-
-		if (counterType is not null && SymbolEqualityComparer.Default.Equals(constructedFrom, counterType))
-			return MetricsInstrumentKind.Counter;
-
-		if (histogramType is not null && SymbolEqualityComparer.Default.Equals(constructedFrom, histogramType))
-			return MetricsInstrumentKind.Histogram;
-
-		// UpDownCounter
-		return upDownCounterType is null || !SymbolEqualityComparer.Default.Equals(constructedFrom, upDownCounterType)
-			? null
-			: MetricsInstrumentKind.UpDownCounter;
-	}
-
-	static string GetMeasurementType(ITypeSymbol type) => type is INamedTypeSymbol { IsGenericType: true } named && named.TypeArguments.Length > 0
-			? named.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)
-			: "long";
-
-	internal static List<MetricsCallInfo> FindMetricsCalls(
+	internal static List<ActivitySourceCallInfo> FindActivityCalls(
 		ClassDeclarationSyntax classDecl,
-		List<MetricsFieldInfo> metricsFields,
-		SemanticModel _,
+		List<ActivitySourceFieldInfo> sourceFields,
+		SemanticModel semanticModel,
 		CancellationToken cancellationToken
 	)
 	{
-		var fieldNames = metricsFields.ToDictionary(f => f.FieldName, StringComparer.Ordinal);
-		var result = new List<MetricsCallInfo>();
+		var fieldNames = new HashSet<string>(sourceFields.Select(f => f.FieldName), StringComparer.Ordinal);
+		var result = new List<ActivitySourceCallInfo>();
 
 		foreach (var invocation in classDecl.DescendantNodes().OfType<InvocationExpressionSyntax>())
 		{
@@ -323,37 +331,45 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 				continue;
 
 			var receiverName = GetSimpleIdentifier(memberAccess.Expression);
-			if (receiverName is null || !fieldNames.TryGetValue(receiverName, out var fieldInfo))
+			if (receiverName is null || !fieldNames.Contains(receiverName))
 				continue;
 
-			var methodName = memberAccess.Name.Identifier.Text;
-			var isAdd = methodName == "Add";
-			var isRecord = methodName == "Record";
-
-			if (!isAdd && !isRecord)
+			if (memberAccess.Name.Identifier.Text != "StartActivity")
 				continue;
 
 			var args = invocation.ArgumentList.Arguments;
-			var isAutoCounter = false;
 
-			// Determine if this is an auto-counter (literal 1 on Counter/UpDownCounter)
-			if (isAdd && fieldInfo.InstrumentKind == MetricsInstrumentKind.Counter && args.Count >= 1)
+			string? activityName = null;
+			string? activityKind = null;
+
+			// First arg: activity name (string literal or named arg)
+			if (args.Count >= 1)
 			{
-				var firstArg = args[0].Expression;
-				if (firstArg is LiteralExpressionSyntax lit && lit.Token.ValueText == "1")
-					isAutoCounter = true;
+				var nameArg = args[0];
+				if (nameArg.NameColon is null && nameArg.Expression is LiteralExpressionSyntax lit)
+					activityName = lit.Token.ValueText;
+				else if (
+					nameArg.NameColon?.Name.Identifier.Text == "name"
+					&& nameArg.Expression is LiteralExpressionSyntax namedLit
+				)
+					activityName = namedLit.Token.ValueText;
 			}
 
-			result.Add(
-				new MetricsCallInfo(
-					Invocation: invocation,
-					ReceiverFieldName: receiverName,
-					InstrumentKind: isAutoCounter ? MetricsInstrumentKind.AutoCounter : fieldInfo.InstrumentKind,
-					MeasurementTypeDisplayString: fieldInfo.MeasurementTypeDisplayString,
-					MeasurementArgument: args.Count >= 1 ? args[0].Expression : null,
-					IsAutoIncrement: isAutoCounter
-				)
-			);
+			// Second arg or named "kind" arg: ActivityKind
+			for (var i = 0; i < args.Count; i++)
+			{
+				var arg = args[i];
+				var isKindArg = (i == 1 && arg.NameColon is null) || arg.NameColon?.Name.Identifier.Text == "kind";
+				if (!isKindArg)
+					continue;
+
+				var kindSymbol = semanticModel.GetSymbolInfo(arg.Expression, cancellationToken).Symbol;
+				if (kindSymbol is IFieldSymbol { ContainingType.Name: "ActivityKind" } kindField)
+					activityKind = kindField.Name;
+				break;
+			}
+
+			result.Add(new ActivitySourceCallInfo(invocation, activityName, activityKind, receiverName));
 		}
 
 		return result;
@@ -363,58 +379,62 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 	// Method name assignment
 	// ─────────────────────────────────────────────────────────────────────────
 
-	static List<(MetricsCallInfo Call, string MethodName)> AssignMethodNames(
-		List<MetricsCallInfo> calls,
-		List<MetricsFieldInfo> fields
-	)
+	static List<(ActivitySourceCallInfo Call, string MethodName)> AssignMethodNames(List<ActivitySourceCallInfo> calls)
 	{
-		// Assign a base method name per field, then deduplicate
-		var fieldNameMap = new Dictionary<string, string>(StringComparer.Ordinal);
-		foreach (var field in fields)
+		var signatureToName = new Dictionary<string, string>(StringComparer.Ordinal);
+		var usedNames = new HashSet<string>(StringComparer.Ordinal);
+		var result = new List<(ActivitySourceCallInfo, string)>(calls.Count);
+
+		foreach (var call in calls)
 		{
-			if (!fieldNameMap.ContainsKey(field.FieldName))
-				fieldNameMap[field.FieldName] = DeriveMethodName(field);
+			var sigKey = GetCallSignatureKey(call);
+			if (!signatureToName.TryGetValue(sigKey, out var name))
+			{
+				var baseName = DeriveActivityMethodName(call);
+				name = baseName;
+				var counter = 2;
+				while (!usedNames.Add(name))
+					name = baseName + counter++;
+
+				signatureToName[sigKey] = name;
+			}
+
+			result.Add((call, name));
 		}
 
-		return
-		[
-			.. calls.Select(c =>
-				(c, fieldNameMap.TryGetValue(c.ReceiverFieldName, out var n) ? n : c.ReceiverFieldName)
-			),
-		];
+		return result;
 	}
 
-	internal static string DeriveMethodName(MetricsFieldInfo field)
+	static string GetCallSignatureKey(ActivitySourceCallInfo call)
 	{
-		// Strip leading underscores
-		var raw = field.FieldName.TrimStart('_');
+		var kind = call.ActivityKind ?? "Internal";
+		return $"{call.ActivityName ?? ""}|{kind}";
+	}
 
-		// Strip recognised suffix (case-insensitive match at end of word)
-		foreach (var suffix in InstrumentSuffixes)
+	internal static string DeriveActivityMethodName(ActivitySourceCallInfo call)
+	{
+		if (!string.IsNullOrEmpty(call.ActivityName))
 		{
-			if (raw.EndsWith(suffix, StringComparison.OrdinalIgnoreCase) && raw.Length > suffix.Length)
-			{
-				raw = raw.Substring(0, raw.Length - suffix.Length);
-				break;
-			}
+			// Split on separators and camel-case boundaries, then PascalCase each word
+			var words = SplitIntoWords(call.ActivityName!);
+			if (words.Length > 0)
+				return string.Concat(words.Select(ToPascalCaseWord));
 		}
 
-		if (string.IsNullOrEmpty(raw))
-			return field.FieldName.TrimStart('_');
-
-		// PascalCase the resulting words
-		var words = SplitIntoWords(raw);
-		return words.Length > 0 ? string.Concat(words.Select(ToPascalCaseWord)) : ToPascalCaseWord(raw);
+		// Fallback: use a generic name based on ActivityKind if provided
+		return call.ActivityKind is not null ? call.ActivityKind + "Activity" : "Activity";
 	}
 
 	static string[] SplitIntoWords(string name)
 	{
+		// First split on explicit separators
 		var parts = WordSplitterRegex.Split(name);
 		var words = new List<string>();
 		foreach (var part in parts)
 		{
 			if (string.IsNullOrEmpty(part))
 				continue;
+			// Further split on camelCase boundaries
 			var subParts = CamelCaseSplitRegex.Split(part);
 			words.AddRange(subParts.Where(w => !string.IsNullOrEmpty(w)));
 		}
@@ -427,6 +447,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		if (string.IsNullOrEmpty(word))
 			return word;
 
+		// ALL_CAPS (e.g. "HTTP") → capitalise only the first
 		if (word.Length > 1 && word.All(char.IsUpper))
 #pragma warning disable CA1308
 			return char.ToUpperInvariant(word[0]) + word.Substring(1).ToLowerInvariant();
@@ -435,58 +456,18 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		return char.ToUpperInvariant(word[0]) + word.Substring(1);
 	}
 
-	internal static List<(MetricsCallInfo Call, string MethodName)> AssignMethodNamesInternal(
-		List<MetricsCallInfo> calls,
-		List<MetricsFieldInfo> fields
-	) => AssignMethodNames(calls, fields);
-
-	internal static string BuildMetricsAttributeInternal(MetricsCallInfo call) => BuildMetricsAttribute(call);
-
-	internal static string BuildParamListInternal(MetricsCallInfo call) => BuildParamList(call);
-
-	internal static ClassDeclarationSyntax RewriteClassInternal(
-		ClassDeclarationSyntax classDecl,
-		List<MetricsFieldInfo> metricsFields,
-		List<(MetricsCallInfo Call, string MethodName)> callsWithMethods,
-		string interfaceName,
-		SemanticModel semanticModel
-	) => RewriteClass(classDecl, metricsFields, callsWithMethods, interfaceName, semanticModel);
-
-	internal static string BuildInterfaceMembers(List<(MetricsCallInfo Call, string MethodName)> callsWithMethods)
-	{
-		var sb = new StringBuilder();
-		var emitted = new HashSet<string>(StringComparer.Ordinal);
-
-		foreach (var (call, methodName) in callsWithMethods)
-		{
-			var sigKey = $"{methodName}|{call.IsAutoIncrement}";
-			if (!emitted.Add(sigKey))
-				continue;
-
-			var attribute = BuildMetricsAttribute(call);
-			var paramList = BuildParamList(call);
-
-			sb.AppendLine($"\t[{attribute}]");
-			sb.AppendLine($"\tvoid {methodName}({paramList});");
-			sb.AppendLine();
-		}
-
-		return sb.ToString();
-	}
-
 	// ─────────────────────────────────────────────────────────────────────────
 	// Interface code generation
 	// ─────────────────────────────────────────────────────────────────────────
 
 	internal static string BuildInterfaceCode(
 		string interfaceName,
-		List<(MetricsCallInfo Call, string MethodName)> callsWithMethods,
-		List<MetricsFieldInfo> _
+		List<(ActivitySourceCallInfo Call, string MethodName)> callsWithMethods
 	)
 	{
 		var sb = new StringBuilder();
 
-		sb.AppendLine($"[{Constants.Metrics.MeterAttributeShortName}]");
+		sb.AppendLine($"[{TelemetryAttributeNames.Activities.ActivitySourceAttribute.RenderAttributeTypeName}]");
 		sb.AppendLine($"public interface {interfaceName}");
 		sb.AppendLine("{");
 		sb.Append(BuildInterfaceMembers(callsWithMethods));
@@ -495,32 +476,8 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		return sb.ToString();
 	}
 
-	static string BuildMetricsAttribute(MetricsCallInfo call) =>
-		call.InstrumentKind switch
-		{
-			MetricsInstrumentKind.AutoCounter => Constants.Metrics.AutoCounterAttributeShortName,
-			MetricsInstrumentKind.Counter => Constants.Metrics.CounterAttributeShortName,
-			MetricsInstrumentKind.Histogram => Constants.Metrics.HistogramAttributeShortName,
-			MetricsInstrumentKind.UpDownCounter => Constants.Metrics.UpDownCounterAttributeShortName,
-			_ => Constants.Metrics.CounterAttributeShortName,
-		};
-
-	static string BuildParamList(MetricsCallInfo call)
-	{
-		if (call.IsAutoIncrement)
-			return string.Empty;
-
-		var measurementType = call.MeasurementTypeDisplayString;
-		var baseParam = $"{measurementType} value";
-
-		// Collect tag parameters (args after the first value argument)
-		var tagArgs = call.Invocation.ArgumentList.Arguments.Skip(1).ToList();
-		if (tagArgs.Count == 0)
-			return baseParam;
-
-		var tagParams = tagArgs.Select((_, i) => $"string tag{i + 1}");
-		return baseParam + ", " + string.Join(", ", tagParams);
-	}
+	static string BuildActivityAttribute(ActivitySourceCallInfo call) =>
+		call.ActivityKind is null or "Internal" ? "Activity" : $"Activity(ActivityKind.{call.ActivityKind})";
 
 	static InterfaceDeclarationSyntax ParseInterfaceNode(string code)
 	{
@@ -531,19 +488,56 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 			?? throw new InvalidOperationException("Could not parse generated interface from: " + code);
 	}
 
+	internal static List<(ActivitySourceCallInfo Call, string MethodName)> AssignMethodNamesInternal(
+		List<ActivitySourceCallInfo> calls
+	) => AssignMethodNames(calls);
+
+	internal static string BuildActivityAttributeInternal(ActivitySourceCallInfo call) => BuildActivityAttribute(call);
+
+	internal static ClassDeclarationSyntax RewriteClassInternal(
+		ClassDeclarationSyntax classDecl,
+		List<ActivitySourceFieldInfo> activitySourceFields,
+		List<(ActivitySourceCallInfo Call, string MethodName)> callsWithMethods,
+		string interfaceName,
+		SemanticModel semanticModel
+	) => RewriteClass(classDecl, activitySourceFields, callsWithMethods, interfaceName, semanticModel);
+
+	internal static string BuildInterfaceMembers(
+		List<(ActivitySourceCallInfo Call, string MethodName)> callsWithMethods
+	)
+	{
+		var sb = new StringBuilder();
+		var emittedSignatures = new HashSet<string>(StringComparer.Ordinal);
+
+		foreach (var (call, methodName) in callsWithMethods)
+		{
+			var attribute = BuildActivityAttribute(call);
+			var signature = $"{attribute}|{methodName}";
+
+			if (!emittedSignatures.Add(signature))
+				continue;
+
+			sb.AppendLine($"\t[{attribute}]");
+			sb.AppendLine($"\tActivity? {methodName}();");
+			sb.AppendLine();
+		}
+
+		return sb.ToString();
+	}
+
 	// ─────────────────────────────────────────────────────────────────────────
 	// Class rewriting
 	// ─────────────────────────────────────────────────────────────────────────
 
 	static ClassDeclarationSyntax RewriteClass(
 		ClassDeclarationSyntax classDecl,
-		List<MetricsFieldInfo> metricsFields,
-		List<(MetricsCallInfo Call, string MethodName)> callsWithMethods,
+		List<ActivitySourceFieldInfo> activitySourceFields,
+		List<(ActivitySourceCallInfo Call, string MethodName)> callsWithMethods,
 		string interfaceName,
 		SemanticModel semanticModel
 	)
 	{
-		// Map each invocation to its replacement
+		// Build invocation map: StartActivity("name") → interface method call
 		var invocationMap = new Dictionary<InvocationExpressionSyntax, InvocationExpressionSyntax>(
 			SyntaxNodeReferenceComparer<InvocationExpressionSyntax>.Instance
 		);
@@ -551,15 +545,14 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		foreach (var (call, methodName) in callsWithMethods)
 		{
 			var newInvocation = RewriteInvocation(call, methodName);
-			if (!invocationMap.ContainsKey(call.Invocation))
-				invocationMap[call.Invocation] = newInvocation;
+			invocationMap[call.Invocation] = newInvocation;
 		}
 
-		// Map field declarations
+		// Build field map
 		var fieldMap = new Dictionary<FieldDeclarationSyntax, FieldDeclarationSyntax>(
 			SyntaxNodeReferenceComparer<FieldDeclarationSyntax>.Instance
 		);
-		foreach (var field in metricsFields)
+		foreach (var field in activitySourceFields)
 		{
 			if (field.FieldDeclaration is null)
 				continue;
@@ -567,11 +560,11 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 			fieldMap[field.FieldDeclaration] = RewriteFieldDeclaration(field.FieldDeclaration, interfaceName);
 		}
 
-		// Map property declarations
+		// Build property map
 		var propertyMap = new Dictionary<PropertyDeclarationSyntax, PropertyDeclarationSyntax>(
 			SyntaxNodeReferenceComparer<PropertyDeclarationSyntax>.Instance
 		);
-		foreach (var field in metricsFields)
+		foreach (var field in activitySourceFields)
 		{
 			if (field.PropertyDeclaration is null)
 				continue;
@@ -582,8 +575,8 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 			);
 		}
 
-		// Map constructor/method parameters
-		var paramMap = BuildParamRewriteMap(classDecl, metricsFields, interfaceName, semanticModel);
+		// Build parameter map
+		var paramMap = BuildParamRewriteMap(classDecl, activitySourceFields, interfaceName, semanticModel);
 
 		return classDecl.ReplaceNodes(
 			invocationMap
@@ -600,21 +593,16 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		);
 	}
 
-	static InvocationExpressionSyntax RewriteInvocation(MetricsCallInfo call, string methodName)
+	static InvocationExpressionSyntax RewriteInvocation(ActivitySourceCallInfo call, string newMethodName)
 	{
 		var memberAccess = (MemberAccessExpressionSyntax)call.Invocation.Expression;
-		var newMemberAccess = memberAccess.WithName(SyntaxFactory.IdentifierName(methodName));
 
-		if (call.IsAutoIncrement)
-		{
-			// AutoCounter: remove all arguments
-			return call
-				.Invocation.WithExpression(newMemberAccess)
-				.WithArgumentList(SyntaxFactory.ArgumentList().WithTriviaFrom(call.Invocation.ArgumentList));
-		}
+		// Replace StartActivity(...) with {MethodName}()
+		var newMemberAccess = memberAccess.WithName(SyntaxFactory.IdentifierName(newMethodName));
 
-		// Keep all original arguments unchanged
-		return call.Invocation.WithExpression(newMemberAccess);
+		return call
+			.Invocation.WithExpression(newMemberAccess)
+			.WithArgumentList(SyntaxFactory.ArgumentList().WithTriviaFrom(call.Invocation.ArgumentList));
 	}
 
 	static FieldDeclarationSyntax RewriteFieldDeclaration(FieldDeclarationSyntax fieldDecl, string interfaceName)
@@ -635,7 +623,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 
 	static Dictionary<ParameterSyntax, ParameterSyntax> BuildParamRewriteMap(
 		ClassDeclarationSyntax classDecl,
-		List<MetricsFieldInfo> metricsFields,
+		List<ActivitySourceFieldInfo> activitySourceFields,
 		string interfaceName,
 		SemanticModel semanticModel
 	)
@@ -644,12 +632,15 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 			SyntaxNodeReferenceComparer<ParameterSyntax>.Instance
 		);
 
+		// Build a set of qualified type names so we can match by name when
+		// the classDecl has already been rewritten (nodes no longer in the
+		// original semantic model's tree).
 		var fieldTypeNames = new HashSet<string>(
-			metricsFields.Select(f => f.TypeSymbol.ToDisplayString()),
+			activitySourceFields.Select(f => f.TypeSymbol.ToDisplayString()),
 			StringComparer.Ordinal
 		);
 		var fieldTypeShortNames = new HashSet<string>(
-			metricsFields.Select(f => f.TypeSymbol.Name),
+			activitySourceFields.Select(f => f.TypeSymbol.Name),
 			StringComparer.Ordinal
 		);
 
@@ -700,6 +691,9 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 			if (param.Type is null)
 				continue;
 
+			// Try semantic resolution first (accurate); fall back to syntax
+			// name matching when the node has already been rewritten and is
+			// no longer part of the semantic model's tree.
 			bool matched;
 			try
 			{
@@ -709,6 +703,8 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 			}
 			catch (ArgumentException)
 			{
+				// Node is not in the semantic tree (e.g., already rewritten).
+				// Fall back to matching by short name from source text.
 				var typeName = param.Type.ToString().TrimEnd('?');
 				matched = fieldTypeShortNames.Contains(typeName) || fieldTypeNames.Contains(typeName);
 			}

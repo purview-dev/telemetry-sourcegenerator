@@ -9,6 +9,7 @@
 	</Folder>
 	<Folder Name="/src/">
 		<Project Path="src/SourceGenerator/SourceGenerator.csproj" />
+		<Project Path="src/SourceGenerator.Refactorings/SourceGenerator.Refactorings.csproj" />
 	</Folder>
 	<Folder Name="/tests/">
 		<Project Path="tests/SourceGenerator.IntegrationTests/SourceGenerator.IntegrationTests.csproj" />

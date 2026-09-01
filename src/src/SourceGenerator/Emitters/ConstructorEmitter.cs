@@ -1,4 +1,6 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Purview.SourceGeneratorFramework;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
 
@@ -15,7 +17,7 @@ static class ConstructorEmitter
 		string fullyQualifiedInterfaceName,
 		CodeWriter writer,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool supportsIMeterFactory = true
 	)
 	{
@@ -29,50 +31,44 @@ static class ConstructorEmitter
 			return;
 		}
 
-		writer
-			.NewLine()
-			.WriteLine(Constants.System.GeneratedCode.Value)
-			.Write("public ")
-			.Write(classNameToGenerate)
-			.Write('(');
-
-		EmitParameters(generationType, fullyQualifiedInterfaceName, writer, supportsIMeterFactory);
-
-		writer.Write(")");
-
-		using (writer.OpenBlockScope())
-		{
-			EmitBody(generationType, writer, supportsIMeterFactory);
-		}
+		writer.NewLine();
+		writer.WriteConstructor(
+			new ConstructorDeclarationOptions(classNameToGenerate, TypeDeclarationAccessibility.Public)
+			{
+				Parameters = BuildParameters(generationType, fullyQualifiedInterfaceName, supportsIMeterFactory),
+				IncludeGeneratedAttributes = false,
+			},
+			body => EmitBody(generationType, body, supportsIMeterFactory)
+		);
 	}
 
-	static void EmitParameters(
+	static ImmutableArray<ParameterDeclarationOptions> BuildParameters(
 		GenerationType generationType,
 		string? loggerFullyQualifiedInterfaceName,
-		CodeWriter writer,
 		bool supportsIMeterFactory
 	)
 	{
+		var builder = ImmutableArray.CreateBuilder<ParameterDeclarationOptions>();
+
 		if (generationType.HasFlag(GenerationType.Logging))
 		{
-			writer
-				.Write(Constants.Logging.MicrosoftExtensions.ILogger)
-				.Write('<')
-				.Write(loggerFullyQualifiedInterfaceName)
-				.Write("> ")
-				.Write(LoggerParameterName);
+			var loggerType = TypeLibrary.Logging.MicrosoftExtensions.ILogger.MakeGeneric(
+				new TypeReference(new TypeIdentity(loggerFullyQualifiedInterfaceName!, null))
+			);
+			builder.Add(new ParameterDeclarationOptions(LoggerParameterName, new TypeReference(loggerType)));
 		}
 
 		if (generationType.HasFlag(GenerationType.Metrics) && supportsIMeterFactory)
 		{
-			if (generationType.HasFlag(GenerationType.Logging))
-				writer.Write(", ");
-
-			writer
-				.Write(Constants.Metrics.SystemDiagnostics.IMeterFactory)
-				.Write(' ')
-				.Write(Constants.Metrics.MeterFactoryParameterName);
+			builder.Add(
+				new ParameterDeclarationOptions(
+					PropertyLibrary.Metrics.MeterFactoryParameterName,
+					TypeLibrary.Metrics.SystemDiagnostics.IMeterFactory
+				)
+			);
 		}
+
+		return builder.ToImmutable();
 	}
 
 	static void EmitBody(GenerationType generationType, CodeWriter writer, bool supportsIMeterFactory)
@@ -80,7 +76,7 @@ static class ConstructorEmitter
 		if (generationType.HasFlag(GenerationType.Logging))
 		{
 			writer
-				.Write(Constants.Logging.LoggerFieldName)
+				.Write(PropertyLibrary.Logging.LoggerFieldName)
 				.Write(" = ")
 				.Write(LoggerParameterName)
 				.Write(";")
@@ -89,10 +85,10 @@ static class ConstructorEmitter
 
 		if (generationType.HasFlag(GenerationType.Metrics))
 		{
-			writer.Write(Constants.Metrics.MeterInitializationMethod).Write('(');
+			writer.Write(PropertyLibrary.Metrics.MeterInitializationMethod).Write('(');
 
 			if (supportsIMeterFactory)
-				writer.Write(Constants.Metrics.MeterFactoryParameterName);
+				writer.Write(PropertyLibrary.Metrics.MeterFactoryParameterName);
 
 			writer.Write(");").NewLine();
 		}

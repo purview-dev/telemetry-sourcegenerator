@@ -5,9 +5,29 @@ using Purview.Telemetry.SourceGenerator.Helpers;
 namespace Purview.Telemetry.SourceGenerator;
 
 [Generator]
-public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator, ILogSupport
+public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator
 {
-	GenerationLogger? _logger;
+	/// <summary>
+	/// Executes a generation action, reporting <c>TSG1000</c> if an unexpected exception escapes. This is
+	/// the one diagnostic the generator raises directly (an execution-failure safety net, not a validation
+	/// diagnostic — the analyzer owns those).
+	/// </summary>
+	static void RunSafely(SourceProductionContext spc, Action generate)
+	{
+		try
+		{
+			generate();
+		}
+		catch (Exception ex)
+		{
+			spc.ReportDiagnostic(
+				DiagnosticInfo.Create(
+					TelemetryRules.ToDescriptor(DiagnosticLibrary.General.FatalExecutionDuringExecution),
+					ex.ToString()
+				)
+			);
+		}
+	}
 
 	public void Initialize(IncrementalGeneratorInitializationContext context)
 	{
@@ -25,30 +45,7 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator, IL
 
 		// Only .NET 8+ and .NET Framework 4.8+ are supported; fail fast for anything else.
 		// A compilation with no target-framework symbols at all (e.g. an in-memory test
-		// compilation) is treated as .NET 8+.
-		var frameworkSupported = context.ParseOptionsProvider.Select(
-			static (opts, _) =>
-			{
-				if (opts is not CSharpParseOptions csOpts)
-					return true;
-
-				var symbols = csOpts.PreprocessorSymbolNames;
-				return symbols.Contains("NET8_0_OR_GREATER")
-					|| symbols.Contains("NET48_OR_GREATER")
-					|| symbols.All(static s => !s.StartsWith("NET", StringComparison.Ordinal));
-			}
-		);
-		context.RegisterSourceOutput(
-			frameworkSupported,
-			static (ctx, supported) =>
-			{
-				if (!supported)
-					TelemetryDiagnostics.Report(
-						ctx.ReportDiagnostic,
-						TelemetryDiagnostics.General.UnsupportedTargetFramework
-					);
-			}
-		);
+		// compilation) is treated as .NET 8+. The diagnostic is raised by the analyzer.
 
 		// RegisterPostInitializationOutput (not RegisterSourceOutput) ensures ForAttributeWithMetadataName
 		// can resolve attribute types before it runs.
@@ -59,49 +56,50 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator, IL
 			// assemblies, preventing CS0436 conflicts when multiple projects reference this generator.
 			ctx.AddEmbeddedAttributeDefinition();
 
-			_logger?.Debug("--- Adding templates.");
-
-			foreach (var template in Constants.GetAllTemplates())
-			{
-				_logger?.Debug($"Adding {template.Name} as {template.GetGeneratedFilename()}.");
-
+			foreach (var template in TemplateLibrary.GetAllTemplates())
 				ctx.AddSource(template.GetGeneratedFilename(), template.TemplateData);
-			}
-
-			_logger?.Debug("--- Finished adding templates.");
 		});
+
+		// The generation context carries the framework logging sink, settings and capabilities.
+		var generationContext = IncrementalPipeline.GenerationContextValueProvider<
+			TelemetryCapabilities,
+			TelemetrySourceGenerator
+		>(context, static (_, _, _, _) => TelemetryCapabilities.Instance, null);
 
 		// Create shared providers so Activities/Metrics pipelines aren't registered twice.
 		var activityProvider = context
 			.SyntaxProvider.ForAttributeWithMetadataName(
-				Constants.Activities.ActivitySourceAttribute.TypeInfo.FullyQualifiedName,
+				TemplateLibrary.Activities.ActivitySourceAttribute.TypeInfo.MetadataFullName,
 				static (node, token) => PipelineHelpers.HasActivityTargetAttribute(node, token),
-				(ctx, cancellationToken) => PipelineHelpers.BuildActivityTransform(ctx, _logger, cancellationToken)
+				static (ctx, cancellationToken) => PipelineHelpers.BuildActivityTransform(ctx, null, cancellationToken)
 			)
-			.WhereNotNull()
+			.Where(static m => m.HasValue)
 			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_Activities");
 
 		var meterProvider = context
 			.SyntaxProvider.ForAttributeWithMetadataName(
-				Constants.Metrics.MeterAttribute.TypeInfo.FullyQualifiedName,
+				TemplateLibrary.Metrics.MeterAttribute.TypeInfo.MetadataFullName,
 				static (node, token) => PipelineHelpers.HasMeterTargetAttribute(node, token),
-				(ctx, cancellationToken) => PipelineHelpers.BuildMeterTransform(ctx, _logger, cancellationToken)
+				static (ctx, cancellationToken) => PipelineHelpers.BuildMeterTransform(ctx, null, cancellationToken)
 			)
-			.WhereNotNull()
+			.Where(static m => m.HasValue)
 			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_Meters");
 
-		RegisterActivitiesGeneration(context, activityProvider, supportsNullableAnnotations, _logger);
-		RegisterLoggerGeneration(context, supportsNullableAnnotations, supportsIMeterFactory, _logger);
-		RegisterMetricsGeneration(context, meterProvider, supportsNullableAnnotations, supportsIMeterFactory, _logger);
+		RegisterActivitiesGeneration(context, activityProvider, supportsNullableAnnotations, generationContext);
+		RegisterLoggerGeneration(context, supportsNullableAnnotations, supportsIMeterFactory, generationContext);
+		RegisterMetricsGeneration(
+			context,
+			meterProvider,
+			supportsNullableAnnotations,
+			supportsIMeterFactory,
+			generationContext
+		);
 		RegisterTelemetryNamesGeneration(
 			context,
 			activityProvider,
 			meterProvider,
 			supportsNullableAnnotations,
-			_logger
+			generationContext
 		);
 	}
-
-	void ILogSupport.SetLogOutput(Action<string, OutputType> action) =>
-		_logger = action == null ? null : new GenerationLogger(action);
 }

@@ -1,8 +1,7 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Emitters;
-using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
-using System.Collections.Immutable;
 
 namespace Purview.Telemetry.SourceGenerator;
 
@@ -10,32 +9,38 @@ partial class TelemetrySourceGenerator
 {
 	static void RegisterActivitiesGeneration(
 		IncrementalGeneratorInitializationContext context,
-		IncrementalValuesProvider<ActivitySourceTarget?> activityTargets,
+		IncrementalValuesProvider<GeneratorResult<ActivitySourceTarget?>> activityTargets,
 		IncrementalValueProvider<bool> supportsNullableAnnotations,
-		GenerationLogger? logger
+		IncrementalValueProvider<GenerationContext<TelemetryCapabilities>> generationContext
 	)
 	{
 		context.RegisterImplementationSourceOutput(
-			source: activityTargets.Collect().Combine(supportsNullableAnnotations),
-			action: (spc, pair) => GenerateActivitiesTargets(pair.Left, pair.Right, spc, logger)
+			source: activityTargets.Collect().Combine(supportsNullableAnnotations).Combine(generationContext),
+			action: (spc, pair) => GenerateActivitiesTargets(pair.Left.Left, pair.Left.Right, pair.Right.Logger, spc)
 		);
 	}
 
 	static void GenerateActivitiesTargets(
-		ImmutableArray<ActivitySourceTarget?> targets,
+		ImmutableArray<GeneratorResult<ActivitySourceTarget?>> targets,
 		bool emitNullable,
-		SourceProductionContext spc,
-		GenerationLogger? logger
+		ISourceGenLogger? logger,
+		SourceProductionContext spc
 	)
 	{
 		if (targets.Length == 0)
 			return;
 
-		foreach (var target in targets)
+		foreach (var result in targets)
 		{
-			logger?.Debug($"Activity generation target: {target!.FullyQualifiedName}");
+			if (!result.ShouldProcess || result.Value is not { } target)
+				continue;
 
-			ActivitySourceTargetClassEmitter.GenerateImplementation(target!, spc, logger, emitNullable);
+			logger?.Debug($"Activity generation target: {target.FullyQualifiedName}");
+
+			RunSafely(
+				spc,
+				() => ActivitySourceTargetClassEmitter.GenerateImplementation(target, spc, logger, emitNullable)
+			);
 		}
 	}
 }

@@ -187,7 +187,12 @@ public interface ITestActivities
 		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG3021"],
+			cancellationToken: cancellationToken
+		);
 	}
 
 	[Test]
@@ -218,7 +223,12 @@ public interface ITestActivities
 		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		await TestHelpers.VerifyAsync(
+			generationResult,
+			expectsDiagnostics: true,
+			expectedDiagnosticCodes: ["TSG3021"],
+			cancellationToken: cancellationToken
+		);
 	}
 
 	[Test]

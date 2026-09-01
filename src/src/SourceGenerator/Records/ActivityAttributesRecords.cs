@@ -1,6 +1,6 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Records;
+namespace Purview.Telemetry.SourceGenerator.Records;
 
-record ActivitySourceAttributeRecord(
+sealed record ActivitySourceAttributeRecord(
 	AttributeStringValue Name,
 	AttributeValue<bool> DefaultToTags,
 	AttributeStringValue BaggageAndTagPrefix,
@@ -8,7 +8,7 @@ record ActivitySourceAttributeRecord(
 	AttributeValue<bool> LowercaseBaggageAndTagKeys
 );
 
-record ActivitySourceGenerationAttributeRecord(
+sealed record ActivitySourceGenerationAttributeRecord(
 	AttributeStringValue Name,
 	AttributeValue<bool> DefaultToTags,
 	AttributeStringValue BaggageAndTagPrefix,
@@ -23,7 +23,7 @@ readonly record struct ActivityAttributeRecord(
 	AttributeValue<bool> CreateOnly
 );
 
-record EventAttributeRecord(
+sealed record EventAttributeRecord(
 	AttributeStringValue Name,
 	AttributeValue<bool> UseRecordExceptionRules,
 	AttributeValue<bool> RecordExceptionEscape,

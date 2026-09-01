@@ -1,8 +1,8 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 
 namespace Purview.Telemetry.SourceGenerator.Records;
 
-record TelemetryDiagnosticDescriptor(
+sealed record TelemetryDiagnosticDescriptor(
 	string Id,
 	string Title,
 	string Description,

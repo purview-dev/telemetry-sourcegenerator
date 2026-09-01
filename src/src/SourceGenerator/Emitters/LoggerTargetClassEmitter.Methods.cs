@@ -8,34 +8,39 @@ partial class LoggerTargetClassEmitter
 {
 	internal static void EmitThrowStub(CodeWriter writer, LogMethodTarget methodTarget, bool emitNullable = true)
 	{
-		writer.NewLine().Write("public ");
+		var returnType = methodTarget.IsScoped
+			? emitNullable
+				? TypeLibrary.System.IDisposable.AsTypeReference().Nullable()
+				: TypeLibrary.System.IDisposable.AsTypeReference()
+			: PurviewTypeLibrary.System.Void.AsTypeReference();
 
-		if (methodTarget.IsScoped)
-			writer.Write(
-				emitNullable
-					? Constants.System.IDisposable.WithNullable().ToString()
-					: (string)Constants.System.IDisposable
-			);
-		else
-			writer.Write(Constants.System.VoidKeyword);
-
-		writer.Write(' ').Write(methodTarget.MethodName).Write('(');
-
-		for (var i = 0; i < methodTarget.Parameters.Count; i++)
+		writer.NewLine();
+		using (
+			writer.WriteMethodScope(
+				new MethodDeclarationOptions(methodTarget.MethodName, returnType, TypeDeclarationAccessibility.Public)
+				{
+					Parameters =
+					[
+						.. methodTarget.Parameters.Select(p => new ParameterDeclarationOptions(
+							p.Name,
+							p.ParameterType
+						)),
+					],
+					ExpressionBody = "throw new global::System.NotSupportedException()",
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
-			if (i > 0)
-				writer.Write(", ");
-			writer.Write(methodTarget.Parameters[i].ParameterType).Write(' ').Write(methodTarget.Parameters[i].Name);
+			//
 		}
-
-		writer.Write(") => throw new global::System.NotSupportedException();").NewLine();
 	}
 
 	static void EmitMethods(
 		LoggerTarget target,
 		CodeWriter writer,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable
 	)
 	{
@@ -70,7 +75,7 @@ partial class LoggerTargetClassEmitter
 				continue;
 			}
 
-			if (methodTarget.ParameterCountSansException > Constants.Logging.MaxNonExceptionParameters)
+			if (methodTarget.ParameterCountSansException > PropertyLibrary.Logging.MaxNonExceptionParameters)
 			{
 				EmitThrowStub(writer, methodTarget, emitNullable);
 				continue;
@@ -84,7 +89,7 @@ partial class LoggerTargetClassEmitter
 		CodeWriter writer,
 		LogMethodTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable = true
 	)
 	{
@@ -107,39 +112,34 @@ partial class LoggerTargetClassEmitter
 			isMultiTarget && (activityOwnsPublicMethod || (loggingOwnsPublicMethod && hasMetricsTarget));
 		var generatePublicDelegator = isMultiTarget && loggingOwnsPublicMethod && hasMetricsTarget;
 
-		var accessModifier = generatePrivateLogging ? "private" : "public";
 		var methodName = generatePrivateLogging ? methodTarget.MethodName + "_Logging" : methodTarget.MethodName;
 
-		writer
-			.NewLine()
-			.WriteLine(Constants.System.GeneratedCode.Value)
-			.WriteLine(Constants.System.AggressiveInlining)
-			.Write(accessModifier + " ");
+		var returnType =
+			generatePrivateLogging || !methodTarget.IsScoped
+				? PurviewTypeLibrary.System.Void.AsTypeReference()
+				: TypeLibrary.System.IDisposable.AsTypeReference().Nullable();
 
-		// For multi-target private methods, always return void (the logging side-effect)
-		// For single-target or public methods, use original return type logic
-		if (generatePrivateLogging)
-		{
-			writer.Write(Constants.System.VoidKeyword);
-		}
-		else if (methodTarget.IsScoped)
-		{
-			writer.Write(Constants.System.IDisposable);
-			if (emitNullable)
-				writer.Write('?');
-		}
-		else
-		{
-			writer.Write(Constants.System.VoidKeyword);
-		}
+		writer.NewLine();
 
-		writer.Write(' ').Write(methodName).Write('(');
-
-		EmitParametersAsMethodArgumentList(methodTarget, writer, context);
-
-		writer.Write(")");
-
-		using (writer.OpenBlockScope())
+		using (
+			writer.WriteMethodScope(
+				new MethodDeclarationOptions(
+					methodName,
+					returnType,
+					generatePrivateLogging ? TypeDeclarationAccessibility.Private : TypeDeclarationAccessibility.Public
+				)
+				{
+					Parameters =
+					[
+						.. methodTarget.Parameters.Select(p => new ParameterDeclarationOptions(
+							p.Name,
+							p.ParameterType
+						)),
+					],
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
 			if (methodTarget.IsScoped && !generatePrivateLogging)
 			{
@@ -147,13 +147,13 @@ partial class LoggerTargetClassEmitter
 					.Write("return ")
 					.Write(methodTarget.LoggerActionFieldName)
 					.Write('(')
-					.Write(Constants.Logging.LoggerFieldName);
+					.Write(PropertyLibrary.Logging.LoggerFieldName);
 			}
 			else
 			{
 				writer
 					.Write("if (!")
-					.Write(Constants.Logging.LoggerFieldName)
+					.Write(PropertyLibrary.Logging.LoggerFieldName)
 					.Write(".IsEnabled(")
 					.Write(methodTarget.MSLevel)
 					.WriteLine("))");
@@ -165,7 +165,7 @@ partial class LoggerTargetClassEmitter
 					.NewLine()
 					.Write(methodTarget.LoggerActionFieldName)
 					.Write('(')
-					.Write(Constants.Logging.LoggerFieldName);
+					.Write(PropertyLibrary.Logging.LoggerFieldName);
 			}
 
 			foreach (var parameter in methodTarget.ParametersSansException)
@@ -198,38 +198,35 @@ partial class LoggerTargetClassEmitter
 		CodeWriter writer,
 		LogMethodTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable = true
 	)
 	{
 		logger?.Debug($"Building public delegating logging method: {methodTarget.MethodName}");
 
-		writer
-			.NewLine()
-			.WriteLine(Constants.System.GeneratedCode.Value)
-			.WriteLine(Constants.System.AggressiveInlining)
-			.Write("public ");
+		var returnType = methodTarget.IsScoped
+			? emitNullable
+				? TypeLibrary.System.IDisposable.AsTypeReference().Nullable()
+				: TypeLibrary.System.IDisposable.AsTypeReference()
+			: PurviewTypeLibrary.System.Void.AsTypeReference();
 
-		// When Logging owns the public method (with Metrics), return void
-		// (Logging without Activity means the return type is void or IDisposable for scoped)
-		if (methodTarget.IsScoped)
-		{
-			writer.Write(Constants.System.IDisposable);
-			if (emitNullable)
-				writer.Write('?');
-		}
-		else
-		{
-			writer.Write(Constants.System.VoidKeyword);
-		}
+		writer.NewLine();
 
-		writer.Write(' ').Write(methodTarget.MethodName).Write('(');
-
-		EmitParametersAsMethodArgumentList(methodTarget, writer, context);
-
-		writer.Write(")");
-
-		using (writer.OpenBlockScope())
+		using (
+			writer.WriteMethodScope(
+				new MethodDeclarationOptions(methodTarget.MethodName, returnType, TypeDeclarationAccessibility.Public)
+				{
+					Parameters =
+					[
+						.. methodTarget.Parameters.Select(p => new ParameterDeclarationOptions(
+							p.Name,
+							p.ParameterType
+						)),
+					],
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
 			// Call the private Logging method
 			if (methodTarget.IsScoped)

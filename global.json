@@ -5,7 +5,7 @@
 		"allowPrerelease": false
 	},
 	"msbuild-sdks": {
-    "Purview.DotNetProjectSdk": "1.0.0-prerelease.43"
+    "Purview.DotNetProjectSdk": "1.0.0-prerelease.44"
   },
 	"test": {
 		"runner": "Microsoft.Testing.Platform"

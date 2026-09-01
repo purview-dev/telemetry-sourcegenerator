@@ -1,16 +1,18 @@
 using Microsoft.CodeAnalysis;
+using Purview.SourceGeneratorFramework;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
-using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 static partial class MeterTargetClassEmitter
 {
-	static PurviewTypeInfo GetDictionaryType(bool emitNullable) =>
-		Constants.System.Dictionary.MakeGeneric(
-			Constants.System.BuiltInTypes.String,
-			emitNullable ? Constants.System.BuiltInTypes.Object.WithNullable() : Constants.System.BuiltInTypes.Object
+	static TypeReference GetDictionaryType(bool emitNullable) =>
+		TypeLibrary.System.Dictionary.MakeGeneric(
+			TypeLibrary.System.String.AsTypeReference(),
+			emitNullable
+				? TypeLibrary.System.Object.AsTypeReference().Nullable()
+				: TypeLibrary.System.Object.AsTypeReference()
 		);
 
 	const string MeterFieldName = "_meter";
@@ -19,7 +21,7 @@ static partial class MeterTargetClassEmitter
 	public static void GenerateImplementation(
 		MeterTarget target,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable = true,
 		bool supportsIMeterFactory = true
 	)
@@ -47,7 +49,7 @@ static partial class MeterTargetClassEmitter
 					GenerationType.Metrics,
 					target.GenerationType,
 					target.ClassNameToGenerate,
-					EmitterHelpers.AsTypeReference(target.InterfaceType),
+					target.InterfaceType,
 					TypeDeclarationAccessibility.Internal
 				)
 			)
@@ -104,7 +106,7 @@ static partial class MeterTargetClassEmitter
 			target.TelemetryGeneration,
 			target.GenerationType,
 			target.ClassNameToGenerate,
-			target.InterfaceType.TypeName,
+			target.InterfaceType.Identity.Name,
 			target.FullNamespace,
 			context,
 			logger,

@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Emitters;
 using Purview.Telemetry.SourceGenerator.Helpers;
@@ -10,34 +10,57 @@ partial class TelemetrySourceGenerator
 {
 	static void RegisterMetricsGeneration(
 		IncrementalGeneratorInitializationContext context,
-		IncrementalValuesProvider<MeterTarget?> meterTargets,
+		IncrementalValuesProvider<GeneratorResult<MeterTarget?>> meterTargets,
 		IncrementalValueProvider<bool> supportsNullableAnnotations,
 		IncrementalValueProvider<bool> supportsIMeterFactory,
-		GenerationLogger? logger
+		IncrementalValueProvider<GenerationContext<TelemetryCapabilities>> generationContext
 	)
 	{
 		context.RegisterImplementationSourceOutput(
-			source: meterTargets.Collect().Combine(supportsNullableAnnotations.Combine(supportsIMeterFactory)),
-			action: (spc, pair) => GenerateMeterTargets(pair.Left, pair.Right.Left, pair.Right.Right, spc, logger)
+			source: meterTargets
+				.Collect()
+				.Combine(supportsNullableAnnotations.Combine(supportsIMeterFactory))
+				.Combine(generationContext),
+			action: (spc, pair) =>
+				GenerateMeterTargets(
+					pair.Left.Left,
+					pair.Left.Right.Left,
+					pair.Left.Right.Right,
+					pair.Right.Logger,
+					spc
+				)
 		);
 	}
 
 	static void GenerateMeterTargets(
-		ImmutableArray<MeterTarget?> targets,
+		ImmutableArray<GeneratorResult<MeterTarget?>> targets,
 		bool emitNullable,
 		bool supportsIMeterFactory,
-		SourceProductionContext spc,
-		GenerationLogger? logger
+		ISourceGenLogger? logger,
+		SourceProductionContext spc
 	)
 	{
 		if (targets.Length == 0)
 			return;
 
-		foreach (var target in targets)
+		foreach (var result in targets)
 		{
-			logger?.Debug($"Meter generation target: {target!.FullyQualifiedName}");
+			if (!result.ShouldProcess || result.Value is not { } target)
+				continue;
 
-			MeterTargetClassEmitter.GenerateImplementation(target!, spc, logger, emitNullable, supportsIMeterFactory);
+			logger?.Debug($"Meter generation target: {target.FullyQualifiedName}");
+
+			RunSafely(
+				spc,
+				() =>
+					MeterTargetClassEmitter.GenerateImplementation(
+						target,
+						spc,
+						logger,
+						emitNullable,
+						supportsIMeterFactory
+					)
+			);
 		}
 	}
 }

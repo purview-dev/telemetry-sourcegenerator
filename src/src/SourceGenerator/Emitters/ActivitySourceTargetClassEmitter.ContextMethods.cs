@@ -10,7 +10,7 @@ partial class ActivitySourceTargetClassEmitter
 		CodeWriter writer,
 		ActivityBasedGenerationTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable = true
 	)
 	{
@@ -36,7 +36,7 @@ partial class ActivitySourceTargetClassEmitter
 		}
 
 		var activityVariableName =
-			activityParam?.ParameterName ?? (Constants.Activities.SystemDiagnostics.Activity + ".Current");
+			activityParam?.ParameterName ?? (TypeLibrary.Activities.SystemDiagnostics.Activity + ".Current");
 
 		if (tagsParam != null)
 		{
@@ -58,13 +58,13 @@ partial class ActivitySourceTargetClassEmitter
 
 		using (writer.OpenBlockScope())
 		{
-			EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, context, logger);
-			EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, context, logger);
+			EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, logger);
+			EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, logger);
 		}
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		if (Constants.Activities.SystemDiagnostics.Activity.Equals(methodTarget.ReturnType))
+		if (methodTarget.ReturnType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.Activity))
 		{
 			writer.NewLine().Write("return ").Write(activityVariableName).Write(";").NewLine();
 		}

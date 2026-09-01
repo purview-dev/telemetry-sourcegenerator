@@ -16,20 +16,14 @@ partial class MeterTargetClassEmitter
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		writer
-			.NewLine()
-			.WriteLine(Constants.System.GeneratedCode.Value)
-			.WriteLine(Constants.System.AggressiveInlining)
-			.Write("void ")
-			.Write(Constants.Metrics.MeterInitializationMethod)
-			.Write('(');
+		writer.NewLine().Write("void ").Write(PropertyLibrary.Metrics.MeterInitializationMethod).Write('(');
 
 		if (supportsIMeterFactory)
 		{
 			writer
-				.Write(Constants.Metrics.SystemDiagnostics.IMeterFactory)
+				.Write(TypeLibrary.Metrics.SystemDiagnostics.IMeterFactory)
 				.Write(' ')
-				.Write(Constants.Metrics.MeterFactoryParameterName);
+				.Write(PropertyLibrary.Metrics.MeterFactoryParameterName);
 		}
 
 		writer.Write(")");
@@ -44,7 +38,7 @@ partial class MeterTargetClassEmitter
 			{
 				writer
 					.Write("throw new ")
-					.Write(Constants.System.Exception)
+					.Write(TypeLibrary.System.Exception)
 					.WriteLine("(\"The meters have already been initialized.\");");
 			}
 
@@ -67,19 +61,14 @@ partial class MeterTargetClassEmitter
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		writer
-			.NewLine()
-			.WriteLine(Constants.System.GeneratedCode.Value)
-			.Write("public ")
-			.Write(target.ClassNameToGenerate)
-			.Write('(');
+		writer.NewLine().Write("public ").Write(target.ClassNameToGenerate).Write('(');
 
 		if (supportsIMeterFactory)
 		{
 			writer
-				.Write(Constants.Metrics.SystemDiagnostics.IMeterFactory)
+				.Write(TypeLibrary.Metrics.SystemDiagnostics.IMeterFactory)
 				.Write(' ')
-				.Write(Constants.Metrics.MeterFactoryParameterName);
+				.Write(PropertyLibrary.Metrics.MeterFactoryParameterName);
 		}
 
 		writer.Write(")");
@@ -116,9 +105,9 @@ partial class MeterTargetClassEmitter
 			writer
 				.Write(MeterFieldName)
 				.Write(" = ")
-				.Write(Constants.Metrics.MeterFactoryParameterName)
+				.Write(PropertyLibrary.Metrics.MeterFactoryParameterName)
 				.Write(".Create(new ")
-				.Write(Constants.Metrics.SystemDiagnostics.MeterOptions)
+				.Write(TypeLibrary.Metrics.SystemDiagnostics.MeterOptions)
 				.Write("(")
 				.Write(target.MeterName!.Wrap())
 				.Write(") {")
@@ -134,7 +123,7 @@ partial class MeterTargetClassEmitter
 			writer
 				.Write(MeterFieldName)
 				.Write(" = new ")
-				.Write(Constants.Metrics.SystemDiagnostics.Meter)
+				.Write(TypeLibrary.Metrics.SystemDiagnostics.Meter)
 				.Write('(')
 				.Write(target.MeterName!.Wrap())
 				.WriteLine(");")
@@ -152,8 +141,9 @@ partial class MeterTargetClassEmitter
 
 		if (!method.IsObservable)
 		{
-			var unit = method.InstrumentAttribute?.Unit?.Value?.Wrap() ?? Constants.System.NullKeyword;
-			var description = method.InstrumentAttribute?.Description?.Value?.Wrap() ?? Constants.System.NullKeyword;
+			var unit = method.InstrumentAttribute?.Unit?.Value?.Wrap() ?? PropertyLibrary.System.NullKeyword;
+			var description =
+				method.InstrumentAttribute?.Description?.Value?.Wrap() ?? PropertyLibrary.System.NullKeyword;
 			var tagVariableName = Utilities.LowercaseFirstChar(method.MethodName) + "Tags";
 
 			var dictType = GetDictionaryType(emitNullable);

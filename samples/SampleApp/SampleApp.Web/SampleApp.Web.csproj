@@ -11,6 +11,14 @@
 			OutputItemType="Analyzer"
 			ReferenceOutputAssembly="false"
 		/>
+		<!-- The generator references the Purview.SourceGeneratorFramework runtime; a project-reference
+		     analyzer only propagates the generator assembly, so ship the runtime beside it explicitly. -->
+		<Analyzer
+			Include="..\..\..\src\src\SourceGenerator\bin\$(Configuration)\netstandard2.0\Purview.SourceGeneratorFramework.dll"
+		/>
+		<Analyzer
+			Include="..\..\..\src\src\SourceGenerator\bin\$(Configuration)\netstandard2.0\Purview.SourceGeneratorFramework.Shared.dll"
+		/>
 		<ProjectReference Include="..\SampleApp.ServiceDefaults\SampleApp.ServiceDefaults.csproj" />
 		<ProjectReference Include="..\SampleApp.Shared\SampleApp.Shared.csproj" />
 	</ItemGroup>

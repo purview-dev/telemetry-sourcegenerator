@@ -1,8 +1,8 @@
-using Purview.Telemetry.SourceGenerator.Templates;
+using Purview.SourceGeneratorFramework;
 
 namespace Purview.Telemetry.SourceGenerator.Records;
 
-record LoggerTarget(
+sealed record LoggerTarget(
 	TelemetryGenerationAttributeRecord TelemetryGeneration,
 	GenerationType GenerationType,
 	string ClassNameToGenerate,
@@ -10,14 +10,14 @@ record LoggerTarget(
 	EquatableArray<string> ParentClasses,
 	string? FullNamespace,
 	string FullyQualifiedName,
-	PurviewTypeInfo InterfaceType,
+	TypeReference InterfaceType,
 	LoggerAttributeRecord LoggerAttribute,
 	int DefaultLevel,
 	EquatableArray<LogMethodTarget> LogMethods,
 	bool UseMSLoggingTelemetryBasedGeneration
 );
 
-record LogMethodTarget(
+sealed record LogMethodTarget(
 	string MethodName,
 	bool IsScoped,
 	string LoggerActionFieldName,
@@ -45,10 +45,10 @@ record LogMethodTarget(
 	public int ParameterCountSansException => ParametersSansException.Count;
 }
 
-record LogParameterTarget(
+sealed record LogParameterTarget(
 	string Name,
 	string UpperCasedName,
-	PurviewTypeInfo ParameterType,
+	TypeReference ParameterType,
 	bool IsException,
 	bool IsFirstException,
 	bool IsIEnumerable,
@@ -64,4 +64,4 @@ record LogParameterTarget(
 	public bool UsedInTemplate => !ReferencedHoles.IsEmpty;
 }
 
-record LogPropertiesParameterDetails(string PropertyName, bool IsNullable);
+sealed record LogPropertiesParameterDetails(string PropertyName, bool IsNullable);

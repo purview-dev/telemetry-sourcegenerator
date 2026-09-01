@@ -1,12 +1,23 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Purview.SourceGeneratorFramework;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
-using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 static class EmitterHelpers
 {
+	/// <summary>
+	/// The <c>[EditorBrowsable(Never)]</c> attribute applied to generated implementation classes
+	/// so they stay hidden from IntelliSense.
+	/// </summary>
+	public static AttributeDeclarationOptions EditorBrowsableAttribute() =>
+		new(new TypeIdentity("EditorBrowsableAttribute", "System.ComponentModel"))
+		{
+			Arguments = [new AttributeArgumentOptions("global::System.ComponentModel.EditorBrowsableState.Never")],
+		};
+
 	/// <summary>
 	/// Writes the deterministic auto-generated file header, conditionally enabling nullable
 	/// annotations. <paramref name="emitNullable"/> is false for C# 7.3 / .NET Framework targets.
@@ -39,15 +50,9 @@ static class EmitterHelpers
 	}
 
 	/// <summary>
-	/// Converts a <see cref="PurviewTypeInfo"/> into a framework type reference, preserving
-	/// containing types (nested interfaces) via the fully-qualified name.
-	/// </summary>
-	public static TypeReference AsTypeReference(PurviewTypeInfo type) =>
-		new(new TypeIdentity(type.FullyQualifiedName, null));
-
-	/// <summary>
-	/// Opens the generated implementation-class scope, emitting class attributes only from the
-	/// canonical emitter (Activities &gt; Logging &gt; Metrics) to avoid duplicates on partial classes.
+	/// Opens the generated implementation-class scope. No generated attributes are emitted; the
+	/// canonical emitter (Activities &gt; Logging &gt; Metrics) additionally applies
+	/// <c>[EditorBrowsable(Never)]</c> to avoid duplicates on partial classes.
 	/// </summary>
 	public static CodeWriter.BlockScope EmitClassScope(
 		CodeWriter writer,
@@ -58,19 +63,16 @@ static class EmitterHelpers
 		TypeDeclarationAccessibility accessibility
 	)
 	{
+		ImmutableArray<AttributeDeclarationOptions> attributes = [];
 		if (SharedHelpers.ShouldEmitClassAttributes(requestingType, generationType))
-		{
-			writer
-				.WriteLine(Constants.System.EditorBrowsableConstant)
-				.WriteLine(Constants.System.ExcludeFromCodeCoverageConstant)
-				.WriteLine(Constants.System.GeneratedCode.Value);
-		}
+			attributes = [EditorBrowsableAttribute()];
 
 		return writer.WriteClassScope(
 			new TypeDeclarationOptions(className, accessibility)
 			{
 				IncludeGeneratedAttributes = false,
 				Interfaces = [interfaceType],
+				Attributes = attributes,
 			}
 		);
 	}

@@ -13,7 +13,7 @@ static class TelemetryNamesEmitter
 		string? rootNamespace,
 		bool emitNullable,
 		SourceProductionContext spc,
-		GenerationLogger? logger
+		ISourceGenLogger? logger
 	)
 	{
 		logger?.Debug($"Generating Telemetry Names using class '{className}'.");
@@ -25,26 +25,42 @@ static class TelemetryNamesEmitter
 
 		using (writer.WriteBlockNamespaceScope(rootNamespace))
 		{
-			writer
-				.WriteLine(Constants.System.EditorBrowsableConstant)
-				.WriteLine(Constants.System.ExcludeFromCodeCoverageConstant)
-				.WriteLine(Constants.System.GeneratedCode.Value);
-
 			using (
 				writer.WriteClassScope(
 					new TypeDeclarationOptions(className, TypeDeclarationAccessibility.Internal)
 					{
 						IsStatic = true,
 						IncludeGeneratedAttributes = false,
+						Attributes = [EmitterHelpers.EditorBrowsableAttribute()],
 					}
 				)
 			)
 			{
-				writer.Write("public static readonly string[] MeterNames = ");
-				WriteStringArray(writer, meterNames);
+				var stringArrayType = TypeLibrary.System.String.AsTypeReference().MakeArray();
 
-				writer.NewLine().Write("public static readonly string[] ActivitySourceNames = ");
-				WriteStringArray(writer, activitySourceNames);
+				writer.WriteField(
+					new FieldDeclarationOptions("MeterNames", stringArrayType, TypeDeclarationAccessibility.Public)
+					{
+						IsStatic = true,
+						IsReadOnly = true,
+						Initializer = BuildArrayInitializer(meterNames),
+						IncludeGeneratedAttributes = false,
+					}
+				);
+
+				writer.WriteField(
+					new FieldDeclarationOptions(
+						"ActivitySourceNames",
+						stringArrayType,
+						TypeDeclarationAccessibility.Public
+					)
+					{
+						IsStatic = true,
+						IsReadOnly = true,
+						Initializer = BuildArrayInitializer(activitySourceNames),
+						IncludeGeneratedAttributes = false,
+					}
+				);
 			}
 		}
 
@@ -55,25 +71,11 @@ static class TelemetryNamesEmitter
 		spc.AddSource(hintName, writer);
 	}
 
-	static void WriteStringArray(CodeWriter writer, ImmutableArray<string> values)
+	static string BuildArrayInitializer(ImmutableArray<string> values)
 	{
 		if (values.Length == 0)
-		{
-			writer.WriteLine("global::System.Array.Empty<string>();");
-			return;
-		}
+			return "global::System.Array.Empty<string>()";
 
-		writer.WriteLine("new string[]");
-		writer.WriteLine("{");
-		writer.Indent();
-		for (var i = 0; i < values.Length; i++)
-		{
-			writer.Write("\"").Write(values[i]).Write('"');
-			if (i < values.Length - 1)
-				writer.Write(',');
-			writer.NewLine();
-		}
-		writer.Unindent();
-		writer.WriteLine("};");
+		return "new string[] { " + string.Join(", ", values.Select(v => "\"" + v + "\"")) + " }";
 	}
 }

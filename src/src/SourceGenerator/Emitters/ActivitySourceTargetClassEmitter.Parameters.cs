@@ -13,15 +13,14 @@ partial class ActivitySourceTargetClassEmitter
 		bool populateTags,
 		ActivityBasedGenerationTarget method,
 		bool checkForNullableActivity,
-		SourceProductionContext context,
-		GenerationLogger? logger
+		ISourceGenLogger? logger
 	)
 	{
 		var parameters = populateTags ? method.Tags : method.Baggage;
 		if (parameters.Count == 0)
 			return;
 
-		var useRecordedExceptionRules = Constants.Activities.UseRecordExceptionRulesDefault;
+		var useRecordedExceptionRules = PropertyLibrary.Activities.UseRecordExceptionRulesDefault;
 		if (method.EventAttribute?.UseRecordExceptionRules.IsSet == true)
 			useRecordedExceptionRules = method.EventAttribute.UseRecordExceptionRules.Value!.Value;
 
@@ -36,13 +35,9 @@ partial class ActivitySourceTargetClassEmitter
 				.Write(", ")
 				.Write(param.ParameterName);
 
-			if (!populateTags && param.ParameterType.SpecialType != SpecialType.System_String)
+			if (!populateTags && param.ParameterType.Identity.SpecialType != SpecialType.System_String)
 			{
 				logger?.Diagnostic("Found a baggage parameter type that is not a string.");
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.Activities.BaggageParameterShouldBeString
-				);
 
 				if (param.ParameterType.IsNullable)
 					writer.Write('?');
@@ -88,7 +83,7 @@ partial class ActivitySourceTargetClassEmitter
 	static bool GuardParameters(
 		ActivityBasedGenerationTarget methodTarget,
 		SourceProductionContext _,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		out ActivityBasedParameterTarget? activityParam,
 		out ActivityBasedParameterTarget? parentContextOrId,
 		out ActivityBasedParameterTarget? tagsParam,
@@ -188,7 +183,7 @@ partial class ActivitySourceTargetClassEmitter
 			escapeParam = escapeParams.FirstOrDefault();
 			if (escapeParam != null)
 			{
-				if (escapeParam.ParameterType.SpecialType != SpecialType.System_Boolean)
+				if (escapeParam.ParameterType.Identity.SpecialType != SpecialType.System_Boolean)
 				{
 					return false;
 				}
@@ -211,7 +206,7 @@ partial class ActivitySourceTargetClassEmitter
 			statusDescriptionParam = statusDescriptionParams.FirstOrDefault();
 			if (statusDescriptionParam != null)
 			{
-				if (statusDescriptionParam.ParameterType.SpecialType != SpecialType.System_String)
+				if (statusDescriptionParam.ParameterType.Identity.SpecialType != SpecialType.System_String)
 				{
 					return false;
 				}

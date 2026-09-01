@@ -10,7 +10,7 @@ partial class ActivitySourceTargetClassEmitter
 		CodeWriter writer,
 		ActivityBasedGenerationTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable = true
 	)
 	{
@@ -36,7 +36,7 @@ partial class ActivitySourceTargetClassEmitter
 		}
 
 		var activityVariableName =
-			activityParam?.ParameterName ?? (Constants.Activities.SystemDiagnostics.Activity + ".Current");
+			activityParam?.ParameterName ?? (TypeLibrary.Activities.SystemDiagnostics.Activity + ".Current");
 		if (parentContextOrId != null)
 		{
 			logger?.Diagnostic("Parent context/ Id not allowed on event method, only activities.");
@@ -72,13 +72,13 @@ partial class ActivitySourceTargetClassEmitter
 			{
 				var tagsListVariableName = "tagsCollection" + methodTarget.MethodName;
 				writer
-					.Write(Constants.Activities.SystemDiagnostics.ActivityTagsCollection)
+					.Write(TypeLibrary.Activities.SystemDiagnostics.ActivityTagsCollection)
 					.Write(' ')
 					.Write(tagsListVariableName)
 					.Write(
 						emitNullable
 							? " = new("
-							: $" = new {Constants.Activities.SystemDiagnostics.ActivityTagsCollection}("
+							: $" = new {TypeLibrary.Activities.SystemDiagnostics.ActivityTagsCollection}("
 					);
 
 				if (tagsParam != null)
@@ -86,8 +86,9 @@ partial class ActivitySourceTargetClassEmitter
 
 				writer.WriteLine(");");
 
-				var useRecordedExceptionRules = Constants.Activities.UseRecordExceptionRulesDefault;
-				var emitExceptionEscape = escapeParam != null || Constants.Activities.RecordExceptionEscapedDefault;
+				var useRecordedExceptionRules = PropertyLibrary.Activities.UseRecordExceptionRulesDefault;
+				var emitExceptionEscape =
+					escapeParam != null || PropertyLibrary.Activities.RecordExceptionEscapedDefault;
 				if (methodTarget.EventAttribute?.UseRecordExceptionRules.IsSet == true)
 				{
 					useRecordedExceptionRules = methodTarget.EventAttribute.UseRecordExceptionRules.Value!.Value;
@@ -103,14 +104,14 @@ partial class ActivitySourceTargetClassEmitter
 				{
 					var emitTag =
 						tagParam.IsException
-						&& methodTarget.ActivityOrEventName != Constants.Activities.Tag_ExceptionEventName
+						&& methodTarget.ActivityOrEventName != PropertyLibrary.Activities.Tag_ExceptionEventName
 						&& useRecordedExceptionRules;
 
 					void EmitTag()
 					{
 						if (tagParam.IsException)
 						{
-							if (methodTarget.ActivityOrEventName == Constants.Activities.Tag_ExceptionEventName)
+							if (methodTarget.ActivityOrEventName == PropertyLibrary.Activities.Tag_ExceptionEventName)
 							{
 								writer.Write("if (").Write(tagParam.ParameterName).WriteLine(" != null)");
 								using (writer.OpenBlockScope())
@@ -130,7 +131,7 @@ partial class ActivitySourceTargetClassEmitter
 								{
 									writer
 										.NewLine()
-										.Write(Constants.Activities.RecordExceptionMethodName)
+										.Write(PropertyLibrary.Activities.RecordExceptionMethodName)
 										.Write("(activity: ")
 										.Write(activityVariableName)
 										.Write(", exception: ")
@@ -182,12 +183,12 @@ partial class ActivitySourceTargetClassEmitter
 
 			writer
 				.NewLine()
-				.Write(Constants.Activities.SystemDiagnostics.ActivityEvent)
+				.Write(TypeLibrary.Activities.SystemDiagnostics.ActivityEvent)
 				.Write(' ')
 				.Write(eventVariableName)
 				.Write(" = new ")
 				// Use explicit type for C# 7.3 compatibility (target-typed new() requires C# 9+)
-				.Write(Constants.Activities.SystemDiagnostics.ActivityEvent)
+				.Write(TypeLibrary.Activities.SystemDiagnostics.ActivityEvent)
 				.Write("(name: ")
 				.Write(methodTarget.ActivityOrEventName.Wrap())
 				// timestamp:
@@ -204,7 +205,7 @@ partial class ActivitySourceTargetClassEmitter
 			{
 				writer.NewLine();
 
-				EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, context, logger);
+				EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, logger);
 			}
 
 			var statusCode = methodTarget.EventAttribute?.StatusCode.Value ?? 0;
@@ -214,7 +215,7 @@ partial class ActivitySourceTargetClassEmitter
 					.NewLine()
 					.Write(activityVariableName)
 					.Write(".SetStatus(")
-					.Write(Constants.Activities.ActivityStatusCodeMap[statusCode]);
+					.Write(PropertyLibrary.Activities.ActivityStatusCodeMap[statusCode]);
 
 				// Error
 				if (statusCode == 2)
@@ -239,7 +240,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		if (Constants.Activities.SystemDiagnostics.Activity.Equals(methodTarget.ReturnType))
+		if (methodTarget.ReturnType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.Activity))
 		{
 			writer.NewLine().Write("return ").Write(activityVariableName).Write(";").NewLine();
 		}

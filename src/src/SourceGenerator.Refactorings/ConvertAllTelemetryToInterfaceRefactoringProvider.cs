@@ -220,10 +220,10 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 		);
 
 		var compilationRoot = (CompilationUnitSyntax)newRoot;
-		if (!compilationRoot.Usings.Any(u => u.Name?.ToString() == Constants.PurviewTelemetryNamespace))
+		if (!compilationRoot.Usings.Any(u => u.Name?.ToString() == TelemetryAttributeNames.PurviewTelemetryNamespace))
 		{
 			var newUsing = SyntaxFactory
-				.UsingDirective(SyntaxFactory.ParseName(Constants.PurviewTelemetryNamespace))
+				.UsingDirective(SyntaxFactory.ParseName(TelemetryAttributeNames.PurviewTelemetryNamespace))
 				.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
 			newRoot = compilationRoot.AddUsings(newUsing);
 			compilationRoot = (CompilationUnitSyntax)newRoot;
@@ -231,11 +231,13 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 
 		if (
 			activityFields.Count > 0
-			&& !compilationRoot.Usings.Any(u => u.Name?.ToString() == Constants.SystemDiagnosticsNamespace)
+			&& !compilationRoot.Usings.Any(u =>
+				u.Name?.ToString() == TelemetryAttributeNames.SystemDiagnosticsNamespace
+			)
 		)
 		{
 			var newUsing = SyntaxFactory
-				.UsingDirective(SyntaxFactory.ParseName(Constants.SystemDiagnosticsNamespace))
+				.UsingDirective(SyntaxFactory.ParseName(TelemetryAttributeNames.SystemDiagnosticsNamespace))
 				.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
 			newRoot = compilationRoot.AddUsings(newUsing);
 		}
@@ -390,13 +392,13 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 		var sb = new StringBuilder();
 
 		if (activityCallsWithMethods.Count > 0)
-			sb.AppendLine($"[{Constants.Activities.ActivitySourceAttributeShortName}]");
+			sb.AppendLine($"[{TelemetryAttributeNames.Activities.ActivitySourceAttribute.RenderAttributeTypeName}]");
 
 		if (logCallsWithMethods.Count > 0)
-			sb.AppendLine($"[{Constants.Logging.LoggerAttributeShortName}]");
+			sb.AppendLine($"[{TelemetryAttributeNames.Logging.LoggerAttribute.RenderAttributeTypeName}]");
 
 		if (metricsCallsWithMethods.Count > 0)
-			sb.AppendLine($"[{Constants.Metrics.MeterAttributeShortName}]");
+			sb.AppendLine($"[{TelemetryAttributeNames.Metrics.MeterAttribute.RenderAttributeTypeName}]");
 
 		sb.AppendLine($"public interface {interfaceName}");
 		sb.AppendLine("{");

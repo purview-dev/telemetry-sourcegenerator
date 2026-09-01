@@ -1,9 +1,9 @@
+using System.Collections.Immutable;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Purview.Telemetry.SourceGenerator.Records;
 using Purview.Telemetry.SourceGenerator.Templates;
-using System.Collections.Immutable;
-using System.Text.RegularExpressions;
 
 namespace Purview.Telemetry.SourceGenerator.Helpers;
 
@@ -27,39 +27,39 @@ static partial class Utilities
 			if (attribute.AttributeClass == null)
 				continue;
 
-			var attributeType = PurviewTypeFactory.Create(attribute.AttributeClass);
+			var attributeType = TypeReference.Create(attribute.AttributeClass);
 
 			// Check activities
 			if (
-				Constants.Activities.ActivityAttribute == attributeType
-				|| Constants.Activities.EventAttribute == attributeType
-				|| Constants.Activities.ContextAttribute == attributeType
+				TemplateLibrary.Activities.ActivityAttribute == attributeType
+				|| TemplateLibrary.Activities.EventAttribute == attributeType
+				|| TemplateLibrary.Activities.ContextAttribute == attributeType
 			)
 			{
 				activityCount++;
 			}
 			// Check logging
 			else if (
-				Constants.Logging.LogAttribute == attributeType
-				|| Constants.Logging.TraceAttribute == attributeType
-				|| Constants.Logging.DebugAttribute == attributeType
-				|| Constants.Logging.InfoAttribute == attributeType
-				|| Constants.Logging.WarningAttribute == attributeType
-				|| Constants.Logging.ErrorAttribute == attributeType
-				|| Constants.Logging.CriticalAttribute == attributeType
+				TemplateLibrary.Logging.LogAttribute == attributeType
+				|| TemplateLibrary.Logging.TraceAttribute == attributeType
+				|| TemplateLibrary.Logging.DebugAttribute == attributeType
+				|| TemplateLibrary.Logging.InfoAttribute == attributeType
+				|| TemplateLibrary.Logging.WarningAttribute == attributeType
+				|| TemplateLibrary.Logging.ErrorAttribute == attributeType
+				|| TemplateLibrary.Logging.CriticalAttribute == attributeType
 			)
 			{
 				loggingCount++;
 			}
 			// Check metrics
 			else if (
-				Constants.Metrics.CounterAttribute == attributeType
-				|| Constants.Metrics.AutoCounterAttribute == attributeType
-				|| Constants.Metrics.UpDownCounterAttribute == attributeType
-				|| Constants.Metrics.HistogramAttribute == attributeType
-				|| Constants.Metrics.ObservableCounterAttribute == attributeType
-				|| Constants.Metrics.ObservableGaugeAttribute == attributeType
-				|| Constants.Metrics.ObservableUpDownCounterAttribute == attributeType
+				TemplateLibrary.Metrics.CounterAttribute == attributeType
+				|| TemplateLibrary.Metrics.AutoCounterAttribute == attributeType
+				|| TemplateLibrary.Metrics.UpDownCounterAttribute == attributeType
+				|| TemplateLibrary.Metrics.HistogramAttribute == attributeType
+				|| TemplateLibrary.Metrics.ObservableCounterAttribute == attributeType
+				|| TemplateLibrary.Metrics.ObservableGaugeAttribute == attributeType
+				|| TemplateLibrary.Metrics.ObservableUpDownCounterAttribute == attributeType
 			)
 			{
 				metricsCount++;
@@ -149,8 +149,8 @@ static partial class Utilities
 			// No Activity attribute, check if there are Activity parameters
 			foreach (var param in method.Parameters)
 			{
-				var paramType = PurviewTypeFactory.Create(param.Type);
-				if (Constants.Activities.SystemDiagnostics.Activity.Equals(paramType))
+				var paramType = TypeReference.Create(param.Type);
+				if (paramType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.Activity))
 				{
 					activityParameterWithoutTarget = param.Name;
 					break;
@@ -263,13 +263,6 @@ static partial class Utilities
 		return fullNamespace;
 	}
 
-	public static object? GetTypedConstantValue(TypedConstant arg) =>
-		arg.Kind == TypedConstantKind.Array ? arg.Values : arg.Value;
-
-	public static IncrementalValuesProvider<TSource> WhereNotNull<TSource>(
-		this IncrementalValuesProvider<TSource> source
-	) => source.Where(static m => m is not null);
-
 	//public static bool IsEnumerableOrArray(string parameterType, string fullTypeName)
 	//	=> IsArray(parameterType, fullTypeName)
 	//		|| IsEnumerable(parameterType, fullTypeName);
@@ -299,7 +292,7 @@ static partial class Utilities
 			return true;
 
 		// Get the `IEnumerable` symbol from the compilation
-		var ienumerableSymbol = compilation.GetTypeByMetadataName(Constants.System.IEnumerable);
+		var ienumerableSymbol = compilation.GetTypeByMetadataName(TypeLibrary.System.IEnumerable);
 
 		// Check if the type implements `IEnumerable`
 		return ienumerableSymbol != null
@@ -323,23 +316,16 @@ static partial class Utilities
 
 	public static bool IsExceptionType(this ITypeSymbol typeSymbol)
 	{
-		var localTypeSymbol = typeSymbol;
-		while (localTypeSymbol != null)
-		{
-			if (Constants.System.Exception.Equals(localTypeSymbol))
-				return true;
-
-			localTypeSymbol = localTypeSymbol.BaseType;
-		}
-
-		return false;
+		// The type itself, or any base in the hierarchy, derives from System.Exception.
+		return TypeLibrary.System.Exception.Equals(typeSymbol)
+			|| TypeHelpers.InheritsFrom(typeSymbol, TypeLibrary.System.Exception);
 	}
 
 	public static string Flatten(this SyntaxNode syntax) => syntax.WithoutTrivia().ToString().Flatten();
 
 	public static string Flatten(this string value) => WhitespaceRegex.Replace(value, " ");
 
-	public static bool ContainsAttribute(ISymbol symbol, PurviewTypeInfo type, CancellationToken token) =>
+	public static bool ContainsAttribute(ISymbol symbol, TypeIdentity type, CancellationToken token) =>
 		TryContainsAttribute(symbol, type, token, out _);
 
 	public static bool ContainsAttribute(ISymbol symbol, TemplateInfo templateInfo, CancellationToken token) =>
@@ -350,7 +336,7 @@ static partial class Utilities
 
 	public static bool TryContainsAttribute(
 		ISymbol symbol,
-		PurviewTypeInfo type,
+		TypeIdentity type,
 		CancellationToken token,
 		out AttributeData? attributeData
 	)
@@ -364,8 +350,10 @@ static partial class Utilities
 			if (attribute.AttributeClass == null)
 				continue;
 
-			var attributeType = PurviewTypeFactory.Create(attribute.AttributeClass);
-			if (attributeType == type)
+			if (!TypeIdentity.TryCreate(attribute.AttributeClass, out var attributeType))
+				continue;
+
+			if (attributeType.Equals(type))
 			{
 				attributeData = attribute;
 				return true;
@@ -391,8 +379,10 @@ static partial class Utilities
 			if (attribute.AttributeClass == null)
 				continue;
 
-			var attributeType = PurviewTypeFactory.Create(attribute.AttributeClass);
-			if (attributeType == templateInfo)
+			if (!TypeIdentity.TryCreate(attribute.AttributeClass, out var attributeType))
+				continue;
+
+			if (templateInfo.Equals(attributeType))
 			{
 				attributeData = attribute;
 				return true;
@@ -421,7 +411,9 @@ static partial class Utilities
 			if (attribute.AttributeClass == null)
 				continue;
 
-			var attributeType = PurviewTypeFactory.Create(attribute.AttributeClass);
+			if (!TypeIdentity.TryCreate(attribute.AttributeClass, out var attributeType))
+				continue;
+
 			foreach (var template in templateInfo)
 			{
 				if (template.Equals(attributeType))
@@ -533,81 +525,16 @@ static partial class Utilities
 	}
 
 	/// <summary>
-	/// Detects if a lowercase string appears to be a compound word without separators.
-	/// E.g., "entityid", "requestcount", "httpconnection" (likely compounds)
-	/// Returns true if the string is likely multiple words smashed together.
-	/// </summary>
-	public static bool IsLikelyCompoundWord(string lowercaseName)
-	{
-		if (string.IsNullOrEmpty(lowercaseName) || lowercaseName.Length < 6)
-			return false;
-
-		// If it contains separators already, it's not a compound
-		if (lowercaseName.Contains('.') || lowercaseName.Contains('_') || lowercaseName.Contains('-'))
-			return false;
-
-		// Common compound patterns (heuristic)
-		string[] commonSuffixes = ["id", "key", "name", "type", "count", "value", "time", "date", "code", "number"];
-		string[] commonPrefixes = ["get", "set", "is", "has", "can", "should", "will"];
-
-		foreach (var suffix in commonSuffixes)
-		{
-			if (lowercaseName.EndsWith(suffix, StringComparison.Ordinal) && lowercaseName.Length > suffix.Length + 2)
-				return true;
-		}
-
-		foreach (var prefix in commonPrefixes)
-		{
-			if (lowercaseName.StartsWith(prefix, StringComparison.Ordinal) && lowercaseName.Length > prefix.Length + 2)
-				return true;
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// Checks if a name is a generic or reserved term that provides little semantic value.
-	/// </summary>
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase")]
-	public static bool IsGenericOrReservedName(string name)
-	{
-		if (string.IsNullOrWhiteSpace(name))
-			return false;
-
-		string[] genericTerms =
-		[
-			"activity",
-			"event",
-			"error",
-			"exception",
-			"start",
-			"stop",
-			"begin",
-			"end",
-			"task",
-			"action",
-			"func",
-			"method",
-			"operation",
-			"process",
-			"handler",
-		];
-
-		var lowerName = name.ToLowerInvariant();
-		return genericTerms.Contains(lowerName);
-	}
-
-	/// <summary>
 	/// Checks if a method has any metrics-related attribute (Counter, AutoCounter, UpDownCounter, Histogram, etc.)
 	/// </summary>
 	public static bool HasMetricsAttribute(IMethodSymbol method, CancellationToken token)
 	{
-		return ContainsAttribute(method, Constants.Metrics.CounterAttribute, token)
-			|| ContainsAttribute(method, Constants.Metrics.AutoCounterAttribute, token)
-			|| ContainsAttribute(method, Constants.Metrics.UpDownCounterAttribute, token)
-			|| ContainsAttribute(method, Constants.Metrics.HistogramAttribute, token)
-			|| ContainsAttribute(method, Constants.Metrics.ObservableCounterAttribute, token)
-			|| ContainsAttribute(method, Constants.Metrics.ObservableGaugeAttribute, token)
-			|| ContainsAttribute(method, Constants.Metrics.ObservableUpDownCounterAttribute, token);
+		return ContainsAttribute(method, TemplateLibrary.Metrics.CounterAttribute, token)
+			|| ContainsAttribute(method, TemplateLibrary.Metrics.AutoCounterAttribute, token)
+			|| ContainsAttribute(method, TemplateLibrary.Metrics.UpDownCounterAttribute, token)
+			|| ContainsAttribute(method, TemplateLibrary.Metrics.HistogramAttribute, token)
+			|| ContainsAttribute(method, TemplateLibrary.Metrics.ObservableCounterAttribute, token)
+			|| ContainsAttribute(method, TemplateLibrary.Metrics.ObservableGaugeAttribute, token)
+			|| ContainsAttribute(method, TemplateLibrary.Metrics.ObservableUpDownCounterAttribute, token);
 	}
 }

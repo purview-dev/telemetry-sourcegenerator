@@ -1,3 +1,5 @@
+using Purview.SourceGeneratorFramework;
+
 namespace Purview.Telemetry.SourceGenerator;
 
 public partial class TelemetrySourceGeneratorTests : IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>
@@ -26,16 +28,10 @@ namespace Testing;
 		{
 			List<string> parameter =
 			[
-				TestHelpers.GetFriendlyTypeName(typeof(List<>).MakeGenericType(typeof(string))),
-				TestHelpers.GetFriendlyTypeName(
-					typeof(IEnumerable<>).MakeGenericType(typeof(string)),
-					useSystemType: false
-				),
-				TestHelpers.GetFriendlyTypeName(typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(int))),
-				TestHelpers.GetFriendlyTypeName(
-					typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(int)),
-					useSystemType: false
-				),
+				new TypeIdentity(typeof(List<>).MakeGenericType(typeof(string))).ToString(),
+				new TypeIdentity(typeof(IEnumerable<>).MakeGenericType(typeof(string))).ToString(),
+				new TypeIdentity(typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(int))).ToString(),
+				new TypeIdentity(typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(int))).ToString(),
 			];
 
 			return parameter;

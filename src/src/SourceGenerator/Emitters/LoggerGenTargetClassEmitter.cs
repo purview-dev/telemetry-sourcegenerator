@@ -9,7 +9,7 @@ static partial class LoggerGenTargetClassEmitter
 	public static void GenerateImplementation(
 		LoggerTarget target,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable = true,
 		bool supportsIMeterFactory = true
 	)
@@ -37,7 +37,7 @@ static partial class LoggerGenTargetClassEmitter
 					GenerationType.Logging,
 					target.GenerationType,
 					target.ClassNameToGenerate,
-					EmitterHelpers.AsTypeReference(target.InterfaceType),
+					target.InterfaceType,
 					TypeDeclarationAccessibility.Internal
 				)
 			)
@@ -71,7 +71,7 @@ static partial class LoggerGenTargetClassEmitter
 			target.TelemetryGeneration,
 			target.GenerationType,
 			target.ClassNameToGenerate,
-			target.InterfaceType.TypeName,
+			target.InterfaceType.Identity.Name,
 			target.FullNamespace,
 			context,
 			logger,
@@ -83,7 +83,7 @@ static partial class LoggerGenTargetClassEmitter
 		LoggerTarget target,
 		CodeWriter writer,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable
 	)
 	{
@@ -91,12 +91,12 @@ static partial class LoggerGenTargetClassEmitter
 
 		writer
 			.Write("readonly ")
-			.Write(Constants.Logging.MicrosoftExtensions.ILogger)
+			.Write(TypeLibrary.Logging.MicrosoftExtensions.ILogger)
 			.Write('<')
 			.Write(target.InterfaceType)
 			.Write('>')
 			.Write(' ')
-			.Write(Constants.Logging.LoggerFieldName)
+			.Write(PropertyLibrary.Logging.LoggerFieldName)
 			.Write(';')
 			.NewLine();
 
@@ -109,10 +109,6 @@ static partial class LoggerGenTargetClassEmitter
 
 			if (methodTarget.UnknownReturnType)
 			{
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.Logging.LogMustReturnVoidOrAsync
-				);
 				continue;
 			}
 
@@ -120,33 +116,21 @@ static partial class LoggerGenTargetClassEmitter
 			if (methodTarget.HasMultipleExceptions)
 			{
 				logger?.Diagnostic("Method has multiple exception parameters, only a single one is permitted.");
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.Logging.MultipleExceptionsDefined
-				);
 				continue;
 			}
 
 			if (!methodTarget.UseV1Generation)
 				continue;
 
-			if (methodTarget.ParameterCountSansException > Constants.Logging.MaxNonExceptionParameters)
+			if (methodTarget.ParameterCountSansException > PropertyLibrary.Logging.MaxNonExceptionParameters)
 			{
 				logger?.Diagnostic("Method has more than 6 parameters.");
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.Logging.MaximumLogEntryParametersExceeded
-				);
 				continue;
 			}
 
 			if (methodTarget.InferredErrorLevel)
 			{
 				logger?.Diagnostic("Inferring error log level.");
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.Logging.InferringErrorLogLevel
-				);
 			}
 
 			LoggerTargetClassEmitter.EmitLogActionField(writer, methodTarget, emitNullable);

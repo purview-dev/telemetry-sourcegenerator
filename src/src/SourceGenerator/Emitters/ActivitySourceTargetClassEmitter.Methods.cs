@@ -10,7 +10,7 @@ partial class ActivitySourceTargetClassEmitter
 		ActivitySourceTarget target,
 		CodeWriter writer,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable
 	)
 	{
@@ -26,10 +26,6 @@ partial class ActivitySourceTargetClassEmitter
 			if (validActivityMethods.Any(m => m.MethodType != ActivityMethodType.Activity))
 			{
 				logger?.Diagnostic("There are no Activity methods defined, however there are Events/ Context methods.");
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.Activities.NoActivityMethodsDefined
-				);
 			}
 		}
 
@@ -44,25 +40,23 @@ partial class ActivitySourceTargetClassEmitter
 	static void EmitRecordExceptionEvent(
 		CodeWriter writer,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		logger?.Debug($"Generating {Constants.Activities.RecordExceptionMethodName}.");
+		logger?.Debug($"Generating {PropertyLibrary.Activities.RecordExceptionMethodName}.");
 
 		writer
-			.WriteLine(Constants.System.GeneratedCode.Value)
-			.WriteLine(Constants.System.AggressiveInlining)
 			.Write("static void ")
-			.Write(Constants.Activities.RecordExceptionMethodName)
+			.Write(PropertyLibrary.Activities.RecordExceptionMethodName)
 			.Write('(')
-			.Write(Constants.Activities.SystemDiagnostics.Activity)
+			.Write(TypeLibrary.Activities.SystemDiagnostics.Activity)
 			.Write(emitNullable ? "? activity, " : " activity, ")
-			.Write(Constants.System.Exception)
+			.Write(TypeLibrary.System.Exception)
 			.Write(emitNullable ? "? exception, " : " exception, ")
-			.Write(Constants.System.BuiltInTypes.BoolKeyword)
+			.Write(PropertyLibrary.BuiltInTypes.BoolKeyword)
 			.WriteLine(" escape)");
 
 		using (writer.OpenBlockScope())
@@ -75,11 +69,11 @@ partial class ActivitySourceTargetClassEmitter
 
 			const string tagsListVariableName = "tagsCollection";
 			writer
-				.Write(Constants.Activities.SystemDiagnostics.ActivityTagsCollection)
+				.Write(TypeLibrary.Activities.SystemDiagnostics.ActivityTagsCollection)
 				.Write(' ')
 				.Write(tagsListVariableName)
 				.Write(" = new ")
-				.Write(Constants.Activities.SystemDiagnostics.ActivityTagsCollection)
+				.Write(TypeLibrary.Activities.SystemDiagnostics.ActivityTagsCollection)
 				.WriteLine("();");
 
 			EmitExceptionParam(writer, tagsListVariableName, "escape", "exception");
@@ -88,14 +82,14 @@ partial class ActivitySourceTargetClassEmitter
 
 			writer
 				.NewLine()
-				.Write(Constants.Activities.SystemDiagnostics.ActivityEvent)
+				.Write(TypeLibrary.Activities.SystemDiagnostics.ActivityEvent)
 				.Write(' ')
 				.Write(eventVariableName)
 				.Write(" = new ")
-				.Write(Constants.Activities.SystemDiagnostics.ActivityEvent)
+				.Write(TypeLibrary.Activities.SystemDiagnostics.ActivityEvent)
 				// name:
 				.Write("(name: ")
-				.Write(Constants.Activities.Tag_ExceptionEventName.Wrap())
+				.Write(PropertyLibrary.Activities.Tag_ExceptionEventName.Wrap())
 				// timestamp:
 				.Write(", timestamp: default")
 				// tags:
@@ -119,7 +113,7 @@ partial class ActivitySourceTargetClassEmitter
 		writer
 			.Write(tagsListVariableName)
 			.Write(".Add(")
-			.Write(Constants.Activities.Tag_ExceptionEscaped.Wrap())
+			.Write(PropertyLibrary.Activities.Tag_ExceptionEscaped.Wrap())
 			.Write(", ")
 			.Write(escapeParam)
 			.WriteLine(");");
@@ -127,7 +121,7 @@ partial class ActivitySourceTargetClassEmitter
 		writer
 			.Write(tagsListVariableName)
 			.Write(".Add(")
-			.Write(Constants.Activities.Tag_ExceptionMessage.Wrap())
+			.Write(PropertyLibrary.Activities.Tag_ExceptionMessage.Wrap())
 			.Write(", ")
 			.Write(exceptionParam)
 			.WriteLine(".Message);");
@@ -135,7 +129,7 @@ partial class ActivitySourceTargetClassEmitter
 		writer
 			.Write(tagsListVariableName)
 			.Write(".Add(")
-			.Write(Constants.Activities.Tag_ExceptionType.Wrap())
+			.Write(PropertyLibrary.Activities.Tag_ExceptionType.Wrap())
 			.Write(", ")
 			.Write(exceptionParam)
 			.WriteLine(".GetType().FullName);");
@@ -143,7 +137,7 @@ partial class ActivitySourceTargetClassEmitter
 		writer
 			.Write(tagsListVariableName)
 			.Write(".Add(")
-			.Write(Constants.Activities.Tag_ExceptionStackTrace.Wrap())
+			.Write(PropertyLibrary.Activities.Tag_ExceptionStackTrace.Wrap())
 			.Write(", ")
 			.Write(exceptionParam)
 			.WriteLine(".StackTrace);");
@@ -187,7 +181,7 @@ partial class ActivitySourceTargetClassEmitter
 		ActivityBasedGenerationTarget methodTarget,
 		ActivitySourceTarget target,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable
 	)
 	{
@@ -208,7 +202,7 @@ partial class ActivitySourceTargetClassEmitter
 			return;
 		}
 
-		if (!GuardMethod(methodTarget, target, context, logger))
+		if (!GuardMethod(methodTarget, target, logger))
 			return;
 
 		var isMultiTarget = methodTarget.TargetGenerationState.IsMultiTarget;
@@ -236,36 +230,32 @@ partial class ActivitySourceTargetClassEmitter
 		ActivityBasedGenerationTarget methodTarget,
 		ActivitySourceTarget _, // target
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable
 	)
 	{
 		var privateMethodName = methodTarget.MethodName + "_Activity";
+		context.CancellationToken.ThrowIfCancellationRequested();
 
-		writer
-			.WriteLine(Constants.System.GeneratedCode.Value)
-			.WriteLine(Constants.System.AggressiveInlining)
-			.Write("private ")
-			.Write(methodTarget.ReturnType);
-
-		writer.Write(' ').Write(privateMethodName).Write('(');
-
-		var index = 0;
-		foreach (var parameter in methodTarget.Parameters)
-		{
-			context.CancellationToken.ThrowIfCancellationRequested();
-
-			writer.Write(parameter.ParameterType).Write(' ').Write(parameter.ParameterName);
-
-			if (index < methodTarget.Parameters.Count - 1)
-				writer.Write(", ");
-
-			index++;
-		}
-
-		writer.WriteLine(")");
-
-		using (writer.OpenBlockScope())
+		using (
+			writer.WriteMethodScope(
+				new MethodDeclarationOptions(
+					privateMethodName,
+					methodTarget.ReturnType,
+					TypeDeclarationAccessibility.Private
+				)
+				{
+					Parameters =
+					[
+						.. methodTarget.Parameters.Select(p => new ParameterDeclarationOptions(
+							p.ParameterName,
+							p.ParameterType
+						)),
+					],
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
 			if (methodTarget.MethodType == ActivityMethodType.Activity)
 				EmitActivityMethodBody(writer, methodTarget, context, logger, emitNullable);
@@ -283,39 +273,38 @@ partial class ActivitySourceTargetClassEmitter
 		ActivityBasedGenerationTarget methodTarget,
 		GenerationType methodTargets,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable
 	)
 	{
 		logger?.Debug($"Building public delegating method for {methodTarget.MethodName}.");
+		context.CancellationToken.ThrowIfCancellationRequested();
 
-		writer
-			.NewLine()
-			.WriteLine(Constants.System.GeneratedCode.Value)
-			.WriteLine(Constants.System.AggressiveInlining)
-			.Write("public ")
-			.Write(methodTarget.ReturnType);
+		writer.NewLine();
 
-		writer.Write(' ').Write(methodTarget.MethodName).Write('(');
-
-		var index = 0;
-		foreach (var parameter in methodTarget.Parameters)
+		using (
+			writer.WriteMethodScope(
+				new MethodDeclarationOptions(
+					methodTarget.MethodName,
+					methodTarget.ReturnType,
+					TypeDeclarationAccessibility.Public
+				)
+				{
+					Parameters =
+					[
+						.. methodTarget.Parameters.Select(p => new ParameterDeclarationOptions(
+							p.ParameterName,
+							p.ParameterType
+						)),
+					],
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
-			context.CancellationToken.ThrowIfCancellationRequested();
-
-			writer.Write(parameter.ParameterType).Write(' ').Write(parameter.ParameterName);
-
-			if (index < methodTarget.Parameters.Count - 1)
-				writer.Write(", ");
-
-			index++;
-		}
-
-		writer.WriteLine(")");
-
-		using (writer.OpenBlockScope())
-		{
-			var returnsActivity = Constants.Activities.SystemDiagnostics.Activity.Equals(methodTarget.ReturnType);
+			var returnsActivity = methodTarget.ReturnType.Identity.Equals(
+				TypeLibrary.Activities.SystemDiagnostics.Activity
+			);
 			var paramList = string.Join(", ", methodTarget.Parameters.Select(p => p.ParameterName));
 
 			// Create filtered parameter list for Logging/Metrics (excludes Activity-related types)
@@ -323,11 +312,11 @@ partial class ActivitySourceTargetClassEmitter
 				", ",
 				methodTarget
 					.Parameters.Where(p =>
-						!Constants.Activities.SystemDiagnostics.Activity.Equals(p.ParameterType)
-						&& !Constants.Activities.SystemDiagnostics.ActivityContext.Equals(p.ParameterType)
-						&& !Constants.Activities.SystemDiagnostics.ActivityLink.Equals(p.ParameterType)
-						&& !Constants.Activities.SystemDiagnostics.ActivityLinkArray.Equals(p.ParameterType)
-						&& !Constants.System.TagList.Equals(p.ParameterType)
+						!p.ParameterType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.Activity)
+						&& !p.ParameterType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.ActivityContext)
+						&& !p.ParameterType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.ActivityLink)
+						&& !p.ParameterType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.ActivityLinkArray)
+						&& !p.ParameterType.Identity.Equals(TypeLibrary.System.TagList)
 					)
 					.Select(p => p.ParameterName)
 			);
@@ -382,34 +371,29 @@ partial class ActivitySourceTargetClassEmitter
 		CodeWriter writer,
 		ActivityBasedGenerationTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable
 	)
 	{
-		writer
-			.WriteLine(Constants.System.GeneratedCode.Value)
-			.WriteLine(Constants.System.AggressiveInlining)
-			.Write("public ")
-			.Write(methodTarget.ReturnType);
-
-		writer.Write(' ').Write(methodTarget.MethodName).Write('(');
-
-		var index = 0;
-		foreach (var parameter in methodTarget.Parameters)
-		{
-			context.CancellationToken.ThrowIfCancellationRequested();
-
-			writer.Write(parameter.ParameterType).Write(' ').Write(parameter.ParameterName);
-
-			if (index < methodTarget.Parameters.Count - 1)
-				writer.Write(", ");
-
-			index++;
-		}
-
-		writer.WriteLine(")");
-
-		using (writer.OpenBlockScope())
+		using (
+			writer.WriteMethodScope(
+				new MethodDeclarationOptions(
+					methodTarget.MethodName,
+					methodTarget.ReturnType,
+					TypeDeclarationAccessibility.Public
+				)
+				{
+					Parameters =
+					[
+						.. methodTarget.Parameters.Select(p => new ParameterDeclarationOptions(
+							p.ParameterName,
+							p.ParameterType
+						)),
+					],
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
 			if (methodTarget.MethodType == ActivityMethodType.Activity)
 				EmitActivityMethodBody(writer, methodTarget, context, logger, emitNullable);
@@ -425,8 +409,7 @@ partial class ActivitySourceTargetClassEmitter
 	static bool GuardMethod(
 		ActivityBasedGenerationTarget methodTarget,
 		ActivitySourceTarget target,
-		SourceProductionContext context,
-		GenerationLogger? logger
+		ISourceGenLogger? logger
 	)
 	{
 		if (!methodTarget.TargetGenerationState.IsValid)
@@ -434,13 +417,13 @@ partial class ActivitySourceTargetClassEmitter
 			if (methodTarget.TargetGenerationState.RaiseMultiGenerationTargetsNotSupported)
 			{
 				logger?.Debug(
-					$"Identified {target.InterfaceType.TypeName}.{methodTarget.MethodName} as problematic as it has another target types."
+					$"Identified {target.InterfaceType.Identity.Name}.{methodTarget.MethodName} as problematic as it has another target types."
 				);
 			}
 			else if (methodTarget.TargetGenerationState.RaiseInferenceNotSupportedWithMultiTargeting)
 			{
 				logger?.Debug(
-					$"Identified {target.InterfaceType.TypeName}.{methodTarget.MethodName} as problematic as it is inferred."
+					$"Identified {target.InterfaceType.Identity.Name}.{methodTarget.MethodName} as problematic as it is inferred."
 				);
 			}
 
@@ -452,17 +435,15 @@ partial class ActivitySourceTargetClassEmitter
 		var isEvent = methodTarget.MethodType == ActivityMethodType.Event;
 
 		var isValidReturnType = isEvent
-			? methodTarget.ReturnType.SpecialType == SpecialType.System_Void
-			: methodTarget.ReturnType.SpecialType == SpecialType.System_Void
-				|| Constants.Activities.SystemDiagnostics.Activity.Equals(methodTarget.ReturnType);
+			? methodTarget.ReturnType.Identity.SpecialType == SpecialType.System_Void
+			: methodTarget.ReturnType.Identity.SpecialType == SpecialType.System_Void
+				|| methodTarget.ReturnType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.Activity);
 
 		if (!isValidReturnType)
 		{
 			logger?.Diagnostic(
 				$"The return type {methodTarget.ReturnType} isn't valid for an activity, event, or context method."
 			);
-
-			TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Activities.InvalidReturnType);
 
 			return false;
 		}
@@ -472,21 +453,13 @@ partial class ActivitySourceTargetClassEmitter
 			// Here we're opting in to generate diagnostics for missing activity return/ params.
 			if (methodTarget.MethodType == ActivityMethodType.Activity)
 			{
-				if (!Constants.Activities.SystemDiagnostics.Activity.Equals(methodTarget.ReturnType))
+				if (!methodTarget.ReturnType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.Activity))
 				{
 					logger?.Diagnostic($"No Activity returned for {methodTarget.MethodName}.");
-					TelemetryDiagnostics.Report(
-						context.ReportDiagnostic,
-						TelemetryDiagnostics.Activities.DoesNotReturnActivity
-					);
 				}
 				else if (!methodTarget.ReturnType.IsNullable)
 				{
 					logger?.Diagnostic($"Activity return type is not nullable for {methodTarget.MethodName}.");
-					TelemetryDiagnostics.Report(
-						context.ReportDiagnostic,
-						TelemetryDiagnostics.Activities.ActivityReturnTypeShouldBeNullable
-					);
 				}
 			}
 			else
@@ -496,7 +469,9 @@ partial class ActivitySourceTargetClassEmitter
 					logger?.Diagnostic($"No Activity parameter is defined on {methodTarget.MethodName}.");
 				}
 				else if (
-					!Constants.Activities.SystemDiagnostics.Activity.Equals(methodTarget.Parameters[0].ParameterType)
+					!methodTarget
+						.Parameters[0]
+						.ParameterType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.Activity)
 				)
 				{
 					logger?.Diagnostic(

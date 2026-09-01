@@ -1,9 +1,9 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Records;
 
 namespace Purview.Telemetry.SourceGenerator;
 
-partial class TelemetryDiagnostics
+partial class DiagnosticLibrary
 {
 	// Start at 2000
 	public static class Logging
@@ -13,15 +13,15 @@ partial class TelemetryDiagnostics
 			Title: "Too many exception parameters",
 			Description: "Only a single exceptions parameter is permitted.",
 			Severity: DiagnosticSeverity.Error,
-			Category: Constants.Diagnostics.Logging.Usage
+			Category: DiagnosticLibrary.Categories.Logging.Usage
 		);
 
 		public static readonly TelemetryDiagnosticDescriptor MaximumLogEntryParametersExceeded = new(
 			Id: "TSG2001",
 			Title: "More than 6 parameters",
-			Description: $"The maximum number of parameters (excluding optional Exception) is {Constants.Logging.MaxNonExceptionParameters}",
+			Description: $"The maximum number of parameters (excluding optional Exception) is {PropertyLibrary.Logging.MaxNonExceptionParameters}",
 			Severity: DiagnosticSeverity.Error,
-			Category: Constants.Diagnostics.Logging.Usage
+			Category: DiagnosticLibrary.Categories.Logging.Usage
 		);
 
 		public static readonly TelemetryDiagnosticDescriptor InferringErrorLogLevel = new(
@@ -29,7 +29,7 @@ partial class TelemetryDiagnostics
 			Title: "Inferring error log level",
 			Description: "Because an exception parameter was defined and no log level was defined the level was inferred to be Error. Consider explicitly defining the required level.",
 			Severity: DiagnosticSeverity.Info,
-			Category: Constants.Diagnostics.Logging.Usage
+			Category: DiagnosticLibrary.Categories.Logging.Usage
 		);
 
 		public static readonly TelemetryDiagnosticDescriptor MSLoggingNotReferenced = new(
@@ -37,7 +37,7 @@ partial class TelemetryDiagnostics
 			Title: "Could not find a reference to Microsoft.Extensions.Logging.ILogger, skipping log generation",
 			Description: "No reference was found for the ILogger type, no log generation is possible so no logging attributes will be added. Add a reference to the appropriate NuGet package, such as Microsoft.Extensions.Logging.",
 			Severity: DiagnosticSeverity.Warning,
-			Category: Constants.Diagnostics.Logging.Usage
+			Category: DiagnosticLibrary.Categories.Logging.Usage
 		);
 
 		public static readonly TelemetryDiagnosticDescriptor MixedOrdinalAndNamedProperties = new(
@@ -45,7 +45,7 @@ partial class TelemetryDiagnostics
 			Title: "Cannot mix ordinal and named property placeholders",
 			Description: "The message template for log method '{0}' mixes ordinal and named property placeholders which is not supported.",
 			Severity: DiagnosticSeverity.Error,
-			Category: Constants.Diagnostics.Logging.Usage
+			Category: DiagnosticLibrary.Categories.Logging.Usage
 		);
 
 		public static readonly TelemetryDiagnosticDescriptor OrdinalsExceedParameters = new(
@@ -53,7 +53,7 @@ partial class TelemetryDiagnostics
 			Title: "Ordinal values exceed parameter count",
 			Description: "The maximum ordinal value for log method '{0}' exceeds the number of provided parameters.",
 			Severity: DiagnosticSeverity.Error,
-			Category: Constants.Diagnostics.Logging.Usage
+			Category: DiagnosticLibrary.Categories.Logging.Usage
 		);
 
 		public static readonly TelemetryDiagnosticDescriptor ExpandEnumerableAndLogPropertiesNotSupported = new(
@@ -61,7 +61,7 @@ partial class TelemetryDiagnostics
 			Title: "Using LogPropertiesAttribute and ExpandEnumerableAttribute on the same parameter is not supported",
 			Description: "Expanding an array/ IEnumerable, and the expanding the complex type of the items in the array are not supported.",
 			Severity: DiagnosticSeverity.Error,
-			Category: Constants.Diagnostics.Logging.Usage
+			Category: DiagnosticLibrary.Categories.Logging.Usage
 		);
 
 		public static readonly TelemetryDiagnosticDescriptor ScopedMethodShouldNotHaveLevel = new(
@@ -69,23 +69,15 @@ partial class TelemetryDiagnostics
 			Title: "A scoped log shouldn't have a LogLevel, this will be ignored.",
 			Description: "Scoped log entries do not support having a log level set.",
 			Severity: DiagnosticSeverity.Warning,
-			Category: Constants.Diagnostics.Logging.Usage
+			Category: DiagnosticLibrary.Categories.Logging.Usage
 		);
 
 		public static readonly TelemetryDiagnosticDescriptor UnboundedIEnumerableMaxCount = new(
 			Id: "TSG2008",
 			Title: "Unbounded enumeration possible",
-			Description: $"The limit on unbounded enumeration is higher than the recommended default ({Constants.Logging.UnboundedIEnumerableMaxCountBeforeDiagnostic}). This may cause performance issues, make sure you understand the consequences and test thoroughly.",
+			Description: $"The limit on unbounded enumeration is higher than the recommended default ({PropertyLibrary.Logging.UnboundedIEnumerableMaxCountBeforeDiagnostic}). This may cause performance issues, make sure you understand the consequences and test thoroughly.",
 			Severity: DiagnosticSeverity.Warning,
-			Category: Constants.Diagnostics.Logging.Performance
-		);
-
-		public static readonly TelemetryDiagnosticDescriptor ScopedLogMustReturnIDisposable = new(
-			Id: "TSG2020",
-			Title: "Scoped logger must return IDisposable",
-			Description: "Scoped logging methods must return IDisposable to properly manage the log scope lifetime.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Constants.Diagnostics.Logging.Usage
+			Category: DiagnosticLibrary.Categories.Logging.Performance
 		);
 
 		public static readonly TelemetryDiagnosticDescriptor LogMustReturnVoidOrAsync = new(
@@ -93,31 +85,7 @@ partial class TelemetryDiagnostics
 			Title: "Log method must return void or IDisposable",
 			Description: "Logging methods can only return void (non-scoped) or IDisposable (scoped). Other return types like string, int, bool, Activity, Task, or ValueTask are not supported.",
 			Severity: DiagnosticSeverity.Error,
-			Category: Constants.Diagnostics.Logging.Usage
-		);
-
-		public static readonly TelemetryDiagnosticDescriptor InvalidAsyncReturnType = new(
-			Id: "TSG2022",
-			Title: "Async return types are not supported",
-			Description: "Logging methods cannot return Task or ValueTask. Only void (non-scoped) or IDisposable (scoped) are supported.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Constants.Diagnostics.Logging.Usage
-		);
-
-		public static readonly TelemetryDiagnosticDescriptor DefaultPrefixTypeUsed = new(
-			Id: "TSG2023",
-			Title: "Log prefix type is Default (no prefix)",
-			Description: "Using Default prefix type results in log names with no context prefix. Consider using TrimmedClassName or Custom prefix for better log categorization and searchability.",
-			Severity: DiagnosticSeverity.Info,
-			Category: Constants.Diagnostics.Logging.Usage
-		);
-
-		public static readonly TelemetryDiagnosticDescriptor LogMethodNameTooShortOrGeneric = new(
-			Id: "TSG2024",
-			Title: "Log method name is very short or generic",
-			Description: "Log method name '{0}' is very short or generic. Consider using a more descriptive name that identifies the logging context.",
-			Severity: DiagnosticSeverity.Warning,
-			Category: Constants.Diagnostics.Logging.Usage
+			Category: DiagnosticLibrary.Categories.Logging.Usage
 		);
 	}
 }

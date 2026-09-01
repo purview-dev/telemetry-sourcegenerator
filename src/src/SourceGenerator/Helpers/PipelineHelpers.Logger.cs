@@ -1,9 +1,9 @@
+using System.Collections.Immutable;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Purview.Telemetry.SourceGenerator.Records;
 using Purview.Telemetry.SourceGenerator.Templates;
-using System.Collections.Immutable;
-using System.Text;
 
 namespace Purview.Telemetry.SourceGenerator.Helpers;
 
@@ -13,53 +13,57 @@ partial class PipelineHelpers
 
 	public static bool HasLoggerTargetAttribute(SyntaxNode _, CancellationToken __) => true;
 
-	public static LoggerTarget? BuildLoggerTransform(
+	public static GeneratorResult<LoggerTarget?> BuildLoggerTransform(
 		GeneratorAttributeSyntaxContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
+		CancellationToken token
+	) => BuildLoggerTarget(context.TargetSymbol as INamedTypeSymbol, context.SemanticModel, logger, token);
+
+	public static GeneratorResult<LoggerTarget?> BuildLoggerTarget(
+		INamedTypeSymbol? interfaceSymbol,
+		SemanticModel semanticModel,
+		ISourceGenLogger? logger,
 		CancellationToken token
 	)
 	{
 		token.ThrowIfCancellationRequested();
 
-		var iLoggerTypeSymbol = context.SemanticModel.Compilation.GetTypeByMetadataName(
-			Constants.Logging.MicrosoftExtensions.ILogger.FullyQualifiedName
+		if (interfaceSymbol is null)
+		{
+			logger?.Fatal($"Could not find the interface symbol for a Logger target.");
+			return GeneratorResult<LoggerTarget?>.Empty;
+		}
+
+		var iLoggerTypeSymbol = semanticModel.Compilation.GetTypeByMetadataName(
+			TypeLibrary.Logging.MicrosoftExtensions.ILogger.MetadataFullName
 		);
 		if (iLoggerTypeSymbol is null)
 		{
 			logger?.Diagnostic(
-				$"Requested a Logger target to be generated, but could not find the ILogger symbol referenced '{context.TargetNode.Flatten()}'."
+				$"Requested a Logger target to be generated, but could not find the ILogger symbol referenced '{interfaceSymbol.Name}'."
 			);
-			return null;
-		}
-
-		if (context.TargetNode is not InterfaceDeclarationSyntax interfaceDeclaration)
-		{
-			logger?.Error($"Could not find interface syntax from the target node '{context.TargetNode.Flatten()}'.");
-			return null;
-		}
-
-		if (context.TargetSymbol is not INamedTypeSymbol interfaceSymbol)
-		{
-			logger?.Error($"Could not find interface symbol '{interfaceDeclaration.Flatten()}'.");
-			return null;
+			return GeneratorResult<LoggerTarget?>.Empty;
 		}
 
 		if (interfaceSymbol.Arity > 0)
 		{
-			logger?.Diagnostic(
-				$"Cannot generate a Logger target for a generic interface '{interfaceDeclaration.Flatten()}'."
+			logger?.Diagnostic($"Cannot generate a Logger target for a generic interface '{interfaceSymbol.Name}'.");
+
+			return GeneratorResult<LoggerTarget?>.Create(
+				DiagnosticInfo.Create(
+					TelemetryRules.ToDescriptor(DiagnosticLibrary.General.GenericInterfacesNotSupported),
+					interfaceSymbol
+				)
 			);
-			return null;
 		}
 
-		var semanticModel = context.SemanticModel;
-		var loggerAttribute = SharedHelpers.GetLoggerAttribute(context.TargetSymbol, semanticModel, logger, token);
+		var loggerAttribute = SharedHelpers.GetLoggerAttribute(interfaceSymbol, semanticModel, logger, token);
 		if (loggerAttribute == null)
 		{
-			logger?.Error(
-				$"Could not find {Constants.Logging.LoggerAttribute} when one was expected '{interfaceDeclaration.Flatten()}'."
+			logger?.Fatal(
+				$"Could not find {TemplateLibrary.Logging.LoggerAttribute} when one was expected '{interfaceSymbol.Name}'."
 			);
-			return null;
+			return GeneratorResult<LoggerTarget?>.Empty;
 		}
 
 		var telemetryGeneration = SharedHelpers.GetTelemetryGenerationAttribute(
@@ -73,7 +77,7 @@ partial class PipelineHelpers
 			: GenerateClassName(interfaceSymbol.Name);
 
 		var loggerGenerationAttribute = SharedHelpers.GetLoggerGenerationAttribute(semanticModel, logger, token);
-		var defaultLogLevel = loggerGenerationAttribute?.DefaultLevel?.Value ?? Constants.Logging.DefaultLevel;
+		var defaultLogLevel = loggerGenerationAttribute?.DefaultLevel?.Value ?? PropertyLibrary.Logging.DefaultLevel;
 		var defaultPrefixType =
 			loggerGenerationAttribute?.DefaultPrefixType.IsSet == true
 				? loggerGenerationAttribute.DefaultPrefixType.Value!.Value
@@ -88,6 +92,14 @@ partial class PipelineHelpers
 			: 0; // Auto
 
 		var generationType = SharedHelpers.GetGenerationTypes(interfaceSymbol, token);
+		var interfaceDeclaration =
+			interfaceSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax(token) as InterfaceDeclarationSyntax;
+		if (interfaceDeclaration is null)
+		{
+			logger?.Fatal($"Could not locate the declaring syntax for '{interfaceSymbol.Name}'.");
+			return GeneratorResult<LoggerTarget?>.Empty;
+		}
+
 		var fullNamespace = Utilities.GetFullNamespace(interfaceDeclaration, true);
 		var logMethods = BuildLogMethods(
 			generationType,
@@ -95,7 +107,6 @@ partial class PipelineHelpers
 			defaultLogLevel,
 			defaultPrefixType,
 			loggerAttribute,
-			context,
 			semanticModel,
 			interfaceSymbol,
 			logger,
@@ -103,19 +114,22 @@ partial class PipelineHelpers
 			token
 		);
 
-		return new(
-			TelemetryGeneration: telemetryGeneration,
-			GenerationType: generationType,
-			ClassNameToGenerate: className,
-			ClassNamespace: Utilities.GetNamespace(interfaceDeclaration),
-			ParentClasses: Utilities.GetParentClasses(interfaceDeclaration),
-			FullNamespace: fullNamespace,
-			FullyQualifiedName: fullNamespace + className,
-			InterfaceType: PurviewTypeFactory.Create(interfaceSymbol),
-			LoggerAttribute: loggerAttribute,
-			DefaultLevel: defaultLogLevel,
-			LogMethods: logMethods,
-			UseMSLoggingTelemetryBasedGeneration: interfaceGenerationMode != 1 // false only when V1 forced
+		return GeneratorResult<LoggerTarget?>.Create(
+			new(
+				TelemetryGeneration: telemetryGeneration,
+				GenerationType: generationType,
+				ClassNameToGenerate: className,
+				ClassNamespace: Utilities.GetNamespace(interfaceDeclaration),
+				ParentClasses: Utilities.GetParentClasses(interfaceDeclaration),
+				FullNamespace: fullNamespace,
+				FullyQualifiedName: fullNamespace + className,
+				InterfaceType: TypeReference.Create(interfaceSymbol),
+				LoggerAttribute: loggerAttribute,
+				DefaultLevel: defaultLogLevel,
+				LogMethods: logMethods,
+				UseMSLoggingTelemetryBasedGeneration: interfaceGenerationMode != 1 // false only when V1 forced
+			),
+			TelemetryRules.GetInterfaceLevelDiagnostics(interfaceSymbol, semanticModel.Compilation, token)
 		);
 	}
 
@@ -125,10 +139,9 @@ partial class PipelineHelpers
 		int defaultLogLevel,
 		int defaultPrefixType,
 		LoggerAttributeRecord loggerTarget,
-		GeneratorAttributeSyntaxContext _,
 		SemanticModel semanticModel,
 		INamedTypeSymbol interfaceSymbol,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		int interfaceGenerationMode,
 		CancellationToken token
 	)
@@ -138,7 +151,7 @@ partial class PipelineHelpers
 		List<LogMethodTarget> methodTargets = [];
 		foreach (var method in GetAllInterfaceMethods(interfaceSymbol, semanticModel.Compilation, token))
 		{
-			if (Utilities.ContainsAttribute(method, Constants.Shared.ExcludeAttribute, token))
+			if (Utilities.ContainsAttribute(method, TemplateLibrary.Shared.ExcludeAttribute, token))
 			{
 				logger?.Debug($"Skipping {interfaceSymbol.Name}.{method.Name}, explicitly excluded.");
 				continue;
@@ -169,9 +182,9 @@ partial class PipelineHelpers
 			logger?.Debug($"Found method {interfaceSymbol.Name}.{method.Name}.");
 
 			// Validate return type - don't skip; let through with UnknownReturnType flag so the emitter can report the diagnostic
-			var invalidReturnType = ValidateLogReturnType(method, semanticModel, logger, token).HasValue;
+			var invalidReturnType = TelemetryRules.IsInvalidLogReturnType(method, token);
 
-			var isScoped = Constants.System.IDisposable.Equals(method.ReturnType);
+			var isScoped = TypeLibrary.System.IDisposable.Equals(method.ReturnType);
 			var methodParameters = GetLogMethodParameters(
 				method,
 				semanticModel,
@@ -187,7 +200,7 @@ partial class PipelineHelpers
 					p => new LogParameterTarget(
 						Name: p.Name,
 						UpperCasedName: Utilities.UppercaseFirstChar(p.Name),
-						ParameterType: PurviewTypeFactory.Create(p.Type),
+						ParameterType: TypeReference.Create(p.Type),
 						IsException: false,
 						IsFirstException: false,
 						IsIEnumerable: false,
@@ -211,7 +224,7 @@ partial class PipelineHelpers
 						TemplateProperties: ImmutableArray<MessageTemplateHole>.Empty,
 						TemplateIsOrdinalBased: false,
 						TemplateIsNamedBased: false,
-						MSLevel: Constants.Logging.LogLevelTypeMap[defaultLogLevel],
+						MSLevel: PropertyLibrary.Logging.LogLevelTypeMap[defaultLogLevel],
 						Parameters: stubParams,
 						ParametersSansException: stubParams,
 						ExceptionParameter: null,
@@ -262,7 +275,7 @@ partial class PipelineHelpers
 			)!;
 
 			var messageTemplateMatches = MessageTemplateHole.FromMatches(
-				Constants.MessageTemplateMatcher.Matches(messageTemplate)
+				PropertyLibrary.MessageTemplateMatcher.Matches(messageTemplate)
 			);
 
 			var templateIsOrdinalBased = false;
@@ -352,7 +365,7 @@ partial class PipelineHelpers
 				// v1 requires: ≤6 non-exception parameters, single exception, no [ExpandEnumerable], no [LogProperties].
 				useV1Generation =
 					!hasMultipleExceptions
-					&& methodParameters.Count(p => !p.IsException) <= Constants.Logging.MaxNonExceptionParameters
+					&& methodParameters.Count(p => !p.IsException) <= PropertyLibrary.Logging.MaxNonExceptionParameters
 					&& !methodParameters.Any(p => p.ExpandEnumerableAttribute != null)
 					&& !methodParameters.Any(p => p.LogPropertiesAttribute != null);
 			}
@@ -369,7 +382,7 @@ partial class PipelineHelpers
 					TemplateProperties: messageTemplateMatches,
 					TemplateIsOrdinalBased: templateIsOrdinalBased,
 					TemplateIsNamedBased: templateIsNamedBased,
-					MSLevel: Constants.Logging.LogLevelTypeMap[level],
+					MSLevel: PropertyLibrary.Logging.LogLevelTypeMap[level],
 					Parameters: methodParameters,
 					ParametersSansException: isScoped
 						? methodParameters
@@ -491,7 +504,7 @@ partial class PipelineHelpers
 	static ImmutableArray<LogParameterTarget> GetLogMethodParameters(
 		IMethodSymbol method,
 		SemanticModel semanticModel,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		CancellationToken token,
 		out bool hasError
 	)
@@ -505,13 +518,13 @@ partial class PipelineHelpers
 			token.ThrowIfCancellationRequested();
 
 			// Skip Activity-related parameters and TagList - they are not valid for logging
-			var parameterType = PurviewTypeFactory.Create(parameter.Type);
+			var parameterType = TypeReference.Create(parameter.Type);
 			if (
-				Constants.Activities.SystemDiagnostics.Activity.Equals(parameterType)
-				|| Constants.Activities.SystemDiagnostics.ActivityContext.Equals(parameterType)
-				|| Constants.Activities.SystemDiagnostics.ActivityLink.Equals(parameterType)
-				|| Constants.Activities.SystemDiagnostics.ActivityLinkArray.Equals(parameterType)
-				|| Constants.System.TagList.Equals(parameterType)
+				parameterType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.Activity)
+				|| parameterType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.ActivityContext)
+				|| parameterType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.ActivityLink)
+				|| parameterType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.ActivityLinkArray)
+				|| parameterType.Identity.Equals(TypeLibrary.System.TagList)
 			)
 			{
 				logger?.Debug($"Skipping parameter '{parameter.Name}' of type '{parameterType}' from logging.");
@@ -550,13 +563,13 @@ partial class PipelineHelpers
 					if (
 						Utilities.ContainsAttribute(
 							property,
-							Constants.Logging.MicrosoftExtensions.LogPropertyIgnoreAttribute,
+							TypeLibrary.Logging.MicrosoftExtensions.LogPropertyIgnoreAttribute,
 							token
 						)
 					)
 					{
 						logger?.Debug(
-							$"Skipping property {propertyName} on {parameter.Name} as it is marked with {Constants.Logging.MicrosoftExtensions.LogPropertyIgnoreAttribute}."
+							$"Skipping property {propertyName} on {parameter.Name} as it is marked with {TypeLibrary.Logging.MicrosoftExtensions.LogPropertyIgnoreAttribute}."
 						);
 						continue;
 					}
@@ -571,7 +584,7 @@ partial class PipelineHelpers
 				}
 			}
 
-			var logParameterType = PurviewTypeFactory.Create(parameter.Type);
+			var logParameterType = TypeReference.Create(parameter.Type);
 			var isException = parameter.Type.IsExceptionType();
 			parameters.Add(
 				new(
@@ -584,9 +597,7 @@ partial class PipelineHelpers
 					IsArray: parameter.Type.IsArray(),
 					IsComplexType: parameter.Type.IsComplexType(),
 					LogPropertiesAttribute: logPropertiesAttribute,
-					LogProperties: logProperties != null
-						? new([.. logProperties])
-						: [],
+					LogProperties: logProperties != null ? new([.. logProperties]) : [],
 					ExpandEnumerableAttribute: expandEnumerableAttribute,
 					ExcludedTargets: SharedHelpers
 						.GetExcludeTargetsAttribute(parameter, semanticModel, logger, token)
@@ -602,63 +613,5 @@ partial class PipelineHelpers
 		logger?.Debug($"Found {parameters.Count} parameter(s) for {method.Name}.");
 
 		return [.. parameters];
-	}
-
-	static (TelemetryDiagnosticDescriptor, ImmutableArray<Location>)? ValidateLogReturnType(
-		IMethodSymbol method,
-		SemanticModel _, // semanticModel
-		GenerationLogger? logger,
-		CancellationToken token
-	)
-	{
-		token.ThrowIfCancellationRequested();
-
-		// Valid return types for logging:
-		// - void (non-scoped)
-		// - IDisposable or IDisposable? (scoped)
-		// - Activity? (multi-target with Activity - Activity return type takes priority)
-		// Everything else is invalid
-
-		var isVoid = method.ReturnsVoid;
-
-		// Check if return type is IDisposable (handle both nullable and non-nullable)
-		var returnType = method.ReturnType;
-		var isIDisposable = Constants.System.IDisposable.Equals(returnType);
-
-		// Also check if it's nullable IDisposable (IDisposable?)
-		if (!isIDisposable && returnType.NullableAnnotation == NullableAnnotation.Annotated)
-		{
-			// Get the underlying type without the nullable annotation
-			if (returnType is INamedTypeSymbol namedType && !namedType.IsValueType)
-			{
-				isIDisposable =
-					Constants.System.IDisposable.Equals(namedType.OriginalDefinition)
-					|| Constants.System.IDisposable.FullyQualifiedName == namedType.ConstructedFrom.ToString();
-			}
-		}
-
-		// Check if return type is Activity? (allowed for multi-target with Activity attributes)
-		var isActivity = Constants.Activities.SystemDiagnostics.Activity.Equals(returnType);
-
-		// If it's Activity, check if this is a valid multi-target scenario
-		// (method has Activity attribute that determines return type)
-		if (isActivity && SharedHelpers.IsActivityMethod(method, token))
-		{
-			// Multi-target with Activity - Activity wins return type
-			return null;
-		}
-
-		// If it's one of the valid types, allow it
-		if (isVoid || isIDisposable)
-		{
-			return null;
-		}
-
-		// Everything else is invalid
-		logger?.Diagnostic(
-			$"Log method {method.Name} must return void or IDisposable (for scoped logs), but returns {method.ReturnType}."
-		);
-
-		return (TelemetryDiagnostics.Logging.LogMustReturnVoidOrAsync, method.ReturnType.Locations);
 	}
 }

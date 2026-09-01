@@ -1,6 +1,6 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Records;
+namespace Purview.Telemetry.SourceGenerator.Records;
 
-record MeterGenerationAttributeRecord(
+sealed record MeterGenerationAttributeRecord(
 	AttributeStringValue InstrumentPrefix,
 	AttributeStringValue InstrumentSeparator,
 	AttributeValue<bool> LowercaseInstrumentName,
@@ -9,7 +9,7 @@ record MeterGenerationAttributeRecord(
 	AttributeValue<int> MeterNameGenerationType
 );
 
-record MeterAttributeRecord(
+sealed record MeterAttributeRecord(
 	AttributeStringValue Name,
 	AttributeStringValue InstrumentPrefix,
 	AttributeValue<bool> IncludeAssemblyInstrumentPrefix,
@@ -17,7 +17,7 @@ record MeterAttributeRecord(
 	AttributeValue<bool> LowercaseTagKeys
 );
 
-record InstrumentAttributeRecord(
+sealed record InstrumentAttributeRecord(
 	AttributeStringValue Name,
 	AttributeStringValue? Unit,
 	AttributeStringValue? Description,

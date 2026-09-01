@@ -10,7 +10,7 @@ partial class ActivitySourceTargetClassEmitter
 		CodeWriter writer,
 		ActivityBasedGenerationTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable
 	)
 	{
@@ -54,18 +54,20 @@ partial class ActivitySourceTargetClassEmitter
 		var activityVariableName = "activity" + methodTarget.MethodName;
 
 		writer
-			.Write(Constants.Activities.SystemDiagnostics.Activity)
+			.Write(TypeLibrary.Activities.SystemDiagnostics.Activity)
 			.Write(emitNullable ? "? " : " ")
 			.Write(activityVariableName)
 			.Write(" = ")
-			.Write(Constants.Activities.ActivitySourceFieldName)
+			.Write(PropertyLibrary.Activities.ActivitySourceFieldName)
 			.Write('.');
 
 		var createOnly = methodTarget.ActivityAttribute?.CreateOnly.Value == true;
 		var createActivityMethod = createOnly ? "Create" : "Start";
-		var useParentContext = Constants.Activities.SystemDiagnostics.ActivityContext.Equals(
-			parentContextOrId?.ParameterType
-		);
+		var useParentContext =
+			parentContextOrId != null
+			&& parentContextOrId.ParameterType.Identity.Equals(
+				TypeLibrary.Activities.SystemDiagnostics.ActivityContext
+			);
 		var parentContextParameterName = useParentContext ? "parentContext" : "parentId";
 
 		if (createOnly && startTimeParam != null)
@@ -78,7 +80,7 @@ partial class ActivitySourceTargetClassEmitter
 		var kind =
 			methodTarget.ActivityAttribute?.Kind.IsSet == true
 				? methodTarget.ActivityAttribute.Value.Kind.Value.GetValueOrDefault()
-				: Constants.Activities.DefaultActivityKind;
+				: PropertyLibrary.Activities.DefaultActivityKind;
 
 		var parentContextOrIdParameterValue = parentContextOrId?.ParameterName ?? "default";
 		if (useParentContext && parentContextOrId!.ParameterType.IsNullable)
@@ -104,7 +106,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		writer
 			// kind: (un-named)
-			.Write(Constants.Activities.ActivityKindTypeMap[kind])
+			.Write(PropertyLibrary.Activities.ActivityKindTypeMap[kind])
 			// parentContext/ parentId:
 			.Write(", ")
 			.Write(parentContextParameterName)
@@ -143,14 +145,14 @@ partial class ActivitySourceTargetClassEmitter
 
 			using (writer.OpenBlockScope())
 			{
-				EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, context, logger);
-				EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, context, logger);
+				EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, logger);
+				EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, logger);
 			}
 		}
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		if (Constants.Activities.SystemDiagnostics.Activity.Equals(methodTarget.ReturnType))
+		if (methodTarget.ReturnType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.Activity))
 		{
 			writer
 				.NewLine()
@@ -176,8 +178,8 @@ partial class ActivitySourceTargetClassEmitter
 
 	static void EmitHasListenersTest(CodeWriter writer, ActivityBasedGenerationTarget methodTarget, bool emitNullable)
 	{
-		var returnsVoid = methodTarget.ReturnType.SpecialType == SpecialType.System_Void;
-		writer.Write("if (!").Write(Constants.Activities.ActivitySourceFieldName).WriteLine(".HasListeners())");
+		var returnsVoid = methodTarget.ReturnType.Identity.SpecialType == SpecialType.System_Void;
+		writer.Write("if (!").Write(PropertyLibrary.Activities.ActivitySourceFieldName).WriteLine(".HasListeners())");
 
 		using (writer.OpenBlockScope())
 		{

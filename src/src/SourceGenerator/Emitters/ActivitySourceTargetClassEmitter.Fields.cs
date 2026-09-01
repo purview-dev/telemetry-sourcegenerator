@@ -10,7 +10,7 @@ partial class ActivitySourceTargetClassEmitter
 		ActivitySourceTarget target,
 		CodeWriter writer,
 		SourceProductionContext context,
-		GenerationLogger? logger
+		ISourceGenLogger? logger
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -19,21 +19,17 @@ partial class ActivitySourceTargetClassEmitter
 		if (string.IsNullOrWhiteSpace(activitySourceName))
 		{
 			logger?.Diagnostic("No activity source specified.");
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Activities.NoActivitySourceSpecified
-			);
 
-			activitySourceName = Constants.Activities.DefaultActivitySourceName;
+			activitySourceName = PropertyLibrary.Activities.DefaultActivitySourceName;
 		}
 
 		writer
 			.Write("readonly static ")
-			.Write(Constants.Activities.SystemDiagnostics.ActivitySource)
+			.Write(TypeLibrary.Activities.SystemDiagnostics.ActivitySource)
 			.Write(' ')
-			.Write(Constants.Activities.ActivitySourceFieldName)
+			.Write(PropertyLibrary.Activities.ActivitySourceFieldName)
 			.Write(" = new ")
-			.Write(Constants.Activities.SystemDiagnostics.ActivitySource)
+			.Write(TypeLibrary.Activities.SystemDiagnostics.ActivitySource)
 			.Write('(')
 			.Write(activitySourceName!.Wrap())
 			.WriteLine(");")

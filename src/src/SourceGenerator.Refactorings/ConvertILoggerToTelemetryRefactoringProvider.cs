@@ -1,11 +1,11 @@
+using System.Composition;
+using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeRefactorings;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Composition;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Purview.Telemetry.SourceGenerator.Refactorings;
 
@@ -124,10 +124,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 		// Add using Purview.Telemetry; to the file if not already present.
 		var compilationRoot = (CompilationUnitSyntax)newRoot;
-		if (!compilationRoot.Usings.Any(u => u.Name?.ToString() == Constants.PurviewTelemetryNamespace))
+		if (!compilationRoot.Usings.Any(u => u.Name?.ToString() == TelemetryAttributeNames.PurviewTelemetryNamespace))
 		{
 			var newUsing = SyntaxFactory
-				.UsingDirective(SyntaxFactory.ParseName(Constants.PurviewTelemetryNamespace))
+				.UsingDirective(SyntaxFactory.ParseName(TelemetryAttributeNames.PurviewTelemetryNamespace))
 				.WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
 			newRoot = compilationRoot.AddUsings(newUsing);
 		}
@@ -146,10 +146,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	)
 	{
 		var iLoggerOpen = semanticModel.Compilation.GetTypeByMetadataName(
-			Constants.Logging.MicrosoftExtensions.ILoggerOfTMetadataName
+			TelemetryAttributeNames.Logging.ILoggerOfT.MetadataFullName
 		);
 		var iLoggerNonGeneric = semanticModel.Compilation.GetTypeByMetadataName(
-			Constants.Logging.MicrosoftExtensions.ILogger.FullyQualifiedName
+			TelemetryAttributeNames.Logging.ILogger.MetadataFullName
 		);
 
 		var result = new List<ILoggerFieldInfo>();
@@ -378,8 +378,11 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 		if (exceptionExpression is not null)
 		{
-			var exType = semanticModel.Compilation.GetTypeByMetadataName(Constants.System.Exception.FullyQualifiedName);
-			var exTypeStr = exType?.ToDisplayString(ParamTypeFormat) ?? Constants.System.Exception.FullyQualifiedName;
+			var exType = semanticModel.Compilation.GetTypeByMetadataName(
+				TelemetryAttributeNames.System.Exception.MetadataFullName
+			);
+			var exTypeStr =
+				exType?.ToDisplayString(ParamTypeFormat) ?? TelemetryAttributeNames.System.Exception.MetadataFullName;
 			parameters.Add(new LogParameterInfo("exception", exTypeStr, exceptionExpression));
 		}
 
@@ -418,7 +421,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		var type = typeInfo.ConvertedType ?? typeInfo.Type;
 		return type is not null
 			&& (
-				type.ToDisplayString() == Constants.Logging.MicrosoftExtensions.EventId.FullyQualifiedName
+				type.ToDisplayString() == TelemetryAttributeNames.Logging.EventId.MetadataFullName
 				|| type.SpecialType == SpecialType.System_Int32
 			);
 	}
@@ -447,7 +450,9 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		if (type is null)
 			return false;
 
-		var exType = semanticModel.Compilation.GetTypeByMetadataName(Constants.System.Exception.FullyQualifiedName);
+		var exType = semanticModel.Compilation.GetTypeByMetadataName(
+			TelemetryAttributeNames.System.Exception.MetadataFullName
+		);
 		return exType is not null && IsOrDerivesFrom(type, exType);
 	}
 
@@ -556,7 +561,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	{
 		var sb = new StringBuilder();
 
-		sb.AppendLine($"[{Constants.Logging.LoggerAttributeShortName}]");
+		sb.AppendLine($"[{TelemetryAttributeNames.Logging.LoggerAttribute.RenderAttributeTypeName}]");
 		sb.AppendLine($"public interface {interfaceName}");
 		sb.AppendLine("{");
 		sb.Append(BuildInterfaceMembers(callsWithMethods));
@@ -603,8 +608,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 				return BuildAttributeArgs(mappedName, call, leadingArg: null);
 
 			// Unmapped / None levels use [Log(LogLevel.X, …)]
-			var levelArg =
-				$"{Constants.Logging.MicrosoftExtensions.LogLevel.ToString(includeGlobal: true)}.{call.ExplicitLogLevel}";
+			var levelArg = $"{TelemetryAttributeNames.Logging.LogLevel.RenderFullName}.{call.ExplicitLogLevel}";
 			return BuildAttributeArgs("Log", call, leadingArg: levelArg);
 		}
 

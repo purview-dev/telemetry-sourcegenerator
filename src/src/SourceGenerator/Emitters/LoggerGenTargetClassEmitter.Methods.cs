@@ -1,7 +1,7 @@
+using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
-using System.Globalization;
 
 namespace Purview.Telemetry.SourceGenerator.Emitters;
 
@@ -11,7 +11,7 @@ partial class LoggerGenTargetClassEmitter
 		LoggerTarget target,
 		CodeWriter writer,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable
 	)
 	{
@@ -24,10 +24,6 @@ partial class LoggerGenTargetClassEmitter
 				// HasLogPropertiesAndExpandEnumerable stubs have IsValid=false; report TSG2006 here.
 				if (methodTarget.HasLogPropertiesAndExpandEnumerable)
 				{
-					TelemetryDiagnostics.Report(
-						context.ReportDiagnostic,
-						TelemetryDiagnostics.Logging.ExpandEnumerableAndLogPropertiesNotSupported
-					);
 					LoggerTargetClassEmitter.EmitThrowStub(writer, methodTarget, emitNullable);
 					continue;
 				}
@@ -63,10 +59,7 @@ partial class LoggerGenTargetClassEmitter
 			// Must be checked before V1/V2 dispatch since V1 returns early.
 			if (methodTarget.IsScoped && methodTarget.HasExplicitLevel)
 			{
-				TelemetryDiagnostics.Report(
-					context.ReportDiagnostic,
-					TelemetryDiagnostics.Logging.ScopedMethodShouldNotHaveLevel
-				);
+				logger?.Diagnostic("Scoped method should not have an explicit log level.");
 			}
 
 			EmitMethod(writer, methodTarget, context, logger, emitNullable);
@@ -77,7 +70,7 @@ partial class LoggerGenTargetClassEmitter
 		CodeWriter writer,
 		LogMethodTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable
 	)
 	{
@@ -90,7 +83,7 @@ partial class LoggerGenTargetClassEmitter
 			// Only use v1 if within param limits; otherwise fall through to v2 (diagnostic already emitted in EmitFields)
 			if (
 				!methodTarget.HasMultipleExceptions
-				&& methodTarget.ParameterCountSansException <= Constants.Logging.MaxNonExceptionParameters
+				&& methodTarget.ParameterCountSansException <= PropertyLibrary.Logging.MaxNonExceptionParameters
 			)
 			{
 				LoggerTargetClassEmitter.EmitLogActionMethod(writer, methodTarget, context, logger, emitNullable);
@@ -115,31 +108,35 @@ partial class LoggerGenTargetClassEmitter
 			isMultiTarget && (activityOwnsPublicMethod || (loggingOwnsPublicMethod && hasMetricsTarget));
 		var generatePublicDelegator = isMultiTarget && loggingOwnsPublicMethod && hasMetricsTarget;
 
-		var accessModifier = generatePrivateLogging ? "private" : "public";
 		var methodName = generatePrivateLogging ? methodTarget.MethodName + "_Logging" : methodTarget.MethodName;
 
-		writer
-			.NewLine()
-			.WriteLine(Constants.System.GeneratedCode.Value)
-			.WriteLine(Constants.System.AggressiveInlining)
-			.Write(accessModifier + " ");
+		var returnType = methodTarget.IsScoped
+			? emitNullable
+				? TypeLibrary.System.IDisposable.AsTypeReference().Nullable()
+				: TypeLibrary.System.IDisposable.AsTypeReference()
+			: PurviewTypeLibrary.System.Void.AsTypeReference();
 
-		if (methodTarget.IsScoped)
-		{
-			writer.Write(Constants.System.IDisposable);
-			if (emitNullable)
-				writer.Write('?');
-		}
-		else
-			writer.Write(Constants.System.VoidKeyword);
+		writer.NewLine();
 
-		writer.Write(' ').Write(methodName).Write('(');
-
-		EmitParametersAsMethodArgumentList(methodTarget, writer, context);
-
-		writer.Write(")");
-
-		using (writer.OpenBlockScope())
+		using (
+			writer.WriteMethodScope(
+				new MethodDeclarationOptions(
+					methodName,
+					returnType,
+					generatePrivateLogging ? TypeDeclarationAccessibility.Private : TypeDeclarationAccessibility.Public
+				)
+				{
+					Parameters =
+					[
+						.. methodTarget.Parameters.Select(p => new ParameterDeclarationOptions(
+							p.Name,
+							p.ParameterType
+						)),
+					],
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
 			// Output state here...then we can use it in
 			// the scoped and none-scoped output.
@@ -167,7 +164,7 @@ partial class LoggerGenTargetClassEmitter
 				// ...but only if it's not been scoped.
 				writer
 					.Write("if (!")
-					.Write(Constants.Logging.LoggerFieldName)
+					.Write(PropertyLibrary.Logging.LoggerFieldName)
 					.Write(".IsEnabled(")
 					.Write(methodTarget.MSLevel)
 					.WriteLine("))");
@@ -194,7 +191,7 @@ partial class LoggerGenTargetClassEmitter
 
 					writer
 						.Write("return ")
-						.Write(Constants.Logging.LoggerFieldName)
+						.Write(PropertyLibrary.Logging.LoggerFieldName)
 						.Write(".BeginScope(new ")
 						.Write(scopeStructName)
 						.Write('(');
@@ -255,7 +252,7 @@ partial class LoggerGenTargetClassEmitter
 					writer
 						.NewLine()
 						.Write("return ")
-						.Write(Constants.Logging.LoggerFieldName)
+						.Write(PropertyLibrary.Logging.LoggerFieldName)
 						.Write(".BeginScope(")
 						.Write(stateVarName)
 						.WriteLine(");");
@@ -286,10 +283,10 @@ partial class LoggerGenTargetClassEmitter
 					var nonExceptionParams = methodTarget.ParametersSansException;
 
 					writer
-						.Write(Constants.Logging.LoggerFieldName)
+						.Write(PropertyLibrary.Logging.LoggerFieldName)
 						.WriteLine(".Log(")
 						.Write(methodTarget.MSLevel.WithComma(andSpace: false))
-						.Write(emitNullable ? "new (" : "new " + Constants.Logging.MicrosoftExtensions.EventId + "(")
+						.Write(emitNullable ? "new (" : "new " + TypeLibrary.Logging.MicrosoftExtensions.EventId + "(")
 						.Write(eventId.ToString(CultureInfo.InvariantCulture))
 						.Write(", nameof(")
 						.Write(methodTarget.LogName)
@@ -309,25 +306,24 @@ partial class LoggerGenTargetClassEmitter
 					writer.Write(methodTarget.ExceptionParameter.OrNullKeyword().WithComma(andSpace: false));
 
 					if (emitNullable)
-						writer.WriteLine(Constants.System.GeneratedCode.Value);
-					writer
-						.Write(emitNullable ? "static string (" : "(")
-						.Write(expressionStateVarName)
-						.Write(", ")
-						.Write(expressionExceptionVarName ?? "_")
-						.WriteLine(") =>")
-						.WriteLine("{")
-						.WriteLine("#if NET")
-						.Write("return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
-						.Write(interpolatedMessage.Wrap())
-						.WriteLine(");")
-						.WriteLine("#else")
-						.Write("return global::System.FormattableString.Invariant($")
-						.Write(interpolatedMessage.Wrap())
-						.WriteLine(");")
-						.WriteLine("#endif")
-						.Write("}")
-						.Write(");");
+						writer
+							.Write(emitNullable ? "static string (" : "(")
+							.Write(expressionStateVarName)
+							.Write(", ")
+							.Write(expressionExceptionVarName ?? "_")
+							.WriteLine(") =>")
+							.WriteLine("{")
+							.WriteLine("#if NET")
+							.Write("return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
+							.Write(interpolatedMessage.Wrap())
+							.WriteLine(");")
+							.WriteLine("#else")
+							.Write("return global::System.FormattableString.Invariant($")
+							.Write(interpolatedMessage.Wrap())
+							.WriteLine(");")
+							.WriteLine("#endif")
+							.Write("}")
+							.Write(");");
 
 					writer.NewLine();
 				}
@@ -345,12 +341,12 @@ partial class LoggerGenTargetClassEmitter
 					var eventId =
 						methodTarget.EventId ?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
 					writer
-						.Write(Constants.Logging.LoggerFieldName)
+						.Write(PropertyLibrary.Logging.LoggerFieldName)
 						.WriteLine(".Log(")
 						// Log level
 						.Write(methodTarget.MSLevel.WithComma(andSpace: false))
 						// Event Id
-						.Write(emitNullable ? "new (" : "new " + Constants.Logging.MicrosoftExtensions.EventId + "(")
+						.Write(emitNullable ? "new (" : "new " + TypeLibrary.Logging.MicrosoftExtensions.EventId + "(")
 						.Write(eventId.ToString(CultureInfo.InvariantCulture))
 						.Write(", nameof(")
 						.Write(methodTarget.LogName)
@@ -361,14 +357,13 @@ partial class LoggerGenTargetClassEmitter
 						.Write(methodTarget.ExceptionParameter.OrNullKeyword().WithComma(andSpace: false));
 					// Message Template
 					if (emitNullable)
-						writer.WriteLine(Constants.System.GeneratedCode.Value);
-					writer
-						.Write(emitNullable ? "static string (" : "(")
-						.Write(expressionStateVarName)
-						.Write(", ")
-						.Write(expressionExceptionVarName ?? "_")
-						.WriteLine(") =>")
-						.WriteLine("{");
+						writer
+							.Write(emitNullable ? "static string (" : "(")
+							.Write(expressionStateVarName)
+							.Write(", ")
+							.Write(expressionExceptionVarName ?? "_")
+							.WriteLine(") =>")
+							.WriteLine("{");
 
 					if (variables.Length > 0)
 					{
@@ -409,7 +404,7 @@ partial class LoggerGenTargetClassEmitter
 		string stateVarName,
 		List<string> existingParamNames,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable = true
 	)
 	{
@@ -433,7 +428,7 @@ partial class LoggerGenTargetClassEmitter
 			.Write("var ")
 			.Write(stateVarName)
 			.Write(" = ")
-			.Write(Constants.Logging.MicrosoftExtensions.LoggerMessageHelper)
+			.Write(TypeLibrary.Logging.MicrosoftExtensions.LoggerMessageHelper)
 			.Write('.')
 			.WriteLine("ThreadLocalState;")
 			.Write(stateVarName)
@@ -610,7 +605,7 @@ partial class LoggerGenTargetClassEmitter
 			writer
 				.Write(value)
 				.Write(" == null ? null : ")
-				.Write(Constants.Logging.MicrosoftExtensions.LoggerMessageHelper)
+				.Write(TypeLibrary.Logging.MicrosoftExtensions.LoggerMessageHelper)
 				.Write(".Stringify(")
 				.Write(value)
 				.Write(')');
@@ -629,7 +624,7 @@ partial class LoggerGenTargetClassEmitter
 		LogParameterTarget parameter,
 		SourceProductionContext context,
 		List<string> existingParamNames,
-		GenerationLogger? logger
+		ISourceGenLogger? logger
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -644,19 +639,14 @@ partial class LoggerGenTargetClassEmitter
 
 		var maxCount =
 			parameter.ExpandEnumerableAttribute!.MaximumValueCount.Value
-			?? Constants.Logging.UnboundedIEnumerableMaxCountBeforeDiagnostic;
+			?? PropertyLibrary.Logging.UnboundedIEnumerableMaxCountBeforeDiagnostic;
 
 		if (maxCount < 1)
 			maxCount = 1;
 
-		if (maxCount > Constants.Logging.UnboundedIEnumerableMaxCountBeforeDiagnostic)
+		if (maxCount > PropertyLibrary.Logging.UnboundedIEnumerableMaxCountBeforeDiagnostic)
 		{
 			logger?.Diagnostic($"Identified {parameter.Name} that has a large unbounded ienumerable max.");
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Logging.UnboundedIEnumerableMaxCount,
-				parameter.ExpandEnumerableAttribute!.ParamLocation
-			);
 		}
 
 		snippet
@@ -855,7 +845,7 @@ partial class LoggerGenTargetClassEmitter
 		LoggerTarget target,
 		CodeWriter writer,
 		SourceProductionContext context,
-		GenerationLogger? _,
+		ISourceGenLogger? _,
 		bool emitNullable
 	)
 	{
@@ -869,7 +859,7 @@ partial class LoggerGenTargetClassEmitter
 			if (
 				methodTarget.UseV1Generation
 				&& !methodTarget.HasMultipleExceptions
-				&& methodTarget.ParameterCountSansException <= Constants.Logging.MaxNonExceptionParameters
+				&& methodTarget.ParameterCountSansException <= PropertyLibrary.Logging.MaxNonExceptionParameters
 			)
 				continue;
 
@@ -902,14 +892,18 @@ partial class LoggerGenTargetClassEmitter
 		var ienumerableKvpType = $"global::System.Collections.Generic.IEnumerable<{kvpType}>";
 		const string ienumerableType = "global::System.Collections.IEnumerator";
 
-		writer
-			.NewLine()
-			.WriteLine(Constants.System.GeneratedCode.Value)
-			.Write("private readonly struct ")
-			.Write(structName)
-			.WriteLine($" : {iReadOnlyListType}");
+		writer.NewLine();
 
-		using (writer.OpenBlockScope())
+		using (
+			writer.WriteStructScope(
+				new TypeDeclarationOptions(structName, TypeDeclarationAccessibility.Private)
+				{
+					IsReadOnly = true,
+					Interfaces = [new TypeReference(new TypeIdentity(iReadOnlyListType, null))],
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
 			writer
 				.Write("static readonly string s_originalFormat = ")
@@ -968,8 +962,6 @@ partial class LoggerGenTargetClassEmitter
 
 			using (writer.OpenBlockScope())
 			{
-				writer.WriteLine(Constants.System.AggressiveInlining);
-
 				if (emitNullable)
 				{
 					writer.WriteLine("get => index switch {");
@@ -1051,9 +1043,17 @@ partial class LoggerGenTargetClassEmitter
 		var currentPropertyType = emitNullable
 			? "object? global::System.Collections.IEnumerator.Current => Current;"
 			: "object global::System.Collections.IEnumerator.Current => Current;";
-		writer.NewLine().Write("public struct Enumerator : ").WriteLine(ienumeratorType);
+		writer.NewLine();
 
-		using (writer.OpenBlockScope())
+		using (
+			writer.WriteStructScope(
+				new TypeDeclarationOptions("Enumerator", TypeDeclarationAccessibility.Public)
+				{
+					IncludeGeneratedAttributes = false,
+					Interfaces = [new TypeReference(new TypeIdentity(ienumeratorType, null))],
+				}
+			)
+		)
 		{
 			writer
 				.Write("readonly ")
@@ -1119,14 +1119,18 @@ partial class LoggerGenTargetClassEmitter
 		var ienumerableKvpType = $"global::System.Collections.Generic.IEnumerable<{kvpType}>";
 		const string ienumerableType = "global::System.Collections.IEnumerator";
 
-		writer
-			.NewLine()
-			.WriteLine(Constants.System.GeneratedCode.Value)
-			.Write("private readonly struct ")
-			.Write(structName)
-			.WriteLine($" : {iReadOnlyListType}");
+		writer.NewLine();
 
-		using (writer.OpenBlockScope())
+		using (
+			writer.WriteStructScope(
+				new TypeDeclarationOptions(structName, TypeDeclarationAccessibility.Private)
+				{
+					IsReadOnly = true,
+					Interfaces = [new TypeReference(new TypeIdentity(iReadOnlyListType, null))],
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
 			writer
 				.Write("static readonly string s_originalFormat = ")
@@ -1182,11 +1186,7 @@ partial class LoggerGenTargetClassEmitter
 				[.. methodTarget.Parameters]
 			);
 
-			writer
-				.NewLine()
-				.NewLine()
-				.WriteLine(Constants.System.GeneratedCode.Value)
-				.Write("public override string ToString()");
+			writer.NewLine().NewLine().Write("public override string ToString()");
 
 			using (writer.OpenBlockScope())
 			{
@@ -1213,8 +1213,6 @@ partial class LoggerGenTargetClassEmitter
 
 			using (writer.OpenBlockScope())
 			{
-				writer.WriteLine(Constants.System.AggressiveInlining);
-
 				if (emitNullable)
 				{
 					writer.WriteLine("get => index switch {");
@@ -1287,29 +1285,25 @@ partial class LoggerGenTargetClassEmitter
 		CodeWriter writer,
 		LogMethodTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable
 	)
 	{
 		logger?.Debug($"Building public delegating logging method: {methodTarget.MethodName}");
 
-		writer
-			.NewLine()
-			.WriteLine(Constants.System.GeneratedCode.Value)
-			.WriteLine(Constants.System.AggressiveInlining)
-			.Write("public ");
+		writer.NewLine().Write("public ");
 
 		// When Logging owns the public method (with Metrics), return void
 		// (Logging without Activity means the return type is void or IDisposable for scoped)
 		if (methodTarget.IsScoped)
 		{
-			writer.Write(Constants.System.IDisposable);
+			writer.Write(TypeLibrary.System.IDisposable);
 			if (emitNullable)
 				writer.Write('?');
 		}
 		else
 		{
-			writer.Write(Constants.System.VoidKeyword);
+			writer.Write(PropertyLibrary.System.VoidKeyword);
 		}
 
 		writer.Write(' ').Write(methodTarget.MethodName).Write('(');

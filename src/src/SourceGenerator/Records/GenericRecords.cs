@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -46,7 +46,7 @@ sealed record AttributeValue<T>
 	public static implicit operator T?(AttributeValue<T> value) => value.Value;
 }
 
-record AttributeStringValue
+sealed record AttributeStringValue
 {
 	public AttributeStringValue(string? value)
 	{

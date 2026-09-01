@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -29,7 +30,7 @@ partial class MeterTargetClassEmitter
 		MeterTarget target,
 		CodeWriter writer,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable
 	)
 	{
@@ -70,7 +71,7 @@ partial class MeterTargetClassEmitter
 		CodeWriter writer,
 		MeterTarget target,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable = true
 	)
 	{
@@ -81,7 +82,6 @@ partial class MeterTargetClassEmitter
 		var dictType = GetDictionaryType(emitNullable);
 		writer
 			.NewLine()
-			.WriteLine(Constants.System.GeneratedCode.Value)
 			.Write("partial void ")
 			.Write(PartialMeterTagsMethod)
 			.Write('(')
@@ -98,7 +98,6 @@ partial class MeterTargetClassEmitter
 				continue;
 
 			writer
-				.WriteLine(Constants.System.GeneratedCode.Value)
 				.Write("partial void ")
 				.Write(instrument.TagPopulateMethodName)
 				.Write('(')
@@ -112,7 +111,7 @@ partial class MeterTargetClassEmitter
 		CodeWriter writer,
 		InstrumentTarget methodTarget,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable = true
 	)
 	{
@@ -128,40 +127,27 @@ partial class MeterTargetClassEmitter
 		var metricsOwnsPublicMethod = !activityOwnsPublicMethod && !loggingOwnsPublicMethod;
 
 		// Validate return type: must be void or bool (for metrics-owned public methods)
-		var isVoidReturn = methodTarget.ReturnType.SpecialType == SpecialType.System_Void;
+		var isVoidReturn = methodTarget.ReturnType.Identity.SpecialType == SpecialType.System_Void;
 		if (metricsOwnsPublicMethod && !isVoidReturn && !methodTarget.ReturnsBool)
 		{
-			TelemetryDiagnostics.Report(context.ReportDiagnostic, TelemetryDiagnostics.Metrics.DoesNotReturnVoid);
 			return;
 		}
 
 		// Observable instruments cannot return bool
 		if (methodTarget.IsObservable && methodTarget.ReturnsBool)
 		{
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Metrics.ObservableCannotReturnBool
-			);
 			return;
 		}
 
 		// Auto-counter instruments must return void (not bool)
 		if (methodTarget.InstrumentAttribute.IsAutoIncrement && methodTarget.ReturnsBool)
 		{
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Metrics.AutoCounterMustReturnVoid
-			);
 			return;
 		}
 
 		// Auto-counter cannot also have a measurement parameter
 		if (methodTarget.InstrumentAttribute.IsAutoIncrement && methodTarget.MeasurementParameter != null)
 		{
-			TelemetryDiagnostics.Report(
-				context.ReportDiagnostic,
-				TelemetryDiagnostics.Metrics.AutoIncrementCountAndMeasurementParam
-			);
 			return;
 		}
 
@@ -173,64 +159,50 @@ partial class MeterTargetClassEmitter
 		logger?.Debug($"Emitting instrument method: {methodTarget.MethodName}.");
 
 		// For multi-target where Activity or Logging owns public method, generate private method
-		var accessModifier = isMultiTarget && !metricsOwnsPublicMethod ? "private" : "public";
 		var methodName =
 			isMultiTarget && !metricsOwnsPublicMethod ? methodTarget.MethodName + "_Metrics" : methodTarget.MethodName;
 
-		writer
-			.NewLine()
-			.WriteLine(Constants.System.GeneratedCode.Value)
-			.WriteLine(Constants.System.AggressiveInlining)
-			.Write(accessModifier + " ");
+		var returnType =
+			isMultiTarget && !metricsOwnsPublicMethod
+				? PurviewTypeLibrary.System.Void.AsTypeReference()
+				: methodTarget.ReturnType;
 
-		// For multi-target private methods, always return void
-		if (isMultiTarget && !metricsOwnsPublicMethod)
-		{
-			writer.Write(Constants.System.VoidKeyword);
-		}
-		else
-		{
-			writer.Write(methodTarget.ReturnType);
-			if (methodTarget.IsNullableReturn)
-				writer.Write('?');
-		}
-
-		writer.Write(' ').Write(methodName).Write('(');
-
-		var index = 0;
-		foreach (var parameter in methodTarget.Parameters)
-		{
-			context.CancellationToken.ThrowIfCancellationRequested();
-
-			if (parameter.IsMeasurement)
+		var parameters = methodTarget
+			.Parameters.Select(p =>
 			{
+				if (!p.IsMeasurement)
+					return new ParameterDeclarationOptions(p.ParameterName, p.ParameterType);
+
 				var type = methodTarget.InstrumentMeasurementType;
 				if (methodTarget.MeasurementParameter!.IsMeasurement)
-					type = Constants.Metrics.SystemDiagnostics.Measurement.MakeGeneric(type);
+					type = TypeLibrary.Metrics.SystemDiagnostics.Measurement.MakeGeneric(type);
 
 				if (methodTarget.MeasurementParameter!.IsIEnumerable)
-					type = Constants.System.GenericIEnumerable.MakeGeneric(type);
+					type = TypeLibrary.System.GenericIEnumerable.MakeGeneric(type);
 
-				type = Constants.System.Func.MakeGeneric(type);
+				type = TypeLibrary.System.Func.MakeGeneric(type);
 
-				writer.Write(type);
-			}
-			else
-			{
-				writer.Write(parameter.ParameterType);
-			}
+				return new ParameterDeclarationOptions(p.ParameterName, new TypeReference(type));
+			})
+			.ToImmutableArray();
 
-			writer.Write(' ').Write(parameter.ParameterName);
+		writer.NewLine();
 
-			if (index < methodTarget.Parameters.Count - 1)
-				writer.Write(", ");
-
-			index++;
-		}
-
-		writer.Write(")");
-
-		using (writer.OpenBlockScope())
+		using (
+			writer.WriteMethodScope(
+				new MethodDeclarationOptions(
+					methodName,
+					returnType,
+					isMultiTarget && !metricsOwnsPublicMethod
+						? TypeDeclarationAccessibility.Private
+						: TypeDeclarationAccessibility.Public
+				)
+				{
+					Parameters = parameters,
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
 			if (methodTarget.IsObservable)
 				EmitObservableInstrumentBodyTest(writer, methodTarget);
@@ -254,7 +226,7 @@ partial class MeterTargetClassEmitter
 			{
 				writer
 					.Write("throw new ")
-					.Write(Constants.System.Exception)
+					.Write(TypeLibrary.System.Exception)
 					.Write("(\"")
 					.Write(method.MetricName)
 					.WriteLine(" has already been initialized.\");");
@@ -291,9 +263,9 @@ partial class MeterTargetClassEmitter
 			.Write(", ")
 			.Write(method.MeasurementParameter!.ParameterName)
 			.Write(", unit: ")
-			.Write(unit ?? Constants.System.NullKeyword)
+			.Write(unit ?? PropertyLibrary.System.NullKeyword)
 			.Write(", description: ")
-			.Write(description ?? Constants.System.NullKeyword);
+			.Write(description ?? PropertyLibrary.System.NullKeyword);
 
 		if (tagVariableName != null)
 		{
@@ -385,7 +357,7 @@ partial class MeterTargetClassEmitter
 		// - 0-3 tags without conditionals: pass directly as KeyValuePair parameters (no TagList needed)
 		// - 4+ tags OR any conditional tags: use TagList to avoid heap allocation or handle conditionals
 		// From: https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/docs/metrics#instruments
-		if (tagCount < Constants.Metrics.MinimumParamsForTagList && !hasConditionalTags)
+		if (tagCount < PropertyLibrary.Metrics.MinimumParamsForTagList && !hasConditionalTags)
 		{
 			// No TagList needed - tags will be passed directly as parameters
 			return null;
@@ -393,7 +365,7 @@ partial class MeterTargetClassEmitter
 
 		var tagVariableName = Utilities.LowercaseFirstChar(methodTarget.MethodName + "TagList");
 		writer
-			.Write(Constants.System.TagList)
+			.Write(TypeLibrary.System.TagList)
 			.Write(' ')
 			.Write(tagVariableName)
 			.Write(" = new")

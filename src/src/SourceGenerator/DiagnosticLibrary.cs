@@ -1,10 +1,31 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Records;
 
 namespace Purview.Telemetry.SourceGenerator;
 
-static partial class TelemetryDiagnostics
+static partial class DiagnosticLibrary
 {
+	public static class Categories
+	{
+		public const string Usage = nameof(Usage);
+
+		public static class Activity
+		{
+			public const string Usage = nameof(Activity) + "." + nameof(Usage);
+		}
+
+		public static class Logging
+		{
+			public const string Usage = nameof(Logging) + "." + nameof(Usage);
+			public const string Performance = nameof(Logging) + "." + nameof(Performance);
+		}
+
+		public static class Metrics
+		{
+			public const string Usage = nameof(Metrics) + "." + nameof(Usage);
+		}
+	}
+
 	public static void Report(
 		Action<Diagnostic> report,
 		TelemetryDiagnosticDescriptor telemetryDiagnostic,

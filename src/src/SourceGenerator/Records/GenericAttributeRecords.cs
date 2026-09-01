@@ -1,8 +1,8 @@
-﻿namespace Purview.Telemetry.SourceGenerator.Records;
+namespace Purview.Telemetry.SourceGenerator.Records;
 
-record TagOrBaggageAttributeRecord(AttributeStringValue Name, AttributeValue<bool> SkipOnNullOrEmpty);
+sealed record TagOrBaggageAttributeRecord(AttributeStringValue Name, AttributeValue<bool> SkipOnNullOrEmpty);
 
-record TelemetryGenerationAttributeRecord(
+sealed record TelemetryGenerationAttributeRecord(
 	AttributeValue<bool> GenerateDependencyExtension,
 	AttributeStringValue ClassName,
 	AttributeStringValue DependencyInjectionClassName,
@@ -13,7 +13,7 @@ record TelemetryGenerationAttributeRecord(
 );
 
 /// <summary>
-/// Record for ExcludeTargetsAttribute on parameters.
+/// sealed record for ExcludeTargetsAttribute on parameters.
 /// Tracks which target families a parameter should be excluded from.
 /// </summary>
-record ExcludeTargetsAttributeRecord(GenerationType ExcludedTargets);
+sealed record ExcludeTargetsAttributeRecord(GenerationType ExcludedTargets);

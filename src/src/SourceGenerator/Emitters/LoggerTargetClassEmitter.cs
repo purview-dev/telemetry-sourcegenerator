@@ -9,7 +9,7 @@ static partial class LoggerTargetClassEmitter
 	public static void GenerateImplementation(
 		LoggerTarget target,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool emitNullable = true,
 		bool supportsIMeterFactory = true
 	)
@@ -37,7 +37,7 @@ static partial class LoggerTargetClassEmitter
 					GenerationType.Logging,
 					target.GenerationType,
 					target.ClassNameToGenerate,
-					EmitterHelpers.AsTypeReference(target.InterfaceType),
+					target.InterfaceType,
 					TypeDeclarationAccessibility.Internal
 				)
 			)
@@ -69,7 +69,7 @@ static partial class LoggerTargetClassEmitter
 			target.TelemetryGeneration,
 			target.GenerationType,
 			target.ClassNameToGenerate,
-			target.InterfaceType.TypeName,
+			target.InterfaceType.Identity.Name,
 			target.FullNamespace,
 			context,
 			logger,

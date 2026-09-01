@@ -187,7 +187,10 @@ public abstract class CodeRefactoringTestBase
 			.Because("Expected the refactoring to change the source.");
 
 		var parseResult = SyntaxFactory.ParseSyntaxTree(after!, cancellationToken: cancellationToken);
-		await Assert.That(parseResult.GetDiagnostics(cancellationToken)).IsEmpty().Because("The rewritten source should be valid C#.");
+		await Assert
+			.That(parseResult.GetDiagnostics(cancellationToken))
+			.IsEmpty()
+			.Because("The rewritten source should be valid C#.");
 	}
 
 	/// <summary>

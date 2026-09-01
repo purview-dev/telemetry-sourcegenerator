@@ -10,7 +10,7 @@ partial class MeterTargetClassEmitter
 		MeterTarget target,
 		CodeWriter writer,
 		SourceProductionContext context,
-		GenerationLogger? logger,
+		ISourceGenLogger? logger,
 		bool readonlyFields = false,
 		bool emitNullable = true
 	)
@@ -25,7 +25,7 @@ partial class MeterTargetClassEmitter
 		{
 			writer
 				.Write("readonly ")
-				.Write((string)Constants.Metrics.SystemDiagnostics.Meter)
+				.Write((string)TypeLibrary.Metrics.SystemDiagnostics.Meter)
 				.Write(' ')
 				.Write(MeterFieldName)
 				.WriteLine(";")
@@ -34,7 +34,7 @@ partial class MeterTargetClassEmitter
 		else
 		{
 			writer
-				.Write(Constants.Metrics.SystemDiagnostics.Meter)
+				.Write(TypeLibrary.Metrics.SystemDiagnostics.Meter)
 				.Write(' ')
 				.Write(MeterFieldName)
 				.WriteLine(emitNullable ? " = default!;" : " = default;")
@@ -55,7 +55,7 @@ partial class MeterTargetClassEmitter
 				continue;
 			}
 
-			var type = Constants
+			var type = TypeLibrary
 				.Metrics.InstrumentTypeMap[method.InstrumentAttribute.InstrumentType]
 				.MakeGeneric(method.InstrumentMeasurementType);
 

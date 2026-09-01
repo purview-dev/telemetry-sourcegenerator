@@ -46,7 +46,7 @@ These are the most important configurable properties exposed by the SDK:
 - `TargetFramework` — defaults to `net10.0` when neither `TargetFramework` nor `TargetFrameworks` is set; projects explicitly declaring `IsRoslynComponent=true` default to `netstandard2.0`
 - `IsRoslynComponent` — when explicitly `true`, applies source-generator defaults: a single `netstandard2.0` target, extended analyzer rules, disabled SourceLink and untracked-source embedding, no dependency file, compiler-generated output under the framework-specific intermediate directory, `symbols.nupkg`, `PackSourceGeneratorSymbols`, telemetry exclusion, and excluded normal build output
 - `PackProjectReferencedSourceGenerators` — default `true`; packable projects automatically include analyzer `ProjectReference` outputs and runtime dependencies under `analyzers/dotnet/cs/`. Set it to `false` globally or use `Pack="false"` on one analyzer reference to opt out.
-- `EnableAssemblyNameGeneration` — default `false`; when `true`, `AssemblyName` and default `PackageId` follow the logical project name
+- `EnableAssemblyNameGeneration` — default `true`; when `true`, `AssemblyName` and default `PackageId` follow the fully evaluated `RootNamespace`. Set `false` before the SDK import to use the standard project-name behaviour
 - `DisableProjectFileNamingConventionCheck` — default `false`; disables the directory-name/file-name match validation
 - `DisableGenerateAssemblyInfoClass` — default `false`; disables generated `AssemblyInfo`
 - `DisableAutoInternalsVisibleTo` — default `false`; disables automatic friend assembly generation
@@ -60,6 +60,8 @@ These are the most important configurable properties exposed by the SDK:
 - `ExcludeMSTelemetryExtension` — default `false`; removes `Microsoft.Extensions.Telemetry.Abstractions`, only relevant if `ExcludePurviewTelemetry` is also `true`
 - `IsPackable` — defaults to `false` if not set elsewhere
 - `PackageTags`, `IncludeSource`, `IncludeSymbols`, `PublishRepositoryUrl`, `SymbolPackageFormat` — standard pack-related settings the SDK participates in for packable projects
+- Packable-project defaults (only applied when the consuming project has not supplied a value): `GenerateDocumentationFile=true`, `IncludeSymbols=true`, `SymbolPackageFormat=snupkg`, `PublishRepositoryUrl=true`, `EmbedUntrackedSources=true`, `DebugType=portable`. Portable PDBs are delivered through the `.snupkg`; the normal `.nupkg` does not receive PDB files unless the project opts in explicitly
+- If the repo root is discoverable, the repository-root `README.md` is packed automatically (and registered via `PackageReadmeFile`) when the file exists and `PackageReadmeFile` was not configured explicitly
 
 ## Test framework settings
 

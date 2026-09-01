@@ -44,7 +44,7 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		var parameterType = parameter.Type;
 		List<ParameterExclusion> exclusions = [];
 		// Activity parameters should be excluded from Logging and Metrics
-		if (Constants.Activities.SystemDiagnostics.Activity.Equals(parameterType))
+		if (TypeLibrary.Activities.SystemDiagnostics.Activity.Equals(parameterType))
 		{
 			if (currentTarget == GenerationType.Logging)
 			{
@@ -70,7 +70,7 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		}
 
 		// ActivityContext parameters should be excluded from Logging and Metrics
-		if (Constants.Activities.SystemDiagnostics.ActivityContext.Equals(parameterType))
+		if (TypeLibrary.Activities.SystemDiagnostics.ActivityContext.Equals(parameterType))
 		{
 			if (currentTarget == GenerationType.Logging)
 			{
@@ -122,7 +122,7 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		}
 
 		// TagList parameters should be excluded from Logging
-		if (Constants.System.TagList.Equals(parameterType))
+		if (TypeLibrary.System.TagList.Equals(parameterType))
 		{
 			if (currentTarget == GenerationType.Logging)
 			{
@@ -161,7 +161,7 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 		// Scoped logger must return IDisposable
 		if (isScoped)
 		{
-			return Constants.System.IDisposable.Equals(returnType)
+			return TypeLibrary.System.IDisposable.Equals(returnType)
 				? ReturnTypeValidation.Valid(GenerationType.Logging, "Scoped logger correctly returns IDisposable.")
 				: ReturnTypeValidation.Invalid(
 					GenerationType.Logging,
@@ -192,7 +192,7 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 	static ReturnTypeValidation ValidateActivityReturnType(ITypeSymbol returnType)
 	{
 		// Activity methods can return Activity or void
-		return Constants.Activities.SystemDiagnostics.Activity.Equals(returnType)
+		return TypeLibrary.Activities.SystemDiagnostics.Activity.Equals(returnType)
 				? ReturnTypeValidation.Valid(GenerationType.Activities, "Activity method correctly returns Activity.")
 			: returnType.SpecialType == SpecialType.System_Void
 				? ReturnTypeValidation.Valid(GenerationType.Activities, "Activity method correctly returns void.")
@@ -227,13 +227,13 @@ sealed class TelemetryMethodValidator(Compilation compilation)
 	static bool IsActivityLinkType(ITypeSymbol type)
 	{
 		// Check if it's ActivityLink or IEnumerable<ActivityLink>
-		if (Constants.Activities.SystemDiagnostics.ActivityLink.Equals(type))
+		if (TypeLibrary.Activities.SystemDiagnostics.ActivityLink.Equals(type))
 			return true;
 
 		if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
 		{
 			var typeArg = namedType.TypeArguments.FirstOrDefault();
-			if (typeArg != null && Constants.Activities.SystemDiagnostics.ActivityLink.Equals(typeArg))
+			if (typeArg != null && TypeLibrary.Activities.SystemDiagnostics.ActivityLink.Equals(typeArg))
 			{
 				return true;
 			}
