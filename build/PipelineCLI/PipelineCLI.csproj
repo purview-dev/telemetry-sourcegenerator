@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<ItemGroup>
+		<PackageReference Include="ModularPipelines" />
+		<PackageReference Include="ModularPipelines.DotNet" />
+		<PackageReference Include="ModularPipelines.Git" />
+		<PackageReference Include="ModularPipelines.GitHub" />
+		<PackageReference Include="NuGet.Packaging" />
+		<PackageReference Include="NuGet.Versioning" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+</Project>

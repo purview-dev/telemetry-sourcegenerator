@@ -1,0 +1,15 @@
+<Project>
+	<Import Sdk="Purview.DotNetProjectSdk" Project="Sdk.targets" />
+	<!-- <PropertyGroup>
+		<ModularPipelinesVersion>[3.2.8,)</ModularPipelinesVersion>
+	</PropertyGroup>
+	<ItemGroup> -->
+	<!-- These exist for the Pipeline -->
+	<!-- <PackageVersion Include="NuGet.Packaging" Version="[7.9.0,)" />
+		<PackageVersion Include="NuGet.Versioning" Version="[7.9.0,)" />
+		<PackageVersion Include="ModularPipelines" Version="$(ModularPipelinesVersion)" />
+		<PackageVersion Include="ModularPipelines.DotNet" Version="$(ModularPipelinesVersion)" />
+		<PackageVersion Include="ModularPipelines.Git" Version="$(ModularPipelinesVersion)" />
+		<PackageVersion Include="ModularPipelines.GitHub" Version="$(ModularPipelinesVersion)" />
+	</ItemGroup> -->
+</Project>

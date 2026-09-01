@@ -1,0 +1,11 @@
+<Solution>
+	<Folder Name="/Solution Items/">
+		<File Path="../global.json" />
+		<File Path="../nuget.config" />
+		<File Path="../package.json" />
+		<File Path="Directory.Build.props" />
+		<File Path="Directory.Build.targets" />
+		<File Path="Directory.Packages.props" />
+	</Folder>
+	<Project Path="PipelineCLI/PipelineCLI.csproj" />
+</Solution>
