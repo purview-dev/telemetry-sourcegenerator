@@ -12,7 +12,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<!-- The harness instantiates the generator types directly and drives Roslyn itself. -->
-		<ProjectReference Include="..\..\src\SourceGenerator\SourceGenerator.csproj" />
 		<ProjectReference Include="..\..\src\SourceGenerator.Refactorings\SourceGenerator.Refactorings.csproj" />
 	</ItemGroup>
 	<ItemGroup>

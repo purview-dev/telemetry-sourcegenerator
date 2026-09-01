@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Release packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Check for version bump
+        id: version
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v$VERSION"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Version $VERSION is already tagged as $TAG. Skipping release."
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "New version $VERSION detected. Releasing $TAG."
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+            echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run release pipeline
+        if: steps.version.outputs.should_publish == 'true'
+        env:
+          Release__ShouldPublish: true
+          NuGet__ApiKey: ${{ secrets.NUGET__APIKEY }}
+        run: dotnet run --project build/PipelineCLI/PipelineCLI.csproj --configuration Release

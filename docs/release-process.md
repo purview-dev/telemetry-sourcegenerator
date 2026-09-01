@@ -27,7 +27,7 @@ It is **designed to be reusable** — copy it (along with the scripts in `script
 
 Releases are **fully automated and gated**. No human ever pushes a version tag or manually creates a GitHub release. The flow is:
 
-```
+```text
 Feature branch
   → just changeset         (describe your change)
   → PR to main             (changeset-check + ci-gate must pass)
@@ -39,7 +39,7 @@ Feature branch
 ### Why this is bullet-proof
 
 | Risk | Mitigation |
-|------|------------|
+| ------ | ------------ |
 | Tag pushed manually before CD runs | Tag ruleset: only `github-actions[bot]` or your GitHub App can create `v*` tags |
 | Release created without build artifacts | Draft-first: NuGet assets attached before `--draft=false` |
 | Published release tampered with | Immutable releases: published releases are locked |
@@ -51,7 +51,7 @@ Feature branch
 ### Workflow components
 
 | Component | File | Purpose |
-|-----------|------|---------|
+| ----------- | ------ | --------- |
 | Changeset bot | `.github/workflows/release-pr.yml` | Creates/updates Version PR on push to main |
 | CD pipeline | `.github/workflows/cd.yml` | Triggers on `package.json` change; builds, tests, packs, releases |
 | Changeset check | `.github/workflows/ci.yml` (`changeset-check` job) | Blocks PRs without a changeset file |
@@ -79,7 +79,7 @@ just changeset
 This opens an interactive prompt. Select the bump type:
 
 | Type | When to use |
-|------|-------------|
+| ------ | ------------- |
 | `patch` | Bug fixes, internal refactors, dependency bumps |
 | `minor` | New features, new options, backwards-compatible additions |
 | `major` | Breaking changes — any change that requires consumer code changes |
@@ -106,6 +106,7 @@ Once `CI Gate` and `Changeset Check` are green, merge the PR.
 ### 5. Version PR is created automatically
 
 The `release-pr.yml` workflow creates (or updates) a **Version Packages** PR:
+
 - Branch: `changeset-release/main`
 - Bumps `package.json` version, updates `CHANGELOG.md`, deletes consumed `.changeset/*.md` files, syncs docs/wiki
 
@@ -114,6 +115,7 @@ Review, ensure CI passes, then merge it.
 ### 6. Release is published automatically
 
 Merging the Version PR triggers `cd.yml`, which:
+
 1. Reads the new version from `package.json`
 2. Skips if the release tag already exists (idempotent)
 3. Runs format check, build, tests (main + sample solution)
@@ -185,7 +187,7 @@ Two idempotent scripts automate the repository configuration. Safe to re-run.
 ### What the scripts configure
 
 | Step | Automatable | Notes |
-|------|-------------|-------|
+| ------ | ------------- | ------- |
 | Branch ruleset (`main`) | ✅ Fully automated | Uses `gh api` |
 | Tag ruleset (`v*`) | ✅ With GitHub App | App installation ID used as bypass actor |
 | Tag ruleset (`v*`) | ⚠ UI step with PAT | `github-actions[bot]` bypass requires UI |
@@ -211,6 +213,7 @@ You must configure one of the following three options:
 GitHub Apps issue short-lived tokens per workflow run. The private key never expires; no rotation needed.
 
 **When to use:**
+
 - Organisation or enterprise repos
 - Any environment where token expiry management is undesirable
 - When you also want the tag ruleset bypass to be automatable
@@ -220,8 +223,8 @@ GitHub Apps issue short-lived tokens per workflow run. The private key never exp
 1. **Create the app**
 
    | Scope | URL |
-   |-------|-----|
-   | Personal | https://github.com/settings/apps/new |
+   | ------- | ----- |
+   | Personal | <https://github.com/settings/apps/new> |
    | Organisation | `https://github.com/organizations/{org}/settings/apps/new` |
    | GHEC | Same as organisation on github.com |
    | GHES | `https://{hostname}/settings/apps/new` |
@@ -234,7 +237,7 @@ GitHub Apps issue short-lived tokens per workflow run. The private key never exp
 3. **Set permissions:**
 
    | Permission | Level | Why |
-   |------------|-------|-----|
+   | ------------ | ------- | ----- |
    | Contents | Read & write | Push version-bump commits, CHANGELOG |
    | Pull requests | Read & write | Create and update Version PR |
    | Workflows | Read & write | Update workflow files if changeset touches `.github/` |
@@ -259,6 +262,7 @@ GitHub Apps issue short-lived tokens per workflow run. The private key never exp
    ```
 
    PowerShell:
+
    ```powershell
    gh secret set APP_ID --repo {owner}/{repo} --body "123456"
    Get-Content .\app.private-key.pem -Raw | gh secret set APP_PRIVATE_KEY --repo {owner}/{repo}
@@ -283,6 +287,7 @@ GitHub Apps issue short-lived tokens per workflow run. The private key never exp
 Scoped to a specific repository with exact permissions. Maximum expiry: 1 year. **Set a calendar reminder to rotate before expiry.**
 
 **When to use:**
+
 - Personal repos or small teams
 - GHES 3.10+
 - When a GitHub App is not practical
@@ -290,7 +295,7 @@ Scoped to a specific repository with exact permissions. Maximum expiry: 1 year. 
 **Required permissions:**
 
 | Permission | Level | Why |
-|------------|-------|-----|
+| ------------ | ------- | ----- |
 | Contents | Read & write | Push version-bump commits |
 | Pull requests | Read & write | Create/update Version PR |
 | Workflows | Read & write | Update `.github/workflows/` if touched |
@@ -301,11 +306,12 @@ Scoped to a specific repository with exact permissions. Maximum expiry: 1 year. 
 <details>
 <summary><strong>Personal account</strong></summary>
 
-1. Navigate to: https://github.com/settings/personal-access-tokens/new
+1. Navigate to: <https://github.com/settings/personal-access-tokens/new>
 2. **Resource owner:** your personal account
 3. **Repository access:** Only select repositories → pick the repo
 4. Set permissions (table above) and an expiry
 5. Copy the token and set the secret:
+
    ```bash
    gh secret set CHANGESET_TOKEN --repo {owner}/{repo}
    # paste when prompted
@@ -321,12 +327,13 @@ Scoped to a specific repository with exact permissions. Maximum expiry: 1 year. 
    - Set policy to **Allow fine-grained personal access tokens**
    - If approval is required, submit a request and wait for admin approval
 
-2. Navigate to: https://github.com/settings/personal-access-tokens/new
+2. Navigate to: <https://github.com/settings/personal-access-tokens/new>
 3. **Resource owner:** select the **organisation** (not your personal account)
 4. **Repository access:** Only select repositories → pick the repo
 5. Set permissions (table above) and an expiry
 6. **SAML SSO:** Fine-grained PATs do **not** require a separate SSO authorization step
 7. Copy the token:
+
    ```bash
    gh secret set CHANGESET_TOKEN --repo {owner}/{repo}
    ```
@@ -337,6 +344,7 @@ Scoped to a specific repository with exact permissions. Maximum expiry: 1 year. 
 <summary><strong>GitHub Enterprise Cloud (GHEC)</strong></summary>
 
 Same as organisation above. Additionally:
+
 - Enterprise admins can enforce a fine-grained PAT policy at the enterprise level
 - Check with your enterprise admin if you get "policy does not allow" errors
 - Enterprise-managed users (EMU): token creation may be restricted to the IdP — follow your enterprise's provisioning process
@@ -352,6 +360,7 @@ Same as organisation above. Additionally:
 2. Navigate to: `https://{hostname}/settings/personal-access-tokens/new`
 3. Set permissions (table above) and an expiry
 4. Copy the token:
+
    ```bash
    GH_HOST={hostname} gh secret set CHANGESET_TOKEN --repo {owner}/{repo}
    ```
@@ -367,6 +376,7 @@ Same as organisation above. Additionally:
 Grants broad `repo` scope across **all** repositories the token owner has access to. Use only when Options A and B are unavailable.
 
 **When to use:**
+
 - GHES < 3.10
 - Organisation policy explicitly blocks fine-grained PATs and GitHub Apps
 
@@ -375,10 +385,11 @@ Grants broad `repo` scope across **all** repositories the token owner has access
 <details>
 <summary><strong>Personal account</strong></summary>
 
-1. Navigate to: https://github.com/settings/tokens/new
+1. Navigate to: <https://github.com/settings/tokens/new>
 2. Scope: `repo`
 3. Set an expiry (recommended, even though it's optional)
 4. Copy the token:
+
    ```bash
    gh secret set CHANGESET_TOKEN --repo {owner}/{repo}
    ```
@@ -388,10 +399,11 @@ Grants broad `repo` scope across **all** repositories the token owner has access
 <details>
 <summary><strong>Organisation-owned repository</strong></summary>
 
-1. Navigate to: https://github.com/settings/tokens/new
+1. Navigate to: <https://github.com/settings/tokens/new>
 2. Scope: `repo`
 3. **SAML SSO:** After creating the token, click **"Authorize"** next to the organisation name
 4. Copy the token:
+
    ```bash
    gh secret set CHANGESET_TOKEN --repo {owner}/{repo}
    ```
@@ -411,6 +423,7 @@ Same as organisation. SAML SSO authorization is required. If the enterprise uses
 1. Navigate to: `https://{hostname}/settings/tokens/new`
 2. Scope: `repo`
 3. Copy the token:
+
    ```bash
    GH_HOST={hostname} gh secret set CHANGESET_TOKEN --repo {owner}/{repo}
    ```
@@ -422,7 +435,7 @@ Same as organisation. SAML SSO authorization is required. If the enterprise uses
 #### Option summary
 
 | Scenario | Recommended option | Token expiry | Tag ruleset bypass automatable |
-|----------|-------------------|--------------|-------------------------------|
+| ---------- | ------------------- | -------------- | ------------------------------- |
 | Organisation or enterprise | **A — GitHub App** | Never (private key) | ✅ Yes |
 | Personal repo, small team | **B — Fine-grained PAT** | Max 1 year | ⚠ UI step |
 | GHES < 3.10 | **C — Classic PAT** | Optional | ⚠ UI step |
@@ -474,6 +487,7 @@ EOF
 ```
 
 PowerShell equivalent:
+
 ```powershell
 $body = @{
   name = "Protect main branch"; target = "branch"; enforcement = "active"
@@ -495,7 +509,7 @@ $body | gh api repos/{owner}/{repo}/rulesets --method POST --header "Content-Typ
 **Via UI:** Settings → Rules → Rulesets → New ruleset → New branch ruleset
 
 | Setting | Value |
-|---------|-------|
+| --------- | ------- |
 | Ruleset name | `Protect main branch` |
 | Target branches | `refs/heads/main` |
 | Rules | ✅ Restrict deletions |
@@ -504,6 +518,7 @@ $body | gh api repos/{owner}/{repo}/rulesets --method POST --header "Content-Typ
 | | ✅ Require status checks → add `CI Gate` |
 
 > **For GHES:** Rulesets require GHES 3.11+. On earlier versions use branch protection rules:
+>
 > ```bash
 > GH_HOST={hostname} gh api repos/{owner}/{repo}/branches/main/protection \
 >   --method PUT \
@@ -554,6 +569,7 @@ EOF
 ```
 
 PowerShell:
+
 ```powershell
 $installationId = (gh api repos/{owner}/{repo}/installation | ConvertFrom-Json).id
 
@@ -618,16 +634,16 @@ Settings → General → Releases → ✅ **Immutable releases**
 Quick reference covering all combinations of scope and token type.
 
 | Scope | Token type | Where to create | Org admin action needed? | SAML SSO step? | Notes |
-|-------|-----------|-----------------|--------------------------|---------------|-------|
-| Personal | GitHub App | https://github.com/settings/apps/new | No | No | Preferred; no expiry |
-| Personal | Fine-grained PAT | https://github.com/settings/personal-access-tokens/new | No | No | Max 1 year; set reminder |
-| Personal | Classic PAT | https://github.com/settings/tokens/new | No | No | Broad scope; avoid if possible |
-| Org | GitHub App | https://github.com/organizations/{org}/settings/apps/new | To install on org | No | Best for teams |
-| Org | Fine-grained PAT | https://github.com/settings/personal-access-tokens/new | Yes — allow fine-grained PATs | No | Org approval may be required |
-| Org | Classic PAT | https://github.com/settings/tokens/new | No (but SSO authz needed) | Yes — authorize for org | Broad scope; fallback only |
+| ------- | ----------- | ----------------- | -------------------------- | --------------- | ------- |
+| Personal | GitHub App | <https://github.com/settings/apps/new> | No | No | Preferred; no expiry |
+| Personal | Fine-grained PAT | <https://github.com/settings/personal-access-tokens/new> | No | No | Max 1 year; set reminder |
+| Personal | Classic PAT | <https://github.com/settings/tokens/new> | No | No | Broad scope; avoid if possible |
+| Org | GitHub App | <https://github.com/organizations/{org}/settings/apps/new> | To install on org | No | Best for teams |
+| Org | Fine-grained PAT | <https://github.com/settings/personal-access-tokens/new> | Yes — allow fine-grained PATs | No | Org approval may be required |
+| Org | Classic PAT | <https://github.com/settings/tokens/new> | No (but SSO authz needed) | Yes — authorize for org | Broad scope; fallback only |
 | GHEC | GitHub App | `https://github.com/organizations/{org}/settings/apps/new` | Yes — enterprise may restrict | No | EMU: check enterprise policy |
-| GHEC | Fine-grained PAT | https://github.com/settings/personal-access-tokens/new | Yes — org and enterprise must allow | No | Enterprise policy may block |
-| GHEC | Classic PAT | https://github.com/settings/tokens/new | No (SSO authz needed) | Yes | Broad scope |
+| GHEC | Fine-grained PAT | <https://github.com/settings/personal-access-tokens/new> | Yes — org and enterprise must allow | No | Enterprise policy may block |
+| GHEC | Classic PAT | <https://github.com/settings/tokens/new> | No (SSO authz needed) | Yes | Broad scope |
 | GHES 3.10+ | Fine-grained PAT | `https://{hostname}/settings/personal-access-tokens/new` | Yes — org must allow | Depends on GHES config | GHES 3.10+ only |
 | GHES any | Classic PAT | `https://{hostname}/settings/tokens/new` | No | Depends on GHES config | Works on all GHES versions |
 | GHES any | GitHub App | `https://{hostname}/settings/apps/new` | To install | No | Fully supported on all GHES |
@@ -663,7 +679,7 @@ Both scripts (`setup-release.sh` and `setup-release.ps1`) are idempotent DSC-sty
 ### Parameters
 
 | Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
+| ----------- | ------ | ---------- | --------- | ------------- |
 | `--owner` / `-Owner` | string | ✅ | — | GitHub user or org name |
 | `--repo` / `-Repo` | string | ✅ | — | Repository name |
 | `--scope` / `-Scope` | enum | — | `personal` | `personal` · `org` · `enterprise` · `ghes` |
@@ -676,7 +692,7 @@ Both scripts (`setup-release.sh` and `setup-release.ps1`) are idempotent DSC-sty
 ### What each step does
 
 | Step | Action | Idempotency check |
-|------|--------|-------------------|
+| ------ | -------- | ------------------- |
 | 1. Branch ruleset | `POST /repos/{r}/rulesets` | Checks for existing ruleset by name |
 | 2. Tag ruleset | `POST /repos/{r}/rulesets` (with bypass if App) | Checks for existing ruleset by name |
 | 3. `skip-changeset` label | `POST /repos/{r}/labels` | Checks for existing label by name |
@@ -733,6 +749,7 @@ Both scripts (`setup-release.sh` and `setup-release.ps1`) are idempotent DSC-sty
 ## Adapting to Another Repository
 
 1. **Copy files:**
+
    ```
    .changeset/config.json       → update "repo" to "{owner}/{repo}"
    .changeset/README.md
@@ -741,14 +758,17 @@ Both scripts (`setup-release.sh` and `setup-release.ps1`) are idempotent DSC-sty
    scripts/setup-release.sh
    scripts/setup-release.ps1
    ```
+
    Plus add the `changeset-check` job and `ci-gate` updates to your existing CI workflow.
 
 2. **Install dependencies:**
+
    ```bash
    bun add -D @changesets/cli @changesets/changelog-github
    ```
 
 3. **Add scripts to `package.json`:**
+
    ```json
    {
      "scripts": {
@@ -757,9 +777,11 @@ Both scripts (`setup-release.sh` and `setup-release.ps1`) are idempotent DSC-sty
      }
    }
    ```
+
    If you have a version-sync script (like `update-version.ts`), append `&& bun .build/update-version.ts`.
 
 4. **Add Justfile recipes:**
+
    ```makefile
    changeset:
        bun changeset
@@ -769,6 +791,7 @@ Both scripts (`setup-release.sh` and `setup-release.ps1`) are idempotent DSC-sty
    ```
 
 5. **Configure the repository** (run the DSC script):
+
    ```bash
    ./scripts/setup-release.sh --owner {owner} --repo {repo} \
      --scope {personal|org|enterprise|ghes} --token-type {app|fine-grained|classic}
@@ -781,6 +804,7 @@ Both scripts (`setup-release.sh` and `setup-release.ps1`) are idempotent DSC-sty
    - Immutable releases: Settings → General → ✅ Immutable releases
 
 8. **Adapt `cd.yml`** for your project type. Key variables:
+
    ```yaml
    env:
      MAIN_SOLUTION: ./src/MyProject.slnx
@@ -788,6 +812,7 @@ Both scripts (`setup-release.sh` and `setup-release.ps1`) are idempotent DSC-sty
      PACKAGE_PROJECT: ./src/MyProject/MyProject.csproj
      ARTIFACTS_DIR: ./artifacts/nuget
    ```
+
    For non-.NET projects, replace the build/test/pack steps with your equivalent commands.
 
 ---
@@ -801,8 +826,10 @@ The `CHANGESET_TOKEN` secret is missing, expired, or has insufficient permission
 **Diagnose:** Check the `release-pr.yml` run logs for "Generate GitHub App token" step — if it was skipped (APP_ID not set) and CHANGESET_TOKEN is empty, the PR was created with GITHUB_TOKEN.
 
 **Fix:**
+
 1. Set or rotate the `CHANGESET_TOKEN` secret (or `APP_ID` + `APP_PRIVATE_KEY`)
 2. Close and reopen the Version PR, or trigger the workflow manually:
+
    ```bash
    gh workflow run release-pr.yml --repo {owner}/{repo}
    ```
@@ -825,6 +852,7 @@ gh workflow run cd.yml --repo {owner}/{repo}
 ### CD pipeline fails mid-release
 
 The ERR trap should have cleaned up automatically. Verify:
+
 ```bash
 # Check no draft release was left behind:
 gh release list --repo {owner}/{repo}
@@ -834,11 +862,13 @@ git ls-remote --tags https://github.com/{owner}/{repo} 'refs/tags/v*'
 ```
 
 If a draft or tag was left, clean up manually:
+
 ```bash
 gh release delete v{version} --cleanup-tag --yes --repo {owner}/{repo}
 ```
 
 Then re-trigger:
+
 ```bash
 gh workflow run cd.yml --repo {owner}/{repo}
 ```
@@ -864,6 +894,7 @@ Run `just changeset` on your feature branch. If the PR is genuinely docs-only or
 The Version PR will be created with `GITHUB_TOKEN` (no CI runs) or the bot will fail entirely.
 
 **Fix:** Rotate the token, update the secret, then re-trigger `release-pr.yml`:
+
 ```bash
 gh workflow run release-pr.yml --repo {owner}/{repo}
 ```
@@ -880,12 +911,14 @@ Or switch to Option A (GitHub App), which doesn't require per-token approval.
 ### GHES: `gh api` returns wrong results
 
 Ensure `GH_HOST` is set:
+
 ```bash
 export GH_HOST=github.example.com
 gh api repos/{owner}/{repo}/rulesets
 ```
 
 Or pass it inline:
+
 ```bash
 GH_HOST=github.example.com gh api repos/{owner}/{repo}/rulesets
 ```

@@ -1,87 +1,108 @@
-###############################################################################
-# Set default behaviour to automatically normalize line endings.
-###############################################################################
+# Default: auto-detect text and normalise to LF in the index.
+# Everything below only overrides the *working tree* checkout behaviour.
 * text=auto
 
-# Force batch scripts to always use CRLF line endings so that if a repo is accessed
-# in Windows via a file share from Linux, the scripts will work.
-*.{cmd,[cC][mM][dD]} text eol=crlf
-*.{bat,[bB][aA][tT]} text eol=crlf
+# ---------------------------------------------------------------------------
+# .NET source and project files
+# No eol= means each dev's core.autocrlf / core.eol decides. Set eol=lf here
+# instead if you want to hard-enforce LF everywhere -- but keep it in sync
+# with end_of_line in .editorconfig or `dotnet format --verify-no-changes`
+# will fail in CI.
+# ---------------------------------------------------------------------------
+*.cs        text diff=csharp
+*.csx       text diff=csharp
+*.vb        text
+*.fs        text
+*.fsx       text
+*.csproj    text
+*.fsproj    text
+*.vbproj    text
+*.props     text
+*.targets   text
+*.resx      text
+*.config    text
+*.ruleset   text
+*.xaml      text
+*.cshtml    text diff=html
+*.razor     text diff=html
+*.sln       text eol=lf
+*.slnx      text eol=lf
 
-# Force bash scripts to always use LF line endings so that if a repo is accessed
-# in Unix via a file share from Windows, the scripts will work.
-*.sh text eol=lf
+# ---------------------------------------------------------------------------
+# Data, config and docs
+# ---------------------------------------------------------------------------
+*.json      text
+*.xml       text
+*.yml       text
+*.yaml      text
+*.toml      text
+*.md        text diff=markdown
+*.svg       text
+*.editorconfig text
+.gitattributes text
+.gitignore  text
 
-# PowerShell is cross-platform, and I think Windows is more forgiving so
-# let's set it to Unix line endings.
-*.ps1 text eol=lf
+# ---------------------------------------------------------------------------
+# Web assets (only relevant if the repo ships any)
+# ---------------------------------------------------------------------------
+*.js        text
+*.jsx       text
+*.ts        text
+*.tsx       text
+*.html      text diff=html
+*.css       text
+*.scss      text
 
-# Source files — enforce LF to match .editorconfig (end_of_line = lf) and
-# CSharpier, which uses the editorconfig setting when checking formatting.
-*.cs text eol=lf working-tree-encoding=UTF-8
-*.csx text eol=lf working-tree-encoding=UTF-8
+# ---------------------------------------------------------------------------
+# Scripts -- these MUST be pinned regardless of platform.
+# cmd.exe misparses LF in multi-line blocks and labels; sh needs LF.
+# ---------------------------------------------------------------------------
+*.sh        text eol=lf
+*.bash      text eol=lf
+*.zsh       text eol=lf
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+*.ps1       text eol=lf
+*.psm1      text eol=lf
+*.psd1      text eol=lf
+Dockerfile  text eol=lf
+*.dockerfile text eol=lf
+justfile    text eol=lf
+Makefile    text eol=lf
 
-# Verify file rules
-*.verified.txt text eol=lf working-tree-encoding=UTF-8
-*.verified.xml text eol=lf working-tree-encoding=UTF-8
-*.verified.json text eol=lf working-tree-encoding=UTF-8
-*.verified.cs text eol=lf working-tree-encoding=UTF-8
+# Patches carry their own endings -- never touch them.
+*.patch     -text
 
-###############################################################################
-# Set default behaviour for command prompt diff.
-#
-# This is need for earlier builds of msysgit that does not have it on by
-# default for csharp files.
-# Note: This is only used by command line
-###############################################################################
-#*.cs     diff=csharp
+# ---------------------------------------------------------------------------
+# Binary
+# ---------------------------------------------------------------------------
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.ico       binary
+*.webp      binary
+*.mp4       binary
+*.zip       binary
+*.gz        binary
+*.7z        binary
+*.tar       binary
+*.exe       binary
+*.dll       binary
+*.pdb       binary
+*.obj       binary
+*.vsix      binary
+*.nupkg     binary
+*.snupkg    binary
+*.snk       binary
+*.pfx       binary
+*.lockb     binary
+*.woff      binary
+*.woff2     binary
 
-###############################################################################
-# Set the merge driver for project and solution files
-#
-# Merging from the command prompt will add diff markers to the files if there
-# are conflicts (Merging from VS is not affected by the settings below, in VS
-# the diff markers are never inserted). Diff markers may cause the following 
-# file extensions to fail to load in VS. An alternative would be to treat
-# these files as binary and thus will always conflict and require user
-# intervention with every merge. To do so, just uncomment the entries below
-###############################################################################
-#*.sln       merge=binary
-#*.csproj    merge=binary
-#*.vbproj    merge=binary
-#*.vcxproj   merge=binary
-#*.vcproj    merge=binary
-#*.dbproj    merge=binary
-#*.fsproj    merge=binary
-#*.lsproj    merge=binary
-#*.wixproj   merge=binary
-#*.modelproj merge=binary
-#*.sqlproj   merge=binary
-#*.wwaproj   merge=binary
-
-###############################################################################
-# behaviour for image files
-#
-# image files are treated as binary by default.
-###############################################################################
-#*.jpg   binary
-#*.png   binary
-#*.gif   binary
-
-###############################################################################
-# diff behaviour for common document formats
-# 
-# Convert binary document formats to text before diffing them. This feature
-# is only available from the command line. Turn it on by uncommenting the 
-# entries below.
-###############################################################################
-#*.doc   diff=astextplain
-#*.DOC   diff=astextplain
-#*.docx  diff=astextplain
-#*.DOCX  diff=astextplain
-#*.dot   diff=astextplain
-#*.DOT   diff=astextplain
-#*.pdf   diff=astextplain
-#*.PDF   diff=astextplain
-#*.rtf   diff=astextplain
-#*.RTF   diff=astextplain
+# ---------------------------------------------------------------------------
+# Keep repo scaffolding out of `git archive` / source packages
+# ---------------------------------------------------------------------------
+.gitattributes  export-ignore
+.gitignore      export-ignore
+.github/        export-ignore
