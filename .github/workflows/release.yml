@@ -49,4 +49,5 @@ jobs:
           Release__Mode: NuGet
           Build__RunPack: true
           NuGet__ApiKey: ${{ secrets.NUGET__APIKEY }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: dotnet run --project build/PipelineCLI/PipelineCLI.csproj --configuration Release
