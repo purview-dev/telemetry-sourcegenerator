@@ -11,8 +11,15 @@
 		<RoslynVersion>4.14.0</RoslynVersion>
 		<TUnitVersion>1.65.51</TUnitVersion>
 		<PurviewSGFVersion>1.0.0-prerelease.27</PurviewSGFVersion>
+		<ModularPipelinesVersion>[3.2.8,)</ModularPipelinesVersion>
 	</PropertyGroup>
 	<ItemGroup>
+		<PackageVersion Include="ModularPipelines" Version="$(ModularPipelinesVersion)" />
+		<PackageVersion Include="ModularPipelines.DotNet" Version="$(ModularPipelinesVersion)" />
+		<PackageVersion Include="ModularPipelines.Git" Version="$(ModularPipelinesVersion)" />
+		<PackageVersion Include="ModularPipelines.GitHub" Version="$(ModularPipelinesVersion)" />
+		<PackageVersion Include="NuGet.Packaging" Version="7.9.0" />
+		<PackageVersion Include="NuGet.Versioning" Version="7.9.0" />
 		<PackageVersion Include="Purview.SourceGeneratorFramework" Version="$(PurviewSGFVersion)" />
 		<PackageVersion Include="Purview.SourceGeneratorFramework.Testing.TUnit" Version="$(PurviewSGFVersion)" />
 		<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.400" />
