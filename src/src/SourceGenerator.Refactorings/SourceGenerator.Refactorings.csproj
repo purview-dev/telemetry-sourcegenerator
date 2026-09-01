@@ -3,6 +3,7 @@
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<IsRoslynComponent>true</IsRoslynComponent>
 		<IsPackable>false</IsPackable>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<Title>Purview Telemetry Refactorings</Title>
 		<Description>Visual Studio code refactorings for the Purview Telemetry source generator.</Description>
 	</PropertyGroup>

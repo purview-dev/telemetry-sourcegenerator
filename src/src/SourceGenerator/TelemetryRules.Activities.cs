@@ -43,7 +43,7 @@ static partial class TelemetryRules
 			);
 
 		var generateDiagnosticsForMissingActivity =
-			target.ActivitySourceGenerationAttribute?.GenerateDiagnosticsForMissingActivity.Value ?? true;
+			target.ActivitySourceGenerationAttribute?.GenerateDiagnosticsForMissingActivity ?? true;
 
 		foreach (var method in target.ActivityMethods)
 		{
@@ -141,27 +141,44 @@ static partial class TelemetryRules
 		}
 
 		// TSG3000: baggage parameters must be strings.
+		ApplyBaggageRules(method, methodSymbol, diagnostics, token);
+
+		// TSG3003: more than one parameter sharing the same reserved destination.
+		ApplyDuplicateReservedRules(method, methodSymbol, diagnostics);
+
+		// Reserved-parameter rules.
+		ApplyReservedParameterRules(method, methodSymbol, diagnostics, token);
+	}
+
+	static void ApplyBaggageRules(
+		ActivityBasedGenerationTarget method,
+		IMethodSymbol methodSymbol,
+		ImmutableArray<DiagnosticInfo>.Builder diagnostics,
+		CancellationToken token
+	)
+	{
 		foreach (var baggage in method.Baggage)
 		{
 			token.ThrowIfCancellationRequested();
 
 			if (baggage.ParameterType.Identity.SpecialType != SpecialType.System_String)
 			{
-				var parameterSymbol = FindParameter(methodSymbol, baggage.ParameterName);
-				var location =
-					parameterSymbol?.Locations.FirstOrDefault(static l => l.IsInSource)
-					?? methodSymbol.Locations.FirstOrDefault(static l => l.IsInSource)
-					?? Location.None;
 				diagnostics.Add(
 					DiagnosticInfo.Create(
 						ToDescriptor(DiagnosticLibrary.Activities.BaggageParameterShouldBeString),
-						location
+						GetParameterLocation(methodSymbol, baggage.ParameterName)
 					)
 				);
 			}
 		}
+	}
 
-		// TSG3003: more than one parameter sharing the same reserved destination.
+	static void ApplyDuplicateReservedRules(
+		ActivityBasedGenerationTarget method,
+		IMethodSymbol methodSymbol,
+		ImmutableArray<DiagnosticInfo>.Builder diagnostics
+	)
+	{
 		var duplicateReserved = method
 			.Parameters.Where(static p =>
 				p.ParamDestination is not (ActivityParameterDestination.Tag or ActivityParameterDestination.Baggage)
@@ -173,32 +190,30 @@ static partial class TelemetryRules
 		{
 			var names = string.Join(", ", group.Select(static p => p.ParameterName));
 			var secondParameter = group.ElementAt(1);
-			var secondSymbol = FindParameter(methodSymbol, secondParameter.ParameterName);
-			var duplicateLocation =
-				secondSymbol?.Locations.FirstOrDefault(static l => l.IsInSource)
-				?? methodSymbol.Locations.FirstOrDefault(static l => l.IsInSource)
-				?? Location.None;
 
 			diagnostics.Add(
 				DiagnosticInfo.Create(
 					ToDescriptor(DiagnosticLibrary.Activities.DuplicateParameterTypes),
-					duplicateLocation,
+					GetParameterLocation(methodSymbol, secondParameter.ParameterName),
 					names,
 					group.Key.ToString()
 				)
 			);
 		}
+	}
 
-		// Reserved-parameter rules.
+	static void ApplyReservedParameterRules(
+		ActivityBasedGenerationTarget method,
+		IMethodSymbol methodSymbol,
+		ImmutableArray<DiagnosticInfo>.Builder diagnostics,
+		CancellationToken token
+	)
+	{
 		foreach (var parameter in method.Parameters)
 		{
 			token.ThrowIfCancellationRequested();
 
-			var parameterSymbol = FindParameter(methodSymbol, parameter.ParameterName);
-			var location =
-				parameterSymbol?.Locations.FirstOrDefault(static l => l.IsInSource)
-				?? methodSymbol.Locations.FirstOrDefault(static l => l.IsInSource)
-				?? Location.None;
+			var location = GetParameterLocation(methodSymbol, parameter.ParameterName);
 			var parameterName = parameter.GeneratedName;
 
 #pragma warning disable IDE0010 // Add missing cases

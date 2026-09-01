@@ -1,32 +1,28 @@
 namespace Purview.Telemetry.SourceGenerator.Records;
 
 sealed record ActivitySourceAttributeRecord(
-	AttributeStringValue Name,
-	AttributeValue<bool> DefaultToTags,
-	AttributeStringValue BaggageAndTagPrefix,
-	AttributeValue<bool> IncludeActivitySourcePrefix,
-	AttributeValue<bool> LowercaseBaggageAndTagKeys
+	string? Name,
+	bool DefaultToTags,
+	string? BaggageAndTagPrefix,
+	bool IncludeActivitySourcePrefix,
+	bool LowercaseBaggageAndTagKeys
 );
 
 sealed record ActivitySourceGenerationAttributeRecord(
-	AttributeStringValue Name,
-	AttributeValue<bool> DefaultToTags,
-	AttributeStringValue BaggageAndTagPrefix,
-	AttributeStringValue BaggageAndTagSeparator,
-	AttributeValue<bool> LowercaseBaggageAndTagKeys,
-	AttributeValue<bool> GenerateDiagnosticsForMissingActivity
+	string? Name,
+	bool DefaultToTags,
+	string? BaggageAndTagPrefix,
+	string? BaggageAndTagSeparator,
+	bool LowercaseBaggageAndTagKeys,
+	bool GenerateDiagnosticsForMissingActivity
 );
 
-readonly record struct ActivityAttributeRecord(
-	AttributeStringValue Name,
-	AttributeValue<int> Kind,
-	AttributeValue<bool> CreateOnly
-);
+sealed record ActivityAttributeRecord(string? Name, int? Kind, bool CreateOnly);
 
 sealed record EventAttributeRecord(
-	AttributeStringValue Name,
-	AttributeValue<bool> UseRecordExceptionRules,
-	AttributeValue<bool> RecordExceptionEscape,
-	AttributeValue<int> StatusCode,
-	AttributeStringValue StatusDescription
+	string? Name,
+	bool UseRecordExceptionRules,
+	bool RecordExceptionEscape,
+	int StatusCode,
+	string? StatusDescription
 );

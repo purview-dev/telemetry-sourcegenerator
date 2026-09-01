@@ -291,21 +291,4 @@ partial class LoggerTargetClassEmitter
 
 		writer.NewLine();
 	}
-
-	static void EmitParametersAsMethodArgumentList(
-		LogMethodTarget methodTarget,
-		CodeWriter writer,
-		SourceProductionContext context
-	)
-	{
-		for (var i = 0; i < methodTarget.TotalParameterCount; i++)
-		{
-			context.CancellationToken.ThrowIfCancellationRequested();
-
-			writer.Write(methodTarget.Parameters[i].ParameterType).Write(' ').Write(methodTarget.Parameters[i].Name);
-
-			if (i < methodTarget.TotalParameterCount - 1)
-				writer.Write(", ");
-		}
-	}
 }

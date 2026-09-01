@@ -1,16 +1,14 @@
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Records;
+using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator.Helpers;
 
 partial class SharedHelpers
 {
-	public static LogAttributeRecord? GetLogAttribute(
-		ISymbol symbol,
-		SemanticModel? semanticModel,
-		ISourceGenLogger? logger,
-		CancellationToken token
-	)
+	const int UnsetValue = 99;
+
+	public static LogAttributeRecord? GetLogAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -25,29 +23,103 @@ partial class SharedHelpers
 			return null;
 		}
 
-		AttributeValue<int>? level = null;
-		if (matchingTemplate != TemplateLibrary.Logging.LogAttribute)
-			level = new(TemplateLibrary.Logging.SpecificLogAttributesToLevel[matchingTemplate!]);
+		if (matchingTemplate == TemplateLibrary.Logging.LogAttribute)
+		{
+			var data = LogAttributeData.FromAttributeData(attributeData!);
+			return new(
+				Level: data.Level == UnsetValue ? null : data.Level,
+				MessageTemplate: NullIfWhitespace(data.MessageTemplate),
+				EventId: data.EventId < 0 ? null : data.EventId,
+				Name: NullIfWhitespace(data.Name),
+				GenerationMode: data.GenerationMode
+			);
+		}
 
-		var parsedLevel = GetAttributeValue<int>(attributeData!, "level");
-		if (parsedLevel.IsSet)
-			level = parsedLevel;
+		// A specific level attribute (Trace/Debug/Info/Warning/Error/Critical) forces its level.
+		(var messageTemplate, var eventId, var name, var generationMode) = GetSpecificLogData(
+			matchingTemplate!,
+			attributeData!
+		);
 
 		return new(
-			Level: level ?? new(),
-			MessageTemplate: GetAttributeStringValue(attributeData!, "messageTemplate"),
-			EventId: GetAttributeValue<int>(attributeData!, "eventId"),
-			Name: GetAttributeStringValue(attributeData!, "name"),
-			GenerationMode: GetAttributeValue<int>(attributeData!, "generationMode")
+			Level: TemplateLibrary.Logging.SpecificLogAttributesToLevel[matchingTemplate!],
+			MessageTemplate: messageTemplate,
+			EventId: eventId < 0 ? null : eventId,
+			Name: name,
+			GenerationMode: generationMode
 		);
 	}
 
-	public static LoggerAttributeRecord? GetLoggerAttribute(
-		ISymbol symbol,
-		SemanticModel? semanticModel,
-		ISourceGenLogger? logger,
-		CancellationToken token
+	static (string? MessageTemplate, int EventId, string? Name, int GenerationMode) GetSpecificLogData(
+		TemplateInfo template,
+		AttributeData attributeData
 	)
+	{
+		if (template == TemplateLibrary.Logging.TraceAttribute)
+		{
+			var data = TraceAttributeData.FromAttributeData(attributeData);
+			return (
+				NullIfWhitespace(data.MessageTemplate),
+				data.EventId,
+				NullIfWhitespace(data.Name),
+				data.GenerationMode
+			);
+		}
+
+		if (template == TemplateLibrary.Logging.DebugAttribute)
+		{
+			var data = DebugAttributeData.FromAttributeData(attributeData);
+			return (
+				NullIfWhitespace(data.MessageTemplate),
+				data.EventId,
+				NullIfWhitespace(data.Name),
+				data.GenerationMode
+			);
+		}
+
+		if (template == TemplateLibrary.Logging.InfoAttribute)
+		{
+			var data = InfoAttributeData.FromAttributeData(attributeData);
+			return (
+				NullIfWhitespace(data.MessageTemplate),
+				data.EventId,
+				NullIfWhitespace(data.Name),
+				data.GenerationMode
+			);
+		}
+
+		if (template == TemplateLibrary.Logging.WarningAttribute)
+		{
+			var data = WarningAttributeData.FromAttributeData(attributeData);
+			return (
+				NullIfWhitespace(data.MessageTemplate),
+				data.EventId,
+				NullIfWhitespace(data.Name),
+				data.GenerationMode
+			);
+		}
+
+		if (template == TemplateLibrary.Logging.ErrorAttribute)
+		{
+			var data = ErrorAttributeData.FromAttributeData(attributeData);
+			return (
+				NullIfWhitespace(data.MessageTemplate),
+				data.EventId,
+				NullIfWhitespace(data.Name),
+				data.GenerationMode
+			);
+		}
+
+		var criticalData = CriticalAttributeData.FromAttributeData(attributeData);
+		return (
+			NullIfWhitespace(criticalData.MessageTemplate),
+			criticalData.EventId,
+			NullIfWhitespace(criticalData.Name),
+			criticalData.GenerationMode
+		);
+	}
+
+	public static LoggerAttributeRecord? GetLoggerAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -61,20 +133,18 @@ partial class SharedHelpers
 			return null;
 		}
 
-		return new(
-			DefaultLevel: GetAttributeValue<int>(attributeData!, "defaultLevel"),
-			CustomPrefix: GetAttributeStringValue(attributeData!, "customPrefix"),
-			PrefixType: GetAttributeValue<int>(attributeData!, "prefixType"),
-			GenerationMode: GetAttributeValue<int>(attributeData!, "generationMode")
-		);
+		var data = LoggerAttributeData.FromAttributeData(attributeData!);
+		return data.Exists
+			? new(
+				DefaultLevel: data.DefaultLevel == UnsetValue ? null : data.DefaultLevel,
+				CustomPrefix: NullIfWhitespace(data.CustomPrefix),
+				PrefixType: data.PrefixType == UnsetValue ? null : data.PrefixType,
+				GenerationMode: data.GenerationMode == UnsetValue ? null : data.GenerationMode
+			)
+			: null;
 	}
 
-	public static LoggerGenerationAttributeRecord? GetLoggerGenerationAttribute(
-		ISymbol symbol,
-		SemanticModel? semanticModel,
-		ISourceGenLogger? logger,
-		CancellationToken token
-	)
+	public static LoggerGenerationAttributeRecord? GetLoggerGenerationAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -88,19 +158,17 @@ partial class SharedHelpers
 			return null;
 		}
 
-		return new(
-			DefaultLevel: GetAttributeValue<int>(attributeData!, "defaultLevel"),
-			GenerationMode: GetAttributeValue<int>(attributeData!, "generationMode"),
-			DefaultPrefixType: GetAttributeValue<int>(attributeData!, "defaultPrefixType")
-		);
+		var data = LoggerGenerationAttributeData.FromAttributeData(attributeData!);
+		return data.Exists
+			? new(
+				DefaultLevel: data.DefaultLevel == UnsetValue ? null : data.DefaultLevel,
+				GenerationMode: data.GenerationMode == UnsetValue ? null : data.GenerationMode,
+				DefaultPrefixType: data.DefaultPrefixType == UnsetValue ? null : data.DefaultPrefixType
+			)
+			: null;
 	}
 
-	public static LogPropertiesAttributeRecord? GetLogPropertiesAttribute(
-		ISymbol symbol,
-		SemanticModel? semanticModel,
-		ISourceGenLogger? logger,
-		CancellationToken token
-	)
+	public static LogPropertiesAttributeRecord? GetLogPropertiesAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -114,19 +182,17 @@ partial class SharedHelpers
 			return null;
 		}
 
-		return new(
-			OmitReferenceName: GetAttributeValue<bool>(attributeData!, "omitReferenceName"),
-			SkipNullProperties: GetAttributeValue<bool>(attributeData!, "skipNullProperties"),
-			Transitive: GetAttributeValue<bool>(attributeData!, "transitive")
-		);
+		var data = LogPropertiesAttributeData.FromAttributeData(attributeData!);
+		return data.Exists
+			? new(
+				OmitReferenceName: data.OmitReferenceName,
+				SkipNullProperties: data.SkipNullProperties,
+				Transitive: data.Transitive
+			)
+			: null;
 	}
 
-	public static ExpandEnumerableAttributeRecord? GetExpandEnumerableAttribute(
-		ISymbol symbol,
-		SemanticModel? semanticModel,
-		ISourceGenLogger? logger,
-		CancellationToken token
-	)
+	public static ExpandEnumerableAttributeRecord? GetExpandEnumerableAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -140,14 +206,14 @@ partial class SharedHelpers
 			return null;
 		}
 
-		return new(MaximumValueCount: GetAttributeValue<int>(attributeData!, "maximumValueCount", 5));
+		var data = ExpandEnumerableAttributeData.FromAttributeData(attributeData!);
+		return data.Exists ? new(MaximumValueCount: data.MaximumValueCount) : null;
 	}
 
 	public static LoggerGenerationAttributeRecord? GetLoggerGenerationAttribute(
-		SemanticModel semanticModel,
-		ISourceGenLogger? logger,
+		Compilation compilation,
 		CancellationToken token
-	) => GetLoggerGenerationAttribute(semanticModel.Compilation.Assembly, semanticModel, logger, token);
+	) => GetLoggerGenerationAttribute(compilation.Assembly, token);
 
 	public static bool IsLogMethod(IMethodSymbol method, CancellationToken token) =>
 		Utilities.ContainsAttribute(

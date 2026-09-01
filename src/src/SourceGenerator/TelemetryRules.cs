@@ -78,17 +78,18 @@ static partial class TelemetryRules
 			ToDescriptor(DiagnosticLibrary.Metrics.InstrumentNameMatchesType),
 		];
 
-	static Location GetLocation(ISymbol symbol) =>
-		symbol.Locations.FirstOrDefault(static location => location.IsInSource) ?? Location.None;
-
 	static IMethodSymbol? FindMethod(INamedTypeSymbol interfaceSymbol, string methodName) =>
 		interfaceSymbol.GetMembers(methodName).OfType<IMethodSymbol>().FirstOrDefault();
 
 	static IParameterSymbol? FindParameter(IMethodSymbol method, string parameterName) =>
 		method.Parameters.FirstOrDefault(p => string.Equals(p.Name, parameterName, StringComparison.Ordinal));
 
-	static ImmutableArray<Location> GetLocations(ISymbol symbol) =>
-		[.. symbol.Locations.Where(static location => location.IsInSource)];
+	static Location GetParameterLocation(IMethodSymbol method, string? parameterName) =>
+		(parameterName is null ? null : FindParameter(method, parameterName))?.Locations.FirstOrDefault(static l =>
+			l.IsInSource
+		)
+		?? method.Locations.FirstOrDefault(static l => l.IsInSource)
+		?? Location.None;
 
 	/// <summary>
 	/// Determines whether the target framework of the compilation is supported (net8.0+/net48+).
@@ -212,76 +213,83 @@ static partial class TelemetryRules
 		// Per-method validation.
 		foreach (var kvp in methodsByName)
 		{
-			var method = kvp.Value[0];
-
 			token.ThrowIfCancellationRequested();
-
-			if (Utilities.ContainsAttribute(method, TemplateLibrary.Shared.ExcludeAttribute, token))
-				continue;
-
-			// TSG1005: generic method.
-			if (method.Arity > 0)
-			{
-				diagnostics.Add(
-					DiagnosticInfo.Create(ToDescriptor(DiagnosticLibrary.General.GenericMethodsNotSupported), method)
-				);
-				continue;
-			}
-
-			var targetState = Utilities.IsValidGenerationTarget(method, generationType, generationType);
-
-			if (targetState.RaiseInferenceNotSupportedWithMultiTargeting)
-				diagnostics.Add(
-					DiagnosticInfo.Create(
-						ToDescriptor(DiagnosticLibrary.General.InferenceNotSupportedWithMultiTargeting),
-						method
-					)
-				);
-
-			if (targetState.RaiseMultiGenerationTargetsNotSupported)
-				diagnostics.Add(
-					DiagnosticInfo.Create(
-						ToDescriptor(DiagnosticLibrary.General.MultiGenerationTargetsNotSupported),
-						method
-					)
-				);
-
-			if (targetState.RaiseMissingInterfaceSource)
-				diagnostics.Add(
-					DiagnosticInfo.Create(
-						ToDescriptor(DiagnosticLibrary.General.MethodTargetNotRegisteredOnInterface),
-						method
-					)
-				);
-
-			// TSG1008: an Activity parameter on a method with no Activity target will be ignored.
-			// Skip when the method is a valid inferred Activity method (single-target Activity
-			// interface, no explicit attributes) - there the parameter is used, not ignored.
-			if (
-				targetState.ActivityParameterWithoutTarget is { } activityParameterName
-				&& !(targetState.MethodTargets == GenerationType.None && generationType == GenerationType.Activities)
-			)
-			{
-				var parameterSymbol = FindParameter(method, activityParameterName);
-				var activityParameterLocation =
-					parameterSymbol?.Locations.FirstOrDefault(static l => l.IsInSource)
-					?? method.Locations.FirstOrDefault(static l => l.IsInSource)
-					?? Location.None;
-
-				diagnostics.Add(
-					DiagnosticInfo.Create(
-						ToDescriptor(DiagnosticLibrary.General.ActivityParameterWithoutActivityTarget),
-						activityParameterLocation,
-						activityParameterName
-					)
-				);
-			}
-
-			// TSG1006/TSG1007: [ExcludeTargets] validation against the method's target families.
-			ApplyExcludeTargetsRules(method, targetState.MethodTargets, diagnostics, token);
+			ApplyPerMethodRules(kvp.Value[0], generationType, diagnostics, token);
 		}
 
 		return diagnostics.ToImmutable();
+	}
+
+	static void ApplyPerMethodRules(
+		IMethodSymbol method,
+		GenerationType generationType,
+		ImmutableArray<DiagnosticInfo>.Builder diagnostics,
+		CancellationToken token
+	)
+	{
+		if (Utilities.ContainsAttribute(method, TemplateLibrary.Shared.ExcludeAttribute, token))
+			return;
+
+		// TSG1005: generic method.
+		if (method.Arity > 0)
+		{
+			diagnostics.Add(
+				DiagnosticInfo.Create(ToDescriptor(DiagnosticLibrary.General.GenericMethodsNotSupported), method)
+			);
+			return;
+		}
+
+		var targetState = Utilities.IsValidGenerationTarget(method, generationType, generationType);
+
+		if (targetState.RaiseInferenceNotSupportedWithMultiTargeting)
+			diagnostics.Add(
+				DiagnosticInfo.Create(
+					ToDescriptor(DiagnosticLibrary.General.InferenceNotSupportedWithMultiTargeting),
+					method
+				)
+			);
+
+		if (targetState.RaiseMultiGenerationTargetsNotSupported)
+			diagnostics.Add(
+				DiagnosticInfo.Create(
+					ToDescriptor(DiagnosticLibrary.General.MultiGenerationTargetsNotSupported),
+					method
+				)
+			);
+
+		if (targetState.RaiseMissingInterfaceSource)
+			diagnostics.Add(
+				DiagnosticInfo.Create(
+					ToDescriptor(DiagnosticLibrary.General.MethodTargetNotRegisteredOnInterface),
+					method
+				)
+			);
+
+		// TSG1008: an Activity parameter on a method with no Activity target will be ignored.
+		// Skip when the method is a valid inferred Activity method (single-target Activity
+		// interface, no explicit attributes) - there the parameter is used, not ignored.
+		if (
+			targetState.ActivityParameterWithoutTarget is { } activityParameterName
+			&& !(targetState.MethodTargets == GenerationType.None && generationType == GenerationType.Activities)
+		)
+		{
+			var parameterSymbol = FindParameter(method, activityParameterName);
+			var activityParameterLocation =
+				parameterSymbol?.Locations.FirstOrDefault(static l => l.IsInSource)
+				?? method.Locations.FirstOrDefault(static l => l.IsInSource)
+				?? Location.None;
+
+			diagnostics.Add(
+				DiagnosticInfo.Create(
+					ToDescriptor(DiagnosticLibrary.General.ActivityParameterWithoutActivityTarget),
+					activityParameterLocation,
+					activityParameterName
+				)
+			);
+		}
+
+		// TSG1006/TSG1007: [ExcludeTargets] validation against the method's target families.
+		ApplyExcludeTargetsRules(method, targetState.MethodTargets, diagnostics, token);
 	}
 
 	static void ApplyExcludeTargetsRules(
@@ -299,8 +307,7 @@ static partial class TelemetryRules
 			.Select(p =>
 				(
 					Parameter: p,
-					Excluded: SharedHelpers.GetExcludeTargetsAttribute(p, null, null, token)?.ExcludedTargets
-						?? GenerationType.None
+					Excluded: SharedHelpers.GetExcludeTargetsAttribute(p, token)?.ExcludedTargets ?? GenerationType.None
 				)
 			)
 			.ToImmutableArray();
@@ -350,6 +357,7 @@ static partial class TelemetryRules
 		}
 	}
 
+#pragma warning disable IDE0072 // Add missing cases
 	static string GetGenerationTypeName(GenerationType target) =>
 		target switch
 		{
@@ -358,6 +366,7 @@ static partial class TelemetryRules
 			GenerationType.Metrics => "Metrics",
 			_ => target.ToString(),
 		};
+#pragma warning restore IDE0072 // Add missing cases
 
 	/// <summary>
 	/// The subset of structural diagnostics that apply to the whole interface (used by the pipeline to

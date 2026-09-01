@@ -61,8 +61,7 @@ partial class ActivitySourceTargetClassEmitter
 			.Write(PropertyLibrary.Activities.ActivitySourceFieldName)
 			.Write('.');
 
-		var createOnly = methodTarget.ActivityAttribute?.CreateOnly.Value == true;
-		var createActivityMethod = createOnly ? "Create" : "Start";
+		var createOnly = methodTarget.ActivityAttribute?.CreateOnly == true;
 		var useParentContext =
 			parentContextOrId != null
 			&& parentContextOrId.ParameterType.Identity.Equals(
@@ -77,10 +76,7 @@ partial class ActivitySourceTargetClassEmitter
 			return;
 		}
 
-		var kind =
-			methodTarget.ActivityAttribute?.Kind.IsSet == true
-				? methodTarget.ActivityAttribute.Value.Kind.Value.GetValueOrDefault()
-				: PropertyLibrary.Activities.DefaultActivityKind;
+		var kind = methodTarget.ActivityAttribute?.Kind ?? PropertyLibrary.Activities.DefaultActivityKind;
 
 		var parentContextOrIdParameterValue = parentContextOrId?.ParameterName ?? "default";
 		if (useParentContext && parentContextOrId!.ParameterType.IsNullable)
@@ -93,7 +89,68 @@ partial class ActivitySourceTargetClassEmitter
 			parentContextOrIdParameterValue += " ?? default";
 		}
 
-		writer.Write(createActivityMethod).Write("Activity(");
+		EmitActivityCall(
+			writer,
+			methodTarget,
+			createOnly,
+			useParentContext,
+			parentContextParameterName,
+			parentContextOrIdParameterValue,
+			tagsParam,
+			linksParam,
+			startTimeParam,
+			kind
+		);
+
+		context.CancellationToken.ThrowIfCancellationRequested();
+
+		if (methodTarget.Tags.Count > 0 || methodTarget.Baggage.Count > 0)
+		{
+			writer.NewLine().Write("if (").Write(activityVariableName).WriteLine(" != null)");
+
+			using (writer.OpenBlockScope())
+			{
+				EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, logger);
+				EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, logger);
+			}
+		}
+
+		context.CancellationToken.ThrowIfCancellationRequested();
+
+		if (methodTarget.ReturnType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.Activity))
+		{
+			writer
+				.NewLine()
+				.Write("return ")
+				.Write(activityVariableName)
+				.Write(!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
+				.Write(";")
+				.NewLine();
+		}
+	}
+
+	static void AddActivityNameParameter(CodeWriter writer, ActivityBasedGenerationTarget methodTarget, bool useName)
+	{
+		if (useName)
+			writer.Write("name: ");
+
+		writer.Write(methodTarget.ActivityOrEventName.Wrap());
+	}
+
+	static void EmitActivityCall(
+		CodeWriter writer,
+		ActivityBasedGenerationTarget methodTarget,
+		bool createOnly,
+		bool useParentContext,
+		string parentContextParameterName,
+		string parentContextOrIdParameterValue,
+		ActivityBasedParameterTarget? tagsParam,
+		ActivityBasedParameterTarget? linksParam,
+		ActivityBasedParameterTarget? startTimeParam,
+		int kind
+	)
+	{
+		writer.Write(createOnly ? "CreateActivity(" : "StartActivity(");
 
 		if (createOnly || !useParentContext)
 		{
@@ -136,44 +193,6 @@ partial class ActivitySourceTargetClassEmitter
 		}
 
 		writer.WriteLine(");");
-
-		context.CancellationToken.ThrowIfCancellationRequested();
-
-		if (methodTarget.Tags.Count > 0 || methodTarget.Baggage.Count > 0)
-		{
-			writer.NewLine().Write("if (").Write(activityVariableName).WriteLine(" != null)");
-
-			using (writer.OpenBlockScope())
-			{
-				EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, logger);
-				EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, logger);
-			}
-		}
-
-		context.CancellationToken.ThrowIfCancellationRequested();
-
-		if (methodTarget.ReturnType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.Activity))
-		{
-			writer
-				.NewLine()
-				.Write("return ")
-				.Write(activityVariableName)
-				.Write(!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
-				.Write(";")
-				.NewLine();
-		}
-
-		static void AddActivityNameParameter(
-			CodeWriter writer,
-			ActivityBasedGenerationTarget methodTarget,
-			bool useName
-		)
-		{
-			if (useName)
-				writer.Write("name: ");
-
-			writer.Write(methodTarget.ActivityOrEventName.Wrap());
-		}
 	}
 
 	static void EmitHasListenersTest(CodeWriter writer, ActivityBasedGenerationTarget methodTarget, bool emitNullable)

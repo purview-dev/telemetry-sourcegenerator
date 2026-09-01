@@ -11,7 +11,6 @@ partial class TelemetrySourceGenerator
 		IncrementalGeneratorInitializationContext context,
 		IncrementalValuesProvider<GeneratorResult<ActivitySourceTarget?>> activityTargets,
 		IncrementalValuesProvider<GeneratorResult<MeterTarget?>> meterTargets,
-		IncrementalValueProvider<bool> supportsNullableAnnotations,
 		IncrementalValueProvider<GenerationContext<TelemetryCapabilities>> generationContext
 	)
 	{
@@ -22,17 +21,16 @@ partial class TelemetrySourceGenerator
 		var combined = assemblyNameProvider
 			.Combine(meterTargets.Collect())
 			.Combine(activityTargets.Collect())
-			.Combine(supportsNullableAnnotations)
 			.Combine(generationContext);
 
-		context.RegisterImplementationSourceOutput(
+		context.RegisterSourceOutput(
 			source: combined,
 			action: (spc, source) =>
 				GenerateTelemetryNames(
-					source.Left.Left.Left.Left,
-					source.Left.Left.Left.Right,
+					source.Left.Left.Left,
 					source.Left.Left.Right,
 					source.Left.Right,
+					source.Right.Capabilities.SupportsNullableAnnotations,
 					spc,
 					source.Right.Logger
 				)
@@ -71,30 +69,30 @@ partial class TelemetrySourceGenerator
 		// Check meter targets for TelemetryGeneration settings
 		foreach (var target in processedMeters)
 		{
-			if (target!.TelemetryGeneration?.GenerateTelemetryNamesClass.Value == false)
+			if (target!.TelemetryGeneration?.GenerateTelemetryNamesClass == false)
 			{
 				generateClass = false;
 				return;
 			}
 
-			if (target.TelemetryGeneration?.TelemetryNamesClassName.Value != null && customClassName == null)
+			if (target.TelemetryGeneration?.TelemetryNamesClassName != null && customClassName == null)
 			{
-				customClassName = target.TelemetryGeneration.TelemetryNamesClassName.Value;
+				customClassName = target.TelemetryGeneration.TelemetryNamesClassName;
 			}
 		}
 
 		// Check activity targets for TelemetryGeneration settings
 		foreach (var target in processedActivities)
 		{
-			if (target!.TelemetryGeneration?.GenerateTelemetryNamesClass.Value == false)
+			if (target!.TelemetryGeneration?.GenerateTelemetryNamesClass == false)
 			{
 				generateClass = false;
 				return;
 			}
 
-			if (target.TelemetryGeneration?.TelemetryNamesClassName.Value != null && customClassName == null)
+			if (target.TelemetryGeneration?.TelemetryNamesClassName != null && customClassName == null)
 			{
-				customClassName = target.TelemetryGeneration.TelemetryNamesClassName.Value;
+				customClassName = target.TelemetryGeneration.TelemetryNamesClassName;
 			}
 		}
 

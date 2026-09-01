@@ -6,17 +6,11 @@ namespace Purview.Telemetry.SourceGenerator.Helpers;
 partial class SharedHelpers
 {
 	public static MeterGenerationAttributeRecord? GetMeterGenerationAttribute(
-		SemanticModel semanticModel,
-		ISourceGenLogger? logger,
+		Compilation compilation,
 		CancellationToken token
-	) => GetMeterGenerationAttribute(semanticModel.Compilation.Assembly, semanticModel, logger, token);
+	) => GetMeterGenerationAttribute(compilation.Assembly, token);
 
-	public static MeterAttributeRecord? GetMeterAttribute(
-		ISymbol symbol,
-		SemanticModel? semanticModel,
-		ISourceGenLogger? logger,
-		CancellationToken token
-	)
+	public static MeterAttributeRecord? GetMeterAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -30,33 +24,19 @@ partial class SharedHelpers
 			return null;
 		}
 
-		return new(
-			Name: GetAttributeStringValue(attributeData!, "name"),
-			InstrumentPrefix: GetAttributeStringValue(attributeData!, "instrumentPrefix"),
-			IncludeAssemblyInstrumentPrefix: GetAttributeValue<bool>(
-				attributeData!,
-				"includeAssemblyInstrumentPrefix",
-				true
-			),
-			LowercaseInstrumentName: GetAttributeValue<bool>(
-				attributeData!,
-				"lowercaseInstrumentName",
-				PropertyLibrary.Metrics.LowercaseInstrumentNameDefault
-			),
-			LowercaseTagKeys: GetAttributeValue<bool>(
-				attributeData!,
-				"lowercaseTagKeys",
-				PropertyLibrary.Metrics.LowercaseTagKeysDefault
+		var data = MeterAttributeData.FromAttributeData(attributeData!);
+		return data.Exists
+			? new(
+				Name: NullIfWhitespace(data.Name),
+				InstrumentPrefix: NullIfWhitespace(data.InstrumentPrefix),
+				IncludeAssemblyInstrumentPrefix: data.IncludeAssemblyInstrumentPrefix,
+				LowercaseInstrumentName: data.LowercaseInstrumentName,
+				LowercaseTagKeys: data.LowercaseTagKeys
 			)
-		);
+			: null;
 	}
 
-	public static MeterGenerationAttributeRecord? GetMeterGenerationAttribute(
-		ISymbol symbol,
-		SemanticModel? semanticModel,
-		ISourceGenLogger? logger,
-		CancellationToken token
-	)
+	public static MeterGenerationAttributeRecord? GetMeterGenerationAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -70,31 +50,21 @@ partial class SharedHelpers
 			return null;
 		}
 
-		return new(
-			InstrumentPrefix: GetAttributeStringValue(attributeData!, "instrumentPrefix"),
-			InstrumentSeparator: GetAttributeStringValue(
-				attributeData!,
-				"instrumentSeparator",
-				PropertyLibrary.Metrics.InstrumentSeparatorDefault
-			),
-			LowercaseInstrumentName: GetAttributeValue<bool>(
-				attributeData!,
-				"lowercaseInstrumentName",
-				PropertyLibrary.Metrics.LowercaseInstrumentNameDefault
-			),
-			LowercaseTagKeys: GetAttributeValue<bool>(
-				attributeData!,
-				"lowercaseTagKeys",
-				PropertyLibrary.Metrics.LowercaseTagKeysDefault
-			),
-			MeterName: GetAttributeStringValue(attributeData!, "meterName"),
-			MeterNameGenerationType: GetAttributeValue<int>(attributeData!, "meterNameGenerationType", 1)
-		);
+		var data = MeterGenerationAttributeData.FromAttributeData(attributeData!);
+		return data.Exists
+			? new(
+				InstrumentPrefix: NullIfWhitespace(data.InstrumentPrefix),
+				InstrumentSeparator: NullIfWhitespace(data.InstrumentSeparator),
+				LowercaseInstrumentName: data.LowercaseInstrumentName,
+				LowercaseTagKeys: data.LowercaseTagKeys,
+				MeterName: NullIfWhitespace(data.MeterName),
+				MeterNameGenerationType: data.MeterNameGenerationType
+			)
+			: null;
 	}
 
 	public static InstrumentAttributeRecord? GetInstrumentAttribute(
 		ISymbol symbol,
-		SemanticModel? semanticModel,
 		ISourceGenLogger? logger,
 		CancellationToken token
 	)
@@ -111,52 +81,84 @@ partial class SharedHelpers
 		if (attributeData?.AttributeClass == null)
 			return null;
 
-		var autoIncrement = GetAttributeValue<bool>(attributeData, "autoIncrement");
-		InstrumentTypes instrumentType;
 		var attributeType = TypeReference.Create(attributeData.AttributeClass);
-		var isAutoCounter = TemplateLibrary.Metrics.AutoCounterAttribute == attributeType;
-		if (isAutoCounter || TemplateLibrary.Metrics.CounterAttribute == attributeType)
-		{
-			instrumentType = InstrumentTypes.Counter;
 
-			if (isAutoCounter)
-				autoIncrement = new(true);
-		}
-		else if (TemplateLibrary.Metrics.HistogramAttribute == attributeType)
+		var record = attributeType switch
 		{
-			instrumentType = InstrumentTypes.Histogram;
-		}
-		else if (TemplateLibrary.Metrics.UpDownCounterAttribute == attributeType)
-		{
-			instrumentType = InstrumentTypes.UpDownCounter;
-		}
-		else if (TemplateLibrary.Metrics.ObservableCounterAttribute == attributeType)
-		{
-			instrumentType = InstrumentTypes.ObservableCounter;
-		}
-		else if (TemplateLibrary.Metrics.ObservableUpDownCounterAttribute == attributeType)
-		{
-			instrumentType = InstrumentTypes.ObservableUpDownCounter;
-		}
-		else if (TemplateLibrary.Metrics.ObservableGaugeAttribute == attributeType)
-		{
-			instrumentType = InstrumentTypes.ObservableGauge;
-		}
-		else
-		{
+			_ when TemplateLibrary.Metrics.CounterAttribute == attributeType => ToRecord(
+				CounterAttributeData.FromAttributeData(attributeData),
+				InstrumentTypes.Counter
+			),
+			_ when TemplateLibrary.Metrics.AutoCounterAttribute == attributeType => ToRecord(
+				AutoCounterAttributeData.FromAttributeData(attributeData),
+				InstrumentTypes.Counter
+			),
+			_ when TemplateLibrary.Metrics.UpDownCounterAttribute == attributeType => ToRecord(
+				UpDownCounterAttributeData.FromAttributeData(attributeData),
+				InstrumentTypes.UpDownCounter
+			),
+			_ when TemplateLibrary.Metrics.HistogramAttribute == attributeType => ToRecord(
+				HistogramAttributeData.FromAttributeData(attributeData),
+				InstrumentTypes.Histogram
+			),
+			_ when TemplateLibrary.Metrics.ObservableCounterAttribute == attributeType => ToRecord(
+				ObservableCounterAttributeData.FromAttributeData(attributeData),
+				InstrumentTypes.ObservableCounter
+			),
+			_ when TemplateLibrary.Metrics.ObservableUpDownCounterAttribute == attributeType => ToRecord(
+				ObservableUpDownCounterAttributeData.FromAttributeData(attributeData),
+				InstrumentTypes.ObservableUpDownCounter
+			),
+			_ when TemplateLibrary.Metrics.ObservableGaugeAttribute == attributeType => ToRecord(
+				ObservableGaugeAttributeData.FromAttributeData(attributeData),
+				InstrumentTypes.ObservableGauge
+			),
+			_ => null,
+		};
+
+		if (record is null)
 			logger?.Fatal($"Unknown instrument type {attributeType}.");
-			return null;
-		}
 
-		return new(
-			Name: GetAttributeStringValue(attributeData, "name"),
-			Unit: GetAttributeStringValue(attributeData, "unit"),
-			Description: GetAttributeStringValue(attributeData, "description"),
+		return record;
+	}
+
+	static InstrumentAttributeRecord ToRecord(
+		string? name,
+		string? unit,
+		string? description,
+		bool autoIncrement,
+		bool throwOnAlreadyInitialized,
+		InstrumentTypes instrumentType
+	) =>
+		new(
+			Name: NullIfWhitespace(name),
+			Unit: NullIfWhitespace(unit),
+			Description: NullIfWhitespace(description),
 			AutoIncrement: autoIncrement,
-			ThrowOnAlreadyInitialized: GetAttributeValue<bool>(attributeData, "throwOnAlreadyInitialized"),
+			ThrowOnAlreadyInitialized: throwOnAlreadyInitialized,
 			InstrumentType: instrumentType
 		);
-	}
+
+	static InstrumentAttributeRecord ToRecord(CounterAttributeData data, InstrumentTypes type) =>
+		ToRecord(data.Name, data.Unit, data.Description, data.AutoIncrement, false, type);
+
+	static InstrumentAttributeRecord ToRecord(AutoCounterAttributeData data, InstrumentTypes type) =>
+		ToRecord(data.Name, data.Unit, data.Description, true, false, type);
+
+	static InstrumentAttributeRecord ToRecord(UpDownCounterAttributeData data, InstrumentTypes type) =>
+		ToRecord(data.Name, data.Unit, data.Description, false, false, type);
+
+	static InstrumentAttributeRecord ToRecord(HistogramAttributeData data, InstrumentTypes type) =>
+		ToRecord(data.Name, data.Unit, data.Description, false, false, type);
+
+	static InstrumentAttributeRecord ToRecord(ObservableCounterAttributeData data, InstrumentTypes type) =>
+		ToRecord(data.Name, data.Unit, data.Description, false, data.ThrowOnAlreadyInitialized, type);
+
+	static InstrumentAttributeRecord ToRecord(ObservableUpDownCounterAttributeData data, InstrumentTypes type) =>
+		ToRecord(data.Name, data.Unit, data.Description, false, data.ThrowOnAlreadyInitialized, type);
+
+	static InstrumentAttributeRecord ToRecord(ObservableGaugeAttributeData data, InstrumentTypes type) =>
+		ToRecord(data.Name, data.Unit, data.Description, false, data.ThrowOnAlreadyInitialized, type);
 
 	public static bool IsValidMeasurementValueType(ITypeSymbol type) =>
 		Array.Exists(PropertyLibrary.Metrics.ValidMeasurementSpecialTypes, m => m == type.SpecialType);

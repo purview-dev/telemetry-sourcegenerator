@@ -141,9 +141,8 @@ partial class MeterTargetClassEmitter
 
 		if (!method.IsObservable)
 		{
-			var unit = method.InstrumentAttribute?.Unit?.Value?.Wrap() ?? PropertyLibrary.System.NullKeyword;
-			var description =
-				method.InstrumentAttribute?.Description?.Value?.Wrap() ?? PropertyLibrary.System.NullKeyword;
+			var unit = method.InstrumentAttribute?.Unit?.Wrap() ?? PropertyLibrary.System.NullKeyword;
+			var description = method.InstrumentAttribute?.Description?.Wrap() ?? PropertyLibrary.System.NullKeyword;
 			var tagVariableName = Utilities.LowercaseFirstChar(method.MethodName) + "Tags";
 
 			var dictType = GetDictionaryType(emitNullable);

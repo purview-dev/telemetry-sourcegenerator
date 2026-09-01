@@ -145,7 +145,7 @@ partial class LoggerGenTargetClassEmitter
 			// exception and output it as the exception parameter in
 			// the Log method.
 
-			List<string> existingParamNames = new(methodTarget.Parameters.Count);
+			List<string> existingParamNames = [with(methodTarget.Parameters.Count)];
 			foreach (var param in methodTarget.Parameters)
 			{
 				existingParamNames.Add(param.Name);
@@ -182,213 +182,9 @@ partial class LoggerGenTargetClassEmitter
 			}
 
 			if (methodTarget.IsScoped)
-			{
-				if (useScopedTypedState)
-				{
-					// Zero-allocation: typed _ScopeState struct — no ThreadLocalState, no eager string formatting.
-					var scopeStructName = methodTarget.MethodName + "_ScopeState";
-					var scopeNonExceptionParams = methodTarget.ParametersSansException;
-
-					writer
-						.Write("return ")
-						.Write(PropertyLibrary.Logging.LoggerFieldName)
-						.Write(".BeginScope(new ")
-						.Write(scopeStructName)
-						.Write('(');
-
-					for (var i = 0; i < scopeNonExceptionParams.Count; i++)
-					{
-						context.CancellationToken.ThrowIfCancellationRequested();
-
-						writer.Write(scopeNonExceptionParams[i].Name);
-						if (i < scopeNonExceptionParams.Count - 1)
-							writer.Write(", ");
-					}
-
-					writer.Write("));").NewLine();
-				}
-				else
-				{
-					var (interpolatedMessage, variables) = GenerateInterpolatedFunction(
-						methodTarget.MessageTemplate,
-						stateVarName,
-						methodTarget.ExceptionParameter?.Name,
-						[.. methodTarget.Parameters],
-						existingParamNames
-					);
-
-					if (variables.Length > 0)
-					{
-						foreach (var variableDefinition in variables)
-							writer.WriteLine(variableDefinition);
-
-						writer.NewLine();
-					}
-
-					var formattedMessageVarName = FindUniqueName("formattedMessage", existingParamNames);
-					writer
-						.Write("var ")
-						.WriteLine("formattedMessage = ")
-						.WriteLine("#if NET")
-						.Write("string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
-						.Write(interpolatedMessage.Wrap())
-						.WriteLine(");")
-						.WriteLine("#else")
-						.Write("global::System.FormattableString.Invariant($")
-						.Write(interpolatedMessage.Wrap())
-						.WriteLine(");")
-						.WriteLine("#endif")
-						.Write(";")
-						.NewLine();
-
-					OutputState(
-						writer,
-						stateVarName,
-						Utilities.UppercaseFirstChar(formattedMessageVarName).Wrap(),
-						formattedMessageVarName,
-						index: null
-					);
-
-					writer
-						.NewLine()
-						.Write("return ")
-						.Write(PropertyLibrary.Logging.LoggerFieldName)
-						.Write(".BeginScope(")
-						.Write(stateVarName)
-						.WriteLine(");");
-				}
-			}
+				EmitScopedBody(writer, methodTarget, stateVarName, existingParamNames, useScopedTypedState, context);
 			else
-			{
-				var expressionStateVarName = FindUniqueName("s", existingParamNames);
-				var expressionExceptionVarName =
-					methodTarget.ExceptionParameter?.UsedInTemplate == true
-						? FindUniqueName("e", existingParamNames)
-						: null;
-
-				if (useTypedState)
-				{
-					// Typed state struct approach: zero boxing, no ThreadLocalState.
-					var structName = methodTarget.MethodName + "_LogState";
-					var interpolatedMessage = GenerateTypedInterpolatedMessage(
-						methodTarget.MessageTemplate,
-						expressionStateVarName,
-						expressionExceptionVarName,
-						[.. methodTarget.Parameters]
-					);
-
-					var eventId =
-						methodTarget.EventId ?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
-
-					var nonExceptionParams = methodTarget.ParametersSansException;
-
-					writer
-						.Write(PropertyLibrary.Logging.LoggerFieldName)
-						.WriteLine(".Log(")
-						.Write(methodTarget.MSLevel.WithComma(andSpace: false))
-						.Write(emitNullable ? "new (" : "new " + TypeLibrary.Logging.MicrosoftExtensions.EventId + "(")
-						.Write(eventId.ToString(CultureInfo.InvariantCulture))
-						.Write(", nameof(")
-						.Write(methodTarget.LogName)
-						.WriteLine(")),")
-						.Write("new ")
-						.Write(structName)
-						.Write('(');
-
-					for (var i = 0; i < nonExceptionParams.Count; i++)
-					{
-						writer.Write(nonExceptionParams[i].Name);
-						if (i < nonExceptionParams.Count - 1)
-							writer.Write(", ");
-					}
-
-					writer.WriteLine("),");
-					writer.Write(methodTarget.ExceptionParameter.OrNullKeyword().WithComma(andSpace: false));
-
-					if (emitNullable)
-						writer
-							.Write(emitNullable ? "static string (" : "(")
-							.Write(expressionStateVarName)
-							.Write(", ")
-							.Write(expressionExceptionVarName ?? "_")
-							.WriteLine(") =>")
-							.WriteLine("{")
-							.WriteLine("#if NET")
-							.Write("return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
-							.Write(interpolatedMessage.Wrap())
-							.WriteLine(");")
-							.WriteLine("#else")
-							.Write("return global::System.FormattableString.Invariant($")
-							.Write(interpolatedMessage.Wrap())
-							.WriteLine(");")
-							.WriteLine("#endif")
-							.Write("}")
-							.Write(");");
-
-					writer.NewLine();
-				}
-				else
-				{
-					var (interpolatedMessage, variables) = GenerateInterpolatedFunction(
-						methodTarget.MessageTemplate,
-						expressionStateVarName,
-						expressionExceptionVarName,
-						[.. methodTarget.Parameters],
-						existingParamNames
-					);
-
-					// Call the .Log method.
-					var eventId =
-						methodTarget.EventId ?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
-					writer
-						.Write(PropertyLibrary.Logging.LoggerFieldName)
-						.WriteLine(".Log(")
-						// Log level
-						.Write(methodTarget.MSLevel.WithComma(andSpace: false))
-						// Event Id
-						.Write(emitNullable ? "new (" : "new " + TypeLibrary.Logging.MicrosoftExtensions.EventId + "(")
-						.Write(eventId.ToString(CultureInfo.InvariantCulture))
-						.Write(", nameof(")
-						.Write(methodTarget.LogName)
-						.WriteLine(")),")
-						// State
-						.Write(stateVarName.WithComma(andSpace: false))
-						// Exception
-						.Write(methodTarget.ExceptionParameter.OrNullKeyword().WithComma(andSpace: false));
-					// Message Template
-					if (emitNullable)
-						writer
-							.Write(emitNullable ? "static string (" : "(")
-							.Write(expressionStateVarName)
-							.Write(", ")
-							.Write(expressionExceptionVarName ?? "_")
-							.WriteLine(") =>")
-							.WriteLine("{");
-
-					if (variables.Length > 0)
-					{
-						foreach (var variableDefinition in variables)
-							writer.WriteLine(variableDefinition);
-
-						writer.NewLine();
-					}
-
-					writer
-						.WriteLine("#if NET")
-						.Write("return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
-						.Write(interpolatedMessage.Wrap())
-						.WriteLine(");")
-						.WriteLine("#else")
-						.Write("return global::System.FormattableString.Invariant($")
-						.Write(interpolatedMessage.Wrap())
-						.WriteLine(");")
-						.WriteLine("#endif")
-						.Write("}")
-						.Write(");");
-
-					writer.NewLine().Write(stateVarName).Write(".Clear();").NewLine();
-				}
-			}
+				EmitNonScopedBody(writer, methodTarget, stateVarName, existingParamNames, useTypedState, emitNullable);
 		}
 
 		// Generate public delegating method if Logging owns it
@@ -396,6 +192,241 @@ partial class LoggerGenTargetClassEmitter
 		{
 			EmitPublicLoggingDelegatingMethod(writer, methodTarget, context, logger, emitNullable);
 		}
+	}
+
+	static void EmitScopedBody(
+		CodeWriter writer,
+		LogMethodTarget methodTarget,
+		string stateVarName,
+		List<string> existingParamNames,
+		bool useScopedTypedState,
+		SourceProductionContext context
+	)
+	{
+		if (useScopedTypedState)
+		{
+			// Zero-allocation: typed _ScopeState struct — no ThreadLocalState, no eager string formatting.
+			var scopeStructName = methodTarget.MethodName + "_ScopeState";
+			var scopeNonExceptionParams = methodTarget.ParametersSansException;
+
+			writer
+				.Write("return ")
+				.Write(PropertyLibrary.Logging.LoggerFieldName)
+				.Write(".BeginScope(new ")
+				.Write(scopeStructName)
+				.Write('(');
+
+			for (var i = 0; i < scopeNonExceptionParams.Count; i++)
+			{
+				context.CancellationToken.ThrowIfCancellationRequested();
+
+				writer.Write(scopeNonExceptionParams[i].Name);
+				if (i < scopeNonExceptionParams.Count - 1)
+					writer.Write(", ");
+			}
+
+			writer.Write("));").NewLine();
+			return;
+		}
+
+		var (interpolatedMessage, variables) = GenerateInterpolatedFunction(
+			methodTarget.MessageTemplate,
+			stateVarName,
+			methodTarget.ExceptionParameter?.Name,
+			[.. methodTarget.Parameters],
+			existingParamNames
+		);
+
+		if (variables.Length > 0)
+		{
+			foreach (var variableDefinition in variables)
+				writer.WriteLine(variableDefinition);
+
+			writer.NewLine();
+		}
+
+		var formattedMessageVarName = FindUniqueName("formattedMessage", existingParamNames);
+		writer
+			.Write("var ")
+			.WriteLine("formattedMessage = ")
+			.WriteLine("#if NET")
+			.Write("string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
+			.Write(interpolatedMessage.Wrap())
+			.WriteLine(");")
+			.WriteLine("#else")
+			.Write("global::System.FormattableString.Invariant($")
+			.Write(interpolatedMessage.Wrap())
+			.WriteLine(");")
+			.WriteLine("#endif")
+			.Write(";")
+			.NewLine();
+
+		OutputState(
+			writer,
+			stateVarName,
+			Utilities.UppercaseFirstChar(formattedMessageVarName).Wrap(),
+			formattedMessageVarName,
+			index: null
+		);
+
+		writer
+			.NewLine()
+			.Write("return ")
+			.Write(PropertyLibrary.Logging.LoggerFieldName)
+			.Write(".BeginScope(")
+			.Write(stateVarName)
+			.WriteLine(");");
+	}
+
+	static void EmitNonScopedBody(
+		CodeWriter writer,
+		LogMethodTarget methodTarget,
+		string stateVarName,
+		List<string> existingParamNames,
+		bool useTypedState,
+		bool emitNullable
+	)
+	{
+		var expressionStateVarName = FindUniqueName("s", existingParamNames);
+		var expressionExceptionVarName =
+			methodTarget.ExceptionParameter?.UsedInTemplate == true ? FindUniqueName("e", existingParamNames) : null;
+
+		if (useTypedState)
+		{
+			EmitTypedStateLogCall(
+				writer,
+				methodTarget,
+				expressionStateVarName,
+				expressionExceptionVarName,
+				emitNullable
+			);
+			return;
+		}
+
+		var (interpolatedMessage, variables) = GenerateInterpolatedFunction(
+			methodTarget.MessageTemplate,
+			expressionStateVarName,
+			expressionExceptionVarName,
+			[.. methodTarget.Parameters],
+			existingParamNames
+		);
+
+		// Call the .Log method.
+		var eventId = methodTarget.EventId ?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
+		writer
+			.Write(PropertyLibrary.Logging.LoggerFieldName)
+			.WriteLine(".Log(")
+			// Log level
+			.Write(methodTarget.MSLevel.WithComma(andSpace: false))
+			// Event Id
+			.Write(emitNullable ? "new (" : "new " + TypeLibrary.Logging.MicrosoftExtensions.EventId + "(")
+			.Write(eventId.ToString(CultureInfo.InvariantCulture))
+			.Write(", nameof(")
+			.Write(methodTarget.LogName)
+			.WriteLine(")),")
+			// State
+			.Write(stateVarName.WithComma(andSpace: false))
+			// Exception
+			.Write(methodTarget.ExceptionParameter.OrNullKeyword().WithComma(andSpace: false));
+		// Message Template
+		if (emitNullable)
+			writer
+				.Write(emitNullable ? "static string (" : "(")
+				.Write(expressionStateVarName)
+				.Write(", ")
+				.Write(expressionExceptionVarName ?? "_")
+				.WriteLine(") =>")
+				.WriteLine("{");
+
+		if (variables.Length > 0)
+		{
+			foreach (var variableDefinition in variables)
+				writer.WriteLine(variableDefinition);
+
+			writer.NewLine();
+		}
+
+		writer
+			.WriteLine("#if NET")
+			.Write("return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
+			.Write(interpolatedMessage.Wrap())
+			.WriteLine(");")
+			.WriteLine("#else")
+			.Write("return global::System.FormattableString.Invariant($")
+			.Write(interpolatedMessage.Wrap())
+			.WriteLine(");")
+			.WriteLine("#endif")
+			.Write("}")
+			.Write(");");
+
+		writer.NewLine().Write(stateVarName).Write(".Clear();").NewLine();
+	}
+
+	static void EmitTypedStateLogCall(
+		CodeWriter writer,
+		LogMethodTarget methodTarget,
+		string expressionStateVarName,
+		string? expressionExceptionVarName,
+		bool emitNullable
+	)
+	{
+		// Typed state struct approach: zero boxing, no ThreadLocalState.
+		var structName = methodTarget.MethodName + "_LogState";
+		var interpolatedMessage = GenerateTypedInterpolatedMessage(
+			methodTarget.MessageTemplate,
+			expressionStateVarName,
+			expressionExceptionVarName,
+			[.. methodTarget.Parameters]
+		);
+
+		var eventId = methodTarget.EventId ?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
+
+		var nonExceptionParams = methodTarget.ParametersSansException;
+
+		writer
+			.Write(PropertyLibrary.Logging.LoggerFieldName)
+			.WriteLine(".Log(")
+			.Write(methodTarget.MSLevel.WithComma(andSpace: false))
+			.Write(emitNullable ? "new (" : "new " + TypeLibrary.Logging.MicrosoftExtensions.EventId + "(")
+			.Write(eventId.ToString(CultureInfo.InvariantCulture))
+			.Write(", nameof(")
+			.Write(methodTarget.LogName)
+			.WriteLine(")),")
+			.Write("new ")
+			.Write(structName)
+			.Write('(');
+
+		for (var i = 0; i < nonExceptionParams.Count; i++)
+		{
+			writer.Write(nonExceptionParams[i].Name);
+			if (i < nonExceptionParams.Count - 1)
+				writer.Write(", ");
+		}
+
+		writer.WriteLine("),");
+		writer.Write(methodTarget.ExceptionParameter.OrNullKeyword().WithComma(andSpace: false));
+
+		if (emitNullable)
+			writer
+				.Write("static string (")
+				.Write(expressionStateVarName)
+				.Write(", ")
+				.Write(expressionExceptionVarName ?? "_")
+				.WriteLine(") =>")
+				.WriteLine("{")
+				.WriteLine("#if NET")
+				.Write("return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
+				.Write(interpolatedMessage.Wrap())
+				.WriteLine(");")
+				.WriteLine("#else")
+				.Write("return global::System.FormattableString.Invariant($")
+				.Write(interpolatedMessage.Wrap())
+				.WriteLine(");")
+				.WriteLine("#endif")
+				.Write("}")
+				.Write(");");
+
+		writer.NewLine();
 	}
 
 	static void EmitStateContent(
@@ -528,13 +559,12 @@ partial class LoggerGenTargetClassEmitter
 
 				var logPropertyValue = $"{parameter.Name}?.{logProperty.PropertyName}";
 				var logPropertyName = logProperty.PropertyName;
-				if (!(parameter.LogPropertiesAttribute!.OmitReferenceName.Value ?? false))
+				if (!parameter.LogPropertiesAttribute!.OmitReferenceName)
 				{
 					logPropertyName = $"{parameter.Name}.{logPropertyName}";
 				}
 
-				var shouldSkipNull =
-					(parameter.LogPropertiesAttribute.SkipNullProperties.Value ?? false) && logProperty.IsNullable;
+				var shouldSkipNull = parameter.LogPropertiesAttribute.SkipNullProperties && logProperty.IsNullable;
 				if (shouldSkipNull)
 				{
 					var tmpVarName = FindUniqueName("tmp", existingParamNames);
@@ -637,9 +667,7 @@ partial class LoggerGenTargetClassEmitter
 		snippet.Indent();
 		snippet.Write("var ").Write(iteratorVarName).WriteLine(" = 0;");
 
-		var maxCount =
-			parameter.ExpandEnumerableAttribute!.MaximumValueCount.Value
-			?? PropertyLibrary.Logging.UnboundedIEnumerableMaxCountBeforeDiagnostic;
+		var maxCount = parameter.ExpandEnumerableAttribute!.MaximumValueCount;
 
 		if (maxCount < 1)
 			maxCount = 1;

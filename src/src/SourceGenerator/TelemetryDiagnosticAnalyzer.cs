@@ -63,13 +63,9 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 				context.ReportDiagnostic(diagnostic.ToDiagnostic());
 		}
 
-		var semanticModel = GetSemanticModel(interfaceSymbol, compilation, token);
-		if (semanticModel is null)
-			return;
-
 		if (hasActivitySource)
 		{
-			var result = PipelineHelpers.BuildActivityTarget(interfaceSymbol, semanticModel, null, token);
+			var result = PipelineHelpers.BuildActivityTarget(interfaceSymbol, compilation, null, token);
 			if (result.HasValue && result.Value is { } activityTarget)
 			{
 				var diagnostics = TelemetryRules.GetActivityDiagnostics(activityTarget, interfaceSymbol, token);
@@ -80,7 +76,7 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 
 		if (hasMeter)
 		{
-			var result = PipelineHelpers.BuildMeterTarget(interfaceSymbol, semanticModel, null, token);
+			var result = PipelineHelpers.BuildMeterTarget(interfaceSymbol, compilation, null, token);
 			if (result.HasValue && result.Value is { } meterTarget)
 			{
 				var diagnostics = TelemetryRules.GetMeterDiagnostics(meterTarget, interfaceSymbol, token);
@@ -88,21 +84,5 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 					context.ReportDiagnostic(diagnostic.ToDiagnostic());
 			}
 		}
-	}
-
-	static SemanticModel? GetSemanticModel(
-		INamedTypeSymbol interfaceSymbol,
-		Compilation compilation,
-		CancellationToken token
-	)
-	{
-		var reference = interfaceSymbol.DeclaringSyntaxReferences.FirstOrDefault();
-		if (reference is null)
-			return null;
-
-		var tree = reference.SyntaxTree;
-		token.ThrowIfCancellationRequested();
-
-		return compilation.GetSemanticModel(tree);
 	}
 }

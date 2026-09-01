@@ -20,7 +20,7 @@ static class DependencyInjectionClassEmitter
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		if (attribute.GenerateDependencyExtension.Value == false)
+		if (!attribute.GenerateDependencyExtension)
 		{
 			logger?.Debug("Skipping dependency injection emit.");
 			return;
@@ -32,14 +32,13 @@ static class DependencyInjectionClassEmitter
 			return;
 		}
 
-		var classNameToGenerate = attribute.DependencyInjectionClassName.Value;
+		var classNameToGenerate = attribute.DependencyInjectionClassName;
 		if (string.IsNullOrWhiteSpace(classNameToGenerate))
 			classNameToGenerate = implementationClassName + "DIExtension";
 
-		var classAccessibility =
-			(attribute.DependencyInjectionClassIsPublic.Value ?? false)
-				? TypeDeclarationAccessibility.Public
-				: TypeDeclarationAccessibility.Internal;
+		var classAccessibility = attribute.DependencyInjectionClassIsPublic
+			? TypeDeclarationAccessibility.Public
+			: TypeDeclarationAccessibility.Internal;
 
 		logger?.Debug(
 			$"Generating service dependency class {classNameToGenerate} for: {fullyQualifiedNamespace}{sourceInterfaceName}"

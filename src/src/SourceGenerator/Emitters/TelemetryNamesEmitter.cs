@@ -71,11 +71,8 @@ static class TelemetryNamesEmitter
 		spc.AddSource(hintName, writer);
 	}
 
-	static string BuildArrayInitializer(ImmutableArray<string> values)
-	{
-		if (values.Length == 0)
-			return "global::System.Array.Empty<string>()";
-
-		return "new string[] { " + string.Join(", ", values.Select(v => "\"" + v + "\"")) + " }";
-	}
+	static string BuildArrayInitializer(ImmutableArray<string> values) =>
+		values.Length == 0
+			? "global::System.Array.Empty<string>()"
+			: "new string[] { " + string.Join(", ", values.Select(v => "\"" + v + "\"")) + " }";
 }

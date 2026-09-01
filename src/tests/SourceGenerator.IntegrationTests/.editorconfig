@@ -6,3 +6,4 @@ root = false
 
 [*.cs]
 dotnet_diagnostic.CA1506.severity = suggestion
+dotnet_diagnostic.IDE0005.severity = silent

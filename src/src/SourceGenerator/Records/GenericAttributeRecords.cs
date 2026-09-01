@@ -1,15 +1,15 @@
 namespace Purview.Telemetry.SourceGenerator.Records;
 
-sealed record TagOrBaggageAttributeRecord(AttributeStringValue Name, AttributeValue<bool> SkipOnNullOrEmpty);
+sealed record TagOrBaggageAttributeRecord(string? Name, bool SkipOnNullOrEmpty);
 
 sealed record TelemetryGenerationAttributeRecord(
-	AttributeValue<bool> GenerateDependencyExtension,
-	AttributeStringValue ClassName,
-	AttributeStringValue DependencyInjectionClassName,
-	AttributeValue<bool> DependencyInjectionClassIsPublic,
-	AttributeValue<int> NamingConvention,
-	AttributeValue<bool> GenerateTelemetryNamesClass,
-	AttributeStringValue TelemetryNamesClassName
+	bool GenerateDependencyExtension,
+	string? ClassName,
+	string? DependencyInjectionClassName,
+	bool DependencyInjectionClassIsPublic,
+	int NamingConvention,
+	bool GenerateTelemetryNamesClass,
+	string? TelemetryNamesClassName
 );
 
 /// <summary>

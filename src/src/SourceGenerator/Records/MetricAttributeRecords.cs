@@ -1,32 +1,32 @@
 namespace Purview.Telemetry.SourceGenerator.Records;
 
 sealed record MeterGenerationAttributeRecord(
-	AttributeStringValue InstrumentPrefix,
-	AttributeStringValue InstrumentSeparator,
-	AttributeValue<bool> LowercaseInstrumentName,
-	AttributeValue<bool> LowercaseTagKeys,
-	AttributeStringValue MeterName,
-	AttributeValue<int> MeterNameGenerationType
+	string? InstrumentPrefix,
+	string? InstrumentSeparator,
+	bool LowercaseInstrumentName,
+	bool LowercaseTagKeys,
+	string? MeterName,
+	int MeterNameGenerationType
 );
 
 sealed record MeterAttributeRecord(
-	AttributeStringValue Name,
-	AttributeStringValue InstrumentPrefix,
-	AttributeValue<bool> IncludeAssemblyInstrumentPrefix,
-	AttributeValue<bool> LowercaseInstrumentName,
-	AttributeValue<bool> LowercaseTagKeys
+	string? Name,
+	string? InstrumentPrefix,
+	bool IncludeAssemblyInstrumentPrefix,
+	bool LowercaseInstrumentName,
+	bool LowercaseTagKeys
 );
 
 sealed record InstrumentAttributeRecord(
-	AttributeStringValue Name,
-	AttributeStringValue? Unit,
-	AttributeStringValue? Description,
-	AttributeValue<bool>? AutoIncrement,
-	AttributeValue<bool>? ThrowOnAlreadyInitialized,
+	string? Name,
+	string? Unit,
+	string? Description,
+	bool AutoIncrement,
+	bool ThrowOnAlreadyInitialized,
 	InstrumentTypes InstrumentType
 )
 {
-	public bool IsAutoIncrement => AutoIncrement?.Value ?? false;
+	public bool IsAutoIncrement => AutoIncrement;
 
 	public bool IsObservable =>
 		InstrumentType

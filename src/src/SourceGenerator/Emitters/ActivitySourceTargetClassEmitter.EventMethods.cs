@@ -64,120 +64,17 @@ partial class ActivitySourceTargetClassEmitter
 
 		using (writer.OpenBlockScope())
 		{
-			var tagsParameterName = tagsParam?.ParameterName ?? "default";
 			var exceptionParam =
 				methodTarget.Parameters.FirstOrDefault(m => m.IsException)
 				?? methodTarget.Tags.FirstOrDefault(m => m.IsException);
-			if (methodTarget.Tags.Count > 0)
-			{
-				var tagsListVariableName = "tagsCollection" + methodTarget.MethodName;
-				writer
-					.Write(TypeLibrary.Activities.SystemDiagnostics.ActivityTagsCollection)
-					.Write(' ')
-					.Write(tagsListVariableName)
-					.Write(
-						emitNullable
-							? " = new("
-							: $" = new {TypeLibrary.Activities.SystemDiagnostics.ActivityTagsCollection}("
-					);
-
-				if (tagsParam != null)
-					writer.Write(tagsParam.ParameterName);
-
-				writer.WriteLine(");");
-
-				var useRecordedExceptionRules = PropertyLibrary.Activities.UseRecordExceptionRulesDefault;
-				var emitExceptionEscape =
-					escapeParam != null || PropertyLibrary.Activities.RecordExceptionEscapedDefault;
-				if (methodTarget.EventAttribute?.UseRecordExceptionRules.IsSet == true)
-				{
-					useRecordedExceptionRules = methodTarget.EventAttribute.UseRecordExceptionRules.Value!.Value;
-				}
-
-				if (methodTarget.EventAttribute?.RecordExceptionEscape.IsSet == true)
-				{
-					emitExceptionEscape = methodTarget.EventAttribute.RecordExceptionEscape!.Value!.Value;
-				}
-
-				var escapeValue = escapeParam?.ParameterName ?? "true";
-				foreach (var tagParam in methodTarget.Tags)
-				{
-					var emitTag =
-						tagParam.IsException
-						&& methodTarget.ActivityOrEventName != PropertyLibrary.Activities.Tag_ExceptionEventName
-						&& useRecordedExceptionRules;
-
-					void EmitTag()
-					{
-						if (tagParam.IsException)
-						{
-							if (methodTarget.ActivityOrEventName == PropertyLibrary.Activities.Tag_ExceptionEventName)
-							{
-								writer.Write("if (").Write(tagParam.ParameterName).WriteLine(" != null)");
-								using (writer.OpenBlockScope())
-								{
-									// We want the details inside of the current event.
-									EmitExceptionParam(
-										writer,
-										tagsListVariableName,
-										escapeValue,
-										tagParam.ParameterName
-									);
-								}
-							}
-							else
-							{
-								if (useRecordedExceptionRules)
-								{
-									writer
-										.NewLine()
-										.Write(PropertyLibrary.Activities.RecordExceptionMethodName)
-										.Write("(activity: ")
-										.Write(activityVariableName)
-										.Write(", exception: ")
-										.Write(tagParam.ParameterName)
-										.Write(", escape: ")
-										.Write(escapeValue)
-										.WriteLine(");");
-								}
-								else
-								{
-									writer
-										.Write(tagsListVariableName)
-										.Write(".Add(")
-										.Write(tagParam.GeneratedName.Wrap())
-										.Write(", ")
-										.Write(tagParam.ParameterName)
-										.WriteLine(".ToString());");
-								}
-							}
-						}
-						else
-						{
-							writer
-								.Write(tagsListVariableName)
-								.Write(".Add(")
-								.Write(tagParam.GeneratedName.Wrap())
-								.Write(", ")
-								.Write(tagParam.ParameterName)
-								.WriteLine(");");
-						}
-					}
-
-					if (tagParam.SkipOnNullOrEmpty)
-					{
-						writer.Write("if (").Write(tagParam.ParameterName).WriteLine(" != default)");
-						using (writer.OpenBlockScope())
-							EmitTag();
-					}
-					else
-					{
-						EmitTag();
-					}
-				}
-
-				tagsParameterName = tagsListVariableName;
-			}
+			var tagsParameterName = EmitEventTags(
+				writer,
+				methodTarget,
+				activityVariableName,
+				tagsParam,
+				escapeParam,
+				emitNullable
+			);
 
 			var eventVariableName = "activityEvent" + methodTarget.MethodName;
 
@@ -208,34 +105,7 @@ partial class ActivitySourceTargetClassEmitter
 				EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, logger);
 			}
 
-			var statusCode = methodTarget.EventAttribute?.StatusCode.Value ?? 0;
-			if (statusCode != 0)
-			{
-				writer
-					.NewLine()
-					.Write(activityVariableName)
-					.Write(".SetStatus(")
-					.Write(PropertyLibrary.Activities.ActivityStatusCodeMap[statusCode]);
-
-				// Error
-				if (statusCode == 2)
-				{
-					if (statusDescriptionParam != null)
-					{
-						writer.Write(", ").Write(statusDescriptionParam.ParameterName);
-					}
-					else if (methodTarget.EventAttribute!.StatusDescription.IsSet)
-					{
-						writer.Write(", ").Write(methodTarget.EventAttribute!.StatusDescription.Value!.Wrap());
-					}
-					else if (exceptionParam != null)
-					{
-						writer.Write(", ").Write(exceptionParam.ParameterName).Write("?.Message");
-					}
-				}
-
-				writer.WriteLine(");");
-			}
+			EmitSetStatus(writer, methodTarget, activityVariableName, statusDescriptionParam, exceptionParam);
 		}
 
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -244,5 +114,149 @@ partial class ActivitySourceTargetClassEmitter
 		{
 			writer.NewLine().Write("return ").Write(activityVariableName).Write(";").NewLine();
 		}
+	}
+
+	static string EmitEventTags(
+		CodeWriter writer,
+		ActivityBasedGenerationTarget methodTarget,
+		string activityVariableName,
+		ActivityBasedParameterTarget? tagsParam,
+		ActivityBasedParameterTarget? escapeParam,
+		bool emitNullable
+	)
+	{
+		var tagsParameterName = tagsParam?.ParameterName ?? "default";
+		if (methodTarget.Tags.Count == 0)
+			return tagsParameterName;
+
+		var tagsListVariableName = "tagsCollection" + methodTarget.MethodName;
+		writer
+			.Write(TypeLibrary.Activities.SystemDiagnostics.ActivityTagsCollection)
+			.Write(' ')
+			.Write(tagsListVariableName)
+			.Write(
+				emitNullable ? " = new(" : $" = new {TypeLibrary.Activities.SystemDiagnostics.ActivityTagsCollection}("
+			);
+
+		if (tagsParam != null)
+			writer.Write(tagsParam.ParameterName);
+
+		writer.WriteLine(");");
+
+		var useRecordedExceptionRules =
+			methodTarget.EventAttribute?.UseRecordExceptionRules
+			?? PropertyLibrary.Activities.UseRecordExceptionRulesDefault;
+
+		var escapeValue = escapeParam?.ParameterName ?? "true";
+		foreach (var tagParam in methodTarget.Tags)
+		{
+			var emitTag =
+				tagParam.IsException
+				&& methodTarget.ActivityOrEventName != PropertyLibrary.Activities.Tag_ExceptionEventName
+				&& useRecordedExceptionRules;
+
+			void EmitTag()
+			{
+				if (tagParam.IsException)
+				{
+					if (methodTarget.ActivityOrEventName == PropertyLibrary.Activities.Tag_ExceptionEventName)
+					{
+						writer.Write("if (").Write(tagParam.ParameterName).WriteLine(" != null)");
+						using (writer.OpenBlockScope())
+						{
+							// We want the details inside of the current event.
+							EmitExceptionParam(writer, tagsListVariableName, escapeValue, tagParam.ParameterName);
+						}
+					}
+					else
+					{
+						if (useRecordedExceptionRules)
+						{
+							writer
+								.NewLine()
+								.Write(PropertyLibrary.Activities.RecordExceptionMethodName)
+								.Write("(activity: ")
+								.Write(activityVariableName)
+								.Write(", exception: ")
+								.Write(tagParam.ParameterName)
+								.Write(", escape: ")
+								.Write(escapeValue)
+								.WriteLine(");");
+						}
+						else
+						{
+							writer
+								.Write(tagsListVariableName)
+								.Write(".Add(")
+								.Write(tagParam.GeneratedName.Wrap())
+								.Write(", ")
+								.Write(tagParam.ParameterName)
+								.WriteLine(".ToString());");
+						}
+					}
+				}
+				else
+				{
+					writer
+						.Write(tagsListVariableName)
+						.Write(".Add(")
+						.Write(tagParam.GeneratedName.Wrap())
+						.Write(", ")
+						.Write(tagParam.ParameterName)
+						.WriteLine(");");
+				}
+			}
+
+			if (tagParam.SkipOnNullOrEmpty)
+			{
+				writer.Write("if (").Write(tagParam.ParameterName).WriteLine(" != default)");
+				using (writer.OpenBlockScope())
+					EmitTag();
+			}
+			else
+			{
+				EmitTag();
+			}
+		}
+
+		return tagsListVariableName;
+	}
+
+	static void EmitSetStatus(
+		CodeWriter writer,
+		ActivityBasedGenerationTarget methodTarget,
+		string activityVariableName,
+		ActivityBasedParameterTarget? statusDescriptionParam,
+		ActivityBasedParameterTarget? exceptionParam
+	)
+	{
+		var statusCode = methodTarget.EventAttribute?.StatusCode ?? 0;
+		if (statusCode == 0)
+			return;
+
+		writer
+			.NewLine()
+			.Write(activityVariableName)
+			.Write(".SetStatus(")
+			.Write(PropertyLibrary.Activities.ActivityStatusCodeMap[statusCode]);
+
+		// Error
+		if (statusCode == 2)
+		{
+			if (statusDescriptionParam != null)
+			{
+				writer.Write(", ").Write(statusDescriptionParam.ParameterName);
+			}
+			else if (!string.IsNullOrWhiteSpace(methodTarget.EventAttribute?.StatusDescription))
+			{
+				writer.Write(", ").Write(methodTarget.EventAttribute!.StatusDescription!.Wrap());
+			}
+			else if (exceptionParam != null)
+			{
+				writer.Write(", ").Write(exceptionParam.ParameterName).Write("?.Message");
+			}
+		}
+
+		writer.WriteLine(");");
 	}
 }

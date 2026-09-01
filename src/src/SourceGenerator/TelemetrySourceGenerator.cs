@@ -32,22 +32,6 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator
 
 	public void Initialize(IncrementalGeneratorInitializationContext context)
 	{
-		// C# 8+ feature detection: controls nullable annotations and null-forgiving operators.
-		var supportsNullableAnnotations = context.ParseOptionsProvider.Select(
-			static (opts, _) =>
-				opts is not CSharpParseOptions csOpts || csOpts.LanguageVersion >= LanguageVersion.CSharp8
-		);
-
-		// IMeterFactory is .NET 8+ only — never available on .NET Framework 4.8.
-		var supportsIMeterFactory = context.ParseOptionsProvider.Select(
-			static (opts, _) =>
-				opts is not CSharpParseOptions csOpts || !csOpts.PreprocessorSymbolNames.Contains("NET48_OR_GREATER")
-		);
-
-		// Only .NET 8+ and .NET Framework 4.8+ are supported; fail fast for anything else.
-		// A compilation with no target-framework symbols at all (e.g. an in-memory test
-		// compilation) is treated as .NET 8+. The diagnostic is raised by the analyzer.
-
 		// RegisterPostInitializationOutput (not RegisterSourceOutput) ensures ForAttributeWithMetadataName
 		// can resolve attribute types before it runs.
 		context.RegisterPostInitializationOutput(ctx =>
@@ -61,46 +45,59 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator
 				ctx.AddSource(template.GetGeneratedFilename(), template.TemplateData);
 		});
 
-		// The generation context carries the framework logging sink, settings and capabilities.
+		// The generation context carries the framework logging sink, settings and the
+		// compilation-level capabilities (nullable annotations, IMeterFactory availability).
 		var generationContext = IncrementalPipeline.GenerationContextValueProvider<
 			TelemetryCapabilities,
 			TelemetrySourceGenerator
-		>(context, static (_, _, _, _) => TelemetryCapabilities.Instance, null);
+		>(context, BuildCapabilities, null);
 
 		// Create shared providers so Activities/Metrics pipelines aren't registered twice.
-		var activityProvider = context
-			.SyntaxProvider.ForAttributeWithMetadataName(
-				TemplateLibrary.Activities.ActivitySourceAttribute.TypeInfo.MetadataFullName,
-				static (node, token) => PipelineHelpers.HasActivityTargetAttribute(node, token),
-				static (ctx, cancellationToken) => PipelineHelpers.BuildActivityTransform(ctx, null, cancellationToken)
+		var activityProvider = IncrementalPipeline
+			.ForAttributeWithMetadataName(
+				context,
+				TemplateLibrary.Activities.ActivitySourceAttribute.TypeInfo,
+				transform: static (ctx, cancellationToken) =>
+					PipelineHelpers.BuildActivityTransform(ctx, null, cancellationToken),
+				predicate: static (node, token) => PipelineHelpers.HasActivityTargetAttribute(node, token),
+				trackingName: $"{nameof(TelemetrySourceGenerator)}_Activities"
 			)
-			.Where(static m => m.HasValue)
-			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_Activities");
+			.Where(static m => m.HasValue);
 
-		var meterProvider = context
-			.SyntaxProvider.ForAttributeWithMetadataName(
-				TemplateLibrary.Metrics.MeterAttribute.TypeInfo.MetadataFullName,
-				static (node, token) => PipelineHelpers.HasMeterTargetAttribute(node, token),
-				static (ctx, cancellationToken) => PipelineHelpers.BuildMeterTransform(ctx, null, cancellationToken)
+		var meterProvider = IncrementalPipeline
+			.ForAttributeWithMetadataName(
+				context,
+				TemplateLibrary.Metrics.MeterAttribute.TypeInfo,
+				transform: static (ctx, cancellationToken) =>
+					PipelineHelpers.BuildMeterTransform(ctx, null, cancellationToken),
+				predicate: static (node, token) => PipelineHelpers.HasMeterTargetAttribute(node, token),
+				trackingName: $"{nameof(TelemetrySourceGenerator)}_Meters"
 			)
-			.Where(static m => m.HasValue)
-			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_Meters");
+			.Where(static m => m.HasValue);
 
-		RegisterActivitiesGeneration(context, activityProvider, supportsNullableAnnotations, generationContext);
-		RegisterLoggerGeneration(context, supportsNullableAnnotations, supportsIMeterFactory, generationContext);
-		RegisterMetricsGeneration(
-			context,
-			meterProvider,
-			supportsNullableAnnotations,
-			supportsIMeterFactory,
-			generationContext
-		);
-		RegisterTelemetryNamesGeneration(
-			context,
-			activityProvider,
-			meterProvider,
-			supportsNullableAnnotations,
-			generationContext
+		RegisterActivitiesGeneration(context, activityProvider, generationContext);
+		RegisterLoggerGeneration(context, generationContext);
+		RegisterMetricsGeneration(context, meterProvider, generationContext);
+		RegisterTelemetryNamesGeneration(context, activityProvider, meterProvider, generationContext);
+	}
+
+	static TelemetryCapabilities BuildCapabilities(
+		Compilation compilation,
+		GenerationSettings settings,
+		ISourceGenLogger? logger,
+		CancellationToken token
+	)
+	{
+		token.ThrowIfCancellationRequested();
+
+		// C# 8+ feature detection: controls nullable annotations and null-forgiving operators.
+		// IMeterFactory is .NET 8+ only — never available on .NET Framework 4.8.
+		var parseOptions = compilation.SyntaxTrees.FirstOrDefault()?.Options as CSharpParseOptions;
+		return new(
+			SupportsNullableAnnotations: parseOptions is null
+				|| parseOptions.LanguageVersion >= LanguageVersion.CSharp8,
+			SupportsIMeterFactory: parseOptions is null
+				|| !parseOptions.PreprocessorSymbolNames.Contains("NET48_OR_GREATER")
 		);
 	}
 }

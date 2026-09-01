@@ -448,7 +448,7 @@ partial class ActivitySourceTargetClassEmitter
 			return false;
 		}
 
-		if (target.ActivitySourceGenerationAttribute?.GenerateDiagnosticsForMissingActivity.Value ?? true)
+		if (target.ActivitySourceGenerationAttribute?.GenerateDiagnosticsForMissingActivity ?? true)
 		{
 			// Here we're opting in to generate diagnostics for missing activity return/ params.
 			if (methodTarget.MethodType == ActivityMethodType.Activity)

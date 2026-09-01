@@ -117,7 +117,7 @@ partial class MeterTargetClassEmitter
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		if (methodTarget.InstrumentAttribute == null)
+		if (methodTarget.InstrumentAttribute == null || ShouldSkipEmit(methodTarget))
 			return;
 
 		var isMultiTarget = methodTarget.TargetGenerationState.IsMultiTarget;
@@ -125,36 +125,6 @@ partial class MeterTargetClassEmitter
 		var activityOwnsPublicMethod = methodTargets.HasFlag(GenerationType.Activities);
 		var loggingOwnsPublicMethod = !activityOwnsPublicMethod && methodTargets.HasFlag(GenerationType.Logging);
 		var metricsOwnsPublicMethod = !activityOwnsPublicMethod && !loggingOwnsPublicMethod;
-
-		// Validate return type: must be void or bool (for metrics-owned public methods)
-		var isVoidReturn = methodTarget.ReturnType.Identity.SpecialType == SpecialType.System_Void;
-		if (metricsOwnsPublicMethod && !isVoidReturn && !methodTarget.ReturnsBool)
-		{
-			return;
-		}
-
-		// Observable instruments cannot return bool
-		if (methodTarget.IsObservable && methodTarget.ReturnsBool)
-		{
-			return;
-		}
-
-		// Auto-counter instruments must return void (not bool)
-		if (methodTarget.InstrumentAttribute.IsAutoIncrement && methodTarget.ReturnsBool)
-		{
-			return;
-		}
-
-		// Auto-counter cannot also have a measurement parameter
-		if (methodTarget.InstrumentAttribute.IsAutoIncrement && methodTarget.MeasurementParameter != null)
-		{
-			return;
-		}
-
-		if (!methodTarget.InstrumentAttribute!.IsAutoIncrement && methodTarget.MeasurementParameter == null)
-		{
-			return;
-		}
 
 		logger?.Debug($"Emitting instrument method: {methodTarget.MethodName}.");
 
@@ -167,24 +137,7 @@ partial class MeterTargetClassEmitter
 				? PurviewTypeLibrary.System.Void.AsTypeReference()
 				: methodTarget.ReturnType;
 
-		var parameters = methodTarget
-			.Parameters.Select(p =>
-			{
-				if (!p.IsMeasurement)
-					return new ParameterDeclarationOptions(p.ParameterName, p.ParameterType);
-
-				var type = methodTarget.InstrumentMeasurementType;
-				if (methodTarget.MeasurementParameter!.IsMeasurement)
-					type = TypeLibrary.Metrics.SystemDiagnostics.Measurement.MakeGeneric(type);
-
-				if (methodTarget.MeasurementParameter!.IsIEnumerable)
-					type = TypeLibrary.System.GenericIEnumerable.MakeGeneric(type);
-
-				type = TypeLibrary.System.Func.MakeGeneric(type);
-
-				return new ParameterDeclarationOptions(p.ParameterName, new TypeReference(type));
-			})
-			.ToImmutableArray();
+		var parameters = BuildParameters(methodTarget);
 
 		writer.NewLine();
 
@@ -216,13 +169,64 @@ partial class MeterTargetClassEmitter
 		}
 	}
 
+	static bool ShouldSkipEmit(InstrumentTarget methodTarget)
+	{
+		var methodTargets = methodTarget.TargetGenerationState.MethodTargets;
+		var activityOwnsPublicMethod = methodTargets.HasFlag(GenerationType.Activities);
+		var loggingOwnsPublicMethod = !activityOwnsPublicMethod && methodTargets.HasFlag(GenerationType.Logging);
+		var metricsOwnsPublicMethod = !activityOwnsPublicMethod && !loggingOwnsPublicMethod;
+
+		// Metrics-owned public methods must return void or bool.
+		var isVoidReturn = methodTarget.ReturnType.Identity.SpecialType == SpecialType.System_Void;
+		if (metricsOwnsPublicMethod && !isVoidReturn && !methodTarget.ReturnsBool)
+			return true;
+
+		// Observable instruments cannot return bool.
+		if (methodTarget.IsObservable && methodTarget.ReturnsBool)
+			return true;
+
+		// Auto-counter instruments must return void (not bool).
+		if (methodTarget.InstrumentAttribute!.IsAutoIncrement && methodTarget.ReturnsBool)
+			return true;
+
+		// Auto-counter cannot also have a measurement parameter.
+		if (methodTarget.InstrumentAttribute.IsAutoIncrement && methodTarget.MeasurementParameter != null)
+			return true;
+
+		// Non-auto-counter instruments require a measurement parameter.
+		return !methodTarget.InstrumentAttribute.IsAutoIncrement && methodTarget.MeasurementParameter == null;
+	}
+
+	static ImmutableArray<ParameterDeclarationOptions> BuildParameters(InstrumentTarget methodTarget)
+	{
+		return
+		[
+			.. methodTarget.Parameters.Select(p =>
+			{
+				if (!p.IsMeasurement)
+					return new ParameterDeclarationOptions(p.ParameterName, p.ParameterType);
+
+				var type = methodTarget.InstrumentMeasurementType;
+				if (methodTarget.MeasurementParameter!.IsMeasurement)
+					type = TypeLibrary.Metrics.SystemDiagnostics.Measurement.MakeGeneric(type);
+
+				if (methodTarget.MeasurementParameter!.IsIEnumerable)
+					type = TypeLibrary.System.GenericIEnumerable.MakeGeneric(type);
+
+				type = TypeLibrary.System.Func.MakeGeneric(type);
+
+				return new ParameterDeclarationOptions(p.ParameterName, new TypeReference(type));
+			}),
+		];
+	}
+
 	static void EmitObservableInstrumentBodyTest(CodeWriter writer, InstrumentTarget method)
 	{
 		writer.Write("if (").Write(method.FieldName).WriteLine(" != null)");
 
 		using (writer.OpenBlockScope())
 		{
-			if (method.InstrumentAttribute?.ThrowOnAlreadyInitialized?.Value == true)
+			if (method.InstrumentAttribute?.ThrowOnAlreadyInitialized == true)
 			{
 				writer
 					.Write("throw new ")
@@ -247,8 +251,8 @@ partial class MeterTargetClassEmitter
 
 	static void EmitObservableInstrumentBody(CodeWriter writer, InstrumentTarget method, string? tagVariableName)
 	{
-		var unit = method.InstrumentAttribute!.Unit?.Value?.Wrap();
-		var description = method.InstrumentAttribute!.Description?.Value?.Wrap();
+		var unit = method.InstrumentAttribute!.Unit?.Wrap();
+		var description = method.InstrumentAttribute!.Description?.Wrap();
 
 		writer
 			.Write(method.FieldName)

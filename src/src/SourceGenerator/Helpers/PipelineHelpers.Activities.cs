@@ -13,11 +13,12 @@ partial class PipelineHelpers
 		GeneratorAttributeSyntaxContext context,
 		ISourceGenLogger? logger,
 		CancellationToken token
-	) => BuildActivityTarget(context.TargetSymbol as INamedTypeSymbol, context.SemanticModel, logger, token);
+	) =>
+		BuildActivityTarget(context.TargetSymbol as INamedTypeSymbol, context.SemanticModel.Compilation, logger, token);
 
 	public static GeneratorResult<ActivitySourceTarget?> BuildActivityTarget(
 		INamedTypeSymbol? interfaceSymbol,
-		SemanticModel semanticModel,
+		Compilation compilation,
 		ISourceGenLogger? logger,
 		CancellationToken token
 	)
@@ -42,12 +43,7 @@ partial class PipelineHelpers
 			);
 		}
 
-		var activitySourceAttribute = SharedHelpers.GetActivitySourceAttribute(
-			interfaceSymbol,
-			semanticModel,
-			logger,
-			token
-		);
+		var activitySourceAttribute = SharedHelpers.GetActivitySourceAttribute(interfaceSymbol, token);
 		if (activitySourceAttribute == null)
 		{
 			logger?.Fatal(
@@ -56,33 +52,19 @@ partial class PipelineHelpers
 			return GeneratorResult<ActivitySourceTarget?>.Empty;
 		}
 
-		var telemetryGeneration = SharedHelpers.GetTelemetryGenerationAttribute(
-			interfaceSymbol,
-			semanticModel,
-			logger,
-			token
-		);
-		var className = telemetryGeneration.ClassName.IsSet
-			? telemetryGeneration.ClassName.Value!
-			: GenerateClassName(interfaceSymbol.Name);
+		var telemetryGeneration = SharedHelpers.GetTelemetryGenerationAttribute(interfaceSymbol, compilation, token);
+		var className = telemetryGeneration.ClassName ?? GenerateClassName(interfaceSymbol.Name);
 
-		var activitySourceGenerationAttribute = SharedHelpers.GetActivitySourceGenerationAttribute(
-			semanticModel,
-			logger,
-			token
-		);
-		var activitySourceName =
-			activitySourceGenerationAttribute?.Name.IsSet == true ? activitySourceGenerationAttribute.Name.Value!
-			: activitySourceAttribute.Name.IsSet ? activitySourceAttribute.Name.Value!
-			: null;
+		var activitySourceGenerationAttribute = SharedHelpers.GetActivitySourceGenerationAttribute(compilation, token);
+		var activitySourceName = activitySourceGenerationAttribute?.Name ?? activitySourceAttribute.Name;
 
 		// Get naming convention from TelemetryGenerationAttribute (default to OpenTelemetry = 1)
-		var namingConvention = telemetryGeneration.NamingConvention.Value ?? 1;
+		var namingConvention = telemetryGeneration.NamingConvention;
 		var isLegacy = namingConvention == 0;
 
 		if (activitySourceName == null)
 		{
-			var assemblyName = semanticModel.Compilation.AssemblyName;
+			var assemblyName = compilation.AssemblyName;
 			if (!string.IsNullOrWhiteSpace(assemblyName))
 			{
 				// Legacy mode: lowercase the assembly name
@@ -109,7 +91,6 @@ partial class PipelineHelpers
 			activitySourceAttribute,
 			activitySourceGenerationAttribute,
 			telemetryGeneration,
-			semanticModel,
 			interfaceSymbol,
 			logger,
 			token
@@ -130,7 +111,7 @@ partial class PipelineHelpers
 				ActivityMethods: activityMethods,
 				ActivityTargetAttributeRecord: activitySourceAttribute
 			),
-			TelemetryRules.GetInterfaceLevelDiagnostics(interfaceSymbol, semanticModel.Compilation, token)
+			TelemetryRules.GetInterfaceLevelDiagnostics(interfaceSymbol, compilation, token)
 		);
 	}
 
@@ -139,7 +120,6 @@ partial class PipelineHelpers
 		ActivitySourceAttributeRecord activitySourceAttribute,
 		ActivitySourceGenerationAttributeRecord? activitySourceGenerationAttribute,
 		TelemetryGenerationAttributeRecord telemetryGeneration,
-		SemanticModel semanticModel,
 		INamedTypeSymbol interfaceSymbol,
 		ISourceGenLogger? logger,
 		CancellationToken token
@@ -148,21 +128,15 @@ partial class PipelineHelpers
 		token.ThrowIfCancellationRequested();
 
 		// Get naming convention from TelemetryGenerationAttribute (default to OpenTelemetry = 1)
-		var namingConvention = telemetryGeneration?.NamingConvention.Value ?? 1;
+		var namingConvention = telemetryGeneration.NamingConvention;
 
 		var prefix = GeneratePrefix(activitySourceGenerationAttribute, activitySourceAttribute, token);
-		var defaultToTags =
-			activitySourceGenerationAttribute?.DefaultToTags.IsSet == true
-				? activitySourceGenerationAttribute.DefaultToTags.Value!.Value
-				: activitySourceAttribute.DefaultToTags?.IsSet != true
-					|| activitySourceAttribute.DefaultToTags.Value!.Value; // Default value
+		var defaultToTags = activitySourceGenerationAttribute?.DefaultToTags ?? activitySourceAttribute.DefaultToTags;
 
-		var lowercaseBaggageAndTagKeys =
-			activitySourceAttribute.LowercaseBaggageAndTagKeys?.IsSet != true
-			|| activitySourceAttribute.LowercaseBaggageAndTagKeys.Value!.Value; // Default value
+		var lowercaseBaggageAndTagKeys = activitySourceAttribute.LowercaseBaggageAndTagKeys;
 
 		List<ActivityBasedGenerationTarget> methodTargets = [];
-		foreach (var method in GetAllInterfaceMethods(interfaceSymbol, semanticModel.Compilation, token))
+		foreach (var method in GetAllInterfaceMethods(interfaceSymbol, token))
 		{
 			token.ThrowIfCancellationRequested();
 
@@ -199,14 +173,12 @@ partial class PipelineHelpers
 
 			var (methodType, isInferred) = GetMethodType(
 				method,
-				semanticModel,
 				logger,
 				token,
 				out var activityAttribute,
 				out var eventAttribute
 			);
-			var activityOrEventName =
-				activityAttribute?.Name.IsSet == true ? activityAttribute.Value.Name.Value : eventAttribute?.Name.Value;
+			var activityOrEventName = activityAttribute?.Name ?? eventAttribute?.Name;
 
 			if (string.IsNullOrWhiteSpace(activityOrEventName))
 				activityOrEventName = method.Name;
@@ -219,7 +191,6 @@ partial class PipelineHelpers
 				defaultToTags,
 				lowercaseBaggageAndTagKeys,
 				namingConvention,
-				semanticModel,
 				logger,
 				token
 			);
@@ -270,7 +241,6 @@ partial class PipelineHelpers
 		bool defaultToTags,
 		bool lowercaseBaggageAndTagKeys,
 		int namingConvention,
-		SemanticModel semanticModel,
 		ISourceGenLogger? logger,
 		CancellationToken token
 	)
@@ -281,99 +251,26 @@ partial class PipelineHelpers
 			token.ThrowIfCancellationRequested();
 
 			var parameterType = TypeReference.Create(parameter.Type);
-			var destination = defaultToTags ? ActivityParameterDestination.Tag : ActivityParameterDestination.Baggage;
-			if (
-				Utilities.TryContainsAttribute(parameter, TemplateLibrary.Shared.TagAttribute, token, out var attribute)
-			)
-			{
-				logger?.Debug($"Found explicit tag: {parameter.Name}.");
-				destination = ActivityParameterDestination.Tag;
-			}
-			else if (
-				Utilities.TryContainsAttribute(
-					parameter,
-					TemplateLibrary.Activities.BaggageAttribute,
-					token,
-					out attribute
-				)
-			)
-			{
-				logger?.Debug($"Found explicit baggage: {parameter.Name}.");
-				destination = ActivityParameterDestination.Baggage;
-			}
-			else if (Utilities.ContainsAttribute(parameter, TemplateLibrary.Activities.EscapeAttribute, token))
-			{
-				logger?.Debug($"Found escape parameter: {parameter.Name}.");
-				destination = ActivityParameterDestination.Escape;
-			}
-			else if (
-				Utilities.ContainsAttribute(parameter, TemplateLibrary.Activities.StatusDescriptionAttribute, token)
-			)
-			{
-				logger?.Debug($"Found status description parameter: {parameter.Name}.");
-				destination = ActivityParameterDestination.StatusDescription;
-			}
-			else if (parameterType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.Activity))
-			{
-				destination = ActivityParameterDestination.Activity;
-			}
-			else if (
-				parameterType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.ActivityTagsCollection)
-				|| TypeLibrary.Activities.SystemDiagnostics.ActivityTagIEnumerable.Equals(parameterType)
-				|| parameterType.Identity.Equals(TypeLibrary.System.TagList)
-			)
-			{
-				destination = ActivityParameterDestination.TagsEnumerable;
-			}
-			else if (
-				parameterType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.ActivityContext)
-				|| (
-					parameter.Name == PropertyLibrary.Activities.ParentIdParameterName
-					&& parameterType.Identity.SpecialType == SpecialType.System_String
-				)
-			)
-			{
-				destination = ActivityParameterDestination.ParentContextOrId;
-			}
-			else if (
-				parameterType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.ActivityLinkArray)
-				|| TypeLibrary.Activities.SystemDiagnostics.ActivityLinkIEnumerable.Equals(parameterType)
-			)
-			{
-				destination = ActivityParameterDestination.LinksEnumerable;
-			}
-			else if (
-				parameter.Name == PropertyLibrary.Activities.StartTimeParameterName
-				&& parameterType.Identity.Equals(TypeLibrary.System.DateTimeOffset)
-			)
-			{
-				destination = ActivityParameterDestination.StartTime;
-			}
-			else if (
-				parameter.Name == PropertyLibrary.Activities.TimeStampParameterName
-				&& parameterType.Identity.Equals(TypeLibrary.System.DateTimeOffset)
-			)
-			{
-				destination = ActivityParameterDestination.Timestamp;
-			}
-			else
-			{
-				// destination is already set to default.
-				logger?.Debug($"Inferring {(defaultToTags ? "tag" : "baggage")}: {parameter.Name}.");
-			}
+			var (destination, attribute) = GetParameterDestination(
+				parameter,
+				parameterType,
+				defaultToTags,
+				logger,
+				token
+			);
 
 			TagOrBaggageAttributeRecord? tagOrBaggageAttribute = null;
 			if (attribute != null)
 			{
-				tagOrBaggageAttribute = SharedHelpers.GetTagOrBaggageAttribute(attribute, semanticModel, logger, token);
+				tagOrBaggageAttribute = SharedHelpers.GetTagOrBaggageAttribute(attribute, token);
 			}
 
 			// Check for ExcludeTargetsAttribute
-			var excludeTargets = SharedHelpers.GetExcludeTargetsAttribute(parameter, semanticModel, logger, token);
+			var excludeTargets = SharedHelpers.GetExcludeTargetsAttribute(parameter, token);
 
 			var parameterName = parameter.Name;
 			var generatedName = GenerateParameterName(
-				tagOrBaggageAttribute?.Name.Value ?? parameterName,
+				tagOrBaggageAttribute?.Name ?? parameterName,
 				prefix,
 				lowercaseBaggageAndTagKeys,
 				namingConvention
@@ -397,7 +294,6 @@ partial class PipelineHelpers
 
 	static (ActivityMethodType, bool) GetMethodType(
 		IMethodSymbol method,
-		SemanticModel semanticModel,
 		ISourceGenLogger? logger,
 		CancellationToken token,
 		out ActivityAttributeRecord? activityAttribute,
@@ -408,14 +304,14 @@ partial class PipelineHelpers
 
 		token.ThrowIfCancellationRequested();
 
-		activityAttribute = SharedHelpers.GetActivityGenAttribute(method, semanticModel, logger, token);
+		activityAttribute = SharedHelpers.GetActivityGenAttribute(method, token);
 		if (activityAttribute != null)
 		{
 			logger?.Debug($"Found explicit activity: {method.Name}.");
 			return (ActivityMethodType.Activity, false);
 		}
 
-		eventAttribute = SharedHelpers.GetActivityEventAttribute(method, semanticModel, logger, token);
+		eventAttribute = SharedHelpers.GetActivityEventAttribute(method, token);
 		if (eventAttribute != null)
 		{
 			logger?.Debug($"Found explicit event: {method.Name}.");
@@ -463,6 +359,84 @@ partial class PipelineHelpers
 		return (ActivityMethodType.Activity, true);
 	}
 
+	static (ActivityParameterDestination Destination, AttributeData? Attribute) GetParameterDestination(
+		IParameterSymbol parameter,
+		TypeReference parameterType,
+		bool defaultToTags,
+		ISourceGenLogger? logger,
+		CancellationToken token
+	)
+	{
+		var destination = defaultToTags ? ActivityParameterDestination.Tag : ActivityParameterDestination.Baggage;
+
+		if (Utilities.TryContainsAttribute(parameter, TemplateLibrary.Shared.TagAttribute, token, out var attribute))
+		{
+			logger?.Debug($"Found explicit tag: {parameter.Name}.");
+			return (ActivityParameterDestination.Tag, attribute);
+		}
+
+		if (
+			Utilities.TryContainsAttribute(parameter, TemplateLibrary.Activities.BaggageAttribute, token, out attribute)
+		)
+		{
+			logger?.Debug($"Found explicit baggage: {parameter.Name}.");
+			return (ActivityParameterDestination.Baggage, attribute);
+		}
+
+		if (Utilities.ContainsAttribute(parameter, TemplateLibrary.Activities.EscapeAttribute, token))
+		{
+			logger?.Debug($"Found escape parameter: {parameter.Name}.");
+			return (ActivityParameterDestination.Escape, null);
+		}
+
+		if (Utilities.ContainsAttribute(parameter, TemplateLibrary.Activities.StatusDescriptionAttribute, token))
+		{
+			logger?.Debug($"Found status description parameter: {parameter.Name}.");
+			return (ActivityParameterDestination.StatusDescription, null);
+		}
+
+		if (parameterType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.Activity))
+			return (ActivityParameterDestination.Activity, null);
+
+		if (
+			parameterType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.ActivityTagsCollection)
+			|| TypeLibrary.Activities.SystemDiagnostics.ActivityTagIEnumerable.Equals(parameterType)
+			|| parameterType.Identity.Equals(TypeLibrary.System.TagList)
+		)
+			return (ActivityParameterDestination.TagsEnumerable, null);
+
+		if (
+			parameterType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.ActivityContext)
+			|| (
+				parameter.Name == PropertyLibrary.Activities.ParentIdParameterName
+				&& parameterType.Identity.SpecialType == SpecialType.System_String
+			)
+		)
+			return (ActivityParameterDestination.ParentContextOrId, null);
+
+		if (
+			parameterType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.ActivityLinkArray)
+			|| TypeLibrary.Activities.SystemDiagnostics.ActivityLinkIEnumerable.Equals(parameterType)
+		)
+			return (ActivityParameterDestination.LinksEnumerable, null);
+
+		if (
+			parameter.Name == PropertyLibrary.Activities.StartTimeParameterName
+			&& parameterType.Identity.Equals(TypeLibrary.System.DateTimeOffset)
+		)
+			return (ActivityParameterDestination.StartTime, null);
+
+		if (
+			parameter.Name == PropertyLibrary.Activities.TimeStampParameterName
+			&& parameterType.Identity.Equals(TypeLibrary.System.DateTimeOffset)
+		)
+			return (ActivityParameterDestination.Timestamp, null);
+
+		// Infer tag/baggage based on the interface default.
+		logger?.Debug($"Inferring {(defaultToTags ? "tag" : "baggage")}: {parameter.Name}.");
+		return (destination, null);
+	}
+
 	static string? GeneratePrefix(
 		ActivitySourceGenerationAttributeRecord? activitySourceGenerationRecord,
 		ActivitySourceAttributeRecord activitySourceRecord,
@@ -472,14 +446,11 @@ partial class PipelineHelpers
 		token.ThrowIfCancellationRequested();
 
 		string? prefix = null;
-		var separator =
-			activitySourceGenerationRecord?.BaggageAndTagSeparator.IsSet == true
-				? activitySourceGenerationRecord.BaggageAndTagSeparator.Or(".")
-				: ".";
+		var separator = activitySourceGenerationRecord?.BaggageAndTagSeparator ?? ".";
 
-		var activitySourceGenPrefix = activitySourceGenerationRecord?.BaggageAndTagPrefix.Value;
-		var activitySourcePrefix = activitySourceRecord.BaggageAndTagPrefix.Value;
-		var includeActivitySource = activitySourceRecord.IncludeActivitySourcePrefix.Value ?? true;
+		var activitySourceGenPrefix = activitySourceGenerationRecord?.BaggageAndTagPrefix;
+		var activitySourcePrefix = activitySourceRecord.BaggageAndTagPrefix;
+		var includeActivitySource = activitySourceRecord.IncludeActivitySourcePrefix;
 
 		if (!string.IsNullOrWhiteSpace(activitySourceGenPrefix))
 			prefix = activitySourceGenPrefix + separator;

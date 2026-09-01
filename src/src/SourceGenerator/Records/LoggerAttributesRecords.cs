@@ -1,30 +1,11 @@
 namespace Purview.Telemetry.SourceGenerator.Records;
 
-sealed record LoggerAttributeRecord(
-	AttributeValue<int> DefaultLevel,
-	AttributeStringValue CustomPrefix,
-	AttributeValue<int> PrefixType,
-	AttributeValue<int> GenerationMode
-);
+sealed record LoggerAttributeRecord(int? DefaultLevel, string? CustomPrefix, int? PrefixType, int? GenerationMode);
 
-sealed record LoggerGenerationAttributeRecord(
-	AttributeValue<int> DefaultLevel,
-	AttributeValue<int> GenerationMode,
-	AttributeValue<int> DefaultPrefixType
-);
+sealed record LoggerGenerationAttributeRecord(int? DefaultLevel, int? GenerationMode, int? DefaultPrefixType);
 
-sealed record LogAttributeRecord(
-	AttributeValue<int> Level,
-	AttributeStringValue MessageTemplate,
-	AttributeValue<int> EventId,
-	AttributeStringValue Name,
-	AttributeValue<int> GenerationMode
-);
+sealed record LogAttributeRecord(int? Level, string? MessageTemplate, int? EventId, string? Name, int? GenerationMode);
 
-sealed record LogPropertiesAttributeRecord(
-	AttributeValue<bool> OmitReferenceName,
-	AttributeValue<bool> SkipNullProperties,
-	AttributeValue<bool> Transitive
-);
+sealed record LogPropertiesAttributeRecord(bool OmitReferenceName, bool SkipNullProperties, bool Transitive);
 
-sealed record ExpandEnumerableAttributeRecord(AttributeValue<int> MaximumValueCount);
+sealed record ExpandEnumerableAttributeRecord(int MaximumValueCount);

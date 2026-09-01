@@ -9,8 +9,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Purview.Telemetry.SourceGenerator.Refactorings;
 
-[ExportCodeRefactoringProvider(LanguageNames.CSharp, Name = nameof(ConvertILoggerToTelemetryRefactoringProvider))]
 [Shared]
+[ExportCodeRefactoringProvider(LanguageNames.CSharp, Name = nameof(ConvertILoggerToTelemetryRefactoringProvider))]
 public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactoringProvider
 {
 	// Matches structured-logging template placeholders: {Name}, {@Name} (destructure), {$Name} (stringify).

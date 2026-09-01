@@ -3,6 +3,9 @@
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<IsRoslynComponent>true</IsRoslynComponent>
 		<IsPackable>true</IsPackable>
+		<!-- IDE0005 (unused usings) analysis is gated on GenerateDocumentationFile; the
+		     XML doc file is not packed (only the DLL is). -->
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<COPYRIGHT_YEAR>2026</COPYRIGHT_YEAR>
 		<Title>Purview Telemetry Source Generator</Title>
 		<Description>.NET Source Generator for interface-based telemetry generating tracing, logs, and metrics.</Description>
@@ -33,10 +36,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="../../../assets/images/purview-logo.jpg" Pack="true" PackagePath="" />
-	</ItemGroup>
-	<ItemGroup>
-		<Compile Remove="Templates\Sources\**\*.cs" />
-		<EmbeddedResource Include="Templates\Sources\**\*.cs" />
 	</ItemGroup>
 	<!-- Package the build output into the "analyser" slot in the NuGet package -->
 	<ItemGroup>

@@ -17,7 +17,57 @@ static partial class Utilities
 		GenerationType requestedType
 	)
 	{
-		// Optimized: Count in single pass instead of multiple enumerations
+		var (activityCount, loggingCount, metricsCount) = CountAttributeFamilies(method);
+
+		// Intra-family conflicts (multiple attributes within same family) are always an error.
+		var multiGenerationTargetsNotSupported = activityCount > 1 || loggingCount > 1 || metricsCount > 1;
+
+		var interfaceTargetCount = CountFlags(generationType);
+		var methodTargets = ToGenerationType(activityCount > 0, loggingCount > 0, metricsCount > 0);
+		var methodTargetFamilyCount = CountFlags(methodTargets);
+		var isMultiTarget = methodTargetFamilyCount > 1;
+
+		// If the interface has multiple target families, methods need explicit attributes (no inference).
+		var inferenceNotSupportedWithMultiTargeting = interfaceTargetCount > 1 && methodTargetFamilyCount == 0;
+
+		// Method has explicit attributes for a family not registered on the interface.
+		var raiseMissingInterfaceSource = (methodTargets & ~generationType) != GenerationType.None;
+
+		// Valid for the requested target when there are no errors, and either the interface is
+		// single-target (inference applies) or the method targets the requested family explicitly.
+#pragma warning disable IDE0072 // Add missing cases
+		var isValid =
+			!multiGenerationTargetsNotSupported
+			&& !inferenceNotSupportedWithMultiTargeting
+			&& !raiseMissingInterfaceSource
+			&& (
+				interfaceTargetCount <= 1
+				|| requestedType switch
+				{
+					GenerationType.Activities => activityCount > 0,
+					GenerationType.Logging => loggingCount > 0,
+					GenerationType.Metrics => metricsCount > 0,
+					_ => false,
+				}
+			);
+#pragma warning restore IDE0072 // Add missing cases
+
+		// Activity parameter without an Activity target is flagged for diagnostics.
+		var activityParameterWithoutTarget = activityCount == 0 ? FindActivityParameterWithoutTarget(method) : null;
+
+		return new(
+			IsValid: isValid,
+			RaiseInferenceNotSupportedWithMultiTargeting: inferenceNotSupportedWithMultiTargeting,
+			RaiseMultiGenerationTargetsNotSupported: multiGenerationTargetsNotSupported,
+			IsMultiTarget: isMultiTarget,
+			MethodTargets: methodTargets,
+			ActivityParameterWithoutTarget: activityParameterWithoutTarget,
+			RaiseMissingInterfaceSource: raiseMissingInterfaceSource
+		);
+	}
+
+	static (int ActivityCount, int LoggingCount, int MetricsCount) CountAttributeFamilies(IMethodSymbol method)
+	{
 		var activityCount = 0;
 		var loggingCount = 0;
 		var metricsCount = 0;
@@ -29,144 +79,74 @@ static partial class Utilities
 
 			var attributeType = TypeReference.Create(attribute.AttributeClass);
 
-			// Check activities
-			if (
-				TemplateLibrary.Activities.ActivityAttribute == attributeType
-				|| TemplateLibrary.Activities.EventAttribute == attributeType
-				|| TemplateLibrary.Activities.ContextAttribute == attributeType
-			)
-			{
+			if (IsActivityAttribute(attributeType))
 				activityCount++;
-			}
-			// Check logging
-			else if (
-				TemplateLibrary.Logging.LogAttribute == attributeType
-				|| TemplateLibrary.Logging.TraceAttribute == attributeType
-				|| TemplateLibrary.Logging.DebugAttribute == attributeType
-				|| TemplateLibrary.Logging.InfoAttribute == attributeType
-				|| TemplateLibrary.Logging.WarningAttribute == attributeType
-				|| TemplateLibrary.Logging.ErrorAttribute == attributeType
-				|| TemplateLibrary.Logging.CriticalAttribute == attributeType
-			)
-			{
+			else if (IsLoggingAttribute(attributeType))
 				loggingCount++;
-			}
-			// Check metrics
-			else if (
-				TemplateLibrary.Metrics.CounterAttribute == attributeType
-				|| TemplateLibrary.Metrics.AutoCounterAttribute == attributeType
-				|| TemplateLibrary.Metrics.UpDownCounterAttribute == attributeType
-				|| TemplateLibrary.Metrics.HistogramAttribute == attributeType
-				|| TemplateLibrary.Metrics.ObservableCounterAttribute == attributeType
-				|| TemplateLibrary.Metrics.ObservableGaugeAttribute == attributeType
-				|| TemplateLibrary.Metrics.ObservableUpDownCounterAttribute == attributeType
-			)
-			{
+			else if (IsMetricsAttribute(attributeType))
 				metricsCount++;
-			}
 		}
 
-		var inferenceNotSupportedWithMultiTargeting = false;
-		var multiGenerationTargetsNotSupported = false;
-		var raiseMissingInterfaceSource = false;
+		return (activityCount, loggingCount, metricsCount);
+	}
 
-		// Check for intra-family conflicts (multiple attributes within same family)
-		// This is always an error - can only have one activity/event/context, one log level, one instrument
-		if (activityCount > 1 || loggingCount > 1 || metricsCount > 1)
-			multiGenerationTargetsNotSupported = true;
+	static bool IsActivityAttribute(TypeReference attributeType) =>
+		TemplateLibrary.Activities.ActivityAttribute == attributeType
+		|| TemplateLibrary.Activities.EventAttribute == attributeType
+		|| TemplateLibrary.Activities.ContextAttribute == attributeType;
 
-		// Count how many families are present on the interface
-		var interfaceTargetCount = 0;
-		if (generationType.HasFlag(GenerationType.Activities))
-			interfaceTargetCount++;
-		if (generationType.HasFlag(GenerationType.Logging))
-			interfaceTargetCount++;
-		if (generationType.HasFlag(GenerationType.Metrics))
-			interfaceTargetCount++;
+	static bool IsLoggingAttribute(TypeReference attributeType) =>
+		TemplateLibrary.Logging.LogAttribute == attributeType
+		|| TemplateLibrary.Logging.TraceAttribute == attributeType
+		|| TemplateLibrary.Logging.DebugAttribute == attributeType
+		|| TemplateLibrary.Logging.InfoAttribute == attributeType
+		|| TemplateLibrary.Logging.WarningAttribute == attributeType
+		|| TemplateLibrary.Logging.ErrorAttribute == attributeType
+		|| TemplateLibrary.Logging.CriticalAttribute == attributeType;
 
-		// Determine which target families this method has explicit attributes for
-		var methodTargets = GenerationType.None;
-		if (activityCount > 0)
-			methodTargets |= GenerationType.Activities;
-		if (loggingCount > 0)
-			methodTargets |= GenerationType.Logging;
-		if (metricsCount > 0)
-			methodTargets |= GenerationType.Metrics;
+	static bool IsMetricsAttribute(TypeReference attributeType) =>
+		TemplateLibrary.Metrics.CounterAttribute == attributeType
+		|| TemplateLibrary.Metrics.AutoCounterAttribute == attributeType
+		|| TemplateLibrary.Metrics.UpDownCounterAttribute == attributeType
+		|| TemplateLibrary.Metrics.HistogramAttribute == attributeType
+		|| TemplateLibrary.Metrics.ObservableCounterAttribute == attributeType
+		|| TemplateLibrary.Metrics.ObservableGaugeAttribute == attributeType
+		|| TemplateLibrary.Metrics.ObservableUpDownCounterAttribute == attributeType;
 
-		// Count how many target families this method targets
-		var methodTargetFamilyCount = 0;
-		if (methodTargets.HasFlag(GenerationType.Activities))
-			methodTargetFamilyCount++;
-		if (methodTargets.HasFlag(GenerationType.Logging))
-			methodTargetFamilyCount++;
-		if (methodTargets.HasFlag(GenerationType.Metrics))
-			methodTargetFamilyCount++;
+	static int CountFlags(GenerationType type)
+	{
+		var count = 0;
+		if (type.HasFlag(GenerationType.Activities))
+			count++;
+		if (type.HasFlag(GenerationType.Logging))
+			count++;
+		if (type.HasFlag(GenerationType.Metrics))
+			count++;
+		return count;
+	}
 
-		// This method is multi-target if it has attributes from more than one family
-		var isMultiTarget = methodTargetFamilyCount > 1;
+	static GenerationType ToGenerationType(bool activities, bool logging, bool metrics)
+	{
+		var result = GenerationType.None;
+		if (activities)
+			result |= GenerationType.Activities;
+		if (logging)
+			result |= GenerationType.Logging;
+		if (metrics)
+			result |= GenerationType.Metrics;
+		return result;
+	}
 
-		// If interface has multiple target families, methods need explicit attributes (no inference)
-		if (interfaceTargetCount > 1)
+	static string? FindActivityParameterWithoutTarget(IMethodSymbol method)
+	{
+		foreach (var param in method.Parameters)
 		{
-			// If no explicit attribute for any target, that's the inference error
-			if (methodTargetFamilyCount == 0)
-				inferenceNotSupportedWithMultiTargeting = true;
+			var paramType = TypeReference.Create(param.Type);
+			if (paramType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.Activity))
+				return param.Name;
 		}
 
-		// Check if the method has explicit attributes for a family not registered on the interface.
-		// e.g. method has [AutoCounter] but interface only has [Logger] (missing [Meter]).
-		var missingInterfaceTargets = methodTargets & ~generationType;
-		if (missingInterfaceTargets != GenerationType.None)
-			raiseMissingInterfaceSource = true;
-
-		// Determine if this method is valid for the requested target type
-		var isValid =
-			!multiGenerationTargetsNotSupported
-			&& !inferenceNotSupportedWithMultiTargeting
-			&& !raiseMissingInterfaceSource;
-		if (isValid)
-		{
-			// Method is valid for this target if it has an explicit attribute for this target,
-			// OR if it's single-target generation and can use inference
-			if (interfaceTargetCount > 1)
-			{
-				// Multi-target interface: must have explicit attribute for this target
-				isValid = requestedType switch
-				{
-					GenerationType.Activities => activityCount > 0,
-					GenerationType.Logging => loggingCount > 0,
-					GenerationType.Metrics => metricsCount > 0,
-					_ => false,
-				};
-			}
-			// Single-target interface: original inference logic applies
-		}
-
-		// Check for Activity parameter without Activity target
-		string? activityParameterWithoutTarget = null;
-		if (activityCount == 0)
-		{
-			// No Activity attribute, check if there are Activity parameters
-			foreach (var param in method.Parameters)
-			{
-				var paramType = TypeReference.Create(param.Type);
-				if (paramType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.Activity))
-				{
-					activityParameterWithoutTarget = param.Name;
-					break;
-				}
-			}
-		}
-
-		return new(
-			IsValid: isValid,
-			RaiseInferenceNotSupportedWithMultiTargeting: inferenceNotSupportedWithMultiTargeting,
-			RaiseMultiGenerationTargetsNotSupported: multiGenerationTargetsNotSupported,
-			IsMultiTarget: isMultiTarget,
-			MethodTargets: methodTargets,
-			ActivityParameterWithoutTarget: activityParameterWithoutTarget,
-			RaiseMissingInterfaceSource: raiseMissingInterfaceSource
-		);
+		return null;
 	}
 
 	public static string WithComma(this string value, bool andSpace = true) => value + ',' + (andSpace ? ' ' : null);

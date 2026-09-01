@@ -18,7 +18,7 @@ static class TelemetryAttributeNames
 			PurviewTelemetryNamespace
 		);
 
-		/// <summary>The <see cref="System.Diagnostics.ActivitySource"/> type.</summary>
+		/// <summary>The <c>System.Diagnostics.ActivitySource</c> type.</summary>
 		public static readonly TypeIdentity ActivitySource = new("ActivitySource", SystemDiagnosticsNamespace);
 	}
 

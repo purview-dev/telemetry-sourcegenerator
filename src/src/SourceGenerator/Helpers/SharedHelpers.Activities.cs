@@ -6,17 +6,11 @@ namespace Purview.Telemetry.SourceGenerator.Helpers;
 partial class SharedHelpers
 {
 	public static ActivitySourceGenerationAttributeRecord? GetActivitySourceGenerationAttribute(
-		SemanticModel semanticModel,
-		ISourceGenLogger? logger,
+		Compilation compilation,
 		CancellationToken token
-	) => GetActivitySourceGenerationAttribute(semanticModel.Compilation.Assembly, semanticModel, logger, token);
+	) => GetActivitySourceGenerationAttribute(compilation.Assembly, token);
 
-	public static ActivitySourceAttributeRecord? GetActivitySourceAttribute(
-		ISymbol symbol,
-		SemanticModel semanticModel,
-		ISourceGenLogger? logger,
-		CancellationToken token
-	)
+	public static ActivitySourceAttributeRecord? GetActivitySourceAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -30,19 +24,20 @@ partial class SharedHelpers
 			return null;
 		}
 
-		return new(
-			Name: GetAttributeStringValue(attributeData!, "name"),
-			DefaultToTags: GetAttributeValue<bool>(attributeData!, "defaultToTags", true),
-			BaggageAndTagPrefix: GetAttributeStringValue(attributeData!, "baggageAndTagPrefix"),
-			IncludeActivitySourcePrefix: GetAttributeValue<bool>(attributeData!, "includeActivitySourcePrefix", true),
-			LowercaseBaggageAndTagKeys: GetAttributeValue<bool>(attributeData!, "lowercaseBaggageAndTagKeys", true)
-		);
+		var data = ActivitySourceAttributeData.FromAttributeData(attributeData!);
+		return data.Exists
+			? new(
+				Name: NullIfWhitespace(data.Name),
+				DefaultToTags: data.DefaultToTags,
+				BaggageAndTagPrefix: NullIfWhitespace(data.BaggageAndTagPrefix),
+				IncludeActivitySourcePrefix: data.IncludeActivitySourcePrefix,
+				LowercaseBaggageAndTagKeys: data.LowercaseBaggageAndTagKeys
+			)
+			: null;
 	}
 
 	public static ActivitySourceGenerationAttributeRecord? GetActivitySourceGenerationAttribute(
 		ISymbol symbol,
-		SemanticModel semanticModel,
-		ISourceGenLogger? logger,
 		CancellationToken token
 	)
 	{
@@ -58,26 +53,20 @@ partial class SharedHelpers
 			return null;
 		}
 
-		return new(
-			Name: GetAttributeStringValue(attributeData!, "name"),
-			DefaultToTags: GetAttributeValue<bool>(attributeData!, "defaultToTags"),
-			BaggageAndTagPrefix: GetAttributeStringValue(attributeData!, "baggageAndTagPrefix"),
-			BaggageAndTagSeparator: GetAttributeStringValue(attributeData!, "baggageAndTagSeparator", "."),
-			LowercaseBaggageAndTagKeys: GetAttributeValue<bool>(attributeData!, "lowercaseBaggageAndTagKeys", true),
-			GenerateDiagnosticsForMissingActivity: GetAttributeValue<bool>(
-				attributeData!,
-				"generateDiagnosticsForMissingActivity",
-				true
+		var data = ActivitySourceGenerationAttributeData.FromAttributeData(attributeData!);
+		return data.Exists
+			? new(
+				Name: NullIfWhitespace(data.Name),
+				DefaultToTags: data.DefaultToTags,
+				BaggageAndTagPrefix: NullIfWhitespace(data.BaggageAndTagPrefix),
+				BaggageAndTagSeparator: NullIfWhitespace(data.BaggageAndTagSeparator),
+				LowercaseBaggageAndTagKeys: data.LowercaseBaggageAndTagKeys,
+				GenerateDiagnosticsForMissingActivity: data.GenerateDiagnosticsForMissingActivity
 			)
-		);
+			: null;
 	}
 
-	public static ActivityAttributeRecord? GetActivityGenAttribute(
-		ISymbol symbol,
-		SemanticModel semanticModel,
-		ISourceGenLogger? logger,
-		CancellationToken token
-	)
+	public static ActivityAttributeRecord? GetActivityGenAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -91,19 +80,13 @@ partial class SharedHelpers
 			return null;
 		}
 
-		return new(
-			Name: GetAttributeStringValue(attributeData!, "name"),
-			Kind: GetAttributeValue<int>(attributeData!, "kind", PropertyLibrary.Activities.DefaultActivityKind),
-			CreateOnly: GetAttributeValue<bool>(attributeData!, "createOnly")
-		);
+		var data = ActivityAttributeData.FromAttributeData(attributeData!);
+		return data.Exists
+			? new(Name: NullIfWhitespace(data.Name), Kind: data.Kind, CreateOnly: data.CreateOnly)
+			: null;
 	}
 
-	public static EventAttributeRecord? GetActivityEventAttribute(
-		ISymbol symbol,
-		SemanticModel semanticModel,
-		ISourceGenLogger? logger,
-		CancellationToken token
-	)
+	public static EventAttributeRecord? GetActivityEventAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (
 			!Utilities.TryContainsAttribute(
@@ -117,13 +100,16 @@ partial class SharedHelpers
 			return null;
 		}
 
-		return new(
-			Name: GetAttributeStringValue(attributeData!, "name"),
-			UseRecordExceptionRules: GetAttributeValue<bool>(attributeData!, "useRecordExceptionRules"),
-			RecordExceptionEscape: GetAttributeValue<bool>(attributeData!, "recordExceptionEscape"),
-			StatusCode: GetAttributeValue<int>(attributeData!, "statusCode"),
-			StatusDescription: GetAttributeStringValue(attributeData!, "statusDescription")
-		);
+		var data = EventAttributeData.FromAttributeData(attributeData!);
+		return data.Exists
+			? new(
+				Name: NullIfWhitespace(data.Name),
+				UseRecordExceptionRules: data.UseRecordExceptionRules,
+				RecordExceptionEscape: data.RecordExceptionEscape,
+				StatusCode: data.StatusCode,
+				StatusDescription: NullIfWhitespace(data.StatusDescription)
+			)
+			: null;
 	}
 
 	public static bool IsActivityMethod(IMethodSymbol method, CancellationToken token)
