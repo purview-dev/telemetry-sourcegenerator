@@ -1,5 +1,3 @@
-using Purview.SourceGeneratorFramework;
-
 namespace Purview.Telemetry.SourceGenerator.Templates;
 
 sealed record TemplateInfo(TypeIdentity TypeInfo, string? Source, string TemplateData) : IEquatable<TypeIdentity>

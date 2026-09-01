@@ -54,7 +54,7 @@ static class DependencyInjectionClassEmitter
 		{
 			using (
 				writer.WriteClassScope(
-					new TypeDeclarationOptions(classNameToGenerate, classAccessibility)
+					new(classNameToGenerate!, classAccessibility)
 					{
 						IsStatic = true,
 						IncludeGeneratedAttributes = false,

@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Reflection;
 using System.Text;
+using Purview.Telemetry.SourceGenerator.Helpers;
 
 namespace Purview.Telemetry.SourceGenerator.Templates;
 

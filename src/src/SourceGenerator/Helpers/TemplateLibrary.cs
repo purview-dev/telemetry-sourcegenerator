@@ -1,6 +1,6 @@
 using Purview.Telemetry.SourceGenerator.Templates;
 
-namespace Purview.Telemetry.SourceGenerator;
+namespace Purview.Telemetry.SourceGenerator.Helpers;
 
 /// <summary>
 /// Registry of the shipped marker-attribute templates injected into consuming compilations.

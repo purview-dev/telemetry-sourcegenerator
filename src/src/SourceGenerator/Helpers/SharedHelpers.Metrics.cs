@@ -1,6 +1,5 @@
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Records;
-using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator.Helpers;
 

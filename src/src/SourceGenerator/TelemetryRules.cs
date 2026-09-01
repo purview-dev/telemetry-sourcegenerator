@@ -88,7 +88,7 @@ static partial class TelemetryRules
 		method.Parameters.FirstOrDefault(p => string.Equals(p.Name, parameterName, StringComparison.Ordinal));
 
 	static ImmutableArray<Location> GetLocations(ISymbol symbol) =>
-		symbol.Locations.Where(static location => location.IsInSource).ToImmutableArray();
+		[.. symbol.Locations.Where(static location => location.IsInSource)];
 
 	/// <summary>
 	/// Determines whether the target framework of the compilation is supported (net8.0+/net48+).

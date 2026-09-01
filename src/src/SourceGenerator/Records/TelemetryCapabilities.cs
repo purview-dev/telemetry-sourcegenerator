@@ -1,4 +1,4 @@
-namespace Purview.Telemetry.SourceGenerator;
+namespace Purview.Telemetry.SourceGenerator.Records;
 
 /// <summary>
 /// Capabilities detected for the current compilation.

@@ -1,5 +1,3 @@
-using Microsoft.CodeAnalysis;
-
 namespace Purview.Telemetry.SourceGenerator.Records;
 
 sealed record LoggerAttributeRecord(

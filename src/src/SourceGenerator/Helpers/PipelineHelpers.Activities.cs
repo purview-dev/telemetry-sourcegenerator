@@ -2,7 +2,6 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Purview.Telemetry.SourceGenerator.Records;
-using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator.Helpers;
 
@@ -94,9 +93,10 @@ partial class PipelineHelpers
 			}
 		}
 
-		var interfaceDeclaration =
-			interfaceSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax(token) as InterfaceDeclarationSyntax;
-		if (interfaceDeclaration is null)
+		if (
+			interfaceSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax(token)
+			is not InterfaceDeclarationSyntax interfaceDeclaration
+		)
 		{
 			logger?.Fatal($"Could not locate the declaring syntax for '{interfaceSymbol.Name}'.");
 			return GeneratorResult<ActivitySourceTarget?>.Empty;

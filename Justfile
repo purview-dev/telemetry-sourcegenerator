@@ -80,6 +80,14 @@ format:
     echo "Formatting {{ BLUE }}{{ root_folder }}{{ NORMAL }}..."
     dotnet format "{{ root_folder }}"
 
+lint:
+    echo "Linting checking {{ BLUE }}{{ root_folder }}{{ NORMAL }}..."
+    dotnet csharpier check .
+
+lint-fix:
+    echo "Linting fixing {{ BLUE }}{{ root_folder }}{{ NORMAL }}..."
+    dotnet csharpier format .
+
 # -----------------------------------------------------------------------------
 # Versioning and Release
 # -----------------------------------------------------------------------------

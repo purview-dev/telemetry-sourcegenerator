@@ -1,10 +1,8 @@
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using Purview.SourceGeneratorFramework;
 using Purview.Telemetry.SourceGenerator.Records;
 
-namespace Purview.Telemetry.SourceGenerator;
+namespace Purview.Telemetry.SourceGenerator.Helpers;
 
 /// <summary>
 /// Registry of the type identities and references used during generation.
@@ -132,10 +130,7 @@ static class TypeLibrary
 			public static readonly TypeIdentity Meter = new("Meter", "System.Diagnostics.Metrics");
 			public static readonly TypeIdentity IMeterFactory = new("IMeterFactory", "System.Diagnostics.Metrics");
 			public static readonly TypeIdentity MeterOptions = new("MeterOptions", "System.Diagnostics.Metrics");
-			public static readonly TypeIdentity Measurement = new TypeIdentity(
-				"Measurement",
-				"System.Diagnostics.Metrics"
-			)
+			public static readonly TypeIdentity Measurement = new("Measurement", "System.Diagnostics.Metrics")
 			{
 				GenericArity = 1,
 			};

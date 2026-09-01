@@ -1,5 +1,4 @@
 using Microsoft.CodeAnalysis;
-using Purview.SourceGeneratorFramework;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
 

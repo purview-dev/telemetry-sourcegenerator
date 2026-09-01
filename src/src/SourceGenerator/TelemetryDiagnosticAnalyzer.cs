@@ -7,7 +7,7 @@ namespace Purview.Telemetry.SourceGenerator;
 
 /// <summary>
 /// Raises all telemetry diagnostics. The generator only collects interface-level diagnostics to decide
-/// <see cref="Purview.SourceGeneratorFramework.GeneratorResult{T}.ShouldProcess"/>; this analyzer is the
+/// <see cref="GeneratorResult{T}.ShouldProcess"/>; this analyzer is the
 /// single source that reports them to the user.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]

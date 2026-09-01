@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using Purview.Telemetry.SourceGenerator.Helpers;
 
 namespace Purview.Telemetry.SourceGenerator.MessageTemplates;
 

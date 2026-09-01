@@ -1,5 +1,3 @@
-using Purview.SourceGeneratorFramework;
-
 namespace Purview.Telemetry.SourceGenerator;
 
 /// <summary>
@@ -77,7 +75,7 @@ static class TelemetryAttributeNames
 
 	public static class System
 	{
-		/// <summary>The <see cref="System.Exception"/> type.</summary>
+		/// <summary>The <see cref="Exception"/> type.</summary>
 		public static readonly TypeIdentity Exception = new("Exception", "System");
 	}
 }

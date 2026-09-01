@@ -1,6 +1,4 @@
-using System.Globalization;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Purview.Telemetry.SourceGenerator.Records;
 
 namespace Purview.Telemetry.SourceGenerator.Helpers;
@@ -35,7 +33,7 @@ static partial class SharedHelpers
 	{
 		if (
 			attributeData.TryGetConstructorArgument<T>(ctorName, out var value)
-			|| attributeData.TryGetNamedArgument<T>(Utilities.UppercaseFirstChar(ctorName), out value)
+			|| attributeData.TryGetNamedArgument(Utilities.UppercaseFirstChar(ctorName), out value)
 		)
 		{
 			return new(value);
@@ -56,7 +54,7 @@ static partial class SharedHelpers
 	{
 		if (
 			attributeData.TryGetConstructorArgument<string>(ctorName, out var value)
-			|| attributeData.TryGetNamedArgument<string>(Utilities.UppercaseFirstChar(ctorName), out value)
+			|| attributeData.TryGetNamedArgument(Utilities.UppercaseFirstChar(ctorName), out value)
 		)
 		{
 			if (!string.IsNullOrWhiteSpace(value))
@@ -134,7 +132,7 @@ static partial class SharedHelpers
 
 		return new(
 			Name: GetAttributeStringValue(attributeData, "name"),
-			SkipOnNullOrEmpty: GetAttributeValue<bool>(attributeData!, "skipOnNullOrEmpty", false)
+			SkipOnNullOrEmpty: GetAttributeValue<bool>(attributeData, "skipOnNullOrEmpty", false)
 		);
 	}
 
@@ -223,16 +221,16 @@ static partial class SharedHelpers
 		token.ThrowIfCancellationRequested();
 
 		return new(
-			GenerateDependencyExtension: GetAttributeValue<bool>(attributeData!, "generateDependencyExtension", true),
+			GenerateDependencyExtension: GetAttributeValue<bool>(attributeData, "generateDependencyExtension", true),
 			ClassName: GetAttributeStringValue(attributeData, "className"),
 			DependencyInjectionClassName: GetAttributeStringValue(attributeData, "dependencyInjectionClassName"),
 			DependencyInjectionClassIsPublic: GetAttributeValue<bool>(
-				attributeData!,
+				attributeData,
 				"dependencyInjectionClassIsPublic",
 				false
 			),
-			NamingConvention: GetAttributeValue<int>(attributeData!, "namingConvention", 1), // Default to OpenTelemetry
-			GenerateTelemetryNamesClass: GetAttributeValue<bool>(attributeData!, "generateTelemetryNamesClass", true),
+			NamingConvention: GetAttributeValue<int>(attributeData, "namingConvention", 1), // Default to OpenTelemetry
+			GenerateTelemetryNamesClass: GetAttributeValue<bool>(attributeData, "generateTelemetryNamesClass", true),
 			TelemetryNamesClassName: GetAttributeStringValue(attributeData, "telemetryNamesClassName")
 		);
 	}

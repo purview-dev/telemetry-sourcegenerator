@@ -3,7 +3,6 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Purview.Telemetry.SourceGenerator.Records;
-using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator.Helpers;
 
@@ -92,9 +91,10 @@ partial class PipelineHelpers
 			: 0; // Auto
 
 		var generationType = SharedHelpers.GetGenerationTypes(interfaceSymbol, token);
-		var interfaceDeclaration =
-			interfaceSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax(token) as InterfaceDeclarationSyntax;
-		if (interfaceDeclaration is null)
+		if (
+			interfaceSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax(token)
+			is not InterfaceDeclarationSyntax interfaceDeclaration
+		)
 		{
 			logger?.Fatal($"Could not locate the declaring syntax for '{interfaceSymbol.Name}'.");
 			return GeneratorResult<LoggerTarget?>.Empty;

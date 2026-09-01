@@ -1,5 +1,3 @@
-using Purview.SourceGeneratorFramework;
-
 namespace Purview.Telemetry.SourceGenerator.Records;
 
 sealed record ActivitySourceTarget(

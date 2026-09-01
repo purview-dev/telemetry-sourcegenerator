@@ -201,6 +201,7 @@ static partial class TelemetryRules
 				?? Location.None;
 			var parameterName = parameter.GeneratedName;
 
+#pragma warning disable IDE0010 // Add missing cases
 			switch (parameter.ParamDestination)
 			{
 				case ActivityParameterDestination.Activity when method.MethodType == ActivityMethodType.Activity:
@@ -295,6 +296,7 @@ static partial class TelemetryRules
 					);
 					break;
 			}
+#pragma warning restore IDE0010 // Add missing cases
 		}
 	}
 }

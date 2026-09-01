@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 
-namespace Purview.Telemetry.SourceGenerator;
+namespace Purview.Telemetry.SourceGenerator.Helpers;
 
 /// <summary>
 /// Non-type generator configuration and constants.
