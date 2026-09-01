@@ -16,7 +16,7 @@ const branch = run('git rev-parse --abbrev-ref HEAD');
 const commit = run('git rev-parse HEAD');
 const year = new Date().getFullYear();
 
-const projectPath = `${rootFolder}Purview.Telemetry.SourceGenerator/Purview.Telemetry.SourceGenerator.csproj`;
+const projectPath = `${rootFolder}src/SourceGenerator/SourceGenerator.csproj`;
 
 const result = spawnSync(
 	'dotnet',

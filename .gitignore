@@ -197,3 +197,4 @@ node_modules/
 
 # BenchmarkDotNet output
 BenchmarkDotNet.Artifacts/!scripts/*
+!build/

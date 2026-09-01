@@ -25,8 +25,8 @@ Bootstrap and build the repository:
 
 Alternative direct commands (use environment variables above):
 
-- `dotnet build ./src/Purview.Telemetry.SourceGenerator.slnx --configuration Release`
-- `dotnet test ./src/Purview.Telemetry.SourceGenerator.slnx --configuration Release`
+- `dotnet build ./src/Telemetry.SourceGenerator.slnx --configuration Release`
+- `dotnet test ./src/Telemetry.SourceGenerator.slnx --configuration Release`
 - `dotnet format ./src/`
 
 ### Build and Test Sample Application
@@ -39,7 +39,7 @@ The sample application demonstrates the source generator in action:
 ### Package Creation
 
 - `just pack` -- creates NuGet package with current version from package.json
-- `just version` -- displays current version (currently 4.0.0)
+- `just version` -- displays current version (currently 4.5.0)
 
 ## Validation
 
@@ -60,7 +60,7 @@ Test these scenarios when modifying the source generator:
 - **Activity Generation**: Test ActivitySource generation by adding methods with activity attributes
 - **Logging Generation**: Test ILogger generation by adding methods with logging attributes
 - **Metrics Generation**: Test metrics generation by adding methods with metrics attributes
-- **Integration Test Coverage**: Verify new functionality is covered by tests in `src/Purview.Telemetry.SourceGenerator.IntegrationTests/`
+- **Integration Test Coverage**: Verify new functionality is covered by tests in `src/tests/SourceGenerator.IntegrationTests/`
 
 ### CI Validation
 
@@ -79,17 +79,20 @@ The CI pipeline (`./.github/workflows/ci.yml`) runs the same dotnet restore → 
 
 ```
 src/
-├── Purview.Telemetry.SourceGenerator/          # Main source generator library
-├── Purview.Telemetry.SourceGenerator.IntegrationTests/  # 282 integration tests
-├── Purview.Telemetry.SourceGenerator.slnx      # Main solution
-└── global.json                                 # Pins to .NET 10.0.200
+├── src/SourceGenerator/                        # Main source generator library
+├── tests/SourceGenerator.IntegrationTests/     # Integration tests
+├── ProjectAgent/                               # Shipped agent skills
+├── Telemetry.SourceGenerator.slnx              # Main solution
+└── global.json                                 # Pins to .NET 10.0.400
 
 samples/
 └── SampleApp/                                  # .NET Aspire demo application
     ├── SampleApp.AppHost/                      # Aspire AppHost
-    ├── SampleApp.Host/                         # Main web API
+    ├── SampleApp.APIService/                   # Main web API
+    ├── SampleApp.APIService.UnitTests/         # API tests
     ├── SampleApp.ServiceDefaults/              # Shared service config
-    ├── SampleApp.UnitTests/                    # Sample app tests
+    ├── SampleApp.Shared/                       # Shared models
+    ├── SampleApp.Web/                          # Blazor UI
     └── SampleApp.slnx                          # Sample solution
 
 benchmarks/
@@ -152,19 +155,13 @@ When `EmitCompilerGeneratedFiles` is true (as in the sample app), generated file
 
 - `obj/Debug|Release/generated/` directories
 
-### Integration Test Snapshots
+### Integration Test Harness
 
-Snapshot files in `src/Purview.Telemetry.SourceGenerator.IntegrationTests/Snapshots/` are **entirely machine-generated** by the [Verify](https://github.com/VerifyTests/Verify) library. **Never manually edit snapshot files.** They are only updated by:
-
-1. Running `just test` (or `dotnet test`)
-2. Reviewing the `*.received.*` diff output
-3. Accepting changes — copy `*.received.*` → `*.verified.*`, or use the Verify CLI/IDE extension
-
-Any manual edits to `.verified.*` files will be silently overwritten the next time tests run and snapshots are accepted.
+Tests run the generator against in-memory C# source via `Purview.SourceGeneratorFramework.Testing.TUnit` and assert on compilation validity, generated diagnostics, and key generated content. Add or update tests in `src/tests/SourceGenerator.IntegrationTests/` whenever generator behavior changes.
 
 ### Version Management
 
-- Version is managed in `package.json` (currently 4.0.0)
+- Version is managed in `package.json` (currently 4.5.0)
 
 - `bun .build/update-version.ts` synchronizes version across all files
 - `just release-final` and `just release-pre` create new releases using commit-and-tag-version

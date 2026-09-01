@@ -9,7 +9,7 @@
 	<ItemGroup>
 		<!-- Use ProjectReference for local development — switch to PackageReference for production use. -->
 		<ProjectReference
-			Include="..\..\..\src\Purview.Telemetry.SourceGenerator\Purview.Telemetry.SourceGenerator.csproj"
+			Include="..\..\..\src\src\SourceGenerator\SourceGenerator.csproj"
 			OutputItemType="Analyzer"
 			ReferenceOutputAssembly="false"
 		/>

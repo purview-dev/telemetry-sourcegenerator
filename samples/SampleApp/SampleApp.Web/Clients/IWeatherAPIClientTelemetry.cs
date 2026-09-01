@@ -17,11 +17,7 @@ public interface IWeatherAPIClientTelemetry
 	[Event]
 	[Error]
 	[AutoCounter]
-	void FailedToGetForecast(
-		Activity? activity,
-		Exception ex,
-		[ExcludeTargets(Targets.Activities)] int? count
-	);
+	void FailedToGetForecast(Activity? activity, Exception ex, [ExcludeTargets(Targets.Activities)] int? count);
 
 	[Event]
 	void RequestComplete(Activity? activity, HttpStatusCode statusCode, bool isSuccessStatusCode);

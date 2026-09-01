@@ -1,0 +1,11 @@
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
+global using Microsoft.Extensions.Options;
+global using ModularPipelines;
+global using ModularPipelines.Extensions;
+global using Octokit;
+global using Octokit.Internal;
+global using Purview.Telemetry.SourceGenerator.PipelineCLI.Helpers;
+global using Purview.Telemetry.SourceGenerator.PipelineCLI.Modules;
+global using Purview.Telemetry.SourceGenerator.PipelineCLI.Settings;

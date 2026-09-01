@@ -2,7 +2,7 @@
 
 Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.activitysource), [`ILogger`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.ilogger), and [`Metrics`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics) based telemetry from methods you define on an interface.
 
-[![CI](https://github.com/kjldev/purview-telemetry-sourcegenerator/actions/workflows/ci.yml/badge.svg)](https://github.com/kjldev/purview-telemetry-sourcegenerator/actions/workflows/ci.yml)
+[![CI](https://github.com/purview-dev/telemetry-sourcegenerator/actions/workflows/ci.yml/badge.svg)](https://github.com/purview-dev/telemetry-sourcegenerator/actions/workflows/ci.yml)
 
 ## Features
 
@@ -14,10 +14,12 @@ Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system
 ## Supported Frameworks
 
 **Consumer runtime targets:**
+
 - .NET Framework 4.8
 - .NET 8 or higher
 
 **Build toolchain requirement:**
+
 - Visual Studio 2022 17.14+ or .NET 10 SDK (Roslyn 4.14.0+)
 
 ## Installation
@@ -25,7 +27,7 @@ Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system
 Add to your `Directory.Build.props` or `.csproj` file:
 
 ```xml
-<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="4.3.0">
+<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="5.0.0-prerelease.1">
   <PrivateAssets>all</PrivateAssets>
   <IncludeAssets>analyzers</IncludeAssets>
 </PackageReference>
@@ -114,7 +116,7 @@ public class EntityService(IEntityStoreTelemetry telemetry)
 ## Telemetry Types
 
 | Attribute | Generation Type | Description |
-|-----------|----------------|-------------|
+| ----------- | ---------------- | ------------- |
 | `[ActivitySource]` | Class-level | Marks interface for Activity generation |
 | `[Activity]` | Method | Creates and starts a new Activity |
 | `[Event]` | Method | Adds an ActivityEvent to an Activity |
@@ -138,6 +140,14 @@ public class EntityService(IEntityStoreTelemetry telemetry)
 - [Multi-Targeting Guide](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Multi-Targeting)
 - [Logging Configuration](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Logging)
 
+## Agent Skills
+
+This repository ships with [Agent Skills](https://agentskills.io/specification) under `src/ProjectAgent/skills/` to help you adopt the generator:
+
+- `telemetry-sourcegenerator-quickstart` — get started with the package, create your first interface, and register it in DI.
+- `telemetry-sourcegenerator-migration` — migrate existing `ILogger`, `ActivitySource`, and metrics code to generated interfaces.
+- `telemetry-sourcegenerator-design` — design best practices, choose between single and per-area interfaces, and apply OpenTelemetry naming conventions.
+
 ## Sample Project
 
 The [.NET Aspire Sample](https://github.com/kjldev/purview-telemetry-sourcegenerator/tree/main/samples/SampleApp) demonstrates Activities, Logs, and Metrics generation working together with the Aspire Dashboard.
@@ -152,7 +162,7 @@ Benchmarked on 13th Gen Intel Core i9-13900KF, .NET SDK 10.0.201. See the [Perfo
 ### Activities (.NET 10.0)
 
 | Scenario | HasListener | Manual | Generated | Ratio |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | start + complete | False | 0.56 ns | 0.55 ns | 0.99x |
 | start + complete | True | 218 ns / 1008 B | 204 ns / 1008 B | 0.94x |
 | start + fail | True | 198 ns / 920 B | 189 ns / 920 B | 0.87x |
@@ -162,7 +172,7 @@ Generated activities match or outperform hand-written code with identical alloca
 ### Logging (.NET 10.0)
 
 | Scenario | HasLogging | LoggerMessage.Define | Generated v1 | Generated v2 |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | single Info call | False | 0.21 ns | 0.18 ns | 0.21 ns |
 | single Info call | True | 4.29 ns | 4.24 ns (0.99x) | 4.20 ns (0.98x) |
 | full lifecycle (4 calls) | True | 17.73 ns | 19.52 ns (1.10x) | 18.81 ns (1.06x) |
@@ -180,7 +190,7 @@ Adding full Activity+Logging+Metrics multi-target generation costs ~13% over Act
 ### Metrics (.NET 10.0)
 
 | Scenario | Generated | Notes |
-|---|---|---|
+| --- | --- | --- |
 | auto-counter (0 tags) | 0.37 ns | - |
 | auto-counter (1 tag) | 0.37 ns | - |
 | up-down counter | 0.35 ns | - |
@@ -219,7 +229,7 @@ v4 defaults to **OpenTelemetry semantic conventions** for generated telemetry na
 #### What Changed
 
 | Telemetry Type | v3 Behavior | v4 Default | Impact |
-|----------------|-------------|------------|--------|
+| ---------------- | ------------- | ------------ | -------- |
 | **ActivitySource Name** | Assembly name lowercased: `"myapp"` | Assembly name preserved: `"MyApp"` | ActivitySource names change casing |
 | **Tag/Baggage Keys** | Lowercased, smashed: `"entityid"` | snake_case: `"entity_id"` | Tag keys have underscores for word boundaries |
 | **Metric Instrument Names** | Lowercased, smashed: `"recordhistogram"` | Hierarchical dot.separated: `"myapp.products.record.histogram"` | Includes meter name prefix + word boundaries |

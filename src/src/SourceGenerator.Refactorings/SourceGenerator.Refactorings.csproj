@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<IsRoslynComponent>true</IsRoslynComponent>
+		<IsPackable>false</IsPackable>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Title>Purview Telemetry Refactorings</Title>
+		<Description>Visual Studio code refactorings for the Purview Telemetry source generator.</Description>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+		<PackageReference Include="Purview.SourceGeneratorFramework" PrivateAssets="all" />
+	</ItemGroup>
+	<ItemGroup>
+		<Compile Include="..\Shared\TelemetryAttributeNames.cs" Link="Shared\TelemetryAttributeNames.cs" />
+		<Compile Include="..\SourceGenerator\Helpers\IsExternalInit.cs" Link="Helpers\IsExternalInit.cs" />
+	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Remove="bin\**" />
+		<None Remove="bin\**" />
+		<None Remove="*.cache" />
+	</ItemGroup>
+</Project>

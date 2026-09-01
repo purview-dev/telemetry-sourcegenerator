@@ -1,0 +1,18 @@
+<Solution>
+	<Folder Name="/Solution Items/">
+		<File Path="Directory.Build.props" />
+		<File Path="Directory.Build.targets" />
+		<File Path="../Directory.Packages.props" />
+		<File Path="exclusion.dic" />
+		<File Path="../global.json" />
+		<File Path="../nuget.config" />
+		<File Path="../package.json" />
+	</Folder>
+	<Folder Name="/src/">
+		<Project Path="src/SourceGenerator/SourceGenerator.csproj" />
+		<Project Path="src/SourceGenerator.Refactorings/SourceGenerator.Refactorings.csproj" />
+	</Folder>
+	<Folder Name="/tests/">
+		<Project Path="tests/SourceGenerator.IntegrationTests/SourceGenerator.IntegrationTests.csproj" />
+	</Folder>
+</Solution>

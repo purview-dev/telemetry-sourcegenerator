@@ -10,7 +10,7 @@ namespace SampleApp.Net48.ConsoleApp
 {
 	static class Program
 	{
-		static void Main(string[] args)
+		static void Main()
 		{
 			using var activityListener = new ActivityListener
 			{
@@ -19,8 +19,7 @@ namespace SampleApp.Net48.ConsoleApp
 					ActivitySamplingResult.AllDataAndRecorded,
 				SampleUsingParentId = (ref ActivityCreationOptions<string> options) =>
 					ActivitySamplingResult.AllDataAndRecorded,
-				ActivityStarted = a =>
-					Console.WriteLine($"  [TRACE START] {a.DisplayName} ({a.Id})"),
+				ActivityStarted = a => Console.WriteLine($"  [TRACE START] {a.DisplayName} ({a.Id})"),
 				ActivityStopped = a =>
 					Console.WriteLine(
 						$"  [TRACE STOP]  {a.DisplayName} - {a.Status} ({a.Duration.TotalMilliseconds:F1} ms)"
@@ -36,15 +35,11 @@ namespace SampleApp.Net48.ConsoleApp
 			};
 			meterListener.SetMeasurementEventCallback<int>(
 				(instrument, value, tags, state) =>
-					Console.WriteLine(
-						$"  [METRIC] {instrument.Meter.Name}/{instrument.Name}: {value}"
-					)
+					Console.WriteLine($"  [METRIC] {instrument.Meter.Name}/{instrument.Name}: {value}")
 			);
 			meterListener.SetMeasurementEventCallback<long>(
 				(instrument, value, tags, state) =>
-					Console.WriteLine(
-						$"  [METRIC] {instrument.Meter.Name}/{instrument.Name}: {value}"
-					)
+					Console.WriteLine($"  [METRIC] {instrument.Meter.Name}/{instrument.Name}: {value}")
 			);
 			meterListener.Start();
 

@@ -1,0 +1,22 @@
+namespace Purview.Telemetry.SourceGenerator.Records;
+
+/// <summary>
+/// The fully-formed, value-equatable model handed to each <c>RegisterSourceOutput</c>
+/// callback and the target emitters. Provides an easy extension point for future
+/// output-wide information.
+/// </summary>
+readonly record struct ActivityOutputContext(
+	ActivitySourceTarget Target,
+	GenerationContext<TelemetryCapabilities> Context
+);
+
+readonly record struct LoggerOutputContext(LoggerTarget Target, GenerationContext<TelemetryCapabilities> Context);
+
+readonly record struct MeterOutputContext(MeterTarget Target, GenerationContext<TelemetryCapabilities> Context);
+
+readonly record struct TelemetryNamesOutputContext(
+	string AssemblyName,
+	EquatableArray<GeneratorResult<MeterTarget?>> MeterTargets,
+	EquatableArray<GeneratorResult<ActivitySourceTarget?>> ActivityTargets,
+	GenerationContext<TelemetryCapabilities> Context
+);

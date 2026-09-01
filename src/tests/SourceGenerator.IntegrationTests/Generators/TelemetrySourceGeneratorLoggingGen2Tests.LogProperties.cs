@@ -1,0 +1,239 @@
+using Purview.Telemetry.SourceGenerator.Infra;
+
+namespace Purview.Telemetry.SourceGenerator.Logging;
+
+partial class TelemetrySourceGeneratorLoggingGen2Tests
+{
+	[Test]
+	public async Task Generate_GivenMethodWithLogProperty_GeneratesIndividualProperties(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		const string basicLogger =
+			@"
+using Microsoft.Extensions.Logging;
+
+namespace Testing;
+
+[Logger]
+public interface ITestLogger
+{
+	void LogWeather([LogProperties]WeatherForecast weather);
+}
+
+public class WeatherForecast
+{
+	public DateTime Date { get; set; }
+	public int TemperatureC { get; set; }
+	public string Summary { get; set; }
+}
+";
+
+		// Act
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
+
+		// Assert
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+	}
+
+	[Test]
+	public async Task Generate_GivenMethodWithLogPropertyAndExpandEnumerable_GeneratesDiagnostic(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		const string basicLogger =
+			@"
+using Microsoft.Extensions.Logging;
+
+namespace Testing;
+
+[Logger]
+public interface ITestLogger
+{
+	void LogWeather([LogProperties][ExpandEnumerable]WeatherForecast[] weather);
+}
+
+public class WeatherForecast
+{
+	public DateTime Date { get; set; }
+	public int TemperatureC { get; set; }
+	public string Summary { get; set; }
+}
+";
+
+		// Act
+		var generationResult = await GenerateAsync(
+			basicLogger,
+			TelemetrySourceGeneratorTestOptions.NoValidation,
+			cancellationToken: cancellationToken
+		);
+
+		// Assert
+		await TestHelpers.VerifyAsync(generationResult, expectsDiagnostics: true, cancellationToken: cancellationToken);
+	}
+
+	[Test]
+	public async Task Generate_GivenMethodWithExceptionUsedInTemplate_UsesPassInException(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		const string basicLogger = """
+
+using Microsoft.Extensions.Logging;
+
+namespace Testing;
+
+[Logger(GenerationMode = LoggerGenerationMode.V2)]
+public interface ITestLogger
+{
+	[Log(MessageTemplate = "v = {v} Exception = {ex}")]
+	void Log(string v, Exception ex);
+}
+
+""";
+
+		// Act
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
+
+		// Assert
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+	}
+
+	[Test]
+	public async Task Generate_GivenMethodWithLogPropertyOmit_GeneratesIndividualProperties(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		const string basicLogger =
+			@"
+using Microsoft.Extensions.Logging;
+
+namespace Testing;
+
+[Logger]
+public interface ITestLogger
+{
+	void LogWeatherWithOmit([LogProperties(OmitReferenceName = true)]WeatherForecast weather);
+}
+
+public class WeatherForecast
+{
+	public DateTime Date { get; set; }
+	public int TemperatureC { get; set; }
+	public string Summary { get; set; }
+}
+";
+
+		// Act
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
+
+		// Assert
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+	}
+
+	[Test]
+	public async Task Generate_GivenMethodWithLogPropertySkipNull_GeneratesIndividualProperties(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		const string basicLogger =
+			@"
+using Microsoft.Extensions.Logging;
+
+namespace Testing;
+
+[Logger]
+public interface ITestLogger
+{
+	void LogWeather([LogProperties(SkipNullProperties = true)]WeatherForecast weather);
+}
+
+public class WeatherForecast
+{
+	public DateTime Date { get; set; }
+	public int TemperatureC { get; set; }
+	public string Summary { get; set; }
+}
+";
+
+		// Act
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
+
+		// Assert
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+	}
+
+	[Test]
+	public async Task Generate_GivenMethodWithLogPropertySkipNullAndOmit_GeneratesIndividualProperties(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		const string basicLogger =
+			@"
+using Microsoft.Extensions.Logging;
+
+namespace Testing;
+
+[Logger]
+public interface ITestLogger
+{
+	void LogWeather([LogProperties(SkipNullProperties = true, OmitReferenceName = true)]WeatherForecast weather);
+}
+
+public class WeatherForecast
+{
+	public DateTime Date { get; set; }
+	public int TemperatureC { get; set; }
+	public string Summary { get; set; }
+}
+";
+
+		// Act
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
+
+		// Assert
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+	}
+
+	[Test]
+	public async Task Generate_GivenMethodWithLogPropertyIgnore_GeneratesIndividualProperties(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		const string basicLogger =
+			@"
+using Microsoft.Extensions.Logging;
+
+namespace Testing;
+
+[Logger]
+public interface ITestLogger
+{
+	void LogWeather([LogProperties]WeatherForecast weather);
+}
+
+public class WeatherForecast
+{
+	public DateTime Date { get; set; }
+	public int TemperatureC { get; set; }
+	public string Summary { get; set; }
+
+	[LogPropertyIgnore]
+	public string IgnoreMe { get; set; }
+}
+";
+
+		// Act
+		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
+
+		// Assert
+		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+	}
+}

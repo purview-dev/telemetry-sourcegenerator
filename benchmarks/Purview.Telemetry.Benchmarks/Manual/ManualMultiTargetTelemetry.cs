@@ -18,26 +18,23 @@ public sealed class ManualMultiTargetTelemetry : IDisposable
 {
 	static readonly ActivitySource _activitySource = new("benchmark-manual-multi-target-source");
 
-	static readonly Action<ILogger, string, int, Exception?> _startOperationLog =
-		LoggerMessage.Define<string, int>(
-			LogLevel.Information,
-			new EventId(1, "StartOperation"),
-			"StartOperation: OperationName = {OperationName}, OperationId = {OperationId}"
-		);
+	static readonly Action<ILogger, string, int, Exception?> _startOperationLog = LoggerMessage.Define<string, int>(
+		LogLevel.Information,
+		new EventId(1, "StartOperation"),
+		"StartOperation: OperationName = {OperationName}, OperationId = {OperationId}"
+	);
 
-	static readonly Action<ILogger, int, long, Exception?> _operationCompletedLog =
-		LoggerMessage.Define<int, long>(
-			LogLevel.Trace,
-			new EventId(2, "OperationCompleted"),
-			"OperationCompleted: ResultCode = {ResultCode}, ElapsedMs = {ElapsedMs}"
-		);
+	static readonly Action<ILogger, int, long, Exception?> _operationCompletedLog = LoggerMessage.Define<int, long>(
+		LogLevel.Trace,
+		new EventId(2, "OperationCompleted"),
+		"OperationCompleted: ResultCode = {ResultCode}, ElapsedMs = {ElapsedMs}"
+	);
 
-	static readonly Action<ILogger, string, Exception?> _operationFailedLog =
-		LoggerMessage.Define<string>(
-			LogLevel.Error,
-			new EventId(3, "OperationFailed"),
-			"OperationFailed: ErrorMessage = {ErrorMessage}"
-		);
+	static readonly Action<ILogger, string, Exception?> _operationFailedLog = LoggerMessage.Define<string>(
+		LogLevel.Error,
+		new EventId(3, "OperationFailed"),
+		"OperationFailed: ErrorMessage = {ErrorMessage}"
+	);
 
 	readonly ILogger _logger;
 	readonly Meter _meter;
@@ -47,6 +44,9 @@ public sealed class ManualMultiTargetTelemetry : IDisposable
 
 	public ManualMultiTargetTelemetry(ILogger logger, IMeterFactory meterFactory)
 	{
+		ArgumentNullException.ThrowIfNull(logger);
+		ArgumentNullException.ThrowIfNull(meterFactory);
+
 		_logger = logger;
 		_meter = meterFactory.Create(new MeterOptions("Purview.Telemetry.Benchmarks.Manual"));
 		_startOperationCounter = _meter.CreateCounter<int>("multi_target.start_operation");
@@ -96,11 +96,7 @@ public sealed class ManualMultiTargetTelemetry : IDisposable
 		// Activity
 		if (_activitySource.HasListeners() && activity != null)
 		{
-			var tags = new ActivityTagsCollection
-			{
-				{ "result_code", resultCode },
-				{ "elapsed_ms", elapsedMs },
-			};
+			var tags = new ActivityTagsCollection { { "result_code", resultCode }, { "elapsed_ms", elapsedMs } };
 
 			activity.AddEvent(new ActivityEvent("OperationCompleted", tags: tags));
 		}
@@ -126,10 +122,7 @@ public sealed class ManualMultiTargetTelemetry : IDisposable
 			_operationFailedLog(_logger, errorMessage, null);
 
 		// Metrics
-		_operationFailedCounter.Add(
-			1,
-			new KeyValuePair<string, object?>("error_message", errorMessage)
-		);
+		_operationFailedCounter.Add(1, new KeyValuePair<string, object?>("error_message", errorMessage));
 	}
 
 	public void RecordLatency(long latencyMs)

@@ -51,12 +51,9 @@ public class LoggerMultiTargetBenchmarks
 	[GlobalSetup]
 	public void Setup()
 	{
-		(_singleTargetV2, _singleTargetV1, _) = BenchmarkHelpers.CreateLoggerTelemetry(
-			loggingEnabled: true
-		);
+		(_singleTargetV2, _singleTargetV1, _) = BenchmarkHelpers.CreateLoggerTelemetry(loggingEnabled: true);
 
-		(_multiTargetV2, _multiTargetV1, _multiTargetManual) =
-			BenchmarkHelpers.CreateMultiTargetTelemetryAll();
+		(_multiTargetV2, _multiTargetV1, _multiTargetManual) = BenchmarkHelpers.CreateMultiTargetTelemetryAll();
 
 		if (HasListener)
 		{

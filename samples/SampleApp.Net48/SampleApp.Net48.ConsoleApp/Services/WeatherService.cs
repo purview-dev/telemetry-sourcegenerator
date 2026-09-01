@@ -51,10 +51,7 @@ namespace SampleApp.Net48.ConsoleApp.Services
 			var sw = Stopwatch.StartNew();
 
 			// MULTI-TARGET: This single call starts Activity + logs info
-			using var activity = _telemetry.GettingWeatherForecast(
-				Guid.NewGuid().ToString(),
-				requestCount
-			);
+			using var activity = _telemetry.GettingWeatherForecast(Guid.NewGuid().ToString(), requestCount);
 
 			// Simulate some variable latency, like a database call or something.
 			System.Threading.Thread.Sleep(_rng.Next(0, 50));
@@ -63,9 +60,7 @@ namespace SampleApp.Net48.ConsoleApp.Services
 			{
 				try
 				{
-					throw new Exception(
-						"Simulated failure - maybe a database or something went ~{fizz-bang}~."
-					);
+					throw new Exception("Simulated failure - maybe a database or something went ~{fizz-bang}~.");
 				}
 				catch (Exception ex)
 				{
@@ -97,11 +92,7 @@ namespace SampleApp.Net48.ConsoleApp.Services
 			if (minTempInC < TooColdTempInC)
 			{
 				// MULTI-TARGET: This single call increments counter + logs warning
-				_telemetry.ItsTooCold(
-					activity,
-					minTempInC,
-					results.Count(wf => wf.TemperatureC < TooColdTempInC)
-				);
+				_telemetry.ItsTooCold(activity, minTempInC, results.Count(wf => wf.TemperatureC < TooColdTempInC));
 			}
 
 			sw.Stop();

@@ -21,10 +21,7 @@ public sealed class WeatherAPIClient(HttpClient httpClient, IWeatherAPIClientTel
 
 		try
 		{
-			Uri url = new(
-				count.HasValue ? $"/weatherforecast/{count}" : "/weatherforecast",
-				UriKind.Relative
-			);
+			Uri url = new(count.HasValue ? $"/weatherforecast/{count}" : "/weatherforecast", UriKind.Relative);
 			var result = await httpClient.GetAsync(url, cancellationToken);
 
 			telemetry.RequestComplete(activity, result.StatusCode, result.IsSuccessStatusCode);
@@ -34,9 +31,7 @@ public sealed class WeatherAPIClient(HttpClient httpClient, IWeatherAPIClientTel
 			telemetry.RequestSuccess();
 
 			var forecasts =
-				await result.Content.ReadFromJsonAsync<WeatherForecast[]>(
-					cancellationToken: cancellationToken
-				) ?? [];
+				await result.Content.ReadFromJsonAsync<WeatherForecast[]>(cancellationToken: cancellationToken) ?? [];
 
 			if (forecasts.Length == 0)
 				telemetry.NoForecastsRecieved(activity);

@@ -1,0 +1,12 @@
+<Project>
+	<PropertyGroup>
+		<NamespacePrefix>Purview.Telemetry.SourceGenerator</NamespacePrefix>
+		<ExcludePurviewTelemetry>true</ExcludePurviewTelemetry>
+	</PropertyGroup>
+
+	<Import Sdk="Purview.DotNetProjectSdk" Project="Sdk.props" />
+
+	<PropertyGroup>
+		<NoWarn>$(NoWarn);CA1062;CA1515;CA2007;CA1873;</NoWarn>
+	</PropertyGroup>
+</Project>

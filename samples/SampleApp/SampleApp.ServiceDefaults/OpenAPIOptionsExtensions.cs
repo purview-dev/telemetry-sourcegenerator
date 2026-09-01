@@ -19,10 +19,9 @@ static class OpenApiOptionsExtensions
 				{
 					var versionedDescriptionProvider =
 						context.ApplicationServices.GetService<IApiVersionDescriptionProvider>();
-					var apiDescription =
-						versionedDescriptionProvider?.ApiVersionDescriptions.SingleOrDefault(
-							description => description.GroupName == context.DocumentName
-						);
+					var apiDescription = versionedDescriptionProvider?.ApiVersionDescriptions.SingleOrDefault(
+						description => description.GroupName == context.DocumentName
+					);
 
 					if (apiDescription is not null)
 					{
@@ -62,9 +61,7 @@ static class OpenApiOptionsExtensions
 				if (text.Length > 0)
 					text.Append(' ');
 
-				text.Append("The API will be sunset on ")
-					.Append(when.Date.ToShortDateString())
-					.Append('.');
+				text.Append("The API will be sunset on ").Append(when.Date.ToShortDateString()).Append('.');
 			}
 
 			if (policy.HasLinks)
@@ -85,9 +82,7 @@ static class OpenApiOptionsExtensions
 					text.Append(link.LinkTarget.OriginalString);
 					text.Append("\">");
 					text.Append(
-						StringSegment.IsNullOrEmpty(link.Title)
-							? link.LinkTarget.OriginalString
-							: link.Title.ToString()
+						StringSegment.IsNullOrEmpty(link.Title) ? link.LinkTarget.OriginalString : link.Title.ToString()
 					);
 					text.Append("</a></li>");
 				}

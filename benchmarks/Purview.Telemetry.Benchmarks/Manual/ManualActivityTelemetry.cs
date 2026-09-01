@@ -45,11 +45,7 @@ public sealed class ManualActivityTelemetry
 
 		if (activity != null)
 		{
-			var tags = new ActivityTagsCollection
-			{
-				{ "result_code", resultCode },
-				{ "elapsed_ms", elapsedMs },
-			};
+			var tags = new ActivityTagsCollection { { "result_code", resultCode }, { "elapsed_ms", elapsedMs } };
 
 			activity.AddEvent(new ActivityEvent("OperationCompleted", tags: tags));
 		}

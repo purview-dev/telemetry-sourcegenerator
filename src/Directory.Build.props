@@ -1,7 +1,14 @@
-﻿<Project>
-	<Import Project="./.build-system/Directory.Build.props" />
+<Project>
 	<PropertyGroup>
-		<DefineConstants Condition="'$(Configuration)' == 'DEBUG'">DEBUG_SG</DefineConstants>
-		<NoWarn>$(NoWarn);CA1031;</NoWarn>
+		<NamespacePrefix>Purview.Telemetry</NamespacePrefix>
+		<IsPackable>false</IsPackable>
+		<!--
+			This comes from Purview.DotnetSdk where we auto include the
+			telemetry... obviously we don't want that here!	
+		-->
+		<ExcludePurviewTelemetry>true</ExcludePurviewTelemetry>
+		<GenerateDocumentationFile>false</GenerateDocumentationFile>
 	</PropertyGroup>
+
+	<Import Sdk="Purview.DotNetProjectSdk" Project="Sdk.props" />
 </Project>

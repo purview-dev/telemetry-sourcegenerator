@@ -20,6 +20,8 @@ public sealed class ManualMetricsTelemetry : IDisposable
 
 	public ManualMetricsTelemetry(IMeterFactory meterFactory)
 	{
+		ArgumentNullException.ThrowIfNull(meterFactory);
+
 		_meter = meterFactory.Create(new MeterOptions("benchmark-manual-metrics"));
 
 		_requestCount = _meter.CreateCounter<int>("increment_request_count");
@@ -51,10 +53,7 @@ public sealed class ManualMetricsTelemetry : IDisposable
 
 	public void RecordDurationByEndpoint(double durationMs, string endpoint)
 	{
-		_durationByEndpoint.Record(
-			durationMs,
-			new KeyValuePair<string, object?>("endpoint", endpoint)
-		);
+		_durationByEndpoint.Record(durationMs, new KeyValuePair<string, object?>("endpoint", endpoint));
 	}
 
 	public void Dispose() => _meter.Dispose();

@@ -52,6 +52,7 @@ const filesToUpdate: string[] = [
 	`${WIKI_DIR}/FAQ.md`,
 	`${WIKI_DIR}/Breaking-Changes.md`,
 	`${WIKI_DIR}/Performance.md`,
+	'src/ProjectAgent/skills/telemetry-sourcegenerator-quickstart/SKILL.md',
 ];
 
 function run(cmd: string, cwd?: string): string {
