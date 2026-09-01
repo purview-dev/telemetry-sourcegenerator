@@ -1,6 +1,4 @@
-using Purview.Telemetry.SourceGenerator.Infra;
-
-namespace Purview.Telemetry.SourceGenerator;
+namespace Purview.Telemetry.SourceGenerator.Infra;
 
 /// <summary>
 /// Base class for generator integration tests. The framework's <c>GenerateAsync</c>

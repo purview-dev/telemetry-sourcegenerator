@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Purview.Telemetry.SourceGenerator;
+namespace Purview.Telemetry.SourceGenerator.Generators;
 
 /// <summary>
 /// Verifies the per-target incremental pipeline: an unrelated edit must leave all generated

@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Purview.Telemetry.SourceGenerator.Helpers;
 
-namespace Purview.Telemetry.SourceGenerator;
+namespace Purview.Telemetry.SourceGenerator.Analyzers;
 
 /// <summary>
 /// Raises all telemetry diagnostics. The generator only collects interface-level diagnostics to decide

@@ -1,6 +1,8 @@
+using Purview.Telemetry.SourceGenerator.Infra;
+
 namespace Purview.Telemetry.SourceGenerator.Logging;
 
-partial class TelemetrySourceGeneratorLoggingTests
+partial class TelemetrySourceGeneratorLoggingGen2Tests
 {
 	[Test]
 	public async Task Generate_GivenBasicGen_GeneratesLogger_WithCSharp73LanguageVersion(
@@ -9,12 +11,14 @@ partial class TelemetrySourceGeneratorLoggingTests
 	{
 		// Arrange: C# 7.3-compatible interface — no nullable reference annotations,
 		// no file-scoped namespace.
-		const string basicLogger =
+		// Uses LoggerGenerationMode.V2 to exercise the LoggerGenTargetClassEmitter which
+		// emits KeyValuePair<string, object?> structs that must become KeyValuePair<string, object>
+		// under C# 7.3.
+		const string source =
 			@"
-
 namespace Testing {
 
-[Logger]
+[Logger(GenerationMode = LoggerGenerationMode.V2)]
 public interface ITestLogger {
 	void Log(string stringParam, int intParam, bool boolParam);
 }
@@ -23,7 +27,7 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
+		var generationResult = await GenerateAsync(source, cancellationToken: cancellationToken);
 
 		// Assert: validationCompilation=true (default) verifies generated code compiles under C# 7.3.
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);

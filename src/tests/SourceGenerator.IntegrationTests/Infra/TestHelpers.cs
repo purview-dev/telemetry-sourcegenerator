@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Text;
 
-namespace Purview.Telemetry.SourceGenerator;
+namespace Purview.Telemetry.SourceGenerator.Infra;
 
 static class TestHelpers
 {

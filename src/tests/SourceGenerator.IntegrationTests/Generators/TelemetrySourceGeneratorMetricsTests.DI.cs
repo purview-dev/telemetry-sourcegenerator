@@ -1,28 +1,31 @@
-namespace Purview.Telemetry.SourceGenerator.Logging;
+using Purview.Telemetry.SourceGenerator.Infra;
 
-partial class TelemetrySourceGeneratorLoggingTests
+namespace Purview.Telemetry.SourceGenerator.Metrics;
+
+partial class TelemetrySourceGeneratorMetricsTests
 {
 	[Test]
-	public async Task Generate_GivenAssemblyEnableDI_GeneratesLog(CancellationToken cancellationToken)
+	public async Task Generate_GivenAssemblyEnableDI_GeneratesMetrics(CancellationToken cancellationToken)
 	{
 		// Arrange
-		const string basicLog =
-			@"
+		const string basicMetric = """
+
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = true)]
 
 namespace Testing;
 
-[Logger]
-public interface ITestLogger {
-	[Log]
-	void Log(string stringParam, int intParam, bool boolParam);
+[Meter("testing-meter")]
+public interface ITestMetrics {
+	[Counter]
+	void Counter(int counterValue, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
-			basicLog,
+			basicMetric,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
@@ -32,25 +35,26 @@ public interface ITestLogger {
 	}
 
 	[Test]
-	public async Task Generate_GivenInterfaceEnableDI_GeneratesLog(CancellationToken cancellationToken)
+	public async Task Generate_GivenInterfaceEnableDI_GeneratesMetrics(CancellationToken cancellationToken)
 	{
 		// Arrange
-		const string basicLog =
-			@"
+		const string basicMetric = """
+
 
 namespace Testing;
 
+[Meter("testing-meter")]
 [TelemetryGeneration(GenerateDependencyExtension = true)]
-[Logger]
-public interface ITestLogger {
-	[Log]
-	void Log(string stringParam, int intParam, bool boolParam);
+public interface ITestMetrics {
+	[Counter]
+	void Counter(int counterValue, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
-			basicLog,
+			basicMetric,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
@@ -60,29 +64,30 @@ public interface ITestLogger {
 	}
 
 	[Test]
-	public async Task Generate_GivenDIDisabledAtAssemblyAndInterfaceEnableDI_GeneratesLog(
+	public async Task Generate_GivenDIDisabledAtAssemblyAndInterfaceEnableDI_GeneratesMetrics(
 		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
-		const string basicLog =
-			@"
+		const string basicMetric = """
+
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = false)]
 
 namespace Testing;
 
+[Meter("testing-meter")]
 [TelemetryGeneration(GenerateDependencyExtension = true)]
-[Logger]
-public interface ITestLogger {
-	[Log]
-	void Log(string stringParam, int intParam, bool boolParam);
+public interface ITestMetrics {
+	[Counter]
+	void Counter(int counterValue, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
-			basicLog,
+			basicMetric,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);
@@ -92,29 +97,30 @@ public interface ITestLogger {
 	}
 
 	[Test]
-	public async Task Generate_GivenDIEnabledAtAssemblyAndInterfaceDisabledDI_GeneratesLog(
+	public async Task Generate_GivenDIEnabledAtAssemblyAndInterfaceDisabledDI_GeneratesMetrics(
 		CancellationToken cancellationToken
 	)
 	{
 		// Arrange
-		const string basicLog =
-			@"
+		const string basicMetric = """
+
 
 [assembly: TelemetryGeneration(GenerateDependencyExtension = true)]
 
 namespace Testing;
 
+[Meter("testing-meter")]
 [TelemetryGeneration(GenerateDependencyExtension = false)]
-[Logger]
-public interface ITestLogger {
-	[Log]
-	void Log(string stringParam, int intParam, bool boolParam);
+public interface ITestMetrics {
+	[Counter]
+	void Counter(int counterValue, [Tag]int intParam, [Tag]bool boolParam);
 }
-";
+
+""";
 
 		// Act
 		var generationResult = await GenerateAsync(
-			basicLog,
+			basicMetric,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
 		);

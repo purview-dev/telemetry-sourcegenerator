@@ -1,3 +1,5 @@
+using Purview.Telemetry.SourceGenerator.Infra;
+
 namespace Purview.Telemetry.SourceGenerator.Metrics;
 
 partial class TelemetrySourceGeneratorMetricsTests

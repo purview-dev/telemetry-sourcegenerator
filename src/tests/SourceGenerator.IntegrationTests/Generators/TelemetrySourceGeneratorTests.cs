@@ -1,4 +1,5 @@
 using Purview.SourceGeneratorFramework;
+using Purview.Telemetry.SourceGenerator.Infra;
 
 namespace Purview.Telemetry.SourceGenerator;
 
