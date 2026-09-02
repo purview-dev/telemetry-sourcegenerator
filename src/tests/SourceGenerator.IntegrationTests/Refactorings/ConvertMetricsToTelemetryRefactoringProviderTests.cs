@@ -1,5 +1,8 @@
+using Purview.Telemetry.SourceGenerator.Infra;
+
 namespace Purview.Telemetry.SourceGenerator.Refactorings;
 
+[SkipOnNetFramework]
 public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefactoringTestBase
 {
 	static readonly ConvertMetricsToTelemetryRefactoringProvider Provider = new();

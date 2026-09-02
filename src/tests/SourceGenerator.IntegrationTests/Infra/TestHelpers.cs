@@ -1,13 +1,10 @@
-using System.Reflection;
-using System.Text;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Purview.Telemetry.SourceGenerator.Infra;
 
 static class TestHelpers
 {
-	static readonly Assembly OwnerAssembly = typeof(TestHelpers).Assembly;
-	static readonly string NamespaceRoot = typeof(TestHelpers).Namespace!;
-
 	public const string DefaultUsingSet =
 		@"
 using System;
@@ -17,22 +14,27 @@ using Purview.Telemetry;
 
 	public static string Wrap(this string value, char c = '"') => c + value + c;
 
-	public static string LoadEmbeddedResource(string folder, string resourceName)
+	/// <summary>Replaces all occurrences using ordinal semantics (net48 lacks the StringComparison overload).</summary>
+	public static string ReplaceOrdinal(this string value, string oldValue, string newValue) =>
+#if NET48
+		value.Replace(oldValue, newValue);
+#else
+		value.Replace(oldValue, newValue, StringComparison.Ordinal);
+#endif
+
+	/// <summary>Throws if the argument is null (net48 lacks ArgumentNullException.ThrowIfNull).</summary>
+#if NET8_0_OR_GREATER
+	[StackTraceHidden]
+#endif
+	[DebuggerHidden]
+	public static void ThrowIfNull(object? argument, [CallerMemberName] string? paramName = null)
 	{
-		resourceName = $"{NamespaceRoot}.Resources.{folder}.{resourceName}";
-
-		var resourceStream = OwnerAssembly.GetManifestResourceStream(resourceName);
-		if (resourceStream is null)
-		{
-			var existingResources = OwnerAssembly.GetManifestResourceNames();
-			throw new ArgumentException(
-				$"Could not find embedded resource {resourceName}. Available resource names: {string.Join(", ", existingResources)}"
-			);
-		}
-
-		using StreamReader reader = new(resourceStream, Encoding.UTF8);
-
-		return reader.ReadToEnd();
+#if NET48
+		if (argument is null)
+			throw new ArgumentNullException(paramName);
+#else
+		ArgumentNullException.ThrowIfNull(argument, paramName);
+#endif
 	}
 
 	public static List<string> GetCasePermutations(string input)
@@ -46,7 +48,7 @@ using Purview.Telemetry;
 		}
 
 		var currentChar = input[0];
-		var remainder = input[1..];
+		var remainder = input.Substring(1);
 		var remainderPermutations = GetCasePermutations(remainder);
 
 		if (char.IsLetter(currentChar))
@@ -110,7 +112,7 @@ using Purview.Telemetry;
 		if (!validationCompilation)
 			return;
 
-		await using MemoryStream ms = new();
+		using MemoryStream ms = new();
 
 		var emitResult = result.CompilationResult.Compilation.Emit(ms, cancellationToken: cancellationToken);
 		if (!emitResult.Success)

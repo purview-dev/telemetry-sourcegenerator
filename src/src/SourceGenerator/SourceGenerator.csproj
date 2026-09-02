@@ -34,20 +34,11 @@
 		/>
 		<Compile Include="..\Shared\TelemetryAttributeNames.cs" Link="Shared\TelemetryAttributeNames.cs" />
 	</ItemGroup>
-	<ItemGroup>
-		<!-- The Sdk folder symlinks resolve to files outside the project dir; keep them out of
-		     the package (the canonical files are packed explicitly below). -->
-		<None Remove="Sdk\README.md" />
-		<None Remove="Sdk\LICENSE.md" />
-		<None Remove="Sdk\assets\images\purview-logo.jpg" />
-	</ItemGroup>
-	<ItemGroup>
-		<None Include="../../../assets/images/purview-logo.jpg" Pack="true" PackagePath="" />
-	</ItemGroup>
 	<!-- Package the build output into the "analyser" slot in the NuGet package -->
 	<ItemGroup>
-		<None Include="..\..\..\README.md" Pack="true" PackagePath="\" />
-		<None Include="..\..\..\LICENSE.md" Pack="true" PackagePath="\" />
+		<None Include="../../../assets/images/purview-logo.jpg" Pack="true" PackagePath="/Sdk/purview-logo.jpg" />
+		<None Include="..\..\..\README.md" Pack="true" PackagePath="/Sdk/" />
+		<None Include="..\..\..\LICENSE.md" Pack="true" PackagePath="/Sdk/" />
 		<None
 			Include="$(OutputPath)\$(AssemblyName).dll"
 			Pack="true"

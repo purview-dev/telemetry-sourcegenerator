@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Purview.Telemetry.SourceGenerator.Emitters;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
 
@@ -46,8 +47,9 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator
 			// assemblies, preventing CS0436 conflicts when multiple projects reference this generator.
 			ctx.AddEmbeddedAttributeDefinition();
 
-			foreach (var template in TemplateLibrary.GetAllTemplates())
-				ctx.AddSource(template.GetGeneratedFilename(), template.TemplateData);
+			// Marker-attribute templates are emitted through a CodeWriter (see
+			// MarkerAttributeTemplateEmitter) rather than loaded from embedded resources.
+			MarkerAttributeTemplateEmitter.EmitAll(ctx);
 		});
 
 		// The generation context carries the framework logging sink, settings and the

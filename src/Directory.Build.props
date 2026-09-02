@@ -8,6 +8,7 @@
 		-->
 		<ExcludePurviewTelemetry>true</ExcludePurviewTelemetry>
 		<GenerateDocumentationFile>false</GenerateDocumentationFile>
+		<EnableGenerateDocumentationFile>true</EnableGenerateDocumentationFile>
 	</PropertyGroup>
 
 	<Import Sdk="Purview.DotNetProjectSdk" Project="Sdk.props" />

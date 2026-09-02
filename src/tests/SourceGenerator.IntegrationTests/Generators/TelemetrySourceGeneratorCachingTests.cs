@@ -3,6 +3,7 @@ using System.Diagnostics.Metrics;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Purview.Telemetry.SourceGenerator.Infra;
 
 namespace Purview.Telemetry.SourceGenerator.Generators;
 
@@ -46,7 +47,7 @@ public class TelemetrySourceGeneratorCachingTests
 	static ImmutableArray<MetadataReference> BuildReferences()
 	{
 		var trusted = ((string?)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") ?? "")
-			.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries)
+			.Split([Path.PathSeparator], StringSplitOptions.RemoveEmptyEntries)
 			.Select(path => MetadataReference.CreateFromFile(path))
 			.ToList();
 
@@ -113,8 +114,8 @@ public class TelemetrySourceGeneratorCachingTests
 		var secondSources = GetGeneratedSources(second);
 
 		await Assert.That(secondSources.Count).IsEqualTo(firstSources.Count);
-		foreach (var (hintName, text) in firstSources)
-			await Assert.That(secondSources[hintName]).IsEqualTo(text);
+		foreach (var source in firstSources)
+			await Assert.That(secondSources[source.Key]).IsEqualTo(source.Value);
 	}
 
 	[Test]
@@ -132,8 +133,8 @@ public class TelemetrySourceGeneratorCachingTests
 		var runSources = GetGeneratedSources(run);
 
 		await Assert.That(runSources.Count).IsEqualTo(firstSources.Count);
-		foreach (var (hintName, text) in firstSources)
-			await Assert.That(runSources[hintName]).IsEqualTo(text);
+		foreach (var source in firstSources)
+			await Assert.That(runSources[source.Key]).IsEqualTo(source.Value);
 	}
 
 	[Test]
@@ -147,14 +148,16 @@ public class TelemetrySourceGeneratorCachingTests
 		var firstSources = GetGeneratedSources(first);
 
 		// Edit only the logger interface.
-		var editedLogger = LoggerInterface.Replace("void Log(", "void Log2(", StringComparison.Ordinal);
+		var editedLogger = LoggerInterface.ReplaceOrdinal("void Log(", "void Log2(");
 		var edited = CreateCompilation(ActivityInterface, editedLogger);
 		var run = driver.RunGeneratorsAndUpdateCompilation(edited, out _, out _, cancellationToken).GetRunResult();
 		var runSources = GetGeneratedSources(run);
 
 		await Assert.That(runSources.Count).IsEqualTo(firstSources.Count);
-		foreach (var (hintName, text) in firstSources)
+		foreach (var source in firstSources)
 		{
+			var hintName = source.Key;
+			var text = source.Value;
 			if (
 				!hintName.EndsWith(".Activity.g.cs", StringComparison.Ordinal)
 				&& !hintName.EndsWith(".Logging.g.cs", StringComparison.Ordinal)

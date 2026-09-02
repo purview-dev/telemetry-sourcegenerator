@@ -1,6 +1,11 @@
 namespace Purview.Telemetry.SourceGenerator.Templates;
 
-sealed record TemplateInfo(TypeIdentity TypeInfo, string? Source, string TemplateData) : IEquatable<TypeIdentity>
+/// <summary>
+/// Identity of a marker-attribute template. The template source is not held in memory;
+/// it is emitted with a <see cref="CodeWriter"/> during <c>RegisterPostInitializationOutput</c>
+/// (see <c>MarkerAttributeTemplateEmitter</c>).
+/// </summary>
+sealed record TemplateInfo(TypeIdentity TypeInfo) : IEquatable<TypeIdentity>
 {
 	public string Name => TypeInfo.Name;
 
@@ -8,25 +13,7 @@ sealed record TemplateInfo(TypeIdentity TypeInfo, string? Source, string Templat
 
 	public bool Equals(TypeIdentity other) => other.Equals(TypeInfo);
 
-	public static TemplateInfo Create(string fullTypeName)
-	{
-		var lastDotIndex = fullTypeName.LastIndexOf('.');
-		var typeName = fullTypeName.Substring(lastDotIndex + 1);
-		var @namespace = fullTypeName.Substring(0, lastDotIndex);
-
-		return Create(new TypeIdentity(typeName, @namespace));
-	}
-
-	public static TemplateInfo Create(TypeIdentity type)
-	{
-		var source = type.Namespace?.Split('.') ?? [];
-		var isRootSources = source.Length == 2;
-		var sourceToUse = isRootSources ? null : source.LastOrDefault();
-
-		var template = SourceEmitter.Emit(type.Name);
-
-		return new(type, sourceToUse, template);
-	}
+	public static TemplateInfo Create(TypeIdentity type) => new(type);
 
 	public static implicit operator string(TemplateInfo templateInfo) => templateInfo.TypeInfo.RenderFullName;
 }

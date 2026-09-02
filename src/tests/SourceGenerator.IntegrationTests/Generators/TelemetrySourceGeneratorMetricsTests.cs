@@ -2,6 +2,7 @@ using Purview.Telemetry.SourceGenerator.Infra;
 
 namespace Purview.Telemetry.SourceGenerator.Metrics;
 
+[SkipOnNetFramework]
 public partial class TelemetrySourceGeneratorMetricsTests : IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>
 {
 	[Test]

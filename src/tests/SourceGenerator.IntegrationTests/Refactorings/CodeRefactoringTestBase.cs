@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeRefactorings;
 using Microsoft.CodeAnalysis.CSharp;
+using Purview.Telemetry.SourceGenerator.Infra;
 
 namespace Purview.Telemetry.SourceGenerator.Refactorings;
 
@@ -98,8 +99,8 @@ public abstract class CodeRefactoringTestBase
 		CancellationToken cancellationToken = default
 	)
 	{
-		ArgumentNullException.ThrowIfNull(codeWithMarker);
-		ArgumentNullException.ThrowIfNull(provider);
+		TestHelpers.ThrowIfNull(codeWithMarker);
+		TestHelpers.ThrowIfNull(provider);
 
 		const string marker = "$$";
 
@@ -143,14 +144,42 @@ public abstract class CodeRefactoringTestBase
 	static IEnumerable<MetadataReference> GetDefaultReferences()
 	{
 		yield return MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
-		yield return MetadataReference.CreateFromFile(
-			System.Reflection.Assembly.Load("netstandard, Version=2.0.0.0").Location
-		);
-		yield return MetadataReference.CreateFromFile(System.Reflection.Assembly.Load("System.Runtime").Location);
+
+		// netstandard/System.Runtime facades are not available on .NET Framework.
+		if (TryLoadAssembly("netstandard, Version=2.0.0.0", out var netstandard))
+			yield return MetadataReference.CreateFromFile(netstandard.Location);
+		if (TryLoadAssembly("System.Runtime", out var systemRuntime))
+			yield return MetadataReference.CreateFromFile(systemRuntime.Location);
+
 		yield return MetadataReference.CreateFromFile(typeof(Microsoft.Extensions.Logging.ILogger).Assembly.Location);
 		yield return MetadataReference.CreateFromFile(typeof(Microsoft.Extensions.Logging.LogLevel).Assembly.Location);
 		yield return MetadataReference.CreateFromFile(typeof(System.Diagnostics.ActivitySource).Assembly.Location);
-		yield return MetadataReference.CreateFromFile(typeof(System.Diagnostics.Metrics.Counter<>).Assembly.Location);
+
+		// System.Diagnostics.Metrics is not available on .NET Framework.
+		var counterType = typeof(System.Diagnostics.ActivitySource).Assembly.GetType(
+			"System.Diagnostics.Metrics.Counter`1"
+		);
+		if (counterType is not null)
+			yield return MetadataReference.CreateFromFile(counterType.Assembly.Location);
+	}
+
+	static bool TryLoadAssembly(string name, out System.Reflection.Assembly assembly)
+	{
+		try
+		{
+			assembly = System.Reflection.Assembly.Load(name);
+			return true;
+		}
+		catch (FileNotFoundException)
+		{
+			assembly = null!;
+			return false;
+		}
+		catch (FileLoadException)
+		{
+			assembly = null!;
+			return false;
+		}
 	}
 
 	/// <summary>
@@ -174,8 +203,8 @@ public abstract class CodeRefactoringTestBase
 		CancellationToken cancellationToken = default
 	)
 	{
-		ArgumentNullException.ThrowIfNull(codeWithMarker);
-		ArgumentNullException.ThrowIfNull(provider);
+		TestHelpers.ThrowIfNull(codeWithMarker, nameof(codeWithMarker));
+		TestHelpers.ThrowIfNull(provider, nameof(provider));
 
 		var after = await ApplyRefactoringAsync(codeWithMarker, provider, equivalenceKey, cancellationToken);
 
@@ -183,7 +212,7 @@ public abstract class CodeRefactoringTestBase
 
 		await Assert
 			.That(after)
-			.IsNotEqualTo(codeWithMarker.Replace("$$", string.Empty, StringComparison.Ordinal).TrimStart())
+			.IsNotEqualTo(codeWithMarker.ReplaceOrdinal("$$", string.Empty).TrimStart())
 			.Because("Expected the refactoring to change the source.");
 
 		var parseResult = SyntaxFactory.ParseSyntaxTree(after!, cancellationToken: cancellationToken);

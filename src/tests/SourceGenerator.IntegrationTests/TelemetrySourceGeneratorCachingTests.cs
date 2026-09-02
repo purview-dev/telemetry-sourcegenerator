@@ -3,6 +3,7 @@ using System.Diagnostics.Metrics;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Purview.Telemetry.SourceGenerator.Infra;
 
 namespace Purview.Telemetry.SourceGenerator;
 
@@ -49,9 +50,20 @@ public class TelemetrySourceGeneratorCachingTests
 	static ImmutableArray<MetadataReference> BuildReferences()
 	{
 		var trusted = ((string?)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") ?? "")
-			.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries)
+			.Split([Path.PathSeparator], StringSplitOptions.RemoveEmptyEntries)
 			.Select(path => MetadataReference.CreateFromFile(path))
 			.ToList();
+
+		// .NET Framework does not populate TRUSTED_PLATFORM_ASSEMBLIES.
+		if (trusted.Count == 0)
+		{
+			trusted.AddRange(
+				AppDomain
+					.CurrentDomain.GetAssemblies()
+					.Where(static assembly => !assembly.IsDynamic && !string.IsNullOrEmpty(assembly.Location))
+					.Select(static assembly => MetadataReference.CreateFromFile(assembly.Location))
+			);
+		}
 
 		foreach (
 			var type in new[]
@@ -92,13 +104,15 @@ public class TelemetrySourceGeneratorCachingTests
 
 	static ImmutableArray<IncrementalStepRunReason> GetSourceOutputReasons(GeneratorDriverRunResult result)
 	{
-		return result
-			.Results.SelectMany(static r => r.TrackedSteps)
-			.Where(static kvp => kvp.Key == "SourceOutput")
-			.SelectMany(static kvp => kvp.Value)
-			.SelectMany(static runStep => runStep.Outputs)
-			.Select(static o => o.Reason)
-			.ToImmutableArray();
+		return
+		[
+			.. result
+				.Results.SelectMany(static r => r.TrackedSteps)
+				.Where(static kvp => kvp.Key == "SourceOutput")
+				.SelectMany(static kvp => kvp.Value)
+				.SelectMany(static runStep => runStep.Outputs)
+				.Select(static o => o.Reason),
+		];
 	}
 
 	[Test]
@@ -159,9 +173,7 @@ public class TelemetrySourceGeneratorCachingTests
 		driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out _, out _, cancellationToken);
 
 		// Edit the activity interface source (change the method name so the output changes).
-		var edited = CreateCompilation(
-			ActivityInterface.Replace("Activity([Tag]", "Activity2([Tag]", StringComparison.Ordinal)
-		);
+		var edited = CreateCompilation(ActivityInterface.ReplaceOrdinal("Activity([Tag]", "Activity2([Tag]"));
 		driver = driver.RunGeneratorsAndUpdateCompilation(edited, out _, out _, cancellationToken);
 		var reasons = GetSourceOutputReasons(driver.GetRunResult());
 		await Assert
