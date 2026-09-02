@@ -85,12 +85,7 @@ public interface ITestMetrics<{{genericTypeDef}}>  {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG1004"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG1004");
 	}
 
 	[Test]
@@ -123,11 +118,6 @@ public interface ITestMetrics<{{genericTypeDef}}>  {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG1004"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG1004");
 	}
 }

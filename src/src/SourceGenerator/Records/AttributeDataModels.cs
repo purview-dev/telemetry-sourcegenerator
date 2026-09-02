@@ -1,3 +1,5 @@
+using Purview.Telemetry.SourceGenerator.Helpers;
+
 namespace Purview.Telemetry.SourceGenerator.Records;
 
 #pragma warning disable format
@@ -54,7 +56,8 @@ readonly partial record struct TelemetryGenerationAttributeData(
 	[Property(DefaultValue = false)] bool DependencyInjectionClassIsPublic,
 	[Property(DefaultValue = 1)] int NamingConvention,
 	[Property(DefaultValue = true)] bool GenerateTelemetryNamesClass,
-	[Property] string? TelemetryNamesClassName
+	[Property] string? TelemetryNamesClassName,
+	[Property] string? TelemetryNamesNamespace
 );
 
 [Generate("Purview.Telemetry.TagAttribute")]
@@ -104,52 +107,74 @@ readonly partial record struct ExpandEnumerableAttributeData(
 );
 
 [Generate("Purview.Telemetry.TraceAttribute")]
-readonly partial record struct TraceAttributeData(
-	[Argument("messageTemplate")] [Property] string? MessageTemplate,
-	[Argument("eventId")] [Property(DefaultValue = -1)] int EventId,
-	[Argument("name")] [Property] string? Name,
-	[Property(DefaultValue = 0)] int GenerationMode
-);
+readonly partial record struct TraceAttributeData([NestedModel] LogAttributeData Log)
+{
+	public LogAttributeData ToLogAttribute() =>
+		Log with
+		{
+			Level = TypeLibrary.Logging.LogLevelMap[TypeLibrary.Logging.TraceAttribute].Value,
+			MessageTemplate = SharedHelpers.NullIfWhitespace(Log.MessageTemplate),
+			Name = SharedHelpers.NullIfWhitespace(Log.Name),
+		};
+}
 
 [Generate("Purview.Telemetry.DebugAttribute")]
-readonly partial record struct DebugAttributeData(
-	[Argument("messageTemplate")] [Property] string? MessageTemplate,
-	[Argument("eventId")] [Property(DefaultValue = -1)] int EventId,
-	[Argument("name")] [Property] string? Name,
-	[Property(DefaultValue = 0)] int GenerationMode
-);
+readonly partial record struct DebugAttributeData([NestedModel] LogAttributeData Log)
+{
+	public LogAttributeData ToLogAttribute() =>
+		Log with
+		{
+			Level = TypeLibrary.Logging.LogLevelMap[TypeLibrary.Logging.DebugAttribute].Value,
+			MessageTemplate = SharedHelpers.NullIfWhitespace(Log.MessageTemplate),
+			Name = SharedHelpers.NullIfWhitespace(Log.Name),
+		};
+}
 
 [Generate("Purview.Telemetry.InfoAttribute")]
-readonly partial record struct InfoAttributeData(
-	[Argument("messageTemplate")] [Property] string? MessageTemplate,
-	[Argument("eventId")] [Property(DefaultValue = -1)] int EventId,
-	[Argument("name")] [Property] string? Name,
-	[Property(DefaultValue = 0)] int GenerationMode
-);
+readonly partial record struct InfoAttributeData([NestedModel] LogAttributeData Log)
+{
+	public LogAttributeData ToLogAttribute() =>
+		Log with
+		{
+			Level = TypeLibrary.Logging.LogLevelMap[TypeLibrary.Logging.InfoAttribute].Value,
+			MessageTemplate = SharedHelpers.NullIfWhitespace(Log.MessageTemplate),
+			Name = SharedHelpers.NullIfWhitespace(Log.Name),
+		};
+}
 
 [Generate("Purview.Telemetry.WarningAttribute")]
-readonly partial record struct WarningAttributeData(
-	[Argument("messageTemplate")] [Property] string? MessageTemplate,
-	[Argument("eventId")] [Property(DefaultValue = -1)] int EventId,
-	[Argument("name")] [Property] string? Name,
-	[Property(DefaultValue = 0)] int GenerationMode
-);
+readonly partial record struct WarningAttributeData([NestedModel] LogAttributeData Log)
+{
+	public LogAttributeData ToLogAttribute() =>
+		Log with
+		{
+			Level = TypeLibrary.Logging.LogLevelMap[TypeLibrary.Logging.WarningAttribute].Value,
+			MessageTemplate = SharedHelpers.NullIfWhitespace(Log.MessageTemplate),
+			Name = SharedHelpers.NullIfWhitespace(Log.Name),
+		};
+}
 
 [Generate("Purview.Telemetry.ErrorAttribute")]
-readonly partial record struct ErrorAttributeData(
-	[Argument("messageTemplate")] [Property] string? MessageTemplate,
-	[Argument("eventId")] [Property(DefaultValue = -1)] int EventId,
-	[Argument("name")] [Property] string? Name,
-	[Property(DefaultValue = 0)] int GenerationMode
-);
+readonly partial record struct ErrorAttributeData([NestedModel] LogAttributeData Log)
+{
+	public LogAttributeData ToLogAttribute() =>
+		Log with
+		{
+			Level = TypeLibrary.Logging.LogLevelMap[TypeLibrary.Logging.ErrorAttribute].Value,
+		};
+}
 
 [Generate("Purview.Telemetry.CriticalAttribute")]
-readonly partial record struct CriticalAttributeData(
-	[Argument("messageTemplate")] [Property] string? MessageTemplate,
-	[Argument("eventId")] [Property(DefaultValue = -1)] int EventId,
-	[Argument("name")] [Property] string? Name,
-	[Property(DefaultValue = 0)] int GenerationMode
-);
+readonly partial record struct CriticalAttributeData([NestedModel] LogAttributeData Log)
+{
+	public LogAttributeData ToLogAttribute() =>
+		Log with
+		{
+			Level = TypeLibrary.Logging.LogLevelMap[TypeLibrary.Logging.CriticalAttribute].Value,
+			MessageTemplate = SharedHelpers.NullIfWhitespace(Log.MessageTemplate),
+			Name = SharedHelpers.NullIfWhitespace(Log.Name),
+		};
+}
 
 [Generate("Microsoft.Extensions.Logging.LogPropertiesAttribute")]
 readonly partial record struct LogPropertiesAttributeData(

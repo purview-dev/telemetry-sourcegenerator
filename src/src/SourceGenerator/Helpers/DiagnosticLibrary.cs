@@ -1,5 +1,5 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Purview.Telemetry.SourceGenerator.Records;
 
 namespace Purview.Telemetry.SourceGenerator;
 
@@ -26,49 +26,37 @@ static partial class DiagnosticLibrary
 		}
 	}
 
-	public static void Report(
-		Action<Diagnostic> report,
-		TelemetryDiagnosticDescriptor telemetryDiagnostic,
-		params object?[] args
-	) => Report(report, telemetryDiagnostic, locations: null, args);
+	public static void Report(Action<Diagnostic> report, DiagnosticInfo telemetryDiagnostic, params object?[] args) =>
+		Report(report, telemetryDiagnostic, locations: null, args);
 
 	public static void Report(
 		Action<Diagnostic> report,
-		TelemetryDiagnosticDescriptor telemetryDiagnostic,
+		DiagnosticInfo telemetryDiagnostic,
 		Location? location,
 		params object?[] args
 	) => Report(report, telemetryDiagnostic, location == null ? null : [location], args);
 
 	public static void Report(
 		Action<Diagnostic> report,
-		TelemetryDiagnosticDescriptor telemetryDiagnostic,
+		DiagnosticInfo telemetryDiagnostic,
 		IEnumerable<Location>? locations,
 		params object?[] args
 	) => Report(report, telemetryDiagnostic, locations?.ToArray(), args);
 
 	public static void Report(
 		Action<Diagnostic> report,
-		TelemetryDiagnosticDescriptor telemetryDiagnostic,
+		DiagnosticInfo telemetryDiagnostic,
 		Location[]? locations,
 		params object?[] args
 	)
 	{
 		var location = locations?.Length > 0 ? locations[0] : null;
-		var additionalLocations = locations?.Length > 1 ? locations.AsSpan().Slice(1) : null;
+		var additionalLocations =
+			locations?.Length > 1 ? locations.AsSpan().Slice(1).ToImmutableArray() : (ImmutableArray<Location>?)null;
 
-		var diagnostic = Diagnostic.Create(
-			new(
-				id: telemetryDiagnostic.Id,
-				title: telemetryDiagnostic.Title,
-				messageFormat: telemetryDiagnostic.Description,
-				category: telemetryDiagnostic.Category,
-				defaultSeverity: telemetryDiagnostic.Severity,
-				isEnabledByDefault: telemetryDiagnostic.EnabledByDefault
-			),
-			location,
-			additionalLocations.ToArray(),
-			args
-		);
+		var diagnostic = DiagnosticInfo
+			.Create(telemetryDiagnostic.Descriptor, location, additionalLocations, args!)
+			.ToDiagnostic();
 
 		report(diagnostic);
 	}

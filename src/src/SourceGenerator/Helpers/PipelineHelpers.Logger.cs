@@ -10,43 +10,31 @@ partial class PipelineHelpers
 
 	public static GeneratorResult<LoggerTarget?> BuildLoggerTransform(
 		GeneratorAttributeSyntaxContext context,
-		ISourceGenLogger? logger,
 		CancellationToken token
-	) => BuildLoggerTarget(context.TargetSymbol as INamedTypeSymbol, context.SemanticModel.Compilation, logger, token);
+	) => BuildLoggerTarget(context.TargetSymbol as INamedTypeSymbol, context.SemanticModel.Compilation, token);
 
 	public static GeneratorResult<LoggerTarget?> BuildLoggerTarget(
 		INamedTypeSymbol? interfaceSymbol,
 		Compilation compilation,
-		ISourceGenLogger? logger,
 		CancellationToken token
 	)
 	{
 		token.ThrowIfCancellationRequested();
 
 		if (interfaceSymbol is null)
-		{
-			logger?.Fatal($"Could not find the interface symbol for a Logger target.");
 			return GeneratorResult<LoggerTarget?>.Empty;
-		}
 
 		var iLoggerTypeSymbol = compilation.GetTypeByMetadataName(
 			TypeLibrary.Logging.MicrosoftExtensions.ILogger.MetadataFullName
 		);
 		if (iLoggerTypeSymbol is null)
-		{
-			logger?.Diagnostic(
-				$"Requested a Logger target to be generated, but could not find the ILogger symbol referenced '{interfaceSymbol.Name}'."
-			);
 			return GeneratorResult<LoggerTarget?>.Empty;
-		}
 
 		if (interfaceSymbol.Arity > 0)
 		{
-			logger?.Diagnostic($"Cannot generate a Logger target for a generic interface '{interfaceSymbol.Name}'.");
-
 			return GeneratorResult<LoggerTarget?>.Create(
 				DiagnosticInfo.Create(
-					TelemetryRules.ToDescriptor(DiagnosticLibrary.General.GenericInterfacesNotSupported),
+					DiagnosticLibrary.General.GenericInterfacesNotSupported.Descriptor,
 					interfaceSymbol
 				)
 			);
@@ -54,12 +42,7 @@ partial class PipelineHelpers
 
 		var loggerData = SharedHelpers.GetLoggerAttribute(interfaceSymbol, token);
 		if (loggerData is not { } loggerAttribute)
-		{
-			logger?.Fatal(
-				$"Could not find {TemplateLibrary.Logging.LoggerAttribute} when one was expected '{interfaceSymbol.Name}'."
-			);
 			return GeneratorResult<LoggerTarget?>.Empty;
-		}
 
 		var telemetryGeneration = SharedHelpers.GetTelemetryGenerationAttribute(interfaceSymbol, compilation, token);
 		var className = telemetryGeneration.ClassName ?? GenerateClassName(interfaceSymbol.Name);
@@ -79,11 +62,9 @@ partial class PipelineHelpers
 			is not InterfaceDeclarationSyntax interfaceDeclaration
 		)
 		{
-			logger?.Fatal($"Could not locate the declaring syntax for '{interfaceSymbol.Name}'.");
 			return GeneratorResult<LoggerTarget?>.Empty;
 		}
 
-		var fullNamespace = Utilities.GetFullNamespace(interfaceDeclaration, true);
 		var logMethods = LogMethodModelBuilder.BuildLogMethods(
 			generationType,
 			className,
@@ -92,7 +73,6 @@ partial class PipelineHelpers
 			loggerAttribute,
 			compilation,
 			interfaceSymbol,
-			logger,
 			interfaceGenerationMode: interfaceGenerationMode,
 			token
 		);
@@ -102,10 +82,7 @@ partial class PipelineHelpers
 				TelemetryGeneration: telemetryGeneration,
 				GenerationType: generationType,
 				ClassNameToGenerate: className,
-				ClassNamespace: Utilities.GetNamespace(interfaceDeclaration),
 				ParentClasses: Utilities.GetParentClasses(interfaceDeclaration),
-				FullNamespace: fullNamespace,
-				FullyQualifiedName: fullNamespace + className,
 				InterfaceType: TypeReference.Create(interfaceSymbol),
 				LoggerAttribute: loggerAttribute,
 				DefaultLevel: defaultLogLevel,

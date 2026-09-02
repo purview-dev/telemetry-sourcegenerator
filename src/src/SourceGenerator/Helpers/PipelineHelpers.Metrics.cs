@@ -10,32 +10,25 @@ partial class PipelineHelpers
 
 	public static GeneratorResult<MeterTarget?> BuildMeterTransform(
 		GeneratorAttributeSyntaxContext context,
-		ISourceGenLogger? logger,
 		CancellationToken token
-	) => BuildMeterTarget(context.TargetSymbol as INamedTypeSymbol, context.SemanticModel.Compilation, logger, token);
+	) => BuildMeterTarget(context.TargetSymbol as INamedTypeSymbol, context.SemanticModel.Compilation, token);
 
 	public static GeneratorResult<MeterTarget?> BuildMeterTarget(
 		INamedTypeSymbol? interfaceSymbol,
 		Compilation compilation,
-		ISourceGenLogger? logger,
 		CancellationToken token
 	)
 	{
 		token.ThrowIfCancellationRequested();
 
 		if (interfaceSymbol is null)
-		{
-			logger?.Fatal($"Could not find the interface symbol for a Meter target.");
 			return GeneratorResult<MeterTarget?>.Empty;
-		}
 
 		if (interfaceSymbol.Arity > 0)
 		{
-			logger?.Diagnostic($"Cannot generate a Meter target for a generic interface '{interfaceSymbol.Name}'.");
-
 			return GeneratorResult<MeterTarget?>.Create(
 				DiagnosticInfo.Create(
-					TelemetryRules.ToDescriptor(DiagnosticLibrary.General.GenericInterfacesNotSupported),
+					DiagnosticLibrary.General.GenericInterfacesNotSupported.Descriptor,
 					interfaceSymbol
 				)
 			);
@@ -43,12 +36,7 @@ partial class PipelineHelpers
 
 		var meterData = SharedHelpers.GetMeterAttribute(interfaceSymbol, token);
 		if (meterData is not { } meterAttribute)
-		{
-			logger?.Fatal(
-				$"Could not find {TemplateLibrary.Metrics.MeterAttribute} when one was expected '{interfaceSymbol.Name}'."
-			);
 			return GeneratorResult<MeterTarget?>.Empty;
-		}
 
 		var telemetryGeneration = SharedHelpers.GetTelemetryGenerationAttribute(interfaceSymbol, compilation, token);
 		var className = telemetryGeneration.ClassName ?? GenerateClassName(interfaceSymbol.Name);
@@ -59,11 +47,8 @@ partial class PipelineHelpers
 			is not InterfaceDeclarationSyntax interfaceDeclaration
 		)
 		{
-			logger?.Fatal($"Could not locate the declaring syntax for '{interfaceSymbol.Name}'.");
 			return GeneratorResult<MeterTarget?>.Empty;
 		}
-
-		var fullNamespace = Utilities.GetFullNamespace(interfaceDeclaration, true);
 
 		var meterName = meterAttribute.Name;
 		if (string.IsNullOrWhiteSpace(meterName))
@@ -99,7 +84,6 @@ partial class PipelineHelpers
 			telemetryGeneration,
 			meterName!,
 			interfaceSymbol,
-			logger,
 			token
 		);
 
@@ -108,10 +92,7 @@ partial class PipelineHelpers
 				TelemetryGeneration: telemetryGeneration,
 				GenerationType: generationType,
 				ClassNameToGenerate: className,
-				ClassNamespace: Utilities.GetNamespace(interfaceDeclaration),
 				ParentClasses: Utilities.GetParentClasses(interfaceDeclaration),
-				FullNamespace: fullNamespace,
-				FullyQualifiedName: fullNamespace + className,
 				InterfaceType: TypeReference.Create(interfaceSymbol),
 				MeterName: meterName,
 				MeterGeneration: meterGenerationAttribute,

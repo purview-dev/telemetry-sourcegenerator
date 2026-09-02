@@ -6,14 +6,10 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 partial class MeterTargetClassEmitter
 {
-	static void EmitInitializationMethod(
-		MeterTarget target,
-		CodeWriter writer,
-		SourceProductionContext context,
-		bool emitNullable,
-		bool supportsIMeterFactory
-	)
+	static void EmitInitializationMethod(MeterOutputContext output, CodeWriter writer, SourceProductionContext context)
 	{
+		var supportsIMeterFactory = output.Context.Capabilities.SupportsIMeterFactory;
+
 		context.CancellationToken.ThrowIfCancellationRequested();
 
 		writer.NewLine().Write("void ").Write(PropertyLibrary.Metrics.MeterInitializationMethod).Write('(');
@@ -44,21 +40,18 @@ partial class MeterTargetClassEmitter
 
 			writer.NewLine();
 
-			EmitInitializationBodyContent(target, writer, emitNullable, supportsIMeterFactory);
+			EmitInitializationBodyContent(output, writer);
 		}
 	}
 
 	// Emits the inline constructor for the Metrics-only (and Activity+Metrics) case
 	// where Metrics owns the constructor. Instrument fields are readonly, so we
 	// inline the init body directly rather than delegating to InitializeMeters().
-	static void EmitInlineConstructor(
-		MeterTarget target,
-		CodeWriter writer,
-		SourceProductionContext context,
-		bool emitNullable,
-		bool supportsIMeterFactory
-	)
+	static void EmitInlineConstructor(MeterOutputContext output, CodeWriter writer, SourceProductionContext context)
 	{
+		var target = output.Target;
+		var supportsIMeterFactory = output.Context.Capabilities.SupportsIMeterFactory;
+
 		context.CancellationToken.ThrowIfCancellationRequested();
 
 		writer.NewLine().Write("public ").Write(target.ClassNameToGenerate).Write('(');
@@ -75,20 +68,17 @@ partial class MeterTargetClassEmitter
 
 		using (writer.OpenBlockScope())
 		{
-			EmitInitializationBodyContent(target, writer, emitNullable, supportsIMeterFactory);
+			EmitInitializationBodyContent(output, writer);
 		}
 	}
 
-	static void EmitInitializationBodyContent(
-		MeterTarget target,
-		CodeWriter writer,
-		bool emitNullable,
-		bool supportsIMeterFactory
-	)
+	static void EmitInitializationBodyContent(MeterOutputContext output, CodeWriter writer)
 	{
+		var target = output.Target;
+		var supportsIMeterFactory = output.Context.Capabilities.SupportsIMeterFactory;
 		const string meterTagsVariableName = "meterTags";
 
-		var dictType = GetDictionaryType(emitNullable);
+		var dictType = GetDictionaryType(writer);
 		writer
 			.Write((string)dictType)
 			.Write(' ')
@@ -131,10 +121,10 @@ partial class MeterTargetClassEmitter
 		}
 
 		foreach (var method in target.InstrumentationMethods)
-			EmitInitialiseInstrumentVariable(method, writer, emitNullable);
+			EmitInitialiseInstrumentVariable(method, writer);
 	}
 
-	static void EmitInitialiseInstrumentVariable(InstrumentTarget method, CodeWriter writer, bool emitNullable)
+	static void EmitInitialiseInstrumentVariable(InstrumentTarget method, CodeWriter writer)
 	{
 		if (!method.TargetGenerationState.IsValid)
 			return;
@@ -145,7 +135,7 @@ partial class MeterTargetClassEmitter
 			var description = method.InstrumentAttribute?.Description?.Wrap() ?? PropertyLibrary.System.NullKeyword;
 			var tagVariableName = Utilities.LowercaseFirstChar(method.MethodName) + "Tags";
 
-			var dictType = GetDictionaryType(emitNullable);
+			var dictType = GetDictionaryType(writer);
 			writer
 				.Write((string)dictType)
 				.Write(' ')

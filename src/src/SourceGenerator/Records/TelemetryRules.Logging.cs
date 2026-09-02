@@ -19,7 +19,7 @@ static partial class TelemetryRules
 	{
 		var diagnostics = ImmutableArray.CreateBuilder<DiagnosticInfo>();
 
-		if (!Utilities.ContainsAttribute(interfaceSymbol, TemplateLibrary.Logging.LoggerAttribute, token))
+		if (!Utilities.ContainsAttribute(interfaceSymbol, TypeLibrary.Logging.LoggerAttribute, token))
 			return diagnostics.ToImmutable();
 
 		var generationType = SharedHelpers.GetGenerationTypes(interfaceSymbol, token);
@@ -32,9 +32,7 @@ static partial class TelemetryRules
 		var methods = interfaceSymbol
 			.GetMembers()
 			.OfType<IMethodSymbol>()
-			.Where(m =>
-				!Utilities.ContainsAttribute(m, TemplateLibrary.Shared.ExcludeAttribute, token) && m.Arity == 0
-			);
+			.Where(m => !TypeHelpers.HasAttribute(m, TypeLibrary.TelemetryShared.ExcludeAttribute) && m.Arity == 0);
 
 		foreach (var method in methods)
 		{
@@ -69,7 +67,7 @@ static partial class TelemetryRules
 		if (hasMultipleExceptions)
 			diagnostics.Add(
 				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.Logging.MultipleExceptionsDefined),
+					DiagnosticLibrary.Logging.MultipleExceptionsDefined.Descriptor,
 					method,
 					method.Name
 				)
@@ -79,7 +77,7 @@ static partial class TelemetryRules
 		if (IsInvalidLogReturnType(method, token))
 			diagnostics.Add(
 				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.Logging.LogMustReturnVoidOrAsync),
+					DiagnosticLibrary.Logging.LogMustReturnVoidOrAsync.Descriptor,
 					method.ReturnType.Locations
 				)
 			);
@@ -110,7 +108,7 @@ static partial class TelemetryRules
 		if (useV1Generation && nonExceptionCount > PropertyLibrary.Logging.MaxNonExceptionParameters)
 			diagnostics.Add(
 				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.Logging.MaximumLogEntryParametersExceeded),
+					DiagnosticLibrary.Logging.MaximumLogEntryParametersExceeded.Descriptor,
 					method,
 					method.Name
 				)
@@ -118,14 +116,12 @@ static partial class TelemetryRules
 
 		// TSG2002: inferred error level (exception present, no explicit level).
 		if (useV1Generation && !isScoped && exceptionParameters.Length == 1 && logAttribute?.LevelOrNull == null)
-			diagnostics.Add(
-				DiagnosticInfo.Create(ToDescriptor(DiagnosticLibrary.Logging.InferringErrorLogLevel), method)
-			);
+			diagnostics.Add(DiagnosticInfo.Create(DiagnosticLibrary.Logging.InferringErrorLogLevel.Descriptor, method));
 
 		// TSG2007: scoped method must not have an explicit level.
 		if (isScoped && logAttribute?.LevelOrNull != null)
 			diagnostics.Add(
-				DiagnosticInfo.Create(ToDescriptor(DiagnosticLibrary.Logging.ScopedMethodShouldNotHaveLevel), method)
+				DiagnosticInfo.Create(DiagnosticLibrary.Logging.ScopedMethodShouldNotHaveLevel.Descriptor, method)
 			);
 
 		// Per-parameter rules.
@@ -154,7 +150,7 @@ static partial class TelemetryRules
 		{
 			diagnostics.Add(
 				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.Logging.ExpandEnumerableAndLogPropertiesNotSupported),
+					DiagnosticLibrary.Logging.ExpandEnumerableAndLogPropertiesNotSupported.Descriptor,
 					parameter
 				)
 			);
@@ -168,7 +164,7 @@ static partial class TelemetryRules
 		)
 		{
 			diagnostics.Add(
-				DiagnosticInfo.Create(ToDescriptor(DiagnosticLibrary.Logging.UnboundedIEnumerableMaxCount), parameter)
+				DiagnosticInfo.Create(DiagnosticLibrary.Logging.UnboundedIEnumerableMaxCount.Descriptor, parameter)
 			);
 		}
 	}
@@ -190,7 +186,7 @@ static partial class TelemetryRules
 		if (isOrdinalBased && isNamedBased)
 			diagnostics.Add(
 				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.Logging.MixedOrdinalAndNamedProperties),
+					DiagnosticLibrary.Logging.MixedOrdinalAndNamedProperties.Descriptor,
 					method,
 					method.Name
 				)
@@ -203,7 +199,7 @@ static partial class TelemetryRules
 		if (maxOrdinal > method.Parameters.Length)
 			diagnostics.Add(
 				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.Logging.OrdinalsExceedParameters),
+					DiagnosticLibrary.Logging.OrdinalsExceedParameters.Descriptor,
 					method,
 					method.Name
 				)

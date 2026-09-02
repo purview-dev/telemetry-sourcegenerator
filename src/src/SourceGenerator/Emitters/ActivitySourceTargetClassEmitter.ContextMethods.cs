@@ -7,11 +7,10 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 partial class ActivitySourceTargetClassEmitter
 {
 	static void EmitContextMethodBody(
-		CodeWriter writer,
+		ActivityOutputContext output,
 		ActivityBasedGenerationTarget methodTarget,
-		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool emitNullable = true
+		CodeWriter writer,
+		SourceProductionContext context
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -19,8 +18,7 @@ partial class ActivitySourceTargetClassEmitter
 		if (
 			!GuardParameters(
 				methodTarget,
-				context,
-				logger,
+				output,
 				out var activityParam,
 				out var _,
 				out var tagsParam,
@@ -36,30 +34,30 @@ partial class ActivitySourceTargetClassEmitter
 		}
 
 		var activityVariableName =
-			activityParam?.ParameterName ?? (TypeLibrary.Activities.SystemDiagnostics.Activity + ".Current");
+			activityParam?.ParameterName ?? TypeLibrary.Activities.SystemDiagnostics.Activity.StaticMember("Current");
 
 		if (tagsParam != null)
 		{
-			logger?.Diagnostic("Tags parameter not allowed on context method, only activities or events.");
+			output.Context.Diagnostic("Tags parameter not allowed on context method, only activities or events.");
 
 			return;
 		}
 
 		if (linksParam != null)
 		{
-			logger?.Diagnostic("Links parameter not allowed on context method, only activities.");
+			output.Context.Diagnostic("Links parameter not allowed on context method, only activities.");
 
 			return;
 		}
 
-		EmitHasListenersTest(writer, methodTarget, emitNullable);
+		EmitHasListenersTest(writer, methodTarget);
 
 		writer.Write("if (").Write(activityVariableName).WriteLine(" != null)");
 
 		using (writer.OpenBlockScope())
 		{
-			EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, logger);
-			EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, logger);
+			EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, output);
+			EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, output);
 		}
 
 		context.CancellationToken.ThrowIfCancellationRequested();

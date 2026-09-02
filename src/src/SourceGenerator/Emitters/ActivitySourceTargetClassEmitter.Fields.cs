@@ -6,19 +6,15 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 partial class ActivitySourceTargetClassEmitter
 {
-	static void EmitFields(
-		ActivitySourceTarget target,
-		CodeWriter writer,
-		SourceProductionContext context,
-		ISourceGenLogger? logger
-	)
+	static void EmitFields(ActivityOutputContext output, CodeWriter writer, SourceProductionContext context)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
 
+		var target = output.Target;
 		var activitySourceName = target.ActivitySourceName;
 		if (string.IsNullOrWhiteSpace(activitySourceName))
 		{
-			logger?.Diagnostic("No activity source specified.");
+			output.Context.Diagnostic("No activity source specified.");
 
 			activitySourceName = PropertyLibrary.Activities.DefaultActivitySourceName;
 		}

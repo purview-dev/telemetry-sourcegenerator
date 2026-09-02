@@ -26,15 +26,11 @@ partial class MeterTargetClassEmitter
 		writer.Write(") => throw new global::System.NotSupportedException();").NewLine();
 	}
 
-	static void EmitMethods(
-		MeterTarget target,
-		CodeWriter writer,
-		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool emitNullable
-	)
+	static void EmitMethods(MeterOutputContext output, CodeWriter writer, SourceProductionContext context)
 	{
-		EmitPartialMethods(writer, target, context, logger, emitNullable);
+		var target = output.Target;
+
+		EmitPartialMethods(output, writer, context);
 
 		foreach (var methodTarget in target.InstrumentationMethods)
 		{
@@ -58,28 +54,23 @@ partial class MeterTargetClassEmitter
 			// Report warning for Activity parameter without Activity target
 			if (methodTarget.TargetGenerationState.ActivityParameterWithoutTarget != null)
 			{
-				logger?.Debug(
+				output.Context.Debug(
 					$"Activity parameter '{methodTarget.TargetGenerationState.ActivityParameterWithoutTarget}' on {methodTarget.MethodName} has no Activity target."
 				);
 			}
 
-			EmitMethod(writer, methodTarget, context, logger, emitNullable);
+			EmitMethod(output, methodTarget, writer, context);
 		}
 	}
 
-	static void EmitPartialMethods(
-		CodeWriter writer,
-		MeterTarget target,
-		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool emitNullable = true
-	)
+	static void EmitPartialMethods(MeterOutputContext output, CodeWriter writer, SourceProductionContext context)
 	{
+		var target = output.Target;
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		logger?.Debug($"Emitting partial method for populating tags: {PartialMeterTagsMethod}.");
+		output.Context.Debug($"Emitting partial method for populating tags: {PartialMeterTagsMethod}.");
 
-		var dictType = GetDictionaryType(emitNullable);
+		var dictType = GetDictionaryType(writer);
 		writer
 			.NewLine()
 			.Write("partial void ")
@@ -108,11 +99,10 @@ partial class MeterTargetClassEmitter
 	}
 
 	static void EmitMethod(
-		CodeWriter writer,
+		MeterOutputContext output,
 		InstrumentTarget methodTarget,
-		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool emitNullable = true
+		CodeWriter writer,
+		SourceProductionContext context
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -126,7 +116,7 @@ partial class MeterTargetClassEmitter
 		var loggingOwnsPublicMethod = !activityOwnsPublicMethod && methodTargets.HasFlag(GenerationType.Logging);
 		var metricsOwnsPublicMethod = !activityOwnsPublicMethod && !loggingOwnsPublicMethod;
 
-		logger?.Debug($"Emitting instrument method: {methodTarget.MethodName}.");
+		output.Context.Debug($"Emitting instrument method: {methodTarget.MethodName}.");
 
 		// For multi-target where Activity or Logging owns public method, generate private method
 		var methodName =
@@ -165,7 +155,7 @@ partial class MeterTargetClassEmitter
 			if (methodTarget.IsObservable)
 				EmitObservableInstrumentBody(writer, methodTarget, tagVariableName);
 			else
-				EmitInstrumentBody(writer, methodTarget, tagVariableName, emitNullable);
+				EmitInstrumentBody(writer, methodTarget, tagVariableName);
 		}
 	}
 
@@ -213,7 +203,7 @@ partial class MeterTargetClassEmitter
 				if (methodTarget.MeasurementParameter!.IsIEnumerable)
 					type = TypeLibrary.System.GenericIEnumerable.MakeGeneric(type);
 
-				type = TypeLibrary.System.Func.MakeGeneric(type);
+				type = PurviewTypeLibrary.System.Func.MakeGeneric(type);
 
 				return new ParameterDeclarationOptions(p.ParameterName, new TypeReference(type));
 			}),

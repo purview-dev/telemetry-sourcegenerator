@@ -13,7 +13,7 @@ partial class ActivitySourceTargetClassEmitter
 		bool populateTags,
 		ActivityBasedGenerationTarget method,
 		bool checkForNullableActivity,
-		ISourceGenLogger? logger
+		ActivityOutputContext output
 	)
 	{
 		var parameters = populateTags ? method.Tags : method.Baggage;
@@ -36,7 +36,7 @@ partial class ActivitySourceTargetClassEmitter
 
 			if (!populateTags && param.ParameterType.Identity.SpecialType != SpecialType.System_String)
 			{
-				logger?.Diagnostic("Found a baggage parameter type that is not a string.");
+				output.Context.Diagnostic("Found a baggage parameter type that is not a string.");
 
 				if (param.ParameterType.IsNullable)
 					writer.Write('?');
@@ -81,8 +81,7 @@ partial class ActivitySourceTargetClassEmitter
 
 	static bool GuardParameters(
 		ActivityBasedGenerationTarget methodTarget,
-		SourceProductionContext _,
-		ISourceGenLogger? logger,
+		ActivityOutputContext output,
 		out ActivityBasedParameterTarget? activityParam,
 		out ActivityBasedParameterTarget? parentContextOrId,
 		out ActivityBasedParameterTarget? tagsParam,
@@ -129,7 +128,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		if (activityParams.Length > 1)
 		{
-			logger?.Diagnostic("More than one activity parameter defined.");
+			output.Context.Diagnostic("More than one activity parameter defined.");
 
 			return false;
 		}
@@ -140,7 +139,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		if (parentContextOrIdParams.Length > 1)
 		{
-			logger?.Diagnostic("More than one parent context/ id defined.");
+			output.Context.Diagnostic("More than one parent context/ id defined.");
 
 			return false;
 		}
@@ -151,7 +150,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		if (tagsParams.Length > 1)
 		{
-			logger?.Diagnostic("More than one tag IEnumerable defined.");
+			output.Context.Diagnostic("More than one tag IEnumerable defined.");
 
 			return false;
 		}
@@ -162,7 +161,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		if (linksParams.Length > 1)
 		{
-			logger?.Diagnostic("More than one ActivityLink/ IEnumerable of ActivityLink is defined.");
+			output.Context.Diagnostic("More than one ActivityLink/ IEnumerable of ActivityLink is defined.");
 
 			return false;
 		}
@@ -173,7 +172,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		if (escapeParams.Length > 1)
 		{
-			logger?.Diagnostic("More than one Escape parameter defined.");
+			output.Context.Diagnostic("More than one Escape parameter defined.");
 
 			return false;
 		}
@@ -196,7 +195,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		if (statusDescriptionParams.Length > 1)
 		{
-			logger?.Diagnostic("More than one StatusDescription parameter defined.");
+			output.Context.Diagnostic("More than one StatusDescription parameter defined.");
 
 			return false;
 		}

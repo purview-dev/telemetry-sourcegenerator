@@ -20,7 +20,6 @@ static class LogMethodModelBuilder
 		LoggerAttributeData loggerTarget,
 		Compilation compilation,
 		INamedTypeSymbol interfaceSymbol,
-		ISourceGenLogger? logger,
 		int interfaceGenerationMode,
 		CancellationToken token
 	)
@@ -30,11 +29,8 @@ static class LogMethodModelBuilder
 		List<LogMethodTarget> methodTargets = [];
 		foreach (var method in PipelineHelpers.GetAllInterfaceMethods(interfaceSymbol, token))
 		{
-			if (Utilities.ContainsAttribute(method, TemplateLibrary.Shared.ExcludeAttribute, token))
-			{
-				logger?.Debug($"Skipping {interfaceSymbol.Name}.{method.Name}, explicitly excluded.");
+			if (Utilities.ContainsAttribute(method, TypeLibrary.TelemetryShared.ExcludeAttribute, token))
 				continue;
-			}
 
 			// For multi-target interfaces (generationType != GenerationType.Logging means interface has multiple targets):
 			// - Include method ONLY if it has an explicit Logging attribute
@@ -45,12 +41,7 @@ static class LogMethodModelBuilder
 				var hasLoggingAttribute = SharedHelpers.GetLogAttribute(method, token) != null;
 
 				if (!hasLoggingAttribute)
-				{
-					logger?.Debug(
-						$"Skipping {interfaceSymbol.Name}.{method.Name} from logging - no explicit Logging attribute on multi-target interface."
-					);
 					continue;
-				}
 			}
 
 			if (method.Arity > 0)
@@ -58,19 +49,11 @@ static class LogMethodModelBuilder
 				continue;
 			}
 
-			logger?.Debug($"Found method {interfaceSymbol.Name}.{method.Name}.");
-
 			// Validate return type - don't skip; let through with UnknownReturnType flag so the emitter can report the diagnostic
 			var invalidReturnType = TelemetryRules.IsInvalidLogReturnType(method, token);
 
 			var isScoped = TypeLibrary.System.IDisposable.Equals(method.ReturnType);
-			var methodParameters = GetLogMethodParameters(
-				method,
-				compilation,
-				logger,
-				token,
-				out var hasParameterError
-			);
+			var methodParameters = GetLogMethodParameters(method, compilation, token, out var hasParameterError);
 			if (hasParameterError)
 			{
 				// LogProperties + ExpandEnumerable conflict: add invalid stub so emitter can report TSG2006
@@ -119,12 +102,6 @@ static class LogMethodModelBuilder
 				generationType,
 				GenerationType.Logging
 			);
-			if (targetGenerationState.RaiseMissingInterfaceSource)
-			{
-				logger?.Debug(
-					$"Identified {interfaceSymbol.Name}.{method.Name} as problematic as the interface is missing source attribute(s) for the method's target(s)."
-				);
-			}
 
 			// Resolve per-method generation mode.
 			// Priority: method GenerationMode > interface/assembly GenerationMode > Auto (per-method param analysis).
@@ -430,7 +407,6 @@ static class LogMethodModelBuilder
 	static ImmutableArray<LogParameterTarget> GetLogMethodParameters(
 		IMethodSymbol method,
 		Compilation compilation,
-		ISourceGenLogger? logger,
 		CancellationToken token,
 		out bool hasError
 	)
@@ -453,7 +429,6 @@ static class LogMethodModelBuilder
 				|| parameterType.Identity.Equals(TypeLibrary.System.TagList)
 			)
 			{
-				logger?.Debug($"Skipping parameter '{parameter.Name}' of type '{parameterType}' from logging.");
 				continue;
 			}
 
@@ -484,9 +459,6 @@ static class LogMethodModelBuilder
 						)
 					)
 					{
-						logger?.Debug(
-							$"Skipping property {propertyName} on {parameter.Name} as it is marked with {TypeLibrary.Logging.MicrosoftExtensions.LogPropertyIgnoreAttribute}."
-						);
 						continue;
 					}
 
@@ -523,8 +495,6 @@ static class LogMethodModelBuilder
 			if (isException)
 				isFirstException = false;
 		}
-
-		logger?.Debug($"Found {parameters.Count} parameter(s) for {method.Name}.");
 
 		return [.. parameters];
 	}

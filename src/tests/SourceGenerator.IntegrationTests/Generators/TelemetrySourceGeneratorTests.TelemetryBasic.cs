@@ -177,12 +177,7 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG3021"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG3021");
 	}
 
 	[Test]
@@ -212,12 +207,7 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG3021"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG3021");
 	}
 
 	[Test]
@@ -247,12 +237,7 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG3021"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG3021");
 	}
 
 	[Test]
@@ -365,11 +350,6 @@ public interface ITestTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			cancellationToken: cancellationToken
-		);
+		await TestHelpers.VerifyAsync(generationResult, expectsDiagnostics: true, cancellationToken: cancellationToken);
 	}
 }

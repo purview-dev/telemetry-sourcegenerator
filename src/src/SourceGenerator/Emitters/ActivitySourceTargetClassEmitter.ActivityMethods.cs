@@ -7,11 +7,10 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 partial class ActivitySourceTargetClassEmitter
 {
 	static void EmitActivityMethodBody(
-		CodeWriter writer,
+		ActivityOutputContext output,
 		ActivityBasedGenerationTarget methodTarget,
-		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool emitNullable
+		CodeWriter writer,
+		SourceProductionContext context
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -19,8 +18,7 @@ partial class ActivitySourceTargetClassEmitter
 		if (
 			!GuardParameters(
 				methodTarget,
-				context,
-				logger,
+				output,
 				out var activityParam,
 				out var parentContextOrId,
 				out var tagsParam,
@@ -37,69 +35,71 @@ partial class ActivitySourceTargetClassEmitter
 
 		if (activityParam != null)
 		{
-			logger?.Diagnostic("Activity parameter not allowed on Activity start/ create method, only event.");
-
+			output.Context.Diagnostic("Activity parameter not allowed on Activity start/ create method, only event.");
 			return;
 		}
 
 		if (timestampParam != null)
 		{
-			logger?.Diagnostic("Timestamp parameter not allowed on Activity start/ create method, only events.");
-
+			output.Context.Diagnostic("Timestamp parameter not allowed on Activity start/ create method, only events.");
 			return;
 		}
 
-		EmitHasListenersTest(writer, methodTarget, emitNullable);
+		EmitHasListenersTest(writer, methodTarget);
 
 		var activityVariableName = "activity" + methodTarget.MethodName;
 
-		writer
-			.Write(TypeLibrary.Activities.SystemDiagnostics.Activity)
-			.Write(emitNullable ? "? " : " ")
-			.Write(activityVariableName)
-			.Write(" = ")
-			.Write(PropertyLibrary.Activities.ActivitySourceFieldName)
-			.Write('.');
+		writer.WriteAssignment(
+			TypeLibrary.Activities.SystemDiagnostics.Activity.MakeNullable(writer),
+			activityVariableName,
+			writeValue: assignmentWriter =>
+			{
+				assignmentWriter
+					//.Write(" = ")
+					.Write(PropertyLibrary.Activities.ActivitySourceFieldName)
+					.Write('.');
 
-		var createOnly = methodTarget.ActivityAttribute?.CreateOnly == true;
-		var useParentContext =
-			parentContextOrId != null
-			&& parentContextOrId.ParameterType.Identity.Equals(
-				TypeLibrary.Activities.SystemDiagnostics.ActivityContext
-			);
-		var parentContextParameterName = useParentContext ? "parentContext" : "parentId";
+				var createOnly = methodTarget.ActivityAttribute?.CreateOnly == true;
+				var useParentContext =
+					parentContextOrId != null
+					&& parentContextOrId.ParameterType.Identity.Equals(
+						TypeLibrary.Activities.SystemDiagnostics.ActivityContext
+					);
+				var parentContextParameterName = useParentContext ? "parentContext" : "parentId";
 
-		if (createOnly && startTimeParam != null)
-		{
-			logger?.Diagnostic("StartTime parameter not allowed on Activity create method.");
+				if (createOnly && startTimeParam != null)
+				{
+					output.Context.Diagnostic("StartTime parameter not allowed on Activity create method.");
 
-			return;
-		}
+					return;
+				}
 
-		var kind = methodTarget.ActivityAttribute?.Kind ?? PropertyLibrary.Activities.DefaultActivityKind;
+				var kind = methodTarget.ActivityAttribute?.Kind ?? PropertyLibrary.Activities.DefaultActivityKind;
 
-		var parentContextOrIdParameterValue = parentContextOrId?.ParameterName ?? "default";
-		if (useParentContext && parentContextOrId!.ParameterType.IsNullable)
-		{
-			// parentContextOrId is not going to be null at this point as
-			// we already checked the type.
-			// If it's nullable we need to use the null-coalescing operator...
-			// and we need to ensure its explicit or the call is ambiguous
-			// between ActivityContext and ParentId.
-			parentContextOrIdParameterValue += " ?? default";
-		}
+				var parentContextOrIdParameterValue = parentContextOrId?.ParameterName ?? "default";
+				if (useParentContext && parentContextOrId!.ParameterType.IsNullable)
+				{
+					// parentContextOrId is not going to be null at this point as
+					// we already checked the type.
+					// If it's nullable we need to use the null-coalescing operator...
+					// and we need to ensure its explicit or the call is ambiguous
+					// between ActivityContext and ParentId.
+					parentContextOrIdParameterValue += " ?? default";
+				}
 
-		EmitActivityCall(
-			writer,
-			methodTarget,
-			createOnly,
-			useParentContext,
-			parentContextParameterName,
-			parentContextOrIdParameterValue,
-			tagsParam,
-			linksParam,
-			startTimeParam,
-			kind
+				EmitActivityCall(
+					assignmentWriter,
+					methodTarget,
+					createOnly,
+					useParentContext,
+					parentContextParameterName,
+					parentContextOrIdParameterValue,
+					tagsParam,
+					linksParam,
+					startTimeParam,
+					kind
+				);
+			}
 		);
 
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -110,22 +110,18 @@ partial class ActivitySourceTargetClassEmitter
 
 			using (writer.OpenBlockScope())
 			{
-				EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, logger);
-				EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, logger);
+				EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, output);
+				EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, output);
 			}
 		}
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		if (methodTarget.ReturnType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.Activity))
+		if (methodTarget.ReturnType.Similar(TypeLibrary.Activities.SystemDiagnostics.Activity))
 		{
-			writer
-				.NewLine()
-				.Write("return ")
-				.Write(activityVariableName)
-				.Write(!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
-				.Write(";")
-				.NewLine();
+			writer.WriteReturn(returnWriter =>
+				returnWriter.Write(activityVariableName).Write(methodTarget.ReturnType.IsNullable ? null : "!")
+			);
 		}
 	}
 
@@ -192,10 +188,10 @@ partial class ActivitySourceTargetClassEmitter
 			}
 		}
 
-		writer.WriteLine(");");
+		writer.WriteLine(")");
 	}
 
-	static void EmitHasListenersTest(CodeWriter writer, ActivityBasedGenerationTarget methodTarget, bool emitNullable)
+	static void EmitHasListenersTest(CodeWriter writer, ActivityBasedGenerationTarget methodTarget)
 	{
 		var returnsVoid = methodTarget.ReturnType.Identity.SpecialType == SpecialType.System_Void;
 		writer.Write("if (!").Write(PropertyLibrary.Activities.ActivitySourceFieldName).WriteLine(".HasListeners())");
@@ -203,13 +199,7 @@ partial class ActivitySourceTargetClassEmitter
 		using (writer.OpenBlockScope())
 		{
 			writer.WriteLine(
-				"return"
-					+ (
-						returnsVoid
-							? null
-							: " null" + (!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
-					)
-					+ ";"
+				"return" + (returnsVoid ? null : " null" + (methodTarget.ReturnType.IsNullable ? null : "!")) + ";"
 			);
 		}
 

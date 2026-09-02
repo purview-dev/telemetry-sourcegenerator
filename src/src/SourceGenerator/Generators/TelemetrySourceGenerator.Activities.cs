@@ -22,7 +22,8 @@ partial class TelemetrySourceGenerator
 			source: outputContexts,
 			action: static (spc, output) =>
 			{
-				output.Context.Logger?.Debug($"Activity generation target: {output.Target.FullyQualifiedName}");
+				output.Context.Debug($"Activity generation target: {output.Target.FullyQualifiedName}");
+
 				RunSafely(spc, () => ActivitySourceTargetClassEmitter.GenerateImplementation(output, spc));
 			}
 		);

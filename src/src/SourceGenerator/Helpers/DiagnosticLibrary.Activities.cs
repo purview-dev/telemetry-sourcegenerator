@@ -1,6 +1,5 @@
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
-using Purview.Telemetry.SourceGenerator.Records;
 
 namespace Purview.Telemetry.SourceGenerator;
 
@@ -9,164 +8,224 @@ partial class DiagnosticLibrary
 	// Start at 3000
 	public static class Activities
 	{
-		public static readonly TelemetryDiagnosticDescriptor BaggageParameterShouldBeString = new(
-			Id: "TSG3000",
-			Title: "Baggage parameter types only accept strings",
-			Description: "Baggage parameter types only accept strings, be aware this parameter will have ToString() called.",
-			Severity: DiagnosticSeverity.Warning,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo BaggageParameterShouldBeString = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3000",
+				title: "Baggage parameter types only accept strings",
+				messageFormat: "Baggage parameter types only accept strings, be aware this parameter will have ToString() called.",
+				defaultSeverity: DiagnosticSeverity.Warning,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor NoActivitySourceSpecified = new(
-			Id: "TSG3001",
-			Title: "No activity source specified",
-			Description: $"An activity source helps to identify your application and it's telemetry. Defaulting to '{PropertyLibrary.Activities.DefaultActivitySourceName}'.",
-			Severity: DiagnosticSeverity.Warning,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo NoActivitySourceSpecified = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3001",
+				title: "No activity source specified",
+				messageFormat: $"An activity source helps to identify your application and it's telemetry. Defaulting to '{PropertyLibrary.Activities.DefaultActivitySourceName}'.",
+				defaultSeverity: DiagnosticSeverity.Warning,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor InvalidReturnType = new(
-			Id: "TSG3002",
-			Title: "Invalid return type",
-			Description: $"An activity or event must return either void or an {TypeLibrary.Activities.SystemDiagnostics.Activity.Name}.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo InvalidReturnType = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3002",
+				title: "Invalid return type",
+				messageFormat: $"An activity or event must return either void or an {TypeLibrary.Activities.SystemDiagnostics.Activity.Name}.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor DuplicateParameterTypes = new(
-			Id: "TSG3003",
-			Title: "Duplicate reserved parameters defined",
-			Description: "{0} are all the same type of parameter ({1}), a maximum or one is allowed. Explicitly define them as either a Tag or Baggage.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo DuplicateParameterTypes = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3003",
+				title: "Duplicate reserved parameters defined",
+				messageFormat: "{0} are all the same type of parameter ({1}), a maximum or one is allowed. Explicitly define them as either a Tag or Baggage.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor ActivityParameterNotAllowed = new(
-			Id: "TSG3004",
-			Title: "Activity parameter is not valid",
-			Description: "The {0} parameter is not allowed when defining an activity, only an event.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo ActivityParameterNotAllowed = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3004",
+				title: "Activity parameter is not valid",
+				messageFormat: "The {0} parameter is not allowed when defining an activity, only an event.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor TimestampParameterNotAllowed = new(
-			Id: "TSG3005",
-			Title: "Timestamp parameter is not valid",
-			Description: "The {0} parameter is not allowed when defining an activity, only an event. You can specify this as a Tag or as Baggage to stop the inference.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo TimestampParameterNotAllowed = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3005",
+				title: "Timestamp parameter is not valid",
+				messageFormat: "The {0} parameter is not allowed when defining an activity, only an event. You can specify this as a Tag or as Baggage to stop the inference.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor StartTimeParameterNotAllowed = new(
-			Id: "TSG3006",
-			Title: "Start time parameter is not valid on Create activity or Event method",
-			Description: "The {0} parameter is not allowed when defining an activity create or activity event method, only when starting an activity.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo StartTimeParameterNotAllowed = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3006",
+				title: "Start time parameter is not valid on Create activity or Event method",
+				messageFormat: "The {0} parameter is not allowed when defining an activity create or activity event method, only when starting an activity.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor ParentContextOrIdParameterNotAllowed = new(
-			Id: "TSG3007",
-			Title: "Parent context or Parent Id parameter is not valid on event",
-			Description: "The {0} parameter is not allowed when defining an activity event, only on the activity start/ create method.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo ParentContextOrIdParameterNotAllowed = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3007",
+				title: "Parent context or Parent Id parameter is not valid on event",
+				messageFormat: "The {0} parameter is not allowed when defining an activity event, only on the activity start/ create method.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor LinksParameterNotAllowed = new(
-			Id: "TSG3008",
-			Title: "Activity links parameters are not valid on events or context methods",
-			Description: "The {0} parameter is not allowed when defining an activity event or context, only on the activity start/ create method.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo LinksParameterNotAllowed = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3008",
+				title: "Activity links parameters are not valid on events or context methods",
+				messageFormat: "The {0} parameter is not allowed when defining an activity event or context, only on the activity start/ create method.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor TagsParameterNotAllowed = new(
-			Id: "TSG3009",
-			Title: "Activity tags parameter are not valid on context methods",
-			Description: "The {0} parameter is not allowed when defining an activity context, only on the activity start/ create methods or events.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo TagsParameterNotAllowed = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3009",
+				title: "Activity tags parameter are not valid on context methods",
+				messageFormat: "The {0} parameter is not allowed when defining an activity context, only on the activity start/ create methods or events.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor EscapedParameterInvalidType = new(
-			Id: "TSG3010",
-			Title: "Escaped parameters must be a boolean",
-			Description: "Only boolean parameter types are valid for the escape parameter.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo EscapedParameterInvalidType = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3010",
+				title: "Escaped parameters must be a boolean",
+				messageFormat: "Only boolean parameter types are valid for the escape parameter.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor EscapedParameterIsOnlyValidOnEvent = new(
-			Id: "TSG3011",
-			Title: "Escaped parameters are only valid on Events, not Activity or Context methods",
-			Description: "The parameters {0} is not valid on Activity or Context methods, only on Events.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo EscapedParameterIsOnlyValidOnEvent = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3011",
+				title: "Escaped parameters are only valid on Events, not Activity or Context methods",
+				messageFormat: "The parameters {0} is not valid on Activity or Context methods, only on Events.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor NoActivityMethodsDefined = new(
-			Id: "TSG3012",
-			Title: "There are no Activity methods defined, assumed use of Activity.Current",
-			Description: "As Event and/ or Context methods are defined, it's best practice to create a specific Activity otherwise the Activity will belong to another operation.",
-			Severity: DiagnosticSeverity.Info,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo NoActivityMethodsDefined = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3012",
+				title: "There are no Activity methods defined, assumed use of Activity.Current",
+				messageFormat: "As Event and/ or Context methods are defined, it's best practice to create a specific Activity otherwise the Activity will belong to another operation.",
+				defaultSeverity: DiagnosticSeverity.Info,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor DoesNotReturnActivity = new(
-			Id: "TSG3013",
-			Title: "Should return the created Activity",
-			Description: "It's best practice to return the created Activity so you can dispose of it, and use it for Event or Context methods.",
-			Severity: DiagnosticSeverity.Warning,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo DoesNotReturnActivity = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3013",
+				title: "Should return the created Activity",
+				messageFormat: "It's best practice to return the created Activity so you can dispose of it, and use it for Event or Context methods.",
+				defaultSeverity: DiagnosticSeverity.Warning,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor DoesNotAcceptActivityParameter = new(
-			Id: "TSG3014",
-			Title: "Should accept an Activity to apply the Event/ Tags/ Baggage too",
-			Description: "It's best practice to accept an Activity parameter to ensure the Event, Tags and/ or Baggage are applied to the Activity you intended.",
-			Severity: DiagnosticSeverity.Warning,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo DoesNotAcceptActivityParameter = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3014",
+				title: "Should accept an Activity to apply the Event/ Tags/ Baggage too",
+				messageFormat: "It's best practice to accept an Activity parameter to ensure the Event, Tags and/ or Baggage are applied to the Activity you intended.",
+				defaultSeverity: DiagnosticSeverity.Warning,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor ActivityShouldBeTheFirstParameter = new(
-			Id: "TSG3015",
-			Title: "Activity should be the first parameter",
-			Description: "For readability, ensure the Activity parameter is the first one defined.",
-			Severity: DiagnosticSeverity.Info,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo ActivityShouldBeTheFirstParameter = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3015",
+				title: "Activity should be the first parameter",
+				messageFormat: "For readability, ensure the Activity parameter is the first one defined.",
+				defaultSeverity: DiagnosticSeverity.Info,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor StatusDescriptionMustBeString = new(
-			Id: "TSG3016",
-			Title: "Status description parameter should be a string",
-			Description: "Status descriptions can only be of type string.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo StatusDescriptionMustBeString = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3016",
+				title: "Status description parameter should be a string",
+				messageFormat: "Status descriptions can only be of type string.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor StatusDescriptionParameterInvalidType = new(
-			Id: "TSG3017",
-			Title: "Status Description parameters are only valid on Events, not Activity or Context methods",
-			Description: "The parameters {0} is not valid on Activity or Context methods, only on Events.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo StatusDescriptionParameterInvalidType = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3017",
+				title: "Status Description parameters are only valid on Events, not Activity or Context methods",
+				messageFormat: "The parameters {0} is not valid on Activity or Context methods, only on Events.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor ActivityReturnTypeShouldBeNullable = new(
-			Id: "TSG3022",
-			Title: "Activity return type should be nullable",
-			Description: "Activity can be null when no listeners are active. Consider using 'Activity?' as the return type to make this explicit.",
-			Severity: DiagnosticSeverity.Warning,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo ActivityReturnTypeShouldBeNullable = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3022",
+				title: "Activity return type should be nullable",
+				messageFormat: "Activity can be null when no listeners are active. Consider using 'Activity?' as the return type to make this explicit.",
+				defaultSeverity: DiagnosticSeverity.Warning,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor ExceptionEventNotStandardName = new(
-			Id: "TSG3021",
-			Title: "Exception event does not use OpenTelemetry standard name",
-			Description: "Event '{0}' records an exception but does not use the OpenTelemetry standard name 'exception'. Consider using [Event(Name = \"exception\")] for better observability.",
-			Severity: DiagnosticSeverity.Info,
-			Category: Categories.Activity.Usage
+		public static readonly DiagnosticInfo ExceptionEventNotStandardName = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3021",
+				title: "Exception event does not use OpenTelemetry standard name",
+				messageFormat: "Event '{0}' records an exception but does not use the OpenTelemetry standard name 'exception'. Consider using [Event(Name = \"exception\")] for better observability.",
+				defaultSeverity: DiagnosticSeverity.Info,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			)
 		);
 	}
 }

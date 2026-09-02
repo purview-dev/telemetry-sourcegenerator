@@ -1,9 +1,6 @@
 using System.Collections.Immutable;
-using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
 using Purview.Telemetry.SourceGenerator.Helpers;
-using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator.Emitters;
 
@@ -12,98 +9,84 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 /// previously shipped as a static embedded resource; it is now built in memory with a
 /// <see cref="CodeWriter"/> inside <c>RegisterPostInitializationOutput</c>.
 /// </summary>
-static class MarkerAttributeTemplateEmitter
+static class GeneratedTypesEmitter
 {
-	static readonly Dictionary<string, Action<CodeWriter, TypeIdentity>> Emitters = new(StringComparer.Ordinal)
+	static readonly Dictionary<TypeIdentity, Action<CodeWriter, TypeIdentity>> Emitters = new()
 	{
-		["TagAttribute"] = WriteTagLikeAttribute,
-		["BaggageAttribute"] = WriteTagLikeAttribute,
-		["ExcludeAttribute"] = (writer, type) =>
+		// Telemetry Shared
+		[TypeLibrary.TelemetryShared.TagAttribute] = WriteTagLikeAttribute,
+		[TypeLibrary.TelemetryShared.ExcludeAttribute] = (writer, type) =>
 			WriteSimpleAttribute(writer, type, AttributeTargets.Method, includeSuppressMessage: false),
-		["TelemetryGenerationAttribute"] = WriteTelemetryGenerationAttribute,
-		["Targets"] = WriteTargetsEnum,
-		["NamingConvention"] = WriteNamingConventionEnum,
-		["ExcludeTargetsAttribute"] = WriteExcludeTargetsAttribute,
-		["ActivitySourceGenerationAttribute"] = WriteActivitySourceGenerationAttribute,
-		["ActivitySourceAttribute"] = WriteActivitySourceAttribute,
-		["ActivityAttribute"] = WriteActivityAttribute,
-		["EventAttribute"] = WriteEventAttribute,
-		["ContextAttribute"] = (writer, type) =>
+		[TypeLibrary.TelemetryShared.TelemetryGenerationAttribute] = WriteTelemetryGenerationAttribute,
+		[TypeLibrary.TelemetryShared.TargetsEnum] = WriteTargetsEnum,
+		[TypeLibrary.TelemetryShared.NamingConventionEnum] = WriteNamingConventionEnum,
+		[TypeLibrary.TelemetryShared.ExcludeTargetsAttribute] = WriteExcludeTargetsAttribute,
+		// Activities
+		[TypeLibrary.Activities.BaggageAttribute] = WriteTagLikeAttribute,
+		[TypeLibrary.Activities.ActivitySourceGenerationAttribute] = WriteActivitySourceGenerationAttribute,
+		[TypeLibrary.Activities.ActivitySourceAttribute] = WriteActivitySourceAttribute,
+		[TypeLibrary.Activities.ActivityAttribute] = WriteActivityAttribute,
+		[TypeLibrary.Activities.EventAttribute] = WriteEventAttribute,
+		[TypeLibrary.Activities.ContextAttribute] = (writer, type) =>
 			WriteSimpleAttribute(writer, type, AttributeTargets.Method, includeSuppressMessage: false),
-		["EscapeAttribute"] = (writer, type) =>
+		[TypeLibrary.Activities.EscapeAttribute] = (writer, type) =>
 			WriteSimpleAttribute(writer, type, AttributeTargets.Parameter, includeSuppressMessage: false),
-		["StatusDescriptionAttribute"] = (writer, type) =>
+		[TypeLibrary.Activities.StatusDescriptionAttribute] = (writer, type) =>
 			WriteSimpleAttribute(writer, type, AttributeTargets.Parameter, includeSuppressMessage: false),
-		["LoggerGenerationAttribute"] = WriteLoggerGenerationAttribute,
-		["LoggerAttribute"] = WriteLoggerAttribute,
-		["LogAttribute"] = WriteLogAttribute,
-		["LogPrefixType"] = WriteLogPrefixTypeEnum,
-		["LoggerGenerationMode"] = WriteLoggerGenerationModeEnum,
-		["ExpandEnumerableAttribute"] = WriteExpandEnumerableAttribute,
-		["TraceAttribute"] = WriteSpecificLogAttribute,
-		["DebugAttribute"] = WriteSpecificLogAttribute,
-		["InfoAttribute"] = WriteSpecificLogAttribute,
-		["WarningAttribute"] = WriteSpecificLogAttribute,
-		["ErrorAttribute"] = WriteSpecificLogAttribute,
-		["CriticalAttribute"] = WriteSpecificLogAttribute,
-		["MeterGenerationAttribute"] = WriteMeterGenerationAttribute,
-		["MeterAttribute"] = WriteMeterAttribute,
-		["MeterNameGenerationType"] = WriteMeterNameGenerationTypeEnum,
-		["InstrumentMeasurementAttribute"] = (writer, type) =>
+		// Logging
+		[TypeLibrary.Logging.LoggerGenerationAttribute] = WriteLoggerGenerationAttribute,
+		[TypeLibrary.Logging.LoggerAttribute] = WriteLoggerAttribute,
+		[TypeLibrary.Logging.LogAttribute] = WriteLogAttribute,
+		[TypeLibrary.Logging.LogPrefixType] = WriteLogPrefixTypeEnum,
+		[TypeLibrary.Logging.LoggerGenerationMode] = WriteLoggerGenerationModeEnum,
+		[TypeLibrary.Logging.ExpandEnumerableAttribute] = WriteExpandEnumerableAttribute,
+		[TypeLibrary.Logging.TraceAttribute] = WriteSpecificLogAttribute,
+		[TypeLibrary.Logging.DebugAttribute] = WriteSpecificLogAttribute,
+		[TypeLibrary.Logging.InfoAttribute] = WriteSpecificLogAttribute,
+		[TypeLibrary.Logging.WarningAttribute] = WriteSpecificLogAttribute,
+		[TypeLibrary.Logging.ErrorAttribute] = WriteSpecificLogAttribute,
+		[TypeLibrary.Logging.CriticalAttribute] = WriteSpecificLogAttribute,
+		// Metrics
+		[TypeLibrary.Metrics.MeterGenerationAttribute] = WriteMeterGenerationAttribute,
+		[TypeLibrary.Metrics.MeterAttribute] = WriteMeterAttribute,
+		[TypeLibrary.Metrics.MeterNameGenerationType] = WriteMeterNameGenerationTypeEnum,
+		[TypeLibrary.Metrics.InstrumentMeasurementAttribute] = (writer, type) =>
 			WriteSimpleAttribute(writer, type, AttributeTargets.Parameter, includeSuppressMessage: false),
-		["AutoCounterAttribute"] = WriteAutoCounterAttribute,
-		["CounterAttribute"] = WriteCounterLikeAttribute,
-		["UpDownCounterAttribute"] = WriteCounterLikeAttribute,
-		["HistogramAttribute"] = WriteCounterLikeAttribute,
-		["ObservableCounterAttribute"] = WriteObservableCounterLikeAttribute,
-		["ObservableUpDownCounterAttribute"] = WriteObservableCounterLikeAttribute,
-		["ObservableGaugeAttribute"] = WriteObservableCounterLikeAttribute,
+		[TypeLibrary.Metrics.AutoCounterAttribute] = WriteAutoCounterAttribute,
+		[TypeLibrary.Metrics.CounterAttribute] = WriteCounterLikeAttribute,
+		[TypeLibrary.Metrics.UpDownCounterAttribute] = WriteCounterLikeAttribute,
+		[TypeLibrary.Metrics.HistogramAttribute] = WriteCounterLikeAttribute,
+		[TypeLibrary.Metrics.ObservableCounterAttribute] = WriteObservableCounterLikeAttribute,
+		[TypeLibrary.Metrics.ObservableUpDownCounterAttribute] = WriteObservableCounterLikeAttribute,
+		[TypeLibrary.Metrics.ObservableGaugeAttribute] = WriteObservableCounterLikeAttribute,
 	};
 
 	public static void EmitAll(IncrementalGeneratorPostInitializationContext context)
 	{
-		var settings = GenerationSettings.Create<TelemetrySourceGenerator>();
+		// Adds Microsoft.CodeAnalysis.EmbeddedAttribute to the compilation so generated marker
+		// types (decorated with [Microsoft.CodeAnalysis.Embedded]) are invisible to downstream
+		// assemblies, preventing CS0436 conflicts when multiple projects reference this generator.
+		context.AddEmbeddedAttributeDefinition();
 
-		foreach (var template in TemplateLibrary.GetAllTemplates())
+		var settings = GenerationSettings.Create<TelemetrySourceGenerator>();
+		foreach (var type in TypeLibrary.GetAllGeneratedTypes())
 		{
-			var writer = new CodeWriter(settings);
-			Emit(writer, template);
-			context.AddSource(template.GetGeneratedFilename(), SourceText.From(writer.ToString(), Encoding.UTF8));
+			CodeWriter writer = new(settings);
+			writer.WriteAutoGeneratedHeader();
+
+			Emit(writer, type);
+
+			context.AddSource($"{type.MetadataFullName}.g.cs", writer);
 		}
 	}
 
-	static void Emit(CodeWriter writer, TemplateInfo template)
+	static void Emit(CodeWriter writer, TypeIdentity type)
 	{
-		if (!Emitters.TryGetValue(template.Name, out var emit))
-			throw new ArgumentOutOfRangeException(
-				nameof(template),
-				template.Name,
-				"Unknown marker-attribute template."
-			);
+		if (!Emitters.TryGetValue(type, out var emit))
+			throw new ArgumentOutOfRangeException(nameof(type), type.Name, "Unknown generation type requested.");
 
-		emit(writer, template.TypeInfo);
+		emit(writer, type);
 	}
-
-	// -------------------------------------------------------------------------------------------
-	// File scaffolding
-	// -------------------------------------------------------------------------------------------
-
-	static void WriteHeader(CodeWriter writer)
-	{
-		writer
-			.WriteLine("// <auto-generated />")
-			.WriteLine("// This code was generated by the Purview.Telemetry.SourceGenerator.")
-			.WriteLine("// Changes to this file will be lost when the source generator runs again.")
-			.NewLine()
-			.WriteLine("#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE")
-			.WriteLine("#nullable enable")
-			.WriteLine("#endif")
-			.NewLine()
-			.WriteLine("#pragma warning disable 1591")
-			.NewLine();
-	}
-
-	static void WriteFileScopedNamespace(CodeWriter writer) => writer.WriteFileScopedNamespace("Purview.Telemetry");
 
 	// -------------------------------------------------------------------------------------------
 	// Attribute templates
@@ -119,36 +102,24 @@ static class MarkerAttributeTemplateEmitter
 		bool includeSuppressMessage = true
 	)
 	{
-		WriteHeader(writer);
-
 		if (wrapInExcludeLoggingGuard)
 			writer.WriteLine("#if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING").NewLine();
 
-		WriteFileScopedNamespace(writer);
-		WriteAttributeTemplate(writer, type, targets, body, includeSuppressMessage);
-
-		if (wrapInExcludeLoggingGuard)
-			writer.WriteLine("#endif");
-	}
-
-	static void WriteAttributeTemplate(
-		CodeWriter writer,
-		TypeIdentity type,
-		AttributeTargets targets,
-		Action<CodeWriter> body,
-		bool includeSuppressMessage
-	)
-	{
 		var attributes = ImmutableArray<AttributeDeclarationOptions>.Empty;
 		attributes = attributes.Add(ConditionalAttribute());
 		if (includeSuppressMessage)
 			attributes = attributes.Add(SuppressMessageAttribute());
 
-		writer.WriteAttributeClass(
-			new TypeDeclarationOptions(type.Name, TypeDeclarationAccessibility.Internal) { Attributes = attributes },
-			targets,
-			body
-		);
+		writer
+			.WriteFileScopedNamespace(TypeLibrary.PurviewTelemetryNamespace)
+			.WriteAttributeClass(
+				new(type.Name, TypeDeclarationAccessibility.Internal) { Attributes = attributes },
+				targets,
+				body
+			);
+
+		if (wrapInExcludeLoggingGuard)
+			writer.WriteLine("#endif");
 	}
 
 	static void WriteSimpleAttribute(
@@ -164,17 +135,13 @@ static class MarkerAttributeTemplateEmitter
 	static AttributeDeclarationOptions ConditionalAttribute() =>
 		new(new TypeIdentity("ConditionalAttribute", "System.Diagnostics"))
 		{
-			Arguments = [new AttributeArgumentOptions("\"PURVIEW_TELEMETRY_ATTRIBUTES\"")],
+			Arguments = [new("\"PURVIEW_TELEMETRY_ATTRIBUTES\"")],
 		};
 
 	static AttributeDeclarationOptions SuppressMessageAttribute() =>
 		new(new TypeIdentity("SuppressMessageAttribute", "System.Diagnostics.CodeAnalysis"))
 		{
-			Arguments =
-			[
-				new AttributeArgumentOptions("\"Design\""),
-				new AttributeArgumentOptions("\"CA1019:Define accessors for attribute arguments\""),
-			],
+			Arguments = [new("\"Design\""), new("\"CA1019:Define accessors for attribute arguments\"")],
 		};
 
 	// -------------------------------------------------------------------------------------------
@@ -191,7 +158,10 @@ static class MarkerAttributeTemplateEmitter
 		writer.WriteConstructor(
 			new ConstructorDeclarationOptions(type.Name, TypeDeclarationAccessibility.Public)
 			{
-				Parameters = [new ParameterDeclarationOptions("name", TypeLibrary.System.String.AsTypeReference())],
+				Parameters =
+				[
+					new ParameterDeclarationOptions("name", PurviewTypeLibrary.System.String.AsTypeReference()),
+				],
 			},
 			ctor => ctor.WriteAssignment("Name", "name")
 		);
@@ -202,7 +172,10 @@ static class MarkerAttributeTemplateEmitter
 			{
 				Parameters =
 				[
-					new ParameterDeclarationOptions("messageTemplate", TypeLibrary.System.String.AsTypeReference()),
+					new ParameterDeclarationOptions(
+						"messageTemplate",
+						PurviewTypeLibrary.System.String.AsTypeReference()
+					),
 				],
 			},
 			ctor => ctor.WriteAssignment("MessageTemplate", "messageTemplate")
@@ -212,7 +185,7 @@ static class MarkerAttributeTemplateEmitter
 		writer.WriteConstructor(
 			new ConstructorDeclarationOptions(type.Name, TypeDeclarationAccessibility.Public)
 			{
-				Parameters = [new ParameterDeclarationOptions("eventId", TypeLibrary.System.Int32.AsTypeReference())],
+				Parameters = [new("eventId", PurviewTypeLibrary.System.Int32.AsTypeReference())],
 			},
 			ctor => ctor.WriteAssignment("EventId", "eventId")
 		);
@@ -239,7 +212,7 @@ static class MarkerAttributeTemplateEmitter
 		writer.WriteProperty(
 			new PropertyDeclarationOptions(
 				name,
-				TypeLibrary.System.String.AsTypeReference(),
+				PurviewTypeLibrary.System.String.AsTypeReference(),
 				TypeDeclarationAccessibility.Public
 			)
 			{
@@ -249,11 +222,7 @@ static class MarkerAttributeTemplateEmitter
 		);
 		writer.WriteLine("#else");
 		writer.WriteProperty(
-			new PropertyDeclarationOptions(
-				name,
-				TypeLibrary.System.String.AsTypeReference().Nullable(),
-				TypeDeclarationAccessibility.Public
-			)
+			new(name, PurviewTypeLibrary.System.String.MakeNullable(writer), TypeDeclarationAccessibility.Public)
 			{
 				HasSetter = true,
 				IncludeGeneratedAttributes = false,
@@ -268,7 +237,7 @@ static class MarkerAttributeTemplateEmitter
 		writer.WriteProperty(
 			new PropertyDeclarationOptions(
 				name,
-				TypeLibrary.System.String.AsTypeReference(),
+				PurviewTypeLibrary.System.String.AsTypeReference(),
 				TypeDeclarationAccessibility.Public
 			)
 			{
@@ -299,7 +268,7 @@ static class MarkerAttributeTemplateEmitter
 						[
 							new ParameterDeclarationOptions(
 								"skipOnNullOrEmpty",
-								TypeLibrary.System.Boolean.AsTypeReference()
+								PurviewTypeLibrary.System.Boolean.AsTypeReference()
 							),
 						],
 					},
@@ -310,10 +279,10 @@ static class MarkerAttributeTemplateEmitter
 					{
 						Parameters =
 						[
-							new ParameterDeclarationOptions("name", TypeLibrary.System.String.AsTypeReference()),
+							new ParameterDeclarationOptions("name", PurviewTypeLibrary.System.String.AsTypeReference()),
 							new ParameterDeclarationOptions(
 								"skipOnNullOrEmpty",
-								TypeLibrary.System.Boolean.AsTypeReference()
+								PurviewTypeLibrary.System.Boolean.AsTypeReference()
 							)
 							{
 								DefaultValue = "false",
@@ -328,14 +297,14 @@ static class MarkerAttributeTemplateEmitter
 				);
 
 				WriteNullableStringProperty(body, "Name");
-				WritePublicProperty(body, "SkipOnNullOrEmpty", TypeLibrary.System.Boolean.AsTypeReference());
+				WritePublicProperty(body, "SkipOnNullOrEmpty", PurviewTypeLibrary.System.Boolean.AsTypeReference());
 			}
 		);
 	}
 
 	static void WriteTelemetryGenerationAttribute(CodeWriter writer, TypeIdentity type)
 	{
-		var namingConvention = TypeLibrary.Telemetry.NamingConventionEnum;
+		var namingConvention = TypeLibrary.TelemetryShared.NamingConventionEnum;
 
 		EmitAttribute(
 			writer,
@@ -351,15 +320,18 @@ static class MarkerAttributeTemplateEmitter
 						[
 							new ParameterDeclarationOptions(
 								"generateDependencyExtension",
-								TypeLibrary.System.Boolean.AsTypeReference()
+								PurviewTypeLibrary.System.Boolean.AsTypeReference()
 							),
-							new ParameterDeclarationOptions("className", TypeLibrary.System.String.AsTypeReference())
+							new ParameterDeclarationOptions(
+								"className",
+								PurviewTypeLibrary.System.String.AsTypeReference()
+							)
 							{
 								DefaultValue = "null",
 							},
 							new ParameterDeclarationOptions(
 								"dependencyInjectionClassName",
-								TypeLibrary.System.String.AsTypeReference()
+								PurviewTypeLibrary.System.String.AsTypeReference()
 							)
 							{
 								DefaultValue = "null",
@@ -378,10 +350,13 @@ static class MarkerAttributeTemplateEmitter
 					{
 						Parameters =
 						[
-							new ParameterDeclarationOptions("className", TypeLibrary.System.String.AsTypeReference()),
+							new ParameterDeclarationOptions(
+								"className",
+								PurviewTypeLibrary.System.String.AsTypeReference()
+							),
 							new ParameterDeclarationOptions(
 								"dependencyInjectionClassName",
-								TypeLibrary.System.String.AsTypeReference()
+								PurviewTypeLibrary.System.String.AsTypeReference()
 							)
 							{
 								DefaultValue = "null",
@@ -398,7 +373,7 @@ static class MarkerAttributeTemplateEmitter
 				WritePublicProperty(
 					body,
 					"GenerateDependencyExtension",
-					TypeLibrary.System.Boolean.AsTypeReference(),
+					PurviewTypeLibrary.System.Boolean.AsTypeReference(),
 					"true"
 				);
 				WriteNullableStringProperty(body, "ClassName");
@@ -406,7 +381,7 @@ static class MarkerAttributeTemplateEmitter
 				WritePublicProperty(
 					body,
 					"DependencyInjectionClassIsPublic",
-					TypeLibrary.System.Boolean.AsTypeReference()
+					PurviewTypeLibrary.System.Boolean.AsTypeReference()
 				);
 				WritePublicProperty(
 					body,
@@ -417,17 +392,18 @@ static class MarkerAttributeTemplateEmitter
 				WritePublicProperty(
 					body,
 					"GenerateTelemetryNamesClass",
-					TypeLibrary.System.Boolean.AsTypeReference(),
+					PurviewTypeLibrary.System.Boolean.AsTypeReference(),
 					"true"
 				);
 				WriteNullableStringProperty(body, "TelemetryNamesClassName");
+				WriteNullableStringProperty(body, "TelemetryNamesNamespace");
 			}
 		);
 	}
 
 	static void WriteExcludeTargetsAttribute(CodeWriter writer, TypeIdentity type)
 	{
-		var targets = TypeLibrary.Telemetry.TargetsEnum;
+		var targets = TypeLibrary.TelemetryShared.TargetsEnum;
 
 		EmitAttribute(
 			writer,
@@ -467,17 +443,17 @@ static class MarkerAttributeTemplateEmitter
 					{
 						Parameters =
 						[
-							new ParameterDeclarationOptions("name", TypeLibrary.System.String.AsTypeReference()),
+							new ParameterDeclarationOptions("name", PurviewTypeLibrary.System.String.AsTypeReference()),
 							new ParameterDeclarationOptions(
 								"defaultToTags",
-								TypeLibrary.System.Boolean.AsTypeReference()
+								PurviewTypeLibrary.System.Boolean.AsTypeReference()
 							)
 							{
 								DefaultValue = "true",
 							},
 							new ParameterDeclarationOptions(
 								"generateDiagnosticsForMissingActivity",
-								TypeLibrary.System.Boolean.AsTypeReference()
+								PurviewTypeLibrary.System.Boolean.AsTypeReference()
 							)
 							{
 								DefaultValue = "true",
@@ -499,19 +475,19 @@ static class MarkerAttributeTemplateEmitter
 				);
 
 				WriteNullableStringProperty(body, "Name");
-				WritePublicProperty(body, "DefaultToTags", TypeLibrary.System.Boolean.AsTypeReference(), "true");
+				WritePublicProperty(body, "DefaultToTags", PurviewTypeLibrary.System.Boolean.AsTypeReference(), "true");
 				WriteNullableStringProperty(body, "BaggageAndTagPrefix");
 				WritePlainStringProperty(body, "BaggageAndTagSeparator", "\".\"");
 				WritePublicProperty(
 					body,
 					"LowercaseBaggageAndTagKeys",
-					TypeLibrary.System.Boolean.AsTypeReference(),
+					PurviewTypeLibrary.System.Boolean.AsTypeReference(),
 					"true"
 				);
 				WritePublicProperty(
 					body,
 					"GenerateDiagnosticsForMissingActivity",
-					TypeLibrary.System.Boolean.AsTypeReference(),
+					PurviewTypeLibrary.System.Boolean.AsTypeReference(),
 					"true"
 				);
 			}
@@ -535,20 +511,20 @@ static class MarkerAttributeTemplateEmitter
 
 				WriteNullableStringProperty(body, "Name");
 				body.XmlSummary("Specifies the default when inferring between tag or baggage.");
-				WritePublicProperty(body, "DefaultToTags", TypeLibrary.System.Boolean.AsTypeReference(), "true");
+				WritePublicProperty(body, "DefaultToTags", PurviewTypeLibrary.System.Boolean.AsTypeReference(), "true");
 				WriteNullableStringProperty(body, "BaggageAndTagPrefix");
 				body.XmlSummary("Determines if the name is used as a prefix.");
 				WritePublicProperty(
 					body,
 					"IncludeActivitySourcePrefix",
-					TypeLibrary.System.Boolean.AsTypeReference(),
+					PurviewTypeLibrary.System.Boolean.AsTypeReference(),
 					"true"
 				);
 				body.XmlSummary("Determines if tag/ baggage names are lowercased.");
 				WritePublicProperty(
 					body,
 					"LowercaseBaggageAndTagKeys",
-					TypeLibrary.System.Boolean.AsTypeReference(),
+					PurviewTypeLibrary.System.Boolean.AsTypeReference(),
 					"true"
 				);
 			}
@@ -579,12 +555,15 @@ static class MarkerAttributeTemplateEmitter
 					{
 						Parameters =
 						[
-							new ParameterDeclarationOptions("name", TypeLibrary.System.String.AsTypeReference()),
+							new ParameterDeclarationOptions("name", PurviewTypeLibrary.System.String.AsTypeReference()),
 							new ParameterDeclarationOptions("kind", activityKind.AsTypeReference())
 							{
 								DefaultValue = $"{activityKind.RenderFullName}.Internal",
 							},
-							new ParameterDeclarationOptions("createOnly", TypeLibrary.System.Boolean.AsTypeReference())
+							new ParameterDeclarationOptions(
+								"createOnly",
+								PurviewTypeLibrary.System.Boolean.AsTypeReference()
+							)
 							{
 								DefaultValue = "false",
 							},
@@ -600,7 +579,7 @@ static class MarkerAttributeTemplateEmitter
 
 				WriteNullableStringProperty(body, "Name");
 				WritePublicProperty(body, "Kind", activityKind.AsTypeReference());
-				WritePublicProperty(body, "CreateOnly", TypeLibrary.System.Boolean.AsTypeReference());
+				WritePublicProperty(body, "CreateOnly", PurviewTypeLibrary.System.Boolean.AsTypeReference());
 			}
 		);
 	}
@@ -633,17 +612,17 @@ static class MarkerAttributeTemplateEmitter
 					{
 						Parameters =
 						[
-							new ParameterDeclarationOptions("name", TypeLibrary.System.String.AsTypeReference()),
+							new ParameterDeclarationOptions("name", PurviewTypeLibrary.System.String.AsTypeReference()),
 							new ParameterDeclarationOptions(
 								"useRecordExceptionRules",
-								TypeLibrary.System.Boolean.AsTypeReference()
+								PurviewTypeLibrary.System.Boolean.AsTypeReference()
 							)
 							{
 								DefaultValue = "true",
 							},
 							new ParameterDeclarationOptions(
 								"recordExceptionAsEscaped",
-								TypeLibrary.System.Boolean.AsTypeReference()
+								PurviewTypeLibrary.System.Boolean.AsTypeReference()
 							)
 							{
 								DefaultValue = "true",
@@ -667,13 +646,13 @@ static class MarkerAttributeTemplateEmitter
 				WritePublicProperty(
 					body,
 					"UseRecordExceptionRules",
-					TypeLibrary.System.Boolean.AsTypeReference(),
+					PurviewTypeLibrary.System.Boolean.AsTypeReference(),
 					"true"
 				);
 				WritePublicProperty(
 					body,
 					"RecordExceptionAsEscaped",
-					TypeLibrary.System.Boolean.AsTypeReference(),
+					PurviewTypeLibrary.System.Boolean.AsTypeReference(),
 					"true"
 				);
 				WritePublicProperty(body, "StatusCode", statusCode.AsTypeReference());
@@ -736,7 +715,10 @@ static class MarkerAttributeTemplateEmitter
 						Parameters =
 						[
 							new ParameterDeclarationOptions("defaultLevel", logLevel.AsTypeReference()),
-							new ParameterDeclarationOptions("customPrefix", TypeLibrary.System.String.AsTypeReference())
+							new ParameterDeclarationOptions(
+								"customPrefix",
+								PurviewTypeLibrary.System.String.AsTypeReference()
+							)
 							{
 								DefaultValue = "null",
 							},
@@ -788,12 +770,12 @@ static class MarkerAttributeTemplateEmitter
 							new ParameterDeclarationOptions("level", logLevel.AsTypeReference()),
 							new ParameterDeclarationOptions(
 								"messageTemplate",
-								TypeLibrary.System.String.AsTypeReference()
+								PurviewTypeLibrary.System.String.AsTypeReference()
 							)
 							{
 								DefaultValue = "null",
 							},
-							new ParameterDeclarationOptions("name", TypeLibrary.System.String.AsTypeReference())
+							new ParameterDeclarationOptions("name", PurviewTypeLibrary.System.String.AsTypeReference())
 							{
 								DefaultValue = "null",
 							},
@@ -811,16 +793,19 @@ static class MarkerAttributeTemplateEmitter
 					{
 						Parameters =
 						[
-							new ParameterDeclarationOptions("eventId", TypeLibrary.System.Int32.AsTypeReference()),
+							new ParameterDeclarationOptions(
+								"eventId",
+								PurviewTypeLibrary.System.Int32.AsTypeReference()
+							),
 							new ParameterDeclarationOptions("level", logLevel.AsTypeReference()),
 							new ParameterDeclarationOptions(
 								"messageTemplate",
-								TypeLibrary.System.String.AsTypeReference()
+								PurviewTypeLibrary.System.String.AsTypeReference()
 							)
 							{
 								DefaultValue = "null",
 							},
-							new ParameterDeclarationOptions("name", TypeLibrary.System.String.AsTypeReference())
+							new ParameterDeclarationOptions("name", PurviewTypeLibrary.System.String.AsTypeReference())
 							{
 								DefaultValue = "null",
 							},
@@ -842,8 +827,8 @@ static class MarkerAttributeTemplateEmitter
 					$"{logLevel.RenderFullName}.Information"
 				);
 				WriteNullableStringProperty(body, "MessageTemplate");
-				WritePublicProperty(body, "EventId", TypeLibrary.System.Int32.AsTypeReference().Nullable());
-				WritePublicProperty(body, "Name", TypeLibrary.System.String.AsTypeReference().Nullable());
+				WritePublicProperty(body, "EventId", PurviewTypeLibrary.System.Int32.MakeNullable(writer));
+				WritePublicProperty(body, "Name", PurviewTypeLibrary.System.String.MakeNullable(writer));
 				WritePublicProperty(body, "GenerationMode", TypeLibrary.Logging.LoggerGenerationMode.AsTypeReference());
 			},
 			wrapInExcludeLoggingGuard: true
@@ -867,12 +852,12 @@ static class MarkerAttributeTemplateEmitter
 						[
 							new ParameterDeclarationOptions(
 								"messageTemplate",
-								TypeLibrary.System.String.AsTypeReference()
+								PurviewTypeLibrary.System.String.AsTypeReference()
 							)
 							{
 								DefaultValue = "null",
 							},
-							new ParameterDeclarationOptions("name", TypeLibrary.System.String.AsTypeReference())
+							new ParameterDeclarationOptions("name", PurviewTypeLibrary.System.String.AsTypeReference())
 							{
 								DefaultValue = "null",
 							},
@@ -889,15 +874,18 @@ static class MarkerAttributeTemplateEmitter
 					{
 						Parameters =
 						[
-							new ParameterDeclarationOptions("eventId", TypeLibrary.System.Int32.AsTypeReference()),
+							new ParameterDeclarationOptions(
+								"eventId",
+								PurviewTypeLibrary.System.Int32.AsTypeReference()
+							),
 							new ParameterDeclarationOptions(
 								"messageTemplate",
-								TypeLibrary.System.String.AsTypeReference()
+								PurviewTypeLibrary.System.String.AsTypeReference()
 							)
 							{
 								DefaultValue = "null",
 							},
-							new ParameterDeclarationOptions("name", TypeLibrary.System.String.AsTypeReference())
+							new ParameterDeclarationOptions("name", PurviewTypeLibrary.System.String.AsTypeReference())
 							{
 								DefaultValue = "null",
 							},
@@ -912,7 +900,7 @@ static class MarkerAttributeTemplateEmitter
 				);
 
 				WriteNullableStringProperty(body, "MessageTemplate");
-				WritePublicProperty(body, "EventId", TypeLibrary.System.Int32.AsTypeReference().Nullable());
+				WritePublicProperty(body, "EventId", PurviewTypeLibrary.System.Int32.MakeNullable(writer));
 				WriteNullableStringProperty(body, "Name");
 				WritePublicProperty(body, "GenerationMode", TypeLibrary.Logging.LoggerGenerationMode.AsTypeReference());
 			},
@@ -935,7 +923,7 @@ static class MarkerAttributeTemplateEmitter
 						[
 							new ParameterDeclarationOptions(
 								"maximumValueCount",
-								TypeLibrary.System.Int32.AsTypeReference()
+								PurviewTypeLibrary.System.Int32.AsTypeReference()
 							)
 							{
 								DefaultValue = "5",
@@ -946,7 +934,7 @@ static class MarkerAttributeTemplateEmitter
 				);
 
 				body.XmlSummary("Gets or sets the maximum number of values to include when expanding an enumerable.");
-				WritePublicProperty(body, "MaximumValueCount", TypeLibrary.System.Int32.AsTypeReference());
+				WritePublicProperty(body, "MaximumValueCount", PurviewTypeLibrary.System.Int32.AsTypeReference());
 			},
 			wrapInExcludeLoggingGuard: true
 		);
@@ -971,7 +959,10 @@ static class MarkerAttributeTemplateEmitter
 					{
 						Parameters =
 						[
-							new ParameterDeclarationOptions("meterName", TypeLibrary.System.String.AsTypeReference())
+							new ParameterDeclarationOptions(
+								"meterName",
+								PurviewTypeLibrary.System.String.AsTypeReference()
+							)
 							{
 								DefaultValue = "null",
 							},
@@ -981,21 +972,21 @@ static class MarkerAttributeTemplateEmitter
 							},
 							new ParameterDeclarationOptions(
 								"instrumentPrefix",
-								TypeLibrary.System.String.AsTypeReference()
+								PurviewTypeLibrary.System.String.AsTypeReference()
 							)
 							{
 								DefaultValue = "null",
 							},
 							new ParameterDeclarationOptions(
 								"lowercaseInstrumentName",
-								TypeLibrary.System.Boolean.AsTypeReference()
+								PurviewTypeLibrary.System.Boolean.AsTypeReference()
 							)
 							{
 								DefaultValue = "true",
 							},
 							new ParameterDeclarationOptions(
 								"lowercaseTagKeys",
-								TypeLibrary.System.Boolean.AsTypeReference()
+								PurviewTypeLibrary.System.Boolean.AsTypeReference()
 							)
 							{
 								DefaultValue = "true",
@@ -1024,10 +1015,15 @@ static class MarkerAttributeTemplateEmitter
 				WritePublicProperty(
 					body,
 					"LowercaseInstrumentName",
-					TypeLibrary.System.Boolean.AsTypeReference(),
+					PurviewTypeLibrary.System.Boolean.AsTypeReference(),
 					"true"
 				);
-				WritePublicProperty(body, "LowercaseTagKeys", TypeLibrary.System.Boolean.AsTypeReference(), "true");
+				WritePublicProperty(
+					body,
+					"LowercaseTagKeys",
+					PurviewTypeLibrary.System.Boolean.AsTypeReference(),
+					"true"
+				);
 			}
 		);
 	}
@@ -1048,16 +1044,21 @@ static class MarkerAttributeTemplateEmitter
 				WritePublicProperty(
 					body,
 					"IncludeAssemblyInstrumentPrefix",
-					TypeLibrary.System.Boolean.AsTypeReference(),
+					PurviewTypeLibrary.System.Boolean.AsTypeReference(),
 					"true"
 				);
 				WritePublicProperty(
 					body,
 					"LowercaseInstrumentName",
-					TypeLibrary.System.Boolean.AsTypeReference(),
+					PurviewTypeLibrary.System.Boolean.AsTypeReference(),
 					"true"
 				);
-				WritePublicProperty(body, "LowercaseTagKeys", TypeLibrary.System.Boolean.AsTypeReference(), "true");
+				WritePublicProperty(
+					body,
+					"LowercaseTagKeys",
+					PurviewTypeLibrary.System.Boolean.AsTypeReference(),
+					"true"
+				);
 			}
 		);
 	}
@@ -1096,7 +1097,7 @@ static class MarkerAttributeTemplateEmitter
 						[
 							new ParameterDeclarationOptions(
 								"autoIncrement",
-								TypeLibrary.System.Boolean.AsTypeReference()
+								PurviewTypeLibrary.System.Boolean.AsTypeReference()
 							),
 						],
 					},
@@ -1104,7 +1105,7 @@ static class MarkerAttributeTemplateEmitter
 				);
 				WriteNameUnitDescriptionConstructor(body, type, appendAutoIncrement: true);
 
-				WritePublicProperty(body, "AutoIncrement", TypeLibrary.System.Boolean.AsTypeReference());
+				WritePublicProperty(body, "AutoIncrement", PurviewTypeLibrary.System.Boolean.AsTypeReference());
 				WriteNullableStringProperty(body, "Name");
 				WriteNullableStringProperty(body, "Unit");
 				WriteNullableStringProperty(body, "Description");
@@ -1123,11 +1124,15 @@ static class MarkerAttributeTemplateEmitter
 				WriteEmptyConstructor(body, type);
 				WriteNameUnitDescriptionConstructor(body, type, appendThrowOnAlreadyInitialized: true);
 
-				WritePublicProperty(body, "AutoIncrement", TypeLibrary.System.Boolean.AsTypeReference());
+				WritePublicProperty(body, "AutoIncrement", PurviewTypeLibrary.System.Boolean.AsTypeReference());
 				WriteNullableStringProperty(body, "Name");
 				WriteNullableStringProperty(body, "Unit");
 				WriteNullableStringProperty(body, "Description");
-				WritePublicProperty(body, "ThrowOnAlreadyInitialized", TypeLibrary.System.Boolean.AsTypeReference());
+				WritePublicProperty(
+					body,
+					"ThrowOnAlreadyInitialized",
+					PurviewTypeLibrary.System.Boolean.AsTypeReference()
+				);
 			}
 		);
 	}
@@ -1164,23 +1169,23 @@ static class MarkerAttributeTemplateEmitter
 	{
 		var parameters = ImmutableArray<ParameterDeclarationOptions>.Empty;
 		parameters = parameters.Add(
-			new ParameterDeclarationOptions("name", TypeLibrary.System.String.AsTypeReference())
+			new ParameterDeclarationOptions("name", PurviewTypeLibrary.System.String.AsTypeReference())
 		);
 		parameters = parameters.Add(
-			new ParameterDeclarationOptions("unit", TypeLibrary.System.String.AsTypeReference())
+			new ParameterDeclarationOptions("unit", PurviewTypeLibrary.System.String.AsTypeReference())
 			{
 				DefaultValue = "null",
 			}
 		);
 		parameters = parameters.Add(
-			new ParameterDeclarationOptions("description", TypeLibrary.System.String.AsTypeReference())
+			new ParameterDeclarationOptions("description", PurviewTypeLibrary.System.String.AsTypeReference())
 			{
 				DefaultValue = "null",
 			}
 		);
 		if (appendAutoIncrement)
 			parameters = parameters.Add(
-				new ParameterDeclarationOptions("autoIncrement", TypeLibrary.System.Boolean.AsTypeReference())
+				new ParameterDeclarationOptions("autoIncrement", PurviewTypeLibrary.System.Boolean.AsTypeReference())
 				{
 					DefaultValue = "false",
 				}
@@ -1189,7 +1194,7 @@ static class MarkerAttributeTemplateEmitter
 			parameters = parameters.Add(
 				new ParameterDeclarationOptions(
 					"throwOnAlreadyInitialized",
-					TypeLibrary.System.Boolean.AsTypeReference()
+					PurviewTypeLibrary.System.Boolean.AsTypeReference()
 				)
 				{
 					DefaultValue = "false",
@@ -1205,82 +1210,65 @@ static class MarkerAttributeTemplateEmitter
 
 	static void WriteTargetsEnum(CodeWriter writer, TypeIdentity type)
 	{
-		WriteHeader(writer);
-		WriteFileScopedNamespace(writer);
-
-		writer.XmlSummary("Determines which telemetry targets a parameter is excluded from.");
-		writer.WriteEnum(
-			new TypeDeclarationOptions(type.Name, TypeDeclarationAccessibility.Public)
-			{
-				Attributes = [new AttributeDeclarationOptions(new TypeIdentity("FlagsAttribute", "System"))],
-			},
-			new EnumFieldDeclarationOptions("None", 0),
-			new EnumFieldDeclarationOptions("Activities", 1),
-			new EnumFieldDeclarationOptions("Logging", 2),
-			new EnumFieldDeclarationOptions("Metrics", 4),
-			new EnumFieldDeclarationOptions("All", "Activities | Logging | Metrics")
-		);
+		writer
+			.WriteFileScopedNamespace(TypeLibrary.PurviewTelemetryNamespace)
+			.XmlSummary("Determines which telemetry targets a parameter is excluded from.")
+			.WriteEnum(
+				new(type.Name, TypeDeclarationAccessibility.Public)
+				{
+					Attributes = [new AttributeDeclarationOptions(new TypeIdentity("FlagsAttribute", "System"))],
+				},
+				new("None", 0),
+				new("Activities", 1),
+				new("Logging", 2),
+				new("Metrics", 4),
+				new("All", "Activities | Logging | Metrics")
+			);
 	}
 
 	static void WriteNamingConventionEnum(CodeWriter writer, TypeIdentity type)
 	{
-		WriteHeader(writer);
-		WriteFileScopedNamespace(writer);
-
-		writer.XmlSummary("Determines the naming convention used for generated telemetry names.");
-		writer.WriteEnum(
-			new TypeDeclarationOptions(type.Name, TypeDeclarationAccessibility.Public),
-			new EnumFieldDeclarationOptions("Legacy", 0),
-			new EnumFieldDeclarationOptions("OpenTelemetry", 1)
-		);
+		writer
+			.WriteFileScopedNamespace(TypeLibrary.PurviewTelemetryNamespace)
+			.XmlSummary("Determines the naming convention used for generated telemetry names.")
+			.WriteEnum(new(type.Name, TypeDeclarationAccessibility.Public), new("Legacy", 0), new("OpenTelemetry", 1));
 	}
 
 	static void WriteLogPrefixTypeEnum(CodeWriter writer, TypeIdentity type)
 	{
-		WriteHeader(writer);
 		writer.WriteLine("#if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING").NewLine();
-		WriteFileScopedNamespace(writer);
-
-		writer.XmlSummary("Determines the mode used to generate or override the prefix for the log entry.");
-		writer.WriteEnum(
-			new TypeDeclarationOptions(type.Name, TypeDeclarationAccessibility.Public),
-			new EnumFieldDeclarationOptions("Default", 0),
-			new EnumFieldDeclarationOptions("Interface", 1),
-			new EnumFieldDeclarationOptions("Class", 2),
-			new EnumFieldDeclarationOptions("Custom", 3),
-			new EnumFieldDeclarationOptions("TrimmedClassName", 4)
-		);
+		writer
+			.WriteFileScopedNamespace(TypeLibrary.PurviewTelemetryNamespace)
+			.XmlSummary("Determines the mode used to generate or override the prefix for the log entry.")
+			.WriteEnum(
+				new(type.Name, TypeDeclarationAccessibility.Public),
+				new("Default", 0),
+				new("Interface", 1),
+				new("Class", 2),
+				new("Custom", 3),
+				new("TrimmedClassName", 4)
+			);
 
 		writer.WriteLine("#endif");
 	}
 
 	static void WriteLoggerGenerationModeEnum(CodeWriter writer, TypeIdentity type)
 	{
-		WriteHeader(writer);
 		writer.WriteLine("#if !EXCLUDE_PURVIEW_TELEMETRY_LOGGING").NewLine();
-		WriteFileScopedNamespace(writer);
 
-		writer.XmlSummary("Controls the generation mode used for log methods.");
-		writer.WriteEnum(
-			new TypeDeclarationOptions(type.Name, TypeDeclarationAccessibility.Public),
-			new EnumFieldDeclarationOptions("Auto", 0),
-			new EnumFieldDeclarationOptions("V1", 1),
-			new EnumFieldDeclarationOptions("V2", 2)
-		);
+		writer
+			.WriteFileScopedNamespace(TypeLibrary.PurviewTelemetryNamespace)
+			.XmlSummary("Controls the generation mode used for log methods.")
+			.WriteEnum(new(type.Name, TypeDeclarationAccessibility.Public), new("Auto", 0), new("V1", 1), new("V2", 2));
 
 		writer.WriteLine("#endif");
 	}
 
 	static void WriteMeterNameGenerationTypeEnum(CodeWriter writer, TypeIdentity type)
 	{
-		WriteHeader(writer);
-		WriteFileScopedNamespace(writer);
-
-		writer.XmlSummary("Determines how meter names are generated when not explicitly specified.");
-		writer.WriteEnum(
-			new TypeDeclarationOptions(type.Name, TypeDeclarationAccessibility.Public),
-			new EnumFieldDeclarationOptions("OpenTelemetry", 0),
-			new EnumFieldDeclarationOptions("DotNet", 1)
-		);
+		writer
+			.WriteFileScopedNamespace(TypeLibrary.PurviewTelemetryNamespace)
+			.XmlSummary("Determines how meter names are generated when not explicitly specified.")
+			.WriteEnum(new(type.Name, TypeDeclarationAccessibility.Public), new("OpenTelemetry", 0), new("DotNet", 1));
 	}
 }

@@ -59,13 +59,12 @@ public interface ITestMetrics
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG4002"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG4002");
+		//await Assert
+		//	.That(generationResult)
+		//	.HasDiagnostic(DiagnosticLibrary.Metrics.AutoIncrementCountAndMeasurementParam);
+
+		await Assert.That(generationResult).HasDiagnostic("TSG4002");
 	}
 
 	[Test]
@@ -121,13 +120,7 @@ public interface ITestMetrics
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG4002"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG4002");
 	}
 
 	[Test]

@@ -133,12 +133,7 @@ public interface ITestLogger {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			cancellationToken: cancellationToken
-		);
+		await TestHelpers.VerifyAsync(generationResult, expectsDiagnostics: true, cancellationToken: cancellationToken);
 	}
 
 	[Test]
@@ -166,12 +161,7 @@ public interface ITestLogger {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			cancellationToken: cancellationToken
-		);
+		await TestHelpers.VerifyAsync(generationResult, expectsDiagnostics: true, cancellationToken: cancellationToken);
 	}
 
 	[Test]

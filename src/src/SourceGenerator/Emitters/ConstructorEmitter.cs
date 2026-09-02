@@ -13,11 +13,10 @@ static class ConstructorEmitter
 		GenerationType requestingType,
 		GenerationType generationType,
 		string classNameToGenerate,
-		string fullyQualifiedInterfaceName,
+		TypeReference interfaceType,
 		CodeWriter writer,
 		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool supportsIMeterFactory = true
+		GenerationContext<TelemetryCapabilities> generationContext
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -25,7 +24,7 @@ static class ConstructorEmitter
 		// Only emit constructor from one target to avoid duplicate definitions
 		if (!SharedHelpers.ShouldEmitConstructor(requestingType, generationType))
 		{
-			logger?.Debug($"Skipping constructor emit for {requestingType} ({generationType}).");
+			generationContext.Debug($"Skipping constructor emit for {requestingType} ({generationType}).");
 
 			return;
 		}
@@ -34,30 +33,28 @@ static class ConstructorEmitter
 		writer.WriteConstructor(
 			new ConstructorDeclarationOptions(classNameToGenerate, TypeDeclarationAccessibility.Public)
 			{
-				Parameters = BuildParameters(generationType, fullyQualifiedInterfaceName, supportsIMeterFactory),
+				Parameters = BuildParameters(generationType, interfaceType, generationContext),
 				IncludeGeneratedAttributes = false,
 			},
-			body => EmitBody(generationType, body, supportsIMeterFactory)
+			body => EmitBody(generationType, body, generationContext)
 		);
 	}
 
 	static ImmutableArray<ParameterDeclarationOptions> BuildParameters(
 		GenerationType generationType,
-		string? loggerFullyQualifiedInterfaceName,
-		bool supportsIMeterFactory
+		TypeReference interfaceType,
+		GenerationContext<TelemetryCapabilities> generationContext
 	)
 	{
 		var builder = ImmutableArray.CreateBuilder<ParameterDeclarationOptions>();
 
 		if (generationType.HasFlag(GenerationType.Logging))
 		{
-			var loggerType = TypeLibrary.Logging.MicrosoftExtensions.ILogger.MakeGeneric(
-				new TypeReference(new TypeIdentity(loggerFullyQualifiedInterfaceName!, null))
-			);
+			var loggerType = TypeLibrary.Logging.MicrosoftExtensions.ILogger.MakeGeneric(interfaceType);
 			builder.Add(new ParameterDeclarationOptions(LoggerParameterName, new TypeReference(loggerType)));
 		}
 
-		if (generationType.HasFlag(GenerationType.Metrics) && supportsIMeterFactory)
+		if (generationType.HasFlag(GenerationType.Metrics) && generationContext.Capabilities.SupportsIMeterFactory)
 		{
 			builder.Add(
 				new ParameterDeclarationOptions(
@@ -70,7 +67,11 @@ static class ConstructorEmitter
 		return builder.ToImmutable();
 	}
 
-	static void EmitBody(GenerationType generationType, CodeWriter writer, bool supportsIMeterFactory)
+	static void EmitBody(
+		GenerationType generationType,
+		CodeWriter writer,
+		GenerationContext<TelemetryCapabilities> generationContext
+	)
 	{
 		if (generationType.HasFlag(GenerationType.Logging))
 		{
@@ -86,7 +87,7 @@ static class ConstructorEmitter
 		{
 			writer.Write(PropertyLibrary.Metrics.MeterInitializationMethod).Write('(');
 
-			if (supportsIMeterFactory)
+			if (generationContext.Capabilities.SupportsIMeterFactory)
 				writer.Write(PropertyLibrary.Metrics.MeterFactoryParameterName);
 
 			writer.Write(");").NewLine();

@@ -287,12 +287,7 @@ partial class MultiTelemetryCore
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG1001"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG1001");
 	}
 
 	[Test]
@@ -588,12 +583,7 @@ public interface IMultiTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG1003"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG1003");
 	}
 
 	[Test]
@@ -668,13 +658,7 @@ public interface IMultiTelemetry
 		);
 
 		// Assert - Task and ValueTask are not valid return types for logging
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG2021"], // Async return types are invalid
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG2021"); // Async return types are invalid
 	}
 
 	[Test]
@@ -745,12 +729,7 @@ public interface IMultiTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG3012"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG3012");
 	}
 
 	[Test]
@@ -784,12 +763,7 @@ public interface ITelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG1010"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG1010");
 	}
 
 	[Test]
@@ -823,12 +797,7 @@ public interface ITelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG1010"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG1010");
 	}
 
 	[Test]
@@ -862,12 +831,7 @@ public interface ITelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG1010"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG1010");
 	}
 
 	[Test]
@@ -899,11 +863,6 @@ public interface ITelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG1010"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG1010");
 	}
 }

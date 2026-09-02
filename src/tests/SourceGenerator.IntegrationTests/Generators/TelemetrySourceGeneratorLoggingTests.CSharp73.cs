@@ -27,7 +27,7 @@ public interface ITestLogger {
 		// Act
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
-		// Assert: validationCompilation=true (default) verifies generated code compiles under C# 7.3.
+		// Assert: GenerateAsync's EnsureValid (default) verifies generated code compiles under C# 7.3.
 		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
 	}
 }

@@ -12,14 +12,7 @@ partial class SharedHelpers
 
 	public static MeterAttributeData? GetMeterAttribute(ISymbol symbol, CancellationToken token)
 	{
-		if (
-			!Utilities.TryContainsAttribute(
-				symbol,
-				TemplateLibrary.Metrics.MeterAttribute,
-				token,
-				out var attributeData
-			)
-		)
+		if (!Utilities.TryContainsAttribute(symbol, TypeLibrary.Metrics.MeterAttribute, token, out var attributeData))
 		{
 			return null;
 		}
@@ -39,7 +32,7 @@ partial class SharedHelpers
 		if (
 			!Utilities.TryContainsAttribute(
 				symbol,
-				TemplateLibrary.Metrics.MeterGenerationAttribute,
+				TypeLibrary.Metrics.MeterGenerationAttribute,
 				token,
 				out var attributeData
 			)
@@ -59,63 +52,27 @@ partial class SharedHelpers
 			: null;
 	}
 
-	public static InstrumentAttributeRecord? GetInstrumentAttribute(
-		ISymbol symbol,
-		ISourceGenLogger? logger,
-		CancellationToken token
-	)
+	public static InstrumentAttributeRecord? GetInstrumentAttribute(ISymbol symbol, CancellationToken token)
 	{
-		AttributeData? attributeData = null;
-		foreach (var instrumentAttribute in TemplateLibrary.Metrics.ValidInstrumentAttributes)
-		{
-			if (Utilities.TryContainsAttribute(symbol, instrumentAttribute, token, out attributeData))
-			{
-				break;
-			}
-		}
+		token.ThrowIfCancellationRequested();
 
-		if (attributeData?.AttributeClass == null)
-			return null;
+		if (CounterAttributeData.TryFromAttributeData(symbol, out var counterAttribute))
+			return ToRecord(counterAttribute, InstrumentTypes.Counter);
+		if (AutoCounterAttributeData.TryFromAttributeData(symbol, out var autoCounterAttribute))
+			return ToRecord(autoCounterAttribute, InstrumentTypes.Counter);
+		if (UpDownCounterAttributeData.TryFromAttributeData(symbol, out var upDownCounterAttribute))
+			return ToRecord(upDownCounterAttribute, InstrumentTypes.UpDownCounter);
+		if (HistogramAttributeData.TryFromAttributeData(symbol, out var histogramAttribute))
+			return ToRecord(histogramAttribute, InstrumentTypes.Histogram);
+		if (ObservableCounterAttributeData.TryFromAttributeData(symbol, out var observableCounterAttribute))
+			return ToRecord(observableCounterAttribute, InstrumentTypes.ObservableCounter);
+		if (ObservableUpDownCounterAttributeData.TryFromAttributeData(symbol, out var observableUpDownCounterAttribute))
+			return ToRecord(observableUpDownCounterAttribute, InstrumentTypes.ObservableUpDownCounter);
+		if (ObservableGaugeAttributeData.TryFromAttributeData(symbol, out var observableGaugeAttribute))
+			return ToRecord(observableGaugeAttribute, InstrumentTypes.ObservableGauge);
 
-		var attributeType = TypeReference.Create(attributeData.AttributeClass);
-
-		var record = attributeType switch
-		{
-			_ when TemplateLibrary.Metrics.CounterAttribute == attributeType => ToRecord(
-				CounterAttributeData.FromAttributeData(attributeData),
-				InstrumentTypes.Counter
-			),
-			_ when TemplateLibrary.Metrics.AutoCounterAttribute == attributeType => ToRecord(
-				AutoCounterAttributeData.FromAttributeData(attributeData),
-				InstrumentTypes.Counter
-			),
-			_ when TemplateLibrary.Metrics.UpDownCounterAttribute == attributeType => ToRecord(
-				UpDownCounterAttributeData.FromAttributeData(attributeData),
-				InstrumentTypes.UpDownCounter
-			),
-			_ when TemplateLibrary.Metrics.HistogramAttribute == attributeType => ToRecord(
-				HistogramAttributeData.FromAttributeData(attributeData),
-				InstrumentTypes.Histogram
-			),
-			_ when TemplateLibrary.Metrics.ObservableCounterAttribute == attributeType => ToRecord(
-				ObservableCounterAttributeData.FromAttributeData(attributeData),
-				InstrumentTypes.ObservableCounter
-			),
-			_ when TemplateLibrary.Metrics.ObservableUpDownCounterAttribute == attributeType => ToRecord(
-				ObservableUpDownCounterAttributeData.FromAttributeData(attributeData),
-				InstrumentTypes.ObservableUpDownCounter
-			),
-			_ when TemplateLibrary.Metrics.ObservableGaugeAttribute == attributeType => ToRecord(
-				ObservableGaugeAttributeData.FromAttributeData(attributeData),
-				InstrumentTypes.ObservableGauge
-			),
-			_ => null,
-		};
-
-		if (record is null)
-			logger?.Fatal($"Unknown instrument type {attributeType}.");
-
-		return record;
+		// No matching instrument attribute found
+		return null;
 	}
 
 	static InstrumentAttributeRecord ToRecord(
@@ -157,5 +114,5 @@ partial class SharedHelpers
 		ToRecord(data.Name, data.Unit, data.Description, false, data.ThrowOnAlreadyInitialized, type);
 
 	public static bool IsValidMeasurementValueType(ITypeSymbol type) =>
-		Array.Exists(PropertyLibrary.Metrics.ValidMeasurementSpecialTypes, m => m == type.SpecialType);
+		PropertyLibrary.Metrics.ValidMeasurementKeywordTypes.Any(m => m.SpecialType == type.SpecialType);
 }

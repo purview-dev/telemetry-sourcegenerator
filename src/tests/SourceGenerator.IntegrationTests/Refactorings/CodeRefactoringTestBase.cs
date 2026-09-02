@@ -99,8 +99,8 @@ public abstract class CodeRefactoringTestBase
 		CancellationToken cancellationToken = default
 	)
 	{
-		TestHelpers.ThrowIfNull(codeWithMarker);
-		TestHelpers.ThrowIfNull(provider);
+		await Assert.That(codeWithMarker).IsNotNullOrWhiteSpace();
+		await Assert.That(provider).IsNotNull();
 
 		const string marker = "$$";
 
@@ -203,8 +203,8 @@ public abstract class CodeRefactoringTestBase
 		CancellationToken cancellationToken = default
 	)
 	{
-		TestHelpers.ThrowIfNull(codeWithMarker, nameof(codeWithMarker));
-		TestHelpers.ThrowIfNull(provider, nameof(provider));
+		await Assert.That(codeWithMarker).IsNotNullOrWhiteSpace();
+		await Assert.That(provider).IsNotNull();
 
 		var after = await ApplyRefactoringAsync(codeWithMarker, provider, equivalenceKey, cancellationToken);
 

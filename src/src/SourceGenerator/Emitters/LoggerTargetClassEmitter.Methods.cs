@@ -6,18 +6,16 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 partial class LoggerTargetClassEmitter
 {
-	internal static void EmitThrowStub(CodeWriter writer, LogMethodTarget methodTarget, bool emitNullable = true)
+	internal static void EmitThrowStub(CodeWriter writer, LogMethodTarget methodTarget)
 	{
 		var returnType = methodTarget.IsScoped
-			? emitNullable
-				? TypeLibrary.System.IDisposable.AsTypeReference().Nullable()
-				: TypeLibrary.System.IDisposable.AsTypeReference()
+			? TypeLibrary.System.IDisposable.AsTypeReference().Nullable(writer)
 			: PurviewTypeLibrary.System.Void.AsTypeReference();
 
 		writer.NewLine();
 		using (
 			writer.WriteMethodScope(
-				new MethodDeclarationOptions(methodTarget.MethodName, returnType, TypeDeclarationAccessibility.Public)
+				new(methodTarget.MethodName, returnType, TypeDeclarationAccessibility.Public)
 				{
 					Parameters =
 					[
@@ -36,14 +34,9 @@ partial class LoggerTargetClassEmitter
 		}
 	}
 
-	static void EmitMethods(
-		LoggerTarget target,
-		CodeWriter writer,
-		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool emitNullable
-	)
+	static void EmitMethods(LoggerOutputContext output, CodeWriter writer, SourceProductionContext context)
 	{
+		var target = output.Target;
 		foreach (var methodTarget in target.LogMethods)
 		{
 			context.CancellationToken.ThrowIfCancellationRequested();
@@ -58,44 +51,43 @@ partial class LoggerTargetClassEmitter
 					)
 				)
 				{
-					EmitThrowStub(writer, methodTarget, emitNullable);
+					EmitThrowStub(writer, methodTarget);
 				}
 				continue;
 			}
 
 			if (methodTarget.UnknownReturnType)
 			{
-				EmitThrowStub(writer, methodTarget, emitNullable);
+				EmitThrowStub(writer, methodTarget);
 				continue; // Diagnostic already reported in EmitFields
 			}
 
 			if (methodTarget.HasMultipleExceptions)
 			{
-				EmitThrowStub(writer, methodTarget, emitNullable);
+				EmitThrowStub(writer, methodTarget);
 				continue;
 			}
 
 			if (methodTarget.ParameterCountSansException > PropertyLibrary.Logging.MaxNonExceptionParameters)
 			{
-				EmitThrowStub(writer, methodTarget, emitNullable);
+				EmitThrowStub(writer, methodTarget);
 				continue;
 			}
 
-			EmitLogActionMethod(writer, methodTarget, context, logger, emitNullable);
+			EmitLogActionMethod(output, methodTarget, writer, context);
 		}
 	}
 
 	internal static void EmitLogActionMethod(
-		CodeWriter writer,
+		LoggerOutputContext output,
 		LogMethodTarget methodTarget,
-		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool emitNullable = true
+		CodeWriter writer,
+		SourceProductionContext context
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		logger?.Debug($"Building logging method: {methodTarget.MethodName}");
+		output.Context.Debug($"Building logging method: {methodTarget.MethodName}");
 
 		var isMultiTarget = methodTarget.TargetGenerationState.IsMultiTarget;
 		var methodTargets = methodTarget.TargetGenerationState.MethodTargets;
@@ -117,7 +109,7 @@ partial class LoggerTargetClassEmitter
 		var returnType =
 			generatePrivateLogging || !methodTarget.IsScoped
 				? PurviewTypeLibrary.System.Void.AsTypeReference()
-				: TypeLibrary.System.IDisposable.AsTypeReference().Nullable();
+				: TypeLibrary.System.IDisposable.AsTypeReference().Nullable(writer);
 
 		writer.NewLine();
 
@@ -190,24 +182,21 @@ partial class LoggerTargetClassEmitter
 		// Generate public delegating method if Logging owns it
 		if (generatePublicDelegator)
 		{
-			EmitPublicLoggingDelegatingMethod(writer, methodTarget, context, logger, emitNullable);
+			EmitPublicLoggingDelegatingMethod(output, methodTarget, writer, context);
 		}
 	}
 
 	static void EmitPublicLoggingDelegatingMethod(
-		CodeWriter writer,
+		LoggerOutputContext output,
 		LogMethodTarget methodTarget,
-		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool emitNullable = true
+		CodeWriter writer,
+		SourceProductionContext context
 	)
 	{
-		logger?.Debug($"Building public delegating logging method: {methodTarget.MethodName}");
+		output.Context.Debug($"Building public delegating logging method: {methodTarget.MethodName}");
 
 		var returnType = methodTarget.IsScoped
-			? emitNullable
-				? TypeLibrary.System.IDisposable.AsTypeReference().Nullable()
-				: TypeLibrary.System.IDisposable.AsTypeReference()
+			? TypeLibrary.System.IDisposable.AsTypeReference().Nullable(writer)
 			: PurviewTypeLibrary.System.Void.AsTypeReference();
 
 		writer.NewLine();

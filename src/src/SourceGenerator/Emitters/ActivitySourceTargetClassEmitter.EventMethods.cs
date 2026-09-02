@@ -7,11 +7,10 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 partial class ActivitySourceTargetClassEmitter
 {
 	static void EmitEventMethodBody(
-		CodeWriter writer,
+		ActivityOutputContext output,
 		ActivityBasedGenerationTarget methodTarget,
-		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool emitNullable = true
+		CodeWriter writer,
+		SourceProductionContext context
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -19,8 +18,7 @@ partial class ActivitySourceTargetClassEmitter
 		if (
 			!GuardParameters(
 				methodTarget,
-				context,
-				logger,
+				output,
 				out var activityParam,
 				out var parentContextOrId,
 				out var tagsParam,
@@ -39,26 +37,26 @@ partial class ActivitySourceTargetClassEmitter
 			activityParam?.ParameterName ?? (TypeLibrary.Activities.SystemDiagnostics.Activity + ".Current");
 		if (parentContextOrId != null)
 		{
-			logger?.Diagnostic("Parent context/ Id not allowed on event method, only activities.");
+			output.Context.Diagnostic("Parent context/ Id not allowed on event method, only activities.");
 
 			return;
 		}
 
 		if (linksParam != null)
 		{
-			logger?.Diagnostic("Links parameter not allowed on event method, only activities.");
+			output.Context.Diagnostic("Links parameter not allowed on event method, only activities.");
 
 			return;
 		}
 
 		if (startTimeParam != null)
 		{
-			logger?.Diagnostic("Start time parameter not allowed on event method, only activities.");
+			output.Context.Diagnostic("Start time parameter not allowed on event method, only activities.");
 
 			return;
 		}
 
-		EmitHasListenersTest(writer, methodTarget, emitNullable);
+		EmitHasListenersTest(writer, methodTarget);
 
 		writer.Write("if (").Write(activityVariableName).WriteLine(" != null)");
 
@@ -67,14 +65,7 @@ partial class ActivitySourceTargetClassEmitter
 			var exceptionParam =
 				methodTarget.Parameters.FirstOrDefault(m => m.IsException)
 				?? methodTarget.Tags.FirstOrDefault(m => m.IsException);
-			var tagsParameterName = EmitEventTags(
-				writer,
-				methodTarget,
-				activityVariableName,
-				tagsParam,
-				escapeParam,
-				emitNullable
-			);
+			var tagsParameterName = EmitEventTags(writer, methodTarget, activityVariableName, tagsParam, escapeParam);
 
 			var eventVariableName = "activityEvent" + methodTarget.MethodName;
 
@@ -102,7 +93,7 @@ partial class ActivitySourceTargetClassEmitter
 			{
 				writer.NewLine();
 
-				EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, logger);
+				EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, output);
 			}
 
 			EmitSetStatus(writer, methodTarget, activityVariableName, statusDescriptionParam, exceptionParam);
@@ -121,8 +112,7 @@ partial class ActivitySourceTargetClassEmitter
 		ActivityBasedGenerationTarget methodTarget,
 		string activityVariableName,
 		ActivityBasedParameterTarget? tagsParam,
-		ActivityBasedParameterTarget? escapeParam,
-		bool emitNullable
+		ActivityBasedParameterTarget? escapeParam
 	)
 	{
 		var tagsParameterName = tagsParam?.ParameterName ?? "default";
@@ -135,7 +125,7 @@ partial class ActivitySourceTargetClassEmitter
 			.Write(' ')
 			.Write(tagsListVariableName)
 			.Write(
-				emitNullable ? " = new(" : $" = new {TypeLibrary.Activities.SystemDiagnostics.ActivityTagsCollection}("
+				" = new(" // : $" = new {TypeLibrary.Activities.SystemDiagnostics.ActivityTagsCollection}("
 			);
 
 		if (tagsParam != null)

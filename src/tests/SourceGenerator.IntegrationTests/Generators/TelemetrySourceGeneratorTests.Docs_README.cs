@@ -116,12 +116,7 @@ interface IActivityTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG3021"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG3021");
 	}
 
 	[Test]

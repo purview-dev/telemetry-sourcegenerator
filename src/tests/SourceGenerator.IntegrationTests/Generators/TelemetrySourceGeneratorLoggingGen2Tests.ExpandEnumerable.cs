@@ -61,12 +61,7 @@ public interface ITestLogger
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG2008"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG2008");
 	}
 
 	public static IEnumerable<string> ExpandableArrays

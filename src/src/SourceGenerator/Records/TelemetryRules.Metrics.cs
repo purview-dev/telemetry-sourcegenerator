@@ -45,7 +45,7 @@ static partial class TelemetryRules
 		if (instrument.InstrumentAttribute is null)
 		{
 			diagnostics.Add(
-				DiagnosticInfo.Create(ToDescriptor(DiagnosticLibrary.Metrics.NoInstrumentDefined), methodSymbol)
+				DiagnosticInfo.Create(DiagnosticLibrary.Metrics.NoInstrumentDefined.Descriptor, methodSymbol)
 			);
 			return;
 		}
@@ -60,26 +60,26 @@ static partial class TelemetryRules
 		// TSG4001: metrics-owned public method must return void or bool.
 		if (metricsOwnsPublicMethod && !isVoid && !instrument.ReturnsBool)
 			diagnostics.Add(
-				DiagnosticInfo.Create(ToDescriptor(DiagnosticLibrary.Metrics.DoesNotReturnVoid), methodSymbol)
+				DiagnosticInfo.Create(DiagnosticLibrary.Metrics.DoesNotReturnVoid.Descriptor, methodSymbol)
 			);
 
 		// TSG4007: observable instruments cannot return bool.
 		if (instrument.IsObservable && instrument.ReturnsBool)
 			diagnostics.Add(
-				DiagnosticInfo.Create(ToDescriptor(DiagnosticLibrary.Metrics.ObservableCannotReturnBool), methodSymbol)
+				DiagnosticInfo.Create(DiagnosticLibrary.Metrics.ObservableCannotReturnBool.Descriptor, methodSymbol)
 			);
 
 		// TSG4008: auto-counter instruments must return void.
 		if (instrument.InstrumentAttribute.IsAutoIncrement && instrument.ReturnsBool)
 			diagnostics.Add(
-				DiagnosticInfo.Create(ToDescriptor(DiagnosticLibrary.Metrics.AutoCounterMustReturnVoid), methodSymbol)
+				DiagnosticInfo.Create(DiagnosticLibrary.Metrics.AutoCounterMustReturnVoid.Descriptor, methodSymbol)
 			);
 
 		// TSG4002: auto-increment counter cannot also have a measurement parameter.
 		if (instrument.InstrumentAttribute.IsAutoIncrement && instrument.MeasurementParameter != null)
 			diagnostics.Add(
 				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.Metrics.AutoIncrementCountAndMeasurementParam),
+					DiagnosticLibrary.Metrics.AutoIncrementCountAndMeasurementParam.Descriptor,
 					methodSymbol
 				)
 			);
@@ -90,7 +90,7 @@ static partial class TelemetryRules
 		{
 			diagnostics.Add(
 				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.Metrics.MoreThanOneMeasurementValueDefined),
+					DiagnosticLibrary.Metrics.MoreThanOneMeasurementValueDefined.Descriptor,
 					GetParameterLocation(methodSymbol, measurementParameters[1].ParameterName)
 				)
 			);
@@ -99,13 +99,13 @@ static partial class TelemetryRules
 		// TSG4004: no measurement value defined for a non-auto-increment instrument.
 		if (!instrument.InstrumentAttribute.IsAutoIncrement && instrument.MeasurementParameter is null)
 			diagnostics.Add(
-				DiagnosticInfo.Create(ToDescriptor(DiagnosticLibrary.Metrics.NoMeasurementValueDefined), methodSymbol)
+				DiagnosticInfo.Create(DiagnosticLibrary.Metrics.NoMeasurementValueDefined.Descriptor, methodSymbol)
 			);
 
 		// TSG4005: observable instruments require a Func<T> parameter.
 		if (instrument.IsObservable && !instrument.Parameters.Any(static p => p.IsFunc))
 			diagnostics.Add(
-				DiagnosticInfo.Create(ToDescriptor(DiagnosticLibrary.Metrics.ObservableRequiredFunc), methodSymbol)
+				DiagnosticInfo.Create(DiagnosticLibrary.Metrics.ObservableRequiredFunc.Descriptor, methodSymbol)
 			);
 
 		// TSG4006: the measurement parameter has an invalid measurement type.
@@ -113,7 +113,7 @@ static partial class TelemetryRules
 		{
 			diagnostics.Add(
 				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.Metrics.InvalidMeasurementType),
+					DiagnosticLibrary.Metrics.InvalidMeasurementType.Descriptor,
 					GetParameterLocation(methodSymbol, measurement.ParameterName)
 				)
 			);
@@ -127,7 +127,7 @@ static partial class TelemetryRules
 		)
 			diagnostics.Add(
 				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.Metrics.InstrumentNameMatchesType),
+					DiagnosticLibrary.Metrics.InstrumentNameMatchesType.Descriptor,
 					methodSymbol,
 					instrument.MetricName
 				)

@@ -32,13 +32,7 @@ public interface IInvalidTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG2021"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG2021");
 	}
 
 	[Test]
@@ -67,13 +61,7 @@ public interface IInvalidTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG4001"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG4001");
 	}
 
 	[Test]
@@ -102,13 +90,7 @@ public interface IInvalidTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG3002"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG3002");
 	}
 
 	[Test]
@@ -137,13 +119,7 @@ public interface IInvalidTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG2021"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG2021");
 	}
 
 	[Test]
@@ -172,13 +148,7 @@ public interface IInvalidTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG2021"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG2021");
 	}
 
 	[Test]
@@ -207,13 +177,7 @@ public interface IInvalidTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG2021"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG2021");
 	}
 
 	[Test]
@@ -243,13 +207,7 @@ public interface IInvalidTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG4001"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG4001");
 	}
 
 	[Test]
@@ -281,13 +239,7 @@ public interface IInvalidTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG3002"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG3002");
 	}
 
 	[Test]
@@ -345,13 +297,7 @@ public interface IInvalidTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG4007"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG4007");
 	}
 
 	[Test]
@@ -380,13 +326,7 @@ public interface IInvalidTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG4008"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG4008");
 	}
 
 	[Test]
@@ -421,13 +361,7 @@ public interface IInvalidTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG3002"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG3002");
 	}
 
 	[Test]
@@ -463,13 +397,7 @@ public interface IInvalidTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG3002"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG3002");
 	}
 
 	[Test]
@@ -497,13 +425,7 @@ public interface IInvalidTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG2021"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG2021");
 	}
 
 	[Test]
@@ -531,13 +453,7 @@ public interface IInvalidTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG2021"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG2021");
 	}
 
 	[Test]
@@ -568,13 +484,7 @@ public interface IInvalidTelemetry
 		);
 
 		// Assert - Task is not a valid return type for logging
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG2021"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG2021");
 	}
 
 	[Test]
@@ -605,13 +515,7 @@ public interface IInvalidTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG2021"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG2021");
 	}
 
 	[Test]
@@ -642,12 +546,6 @@ public interface IInvalidTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			expectedDiagnosticCodes: ["TSG4001"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG4001");
 	}
 }
