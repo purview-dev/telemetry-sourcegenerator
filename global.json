@@ -5,8 +5,7 @@
 		"allowPrerelease": false
 	},
 	"msbuild-sdks": {
-    "Purview.DotNetProjectSdk": "1.0.0-prerelease.45",
-    "Aspire.AppHost.Sdk": "13.2.0"
+    "Purview.DotNetProjectSdk": "1.0.0-prerelease.46"
   },
 	"test": {
 		"runner": "Microsoft.Testing.Platform"
