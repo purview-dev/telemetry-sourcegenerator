@@ -13,7 +13,7 @@ jobs:
     name: Release packages
     uses: purview-dev/build/.github/workflows/purview-release.yml@main
     with:
-      build-version: "0.2.0"
+      build-version: "0.2.1"
       release-mode: NuGet
       release-branch: main
     secrets: inherit

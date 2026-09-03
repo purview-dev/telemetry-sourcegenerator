@@ -5,8 +5,8 @@ solution_file := root_folder + "Telemetry.SourceGenerator.slnx"
 test_solution := solution_file
 build_configuration := "Release"
 
-pipeline_version := "0.2.0"
-pipeline_feed := "https://nuget.pkg.github.com/purview-dev/index.json"
+pipeline_version := "0.2.1"
+pipeline_feed := "https://api.nuget.org/v3/index.json"
 pipeline_tool := ".tools/purview-build/purview-build"
 
 sample_solution_file := "./samples/SampleApp/SampleApp.slnx"

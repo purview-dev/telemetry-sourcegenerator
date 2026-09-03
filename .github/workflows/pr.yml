@@ -13,7 +13,7 @@ jobs:
     name: Build and test
     uses: purview-dev/build/.github/workflows/purview-build.yml@main
     with:
-      build-version: "0.2.0"
+      build-version: "0.2.1"
     secrets: inherit
 
   samples:
