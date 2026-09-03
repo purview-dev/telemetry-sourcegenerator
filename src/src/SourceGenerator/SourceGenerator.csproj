@@ -35,17 +35,13 @@
 		/>
 		<Compile Include="..\Shared\TelemetryAttributeNames.cs" Link="Shared\TelemetryAttributeNames.cs" />
 	</ItemGroup>
-	<!-- Package the build output into the "analyser" slot in the NuGet package -->
+	<!-- Package the build output into the "analyser" slot in the NuGet package.
+	     The generator assembly itself is packed by the SDK (Purview.DotNetProjectSdk)
+	     into analyzers/dotnet/cs; only the refactorings assembly is added here. -->
 	<ItemGroup>
-		<None Include="../../../assets/images/purview-logo.jpg" Pack="true" PackagePath="/Sdk/purview-logo.jpg" />
+		<None Include="../../../assets/images/purview-logo.jpg" Pack="true" PackagePath="/" />
 		<None Include="..\..\..\README.md" Pack="true" PackagePath="/Sdk/" />
 		<None Include="..\..\..\LICENSE.md" Pack="true" PackagePath="/Sdk/" />
-		<None
-			Include="$(OutputPath)\$(AssemblyName).dll"
-			Pack="true"
-			PackagePath="analyzers/dotnet/cs"
-			Visible="false"
-		/>
 		<None
 			Include="..\SourceGenerator.Refactorings\bin\$(Configuration)\netstandard2.0\Purview.Telemetry.SourceGenerator.Refactorings.dll"
 			Pack="true"
