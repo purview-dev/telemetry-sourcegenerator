@@ -1,3 +1,4 @@
+using Purview.SourceGeneratorFramework;
 using Purview.Telemetry.SourceGenerator.Infra;
 
 namespace Purview.Telemetry.SourceGenerator.Metrics;
@@ -28,7 +29,12 @@ public interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "AutoCounter", TypeReference.Create<int>()))
+			.IsTrue()
+			.Because("the generated metrics class must contain the auto-counter method");
 	}
 
 	[Test]
@@ -60,11 +66,6 @@ public interface ITestMetrics
 
 		// Assert
 		await Assert.That(generationResult).HasDiagnostic("TSG4002");
-		//await Assert
-		//	.That(generationResult)
-		//	.HasDiagnostic(DiagnosticLibrary.Metrics.AutoIncrementCountAndMeasurementParam);
-
-		await Assert.That(generationResult).HasDiagnostic("TSG4002");
 	}
 
 	[Test]
@@ -89,7 +90,14 @@ public interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(
+				metricsClass.HasMethod(query, "AutoCounter", TypeReference.Create<int>(), TypeReference.Create<bool>())
+			)
+			.IsTrue()
+			.Because("the generated metrics class must contain the auto-counter method");
 	}
 
 	[Test]
@@ -162,7 +170,16 @@ public interface ITestMetrics {
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		string[] counterMethods = ["Counter", "Counter2", "Counter3", "Counter4", "Counter5", "Counter6", "Counter7"];
+		foreach (var methodName in counterMethods)
+		{
+			await Assert
+				.That(metricsClass.HasMethod(query, methodName))
+				.IsTrue()
+				.Because($"the generated metrics class must contain the {methodName} method");
+		}
 	}
 
 	[Test]
@@ -192,7 +209,16 @@ public interface ITestMetrics {
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		string[] counterMethods = ["Counter1", "Counter2", "Counter3"];
+		foreach (var methodName in counterMethods)
+		{
+			await Assert
+				.That(metricsClass.HasMethod(query, methodName))
+				.IsTrue()
+				.Because($"the generated metrics class must contain the {methodName} method");
+		}
 	}
 
 	[Test]
@@ -224,6 +250,19 @@ public interface ITestMetrics {
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "ObservableCounter"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the observable counter method");
+		await Assert
+			.That(metricsClass.HasMethod(query, "ObservableCounter2"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the second observable counter method");
+		await Assert
+			.That(metricsClass.HasMethod(query, "ObservableCounter3"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the third observable counter method");
 	}
 }

@@ -25,6 +25,9 @@ public sealed record TelemetrySourceGeneratorTestOptions : SourceGeneratorTestOp
 
 		AnalyzerTypes = [typeof(TelemetryDiagnosticAnalyzer)];
 
+		// Undisposed CodeWriter scopes fail tests, so emitters must dispose every scope they open.
+		ValidateCodeWriterScopes = true;
+
 		// Most tests do not want a dependency-injection extension generated.
 		AdditionalSources = ["[assembly: Purview.Telemetry.TelemetryGeneration(GenerateDependencyExtension = false)]"];
 

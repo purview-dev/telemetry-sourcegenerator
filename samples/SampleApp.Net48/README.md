@@ -38,24 +38,21 @@ Meter           : sample-weather-app-net48
 ## How NET48 affects template generation
 
 The source generator injects attribute definition files (e.g. `ErrorAttribute.g.cs`) into the
-consuming project. These files contain `#if` guards so they compile cleanly on **both** modern
-.NET and .NET Framework 4.8:
+consuming project. Because `NET48_OR_GREATER` is automatically defined by the SDK when targeting
+`net48`, the injected member declarations use plain `string` instead of `string?`:
 
 ```csharp
 // In the injected ErrorAttribute.g.cs:
-#if !NET48_OR_GREATER && !PURVIEW_TELEMETRY_NON_NULLABLE
-#nullable enable
-#endif
-
 #if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
-public ErrorAttribute(string messageTemplate = null, string name = null)
+public string MessageTemplate { get; set; }
 #else
-public ErrorAttribute(string? messageTemplate = null, string? name = null)
+public string? MessageTemplate { get; set; }
 #endif
 ```
 
-On net48, `NET48_OR_GREATER` is defined → the non-nullable branch is used, `#nullable enable` is
-omitted, and the file compiles without requiring C# 8 nullable reference type support.
+The attribute files are decorated with `[Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]`, so the
+sample defines `PURVIEW_TELEMETRY_ATTRIBUTES` in `Directory.Build.props` to keep the attribute
+usages visible to the generator's incremental pipeline.
 
 ### Opt-out for any project
 

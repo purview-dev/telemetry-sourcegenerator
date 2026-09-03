@@ -666,11 +666,12 @@ partial class LoggerGenTargetClassEmitter
 			.Write(iteratorVarName)
 			.Write(" == ")
 			.Write(maxCount.ToString(CultureInfo.InvariantCulture))
-			.WriteLine(")")
-			.Write("{");
-
-		using (snippet.OpenBlockScope())
-			snippet.WriteLine("break;");
+			.WriteLine(")");
+		snippet.WriteLine("{");
+		snippet.Indent();
+		snippet.WriteLine("break;");
+		snippet.Unindent();
+		snippet.WriteLine("}");
 
 		snippet.NewLine();
 
@@ -678,7 +679,6 @@ partial class LoggerGenTargetClassEmitter
 
 		snippet.Write(iteratorVarName).WriteLine("++;");
 
-		snippet.Write("}");
 		snippet.Unindent();
 		snippet.Write("}");
 		snippet.Unindent();

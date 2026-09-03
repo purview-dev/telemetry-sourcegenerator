@@ -117,7 +117,7 @@ public interface IWeatherAPIClientTelemetry
     [Error]
     [AutoCounter]
     void FailedToGetForecast(Activity? activity, Exception ex,
-        [ExcludeTargets(Targets.Activities)] int? count);
+        [ExcludeTargets(TargetsEnum.Activities)] int? count);
 
     // SINGLE-TARGET: adds ActivityEvent with HTTP status details
     [Event]
@@ -137,7 +137,7 @@ public interface IWeatherAPIClientTelemetry
     [Event(ActivityStatusCode.Ok)]
     [Debug]
     void ForecastsRecieved(Activity? activity, int forecastCount,
-        [ExpandEnumerable(100), ExcludeTargets(Targets.Activities)] WeatherForecast[] weatherForecasts);
+        [ExpandEnumerable(100), ExcludeTargets(TargetsEnum.Activities)] WeatherForecast[] weatherForecasts);
 }
 ```
 
@@ -188,11 +188,8 @@ SampleApp/
 ### Prerequisites
 
 - [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) or later
-- [.NET Aspire workload](https://learn.microsoft.com/en-us/dotnet/aspire/fundamentals/setup-tooling)
-
-```bash
-dotnet workload install aspire
-```
+- [Aspire CLI](https://learn.microsoft.com/en-us/dotnet/aspire/) — the AppHost SDK (`Aspire.AppHost.Sdk`) and
+  orchestration binaries are resolved from NuGet and the Aspire CLI bundle, so no legacy Aspire workload is required.
 
 ### Running the Application
 

@@ -1,3 +1,4 @@
+using Purview.SourceGeneratorFramework;
 using Purview.Telemetry.SourceGenerator.Infra;
 
 namespace Purview.Telemetry.SourceGenerator;
@@ -268,7 +269,12 @@ public interface IInvalidTelemetry
 		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
 
 		// Assert - this should succeed since void-returning logs are valid non-scoped logs
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("InvalidTelemetryCore", "Testing");
+		await Assert
+			.That(loggerClass.HasMethod(query, "ValidNonScopedLog", TypeReference.Create<string>()))
+			.IsTrue()
+			.Because("the generated logger must contain the valid non-scoped log method");
 	}
 
 	[Test]

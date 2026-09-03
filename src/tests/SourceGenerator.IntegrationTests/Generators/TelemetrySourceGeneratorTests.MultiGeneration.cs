@@ -34,7 +34,15 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("StartActivity"))
+			.IsTrue()
+			.Because("the generated class must contain the activity method");
+		await Assert
+			.That(query.HasMethod("LogOperation"))
+			.IsTrue()
+			.Because("the generated class must contain the log method");
 	}
 
 	[Test]
@@ -63,7 +71,15 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("StartActivity"))
+			.IsTrue()
+			.Because("the generated class must contain the activity method");
+		await Assert
+			.That(query.HasMethod("IncrementCounter"))
+			.IsTrue()
+			.Because("the generated class must contain the counter method");
 	}
 
 	[Test]
@@ -92,7 +108,15 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("LogOperation"))
+			.IsTrue()
+			.Because("the generated class must contain the log method");
+		await Assert
+			.That(query.HasMethod("IncrementCounter"))
+			.IsTrue()
+			.Because("the generated class must contain the counter method");
 	}
 
 	[Test]
@@ -125,7 +149,19 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("StartActivity"))
+			.IsTrue()
+			.Because("the generated class must contain the activity method");
+		await Assert
+			.That(query.HasMethod("LogOperation"))
+			.IsTrue()
+			.Because("the generated class must contain the log method");
+		await Assert
+			.That(query.HasMethod("IncrementCounter"))
+			.IsTrue()
+			.Because("the generated class must contain the counter method");
 	}
 
 	[Test]
@@ -154,7 +190,11 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert - should generate both activity and logging for this method
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("TraceAndLogMethod"))
+			.IsTrue()
+			.Because("the generated class must contain the multi-target method");
 	}
 
 	[Test]
@@ -183,7 +223,11 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert - should generate both activity and counter for this method
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("TraceAndCountMethod"))
+			.IsTrue()
+			.Because("the generated class must contain the multi-target method");
 	}
 
 	[Test]
@@ -212,7 +256,11 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert - should generate both logging and counter for this method
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("LogAndCountMethod"))
+			.IsTrue()
+			.Because("the generated class must contain the multi-target method");
 	}
 
 	[Test]
@@ -243,7 +291,11 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert - should generate activity, logging, and counter for this method
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("FullTelemetryMethod"))
+			.IsTrue()
+			.Because("the generated class must contain the multi-target method");
 	}
 
 	[Test]
@@ -336,7 +388,39 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("StartActivity"))
+			.IsTrue()
+			.Because("the generated class must contain the activity method");
+		await Assert
+			.That(query.HasMethod("RecordEvent"))
+			.IsTrue()
+			.Because("the generated class must contain the event method");
+		await Assert
+			.That(query.HasMethod("TraceMessage"))
+			.IsTrue()
+			.Because("the generated class must contain the trace log method");
+		await Assert
+			.That(query.HasMethod("DebugMessage"))
+			.IsTrue()
+			.Because("the generated class must contain the debug log method");
+		await Assert
+			.That(query.HasMethod("InfoMessage"))
+			.IsTrue()
+			.Because("the generated class must contain the info log method");
+		await Assert
+			.That(query.HasMethod("WarnMessage"))
+			.IsTrue()
+			.Because("the generated class must contain the warning log method");
+		await Assert
+			.That(query.HasMethod("ErrorMessage"))
+			.IsTrue()
+			.Because("the generated class must contain the error log method");
+		await Assert
+			.That(query.HasMethod("CriticalMessage"))
+			.IsTrue()
+			.Because("the generated class must contain the critical log method");
 	}
 
 	[Test]
@@ -385,7 +469,39 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("StartActivity"))
+			.IsTrue()
+			.Because("the generated class must contain the activity method");
+		await Assert
+			.That(query.HasMethod("IncrementCounter"))
+			.IsTrue()
+			.Because("the generated class must contain the counter method");
+		await Assert
+			.That(query.HasMethod("AutoIncrement"))
+			.IsTrue()
+			.Because("the generated class must contain the auto-counter method");
+		await Assert
+			.That(query.HasMethod("UpdateUpDownCounter"))
+			.IsTrue()
+			.Because("the generated class must contain the up-down counter method");
+		await Assert
+			.That(query.HasMethod("RecordHistogram"))
+			.IsTrue()
+			.Because("the generated class must contain the histogram method");
+		await Assert
+			.That(query.HasMethod("GetObservableCounter"))
+			.IsTrue()
+			.Because("the generated class must contain the observable counter method");
+		await Assert
+			.That(query.HasMethod("GetObservableGauge"))
+			.IsTrue()
+			.Because("the generated class must contain the observable gauge method");
+		await Assert
+			.That(query.HasMethod("GetObservableUpDownCounter"))
+			.IsTrue()
+			.Because("the generated class must contain the observable up-down counter method");
 	}
 
 	[Test]
@@ -425,7 +541,27 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("LogOperation"))
+			.IsTrue()
+			.Because("the generated class must contain the log method");
+		await Assert
+			.That(query.HasMethod("IncrementOperationCounter"))
+			.IsTrue()
+			.Because("the generated class must contain the counter method");
+		await Assert
+			.That(query.HasMethod("RecordOperationDuration"))
+			.IsTrue()
+			.Because("the generated class must contain the histogram method");
+		await Assert
+			.That(query.HasMethod("InfoLog"))
+			.IsTrue()
+			.Because("the generated class must contain the info log method");
+		await Assert
+			.That(query.HasMethod("UpdateActiveConnections"))
+			.IsTrue()
+			.Because("the generated class must contain the up-down counter method");
 	}
 
 	[Test]
@@ -473,7 +609,23 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("ProcessRequest"))
+			.IsTrue()
+			.Because("the generated class must contain the activity method");
+		await Assert
+			.That(query.HasMethod("LogProcessing"))
+			.IsTrue()
+			.Because("the generated class must contain the log method");
+		await Assert
+			.That(query.HasMethod("IncrementRequestCount"))
+			.IsTrue()
+			.Because("the generated class must contain the auto-counter method");
+		await Assert
+			.That(query.HasMethod("RecordRequestDuration"))
+			.IsTrue()
+			.Because("the generated class must contain the histogram method");
 	}
 
 	[Test]
@@ -510,7 +662,23 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("StartOperation"))
+			.IsTrue()
+			.Because("the generated class must contain the activity method");
+		await Assert
+			.That(query.HasMethod("SetContext"))
+			.IsTrue()
+			.Because("the generated class must contain the context method");
+		await Assert
+			.That(query.HasMethod("RecordEvent"))
+			.IsTrue()
+			.Because("the generated class must contain the event method");
+		await Assert
+			.That(query.HasMethod("CountOperation"))
+			.IsTrue()
+			.Because("the generated class must contain the counter method");
 	}
 
 	[Test]
@@ -550,7 +718,19 @@ partial class MultiTelemetryCore
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("StartActivity"))
+			.IsTrue()
+			.Because("the generated class must contain the activity method");
+		await Assert
+			.That(query.HasMethod("LogOperation"))
+			.IsTrue()
+			.Because("the generated class must contain the log method");
+		await Assert
+			.That(query.HasMethod("ExcludedMethod"))
+			.IsFalse()
+			.Because("the excluded method must not be generated in the telemetry implementation");
 	}
 
 	[Test]
@@ -621,7 +801,19 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("StartActivity"))
+			.IsTrue()
+			.Because("the generated class must contain the activity method");
+		await Assert
+			.That(query.HasMethod("LogOperation"))
+			.IsTrue()
+			.Because("the generated class must contain the log method");
+		await Assert
+			.That(query.HasMethod("IncrementCounter"))
+			.IsTrue()
+			.Because("the generated class must contain the counter method");
 	}
 
 	[Test]
@@ -690,7 +882,15 @@ public interface IMultiTelemetry
 		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("LogOperation"))
+			.IsTrue()
+			.Because("the generated class must contain the log method");
+		await Assert
+			.That(query.HasMethod("InfoMessage"))
+			.IsTrue()
+			.Because("the generated class must contain the info log method");
 	}
 
 	[Test]

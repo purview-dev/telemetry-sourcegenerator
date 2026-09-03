@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -34,7 +34,7 @@ public static class WebApplicationExtensions
 			if (!openApiSection.Exists())
 				return;
 
-			app.MapOpenApi();
+			app.MapOpenApi("v1");
 
 			if (app.Environment.IsDevelopment())
 			{

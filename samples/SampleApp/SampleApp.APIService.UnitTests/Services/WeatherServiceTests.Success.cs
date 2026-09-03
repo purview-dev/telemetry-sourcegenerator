@@ -1,4 +1,4 @@
-﻿namespace SampleApp.APIService.Services;
+namespace SampleApp.APIService.Services;
 
 partial class WeatherServiceTests
 {
@@ -19,6 +19,6 @@ partial class WeatherServiceTests
 		await service.GetWeatherForecastsAsync(requestCount, cancellationToken);
 
 		// Assert
-		telemetry.Received(1).GettingWeatherForecast(Arg.Any<string>(), Arg.Is(requestCount));
+		telemetry.GettingWeatherForecast(Any<string>(), Is(requestCount)).WasCalled(Times.Once);
 	}
 }

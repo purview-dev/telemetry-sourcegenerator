@@ -1,13 +1,10 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 namespace SampleApp.Net48.ConsoleApp.Services
 {
 	sealed class WeatherService : IWeatherService
 	{
-		static readonly Random _rng = new Random();
+		static readonly Random _rng = new();
 
 		static readonly string[] Summaries =
 		[
@@ -37,7 +34,7 @@ namespace SampleApp.Net48.ConsoleApp.Services
 			const int minRequestCount = 5;
 			const int maxRequestCount = 20;
 
-			if (requestCount < minRequestCount || requestCount > maxRequestCount)
+			if (requestCount is < minRequestCount or > maxRequestCount)
 			{
 				// MULTI-TARGET: This single call logs error + increments counter
 				_telemetry.RequestedCountIsOutOfRange(requestCount);

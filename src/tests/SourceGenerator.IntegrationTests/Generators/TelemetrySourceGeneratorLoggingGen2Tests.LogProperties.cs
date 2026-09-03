@@ -1,3 +1,4 @@
+using Purview.SourceGeneratorFramework;
 using Purview.Telemetry.SourceGenerator.Infra;
 
 namespace Purview.Telemetry.SourceGenerator.Logging;
@@ -34,7 +35,22 @@ public class WeatherForecast
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"LogWeather",
+					new TypeReference(new TypeIdentity("WeatherForecast", "Testing"))
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the log method with the class-typed parameter");
+		await Assert
+			.That(generationResult.GetSource("TestLoggerCore.Logging.g.cs"))
+			.ContainsGeneratedCode("TemperatureC")
+			.Because("the object's individual properties must be expanded into the log state");
 	}
 
 	[Test]
@@ -71,7 +87,7 @@ public class WeatherForecast
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, expectsDiagnostics: true, cancellationToken: cancellationToken);
+		await Assert.That(generationResult).HasDiagnostic("TSG2006");
 	}
 
 	[Test]
@@ -99,7 +115,18 @@ public interface ITestLogger
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(query, "Log", TypeReference.Create<string>(), TypeReference.Create<Exception>())
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the log method with the exception parameter");
+		await Assert
+			.That(generationResult.GetSource("TestLoggerCore.Logging.g.cs"))
+			.ContainsGeneratedCode("Exception = {ex}")
+			.Because("the message template must reference the passed-in exception");
 	}
 
 	[Test]
@@ -132,7 +159,22 @@ public class WeatherForecast
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"LogWeatherWithOmit",
+					new TypeReference(new TypeIdentity("WeatherForecast", "Testing"))
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the log method with the class-typed parameter");
+		await Assert
+			.That(generationResult.GetSource("TestLoggerCore.Logging.g.cs"))
+			.ContainsGeneratedCode("TemperatureC")
+			.Because("the object's individual properties must be expanded into the log state");
 	}
 
 	[Test]
@@ -165,7 +207,22 @@ public class WeatherForecast
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"LogWeather",
+					new TypeReference(new TypeIdentity("WeatherForecast", "Testing"))
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the log method with the class-typed parameter");
+		await Assert
+			.That(generationResult.GetSource("TestLoggerCore.Logging.g.cs"))
+			.ContainsGeneratedCode("TemperatureC")
+			.Because("the object's individual properties must be expanded into the log state");
 	}
 
 	[Test]
@@ -198,7 +255,22 @@ public class WeatherForecast
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"LogWeather",
+					new TypeReference(new TypeIdentity("WeatherForecast", "Testing"))
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the log method with the class-typed parameter");
+		await Assert
+			.That(generationResult.GetSource("TestLoggerCore.Logging.g.cs"))
+			.ContainsGeneratedCode("TemperatureC")
+			.Because("the object's individual properties must be expanded into the log state");
 	}
 
 	[Test]
@@ -234,6 +306,25 @@ public class WeatherForecast
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"LogWeather",
+					new TypeReference(new TypeIdentity("WeatherForecast", "Testing"))
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the log method with the class-typed parameter");
+		await Assert
+			.That(generationResult.GetSource("TestLoggerCore.Logging.g.cs"))
+			.ContainsGeneratedCode("TemperatureC")
+			.Because("the object's individual properties must be expanded into the log state");
+		await Assert
+			.That(generationResult.GetSource("TestLoggerCore.Logging.g.cs"))
+			.DoesNotContain("IgnoreMe")
+			.Because("the ignored property must be excluded from the expanded log properties");
 	}
 }

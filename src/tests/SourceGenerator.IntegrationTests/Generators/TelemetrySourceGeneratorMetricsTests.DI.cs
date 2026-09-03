@@ -1,4 +1,5 @@
-using Purview.Telemetry.SourceGenerator.Infra;
+using Microsoft.Extensions.DependencyInjection;
+using Purview.SourceGeneratorFramework;
 
 namespace Purview.Telemetry.SourceGenerator.Metrics;
 
@@ -31,7 +32,25 @@ public interface ITestMetrics {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(
+				metricsClass.HasMethod(
+					query,
+					"Counter",
+					TypeReference.Create<int>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated metrics class must contain the counter method");
+		var diClass = query.GetClass("TestMetricsCoreDIExtension", "Microsoft.Extensions.DependencyInjection");
+		await Assert
+			.That(diClass.HasMethod(query, "AddTestMetrics", TypeReference.Create<IServiceCollection>()))
+			.IsTrue()
+			.Because("the DI extension must register the metrics via AddTestMetrics");
 	}
 
 	[Test]
@@ -60,7 +79,25 @@ public interface ITestMetrics {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(
+				metricsClass.HasMethod(
+					query,
+					"Counter",
+					TypeReference.Create<int>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated metrics class must contain the counter method");
+		var diClass = query.GetClass("TestMetricsCoreDIExtension", "Microsoft.Extensions.DependencyInjection");
+		await Assert
+			.That(diClass.HasMethod(query, "AddTestMetrics", TypeReference.Create<IServiceCollection>()))
+			.IsTrue()
+			.Because("the DI extension must be generated when the interface opts in");
 	}
 
 	[Test]
@@ -93,7 +130,25 @@ public interface ITestMetrics {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(
+				metricsClass.HasMethod(
+					query,
+					"Counter",
+					TypeReference.Create<int>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated metrics class must contain the counter method");
+		var diClass = query.GetClass("TestMetricsCoreDIExtension", "Microsoft.Extensions.DependencyInjection");
+		await Assert
+			.That(diClass.HasMethod(query, "AddTestMetrics", TypeReference.Create<IServiceCollection>()))
+			.IsTrue()
+			.Because("the DI extension must be generated when the interface overrides the disabled assembly default");
 	}
 
 	[Test]
@@ -126,6 +181,23 @@ public interface ITestMetrics {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(
+				metricsClass.HasMethod(
+					query,
+					"Counter",
+					TypeReference.Create<int>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated metrics class must contain the counter method");
+		await Assert
+			.That(query.HasClass("TestMetricsCoreDIExtension", "Microsoft.Extensions.DependencyInjection"))
+			.IsFalse()
+			.Because("the DI extension must not be generated when the interface opts out");
 	}
 }

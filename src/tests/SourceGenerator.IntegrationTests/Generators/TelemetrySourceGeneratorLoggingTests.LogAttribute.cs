@@ -1,4 +1,4 @@
-using Purview.Telemetry.SourceGenerator.Infra;
+using Purview.SourceGeneratorFramework;
 
 namespace Purview.Telemetry.SourceGenerator.Logging;
 
@@ -29,7 +29,24 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"Log",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the log method");
+		await Assert
+			.That(generationResult.GetSource("TestLoggerCore.Logging.g.cs"))
+			.ContainsGeneratedCode(logTargetName)
+			.Because("the generated log entry must carry the configured name");
 	}
 
 	[Test]
@@ -64,7 +81,24 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"Log",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the log method");
+		await Assert
+			.That(generationResult.GetSource("TestLoggerCore.Logging.g.cs"))
+			.ContainsGeneratedCode(logTargetName)
+			.Because("the generated log entry must carry the configured name");
 	}
 
 	public static IEnumerable<(string, string)> GetPrefixAndEntryNames()

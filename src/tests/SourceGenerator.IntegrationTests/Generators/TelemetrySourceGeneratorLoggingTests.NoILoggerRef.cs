@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using Purview.SourceGeneratorFramework;
 using Purview.Telemetry.SourceGenerator.Infra;
 
 namespace Purview.Telemetry.SourceGenerator.Logging;
@@ -30,7 +32,22 @@ public interface ITestActivities {
 		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		await Assert.That(generationResult).HasNoDiagnostics();
+
+		var query = generationResult.Generated();
+		var implClass = query.GetClass("TestActivitiesCore", "Testing");
+		await Assert
+			.That(
+				implClass.HasMethod(
+					query,
+					"Activity",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated implementation must contain the activity method");
 	}
 
 	[Test]
@@ -63,11 +80,6 @@ public interface ITestActivities {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: false,
-			whenValidatingDiagnosticsIgnoreNonErrors: true,
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasNoErrorDiagnostics();
 	}
 }

@@ -1,5 +1,3 @@
-using Purview.Telemetry.SourceGenerator.Infra;
-
 namespace Purview.Telemetry.SourceGenerator.Metrics;
 
 partial class TelemetrySourceGeneratorMetricsTests
@@ -45,6 +43,24 @@ public interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		string[] autoCounters =
+		[
+			"NoTagList0",
+			"NoTagList1",
+			"NoTagList2",
+			"NoTagList3",
+			"HasTagList4",
+			"HasTagList5",
+			"HasTagList10",
+		];
+		foreach (var methodName in autoCounters)
+		{
+			await Assert
+				.That(metricsClass.HasMethod(query, methodName))
+				.IsTrue()
+				.Because($"the generated metrics class must contain the {methodName} method");
+		}
 	}
 }

@@ -954,6 +954,8 @@ static class GeneratedTypesEmitter
 			AttributeTargets.Assembly,
 			body =>
 			{
+				WriteEmptyConstructor(body, type);
+
 				body.WriteConstructor(
 					new ConstructorDeclarationOptions(type.Name, TypeDeclarationAccessibility.Public)
 					{

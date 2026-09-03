@@ -1,4 +1,4 @@
-using Purview.Telemetry.SourceGenerator.Infra;
+using Purview.SourceGeneratorFramework;
 
 namespace Purview.Telemetry.SourceGenerator.Metrics;
 
@@ -28,6 +28,31 @@ public interface ITestMetrics {
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(
+				metricsClass.HasMethod(
+					query,
+					"Histogram",
+					TypeReference.Create<int>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated metrics class must contain the histogram method");
+		await Assert
+			.That(
+				metricsClass.HasMethod(
+					query,
+					"Histogram1",
+					TypeReference.Create<int>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated metrics class must contain the second histogram method");
 	}
 }

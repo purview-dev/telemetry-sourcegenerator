@@ -1,26 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<OutputType>Exe</OutputType>
-		<NoWarn>$(NoWarn);CA1707;</NoWarn>
-		<NoWarn>$(NoWarn);IDE0039;</NoWarn>
-		<TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
-		<UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-		<EnableMicrosoftTestingPlatform>true</EnableMicrosoftTestingPlatform>
-		<CollectCoverage>true</CollectCoverage>
-		<Exclude>[NSubstitute*]*,[TUnit.*]*,[Microsoft.Testing.*]*,[Microsoft.NET.Test*]</Exclude>
-		<RootNamespace>SampleApp</RootNamespace>
-	</PropertyGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\SampleApp.APIService\SampleApp.APIService.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-		<Using Include="NSubstitute" />
-		<PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="2.1.0" />
-		<PackageReference Include="NSubstitute" Version="5.3.0" />
-		<PackageReference Include="NSubstitute.Analyzers.CSharp" Version="1.0.17">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="TUnit" Version="1.21.24" />
 	</ItemGroup>
 </Project>

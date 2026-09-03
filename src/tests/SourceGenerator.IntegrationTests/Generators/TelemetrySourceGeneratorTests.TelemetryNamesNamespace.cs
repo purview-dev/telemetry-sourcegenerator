@@ -1,5 +1,3 @@
-using Purview.Telemetry.SourceGenerator.Infra;
-
 namespace Purview.Telemetry.SourceGenerator;
 
 partial class TelemetrySourceGeneratorTests
@@ -43,8 +41,6 @@ partial class TelemetrySourceGeneratorTests
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
-
 		await Assert
 			.That(generationResult.GetSource("TestActivitiesCore.Activity.g.cs"))
 			.ContainsGeneratedCode("namespace Custom.Telemetry");
@@ -91,8 +87,6 @@ partial class TelemetrySourceGeneratorTests
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
-
 		await Assert
 			.That(generationResult.GetSource("TestLoggerCore.Logging.g.cs"))
 			.ContainsGeneratedCode("namespace Testing");

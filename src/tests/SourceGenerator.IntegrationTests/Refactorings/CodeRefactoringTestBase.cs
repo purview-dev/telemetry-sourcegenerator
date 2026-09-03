@@ -9,6 +9,15 @@ namespace Purview.Telemetry.SourceGenerator.Refactorings;
 /// Base class for testing <see cref="CodeRefactoringProvider"/> implementations.
 /// The source code should include a <c>$$</c> marker to indicate the cursor position.
 /// </summary>
+/// <remarks>
+/// This deliberately does not use the framework's <c>TUnitRefactoringTestBase</c>/<c>RefactorAsync</c>:
+/// every refactoring provider here registers a top-level <em>group</em> action (nested
+/// Class/Document/Project/Solution scopes) and several tests assert that no action is offered.
+/// <c>RefactoringTestRunner</c> selects only from the flat <c>CodeActions</c> list (by
+/// <c>CodeActionIndex</c>/<c>EquivalenceKey</c>) and throws when no action resolves, so it cannot
+/// apply a nested action or represent an empty action set. See the framework's
+/// <c>RefactoringTestRunner.RunAsync</c> for the selection logic.
+/// </remarks>
 public abstract class CodeRefactoringTestBase
 {
 	protected static async Task<string?> ApplyRefactoringAsync(

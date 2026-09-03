@@ -40,32 +40,4 @@ static class TestHelpers
 
 		return result;
 	}
-
-	public static async Task VerifyAsync(
-		DriverRunResult result,
-		bool expectsDiagnostics = false,
-		bool whenValidatingDiagnosticsIgnoreNonErrors = false,
-		CancellationToken cancellationToken = default
-	)
-	{
-		cancellationToken.ThrowIfCancellationRequested();
-
-		var diag = result.DriverResult.Diagnostics.AddRange(result.AnalyzerResult?.Diagnostics ?? []).ToArray();
-		if (whenValidatingDiagnosticsIgnoreNonErrors)
-			diag = [.. diag.Where(m => m.Severity == DiagnosticSeverity.Error)];
-
-		if (expectsDiagnostics)
-		{
-			await Assert.That(diag).IsNotEmpty();
-		}
-		else
-		{
-			await Assert
-				.That(diag)
-				.IsEmpty()
-				.Because(
-					$"Expected no diagnostics, but found: [{string.Join(", ", diag.Select(d => d.Id).Distinct())}]"
-				);
-		}
-	}
 }

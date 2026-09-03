@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using Purview.SourceGeneratorFramework;
 using Purview.Telemetry.SourceGenerator.Infra;
 
 namespace Purview.Telemetry.SourceGenerator.Activities;
@@ -28,7 +30,43 @@ public interface ITestActivities {
 		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var implClass = query.GetClass("TestActivitiesCore", "Testing");
+		await Assert
+			.That(
+				implClass.HasMethod(
+					query,
+					"Activity",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated implementation must contain the activity method with its parameter signature");
+		await Assert
+			.That(
+				implClass.HasMethodReturnType(
+					query,
+					"Activity",
+					TypeReference.Create<Activity>().Nullable(GenerationSettings.Create<TelemetrySourceGenerator>())
+				)
+			)
+			.IsTrue()
+			.Because("the activity method must return a nullable Activity");
+		await Assert
+			.That(
+				implClass.HasMethod(
+					query,
+					"Event",
+					TypeReference.Create<Activity>(),
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated implementation must contain the event method with its parameter signature");
 	}
 
 	[Test]
@@ -87,7 +125,33 @@ public interface ITestActivities
 		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var implClass = query.GetClass("TestActivitiesCore", "Testing");
+		await Assert
+			.That(
+				implClass.HasMethod(
+					query,
+					"Activity",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated implementation must contain the activity method");
+		await Assert
+			.That(
+				implClass.HasMethod(
+					query,
+					"Event",
+					TypeReference.Create<Activity>(),
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated implementation must contain the event method");
 	}
 
 	[Test]
@@ -216,7 +280,32 @@ public interface ITestActivities {
 		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var implClass = query.GetClass("TestActivitiesCore", "Testing");
+		await Assert
+			.That(
+				implClass.HasMethod(
+					query,
+					"Activity",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>().Nullable(GenerationSettings.Create<TelemetrySourceGenerator>()),
+					TypeReference.Create<bool>().Nullable(GenerationSettings.Create<TelemetrySourceGenerator>())
+				)
+			)
+			.IsTrue()
+			.Because("the generated implementation must contain the activity method with nullable parameters");
+		await Assert
+			.That(
+				implClass.HasMethod(
+					query,
+					"ActivityWithNullableParams",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>().Nullable(GenerationSettings.Create<TelemetrySourceGenerator>()),
+					TypeReference.Create<bool>().Nullable(GenerationSettings.Create<TelemetrySourceGenerator>())
+				)
+			)
+			.IsTrue()
+			.Because("the generated implementation must contain the nullable-parameter activity method");
 	}
 
 	[Test]

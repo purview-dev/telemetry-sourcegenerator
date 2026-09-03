@@ -1,5 +1,3 @@
-using Purview.Telemetry.SourceGenerator.Infra;
-
 namespace Purview.Telemetry.SourceGenerator.Metrics;
 
 partial class TelemetrySourceGeneratorMetricsTests
@@ -32,7 +30,20 @@ public interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "Counter"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the observable counter method");
+		await Assert
+			.That(metricsClass.HasMethod(query, "Gauge"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the observable gauge method");
+		await Assert
+			.That(metricsClass.HasMethod(query, "UpDown"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the observable up-down counter method");
 	}
 
 	[Test]
@@ -64,6 +75,19 @@ public interface ITestMetrics {
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "Counter"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the observable counter method");
+		await Assert
+			.That(metricsClass.HasMethod(query, "Gauge"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the observable gauge method");
+		await Assert
+			.That(metricsClass.HasMethod(query, "UpDown"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the observable up-down counter method");
 	}
 }

@@ -28,7 +28,12 @@ public interface ITestLogger
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(loggerClass.HasMethod(query, "Log"))
+			.IsTrue()
+			.Because("the generated logger must contain the log method with the expandable parameter");
 	}
 
 	[Test]

@@ -1,4 +1,4 @@
-using Purview.Telemetry.SourceGenerator.Infra;
+using Purview.SourceGeneratorFramework;
 
 namespace Purview.Telemetry.SourceGenerator.Metrics;
 
@@ -28,7 +28,32 @@ public interface ITestMetrics {
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(
+				metricsClass.HasMethod(
+					query,
+					"UpDown",
+					TypeReference.Create<int>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated metrics class must contain the up-down counter method");
+		await Assert
+			.That(
+				metricsClass.HasMethod(
+					query,
+					"UpDown2",
+					TypeReference.Create<int>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated metrics class must contain the second up-down counter method");
 	}
 
 	[Test]
@@ -60,6 +85,19 @@ public interface ITestMetrics {
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "ObservableUpDown"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the observable up-down counter method");
+		await Assert
+			.That(metricsClass.HasMethod(query, "ObservableUpDown2"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the second observable up-down counter method");
+		await Assert
+			.That(metricsClass.HasMethod(query, "ObservableUpDown3"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the third observable up-down counter method");
 	}
 }

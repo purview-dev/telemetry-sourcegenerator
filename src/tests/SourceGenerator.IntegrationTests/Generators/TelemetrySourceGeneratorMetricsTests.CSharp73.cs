@@ -1,4 +1,4 @@
-using Purview.Telemetry.SourceGenerator.Infra;
+using Purview.SourceGeneratorFramework;
 
 namespace Purview.Telemetry.SourceGenerator.Metrics;
 
@@ -41,6 +41,32 @@ public interface ITestMetrics {
 		var generationResult = await GenerateAsync(basicMetrics, cancellationToken: cancellationToken);
 
 		// Assert: GenerateAsync's EnsureValid (default) verifies generated code compiles under C# 7.3.
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "AutoCounter", TypeReference.Create<string>()))
+			.IsTrue()
+			.Because("the generated metrics class must contain the auto-counter method");
+		await Assert
+			.That(metricsClass.HasMethod(query, "Counter", TypeReference.Create<int>(), TypeReference.Create<string>()))
+			.IsTrue()
+			.Because("the generated metrics class must contain the counter method");
+		await Assert
+			.That(
+				metricsClass.HasMethod(query, "Histogram", TypeReference.Create<int>(), TypeReference.Create<string>())
+			)
+			.IsTrue()
+			.Because("the generated metrics class must contain the histogram method");
+		await Assert
+			.That(
+				metricsClass.HasMethod(
+					query,
+					"UpDownCounter",
+					TypeReference.Create<int>(),
+					TypeReference.Create<string>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated metrics class must contain the up-down counter method");
 	}
 }

@@ -11,7 +11,7 @@
 		<RoslynVersion>4.14.0</RoslynVersion>
 		<TUnitVersion>1.65.51</TUnitVersion>
 		<PurviewSGFVersion>1.0.0-prerelease.28</PurviewSGFVersion>
-		<ModularPipelinesVersion>[3.2.8,)</ModularPipelinesVersion>
+		<ModularPipelinesVersion>3.2.8</ModularPipelinesVersion>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageVersion Include="ModularPipelines" Version="$(ModularPipelinesVersion)" />
@@ -28,13 +28,33 @@
 		<PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
 		<PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)" />
 		<PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" />
-		<PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.10" />
-		<PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.10" />
-		<PackageVersion Include="Microsoft.Extensions.Telemetry.Abstractions" Version="10.8.0" />
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />
+		<PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.11" />
+		<PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.11" />
+		<PackageVersion Include="Microsoft.Extensions.Telemetry.Abstractions" Version="10.9.0" />
+		<PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="10.0.11" />
 	</ItemGroup>
 	<ItemGroup Label="Testing">
 		<PackageVersion Include="TUnit" Version="$(TUnitVersion)" />
 		<PackageVersion Include="TUnit.Mocks" Version="$(TUnitVersion)" />
 		<PackageVersion Include="Bogus" Version="35.6.5" />
+	</ItemGroup>
+	<ItemGroup Label="Samples">
+		<PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.11" />
+		<PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.9.0" />
+		<PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.9.0" />
+		<PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.18.0" />
+		<PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.18.0" />
+		<PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.18.0" />
+		<PackageVersion Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.11.0-beta.2" />
+		<PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.18.0" />
+		<PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="1.11.0-beta.2" />
+		<PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.18.0" />
+		<PackageVersion Include="Scalar.AspNetCore" Version="2.17.2" />
+		<PackageVersion Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.2.1" />
+		<PackageVersion Include="ErrorOr" Version="2.1.1" />
+		<!-- The Aspire AppHost SDK pulls MessagePack 2.5.192 transitively, which has known
+		     advisories; pin the patched 2.5.302 so isolated AppHost builds stay clean. -->
+		<PackageVersion Include="MessagePack" Version="2.5.302" />
 	</ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Security.Cryptography;
 
 namespace SampleApp.APIService.Services;
@@ -33,7 +33,7 @@ sealed class WeatherService(IWeatherServiceTelemetry telemetry, Func<int>? rng =
 		const int minRequestCount = 5;
 		const int maxRequestCount = 20;
 
-		if (requestCount < minRequestCount || requestCount > maxRequestCount)
+		if (requestCount is < minRequestCount or > maxRequestCount)
 		{
 			telemetry.RequestedCountIsOutOfRange(requestCount);
 

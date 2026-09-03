@@ -65,6 +65,7 @@ static class WeatherAPI
 		if (results.IsError)
 			return TypedResults.Problem(results.FirstError.ToProblemDetails());
 
+		// If the results are empty, return NoContent; otherwise, return Ok with the results.
 		return results.Value?.Any() == true ? TypedResults.Ok(results.Value.ToArray()) : TypedResults.NoContent();
 	}
 }

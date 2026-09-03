@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Purview.Telemetry;
 
 namespace SampleApp.APIService.Services;
@@ -27,7 +27,7 @@ public interface IWeatherServiceTelemetry
 
 	// --> SINGLE-TARGET: Event (Error)
 	[Event(ActivityStatusCode.Error)]
-	void FailedToRetrieveForecast(Activity? activity, Exception ex);
+	void FailedToRetrieveForecast(Activity? activity, Exception exception);
 
 	// --> SINGLE-TARGET: Event (Ok)
 	[Event(ActivityStatusCode.Ok)]

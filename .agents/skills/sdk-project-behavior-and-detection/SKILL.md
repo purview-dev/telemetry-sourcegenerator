@@ -145,6 +145,13 @@ This is why consistent naming and placement matter so much in repos that use the
 - Packs the repository-root `README.md` (registered via `PackageReadmeFile`) when the file exists and `PackageReadmeFile` is unset; skips when a README is already being packed
 - Non-packable projects (including web apps) default `WarnOnPackingNonPackableProject=false` so solution-wide pack operations skip them silently
 
+### For Roslyn component (analyzer/source-generator) projects
+
+- Defaults a single `netstandard2.0` target, `LangVersion=latest`, `Nullable=enable`, `TreatWarningsAsErrors=true`, extended analyzer rules, disabled SourceLink, and excluded normal build output (`IncludeBuildOutput=false`)
+- Defaults `IncludeSymbols=false` — no `.symbols.nupkg` or `.snupkg` is produced by default; the analyzer PDB ships inside the main `.nupkg` under `analyzers/dotnet/cs/` beside the analyzer assembly
+- Packable Roslyn components automatically pack the built analyzer assembly (and PDB) into `analyzers/dotnet/cs/`; `SymbolPackageFormat` defaults to the modern `snupkg` if symbols are explicitly opted into
+- `Microsoft.CodeAnalysis.*` and `Microsoft.CodeAnalysis.Analyzers` references are defaulted to `PrivateAssets=all` (development-only dependencies) so they never leak into the packed nuspec
+
 ### For test and shared-testing projects
 
 - Applies test-friendly `NoWarn` defaults
