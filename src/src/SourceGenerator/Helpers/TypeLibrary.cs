@@ -9,48 +9,47 @@ namespace Purview.Telemetry.SourceGenerator.Helpers;
 /// </summary>
 static class TypeLibrary
 {
+	public const string PurviewTelemetryNamespace = "Purview.Telemetry";
+
 	public static class System
 	{
-		public static readonly TypeIdentity Void = new("void", null);
-		public static readonly TypeIdentity String = PurviewTypeLibrary.System.String;
-		public static readonly TypeIdentity Object = PurviewTypeLibrary.System.Object;
-		public static readonly TypeIdentity Boolean = PurviewTypeLibrary.System.Boolean;
-		public static readonly TypeIdentity Int32 = PurviewTypeLibrary.System.Int32;
-		public static readonly TypeIdentity Int64 = PurviewTypeLibrary.System.Int64;
 		public static readonly TypeIdentity Exception = TypeIdentity.Create<Exception>();
 		public static readonly TypeIdentity IDisposable = TypeIdentity.Create<IDisposable>();
 		public static readonly TypeIdentity DateTimeOffset = TypeIdentity.Create<DateTimeOffset>();
-		public static readonly TypeIdentity Func = new(nameof(Func), "System");
-		public static readonly TypeIdentity Action = new(nameof(Action), "System");
 		public static readonly TypeIdentity IEnumerable = TypeIdentity.Create<global::System.Collections.IEnumerable>();
 		public static readonly TypeIdentity GenericIEnumerable = new(typeof(IEnumerable<>));
 		public static readonly TypeIdentity List = new(typeof(List<>));
 		public static readonly TypeIdentity Dictionary = new(typeof(Dictionary<,>));
 		public static readonly TypeIdentity ConcurrentDictionary = new(typeof(ConcurrentDictionary<,>));
-		public static readonly TypeIdentity TagList = new("TagList", "System.Diagnostics");
+		public static readonly TypeIdentity TagList = new(nameof(TagList), "System.Diagnostics");
 	}
 
 	public static class Activities
 	{
 		public static class SystemDiagnostics
 		{
-			public static readonly TypeIdentity Activity = new("Activity", "System.Diagnostics");
-			public static readonly TypeIdentity ActivitySource = new("ActivitySource", "System.Diagnostics");
-			public static readonly TypeIdentity ActivityEvent = new("ActivityEvent", "System.Diagnostics");
-			public static readonly TypeIdentity ActivityContext = new("ActivityContext", "System.Diagnostics");
-			public static readonly TypeIdentity ActivityKind = new("ActivityKind", "System.Diagnostics");
-			public static readonly TypeIdentity ActivityStatusCode = new("ActivityStatusCode", "System.Diagnostics");
-			public static readonly TypeIdentity ActivityTagsCollection = new(
-				"ActivityTagsCollection",
-				"System.Diagnostics"
+			public const string DiagnosticsNamespace = "System.Diagnostics";
+
+			public static readonly TypeIdentity Activity = new(nameof(Activity), DiagnosticsNamespace);
+			public static readonly TypeIdentity ActivitySource = new(nameof(ActivitySource), DiagnosticsNamespace);
+			public static readonly TypeIdentity ActivityEvent = new(nameof(ActivityEvent), DiagnosticsNamespace);
+			public static readonly TypeIdentity ActivityContext = new(nameof(ActivityContext), DiagnosticsNamespace);
+			public static readonly TypeIdentity ActivityKind = new(nameof(ActivityKind), DiagnosticsNamespace);
+			public static readonly TypeIdentity ActivityStatusCode = new(
+				nameof(ActivityStatusCode),
+				DiagnosticsNamespace
 			);
-			public static readonly TypeIdentity ActivityLink = new("ActivityLink", "System.Diagnostics");
+			public static readonly TypeIdentity ActivityTagsCollection = new(
+				nameof(ActivityTagsCollection),
+				DiagnosticsNamespace
+			);
+			public static readonly TypeIdentity ActivityLink = new(nameof(ActivityLink), DiagnosticsNamespace);
 
 			public static readonly TypeReference ActivityTagIEnumerable = System.GenericIEnumerable.MakeGeneric(
 				new TypeReference(
 					new TypeIdentity("KeyValuePair", "System.Collections.Generic").MakeGeneric(
-						System.String.AsTypeReference(),
-						System.Object.AsTypeReference().Nullable()
+						PurviewTypeLibrary.System.String.AsTypeReference(),
+						PurviewTypeLibrary.System.Object.AsTypeReference()
 					)
 				)
 			);
@@ -63,119 +62,208 @@ static class TypeLibrary
 		}
 
 		public static readonly TypeIdentity ActivitySourceGenerationAttribute = new(
-			"ActivitySourceGenerationAttribute",
-			"Purview.Telemetry"
+			nameof(ActivitySourceGenerationAttribute),
+			PurviewTelemetryNamespace
 		);
 		public static readonly TypeIdentity ActivitySourceAttribute = new(
-			"ActivitySourceAttribute",
-			"Purview.Telemetry"
+			nameof(ActivitySourceAttribute),
+			PurviewTelemetryNamespace
 		);
-		public static readonly TypeIdentity ActivityAttribute = new("ActivityAttribute", "Purview.Telemetry");
-		public static readonly TypeIdentity EventAttribute = new("EventAttribute", "Purview.Telemetry");
-		public static readonly TypeIdentity ContextAttribute = new("ContextAttribute", "Purview.Telemetry");
-		public static readonly TypeIdentity BaggageAttribute = new("BaggageAttribute", "Purview.Telemetry");
-		public static readonly TypeIdentity EscapeAttribute = new("EscapeAttribute", "Purview.Telemetry");
+		public static readonly TypeIdentity ActivityAttribute = new(
+			nameof(ActivityAttribute),
+			PurviewTelemetryNamespace
+		);
+		public static readonly TypeIdentity EventAttribute = new(nameof(EventAttribute), PurviewTelemetryNamespace);
+		public static readonly TypeIdentity ContextAttribute = new(nameof(ContextAttribute), PurviewTelemetryNamespace);
+		public static readonly TypeIdentity BaggageAttribute = new(nameof(BaggageAttribute), PurviewTelemetryNamespace);
+		public static readonly TypeIdentity EscapeAttribute = new(nameof(EscapeAttribute), PurviewTelemetryNamespace);
 		public static readonly TypeIdentity StatusDescriptionAttribute = new(
-			"StatusDescriptionAttribute",
-			"Purview.Telemetry"
+			nameof(StatusDescriptionAttribute),
+			PurviewTelemetryNamespace
 		);
+
+		public static ImmutableArray<TypeIdentity> GetGeneratedTypes() =>
+			[
+				ActivitySourceGenerationAttribute,
+				ActivitySourceAttribute,
+				ActivityAttribute,
+				EventAttribute,
+				ContextAttribute,
+				BaggageAttribute,
+				EscapeAttribute,
+				StatusDescriptionAttribute,
+			];
 	}
 
 	public static class Logging
 	{
 		public static class MicrosoftExtensions
 		{
-			public static readonly TypeIdentity ILogger = new("ILogger", "Microsoft.Extensions.Logging");
-			public static readonly TypeIdentity LoggerMessage = new("LoggerMessage", "Microsoft.Extensions.Logging");
-			public static readonly TypeIdentity LogLevel = new("LogLevel", "Microsoft.Extensions.Logging");
-			public static readonly TypeIdentity EventId = new("EventId", "Microsoft.Extensions.Logging");
+			public const string LoggingNamespace = "Microsoft.Extensions.Logging";
+
+			public static readonly TypeIdentity ILogger = new(nameof(ILogger), LoggingNamespace);
+			public static readonly TypeIdentity LoggerMessage = new(nameof(LoggerMessage), LoggingNamespace);
+			public static readonly TypeIdentity LogLevel = new(nameof(LogLevel), LoggingNamespace);
+			public static readonly TypeIdentity EventId = new(nameof(EventId), LoggingNamespace);
 			public static readonly TypeIdentity LoggerMessageHelper = new(
-				"LoggerMessageHelper",
-				"Microsoft.Extensions.Logging"
+				nameof(LoggerMessageHelper),
+				LoggingNamespace
 			);
 			public static readonly TypeIdentity LogPropertiesAttribute = new(
-				"LogPropertiesAttribute",
-				"Microsoft.Extensions.Logging"
+				nameof(LogPropertiesAttribute),
+				LoggingNamespace
 			);
 			public static readonly TypeIdentity LogPropertyIgnoreAttribute = new(
-				"LogPropertyIgnoreAttribute",
-				"Microsoft.Extensions.Logging"
+				nameof(LogPropertyIgnoreAttribute),
+				LoggingNamespace
 			);
 		}
 
 		public static readonly TypeIdentity LoggerGenerationAttribute = new(
-			"LoggerGenerationAttribute",
-			"Purview.Telemetry"
+			nameof(LoggerGenerationAttribute),
+			PurviewTelemetryNamespace
 		);
-		public static readonly TypeIdentity LoggerAttribute = new("LoggerAttribute", "Purview.Telemetry");
-		public static readonly TypeIdentity LogAttribute = new("LogAttribute", "Purview.Telemetry");
-		public static readonly TypeIdentity LogPrefixType = new("LogPrefixType", "Purview.Telemetry");
-		public static readonly TypeIdentity LoggerGenerationMode = new("LoggerGenerationMode", "Purview.Telemetry");
+		public static readonly TypeIdentity LoggerAttribute = new(nameof(LoggerAttribute), PurviewTelemetryNamespace);
+		public static readonly TypeIdentity LogAttribute = new(nameof(LogAttribute), PurviewTelemetryNamespace);
+		public static readonly TypeIdentity LogPrefixType = new(nameof(LogPrefixType), PurviewTelemetryNamespace);
+		public static readonly TypeIdentity LoggerGenerationMode = new(
+			nameof(LoggerGenerationMode),
+			PurviewTelemetryNamespace
+		);
 		public static readonly TypeIdentity ExpandEnumerableAttribute = new(
-			"ExpandEnumerableAttribute",
-			"Purview.Telemetry"
+			nameof(ExpandEnumerableAttribute),
+			PurviewTelemetryNamespace
 		);
-		public static readonly TypeIdentity TraceAttribute = new("TraceAttribute", "Purview.Telemetry");
-		public static readonly TypeIdentity DebugAttribute = new("DebugAttribute", "Purview.Telemetry");
-		public static readonly TypeIdentity InfoAttribute = new("InfoAttribute", "Purview.Telemetry");
-		public static readonly TypeIdentity WarningAttribute = new("WarningAttribute", "Purview.Telemetry");
-		public static readonly TypeIdentity ErrorAttribute = new("ErrorAttribute", "Purview.Telemetry");
-		public static readonly TypeIdentity CriticalAttribute = new("CriticalAttribute", "Purview.Telemetry");
+		public static readonly TypeIdentity TraceAttribute = new(nameof(TraceAttribute), PurviewTelemetryNamespace);
+		public static readonly TypeIdentity DebugAttribute = new(nameof(DebugAttribute), PurviewTelemetryNamespace);
+		public static readonly TypeIdentity InfoAttribute = new(nameof(InfoAttribute), PurviewTelemetryNamespace);
+		public static readonly TypeIdentity WarningAttribute = new(nameof(WarningAttribute), PurviewTelemetryNamespace);
+		public static readonly TypeIdentity ErrorAttribute = new(nameof(ErrorAttribute), PurviewTelemetryNamespace);
+		public static readonly TypeIdentity CriticalAttribute = new(
+			nameof(CriticalAttribute),
+			PurviewTelemetryNamespace
+		);
+
+		public static readonly ImmutableArray<TypeIdentity> LogAttributeTargets =
+		[
+			LogAttribute,
+			TraceAttribute,
+			DebugAttribute,
+			InfoAttribute,
+			WarningAttribute,
+			ErrorAttribute,
+			CriticalAttribute,
+		];
+
+		public static ImmutableArray<TypeIdentity> GetGeneratedTypes() =>
+			[
+				LoggerGenerationAttribute,
+				LoggerAttribute,
+				LogAttribute,
+				LogPrefixType,
+				LoggerGenerationMode,
+				ExpandEnumerableAttribute,
+				TraceAttribute,
+				DebugAttribute,
+				InfoAttribute,
+				WarningAttribute,
+				ErrorAttribute,
+				CriticalAttribute,
+			];
+
+		public static ImmutableDictionary<TypeIdentity, LogLevelDetails> LogLevelMap = new Dictionary<
+			TypeIdentity,
+			LogLevelDetails
+		>
+		{
+			{ TraceAttribute, new(TraceAttribute, 0, "Trace") },
+			{ DebugAttribute, new(DebugAttribute, 1, "Debug") },
+			{ InfoAttribute, new(InfoAttribute, 2, "Info") },
+			{ WarningAttribute, new(WarningAttribute, 3, "Warning") },
+			{ ErrorAttribute, new(ErrorAttribute, 4, "Error") },
+			{ CriticalAttribute, new(CriticalAttribute, 5, "Critical") },
+		}.ToImmutableDictionary();
 	}
 
 	public static class Metrics
 	{
 		public static class SystemDiagnostics
 		{
-			public static readonly TypeIdentity Meter = new("Meter", "System.Diagnostics.Metrics");
-			public static readonly TypeIdentity IMeterFactory = new("IMeterFactory", "System.Diagnostics.Metrics");
-			public static readonly TypeIdentity MeterOptions = new("MeterOptions", "System.Diagnostics.Metrics");
-			public static readonly TypeIdentity Measurement = new("Measurement", "System.Diagnostics.Metrics")
+			public const string SystemDiagnosticsMetricsNamespace = "System.Diagnostics.Metrics";
+
+			public static readonly TypeIdentity Meter = new(nameof(Meter), SystemDiagnosticsMetricsNamespace);
+			public static readonly TypeIdentity IMeterFactory = new(
+				nameof(IMeterFactory),
+				SystemDiagnosticsMetricsNamespace
+			);
+			public static readonly TypeIdentity MeterOptions = new(
+				nameof(MeterOptions),
+				SystemDiagnosticsMetricsNamespace
+			);
+			public static readonly TypeIdentity Measurement = new(
+				nameof(Measurement),
+				SystemDiagnosticsMetricsNamespace
+			)
 			{
 				GenericArity = 1,
 			};
-			public static readonly TypeIdentity Counter = new("Counter", "System.Diagnostics.Metrics");
-			public static readonly TypeIdentity UpDownCounter = new("UpDownCounter", "System.Diagnostics.Metrics");
-			public static readonly TypeIdentity Histogram = new("Histogram", "System.Diagnostics.Metrics");
-			public static readonly TypeIdentity ObservableCounter = new(
-				"ObservableCounter",
-				"System.Diagnostics.Metrics"
+			public static readonly TypeIdentity Counter = new(nameof(Counter), SystemDiagnosticsMetricsNamespace);
+			public static readonly TypeIdentity UpDownCounter = new(
+				nameof(UpDownCounter),
+				SystemDiagnosticsMetricsNamespace
 			);
-			public static readonly TypeIdentity ObservableGauge = new("ObservableGauge", "System.Diagnostics.Metrics");
+			public static readonly TypeIdentity Histogram = new(nameof(Histogram), SystemDiagnosticsMetricsNamespace);
+			public static readonly TypeIdentity ObservableCounter = new(
+				nameof(ObservableCounter),
+				SystemDiagnosticsMetricsNamespace
+			);
+			public static readonly TypeIdentity ObservableGauge = new(
+				nameof(ObservableGauge),
+				SystemDiagnosticsMetricsNamespace
+			);
 			public static readonly TypeIdentity ObservableUpDownCounter = new(
-				"ObservableUpDownCounter",
-				"System.Diagnostics.Metrics"
+				nameof(ObservableUpDownCounter),
+				SystemDiagnosticsMetricsNamespace
 			);
 		}
 
 		public static readonly TypeIdentity MeterGenerationAttribute = new(
-			"MeterGenerationAttribute",
-			"Purview.Telemetry"
+			nameof(MeterGenerationAttribute),
+			PurviewTelemetryNamespace
 		);
-		public static readonly TypeIdentity MeterAttribute = new("MeterAttribute", "Purview.Telemetry");
+		public static readonly TypeIdentity MeterAttribute = new(nameof(MeterAttribute), PurviewTelemetryNamespace);
 		public static readonly TypeIdentity MeterNameGenerationType = new(
-			"MeterNameGenerationType",
-			"Purview.Telemetry"
+			nameof(MeterNameGenerationType),
+			PurviewTelemetryNamespace
 		);
 		public static readonly TypeIdentity InstrumentMeasurementAttribute = new(
-			"InstrumentMeasurementAttribute",
-			"Purview.Telemetry"
+			nameof(InstrumentMeasurementAttribute),
+			PurviewTelemetryNamespace
 		);
-		public static readonly TypeIdentity AutoCounterAttribute = new("AutoCounterAttribute", "Purview.Telemetry");
-		public static readonly TypeIdentity CounterAttribute = new("CounterAttribute", "Purview.Telemetry");
-		public static readonly TypeIdentity UpDownCounterAttribute = new("UpDownCounterAttribute", "Purview.Telemetry");
-		public static readonly TypeIdentity HistogramAttribute = new("HistogramAttribute", "Purview.Telemetry");
+		public static readonly TypeIdentity AutoCounterAttribute = new(
+			nameof(AutoCounterAttribute),
+			PurviewTelemetryNamespace
+		);
+		public static readonly TypeIdentity CounterAttribute = new(nameof(CounterAttribute), PurviewTelemetryNamespace);
+		public static readonly TypeIdentity UpDownCounterAttribute = new(
+			nameof(UpDownCounterAttribute),
+			PurviewTelemetryNamespace
+		);
+		public static readonly TypeIdentity HistogramAttribute = new(
+			nameof(HistogramAttribute),
+			PurviewTelemetryNamespace
+		);
 		public static readonly TypeIdentity ObservableCounterAttribute = new(
-			"ObservableCounterAttribute",
-			"Purview.Telemetry"
+			nameof(ObservableCounterAttribute),
+			PurviewTelemetryNamespace
 		);
 		public static readonly TypeIdentity ObservableUpDownCounterAttribute = new(
-			"ObservableUpDownCounterAttribute",
-			"Purview.Telemetry"
+			nameof(ObservableUpDownCounterAttribute),
+			PurviewTelemetryNamespace
 		);
 		public static readonly TypeIdentity ObservableGaugeAttribute = new(
-			"ObservableGaugeAttribute",
-			"Purview.Telemetry"
+			nameof(ObservableGaugeAttribute),
+			PurviewTelemetryNamespace
 		);
 
 		public static readonly ImmutableDictionary<InstrumentTypes, TypeIdentity> InstrumentTypeMap = new Dictionary<
@@ -190,37 +278,75 @@ static class TypeLibrary
 			{ InstrumentTypes.ObservableGauge, SystemDiagnostics.ObservableGauge },
 			{ InstrumentTypes.ObservableUpDownCounter, SystemDiagnostics.ObservableUpDownCounter },
 		}.ToImmutableDictionary();
+
+		public static ImmutableArray<TypeIdentity> GetGeneratedTypes() =>
+			[
+				MeterGenerationAttribute,
+				MeterAttribute,
+				MeterNameGenerationType,
+				InstrumentMeasurementAttribute,
+				AutoCounterAttribute,
+				CounterAttribute,
+				UpDownCounterAttribute,
+				HistogramAttribute,
+				ObservableCounterAttribute,
+				ObservableUpDownCounterAttribute,
+				ObservableGaugeAttribute,
+			];
 	}
 
 	public static class DependencyInjection
 	{
+		public const string DependencyInjectionNamespace = "Microsoft.Extensions.DependencyInjection";
+
 		public static readonly TypeIdentity IServiceCollection = new(
-			"IServiceCollection",
-			"Microsoft.Extensions.DependencyInjection"
+			nameof(IServiceCollection),
+			DependencyInjectionNamespace
 		);
 		public static readonly TypeIdentity ServiceDescriptor = new(
-			"ServiceDescriptor",
-			"Microsoft.Extensions.DependencyInjection"
+			nameof(ServiceDescriptor),
+			DependencyInjectionNamespace
 		);
 		public static readonly TypeIdentity ServiceLifetime = new(
-			"ServiceLifetime",
-			"Microsoft.Extensions.DependencyInjection"
+			nameof(ServiceLifetime),
+			DependencyInjectionNamespace
 		);
 	}
 
-	public static class Telemetry
+	public static class TelemetryShared
 	{
-		public static readonly TypeIdentity TagAttribute = new("TagAttribute", "Purview.Telemetry");
-		public static readonly TypeIdentity ExcludeAttribute = new("ExcludeAttribute", "Purview.Telemetry");
+		public static readonly TypeIdentity TagAttribute = new(nameof(TagAttribute), PurviewTelemetryNamespace);
+		public static readonly TypeIdentity ExcludeAttribute = new(nameof(ExcludeAttribute), PurviewTelemetryNamespace);
 		public static readonly TypeIdentity TelemetryGenerationAttribute = new(
-			"TelemetryGenerationAttribute",
-			"Purview.Telemetry"
+			nameof(TelemetryGenerationAttribute),
+			PurviewTelemetryNamespace
 		);
-		public static readonly TypeIdentity TargetsEnum = new("Targets", "Purview.Telemetry");
-		public static readonly TypeIdentity NamingConventionEnum = new("NamingConvention", "Purview.Telemetry");
+		public static readonly TypeIdentity TargetsEnum = new(nameof(TargetsEnum), PurviewTelemetryNamespace);
+		public static readonly TypeIdentity NamingConventionEnum = new(
+			nameof(NamingConventionEnum),
+			PurviewTelemetryNamespace
+		);
 		public static readonly TypeIdentity ExcludeTargetsAttribute = new(
-			"ExcludeTargetsAttribute",
-			"Purview.Telemetry"
+			nameof(ExcludeTargetsAttribute),
+			PurviewTelemetryNamespace
 		);
+
+		public static ImmutableArray<TypeIdentity> GetGeneratedTypes() =>
+			[
+				TagAttribute,
+				ExcludeAttribute,
+				TelemetryGenerationAttribute,
+				TargetsEnum,
+				NamingConventionEnum,
+				ExcludeTargetsAttribute,
+			];
 	}
+
+	public static ImmutableArray<TypeIdentity> GetAllGeneratedTypes() =>
+		[
+			.. Activities.GetGeneratedTypes(),
+			.. Logging.GetGeneratedTypes(),
+			.. Metrics.GetGeneratedTypes(),
+			.. TelemetryShared.GetGeneratedTypes(),
+		];
 }

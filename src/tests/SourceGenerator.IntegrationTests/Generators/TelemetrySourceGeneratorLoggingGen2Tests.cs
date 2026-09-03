@@ -29,7 +29,12 @@ public interface ITestLogger
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(loggerClass.HasMethod(query, "LogEntryWithGenericTypeParam"))
+			.IsTrue()
+			.Because("the generated logger must contain the log method");
 	}
 
 	[Test]
@@ -60,7 +65,7 @@ public interface ITestLogger<{genericTypeDef}> {{
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, expectsDiagnostics: true, cancellationToken: cancellationToken);
+		await Assert.That(generationResult).HasDiagnostic("TSG1004");
 	}
 
 	[Test]
@@ -91,7 +96,7 @@ public interface ITestLogger<{genericTypeDef}> {{
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, expectsDiagnostics: true, cancellationToken: cancellationToken);
+		await Assert.That(generationResult).HasDiagnostic("TSG1004");
 	}
 
 	[Test]
@@ -113,6 +118,11 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(loggerClass.HasMethod(query, "LogEntryWithMoreThanSixParams"))
+			.IsTrue()
+			.Because("the generated logger must contain the log method with more than six parameters");
 	}
 }

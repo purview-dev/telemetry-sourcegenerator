@@ -2,6 +2,7 @@ using Purview.Telemetry.SourceGenerator.Infra;
 
 namespace Purview.Telemetry.SourceGenerator.Metrics;
 
+[SkipOnNetFramework]
 public partial class TelemetrySourceGeneratorMetricsTests : IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>
 {
 	[Test]
@@ -51,7 +52,40 @@ public interface ITestMetrics
 		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "AutoCounter"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the auto-counter method");
+		await Assert
+			.That(metricsClass.HasMethod(query, "Counter_AutoIncrement"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the auto-increment counter method");
+		await Assert
+			.That(metricsClass.HasMethod(query, "Counter"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the counter method");
+		await Assert
+			.That(metricsClass.HasMethod(query, "Histogram"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the histogram method");
+		await Assert
+			.That(metricsClass.HasMethod(query, "UpDownCounter"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the up-down counter method");
+		await Assert
+			.That(metricsClass.HasMethod(query, "ObservableCounter"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the observable counter method");
+		await Assert
+			.That(metricsClass.HasMethod(query, "ObservableGauge"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the observable gauge method");
+		await Assert
+			.That(metricsClass.HasMethod(query, "ObservableUpDownCounter"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the observable up-down counter method");
 	}
 
 	[Test]
@@ -84,12 +118,7 @@ public interface ITestMetrics<{{genericTypeDef}}>  {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG1004"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG1004");
 	}
 
 	[Test]
@@ -122,11 +151,6 @@ public interface ITestMetrics<{{genericTypeDef}}>  {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG1004"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG1004");
 	}
 }

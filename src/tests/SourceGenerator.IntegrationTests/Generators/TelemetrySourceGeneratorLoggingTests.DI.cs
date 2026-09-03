@@ -1,4 +1,5 @@
-using Purview.Telemetry.SourceGenerator.Infra;
+using Microsoft.Extensions.DependencyInjection;
+using Purview.SourceGeneratorFramework;
 
 namespace Purview.Telemetry.SourceGenerator.Logging;
 
@@ -30,7 +31,25 @@ public interface ITestLogger {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"Log",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the log method");
+		var diClass = query.GetClass("TestLoggerCoreDIExtension", "Microsoft.Extensions.DependencyInjection");
+		await Assert
+			.That(diClass.HasMethod(query, "AddTestLogger", TypeReference.Create<IServiceCollection>()))
+			.IsTrue()
+			.Because("the DI extension must register the logger via AddTestLogger");
 	}
 
 	[Test]
@@ -58,7 +77,25 @@ public interface ITestLogger {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"Log",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the log method");
+		var diClass = query.GetClass("TestLoggerCoreDIExtension", "Microsoft.Extensions.DependencyInjection");
+		await Assert
+			.That(diClass.HasMethod(query, "AddTestLogger", TypeReference.Create<IServiceCollection>()))
+			.IsTrue()
+			.Because("the DI extension must be generated when the interface opts in");
 	}
 
 	[Test]
@@ -90,7 +127,25 @@ public interface ITestLogger {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"Log",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the log method");
+		var diClass = query.GetClass("TestLoggerCoreDIExtension", "Microsoft.Extensions.DependencyInjection");
+		await Assert
+			.That(diClass.HasMethod(query, "AddTestLogger", TypeReference.Create<IServiceCollection>()))
+			.IsTrue()
+			.Because("the DI extension must be generated when the interface overrides the disabled assembly default");
 	}
 
 	[Test]
@@ -122,6 +177,23 @@ public interface ITestLogger {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"Log",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the log method");
+		await Assert
+			.That(query.HasClass("TestLoggerCoreDIExtension", "Microsoft.Extensions.DependencyInjection"))
+			.IsFalse()
+			.Because("the DI extension must not be generated when the interface opts out");
 	}
 }

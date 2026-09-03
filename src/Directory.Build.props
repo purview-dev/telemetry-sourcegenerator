@@ -1,14 +1,16 @@
 <Project>
 	<PropertyGroup>
 		<NamespacePrefix>Purview.Telemetry</NamespacePrefix>
-		<IsPackable>false</IsPackable>
 		<!--
 			This comes from Purview.DotnetSdk where we auto include the
 			telemetry... obviously we don't want that here!	
 		-->
 		<ExcludePurviewTelemetry>true</ExcludePurviewTelemetry>
-		<GenerateDocumentationFile>false</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<Import Sdk="Purview.DotNetProjectSdk" Project="Sdk.props" />
+
+	<PropertyGroup>
+		<LangVersion>preview</LangVersion>
+	</PropertyGroup>
 </Project>

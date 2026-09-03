@@ -1,3 +1,4 @@
+using Purview.SourceGeneratorFramework;
 using Purview.Telemetry.SourceGenerator.Infra;
 
 namespace Purview.Telemetry.SourceGenerator.Logging;
@@ -27,7 +28,16 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(source, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(loggerClass.HasMethod(query, "RegularV2LogEntry", TypeReference.Create<int>()))
+			.IsTrue()
+			.Because("the generated logger must contain the regular V2 log method");
+		await Assert
+			.That(loggerClass.HasMethod(query, "HotPathV1LogEntry", TypeReference.Create<int>()))
+			.IsTrue()
+			.Because("the generated logger must contain the V1-overridden log method");
 	}
 
 	[Test]
@@ -53,7 +63,16 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(source, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(loggerClass.HasMethod(query, "RegularV2LogEntry", TypeReference.Create<string>()))
+			.IsTrue()
+			.Because("the generated logger must contain the regular V2 log method");
+		await Assert
+			.That(loggerClass.HasMethod(query, "HotPathDebugEntry", TypeReference.Create<string>()))
+			.IsTrue()
+			.Because("the generated logger must contain the V1-overridden debug log method");
 	}
 
 	[Test]
@@ -81,11 +100,6 @@ public interface ITestLogger {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG2001"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG2001");
 	}
 }

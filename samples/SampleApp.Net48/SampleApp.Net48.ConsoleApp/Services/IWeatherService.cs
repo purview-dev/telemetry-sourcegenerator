@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace SampleApp.Net48.ConsoleApp.Services
 {
 	public interface IWeatherService

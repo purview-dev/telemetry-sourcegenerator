@@ -36,49 +36,13 @@ static class PropertyLibrary
 		RegexOptions.ExplicitCapture | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace
 	);
 
-	// Template header: used only when loading the shipped marker-attribute templates.
-	const string GeneratedCodeConstant =
-		"[global::System.CodeDom.Compiler.GeneratedCodeAttribute(\"Purview.Telemetry.SourceGenerator\", \"{0}\")]";
-
-	public static readonly Lazy<string> TemplateGeneratedCode = new(() =>
-		string.Format(global::System.Globalization.CultureInfo.InvariantCulture, GeneratedCodeConstant, Version.Value)
-	);
-
-	public static class BuiltInTypes
-	{
-		public const string StringKeyword = "string";
-		public const string ObjectKeyword = "object";
-		public const string BoolKeyword = "bool";
-		public const string ByteKeyword = "byte";
-		public const string ShortKeyword = "short";
-		public const string IntKeyword = "int";
-		public const string LongKeyword = "long";
-		public const string SByteKeyword = "sbyte";
-		public const string UShortKeyword = "ushort";
-		public const string UIntKeyword = "uint";
-		public const string ULongKeyword = "ulong";
-		public const string FloatKeyword = "float";
-		public const string DoubleKeyword = "double";
-		public const string DecimalKeyword = "decimal";
-		public const string CharKeyword = "char";
-	}
-
 	public static class System
 	{
-		public const string VoidKeyword = "void";
 		public const string NullKeyword = "null";
-		public const string DefaultKeyword = "default";
 	}
 
 	// TEMPORARY attribute strings still referenced by emitters; removed during the
 	// structured-emission pass.
-	public const string AggressiveInlining =
-		"[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]";
-	public const string ExcludeFromCodeCoverageConstant =
-		"[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]";
-	public const string EditorBrowsableConstant =
-		"[global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]";
-
 	public static class Activities
 	{
 		public const bool UseRecordExceptionRulesDefault = true;
@@ -209,26 +173,15 @@ static class PropertyLibrary
 		public static string UpDownCounterMetadataName =>
 			TelemetryAttributeNames.Metrics.UpDownCounter.MetadataFullName;
 
-		public static readonly string[] ValidMeasurementKeywordTypes =
+		public static readonly TypeMapping[] ValidMeasurementKeywordTypes =
 		[
-			BuiltInTypes.ByteKeyword,
-			BuiltInTypes.ShortKeyword,
-			BuiltInTypes.IntKeyword,
-			BuiltInTypes.LongKeyword,
-			BuiltInTypes.DoubleKeyword,
-			BuiltInTypes.FloatKeyword,
-			BuiltInTypes.DecimalKeyword,
-		];
-
-		public static readonly SpecialType[] ValidMeasurementSpecialTypes =
-		[
-			SpecialType.System_Byte,
-			SpecialType.System_Int16,
-			SpecialType.System_Int32,
-			SpecialType.System_Int64,
-			SpecialType.System_Double,
-			SpecialType.System_Single,
-			SpecialType.System_Decimal,
+			KnownLangTypes.Get(SpecialType.System_Byte),
+			KnownLangTypes.Get(SpecialType.System_Int16),
+			KnownLangTypes.Get(SpecialType.System_Int32),
+			KnownLangTypes.Get(SpecialType.System_Int64),
+			KnownLangTypes.Get(SpecialType.System_Double),
+			KnownLangTypes.Get(SpecialType.System_Single),
+			KnownLangTypes.Get(SpecialType.System_Decimal),
 		];
 	}
 
@@ -238,14 +191,5 @@ static class PropertyLibrary
 		public static readonly string Singleton = TypeLibrary.DependencyInjection.ServiceLifetime.StaticMember(
 			"Singleton"
 		);
-	}
-
-	/// <summary>
-	/// Naming convention strategies for generated telemetry names.
-	/// </summary>
-	public enum NamingConvention
-	{
-		Legacy = 0,
-		OpenTelemetry = 1,
 	}
 }

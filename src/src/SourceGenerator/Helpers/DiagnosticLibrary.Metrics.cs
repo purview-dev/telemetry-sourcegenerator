@@ -1,6 +1,5 @@
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
-using Purview.Telemetry.SourceGenerator.Records;
 
 namespace Purview.Telemetry.SourceGenerator;
 
@@ -9,84 +8,114 @@ partial class DiagnosticLibrary
 	// Starts at 4000
 	public static class Metrics
 	{
-		public static readonly TelemetryDiagnosticDescriptor NoInstrumentDefined = new(
-			Id: "TSG4000",
-			Title: "No instrument defined",
-			Description: "Either exclude this method, or define an instrument.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Metrics.Usage
+		public static readonly DiagnosticInfo NoInstrumentDefined = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG4000",
+				title: "No instrument defined",
+				messageFormat: "Either exclude this method, or define an instrument.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Metrics.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor DoesNotReturnVoid = new(
-			Id: "TSG4001",
-			Title: "Must return void or bool",
-			Description: "Instrument methods can only return void or boolean.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Metrics.Usage
+		public static readonly DiagnosticInfo DoesNotReturnVoid = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG4001",
+				title: "Must return void or bool",
+				messageFormat: "Instrument methods can only return void or boolean.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Metrics.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor AutoIncrementCountAndMeasurementParam = new(
-			Id: "TSG4002",
-			Title: "Auto increment counter and measurement defined",
-			Description: "Auto increment counter and a measurement parameter are defined, either remove the parameter/ attribute or change to a normal counter.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Metrics.Usage
+		public static readonly DiagnosticInfo AutoIncrementCountAndMeasurementParam = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG4002",
+				title: "Auto increment counter and measurement defined",
+				messageFormat: "Auto increment counter and a measurement parameter are defined, either remove the parameter/ attribute or change to a normal counter.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Metrics.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor MoreThanOneMeasurementValueDefined = new(
-			Id: "TSG4003",
-			Title: "Multiple measurement values defined",
-			Description: "More than one measurement parameters are defined.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Metrics.Usage
+		public static readonly DiagnosticInfo MoreThanOneMeasurementValueDefined = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG4003",
+				title: "Multiple measurement values defined",
+				messageFormat: "More than one measurement parameters are defined.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Metrics.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor NoMeasurementValueDefined = new(
-			Id: "TSG4004",
-			Title: "No measurement value defined",
-			Description: "Either define a measurement parameter, or provide a supported type parameter that is not a tag to enable inferring.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Metrics.Usage
+		public static readonly DiagnosticInfo NoMeasurementValueDefined = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG4004",
+				title: "No measurement value defined",
+				messageFormat: "Either define a measurement parameter, or provide a supported type parameter that is not a tag to enable inferring.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Metrics.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor ObservableRequiredFunc = new(
-			Id: "TSG4005",
-			Title: "Observable instrument requires Func<T>",
-			Description: "Observable instruments require a Func<T> where T is a supported instrument result type.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Metrics.Usage
+		public static readonly DiagnosticInfo ObservableRequiredFunc = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG4005",
+				title: "Observable instrument requires Func<T>",
+				messageFormat: "Observable instruments require a Func<T> where T is a supported instrument result type.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Metrics.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor InvalidMeasurementType = new(
-			Id: "TSG4006",
-			Title: "Invalid measurement type",
-			Description: $"Invalid measurement type used, valid types are {string.Join(", ", PropertyLibrary.Metrics.ValidMeasurementKeywordTypes)}, Measurement<T> or IEnumerable<MeasurementT>>.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Metrics.Usage
+		public static readonly DiagnosticInfo InvalidMeasurementType = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG4006",
+				title: "Invalid measurement type",
+				messageFormat: $"Invalid measurement type used, valid types are {string.Join(", ", PropertyLibrary.Metrics.ValidMeasurementKeywordTypes)}, Measurement<T> or IEnumerable<MeasurementT>>.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Metrics.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor ObservableCannotReturnBool = new(
-			Id: "TSG4007",
-			Title: "Observable metrics cannot return bool",
-			Description: "Observable metrics can only return void or Activity? (when combined with Activity attribute). Boolean returns are not supported for observables.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Metrics.Usage
+		public static readonly DiagnosticInfo ObservableCannotReturnBool = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG4007",
+				title: "Observable metrics cannot return bool",
+				messageFormat: "Observable metrics can only return void or Activity? (when combined with Activity attribute). Boolean returns are not supported for observables.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Metrics.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor AutoCounterMustReturnVoid = new(
-			Id: "TSG4008",
-			Title: "AutoCounter must return void",
-			Description: "AutoCounter methods must return void. Boolean or other return types are not supported.",
-			Severity: DiagnosticSeverity.Error,
-			Category: Categories.Metrics.Usage
+		public static readonly DiagnosticInfo AutoCounterMustReturnVoid = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG4008",
+				title: "AutoCounter must return void",
+				messageFormat: "AutoCounter methods must return void. Boolean or other return types are not supported.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Metrics.Usage,
+				isEnabledByDefault: true
+			)
 		);
 
-		public static readonly TelemetryDiagnosticDescriptor InstrumentNameMatchesType = new(
-			Id: "TSG4009",
-			Title: "Instrument name matches the instrument type name",
-			Description: "Instrument name '{0}' matches the instrument type name. Use a name that describes what is being measured, not the instrument type.",
-			Severity: DiagnosticSeverity.Warning,
-			Category: Categories.Metrics.Usage
+		public static readonly DiagnosticInfo InstrumentNameMatchesType = DiagnosticInfo.Create(
+			new DiagnosticDescriptor(
+				id: "TSG4009",
+				title: "Instrument name matches the instrument type name",
+				messageFormat: "Instrument name '{0}' matches the instrument type name. Use a name that describes what is being measured, not the instrument type.",
+				defaultSeverity: DiagnosticSeverity.Warning,
+				category: Categories.Metrics.Usage,
+				isEnabledByDefault: true
+			)
 		);
 	}
 }

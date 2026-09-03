@@ -1,18 +1,18 @@
-using System.Diagnostics;
-using System.Diagnostics.Metrics;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Purview.Telemetry.SourceGenerator.Infra;
 
 namespace Purview.Telemetry.SourceGenerator.Generators;
 
 /// <summary>
-/// Verifies the per-target incremental pipeline: an unrelated edit must leave all generated
-/// output unchanged, and editing one target's interface must change only that target's output.
+/// Verifies the incremental pipeline caches across unchanged runs and invalidates only the
+/// affected target when an interface is edited. Runs through the framework's incremental harness
+/// (<c>GenerateIncrementalAsync</c>) and asserts on the generator's tracking-named stages, per the
+/// <c>source-generator-testing</c> guidance.
 /// </summary>
-public class TelemetrySourceGeneratorCachingTests
+public class TelemetrySourceGeneratorCachingTests : IncrementalSourceGeneratorTestBase<TelemetrySourceGenerator>
 {
 	const string ActivityInterface = """
+		using Purview.Telemetry;
+
 		namespace Testing;
 
 		[ActivitySource("testing-activity-source")]
@@ -25,6 +25,7 @@ public class TelemetrySourceGeneratorCachingTests
 
 	const string LoggerInterface = """
 		using Microsoft.Extensions.Logging;
+		using Purview.Telemetry;
 
 		namespace Testing;
 
@@ -41,127 +42,182 @@ public class TelemetrySourceGeneratorCachingTests
 		public class Unrelated { public int Value { get; set; } }
 		""";
 
-	static ImmutableArray<MetadataReference> References { get; } = BuildReferences();
+	static readonly TelemetrySourceGeneratorTestOptions Options = new();
 
-	static ImmutableArray<MetadataReference> BuildReferences()
+	/// <summary>
+	/// The framework-named pipeline stages this generator participates in. The generator overrides the
+	/// <c>ForAttributeWithMetadataName</c> tracking names (<c>TelemetrySourceGenerator_*</c>); the
+	/// remaining stages come from the framework's <c>GenerationContextValueProvider</c>
+	/// (<c>GetGenerationContext_*</c>). The generator passes a <see langword="null"/> disable-property
+	/// name, so no <c>GetMSBuildPropertyValue_*</c> stages exist and a property-only invalidation test
+	/// is not applicable.
+	/// </summary>
+	static bool IsFrameworkStage(string trackingName) =>
+		trackingName.StartsWith("TelemetrySourceGenerator_", StringComparison.Ordinal)
+		|| trackingName.StartsWith("GetGenerationContext_", StringComparison.Ordinal);
+
+	static ImmutableArray<IncrementalStepRunReason> GetFrameworkReasons(IncrementalCacheRun run) =>
+		[
+			.. run
+				.Steps.Where(static kvp => IsFrameworkStage(kvp.Key))
+				.SelectMany(static kvp => kvp.Value)
+				.SelectMany(static step => step.Outputs)
+				.Select(static output => output.Reason),
+		];
+
+	static ImmutableArray<IncrementalStepRunReason> GetStageReasons(IncrementalCacheRun run, string trackingName)
 	{
-		var trusted = ((string?)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") ?? "")
-			.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries)
-			.Select(path => MetadataReference.CreateFromFile(path))
-			.ToList();
-
-		foreach (
-			var type in new[]
-			{
-				typeof(Activity),
-				typeof(Meter),
-				typeof(IServiceCollection),
-				typeof(LogLevel),
-				typeof(LogPropertiesAttribute),
-			}
-		)
-		{
-			trusted.Add(MetadataReference.CreateFromFile(type.Assembly.Location));
-		}
-
-		return [.. trusted];
+		return
+		[
+			.. run
+				.Steps.Where(kvp => kvp.Key == trackingName)
+				.SelectMany(kvp => kvp.Value)
+				.SelectMany(static step => step.Outputs)
+				.Select(static output => output.Reason),
+		];
 	}
 
-	static CSharpCompilation CreateCompilation(params string[] sources)
-	{
-		var trees = sources.Select(source => CSharpSyntaxTree.ParseText(source));
-		return CSharpCompilation.Create(
-			"CachingTest",
-			trees,
-			References,
-			new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
-		);
-	}
-
-	static CSharpGeneratorDriver CreateDriver() =>
-		CSharpGeneratorDriver.Create(generators: [new TelemetrySourceGenerator().AsSourceGenerator()]);
-
-	static ImmutableDictionary<string, string> GetGeneratedSources(GeneratorDriverRunResult result)
+	static ImmutableDictionary<string, string> GetGeneratedSources(GeneratorRunResult result)
 	{
 		var builder = ImmutableDictionary.CreateBuilder<string, string>(StringComparer.Ordinal);
-		foreach (var generated in result.Results.SelectMany(static r => r.GeneratedSources))
+		foreach (var generated in result.GeneratedSources)
 		{
-			var hintName = generated.HintName;
-			if (builder.ContainsKey(hintName))
+			if (builder.ContainsKey(generated.HintName))
 				continue;
 
-			builder.Add(hintName, generated.SourceText.ToString());
+			builder.Add(generated.HintName, generated.SourceText.ToString());
 		}
 
 		return builder.ToImmutable();
 	}
 
 	[Test]
+	public async Task Generate_UnchangedCompilation_OutputCached(CancellationToken cancellationToken)
+	{
+		var result = await GenerateIncrementalAsync([ActivityInterface, LoggerInterface], Options, cancellationToken);
+
+		await Assert
+			.That(GetFrameworkReasons(result.Runs[0]).All(static reason => reason == IncrementalStepRunReason.New))
+			.IsTrue()
+			.Because("the first run must produce every output");
+		await Assert
+			.That(
+				GetFrameworkReasons(result.Runs[1])
+					.All(static reason =>
+						reason is IncrementalStepRunReason.Cached or IncrementalStepRunReason.Unchanged
+					)
+			)
+			.IsTrue()
+			.Because("an unchanged compilation must not re-run any target");
+	}
+
+	[Test]
 	public async Task Generate_UnchangedCompilation_OutputIsStable(CancellationToken cancellationToken)
 	{
-		var compilation = CreateCompilation(ActivityInterface, LoggerInterface);
-		var driver = CreateDriver();
+		var result = await GenerateIncrementalAsync([ActivityInterface, LoggerInterface], Options, cancellationToken);
 
-		var first = driver
-			.RunGeneratorsAndUpdateCompilation(compilation, out _, out _, cancellationToken)
-			.GetRunResult();
-		var firstSources = GetGeneratedSources(first);
+		var first = GetGeneratedSources(result.Runs[0].RunResult);
+		var second = GetGeneratedSources(result.Runs[1].RunResult);
 
-		var second = driver
-			.RunGeneratorsAndUpdateCompilation(compilation, out _, out _, cancellationToken)
-			.GetRunResult();
-		var secondSources = GetGeneratedSources(second);
+		await Assert.That(second.Count).IsEqualTo(first.Count);
+		foreach (var source in first)
+			await Assert.That(second[source.Key]).IsEqualTo(source.Value);
+	}
 
-		await Assert.That(secondSources.Count).IsEqualTo(firstSources.Count);
-		foreach (var (hintName, text) in firstSources)
-			await Assert.That(secondSources[hintName]).IsEqualTo(text);
+	[Test]
+	public async Task Generate_UnrelatedChange_OutputStaysCached(CancellationToken cancellationToken)
+	{
+		var inputs = new[]
+		{
+			new IncrementalRunInput([ActivityInterface, LoggerInterface], []),
+			new IncrementalRunInput([ActivityInterface, LoggerInterface, UnrelatedType], []),
+		};
+		var result = await GenerateIncrementalAsync(inputs, Options, cancellationToken);
+
+		var reasons = GetFrameworkReasons(result.Runs[1]);
+		await Assert.That(reasons).IsNotEmpty();
+		await Assert
+			.That(
+				reasons.All(static reason =>
+					reason is IncrementalStepRunReason.Cached or IncrementalStepRunReason.Unchanged
+				)
+			)
+			.IsTrue()
+			.Because("an unrelated edit must not invalidate the generated output");
 	}
 
 	[Test]
 	public async Task Generate_UnrelatedChange_AllOutputUnchanged(CancellationToken cancellationToken)
 	{
-		var compilation = CreateCompilation(ActivityInterface, LoggerInterface);
-		var driver = CreateDriver();
-		var first = driver
-			.RunGeneratorsAndUpdateCompilation(compilation, out _, out _, cancellationToken)
-			.GetRunResult();
-		var firstSources = GetGeneratedSources(first);
+		var inputs = new[]
+		{
+			new IncrementalRunInput([ActivityInterface, LoggerInterface], []),
+			new IncrementalRunInput([ActivityInterface, LoggerInterface, UnrelatedType], []),
+		};
+		var result = await GenerateIncrementalAsync(inputs, Options, cancellationToken);
 
-		var changed = CreateCompilation(ActivityInterface, LoggerInterface, UnrelatedType);
-		var run = driver.RunGeneratorsAndUpdateCompilation(changed, out _, out _, cancellationToken).GetRunResult();
-		var runSources = GetGeneratedSources(run);
+		var first = GetGeneratedSources(result.Runs[0].RunResult);
+		var second = GetGeneratedSources(result.Runs[1].RunResult);
 
-		await Assert.That(runSources.Count).IsEqualTo(firstSources.Count);
-		foreach (var (hintName, text) in firstSources)
-			await Assert.That(runSources[hintName]).IsEqualTo(text);
+		await Assert.That(second.Count).IsEqualTo(first.Count);
+		foreach (var source in first)
+			await Assert.That(second[source.Key]).IsEqualTo(source.Value);
+	}
+
+	[Test]
+	public async Task Generate_ActivityEdit_OutputReRuns(CancellationToken cancellationToken)
+	{
+		var edited = ActivityInterface.ReplaceOrdinal("Activity([Tag]", "Activity2([Tag]");
+		var inputs = new[] { new IncrementalRunInput([ActivityInterface], []), new IncrementalRunInput([edited], []) };
+		var result = await GenerateIncrementalAsync(inputs, Options, cancellationToken);
+
+		var reasons = GetStageReasons(result.Runs[1], "TelemetrySourceGenerator_Activities");
+		await Assert
+			.That(reasons.Any(static reason => reason == IncrementalStepRunReason.Modified))
+			.IsTrue()
+			.Because("editing the interface must re-run generation");
 	}
 
 	[Test]
 	public async Task Generate_LoggerEdit_OnlyLoggerOutputChanges(CancellationToken cancellationToken)
 	{
-		var compilation = CreateCompilation(ActivityInterface, LoggerInterface);
-		var driver = CreateDriver();
-		var first = driver
-			.RunGeneratorsAndUpdateCompilation(compilation, out _, out _, cancellationToken)
-			.GetRunResult();
-		var firstSources = GetGeneratedSources(first);
-
-		// Edit only the logger interface.
-		var editedLogger = LoggerInterface.Replace("void Log(", "void Log2(", StringComparison.Ordinal);
-		var edited = CreateCompilation(ActivityInterface, editedLogger);
-		var run = driver.RunGeneratorsAndUpdateCompilation(edited, out _, out _, cancellationToken).GetRunResult();
-		var runSources = GetGeneratedSources(run);
-
-		await Assert.That(runSources.Count).IsEqualTo(firstSources.Count);
-		foreach (var (hintName, text) in firstSources)
+		var editedLogger = LoggerInterface.ReplaceOrdinal("void Log(", "void Log2(");
+		var inputs = new[]
 		{
+			new IncrementalRunInput([ActivityInterface, LoggerInterface], []),
+			new IncrementalRunInput([ActivityInterface, editedLogger], []),
+		};
+		var result = await GenerateIncrementalAsync(inputs, Options, cancellationToken);
+
+		var loggerReasons = GetStageReasons(result.Runs[1], "TelemetrySourceGenerator_Logging");
+		await Assert
+			.That(loggerReasons.Any(static reason => reason == IncrementalStepRunReason.Modified))
+			.IsTrue()
+			.Because("editing the logger interface must re-run the logging stage");
+
+		var activityReasons = GetStageReasons(result.Runs[1], "TelemetrySourceGenerator_Activities");
+		await Assert
+			.That(
+				activityReasons.All(static reason =>
+					reason is IncrementalStepRunReason.Cached or IncrementalStepRunReason.Unchanged
+				)
+			)
+			.IsTrue()
+			.Because("editing the logger must not invalidate the activity stage");
+
+		var first = GetGeneratedSources(result.Runs[0].RunResult);
+		var second = GetGeneratedSources(result.Runs[1].RunResult);
+
+		foreach (var source in first)
+		{
+			var hintName = source.Key;
 			if (
 				!hintName.EndsWith(".Activity.g.cs", StringComparison.Ordinal)
 				&& !hintName.EndsWith(".Logging.g.cs", StringComparison.Ordinal)
 			)
 				continue;
 
-			var changed = !runSources[hintName].Equals(text, StringComparison.Ordinal);
+			var changed = !second[hintName].Equals(source.Value, StringComparison.Ordinal);
 			if (hintName.EndsWith(".Activity.g.cs", StringComparison.Ordinal))
 				await Assert
 					.That(changed)

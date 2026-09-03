@@ -26,3 +26,24 @@ jobs:
 
       - name: Run PR pipeline
         run: dotnet run --project build/PipelineCLI/PipelineCLI.csproj --configuration Release
+
+  samples:
+    name: Build and test samples
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Build SampleApp
+        run: dotnet build samples/SampleApp/SampleApp.slnx --configuration Release
+
+      - name: Test SampleApp
+        run: dotnet test samples/SampleApp/SampleApp.slnx --configuration Release --no-build

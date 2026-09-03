@@ -1,12 +1,8 @@
 {
   "name": "purview-telemetry-sourcegenerator",
-  "version": "5.0.0-prerelease.1",
+  "version": "5.0.0-prerelease.2",
   "description": "Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.activitysource), [`ILogger`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.ilogger), and [`Metrics`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics) based on interface methods.",
   "readme": "README.md",
-  "scripts": {
-    "changeset": "changeset",
-    "version-packages": "changeset version && bun .build/update-version.ts"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/purview-dev/telemetry-sourcegenerator.git"
@@ -16,9 +12,5 @@
   "bugs": {
     "url": "https://github.com/purview-dev/telemetry-sourcegenerator/issues"
   },
-  "homepage": "https://github.com/purview-dev/telemetry-sourcegenerator#readme",
-  "devDependencies": {
-    "@changesets/changelog-github": "^0.5.0",
-    "@changesets/cli": "^2.27.12"
-  }
+  "homepage": "https://github.com/purview-dev/telemetry-sourcegenerator#readme"
 }

@@ -67,7 +67,28 @@ partial interface ITestTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("Activity"))
+			.IsTrue()
+			.Because("the generated class must contain the activity method");
+		await Assert
+			.That(query.HasMethod("Event"))
+			.IsTrue()
+			.Because("the generated class must contain the event method");
+		await Assert
+			.That(query.HasMethod("Context"))
+			.IsTrue()
+			.Because("the generated class must contain the context method");
+		await Assert.That(query.HasMethod("Log")).IsTrue().Because("the generated class must contain the log method");
+		await Assert
+			.That(query.HasMethod("LogScope"))
+			.IsTrue()
+			.Because("the generated class must contain the scoped log method");
+		await Assert
+			.That(query.HasMethod("Counter"))
+			.IsTrue()
+			.Because("the generated class must contain the counter method");
 	}
 
 	[Test]
@@ -107,7 +128,28 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("Activity"))
+			.IsTrue()
+			.Because("the generated class must contain the activity method");
+		await Assert
+			.That(query.HasMethod("Event"))
+			.IsTrue()
+			.Because("the generated class must contain the event method");
+		await Assert
+			.That(query.HasMethod("Context"))
+			.IsTrue()
+			.Because("the generated class must contain the context method");
+		await Assert.That(query.HasMethod("Log")).IsTrue().Because("the generated class must contain the log method");
+		await Assert
+			.That(query.HasMethod("LogScope"))
+			.IsTrue()
+			.Because("the generated class must contain the scoped log method");
+		await Assert
+			.That(query.HasMethod("Counter"))
+			.IsTrue()
+			.Because("the generated class must contain the counter method");
 	}
 
 	[Test]
@@ -149,7 +191,28 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("Activity"))
+			.IsTrue()
+			.Because("the generated class must contain the activity method");
+		await Assert
+			.That(query.HasMethod("Event"))
+			.IsTrue()
+			.Because("the generated class must contain the event method");
+		await Assert
+			.That(query.HasMethod("Context"))
+			.IsTrue()
+			.Because("the generated class must contain the context method");
+		await Assert.That(query.HasMethod("Log")).IsTrue().Because("the generated class must contain the log method");
+		await Assert
+			.That(query.HasMethod("LogScope"))
+			.IsTrue()
+			.Because("the generated class must contain the scoped log method");
+		await Assert
+			.That(query.HasMethod("Counter"))
+			.IsTrue()
+			.Because("the generated class must contain the counter method");
 	}
 
 	[Test]
@@ -177,12 +240,7 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG3021"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG3021");
 	}
 
 	[Test]
@@ -212,12 +270,7 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG3021"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG3021");
 	}
 
 	[Test]
@@ -247,12 +300,7 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG3021"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG3021");
 	}
 
 	[Test]
@@ -282,7 +330,11 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("EventMethod"))
+			.IsTrue()
+			.Because("the generated class must contain the named-exception event method");
 	}
 
 	[Test]
@@ -312,7 +364,11 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("EventMethod"))
+			.IsTrue()
+			.Because("the generated class must contain the named-exception event method");
 	}
 
 	[Test]
@@ -365,11 +421,6 @@ public interface ITestTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG1002");
 	}
 }

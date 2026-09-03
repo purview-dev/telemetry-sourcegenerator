@@ -7,14 +7,10 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 partial class LoggerTargetClassEmitter
 {
-	static void EmitFields(
-		LoggerTarget target,
-		CodeWriter writer,
-		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool emitNullable
-	)
+	static void EmitFields(LoggerOutputContext output, CodeWriter writer, SourceProductionContext context)
 	{
+		var target = output.Target;
+
 		context.CancellationToken.ThrowIfCancellationRequested();
 
 		writer
@@ -37,13 +33,13 @@ partial class LoggerTargetClassEmitter
 			{
 				if (methodTarget.TargetGenerationState.RaiseMultiGenerationTargetsNotSupported)
 				{
-					logger?.Debug(
+					output.Context.Debug(
 						$"Identified {target.InterfaceType.Identity.Name}.{methodTarget.MethodName} as problematic as it has another target types."
 					);
 				}
 				else if (methodTarget.TargetGenerationState.RaiseInferenceNotSupportedWithMultiTargeting)
 				{
-					logger?.Debug(
+					output.Context.Debug(
 						$"Identified {target.InterfaceType.Identity.Name}.{methodTarget.MethodName} as problematic as it is inferred."
 					);
 				}
@@ -54,7 +50,7 @@ partial class LoggerTargetClassEmitter
 			// Report warning for Activity parameter without Activity target
 			if (methodTarget.TargetGenerationState.ActivityParameterWithoutTarget != null)
 			{
-				logger?.Debug(
+				output.Context.Debug(
 					$"Activity parameter '{methodTarget.TargetGenerationState.ActivityParameterWithoutTarget}' on {methodTarget.MethodName} has no Activity target."
 				);
 			}
@@ -66,32 +62,32 @@ partial class LoggerTargetClassEmitter
 
 			if (methodTarget.HasMultipleExceptions)
 			{
-				logger?.Diagnostic("Method has multiple exception parameters, only a single one is permitted.");
+				output.Context.Diagnostic("Method has multiple exception parameters, only a single one is permitted.");
 
 				continue;
 			}
 
 			if (methodTarget.ParameterCountSansException > PropertyLibrary.Logging.MaxNonExceptionParameters)
 			{
-				logger?.Diagnostic("Method has more than 6 parameters.");
+				output.Context.Diagnostic("Method has more than 6 parameters.");
 
 				continue;
 			}
 
 			if (methodTarget.InferredErrorLevel)
 			{
-				logger?.Diagnostic("Inferring error log level.");
+				output.Context.Diagnostic("Inferring error log level.");
 			}
 
-			EmitLogActionField(writer, methodTarget, emitNullable);
+			EmitLogActionField(writer, methodTarget);
 		}
 	}
 
-	internal static void EmitLogActionField(CodeWriter writer, LogMethodTarget methodTarget, bool emitNullable = true)
+	internal static void EmitLogActionField(CodeWriter writer, LogMethodTarget methodTarget)
 	{
 		writer
 			.Write("static readonly ")
-			.Write(methodTarget.IsScoped ? TypeLibrary.System.Func : TypeLibrary.System.Action)
+			.Write(methodTarget.IsScoped ? PurviewTypeLibrary.System.Func : PurviewTypeLibrary.System.Action)
 			.Write('<')
 			.Write(TypeLibrary.Logging.MicrosoftExtensions.ILogger)
 			.Write(", ");
@@ -101,16 +97,12 @@ partial class LoggerTargetClassEmitter
 
 		if (methodTarget.IsScoped)
 		{
-			writer.Write(TypeLibrary.System.IDisposable);
-			if (emitNullable)
-				writer.Write('?');
+			writer.Write(TypeLibrary.System.IDisposable.MakeNullable(writer));
 			writer.Write("> ");
 		}
 		else
 		{
-			writer.Write(TypeLibrary.System.Exception);
-			if (emitNullable)
-				writer.Write('?');
+			writer.Write(TypeLibrary.System.Exception.MakeNullable(writer));
 			writer.Write("> ");
 		}
 

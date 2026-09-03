@@ -1,13 +1,24 @@
 <Project>
 	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
-		<LangVersion>14.0</LangVersion>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-		<EnableNETAnalyzers>true</EnableNETAnalyzers>
-		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
-		<AnalysisLevel>latest</AnalysisLevel>
-		<NoWarn>$(NoWarn);CA1031;CA1515;CA1724;CA2007;CA2201;</NoWarn>
+		<NamespacePrefix>SampleApp</NamespacePrefix>
+		<!--
+			This comes from Purview.DotnetSdk where we auto include the
+			telemetry... the samples consume the local generator via analyzer
+			ProjectReference, so the published package is excluded here.
+		-->
+		<ExcludePurviewTelemetry>true</ExcludePurviewTelemetry>
+		<!-- Sample-app analysis relaxations:
+		     CA1031: sample services catch broad exceptions to simulate upstream failures.
+		     CA1515: sample types are public for demonstration purposes.
+		     CA1724: sample type names intentionally shadow well-known namespaces.
+		     CA2007: fire-and-forget async calls are fine for the sample workflow.
+		     CA2201: simulated failures raise generic exception types.
+		     CS8618/CS8625: the generator's injected attribute templates (with #nullable enable)
+		     initialize non-nullable members with null under net8+/net10.
+		     TSG2008: the sample intentionally demonstrates a large ExpandEnumerable limit;
+		     source-generator diagnostics are not suppressible with #pragma, so it's NoWarn'd. -->
+		<NoWarn>$(NoWarn);CA1031;CA1515;CA1724;CA2007;CA2201;CS8618;CS8625;TSG2008;</NoWarn>
 	</PropertyGroup>
+
+	<Import Sdk="Purview.DotNetProjectSdk" Project="Sdk.props" />
 </Project>

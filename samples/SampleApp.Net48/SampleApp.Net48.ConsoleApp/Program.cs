@@ -1,7 +1,5 @@
-using System;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
-using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SampleApp.Net48.ConsoleApp.Services;
@@ -15,10 +13,8 @@ namespace SampleApp.Net48.ConsoleApp
 			using var activityListener = new ActivityListener
 			{
 				ShouldListenTo = source => source.Name == TelemetryNames.ActivitySourceNames[0],
-				Sample = (ref ActivityCreationOptions<ActivityContext> options) =>
-					ActivitySamplingResult.AllDataAndRecorded,
-				SampleUsingParentId = (ref ActivityCreationOptions<string> options) =>
-					ActivitySamplingResult.AllDataAndRecorded,
+				Sample = (ref options) => ActivitySamplingResult.AllDataAndRecorded,
+				SampleUsingParentId = (ref options) => ActivitySamplingResult.AllDataAndRecorded,
 				ActivityStarted = a => Console.WriteLine($"  [TRACE START] {a.DisplayName} ({a.Id})"),
 				ActivityStopped = a =>
 					Console.WriteLine(

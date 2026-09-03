@@ -6,15 +6,11 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 partial class ActivitySourceTargetClassEmitter
 {
-	static void EmitMethods(
-		ActivitySourceTarget target,
-		CodeWriter writer,
-		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool emitNullable
-	)
+	static void EmitMethods(ActivityOutputContext output, CodeWriter writer, SourceProductionContext context)
 	{
-		EmitRecordExceptionEvent(writer, context, logger, emitNullable);
+		var target = output.Target;
+
+		EmitRecordExceptionEvent(output, writer, context);
 
 		// Filter to only methods that are valid for Activities target
 		// (have explicit Activity/Event/Context attributes, or valid inference in single-target)
@@ -25,7 +21,9 @@ partial class ActivitySourceTargetClassEmitter
 		{
 			if (validActivityMethods.Any(m => m.MethodType != ActivityMethodType.Activity))
 			{
-				logger?.Diagnostic("There are no Activity methods defined, however there are Events/ Context methods.");
+				output.Context.Diagnostic(
+					"There are no Activity methods defined, however there are Events/ Context methods."
+				);
 			}
 		}
 
@@ -33,30 +31,29 @@ partial class ActivitySourceTargetClassEmitter
 		{
 			context.CancellationToken.ThrowIfCancellationRequested();
 
-			EmitMethod(writer, methodTarget, target, context, logger, emitNullable);
+			EmitMethod(output, methodTarget, writer, context);
 		}
 	}
 
 	static void EmitRecordExceptionEvent(
+		ActivityOutputContext output,
 		CodeWriter writer,
-		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool emitNullable
+		SourceProductionContext context
 	)
 	{
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		logger?.Debug($"Generating {PropertyLibrary.Activities.RecordExceptionMethodName}.");
+		output.Context.Debug($"Generating {PropertyLibrary.Activities.RecordExceptionMethodName}.");
 
 		writer
 			.Write("static void ")
 			.Write(PropertyLibrary.Activities.RecordExceptionMethodName)
 			.Write('(')
-			.Write(TypeLibrary.Activities.SystemDiagnostics.Activity)
-			.Write(emitNullable ? "? activity, " : " activity, ")
-			.Write(TypeLibrary.System.Exception)
-			.Write(emitNullable ? "? exception, " : " exception, ")
-			.Write(PropertyLibrary.BuiltInTypes.BoolKeyword)
+			.Write(TypeLibrary.Activities.SystemDiagnostics.Activity.MakeNullable(writer))
+			.Write(" activity, ")
+			.Write(TypeLibrary.System.Exception.MakeNullable(writer))
+			.Write(" exception, ")
+			.Write(PurviewTypeLibrary.System.Boolean)
 			.WriteLine(" escape)");
 
 		using (writer.OpenBlockScope())
@@ -177,14 +174,14 @@ partial class ActivitySourceTargetClassEmitter
 	}
 
 	static void EmitMethod(
-		CodeWriter writer,
+		ActivityOutputContext output,
 		ActivityBasedGenerationTarget methodTarget,
-		ActivitySourceTarget target,
-		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool emitNullable
+		CodeWriter writer,
+		SourceProductionContext context
 	)
 	{
+		var target = output.Target;
+
 		context.CancellationToken.ThrowIfCancellationRequested();
 
 		if (!methodTarget.TargetGenerationState.IsValid)
@@ -202,7 +199,7 @@ partial class ActivitySourceTargetClassEmitter
 			return;
 		}
 
-		if (!GuardMethod(methodTarget, target, logger))
+		if (!GuardMethod(methodTarget, output))
 			return;
 
 		var isMultiTarget = methodTarget.TargetGenerationState.IsMultiTarget;
@@ -213,25 +210,23 @@ partial class ActivitySourceTargetClassEmitter
 		if (isMultiTarget)
 		{
 			// Generate private activity implementation method
-			EmitPrivateActivityMethod(writer, methodTarget, target, context, logger, emitNullable);
+			EmitPrivateActivityMethod(output, methodTarget, writer, context);
 
 			// Generate public delegating method (Activity emitter owns this for multi-target)
-			EmitPublicDelegatingMethod(writer, methodTarget, methodTargets, context, logger, emitNullable);
+			EmitPublicDelegatingMethod(output, methodTarget, methodTargets, writer, context);
 		}
 		else
 		{
 			// Single-target: generate public method as before
-			EmitPublicActivityMethod(writer, methodTarget, context, logger, emitNullable);
+			EmitPublicActivityMethod(output, methodTarget, writer, context);
 		}
 	}
 
 	static void EmitPrivateActivityMethod(
-		CodeWriter writer,
+		ActivityOutputContext output,
 		ActivityBasedGenerationTarget methodTarget,
-		ActivitySourceTarget _, // target
-		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool emitNullable
+		CodeWriter writer,
+		SourceProductionContext context
 	)
 	{
 		var privateMethodName = methodTarget.MethodName + "_Activity";
@@ -258,26 +253,25 @@ partial class ActivitySourceTargetClassEmitter
 		)
 		{
 			if (methodTarget.MethodType == ActivityMethodType.Activity)
-				EmitActivityMethodBody(writer, methodTarget, context, logger, emitNullable);
+				EmitActivityMethodBody(output, methodTarget, writer, context);
 			else if (methodTarget.MethodType == ActivityMethodType.Event)
-				EmitEventMethodBody(writer, methodTarget, context, logger, emitNullable);
+				EmitEventMethodBody(output, methodTarget, writer, context);
 			else if (methodTarget.MethodType == ActivityMethodType.Context)
-				EmitContextMethodBody(writer, methodTarget, context, logger, emitNullable);
+				EmitContextMethodBody(output, methodTarget, writer, context);
 		}
 
 		writer.NewLine();
 	}
 
 	static void EmitPublicDelegatingMethod(
-		CodeWriter writer,
+		ActivityOutputContext output,
 		ActivityBasedGenerationTarget methodTarget,
 		GenerationType methodTargets,
-		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool emitNullable
+		CodeWriter writer,
+		SourceProductionContext context
 	)
 	{
-		logger?.Debug($"Building public delegating method for {methodTarget.MethodName}.");
+		output.Context.Debug($"Building public delegating method for {methodTarget.MethodName}.");
 		context.CancellationToken.ThrowIfCancellationRequested();
 
 		writer.NewLine();
@@ -356,11 +350,7 @@ partial class ActivitySourceTargetClassEmitter
 			{
 				writer
 					.NewLine()
-					.Write(
-						"return activityResult"
-							+ (!emitNullable || methodTarget.ReturnType.IsNullable ? null : "!")
-							+ ";"
-					);
+					.Write("return activityResult" + (methodTarget.ReturnType.IsNullable ? null : "!") + ";");
 			}
 		}
 
@@ -368,20 +358,15 @@ partial class ActivitySourceTargetClassEmitter
 	}
 
 	static void EmitPublicActivityMethod(
-		CodeWriter writer,
+		ActivityOutputContext output,
 		ActivityBasedGenerationTarget methodTarget,
-		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool emitNullable
+		CodeWriter writer,
+		SourceProductionContext context
 	)
 	{
 		using (
 			writer.WriteMethodScope(
-				new MethodDeclarationOptions(
-					methodTarget.MethodName,
-					methodTarget.ReturnType,
-					TypeDeclarationAccessibility.Public
-				)
+				new(methodTarget.MethodName, methodTarget.ReturnType, TypeDeclarationAccessibility.Public)
 				{
 					Parameters =
 					[
@@ -396,33 +381,31 @@ partial class ActivitySourceTargetClassEmitter
 		)
 		{
 			if (methodTarget.MethodType == ActivityMethodType.Activity)
-				EmitActivityMethodBody(writer, methodTarget, context, logger, emitNullable);
+				EmitActivityMethodBody(output, methodTarget, writer, context);
 			else if (methodTarget.MethodType == ActivityMethodType.Event)
-				EmitEventMethodBody(writer, methodTarget, context, logger, emitNullable);
+				EmitEventMethodBody(output, methodTarget, writer, context);
 			else if (methodTarget.MethodType == ActivityMethodType.Context)
-				EmitContextMethodBody(writer, methodTarget, context, logger, emitNullable);
+				EmitContextMethodBody(output, methodTarget, writer, context);
 		}
 
 		writer.NewLine();
 	}
 
-	static bool GuardMethod(
-		ActivityBasedGenerationTarget methodTarget,
-		ActivitySourceTarget target,
-		ISourceGenLogger? logger
-	)
+	static bool GuardMethod(ActivityBasedGenerationTarget methodTarget, ActivityOutputContext output)
 	{
+		var target = output.Target;
+
 		if (!methodTarget.TargetGenerationState.IsValid)
 		{
 			if (methodTarget.TargetGenerationState.RaiseMultiGenerationTargetsNotSupported)
 			{
-				logger?.Debug(
+				output.Context.Debug(
 					$"Identified {target.InterfaceType.Identity.Name}.{methodTarget.MethodName} as problematic as it has another target types."
 				);
 			}
 			else if (methodTarget.TargetGenerationState.RaiseInferenceNotSupportedWithMultiTargeting)
 			{
-				logger?.Debug(
+				output.Context.Debug(
 					$"Identified {target.InterfaceType.Identity.Name}.{methodTarget.MethodName} as problematic as it is inferred."
 				);
 			}
@@ -441,7 +424,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		if (!isValidReturnType)
 		{
-			logger?.Diagnostic(
+			output.Context.Diagnostic(
 				$"The return type {methodTarget.ReturnType} isn't valid for an activity, event, or context method."
 			);
 
@@ -455,18 +438,18 @@ partial class ActivitySourceTargetClassEmitter
 			{
 				if (!methodTarget.ReturnType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.Activity))
 				{
-					logger?.Diagnostic($"No Activity returned for {methodTarget.MethodName}.");
+					output.Context.Diagnostic($"No Activity returned for {methodTarget.MethodName}.");
 				}
 				else if (!methodTarget.ReturnType.IsNullable)
 				{
-					logger?.Diagnostic($"Activity return type is not nullable for {methodTarget.MethodName}.");
+					output.Context.Diagnostic($"Activity return type is not nullable for {methodTarget.MethodName}.");
 				}
 			}
 			else
 			{
 				if (!methodTarget.HasActivityParameter)
 				{
-					logger?.Diagnostic($"No Activity parameter is defined on {methodTarget.MethodName}.");
+					output.Context.Diagnostic($"No Activity parameter is defined on {methodTarget.MethodName}.");
 				}
 				else if (
 					!methodTarget
@@ -474,7 +457,7 @@ partial class ActivitySourceTargetClassEmitter
 						.ParameterType.Identity.Equals(TypeLibrary.Activities.SystemDiagnostics.Activity)
 				)
 				{
-					logger?.Diagnostic(
+					output.Context.Diagnostic(
 						$"Activity parameter is defined, but it's not the first on {methodTarget.MethodName}."
 					);
 				}

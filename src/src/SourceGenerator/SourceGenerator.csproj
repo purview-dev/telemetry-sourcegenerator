@@ -5,15 +5,16 @@
 		<IsPackable>true</IsPackable>
 		<!-- IDE0005 (unused usings) analysis is gated on GenerateDocumentationFile; the
 		     XML doc file is not packed (only the DLL is). -->
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<COPYRIGHT_YEAR>2026</COPYRIGHT_YEAR>
+		<!--
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>-->
+		<!--<COPYRIGHT_YEAR>2026</COPYRIGHT_YEAR>-->
 		<Title>Purview Telemetry Source Generator</Title>
 		<Description>.NET Source Generator for interface-based telemetry generating tracing, logs, and metrics.</Description>
 		<PackageIcon>purview-logo.jpg</PackageIcon>
-		<Authors>Kieron Lanning</Authors>
+		<!--<Authors>Kieron Lanning</Authors>
 		<Company>Purview-Dev</Company>
-		<Copyright>Purview-Dev, $(COPYRIGHT_YEAR) | All rights reserved.</Copyright>
-		<RepositoryUrl>https://github.com/purview-dev/purview-telemetry-sourcegenerator/</RepositoryUrl>
+		<Copyright>Purview-Dev, $(COPYRIGHT_YEAR) | All rights reserved.</Copyright>-->
+		<RepositoryUrl>https://github.com/purview-dev/telemetry-sourcegenerator/</RepositoryUrl>
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<!--<PackageProjectUrl>https://kjl.dev/projects/purviewtelemetrysourcegenerator/</PackageProjectUrl>-->
@@ -34,20 +35,11 @@
 		/>
 		<Compile Include="..\Shared\TelemetryAttributeNames.cs" Link="Shared\TelemetryAttributeNames.cs" />
 	</ItemGroup>
-	<ItemGroup>
-		<!-- The Sdk folder symlinks resolve to files outside the project dir; keep them out of
-		     the package (the canonical files are packed explicitly below). -->
-		<None Remove="Sdk\README.md" />
-		<None Remove="Sdk\LICENSE.md" />
-		<None Remove="Sdk\assets\images\purview-logo.jpg" />
-	</ItemGroup>
-	<ItemGroup>
-		<None Include="../../../assets/images/purview-logo.jpg" Pack="true" PackagePath="" />
-	</ItemGroup>
 	<!-- Package the build output into the "analyser" slot in the NuGet package -->
 	<ItemGroup>
-		<None Include="..\..\..\README.md" Pack="true" PackagePath="\" />
-		<None Include="..\..\..\LICENSE.md" Pack="true" PackagePath="\" />
+		<None Include="../../../assets/images/purview-logo.jpg" Pack="true" PackagePath="/Sdk/purview-logo.jpg" />
+		<None Include="..\..\..\README.md" Pack="true" PackagePath="/Sdk/" />
+		<None Include="..\..\..\LICENSE.md" Pack="true" PackagePath="/Sdk/" />
 		<None
 			Include="$(OutputPath)\$(AssemblyName).dll"
 			Pack="true"

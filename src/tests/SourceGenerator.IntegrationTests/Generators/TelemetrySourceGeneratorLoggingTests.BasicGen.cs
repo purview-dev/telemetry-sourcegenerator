@@ -1,3 +1,4 @@
+using Purview.SourceGeneratorFramework;
 using Purview.Telemetry.SourceGenerator.Infra;
 
 namespace Purview.Telemetry.SourceGenerator.Logging;
@@ -26,7 +27,20 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"Log",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the log method with its parameter signature");
 	}
 
 	[Test]
@@ -50,7 +64,20 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"Log",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the implicit log method with its parameter signature");
 	}
 
 	[Test]
@@ -79,7 +106,21 @@ public interface ITestLogger {{
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"Log",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>(),
+					TypeReference.Create<Exception>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the log method with its parameter signature");
 	}
 
 	[Test]
@@ -107,7 +148,7 @@ public interface ITestLogger {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, expectsDiagnostics: true, cancellationToken: cancellationToken);
+		await Assert.That(generationResult).HasDiagnostic("TSG2002");
 	}
 
 	[Test]
@@ -133,12 +174,7 @@ public interface ITestLogger {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG2001");
 	}
 
 	[Test]
@@ -166,12 +202,7 @@ public interface ITestLogger {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			validationCompilation: false,
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG2000");
 	}
 
 	[Test]
@@ -195,7 +226,16 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(loggerClass.HasMethod(query, "Log"))
+			.IsTrue()
+			.Because("the generated logger must contain the scoped log method");
+		await Assert
+			.That(loggerClass.HasMethodReturnType(query, "Log", TypeReference.Create<IDisposable>()))
+			.IsTrue()
+			.Because("the scoped log method must return IDisposable");
 	}
 
 	[Test]
@@ -219,7 +259,24 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"Log",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<Exception>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the scoped log method with its parameter signature");
+		await Assert
+			.That(loggerClass.HasMethodReturnType(query, "Log", TypeReference.Create<IDisposable>()))
+			.IsTrue()
+			.Because("the scoped log method must return IDisposable");
 	}
 
 	[Test]
@@ -243,6 +300,15 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(loggerClass.HasMethod(query, "Log", TypeReference.Create<string>(), TypeReference.Create<int>()))
+			.IsTrue()
+			.Because("the generated logger must contain the scoped log method with its parameter signature");
+		await Assert
+			.That(loggerClass.HasMethodReturnType(query, "Log", TypeReference.Create<IDisposable>()))
+			.IsTrue()
+			.Because("the scoped log method must return IDisposable");
 	}
 }

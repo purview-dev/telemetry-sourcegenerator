@@ -14,7 +14,7 @@ enum GenerationType
 	All = Activities | Logging | Metrics,
 }
 
-sealed record TargetGeneration(
+readonly record struct TargetGeneration(
 	bool IsValid,
 	bool RaiseInferenceNotSupportedWithMultiTargeting,
 	bool RaiseMultiGenerationTargetsNotSupported,
@@ -24,7 +24,7 @@ sealed record TargetGeneration(
 	bool RaiseMissingInterfaceSource = false
 );
 
-public record struct MessageTemplateHole(
+public readonly record struct MessageTemplateHole(
 	string? Name,
 	int? Ordinal,
 	int? Alignment,

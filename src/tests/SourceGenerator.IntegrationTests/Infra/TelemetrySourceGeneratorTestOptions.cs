@@ -2,7 +2,9 @@ using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Purview.SourceGeneratorFramework;
 using Purview.Telemetry.SourceGenerator.Analyzers;
+using Purview.Telemetry.SourceGenerator.Helpers;
 
 namespace Purview.Telemetry.SourceGenerator.Infra;
 
@@ -23,8 +25,20 @@ public sealed record TelemetrySourceGeneratorTestOptions : SourceGeneratorTestOp
 
 		AnalyzerTypes = [typeof(TelemetryDiagnosticAnalyzer)];
 
+		// Undisposed CodeWriter scopes fail tests, so emitters must dispose every scope they open.
+		ValidateCodeWriterScopes = true;
+
 		// Most tests do not want a dependency-injection extension generated.
 		AdditionalSources = ["[assembly: Purview.Telemetry.TelemetryGeneration(GenerateDependencyExtension = false)]"];
+
+		ExcludeGeneratedSourceHintNames =
+		[
+			PurviewTypeLibrary.Microsoft.CodeAnalysis.EmbeddedAttribute,
+			.. TypeLibrary.TelemetryShared.GetGeneratedTypes().Select(c => c.MetadataFullName),
+			.. TypeLibrary.Activities.GetGeneratedTypes().Select(c => c.MetadataFullName),
+			.. TypeLibrary.Logging.GetGeneratedTypes().Select(c => c.MetadataFullName),
+			.. TypeLibrary.Metrics.GetGeneratedTypes().Select(c => c.MetadataFullName),
+		];
 	}
 
 	/// <summary>

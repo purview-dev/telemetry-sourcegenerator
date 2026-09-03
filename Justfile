@@ -58,16 +58,21 @@ pipeline-tests *args:
 # Builds the solution with the specified configuration (default: Release)
 
 [group('Build and Test')]
-build:
+build *args:
     echo "Building {{ BLUE }}{{ solution_file }}{{ NORMAL }} with {{ YELLOW }}{{ build_configuration }}{{ NORMAL }}..."
-    dotnet build "{{ solution_file }}" --configuration "{{ build_configuration }}"
+    dotnet build "{{ solution_file }}" --configuration "{{ build_configuration }}" {{ args }}
 
 # Runs tests for the solution with the specified configuration (default: Release)
-
 [group('Build and Test')]
-test:
+test filter="/*/*/*/*/" *args:
     echo "Running tests for {{ BLUE }}{{ test_solution }}{{ NORMAL }} with {{ YELLOW }}{{ build_configuration }}{{ NORMAL }}..."
-    dotnet test --solution "{{ test_solution }}" --configuration "{{ build_configuration }}"
+    dotnet test --solution "{{ test_solution }}" --configuration "{{ build_configuration }}" --treenode-filter={{ filter }} {{ args }}
+
+# Cleans the solution with the specified configuration (default: Release)
+[group('Build and Test')]
+clean *args:
+    echo "Cleaning {{ BLUE }}{{ solution_file }}{{ NORMAL }} with {{ YELLOW }}{{ build_configuration }}{{ NORMAL }}..."
+    dotnet clean "{{ solution_file }}" --configuration "{{ build_configuration }}" {{ args }}
 
 # Packs the source generator into a NuGet package
 
@@ -111,40 +116,22 @@ test-s:
 # -----------------------------------------------------------------------------
 
 # Formats the code in the root folder
-
 format:
     echo "Formatting {{ BLUE }}{{ root_folder }}{{ NORMAL }}..."
     dotnet format "{{ root_folder }}"
 
+# Checks for linting issues in the root folder
 lint:
     echo "Linting checking {{ BLUE }}{{ root_folder }}{{ NORMAL }}..."
     dotnet csharpier check .
 
+# Fixes linting issues in the root folder
 lint-fix:
     echo "Linting fixing {{ BLUE }}{{ root_folder }}{{ NORMAL }}..."
     dotnet csharpier format .
 
-# -----------------------------------------------------------------------------
-# Versioning and Release
-# -----------------------------------------------------------------------------
-
-# Creates a new changeset to describe the changes in the current branch.
-# Requires Bun.
-
-[group('Versioning and Release')]
-changeset:
-    bun changeset
-
-# Shows pending changesets and the version bump they imply.
-# Requires Bun.
-
-[group('Versioning and Release')]
-changeset-status:
-    bun changeset status
-
 # Displays the current version of the project.
 # Requires Bun.
-
 [group('Versioning and Release')]
 version:
     bun -e "console.log('Current Version: {{ GREEN }}' + require('./package.json').version + '{{ NORMAL }}')"

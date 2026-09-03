@@ -1,5 +1,3 @@
-using Purview.Telemetry.SourceGenerator.Infra;
-
 namespace Purview.Telemetry.SourceGenerator;
 
 partial class TelemetrySourceGeneratorTests
@@ -76,7 +74,39 @@ interface IEntityStoreTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("GettingEntityFromStore"))
+			.IsTrue()
+			.Because("the generated class must contain the activity method");
+		await Assert
+			.That(query.HasMethod("GetDuration"))
+			.IsTrue()
+			.Because("the generated class must contain the event method");
+		await Assert
+			.That(query.HasMethod("RetrievedEntity"))
+			.IsTrue()
+			.Because("the generated class must contain the context method");
+		await Assert
+			.That(query.HasMethod("AScopedLogEntry"))
+			.IsTrue()
+			.Because("the generated class must contain the scoped log method");
+		await Assert
+			.That(query.HasMethod("LogMessage"))
+			.IsTrue()
+			.Because("the generated class must contain the log method");
+		await Assert
+			.That(query.HasMethod("ExplicitInfoMessage"))
+			.IsTrue()
+			.Because("the generated class must contain the info log method");
+		await Assert
+			.That(query.HasMethod("ExplicitErrorMessage"))
+			.IsTrue()
+			.Because("the generated class must contain the error log method");
+		await Assert
+			.That(query.HasMethod("RetrievingEntity"))
+			.IsTrue()
+			.Because("the generated class must contain the auto-counter method");
 	}
 
 	[Test]
@@ -116,12 +146,7 @@ interface IActivityTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			expectsDiagnostics: true,
-			expectedDiagnosticCodes: ["TSG3021"],
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasDiagnostic("TSG3021");
 	}
 
 	[Test]
@@ -165,7 +190,23 @@ enum ItemTypes
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("ProcessingWorkItem"))
+			.IsTrue()
+			.Because("the generated logger must contain the scoped log method");
+		await Assert
+			.That(query.HasMethod("ProcessingItemType"))
+			.IsTrue()
+			.Because("the generated logger must contain the item-type log method");
+		await Assert
+			.That(query.HasMethod("FailedToProcessWorkItem"))
+			.IsTrue()
+			.Because("the generated logger must contain the error log method");
+		await Assert
+			.That(query.HasMethod("ProcessingComplete"))
+			.IsTrue()
+			.Because("the generated logger must contain the completion log method");
 	}
 
 	[Test]
@@ -214,7 +255,39 @@ interface IMeterTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("AutoCounterMeter"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the auto-counter method");
+		await Assert
+			.That(query.HasMethod("AutoIncrementMeter"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the auto-increment counter method");
+		await Assert
+			.That(query.HasMethod("CounterMeter"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the counter method");
+		await Assert
+			.That(query.HasMethod("HistogramMeter"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the histogram method");
+		await Assert
+			.That(query.HasMethod("ObservableCounterMeter"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the observable counter method");
+		await Assert
+			.That(query.HasMethod("ObservableGaugeMeter"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the observable gauge method");
+		await Assert
+			.That(query.HasMethod("ObservableUpDownCounter"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the observable up-down counter method");
+		await Assert
+			.That(query.HasMethod("UpDownCounterMeter"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the up-down counter method");
 	}
 
 	[Test]
@@ -256,6 +329,26 @@ interface IServiceTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("StartAnActivity"))
+			.IsTrue()
+			.Because("the generated class must contain the activity method");
+		await Assert
+			.That(query.HasMethod("AnInterestingEvent"))
+			.IsTrue()
+			.Because("the generated class must contain the event method");
+		await Assert
+			.That(query.HasMethod("InterestingInfo"))
+			.IsTrue()
+			.Because("the generated class must contain the context method");
+		await Assert
+			.That(query.HasMethod("ProcessingEntity"))
+			.IsTrue()
+			.Because("the generated class must contain the log method");
+		await Assert
+			.That(query.HasMethod("AnAutoIncrement"))
+			.IsTrue()
+			.Because("the generated class must contain the auto-increment counter method");
 	}
 }

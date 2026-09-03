@@ -1,6 +1,5 @@
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Records;
-using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator.Helpers;
 
@@ -11,17 +10,17 @@ partial class SharedHelpers
 		if (
 			!Utilities.TryContainsAttribute(
 				symbol,
-				[TemplateLibrary.Logging.LogAttribute, .. TemplateLibrary.Logging.SpecificLogAttributes],
+				TypeLibrary.Logging.LogAttributeTargets,
 				token,
-				out var attributeData,
-				out var matchingTemplate
+				out var matchingType,
+				out var attributeData
 			)
 		)
 		{
 			return null;
 		}
 
-		if (matchingTemplate == TemplateLibrary.Logging.LogAttribute)
+		if (matchingType == TypeLibrary.Logging.LogAttribute)
 		{
 			var data = LogAttributeData.FromAttributeData(attributeData!);
 			return data.Exists
@@ -33,101 +32,48 @@ partial class SharedHelpers
 				: null;
 		}
 
-		// A specific level attribute (Trace/Debug/Info/Warning/Error/Critical) forces its level.
-		(var messageTemplate, var eventId, var name, var generationMode) = GetSpecificLogData(
-			matchingTemplate!,
-			attributeData!
-		);
-
-		return new(
-			exists: true,
-			Level: TemplateLibrary.Logging.SpecificLogAttributesToLevel[matchingTemplate!],
-			MessageTemplate: messageTemplate,
-			EventId: eventId,
-			Name: name,
-			GenerationMode: generationMode
-		);
+		return GetSpecificLogData(matchingType, attributeData!);
 	}
 
-	static (string? MessageTemplate, int EventId, string? Name, int GenerationMode) GetSpecificLogData(
-		TemplateInfo template,
-		AttributeData attributeData
-	)
+	static LogAttributeData GetSpecificLogData(TypeIdentity template, AttributeData attributeData)
 	{
-		if (template == TemplateLibrary.Logging.TraceAttribute)
+		if (template == TypeLibrary.Logging.TraceAttribute)
 		{
 			var data = TraceAttributeData.FromAttributeData(attributeData);
-			return (
-				NullIfWhitespace(data.MessageTemplate),
-				data.EventId,
-				NullIfWhitespace(data.Name),
-				data.GenerationMode
-			);
+			return data.ToLogAttribute();
 		}
 
-		if (template == TemplateLibrary.Logging.DebugAttribute)
+		if (template == TypeLibrary.Logging.DebugAttribute)
 		{
 			var data = DebugAttributeData.FromAttributeData(attributeData);
-			return (
-				NullIfWhitespace(data.MessageTemplate),
-				data.EventId,
-				NullIfWhitespace(data.Name),
-				data.GenerationMode
-			);
+			return data.ToLogAttribute();
 		}
 
-		if (template == TemplateLibrary.Logging.InfoAttribute)
+		if (template == TypeLibrary.Logging.InfoAttribute)
 		{
 			var data = InfoAttributeData.FromAttributeData(attributeData);
-			return (
-				NullIfWhitespace(data.MessageTemplate),
-				data.EventId,
-				NullIfWhitespace(data.Name),
-				data.GenerationMode
-			);
+			return data.ToLogAttribute();
 		}
 
-		if (template == TemplateLibrary.Logging.WarningAttribute)
+		if (template == TypeLibrary.Logging.WarningAttribute)
 		{
 			var data = WarningAttributeData.FromAttributeData(attributeData);
-			return (
-				NullIfWhitespace(data.MessageTemplate),
-				data.EventId,
-				NullIfWhitespace(data.Name),
-				data.GenerationMode
-			);
+			return data.ToLogAttribute();
 		}
 
-		if (template == TemplateLibrary.Logging.ErrorAttribute)
+		if (template == TypeLibrary.Logging.ErrorAttribute)
 		{
 			var data = ErrorAttributeData.FromAttributeData(attributeData);
-			return (
-				NullIfWhitespace(data.MessageTemplate),
-				data.EventId,
-				NullIfWhitespace(data.Name),
-				data.GenerationMode
-			);
+			return data.ToLogAttribute();
 		}
 
 		var criticalData = CriticalAttributeData.FromAttributeData(attributeData);
-		return (
-			NullIfWhitespace(criticalData.MessageTemplate),
-			criticalData.EventId,
-			NullIfWhitespace(criticalData.Name),
-			criticalData.GenerationMode
-		);
+		return criticalData.ToLogAttribute();
 	}
 
 	public static LoggerAttributeData? GetLoggerAttribute(ISymbol symbol, CancellationToken token)
 	{
-		if (
-			!Utilities.TryContainsAttribute(
-				symbol,
-				TemplateLibrary.Logging.LoggerAttribute,
-				token,
-				out var attributeData
-			)
-		)
+		if (!Utilities.TryContainsAttribute(symbol, TypeLibrary.Logging.LoggerAttribute, token, out var attributeData))
 		{
 			return null;
 		}
@@ -141,7 +87,7 @@ partial class SharedHelpers
 		if (
 			!Utilities.TryContainsAttribute(
 				symbol,
-				TemplateLibrary.Logging.LoggerGenerationAttribute,
+				TypeLibrary.Logging.LoggerGenerationAttribute,
 				token,
 				out var attributeData
 			)
@@ -177,7 +123,7 @@ partial class SharedHelpers
 		if (
 			!Utilities.TryContainsAttribute(
 				symbol,
-				TemplateLibrary.Logging.ExpandEnumerableAttribute,
+				TypeLibrary.Logging.ExpandEnumerableAttribute,
 				token,
 				out var attributeData
 			)
@@ -194,13 +140,6 @@ partial class SharedHelpers
 		Compilation compilation,
 		CancellationToken token
 	) => GetLoggerGenerationAttribute(compilation.Assembly, token);
-
-	public static bool IsLogMethod(IMethodSymbol method, CancellationToken token) =>
-		Utilities.ContainsAttribute(
-			method,
-			[TemplateLibrary.Logging.LogAttribute, .. TemplateLibrary.Logging.SpecificLogAttributes],
-			token
-		);
 
 	/// <summary>
 	/// Returns a non-randomized hash code for the given string.

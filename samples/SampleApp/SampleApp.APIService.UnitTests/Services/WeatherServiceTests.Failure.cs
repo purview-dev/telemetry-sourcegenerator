@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
 namespace SampleApp.APIService.Services;
 
@@ -18,7 +18,7 @@ partial class WeatherServiceTests
 			nameof(GetWeatherForecastsAsync_GivenSimulatedUpstreamFails_CallsFailureActivityEventAndLog)
 		);
 
-		telemetry.GettingWeatherForecast(Arg.Any<string>(), requestCount).Returns(activity);
+		telemetry.GettingWeatherForecast(Any<string>(), Is(requestCount)).Returns(activity);
 
 		// Act
 		var err = await service.GetWeatherForecastsAsync(requestCount, cancellationToken);
@@ -28,6 +28,6 @@ partial class WeatherServiceTests
 		await Assert.That(err.FirstError.Code).IsEqualTo("WeatherForecast.RetrievalFailed");
 		await Assert.That(err.FirstError.Type).IsEqualTo(ErrorOr.ErrorType.Failure);
 
-		telemetry.Received(1).FailedToRetrieveForecast(Arg.Is(activity), Arg.Any<Exception>());
+		telemetry.FailedToRetrieveForecast(Is<Activity?>(activity), Any<Exception>()).WasCalled(Times.Once);
 	}
 }

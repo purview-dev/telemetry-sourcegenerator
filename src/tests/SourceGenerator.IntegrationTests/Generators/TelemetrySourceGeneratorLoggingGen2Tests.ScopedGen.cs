@@ -1,3 +1,4 @@
+using Purview.SourceGeneratorFramework;
 using Purview.Telemetry.SourceGenerator.Infra;
 
 namespace Purview.Telemetry.SourceGenerator.Logging;
@@ -30,7 +31,16 @@ public interface ITestLogger
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(loggerClass.HasMethod(query, "BasicScoped"))
+			.IsTrue()
+			.Because("the generated logger must contain the scoped log method");
+		await Assert
+			.That(loggerClass.HasMethodReturnType(query, "BasicScoped", TypeReference.Create<IDisposable>()))
+			.IsTrue()
+			.Because("the scoped log method must return IDisposable");
 	}
 
 	[Test]
@@ -55,7 +65,24 @@ public interface ITestLogger
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"BasicScoped",
+					TypeReference.Create<int>(),
+					TypeReference.Create<string>(),
+					TypeReference.Create<uint>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the scoped log method with its parameter signature");
+		await Assert
+			.That(loggerClass.HasMethodReturnType(query, "BasicScoped", TypeReference.Create<IDisposable>()))
+			.IsTrue()
+			.Because("the scoped log method must return IDisposable");
 	}
 
 	[Test]
@@ -82,7 +109,24 @@ public interface ITestLogger
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"BasicScoped",
+					TypeReference.Create<int>(),
+					TypeReference.Create<string>(),
+					TypeReference.Create<uint>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the scoped log method with its parameter signature");
+		await Assert
+			.That(loggerClass.HasMethodReturnType(query, "BasicScoped", TypeReference.Create<IDisposable>()))
+			.IsTrue()
+			.Because("the scoped log method must return IDisposable");
 	}
 
 	[Test]
@@ -109,7 +153,24 @@ public interface ITestLogger
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"BasicScoped",
+					TypeReference.Create<int>(),
+					TypeReference.Create<string>(),
+					TypeReference.Create<uint>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the scoped log method with its parameter signature");
+		await Assert
+			.That(loggerClass.HasMethodReturnType(query, "BasicScoped", TypeReference.Create<IDisposable>()))
+			.IsTrue()
+			.Because("the scoped log method must return IDisposable");
 	}
 
 	[Test]
@@ -140,7 +201,7 @@ public interface ITestLogger
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, expectsDiagnostics: true, cancellationToken: cancellationToken);
+		await Assert.That(generationResult).HasDiagnostic("TSG2007");
 	}
 
 	[Test]
@@ -171,6 +232,6 @@ public interface ITestLogger
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, expectsDiagnostics: true, cancellationToken: cancellationToken);
+		await Assert.That(generationResult).HasDiagnostic("TSG2007");
 	}
 }

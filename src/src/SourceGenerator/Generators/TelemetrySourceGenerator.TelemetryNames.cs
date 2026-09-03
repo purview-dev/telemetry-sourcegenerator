@@ -41,8 +41,6 @@ partial class TelemetrySourceGenerator
 
 	static void GenerateTelemetryNames(TelemetryNamesOutputContext output, SourceProductionContext spc)
 	{
-		var logger = output.Context.Logger;
-
 		// Only generate if we have at least one target
 		if (output.MeterTargets.IsEmpty && output.ActivityTargets.IsEmpty)
 		{
@@ -62,6 +60,7 @@ partial class TelemetrySourceGenerator
 		// Check if any target has GenerateTelemetryNamesClass set to false
 		var generateClass = true;
 		string? customClassName = null;
+		string? customNamespace = null;
 
 		// Check meter targets for TelemetryGeneration settings
 		foreach (var target in processedMeters)
@@ -75,6 +74,11 @@ partial class TelemetrySourceGenerator
 			if (target.TelemetryGeneration.TelemetryNamesClassName != null && customClassName == null)
 			{
 				customClassName = target.TelemetryGeneration.TelemetryNamesClassName;
+			}
+
+			if (target.TelemetryGeneration.TelemetryNamesNamespace != null && customNamespace == null)
+			{
+				customNamespace = target.TelemetryGeneration.TelemetryNamesNamespace;
 			}
 		}
 
@@ -90,6 +94,11 @@ partial class TelemetrySourceGenerator
 			if (target.TelemetryGeneration.TelemetryNamesClassName != null && customClassName == null)
 			{
 				customClassName = target.TelemetryGeneration.TelemetryNamesClassName;
+			}
+
+			if (target.TelemetryGeneration.TelemetryNamesNamespace != null && customNamespace == null)
+			{
+				customNamespace = target.TelemetryGeneration.TelemetryNamesNamespace;
 			}
 		}
 
@@ -121,13 +130,13 @@ partial class TelemetrySourceGenerator
 			spc,
 			() =>
 				TelemetryNamesEmitter.GenerateClass(
+					output,
 					meterNames,
 					activitySourceNames,
 					className!,
-					output.AssemblyName,
-					output.Context.Capabilities.SupportsNullableAnnotations,
+					customNamespace ?? output.AssemblyName,
 					spc,
-					logger
+					output.Context
 				)
 		);
 	}

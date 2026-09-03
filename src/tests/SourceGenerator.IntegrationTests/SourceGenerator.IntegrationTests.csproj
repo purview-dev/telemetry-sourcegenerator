@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<!-- The Purview SDK defaults TargetFramework to net10.0 before this file is evaluated;
+		     clear it so the multi-targeted TargetFrameworks below take effect. -->
+		<TargetFramework></TargetFramework>
+		<!-- net48 can only be built and run on Windows, so it is excluded on other platforms. -->
+		<TargetFrameworks>net8.0;net9.0;net10.0;</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">net48;$(TargetFrameworks)</TargetFrameworks>
 	</PropertyGroup>
-	<ItemGroup>
-		<Compile Remove="Resources/**/*" />
-		<EmbeddedResource Include="Resources/**/*" />
-	</ItemGroup>
 	<ItemGroup>
 		<Using Include="Microsoft.CodeAnalysis" />
 		<Using Include="System.Collections.Immutable" />
@@ -20,5 +22,28 @@
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" />
 		<PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" />
 		<PackageReference Include="Purview.SourceGeneratorFramework.Testing.TUnit" />
+	</ItemGroup>
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net48'">
+		<!-- The Microsoft.Extensions.* 8.x packages ship net462 assets but mark them "not tested on
+		     net48" (TfmSupport warning). net48 is a supported target for this test project, so the
+		     warning is suppressed. -->
+		<SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+	</PropertyGroup>
+	<!-- Microsoft.Extensions.* versions are aligned with the target framework era: net48/net8.0 use
+	     the 8.x line, net9.0 uses 9.x, and net10.0 uses the centrally-managed 10.x defaults. -->
+	<ItemGroup Condition="'$(TargetFramework)' == 'net48' Or '$(TargetFramework)' == 'net8.0'">
+		<PackageReference Update="Microsoft.Extensions.Logging" VersionOverride="8.0.1" />
+		<PackageReference Update="Microsoft.Extensions.DependencyInjection" VersionOverride="8.0.1" />
+		<PackageReference Update="Microsoft.Extensions.Telemetry.Abstractions" VersionOverride="8.10.0" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+		<PackageReference Update="Microsoft.Extensions.Logging" VersionOverride="9.0.19" />
+		<PackageReference Update="Microsoft.Extensions.DependencyInjection" VersionOverride="9.0.19" />
+		<PackageReference Update="Microsoft.Extensions.Telemetry.Abstractions" VersionOverride="9.10.0" />
+	</ItemGroup>
+	<!-- net48's ExcludeFromCodeCoverageAttribute does not allow assembly targets, so the SDK's
+	     test-project [assembly: ExcludeFromCodeCoverage] is removed for that target. -->
+	<ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+		<AssemblyAttribute Remove="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute" />
 	</ItemGroup>
 </Project>

@@ -38,11 +38,11 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 
 		var hasActivitySource = Utilities.ContainsAttribute(
 			interfaceSymbol,
-			TemplateLibrary.Activities.ActivitySourceAttribute,
+			TypeLibrary.Activities.ActivitySourceAttribute,
 			token
 		);
-		var hasLogger = Utilities.ContainsAttribute(interfaceSymbol, TemplateLibrary.Logging.LoggerAttribute, token);
-		var hasMeter = Utilities.ContainsAttribute(interfaceSymbol, TemplateLibrary.Metrics.MeterAttribute, token);
+		var hasLogger = Utilities.ContainsAttribute(interfaceSymbol, TypeLibrary.Logging.LoggerAttribute, token);
+		var hasMeter = Utilities.ContainsAttribute(interfaceSymbol, TypeLibrary.Metrics.MeterAttribute, token);
 
 		if (!hasActivitySource && !hasLogger && !hasMeter)
 			return;
@@ -65,7 +65,7 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 
 		if (hasActivitySource)
 		{
-			var result = PipelineHelpers.BuildActivityTarget(interfaceSymbol, compilation, null, token);
+			var result = PipelineHelpers.BuildActivityTarget(interfaceSymbol, compilation, token);
 			if (result.HasValue && result.Value is { } activityTarget)
 			{
 				var diagnostics = TelemetryRules.GetActivityDiagnostics(activityTarget, interfaceSymbol, token);
@@ -76,7 +76,7 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 
 		if (hasMeter)
 		{
-			var result = PipelineHelpers.BuildMeterTarget(interfaceSymbol, compilation, null, token);
+			var result = PipelineHelpers.BuildMeterTarget(interfaceSymbol, compilation, token);
 			if (result.HasValue && result.Value is { } meterTarget)
 			{
 				var diagnostics = TelemetryRules.GetMeterDiagnostics(meterTarget, interfaceSymbol, token);

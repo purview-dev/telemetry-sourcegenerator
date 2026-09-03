@@ -22,7 +22,7 @@ partial class TelemetrySourceGenerator
 			source: outputContexts,
 			action: static (spc, output) =>
 			{
-				output.Context.Logger?.Debug($"Meter generation target: {output.Target.FullyQualifiedName}");
+				output.Context.Debug($"Meter generation target: {output.Target.FullyQualifiedName}");
 				RunSafely(spc, () => MeterTargetClassEmitter.GenerateImplementation(output, spc));
 			}
 		);

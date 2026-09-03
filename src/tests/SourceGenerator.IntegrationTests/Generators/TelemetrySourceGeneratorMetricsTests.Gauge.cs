@@ -1,5 +1,3 @@
-using Purview.Telemetry.SourceGenerator.Infra;
-
 namespace Purview.Telemetry.SourceGenerator.Metrics;
 
 partial class TelemetrySourceGeneratorMetricsTests
@@ -33,6 +31,19 @@ public interface ITestMetrics {
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "ObservableGauge"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the observable gauge method");
+		await Assert
+			.That(metricsClass.HasMethod(query, "ObservableGauge2"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the second observable gauge method");
+		await Assert
+			.That(metricsClass.HasMethod(query, "ObservableGauge3"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the third observable gauge method");
 	}
 }

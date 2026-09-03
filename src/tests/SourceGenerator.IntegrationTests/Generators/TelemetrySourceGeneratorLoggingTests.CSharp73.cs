@@ -1,4 +1,4 @@
-using Purview.Telemetry.SourceGenerator.Infra;
+using Purview.SourceGeneratorFramework;
 
 namespace Purview.Telemetry.SourceGenerator.Logging;
 
@@ -27,7 +27,20 @@ public interface ITestLogger {
 		// Act
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
-		// Assert: validationCompilation=true (default) verifies generated code compiles under C# 7.3.
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		// Assert: GenerateAsync's EnsureValid (default) verifies generated code compiles under C# 7.3.
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"Log",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must contain the log method with its parameter signature");
 	}
 }

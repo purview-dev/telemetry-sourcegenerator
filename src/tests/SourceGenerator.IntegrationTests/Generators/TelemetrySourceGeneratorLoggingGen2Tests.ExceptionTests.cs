@@ -1,3 +1,4 @@
+using Purview.SourceGeneratorFramework;
 using Purview.Telemetry.SourceGenerator.Infra;
 
 namespace Purview.Telemetry.SourceGenerator.Logging;
@@ -25,7 +26,18 @@ public interface ITestLogger {
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"LogEntryWithCustomExceptionType",
+					TypeReference.Create<NullReferenceException>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must treat the non-specific exception type as the exception parameter");
 	}
 
 	[Test]
@@ -51,7 +63,18 @@ public class BadLuckException : Exception { }
 		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var loggerClass = query.GetClass("TestLoggerCore", "Testing");
+		await Assert
+			.That(
+				loggerClass.HasMethod(
+					query,
+					"LogEntryWithCustomExceptionType",
+					new TypeReference(new TypeIdentity("BadLuckException", "Testing"))
+				)
+			)
+			.IsTrue()
+			.Because("the generated logger must treat the custom exception type as the exception parameter");
 	}
 
 	[Test]
@@ -81,6 +104,6 @@ public class BadLuckException : Exception { }
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, expectsDiagnostics: true, cancellationToken: cancellationToken);
+		await Assert.That(generationResult).HasDiagnostic("TSG2000");
 	}
 }

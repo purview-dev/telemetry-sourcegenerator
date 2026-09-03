@@ -1,20 +1,29 @@
 <Project>
 	<PropertyGroup>
 		<TargetFramework>net48</TargetFramework>
-		<LangVersion>latest</LangVersion>
-		<Nullable>disable</Nullable>
-		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-		<EnableNETAnalyzers>true</EnableNETAnalyzers>
-		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
-		<AnalysisLevel>latest</AnalysisLevel>
+		<NamespacePrefix>SampleApp.Net48</NamespacePrefix>
+		<!--
+			This comes from Purview.DotnetSdk where we auto include the
+			telemetry... the samples consume the local generator via analyzer
+			ProjectReference, so the published package is excluded here.
+		-->
+		<ExcludePurviewTelemetry>true</ExcludePurviewTelemetry>
+		<!-- The marker attributes injected by the generator are decorated with
+		     [Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")], so consumers must define this symbol
+		     for the generator (and analyzer) to see the attribute usages. -->
+		<DefineConstants>$(DefineConstants);PURVIEW_TELEMETRY_ATTRIBUTES</DefineConstants>
 		<!--
 			CA1303: Console app — no resource table needed for literal strings.
 			CA1515: Console app — public types are fine (no assembly boundary concerns).
 			CA1812: WeatherService is instantiated via DI, not directly.
 			CA5394: Random is fine for simulation / demo purposes.
 			CS1574: cref resolution differences in net48 XML doc comments (in generated code).
+			CS8618/CS8625: the generator's injected attribute templates initialize non-nullable
+			members with null when compiled under net8+/net10-style nullable settings.
 			TSG3022: Activity? vs Activity — net48 disables nullable, so Activity is used here.
 		-->
-		<NoWarn>$(NoWarn);CA1031;CA1303;CA1515;CA1812;CA2007;CA2201;CA5394;CS1574;TSG3022;</NoWarn>
+		<NoWarn>$(NoWarn);CA1031;CA1303;CA1515;CA1812;CA2007;CA2201;CA5394;CS1574;CS8618;CS8625;TSG3022;</NoWarn>
 	</PropertyGroup>
+
+	<Import Sdk="Purview.DotNetProjectSdk" Project="Sdk.props" />
 </Project>

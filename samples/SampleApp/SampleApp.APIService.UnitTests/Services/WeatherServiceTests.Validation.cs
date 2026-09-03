@@ -1,4 +1,4 @@
-﻿namespace SampleApp.APIService.Services;
+namespace SampleApp.APIService.Services;
 
 partial class WeatherServiceTests
 {
@@ -24,6 +24,6 @@ partial class WeatherServiceTests
 		await Assert.That(err.FirstError.Code).IsEqualTo("RequestCount.Invalid");
 		await Assert.That(err.FirstError.Type).IsEqualTo(ErrorOr.ErrorType.Validation);
 
-		telemetry.Received(1).RequestedCountIsOutOfRange(Arg.Is(requestCount));
+		telemetry.RequestedCountIsOutOfRange(Is(requestCount)).WasCalled(Times.Once);
 	}
 }

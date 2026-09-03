@@ -1,5 +1,3 @@
-using Purview.Telemetry.SourceGenerator.Infra;
-
 namespace Purview.Telemetry.SourceGenerator;
 
 partial class TelemetrySourceGeneratorTests
@@ -92,10 +90,24 @@ public interface ICacheServiceProviderTelemetry
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(
-			generationResult,
-			whenValidatingDiagnosticsIgnoreNonErrors: true,
-			cancellationToken: cancellationToken
-		);
+		await Assert.That(generationResult).HasNoErrorDiagnostics();
+
+		var query = generationResult.Generated();
+		await Assert
+			.That(query.HasMethod("GetFromCache"))
+			.IsTrue()
+			.Because("the generated class must contain the activity method");
+		await Assert
+			.That(query.HasMethod("SerializePayload"))
+			.IsTrue()
+			.Because("the generated class must contain the serialize-payload activity method");
+		await Assert
+			.That(query.HasMethod("FailedToGetFromCache"))
+			.IsTrue()
+			.Because("the generated class must contain the log method");
+		await Assert
+			.That(query.HasMethod("CacheHit"))
+			.IsTrue()
+			.Because("the generated class must contain the cache-hit event method");
 	}
 }

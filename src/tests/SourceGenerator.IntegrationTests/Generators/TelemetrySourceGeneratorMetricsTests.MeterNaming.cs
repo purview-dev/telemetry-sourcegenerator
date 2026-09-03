@@ -1,5 +1,3 @@
-using Purview.Telemetry.SourceGenerator.Infra;
-
 namespace Purview.Telemetry.SourceGenerator.Metrics;
 
 partial class TelemetrySourceGeneratorMetricsTests
@@ -28,7 +26,16 @@ interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "AutoCounterMetric"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the auto-counter method");
+		await Assert
+			.That(generationResult.GetSource("TestMetricsCore.Metric.g.cs"))
+			.ContainsGeneratedCode("this.is.a.prefix.auto_counter_metric")
+			.Because("the instrument name must be prefixed and lowercased");
 	}
 
 	[Test]
@@ -57,7 +64,16 @@ interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "AutoCounterMetric"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the auto-counter method");
+		await Assert
+			.That(generationResult.GetSource("TestMetricsCore.Metric.g.cs"))
+			.ContainsGeneratedCode("this.is.an.assembly.prefix.test_metrics.auto_counter_metric")
+			.Because("the instrument name must be prefixed from the assembly and lowercased");
 	}
 
 	[Test]
@@ -86,7 +102,16 @@ interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "AutoCounterMetric"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the auto-counter method");
+		await Assert
+			.That(generationResult.GetSource("TestMetricsCore.Metric.g.cs"))
+			.ContainsGeneratedCode("this.is.an.assembly.prefix.this.is.a.prefix.auto_counter_metric")
+			.Because("the assembly and interface prefixes must be combined");
 	}
 
 	[Test]
@@ -115,7 +140,16 @@ interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "AutoCounterMetric"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the auto-counter method");
+		await Assert
+			.That(generationResult.GetSource("TestMetricsCore.Metric.g.cs"))
+			.ContainsGeneratedCode("auto-counter")
+			.Because("the explicit instrument name must be used");
 	}
 
 	[Test]
@@ -142,7 +176,16 @@ interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "AutoCounterMetric"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the auto-counter method");
+		await Assert
+			.That(generationResult.GetSource("TestMetricsCore.Metric.g.cs"))
+			.ContainsGeneratedCode("test_metrics.auto_counter_metric")
+			.Because("the instrument name must be lowercased");
 	}
 
 	[Test]
@@ -169,7 +212,16 @@ interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "AutoCounterMetric"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the auto-counter method");
+		await Assert
+			.That(generationResult.GetSource("TestMetricsCore.Metric.g.cs"))
+			.ContainsGeneratedCode("test_metrics.auto_counter_metric")
+			.Because("the default instrument name must be lowercased");
 	}
 
 	[Test]
@@ -196,7 +248,16 @@ interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "AutoCounterMetric"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the auto-counter method");
+		await Assert
+			.That(generationResult.GetSource("TestMetricsCore.Metric.g.cs"))
+			.ContainsGeneratedCode("AutoCounterMetric")
+			.Because("the instrument name must preserve its defined case");
 	}
 
 	[Test]
@@ -223,7 +284,16 @@ interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "AutoCounterMetric"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the auto-counter method");
+		await Assert
+			.That(generationResult.GetSource("TestMetricsCore.Metric"))
+			.ContainsGeneratedCode("test_metrics.auto_counter_metric")
+			.Because("the instrument name must be generated for the assembly-derived meter name");
 	}
 
 	[Test]
@@ -250,7 +320,16 @@ interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "AutoCounterMetric"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the auto-counter method");
+		await Assert
+			.That(generationResult.GetSource("TestMetricsCore.Metric.g.cs"))
+			.ContainsGeneratedCode("my.custom.meter")
+			.Because("the assembly meter name must be used");
 	}
 
 	[Test]
@@ -279,7 +358,16 @@ interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "AutoCounterMetric"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the auto-counter method");
+		await Assert
+			.That(generationResult.GetSource("TestMetricsCore.Metric.g.cs"))
+			.ContainsGeneratedCode("test_metrics.auto_counter_metric")
+			.Because("the instrument name must be generated for the DotNet-convention meter name");
 	}
 
 	[Test]
@@ -306,6 +394,15 @@ interface ITestMetrics
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "AutoCounterMetric"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the auto-counter method");
+		await Assert
+			.That(generationResult.GetSource("TestMetricsCore.Metric.g.cs"))
+			.ContainsGeneratedCode("interface.override")
+			.Because("the interface meter name must override the assembly default");
 	}
 }

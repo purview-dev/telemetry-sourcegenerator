@@ -7,17 +7,16 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 partial class MeterTargetClassEmitter
 {
 	static void EmitFields(
-		MeterTarget target,
+		MeterOutputContext output,
 		CodeWriter writer,
 		SourceProductionContext context,
-		ISourceGenLogger? logger,
-		bool readonlyFields = false,
-		bool emitNullable = true
+		bool readonlyFields = false
 	)
 	{
+		var target = output.Target;
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		logger?.Debug($"Emitting fields for {target.ClassNameToGenerate}");
+		output.Context.Debug($"Emitting fields for {target.ClassNameToGenerate}");
 
 		// When metrics owns the constructor, emit readonly fields so the JIT can treat
 		// them as immutable after construction and eliminate null checks in hot paths.
@@ -37,7 +36,7 @@ partial class MeterTargetClassEmitter
 				.Write(TypeLibrary.Metrics.SystemDiagnostics.Meter)
 				.Write(' ')
 				.Write(MeterFieldName)
-				.WriteLine(emitNullable ? " = default!;" : " = default;")
+				.WriteLine(writer.IsNullableContextEnabled is null or true ? " = default!;" : " = default;")
 				.NewLine();
 		}
 
@@ -73,7 +72,7 @@ partial class MeterTargetClassEmitter
 					.Write(type)
 					.Write(' ')
 					.Write(method.FieldName)
-					.WriteLine(emitNullable ? " = default!;" : " = default;");
+					.WriteLine(writer.IsNullableContextEnabled is null or true ? " = default!;" : " = default;");
 			}
 		}
 	}

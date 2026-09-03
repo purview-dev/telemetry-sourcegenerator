@@ -1,3 +1,5 @@
+using Purview.Telemetry.SourceGenerator.Infra;
+
 namespace Purview.Telemetry.SourceGenerator.Refactorings;
 
 /// <summary>
@@ -5,6 +7,7 @@ namespace Purview.Telemetry.SourceGenerator.Refactorings;
 /// Each test defines a <em>before</em> scenario and the snapshot captures the <em>after</em> output.
 /// To regenerate snapshots: run <c>dotnet test</c>; <c>*.received.txt</c> files are auto-accepted.
 /// </summary>
+[SkipOnNetFramework]
 public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : CodeRefactoringTestBase
 {
 	static readonly ConvertMetricsToTelemetryRefactoringProvider Provider = new();

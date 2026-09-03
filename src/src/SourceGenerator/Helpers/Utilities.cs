@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Purview.Telemetry.SourceGenerator.Records;
-using Purview.Telemetry.SourceGenerator.Templates;
 
 namespace Purview.Telemetry.SourceGenerator.Helpers;
 
@@ -91,27 +90,27 @@ static partial class Utilities
 	}
 
 	static bool IsActivityAttribute(TypeReference attributeType) =>
-		TemplateLibrary.Activities.ActivityAttribute == attributeType
-		|| TemplateLibrary.Activities.EventAttribute == attributeType
-		|| TemplateLibrary.Activities.ContextAttribute == attributeType;
+		TypeLibrary.Activities.ActivityAttribute == attributeType
+		|| TypeLibrary.Activities.EventAttribute == attributeType
+		|| TypeLibrary.Activities.ContextAttribute == attributeType;
 
 	static bool IsLoggingAttribute(TypeReference attributeType) =>
-		TemplateLibrary.Logging.LogAttribute == attributeType
-		|| TemplateLibrary.Logging.TraceAttribute == attributeType
-		|| TemplateLibrary.Logging.DebugAttribute == attributeType
-		|| TemplateLibrary.Logging.InfoAttribute == attributeType
-		|| TemplateLibrary.Logging.WarningAttribute == attributeType
-		|| TemplateLibrary.Logging.ErrorAttribute == attributeType
-		|| TemplateLibrary.Logging.CriticalAttribute == attributeType;
+		TypeLibrary.Logging.LogAttribute == attributeType
+		|| TypeLibrary.Logging.TraceAttribute == attributeType
+		|| TypeLibrary.Logging.DebugAttribute == attributeType
+		|| TypeLibrary.Logging.InfoAttribute == attributeType
+		|| TypeLibrary.Logging.WarningAttribute == attributeType
+		|| TypeLibrary.Logging.ErrorAttribute == attributeType
+		|| TypeLibrary.Logging.CriticalAttribute == attributeType;
 
 	static bool IsMetricsAttribute(TypeReference attributeType) =>
-		TemplateLibrary.Metrics.CounterAttribute == attributeType
-		|| TemplateLibrary.Metrics.AutoCounterAttribute == attributeType
-		|| TemplateLibrary.Metrics.UpDownCounterAttribute == attributeType
-		|| TemplateLibrary.Metrics.HistogramAttribute == attributeType
-		|| TemplateLibrary.Metrics.ObservableCounterAttribute == attributeType
-		|| TemplateLibrary.Metrics.ObservableGaugeAttribute == attributeType
-		|| TemplateLibrary.Metrics.ObservableUpDownCounterAttribute == attributeType;
+		TypeLibrary.Metrics.CounterAttribute == attributeType
+		|| TypeLibrary.Metrics.AutoCounterAttribute == attributeType
+		|| TypeLibrary.Metrics.UpDownCounterAttribute == attributeType
+		|| TypeLibrary.Metrics.HistogramAttribute == attributeType
+		|| TypeLibrary.Metrics.ObservableCounterAttribute == attributeType
+		|| TypeLibrary.Metrics.ObservableGaugeAttribute == attributeType
+		|| TypeLibrary.Metrics.ObservableUpDownCounterAttribute == attributeType;
 
 	static int CountFlags(GenerationType type)
 	{
@@ -308,11 +307,41 @@ static partial class Utilities
 	public static bool ContainsAttribute(ISymbol symbol, TypeIdentity type, CancellationToken token) =>
 		TryContainsAttribute(symbol, type, token, out _);
 
-	public static bool ContainsAttribute(ISymbol symbol, TemplateInfo templateInfo, CancellationToken token) =>
-		TryContainsAttribute(symbol, templateInfo, token, out _);
+	public static bool TryContainsAttribute(
+		ISymbol symbol,
+		IEnumerable<TypeIdentity> types,
+		CancellationToken token,
+		out TypeIdentity matchingType,
+		out AttributeData? attributeData
+	)
+	{
+		matchingType = default;
+		attributeData = null;
 
-	public static bool ContainsAttribute(ISymbol symbol, TemplateInfo[] templateInfo, CancellationToken token) =>
-		TryContainsAttribute(symbol, templateInfo, token, out _, out _);
+		var attributes = symbol.GetAttributes();
+		foreach (var attribute in attributes)
+		{
+			token.ThrowIfCancellationRequested();
+			if (attribute.AttributeClass == null)
+				continue;
+
+			if (!TypeIdentity.TryCreate(attribute.AttributeClass, out var attributeType))
+				continue;
+
+			foreach (var type in types)
+			{
+				if (type.Equals(attributeType))
+				{
+					matchingType = type;
+					attributeData = attribute;
+
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
 
 	public static bool TryContainsAttribute(
 		ISymbol symbol,
@@ -337,72 +366,6 @@ static partial class Utilities
 			{
 				attributeData = attribute;
 				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public static bool TryContainsAttribute(
-		ISymbol symbol,
-		TemplateInfo templateInfo,
-		CancellationToken token,
-		out AttributeData? attributeData
-	)
-	{
-		attributeData = null;
-
-		var attributes = symbol.GetAttributes();
-		foreach (var attribute in attributes)
-		{
-			token.ThrowIfCancellationRequested();
-			if (attribute.AttributeClass == null)
-				continue;
-
-			if (!TypeIdentity.TryCreate(attribute.AttributeClass, out var attributeType))
-				continue;
-
-			if (templateInfo.Equals(attributeType))
-			{
-				attributeData = attribute;
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public static bool TryContainsAttribute(
-		ISymbol symbol,
-		TemplateInfo[] templateInfo,
-		CancellationToken token,
-		out AttributeData? attributeData,
-		out TemplateInfo? matchingTemplate
-	)
-	{
-		attributeData = null;
-		matchingTemplate = null;
-
-		var attributes = symbol.GetAttributes();
-		foreach (var attribute in attributes)
-		{
-			token.ThrowIfCancellationRequested();
-
-			if (attribute.AttributeClass == null)
-				continue;
-
-			if (!TypeIdentity.TryCreate(attribute.AttributeClass, out var attributeType))
-				continue;
-
-			foreach (var template in templateInfo)
-			{
-				if (template.Equals(attributeType))
-				{
-					attributeData = attribute;
-					matchingTemplate = template;
-
-					return true;
-				}
 			}
 		}
 
@@ -509,12 +472,12 @@ static partial class Utilities
 	/// </summary>
 	public static bool HasMetricsAttribute(IMethodSymbol method, CancellationToken token)
 	{
-		return ContainsAttribute(method, TemplateLibrary.Metrics.CounterAttribute, token)
-			|| ContainsAttribute(method, TemplateLibrary.Metrics.AutoCounterAttribute, token)
-			|| ContainsAttribute(method, TemplateLibrary.Metrics.UpDownCounterAttribute, token)
-			|| ContainsAttribute(method, TemplateLibrary.Metrics.HistogramAttribute, token)
-			|| ContainsAttribute(method, TemplateLibrary.Metrics.ObservableCounterAttribute, token)
-			|| ContainsAttribute(method, TemplateLibrary.Metrics.ObservableGaugeAttribute, token)
-			|| ContainsAttribute(method, TemplateLibrary.Metrics.ObservableUpDownCounterAttribute, token);
+		return ContainsAttribute(method, TypeLibrary.Metrics.CounterAttribute, token)
+			|| ContainsAttribute(method, TypeLibrary.Metrics.AutoCounterAttribute, token)
+			|| ContainsAttribute(method, TypeLibrary.Metrics.UpDownCounterAttribute, token)
+			|| ContainsAttribute(method, TypeLibrary.Metrics.HistogramAttribute, token)
+			|| ContainsAttribute(method, TypeLibrary.Metrics.ObservableCounterAttribute, token)
+			|| ContainsAttribute(method, TypeLibrary.Metrics.ObservableGaugeAttribute, token)
+			|| ContainsAttribute(method, TypeLibrary.Metrics.ObservableUpDownCounterAttribute, token);
 	}
 }

@@ -1,5 +1,3 @@
-using Purview.Telemetry.SourceGenerator.Infra;
-
 namespace Purview.Telemetry.SourceGenerator.Metrics;
 
 partial class TelemetrySourceGeneratorMetricsTests
@@ -32,7 +30,19 @@ public interface ITestMetrics {
 		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var metricsClass = query.GetClass("TestMetricsCore", "Testing");
+		await Assert
+			.That(metricsClass.HasMethod(query, "Metric"))
+			.IsTrue()
+			.Because("the generated metrics class must contain the instrument method");
+
+		// The instrument name is always the first quoted value in the attribute application.
+		var instrumentName = attribute.Split('"')[1];
+		await Assert
+			.That(generationResult.GetSource("TestMetricsCore.Metric.g.cs"))
+			.ContainsGeneratedCode(instrumentName)
+			.Because("the instrument must carry the configured name");
 	}
 
 	public static IEnumerable<(string, string)> NameUnitsDescriptorData

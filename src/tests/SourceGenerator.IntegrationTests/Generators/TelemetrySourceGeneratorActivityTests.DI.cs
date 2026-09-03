@@ -1,4 +1,6 @@
-using Purview.Telemetry.SourceGenerator.Infra;
+using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
+using Purview.SourceGeneratorFramework;
 
 namespace Purview.Telemetry.SourceGenerator.Activities;
 
@@ -35,7 +37,37 @@ public interface ITestActivities {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+
+		var implClass = query.GetClass("TestActivitiesCore", "Testing");
+		await Assert
+			.That(
+				implClass.HasMethod(
+					query,
+					"Activity",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated implementation must contain the activity method with its parameter signature");
+		await Assert
+			.That(
+				implClass.HasMethodReturnType(
+					query,
+					"Activity",
+					TypeReference.Create<Activity>().Nullable(GenerationSettings.Create<TelemetrySourceGenerator>())
+				)
+			)
+			.IsTrue()
+			.Because("the activity method must return a nullable Activity");
+
+		var diClass = query.GetClass("TestActivitiesCoreDIExtension", "Microsoft.Extensions.DependencyInjection");
+		await Assert
+			.That(diClass.HasMethod(query, "AddTestActivities", TypeReference.Create<IServiceCollection>()))
+			.IsTrue()
+			.Because("the DI extension must register the implementation via AddTestActivities");
 	}
 
 	[Test]
@@ -68,7 +100,25 @@ public interface ITestActivities {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var implClass = query.GetClass("TestActivitiesCore", "Testing");
+		await Assert
+			.That(
+				implClass.HasMethod(
+					query,
+					"Activity",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated implementation must contain the activity method");
+		var diClass = query.GetClass("TestActivitiesCoreDIExtension", "Microsoft.Extensions.DependencyInjection");
+		await Assert
+			.That(diClass.HasMethod(query, "AddTestActivities", TypeReference.Create<IServiceCollection>()))
+			.IsTrue()
+			.Because("the DI extension must register the implementation via AddTestActivities");
 	}
 
 	[Test]
@@ -105,7 +155,25 @@ public interface ITestActivities {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var implClass = query.GetClass("TestActivitiesCore", "Testing");
+		await Assert
+			.That(
+				implClass.HasMethod(
+					query,
+					"Activity",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated implementation must contain the activity method");
+		var diClass = query.GetClass("TestActivitiesCoreDIExtension", "Microsoft.Extensions.DependencyInjection");
+		await Assert
+			.That(diClass.HasMethod(query, "AddTestActivities", TypeReference.Create<IServiceCollection>()))
+			.IsTrue()
+			.Because("the DI extension must be generated when the interface opts in");
 	}
 
 	[Test]
@@ -142,7 +210,24 @@ public interface ITestActivities {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var implClass = query.GetClass("TestActivitiesCore", "Testing");
+		await Assert
+			.That(
+				implClass.HasMethod(
+					query,
+					"Activity",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated implementation must contain the activity method");
+		await Assert
+			.That(query.HasClass("TestActivitiesCoreDIExtension", "Microsoft.Extensions.DependencyInjection"))
+			.IsFalse()
+			.Because("the DI extension must not be generated when the interface opts out");
 	}
 
 	[Test]
@@ -178,6 +263,24 @@ public interface ITestActivities {
 		);
 
 		// Assert
-		await TestHelpers.VerifyAsync(generationResult, cancellationToken: cancellationToken);
+		var query = generationResult.Generated();
+		var implClass = query.GetClass("TestActivitiesCore", "Testing");
+		await Assert
+			.That(
+				implClass.HasMethod(
+					query,
+					"Activity",
+					TypeReference.Create<string>(),
+					TypeReference.Create<int>(),
+					TypeReference.Create<bool>()
+				)
+			)
+			.IsTrue()
+			.Because("the generated implementation must contain the activity method");
+		var diClass = query.GetClass("TestActivitiesCoreDIExtension", "Microsoft.Extensions.DependencyInjection");
+		await Assert
+			.That(diClass.HasMethod(query, "AddTestActivities", TypeReference.Create<IServiceCollection>()))
+			.IsTrue()
+			.Because("the public DI extension must register the implementation via AddTestActivities");
 	}
 }

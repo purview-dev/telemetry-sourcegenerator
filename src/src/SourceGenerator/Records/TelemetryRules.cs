@@ -14,69 +14,59 @@ namespace Purview.Telemetry.SourceGenerator;
 /// </summary>
 static partial class TelemetryRules
 {
-	public static DiagnosticDescriptor ToDescriptor(TelemetryDiagnosticDescriptor descriptor) =>
-		new(
-			id: descriptor.Id,
-			title: descriptor.Title,
-			messageFormat: descriptor.Description,
-			category: descriptor.Category,
-			defaultSeverity: descriptor.Severity,
-			isEnabledByDefault: descriptor.EnabledByDefault
-		);
-
 	public static ImmutableArray<DiagnosticDescriptor> GetAllSupportedDescriptors() =>
 		[
-			ToDescriptor(DiagnosticLibrary.General.FatalExecutionDuringExecution),
-			ToDescriptor(DiagnosticLibrary.General.InferenceNotSupportedWithMultiTargeting),
-			ToDescriptor(DiagnosticLibrary.General.MultiGenerationTargetsNotSupported),
-			ToDescriptor(DiagnosticLibrary.General.DuplicateMethodNamesAreNotSupported),
-			ToDescriptor(DiagnosticLibrary.General.GenericInterfacesNotSupported),
-			ToDescriptor(DiagnosticLibrary.General.GenericMethodsNotSupported),
-			ToDescriptor(DiagnosticLibrary.General.ExcludeTargetsTargetNotPresent),
-			ToDescriptor(DiagnosticLibrary.General.ExcludeTargetsResultsInEmptyParameterSet),
-			ToDescriptor(DiagnosticLibrary.General.ActivityParameterWithoutActivityTarget),
-			ToDescriptor(DiagnosticLibrary.General.MethodTargetNotRegisteredOnInterface),
-			ToDescriptor(DiagnosticLibrary.General.UnsupportedTargetFramework),
-			ToDescriptor(DiagnosticLibrary.Logging.MultipleExceptionsDefined),
-			ToDescriptor(DiagnosticLibrary.Logging.MaximumLogEntryParametersExceeded),
-			ToDescriptor(DiagnosticLibrary.Logging.InferringErrorLogLevel),
-			ToDescriptor(DiagnosticLibrary.Logging.MSLoggingNotReferenced),
-			ToDescriptor(DiagnosticLibrary.Logging.MixedOrdinalAndNamedProperties),
-			ToDescriptor(DiagnosticLibrary.Logging.OrdinalsExceedParameters),
-			ToDescriptor(DiagnosticLibrary.Logging.ExpandEnumerableAndLogPropertiesNotSupported),
-			ToDescriptor(DiagnosticLibrary.Logging.ScopedMethodShouldNotHaveLevel),
-			ToDescriptor(DiagnosticLibrary.Logging.UnboundedIEnumerableMaxCount),
-			ToDescriptor(DiagnosticLibrary.Logging.LogMustReturnVoidOrAsync),
-			ToDescriptor(DiagnosticLibrary.Activities.BaggageParameterShouldBeString),
-			ToDescriptor(DiagnosticLibrary.Activities.NoActivitySourceSpecified),
-			ToDescriptor(DiagnosticLibrary.Activities.InvalidReturnType),
-			ToDescriptor(DiagnosticLibrary.Activities.DuplicateParameterTypes),
-			ToDescriptor(DiagnosticLibrary.Activities.ActivityParameterNotAllowed),
-			ToDescriptor(DiagnosticLibrary.Activities.TimestampParameterNotAllowed),
-			ToDescriptor(DiagnosticLibrary.Activities.StartTimeParameterNotAllowed),
-			ToDescriptor(DiagnosticLibrary.Activities.ParentContextOrIdParameterNotAllowed),
-			ToDescriptor(DiagnosticLibrary.Activities.LinksParameterNotAllowed),
-			ToDescriptor(DiagnosticLibrary.Activities.TagsParameterNotAllowed),
-			ToDescriptor(DiagnosticLibrary.Activities.EscapedParameterInvalidType),
-			ToDescriptor(DiagnosticLibrary.Activities.EscapedParameterIsOnlyValidOnEvent),
-			ToDescriptor(DiagnosticLibrary.Activities.NoActivityMethodsDefined),
-			ToDescriptor(DiagnosticLibrary.Activities.DoesNotReturnActivity),
-			ToDescriptor(DiagnosticLibrary.Activities.DoesNotAcceptActivityParameter),
-			ToDescriptor(DiagnosticLibrary.Activities.ActivityShouldBeTheFirstParameter),
-			ToDescriptor(DiagnosticLibrary.Activities.StatusDescriptionMustBeString),
-			ToDescriptor(DiagnosticLibrary.Activities.StatusDescriptionParameterInvalidType),
-			ToDescriptor(DiagnosticLibrary.Activities.ExceptionEventNotStandardName),
-			ToDescriptor(DiagnosticLibrary.Activities.ActivityReturnTypeShouldBeNullable),
-			ToDescriptor(DiagnosticLibrary.Metrics.NoInstrumentDefined),
-			ToDescriptor(DiagnosticLibrary.Metrics.DoesNotReturnVoid),
-			ToDescriptor(DiagnosticLibrary.Metrics.AutoIncrementCountAndMeasurementParam),
-			ToDescriptor(DiagnosticLibrary.Metrics.MoreThanOneMeasurementValueDefined),
-			ToDescriptor(DiagnosticLibrary.Metrics.NoMeasurementValueDefined),
-			ToDescriptor(DiagnosticLibrary.Metrics.ObservableRequiredFunc),
-			ToDescriptor(DiagnosticLibrary.Metrics.InvalidMeasurementType),
-			ToDescriptor(DiagnosticLibrary.Metrics.ObservableCannotReturnBool),
-			ToDescriptor(DiagnosticLibrary.Metrics.AutoCounterMustReturnVoid),
-			ToDescriptor(DiagnosticLibrary.Metrics.InstrumentNameMatchesType),
+			DiagnosticLibrary.General.FatalExecutionDuringExecution.Descriptor,
+			DiagnosticLibrary.General.InferenceNotSupportedWithMultiTargeting.Descriptor,
+			DiagnosticLibrary.General.MultiGenerationTargetsNotSupported.Descriptor,
+			DiagnosticLibrary.General.DuplicateMethodNamesAreNotSupported.Descriptor,
+			DiagnosticLibrary.General.GenericInterfacesNotSupported.Descriptor,
+			DiagnosticLibrary.General.GenericMethodsNotSupported.Descriptor,
+			DiagnosticLibrary.General.ExcludeTargetsTargetNotPresent.Descriptor,
+			DiagnosticLibrary.General.ExcludeTargetsResultsInEmptyParameterSet.Descriptor,
+			DiagnosticLibrary.General.ActivityParameterWithoutActivityTarget.Descriptor,
+			DiagnosticLibrary.General.MethodTargetNotRegisteredOnInterface.Descriptor,
+			DiagnosticLibrary.General.UnsupportedTargetFramework.Descriptor,
+			DiagnosticLibrary.Logging.MultipleExceptionsDefined.Descriptor,
+			DiagnosticLibrary.Logging.MaximumLogEntryParametersExceeded.Descriptor,
+			DiagnosticLibrary.Logging.InferringErrorLogLevel.Descriptor,
+			DiagnosticLibrary.Logging.MSLoggingNotReferenced.Descriptor,
+			DiagnosticLibrary.Logging.MixedOrdinalAndNamedProperties.Descriptor,
+			DiagnosticLibrary.Logging.OrdinalsExceedParameters.Descriptor,
+			DiagnosticLibrary.Logging.ExpandEnumerableAndLogPropertiesNotSupported.Descriptor,
+			DiagnosticLibrary.Logging.ScopedMethodShouldNotHaveLevel.Descriptor,
+			DiagnosticLibrary.Logging.UnboundedIEnumerableMaxCount.Descriptor,
+			DiagnosticLibrary.Logging.LogMustReturnVoidOrAsync.Descriptor,
+			DiagnosticLibrary.Activities.BaggageParameterShouldBeString.Descriptor,
+			DiagnosticLibrary.Activities.NoActivitySourceSpecified.Descriptor,
+			DiagnosticLibrary.Activities.InvalidReturnType.Descriptor,
+			DiagnosticLibrary.Activities.DuplicateParameterTypes.Descriptor,
+			DiagnosticLibrary.Activities.ActivityParameterNotAllowed.Descriptor,
+			DiagnosticLibrary.Activities.TimestampParameterNotAllowed.Descriptor,
+			DiagnosticLibrary.Activities.StartTimeParameterNotAllowed.Descriptor,
+			DiagnosticLibrary.Activities.ParentContextOrIdParameterNotAllowed.Descriptor,
+			DiagnosticLibrary.Activities.LinksParameterNotAllowed.Descriptor,
+			DiagnosticLibrary.Activities.TagsParameterNotAllowed.Descriptor,
+			DiagnosticLibrary.Activities.EscapedParameterInvalidType.Descriptor,
+			DiagnosticLibrary.Activities.EscapedParameterIsOnlyValidOnEvent.Descriptor,
+			DiagnosticLibrary.Activities.NoActivityMethodsDefined.Descriptor,
+			DiagnosticLibrary.Activities.DoesNotReturnActivity.Descriptor,
+			DiagnosticLibrary.Activities.DoesNotAcceptActivityParameter.Descriptor,
+			DiagnosticLibrary.Activities.ActivityShouldBeTheFirstParameter.Descriptor,
+			DiagnosticLibrary.Activities.StatusDescriptionMustBeString.Descriptor,
+			DiagnosticLibrary.Activities.StatusDescriptionParameterInvalidType.Descriptor,
+			DiagnosticLibrary.Activities.ExceptionEventNotStandardName.Descriptor,
+			DiagnosticLibrary.Activities.ActivityReturnTypeShouldBeNullable.Descriptor,
+			DiagnosticLibrary.Metrics.NoInstrumentDefined.Descriptor,
+			DiagnosticLibrary.Metrics.DoesNotReturnVoid.Descriptor,
+			DiagnosticLibrary.Metrics.AutoIncrementCountAndMeasurementParam.Descriptor,
+			DiagnosticLibrary.Metrics.MoreThanOneMeasurementValueDefined.Descriptor,
+			DiagnosticLibrary.Metrics.NoMeasurementValueDefined.Descriptor,
+			DiagnosticLibrary.Metrics.ObservableRequiredFunc.Descriptor,
+			DiagnosticLibrary.Metrics.InvalidMeasurementType.Descriptor,
+			DiagnosticLibrary.Metrics.ObservableCannotReturnBool.Descriptor,
+			DiagnosticLibrary.Metrics.AutoCounterMustReturnVoid.Descriptor,
+			DiagnosticLibrary.Metrics.InstrumentNameMatchesType.Descriptor,
 		];
 
 	static IMethodSymbol? FindMethod(INamedTypeSymbol interfaceSymbol, string methodName) =>
@@ -128,10 +118,7 @@ static partial class TelemetryRules
 		// TSG1011: unsupported target framework.
 		if (IsUnsupportedTargetFramework(compilation))
 			diagnostics.Add(
-				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.General.UnsupportedTargetFramework),
-					interfaceSymbol
-				)
+				DiagnosticInfo.Create(DiagnosticLibrary.General.UnsupportedTargetFramework.Descriptor, interfaceSymbol)
 			);
 
 		// TSG1004: generic interface - nothing further is meaningful.
@@ -139,7 +126,7 @@ static partial class TelemetryRules
 		{
 			diagnostics.Add(
 				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.General.GenericInterfacesNotSupported),
+					DiagnosticLibrary.General.GenericInterfacesNotSupported.Descriptor,
 					interfaceSymbol
 				)
 			);
@@ -148,11 +135,11 @@ static partial class TelemetryRules
 
 		var hasActivitySource = Utilities.ContainsAttribute(
 			interfaceSymbol,
-			TemplateLibrary.Activities.ActivitySourceAttribute,
+			TypeLibrary.Activities.ActivitySourceAttribute,
 			token
 		);
-		var hasLogger = Utilities.ContainsAttribute(interfaceSymbol, TemplateLibrary.Logging.LoggerAttribute, token);
-		var hasMeter = Utilities.ContainsAttribute(interfaceSymbol, TemplateLibrary.Metrics.MeterAttribute, token);
+		var hasLogger = Utilities.ContainsAttribute(interfaceSymbol, TypeLibrary.Logging.LoggerAttribute, token);
+		var hasMeter = Utilities.ContainsAttribute(interfaceSymbol, TypeLibrary.Metrics.MeterAttribute, token);
 
 		if (!hasActivitySource && !hasLogger && !hasMeter)
 			return diagnostics.ToImmutable();
@@ -165,10 +152,7 @@ static partial class TelemetryRules
 			);
 			if (iLoggerSymbol is null)
 				diagnostics.Add(
-					DiagnosticInfo.Create(
-						ToDescriptor(DiagnosticLibrary.Logging.MSLoggingNotReferenced),
-						interfaceSymbol
-					)
+					DiagnosticInfo.Create(DiagnosticLibrary.Logging.MSLoggingNotReferenced.Descriptor, interfaceSymbol)
 				);
 		}
 
@@ -198,7 +182,7 @@ static partial class TelemetryRules
 			var locations = methods.SelectMany(static m => m.Locations).ToImmutableArray();
 			diagnostics.Add(
 				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.General.DuplicateMethodNamesAreNotSupported),
+					DiagnosticLibrary.General.DuplicateMethodNamesAreNotSupported.Descriptor,
 					locations,
 					kvp.Key
 				)
@@ -228,14 +212,14 @@ static partial class TelemetryRules
 		CancellationToken token
 	)
 	{
-		if (Utilities.ContainsAttribute(method, TemplateLibrary.Shared.ExcludeAttribute, token))
+		if (TypeHelpers.HasAttribute(method, TypeLibrary.TelemetryShared.ExcludeAttribute))
 			return;
 
 		// TSG1005: generic method.
 		if (method.Arity > 0)
 		{
 			diagnostics.Add(
-				DiagnosticInfo.Create(ToDescriptor(DiagnosticLibrary.General.GenericMethodsNotSupported), method)
+				DiagnosticInfo.Create(DiagnosticLibrary.General.GenericMethodsNotSupported.Descriptor, method)
 			);
 			return;
 		}
@@ -245,25 +229,19 @@ static partial class TelemetryRules
 		if (targetState.RaiseInferenceNotSupportedWithMultiTargeting)
 			diagnostics.Add(
 				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.General.InferenceNotSupportedWithMultiTargeting),
+					DiagnosticLibrary.General.InferenceNotSupportedWithMultiTargeting.Descriptor,
 					method
 				)
 			);
 
 		if (targetState.RaiseMultiGenerationTargetsNotSupported)
 			diagnostics.Add(
-				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.General.MultiGenerationTargetsNotSupported),
-					method
-				)
+				DiagnosticInfo.Create(DiagnosticLibrary.General.MultiGenerationTargetsNotSupported.Descriptor, method)
 			);
 
 		if (targetState.RaiseMissingInterfaceSource)
 			diagnostics.Add(
-				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.General.MethodTargetNotRegisteredOnInterface),
-					method
-				)
+				DiagnosticInfo.Create(DiagnosticLibrary.General.MethodTargetNotRegisteredOnInterface.Descriptor, method)
 			);
 
 		// TSG1008: an Activity parameter on a method with no Activity target will be ignored.
@@ -282,7 +260,7 @@ static partial class TelemetryRules
 
 			diagnostics.Add(
 				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.General.ActivityParameterWithoutActivityTarget),
+					DiagnosticLibrary.General.ActivityParameterWithoutActivityTarget.Descriptor,
 					activityParameterLocation,
 					activityParameterName
 				)
@@ -333,7 +311,7 @@ static partial class TelemetryRules
 					var location = parameter.Locations.FirstOrDefault(static l => l.IsInSource) ?? Location.None;
 					diagnostics.Add(
 						DiagnosticInfo.Create(
-							ToDescriptor(DiagnosticLibrary.General.ExcludeTargetsTargetNotPresent),
+							DiagnosticLibrary.General.ExcludeTargetsTargetNotPresent.Descriptor,
 							location,
 							GetGenerationTypeName(target)
 						)
@@ -348,7 +326,7 @@ static partial class TelemetryRules
 			{
 				diagnostics.Add(
 					DiagnosticInfo.Create(
-						ToDescriptor(DiagnosticLibrary.General.ExcludeTargetsResultsInEmptyParameterSet),
+						DiagnosticLibrary.General.ExcludeTargetsResultsInEmptyParameterSet.Descriptor,
 						method,
 						GetGenerationTypeName(target),
 						method.Name
@@ -384,17 +362,14 @@ static partial class TelemetryRules
 
 		if (IsUnsupportedTargetFramework(compilation))
 			diagnostics.Add(
-				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.General.UnsupportedTargetFramework),
-					interfaceSymbol
-				)
+				DiagnosticInfo.Create(DiagnosticLibrary.General.UnsupportedTargetFramework.Descriptor, interfaceSymbol)
 			);
 
 		if (interfaceSymbol.Arity > 0)
 		{
 			diagnostics.Add(
 				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.General.GenericInterfacesNotSupported),
+					DiagnosticLibrary.General.GenericInterfacesNotSupported.Descriptor,
 					interfaceSymbol
 				)
 			);
@@ -426,7 +401,7 @@ static partial class TelemetryRules
 			var locations = kvp.Value.SelectMany(static m => m.Locations).ToImmutableArray();
 			diagnostics.Add(
 				DiagnosticInfo.Create(
-					ToDescriptor(DiagnosticLibrary.General.DuplicateMethodNamesAreNotSupported),
+					DiagnosticLibrary.General.DuplicateMethodNamesAreNotSupported.Descriptor,
 					locations,
 					kvp.Key
 				)

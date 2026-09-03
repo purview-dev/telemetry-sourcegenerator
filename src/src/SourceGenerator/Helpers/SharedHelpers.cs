@@ -11,13 +11,13 @@ static partial class SharedHelpers
 
 		var generationType = GenerationType.None;
 
-		if (Utilities.ContainsAttribute(symbol, TemplateLibrary.Activities.ActivitySourceAttribute, token))
+		if (Utilities.ContainsAttribute(symbol, TypeLibrary.Activities.ActivitySourceAttribute, token))
 			generationType |= GenerationType.Activities;
 
-		if (Utilities.ContainsAttribute(symbol, TemplateLibrary.Logging.LoggerAttribute, token))
+		if (Utilities.ContainsAttribute(symbol, TypeLibrary.Logging.LoggerAttribute, token))
 			generationType |= GenerationType.Logging;
 
-		if (Utilities.ContainsAttribute(symbol, TemplateLibrary.Metrics.MeterAttribute, token))
+		if (Utilities.ContainsAttribute(symbol, TypeLibrary.Metrics.MeterAttribute, token))
 			generationType |= GenerationType.Metrics;
 
 		return generationType;
@@ -114,7 +114,8 @@ static partial class SharedHelpers
 		DependencyInjectionClassIsPublic: false,
 		NamingConvention: 1, // Default to OpenTelemetry
 		GenerateTelemetryNamesClass: true,
-		TelemetryNamesClassName: null
+		TelemetryNamesClassName: null,
+		TelemetryNamesNamespace: null
 	);
 
 	public static TelemetryGenerationAttributeData GetTelemetryGenerationAttribute(
@@ -139,6 +140,7 @@ static partial class SharedHelpers
 			ClassName = NullIfWhitespace(data.ClassName),
 			DependencyInjectionClassName = NullIfWhitespace(data.DependencyInjectionClassName),
 			TelemetryNamesClassName = NullIfWhitespace(data.TelemetryNamesClassName),
+			TelemetryNamesNamespace = NullIfWhitespace(data.TelemetryNamesNamespace),
 		};
 
 	/// <summary>
@@ -152,7 +154,7 @@ static partial class SharedHelpers
 		if (
 			!Utilities.TryContainsAttribute(
 				parameter,
-				TemplateLibrary.Shared.ExcludeTargetsAttribute,
+				TypeLibrary.TelemetryShared.ExcludeTargetsAttribute,
 				token,
 				out var attributeData
 			)
