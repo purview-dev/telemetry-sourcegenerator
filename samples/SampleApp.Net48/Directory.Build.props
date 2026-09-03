@@ -18,11 +18,11 @@
 			CA1812: WeatherService is instantiated via DI, not directly.
 			CA5394: Random is fine for simulation / demo purposes.
 			CS1574: cref resolution differences in net48 XML doc comments (in generated code).
-			CS8618/CS8625: the generator's injected attribute templates initialize non-nullable
-			members with null when compiled under net8+/net10-style nullable settings.
+			CS8618: the sample's WeatherForecast DTO declares a non-nullable Summary that is
+			populated before use (sample-code relaxation; not from generated code).
 			TSG3022: Activity? vs Activity — net48 disables nullable, so Activity is used here.
 		-->
-		<NoWarn>$(NoWarn);CA1031;CA1303;CA1515;CA1812;CA2007;CA2201;CA5394;CS1574;CS8618;CS8625;TSG3022;</NoWarn>
+		<NoWarn>$(NoWarn);CA1031;CA1303;CA1515;CA1812;CA2007;CA2201;CA5394;CS1574;CS8618;TSG3022;</NoWarn>
 	</PropertyGroup>
 
 	<Import Sdk="Purview.DotNetProjectSdk" Project="Sdk.props" />

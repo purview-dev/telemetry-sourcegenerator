@@ -13,11 +13,9 @@
 		     CA1724: sample type names intentionally shadow well-known namespaces.
 		     CA2007: fire-and-forget async calls are fine for the sample workflow.
 		     CA2201: simulated failures raise generic exception types.
-		     CS8618/CS8625: the generator's injected attribute templates (with #nullable enable)
-		     initialize non-nullable members with null under net8+/net10.
 		     TSG2008: the sample intentionally demonstrates a large ExpandEnumerable limit;
 		     source-generator diagnostics are not suppressible with #pragma, so it's NoWarn'd. -->
-		<NoWarn>$(NoWarn);CA1031;CA1515;CA1724;CA2007;CA2201;CS8618;CS8625;TSG2008;</NoWarn>
+		<NoWarn>$(NoWarn);CA1031;CA1515;CA1724;CA2007;CA2201;TSG2008;</NoWarn>
 	</PropertyGroup>
 
 	<Import Sdk="Purview.DotNetProjectSdk" Project="Sdk.props" />
