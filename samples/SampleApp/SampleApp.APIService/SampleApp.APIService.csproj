@@ -3,21 +3,14 @@
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 	</PropertyGroup>
 	<ItemGroup>
-		<!-- Build-order only dependency for local development. The generator is registered as an
-		     analyzer explicitly below so a single, configuration-consistent assembly is loaded
-		     (the .NET SDK strips Configuration from analyzer project references, which would
-		     otherwise load both Debug and Release copies and run the generator twice). -->
+		<!-- The generator and its Purview.SourceGeneratorFramework runtime dependencies are resolved
+		     from the generator's build output via the SDK's GetSourceGeneratorAnalyzerFiles target,
+		     always built with the referencing configuration, so no bin/ paths are hard-coded. -->
 		<ProjectReference
 			Include="..\..\..\src\src\SourceGenerator\SourceGenerator.csproj"
+			OutputItemType="Analyzer"
 			ReferenceOutputAssembly="false"
 		/>
-		<!-- The generator references the Purview.SourceGeneratorFramework runtime; a project-reference
-		     analyzer only propagates the generator assembly, so ship the generator and its runtime
-		     beside it explicitly. The framework package ships analyzer + library assets, so only
-		     the generator and the two runtime DLLs are referenced here. -->
-		<Analyzer Include="..\..\..\src\src\SourceGenerator\bin\$(Configuration)\netstandard2.0\Purview.Telemetry.SourceGenerator.dll" />
-		<Analyzer Include="..\..\..\src\src\SourceGenerator\bin\$(Configuration)\netstandard2.0\Purview.SourceGeneratorFramework.dll" />
-		<Analyzer Include="..\..\..\src\src\SourceGenerator\bin\$(Configuration)\netstandard2.0\Purview.SourceGeneratorFramework.Shared.dll" />
 		<ProjectReference Include="..\SampleApp.ServiceDefaults\SampleApp.ServiceDefaults.csproj" />
 		<ProjectReference Include="..\SampleApp.Shared\SampleApp.Shared.csproj" />
 	</ItemGroup>

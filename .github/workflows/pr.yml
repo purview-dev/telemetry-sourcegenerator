@@ -11,21 +11,10 @@ concurrency:
 jobs:
   build:
     name: Build and test
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-          fetch-tags: true
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: "10.0.x"
-
-      - name: Run PR pipeline
-        run: dotnet run --project build/PipelineCLI/PipelineCLI.csproj --configuration Release
+    uses: purview-dev/build/.github/workflows/purview-build.yml@main
+    with:
+      build-version: "0.2.0"
+    secrets: inherit
 
   samples:
     name: Build and test samples
@@ -41,11 +30,6 @@ jobs:
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: "10.0.x"
-
-      # This is so the analyzer projects can be used in the sample app projects.
-      # The analyzer projects are not referenced by the sample app projects, the assemblies are, so they need to be built first.
-      - name: Run pipeline build
-        run: dotnet run --project build/PipelineCLI/PipelineCLI.csproj --configuration Release -- --Build:RunTests=false --Release:Mode=None
 
       - name: Build SampleApp
         run: dotnet build samples/SampleApp/SampleApp.slnx --configuration Release

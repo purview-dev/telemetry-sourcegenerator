@@ -2,7 +2,7 @@
 
 Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.activitysource), [`ILogger`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.ilogger), and [`Metrics`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics) based telemetry from methods you define on an interface.
 
-[![CI](https://github.com/purview-dev/telemetry-sourcegenerator/actions/workflows/ci.yml/badge.svg)](https://github.com/purview-dev/telemetry-sourcegenerator/actions/workflows/ci.yml)
+[![Release](https://github.com/purview-dev/telemetry-sourcegenerator/actions/workflows/release.yml/badge.svg)](https://github.com/purview-dev/telemetry-sourcegenerator/actions/workflows/release.yml)
 
 ## Features
 
