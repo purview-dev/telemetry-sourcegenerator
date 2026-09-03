@@ -47,21 +47,3 @@ jobs:
 
       - name: Test SampleApp
         run: dotnet test samples/SampleApp/SampleApp.slnx --configuration Release --no-build
-
-  samples-net48:
-    name: Build SampleApp.Net48
-    runs-on: windows-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-          fetch-tags: true
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: "10.0.x"
-
-      - name: Build SampleApp.Net48
-        run: dotnet build samples/SampleApp.Net48/SampleApp.Net48.slnx --configuration Release

@@ -10,7 +10,7 @@
          Consumers on net48 or net8+ built with VS 2022 17.14+ or .NET 10+ SDK are fully supported. -->
 		<RoslynVersion>4.14.0</RoslynVersion>
 		<TUnitVersion>1.65.51</TUnitVersion>
-		<PurviewSGFVersion>1.0.0-prerelease.28</PurviewSGFVersion>
+		<PurviewSGFVersion>1.0.0-prerelease.29</PurviewSGFVersion>
 		<ModularPipelinesVersion>3.2.8</ModularPipelinesVersion>
 	</PropertyGroup>
 	<ItemGroup>
@@ -53,8 +53,5 @@
 		<PackageVersion Include="Scalar.AspNetCore" Version="2.17.2" />
 		<PackageVersion Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.2.1" />
 		<PackageVersion Include="ErrorOr" Version="2.1.1" />
-		<!-- The Aspire AppHost SDK pulls MessagePack 2.5.192 transitively, which has known
-		     advisories; pin the patched 2.5.302 so isolated AppHost builds stay clean. -->
-		<PackageVersion Include="MessagePack" Version="2.5.302" />
 	</ItemGroup>
 </Project>
