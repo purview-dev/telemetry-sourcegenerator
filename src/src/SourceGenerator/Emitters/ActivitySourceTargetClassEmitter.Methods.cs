@@ -45,18 +45,27 @@ partial class ActivitySourceTargetClassEmitter
 
 		output.Context.Debug($"Generating {PropertyLibrary.Activities.RecordExceptionMethodName}.");
 
-		writer
-			.Write("static void ")
-			.Write(PropertyLibrary.Activities.RecordExceptionMethodName)
-			.Write('(')
-			.Write(TypeLibrary.Activities.SystemDiagnostics.Activity.MakeNullable(writer))
-			.Write(" activity, ")
-			.Write(TypeLibrary.System.Exception.MakeNullable(writer))
-			.Write(" exception, ")
-			.Write(PurviewTypeLibrary.System.Boolean)
-			.WriteLine(" escape)");
-
-		using (writer.OpenBlockScope())
+		using (
+			writer.WriteMethodScope(
+				new MethodDeclarationOptions(
+					PropertyLibrary.Activities.RecordExceptionMethodName,
+					PurviewTypeLibrary.System.Void.AsTypeReference()
+				)
+				{
+					IsStatic = true,
+					Parameters =
+					[
+						new ParameterDeclarationOptions(
+							"activity",
+							TypeLibrary.Activities.SystemDiagnostics.Activity.MakeNullable(writer)
+						),
+						new ParameterDeclarationOptions("exception", TypeLibrary.System.Exception.MakeNullable(writer)),
+						new ParameterDeclarationOptions("escape", PurviewTypeLibrary.System.Boolean.AsTypeReference()),
+					],
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
 			writer.WriteLine("if (activity == null || exception == null)");
 			using (writer.OpenBlockScope())
@@ -142,35 +151,34 @@ partial class ActivitySourceTargetClassEmitter
 
 	static void EmitThrowStub(CodeWriter writer, ActivityBasedGenerationTarget methodTarget)
 	{
-		writer.NewLine().Write("public ").Write(methodTarget.ReturnType);
+		writer.NewLine();
 
-		writer.Write(' ').Write(methodTarget.MethodName);
-
-		if (methodTarget.TypeParameters.Count > 0)
+		using (
+			writer.WriteMethodScope(
+				new MethodDeclarationOptions(
+					methodTarget.MethodName,
+					methodTarget.ReturnType,
+					TypeDeclarationAccessibility.Public
+				)
+				{
+					Parameters =
+					[
+						.. methodTarget.Parameters.Select(p => new ParameterDeclarationOptions(
+							p.ParameterName,
+							p.ParameterType
+						)),
+					],
+					GenericTypes = [.. methodTarget.TypeParameters],
+					ExpressionBody = "throw new global::System.NotSupportedException()",
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
-			writer.Write('<');
-			for (var i = 0; i < methodTarget.TypeParameters.Count; i++)
-			{
-				if (i > 0)
-					writer.Write(", ");
-				writer.Write(methodTarget.TypeParameters[i]);
-			}
-			writer.Write('>');
+			//
 		}
 
-		writer.Write('(');
-
-		for (var i = 0; i < methodTarget.Parameters.Count; i++)
-		{
-			if (i > 0)
-				writer.Write(", ");
-			writer
-				.Write(methodTarget.Parameters[i].ParameterType)
-				.Write(' ')
-				.Write(methodTarget.Parameters[i].ParameterName);
-		}
-
-		writer.WriteLine(") => throw new global::System.NotSupportedException();").NewLine();
+		writer.NewLine();
 	}
 
 	static void EmitMethod(

@@ -81,14 +81,16 @@ static partial class LoggerGenTargetClassEmitter
 		context.CancellationToken.ThrowIfCancellationRequested();
 
 		writer
-			.Write("readonly ")
-			.Write(TypeLibrary.Logging.MicrosoftExtensions.ILogger)
-			.Write('<')
-			.Write(target.InterfaceType)
-			.Write('>')
-			.Write(' ')
-			.Write(PropertyLibrary.Logging.LoggerFieldName)
-			.Write(';')
+			.WriteField(
+				new FieldDeclarationOptions(
+					PropertyLibrary.Logging.LoggerFieldName,
+					TypeLibrary.Logging.MicrosoftExtensions.ILogger.MakeGeneric(target.InterfaceType).AsTypeReference()
+				)
+				{
+					IsReadOnly = true,
+					IncludeGeneratedAttributes = false,
+				}
+			)
 			.NewLine();
 
 		foreach (var methodTarget in target.LogMethods)

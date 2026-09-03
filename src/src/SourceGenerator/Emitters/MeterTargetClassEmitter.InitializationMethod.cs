@@ -12,19 +12,28 @@ partial class MeterTargetClassEmitter
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		writer.NewLine().Write("void ").Write(PropertyLibrary.Metrics.MeterInitializationMethod).Write('(');
+		writer.NewLine();
 
-		if (supportsIMeterFactory)
-		{
-			writer
-				.Write(TypeLibrary.Metrics.SystemDiagnostics.IMeterFactory)
-				.Write(' ')
-				.Write(PropertyLibrary.Metrics.MeterFactoryParameterName);
-		}
-
-		writer.Write(")");
-
-		using (writer.OpenBlockScope())
+		using (
+			writer.WriteMethodScope(
+				new MethodDeclarationOptions(
+					PropertyLibrary.Metrics.MeterInitializationMethod,
+					PurviewTypeLibrary.System.Void.AsTypeReference()
+				)
+				{
+					Parameters = supportsIMeterFactory
+						?
+						[
+							new ParameterDeclarationOptions(
+								PropertyLibrary.Metrics.MeterFactoryParameterName,
+								TypeLibrary.Metrics.SystemDiagnostics.IMeterFactory.AsTypeReference()
+							),
+						]
+						: [],
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
 			// Double-init guard: prevents re-initialization when the method path is used
 			// (occurs in Logging+Metrics multi-target where Logging owns the constructor).
@@ -54,19 +63,25 @@ partial class MeterTargetClassEmitter
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		writer.NewLine().Write("public ").Write(target.ClassNameToGenerate).Write('(');
+		writer.NewLine();
 
-		if (supportsIMeterFactory)
-		{
-			writer
-				.Write(TypeLibrary.Metrics.SystemDiagnostics.IMeterFactory)
-				.Write(' ')
-				.Write(PropertyLibrary.Metrics.MeterFactoryParameterName);
-		}
-
-		writer.Write(")");
-
-		using (writer.OpenBlockScope())
+		using (
+			writer.WriteConstructorScope(
+				new ConstructorDeclarationOptions(target.ClassNameToGenerate, TypeDeclarationAccessibility.Public)
+				{
+					Parameters = supportsIMeterFactory
+						?
+						[
+							new ParameterDeclarationOptions(
+								PropertyLibrary.Metrics.MeterFactoryParameterName,
+								TypeLibrary.Metrics.SystemDiagnostics.IMeterFactory.AsTypeReference()
+							),
+						]
+						: [],
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
 			EmitInitializationBodyContent(output, writer);
 		}

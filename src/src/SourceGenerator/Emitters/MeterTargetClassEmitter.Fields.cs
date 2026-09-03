@@ -23,20 +23,31 @@ partial class MeterTargetClassEmitter
 		if (readonlyFields)
 		{
 			writer
-				.Write("readonly ")
-				.Write((string)TypeLibrary.Metrics.SystemDiagnostics.Meter)
-				.Write(' ')
-				.Write(MeterFieldName)
-				.WriteLine(";")
+				.WriteField(
+					new FieldDeclarationOptions(
+						MeterFieldName,
+						TypeLibrary.Metrics.SystemDiagnostics.Meter.AsTypeReference()
+					)
+					{
+						IsReadOnly = true,
+						IncludeGeneratedAttributes = false,
+					}
+				)
 				.NewLine();
 		}
 		else
 		{
 			writer
-				.Write(TypeLibrary.Metrics.SystemDiagnostics.Meter)
-				.Write(' ')
-				.Write(MeterFieldName)
-				.WriteLine(writer.IsNullableContextEnabled is null or true ? " = default!;" : " = default;")
+				.WriteField(
+					new FieldDeclarationOptions(
+						MeterFieldName,
+						TypeLibrary.Metrics.SystemDiagnostics.Meter.AsTypeReference()
+					)
+					{
+						Initializer = writer.IsNullableContextEnabled is null or true ? "default!" : "default",
+						IncludeGeneratedAttributes = false,
+					}
+				)
 				.NewLine();
 		}
 
@@ -64,15 +75,23 @@ partial class MeterTargetClassEmitter
 
 			if (emitReadonly)
 			{
-				writer.Write("readonly ").Write((string)type).Write(' ').Write(method.FieldName).WriteLine(";");
+				writer.WriteField(
+					new FieldDeclarationOptions(method.FieldName, type)
+					{
+						IsReadOnly = true,
+						IncludeGeneratedAttributes = false,
+					}
+				);
 			}
 			else
 			{
-				writer
-					.Write(type)
-					.Write(' ')
-					.Write(method.FieldName)
-					.WriteLine(writer.IsNullableContextEnabled is null or true ? " = default!;" : " = default;");
+				writer.WriteField(
+					new FieldDeclarationOptions(method.FieldName, type)
+					{
+						Initializer = writer.IsNullableContextEnabled is null or true ? "default!" : "default",
+						IncludeGeneratedAttributes = false,
+					}
+				);
 			}
 		}
 	}

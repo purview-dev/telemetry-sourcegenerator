@@ -14,14 +14,16 @@ partial class LoggerTargetClassEmitter
 		context.CancellationToken.ThrowIfCancellationRequested();
 
 		writer
-			.Write("readonly ")
-			.Write(TypeLibrary.Logging.MicrosoftExtensions.ILogger)
-			.Write('<')
-			.Write(target.InterfaceType)
-			.Write('>')
-			.Write(' ')
-			.Write(PropertyLibrary.Logging.LoggerFieldName)
-			.Write(';')
+			.WriteField(
+				new FieldDeclarationOptions(
+					PropertyLibrary.Logging.LoggerFieldName,
+					TypeLibrary.Logging.MicrosoftExtensions.ILogger.MakeGeneric(target.InterfaceType).AsTypeReference()
+				)
+				{
+					IsReadOnly = true,
+					IncludeGeneratedAttributes = false,
+				}
+			)
 			.NewLine()
 			.NewLine();
 
@@ -85,70 +87,58 @@ partial class LoggerTargetClassEmitter
 
 	internal static void EmitLogActionField(CodeWriter writer, LogMethodTarget methodTarget)
 	{
-		writer
-			.Write("static readonly ")
-			.Write(methodTarget.IsScoped ? PurviewTypeLibrary.System.Func : PurviewTypeLibrary.System.Action)
-			.Write('<')
-			.Write(TypeLibrary.Logging.MicrosoftExtensions.ILogger)
-			.Write(", ");
+		var useNullable = writer.IsNullableContextEnabled is null or true;
 
-		foreach (var parameter in methodTarget.ParametersSansException)
-			writer.Write(parameter.ParameterType).Write(", ");
+		var typeName =
+			(methodTarget.IsScoped ? "global::System.Func<" : "global::System.Action<")
+			+ TypeLibrary.Logging.MicrosoftExtensions.ILogger.RenderFullNameForNullable(useNullable)
+			+ string.Concat(
+				methodTarget.ParametersSansException.Select(p =>
+					", " + p.ParameterType.RenderFullNameForNullable(useNullable)
+				)
+			)
+			+ ", "
+			+ (
+				methodTarget.IsScoped
+					? TypeLibrary.System.IDisposable.MakeNullable(writer).RenderFullNameForNullable(useNullable)
+					: TypeLibrary.System.Exception.MakeNullable(writer).RenderFullNameForNullable(useNullable)
+			)
+			+ ">";
 
-		if (methodTarget.IsScoped)
-		{
-			writer.Write(TypeLibrary.System.IDisposable.MakeNullable(writer));
-			writer.Write("> ");
-		}
-		else
-		{
-			writer.Write(TypeLibrary.System.Exception.MakeNullable(writer));
-			writer.Write("> ");
-		}
+		var genericArguments =
+			methodTarget.ParameterCountSansException > 0
+				? "<"
+					+ string.Join(
+						", ",
+						methodTarget.ParametersSansException.Select(p =>
+							p.ParameterType.RenderFullNameForNullable(useNullable)
+						)
+					)
+					+ ">"
+				: "";
 
-		writer
-			.Write(methodTarget.LoggerActionFieldName)
-			.Write(" = ")
-			.Write(TypeLibrary.Logging.MicrosoftExtensions.LoggerMessage)
-			.Write(".Define");
+		var eventId = methodTarget.EventId ?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
+		var arguments = methodTarget.IsScoped
+			? $"\"{methodTarget.MessageTemplate}\""
+			: $"{methodTarget.MSLevel}, new global::Microsoft.Extensions.Logging.EventId({eventId.ToString(CultureInfo.InvariantCulture)}, \"{methodTarget.LogName}\"), \"{methodTarget.MessageTemplate}\"";
 
-		if (methodTarget.IsScoped)
-			writer.Write("Scope");
+		var initializer =
+			$"global::Microsoft.Extensions.Logging.LoggerMessage.Define"
+			+ (methodTarget.IsScoped ? "Scope" : "")
+			+ genericArguments
+			+ $"({arguments})";
 
-		if (methodTarget.ParameterCountSansException > 0)
-		{
-			writer.Write('<');
-
-			var i = 0;
-			foreach (var parameter in methodTarget.ParametersSansException)
+		writer.WriteField(
+			new FieldDeclarationOptions(
+				methodTarget.LoggerActionFieldName,
+				new TypeReference(new TypeIdentity(typeName, null))
+			)
 			{
-				writer.Write(parameter.ParameterType);
-				if (i < methodTarget.ParameterCountSansException - 1)
-					writer.Write(", ");
-
-				i++;
+				IsStatic = true,
+				IsReadOnly = true,
+				Initializer = initializer,
+				IncludeGeneratedAttributes = false,
 			}
-
-			writer.Write('>');
-		}
-
-		writer.Write('(');
-
-		if (!methodTarget.IsScoped)
-		{
-			writer.Write(methodTarget.MSLevel).Write(", ");
-
-			var eventId = methodTarget.EventId ?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
-			writer
-				.Write("new ")
-				.Write(TypeLibrary.Logging.MicrosoftExtensions.EventId)
-				.Write('(')
-				.Write(eventId.ToString(CultureInfo.InvariantCulture))
-				.Write(", \"")
-				.Write(methodTarget.LogName)
-				.Write("\"), ");
-		}
-
-		writer.Write('"').Write(methodTarget.MessageTemplate).Write('"').Write(");").NewLine();
+		);
 	}
 }

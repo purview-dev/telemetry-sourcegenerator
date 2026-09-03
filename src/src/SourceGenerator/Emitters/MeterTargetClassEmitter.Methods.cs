@@ -9,21 +9,33 @@ partial class MeterTargetClassEmitter
 {
 	static void EmitThrowStub(CodeWriter writer, InstrumentTarget methodTarget)
 	{
-		writer.NewLine().Write("public ").Write(methodTarget.ReturnType);
+		writer.NewLine();
 
-		writer.Write(' ').Write(methodTarget.MethodName).Write('(');
-
-		for (var i = 0; i < methodTarget.Parameters.Count; i++)
+		using (
+			writer.WriteMethodScope(
+				new MethodDeclarationOptions(
+					methodTarget.MethodName,
+					methodTarget.ReturnType,
+					TypeDeclarationAccessibility.Public
+				)
+				{
+					Parameters =
+					[
+						.. methodTarget.Parameters.Select(p => new ParameterDeclarationOptions(
+							p.ParameterName,
+							p.ParameterType
+						)),
+					],
+					ExpressionBody = "throw new global::System.NotSupportedException()",
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
-			if (i > 0)
-				writer.Write(", ");
-			writer
-				.Write(methodTarget.Parameters[i].ParameterType)
-				.Write(' ')
-				.Write(methodTarget.Parameters[i].ParameterName);
+			//
 		}
 
-		writer.Write(") => throw new global::System.NotSupportedException();").NewLine();
+		writer.NewLine();
 	}
 
 	static void EmitMethods(MeterOutputContext output, CodeWriter writer, SourceProductionContext context)
@@ -73,11 +85,13 @@ partial class MeterTargetClassEmitter
 		var dictType = GetDictionaryType(writer);
 		writer
 			.NewLine()
-			.Write("partial void ")
-			.Write(PartialMeterTagsMethod)
-			.Write('(')
-			.Write(dictType)
-			.WriteLine(" meterTags);")
+			.WritePartialMethod(
+				new MethodDeclarationOptions(PartialMeterTagsMethod, PurviewTypeLibrary.System.Void.AsTypeReference())
+				{
+					Parameters = [new ParameterDeclarationOptions("meterTags", dictType)],
+					IncludeGeneratedAttributes = false,
+				}
+			)
 			.NewLine();
 
 		foreach (var instrument in target.InstrumentationMethods)
@@ -89,11 +103,16 @@ partial class MeterTargetClassEmitter
 				continue;
 
 			writer
-				.Write("partial void ")
-				.Write(instrument.TagPopulateMethodName)
-				.Write('(')
-				.Write(dictType)
-				.WriteLine(" instrumentTags);")
+				.WritePartialMethod(
+					new MethodDeclarationOptions(
+						instrument.TagPopulateMethodName,
+						PurviewTypeLibrary.System.Void.AsTypeReference()
+					)
+					{
+						Parameters = [new ParameterDeclarationOptions("instrumentTags", dictType)],
+						IncludeGeneratedAttributes = false,
+					}
+				)
 				.NewLine();
 		}
 	}
