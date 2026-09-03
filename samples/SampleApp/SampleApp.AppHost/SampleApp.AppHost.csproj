@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.2.0">
+﻿<Project Sdk="Aspire.AppHost.Sdk/13.5.3">
 	<PropertyGroup>
 		<!-- The AppHost only orchestrates project resources; nothing in its compilation declares the
 		     SampleApp namespace, so the SDK's namespace-prefix global using is not resolvable. -->
@@ -8,9 +8,6 @@
 		<NoWarn>$(NoWarn);ASPIRE010;</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>
-		<!-- The Aspire hosting SDK pulls MessagePack 2.5.192 transitively (known advisories);
-		     this direct private reference forces the centrally-managed patched 2.5.302. -->
-		<PackageReference Include="MessagePack" PrivateAssets="all" />
 		<ProjectReference Include="..\SampleApp.APIService\SampleApp.APIService.csproj" />
 		<ProjectReference Include="..\SampleApp.Web\SampleApp.Web.csproj" />
 	</ItemGroup>
