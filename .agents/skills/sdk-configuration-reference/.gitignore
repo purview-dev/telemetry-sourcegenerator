@@ -1,8 +1,0 @@
-# Ignore all files
-*
-
-# Don't ignore directories, so Git can traverse them
-!*/
-
-# Keep this file
-!.gitignore

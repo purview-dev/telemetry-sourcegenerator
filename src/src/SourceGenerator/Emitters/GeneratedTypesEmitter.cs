@@ -18,8 +18,8 @@ static class GeneratedTypesEmitter
 		[TypeLibrary.TelemetryShared.ExcludeAttribute] = (writer, type) =>
 			WriteSimpleAttribute(writer, type, AttributeTargets.Method, includeSuppressMessage: false),
 		[TypeLibrary.TelemetryShared.TelemetryGenerationAttribute] = WriteTelemetryGenerationAttribute,
-		[TypeLibrary.TelemetryShared.TargetsEnum] = WriteTargetsEnum,
-		[TypeLibrary.TelemetryShared.NamingConventionEnum] = WriteNamingConventionEnum,
+		[TypeLibrary.TelemetryShared.Targets] = WriteTargetsEnum,
+		[TypeLibrary.TelemetryShared.NamingConvention] = WriteNamingConventionEnum,
 		[TypeLibrary.TelemetryShared.ExcludeTargetsAttribute] = WriteExcludeTargetsAttribute,
 		// Activities
 		[TypeLibrary.Activities.BaggageAttribute] = WriteTagLikeAttribute,
@@ -322,7 +322,7 @@ static class GeneratedTypesEmitter
 
 	static void WriteTelemetryGenerationAttribute(CodeWriter writer, TypeIdentity type)
 	{
-		var namingConvention = TypeLibrary.TelemetryShared.NamingConventionEnum;
+		var namingConvention = TypeLibrary.TelemetryShared.NamingConvention;
 
 		EmitAttribute(
 			writer,
@@ -421,7 +421,7 @@ static class GeneratedTypesEmitter
 
 	static void WriteExcludeTargetsAttribute(CodeWriter writer, TypeIdentity type)
 	{
-		var targets = TypeLibrary.TelemetryShared.TargetsEnum;
+		var targets = TypeLibrary.TelemetryShared.Targets;
 
 		EmitAttribute(
 			writer,
@@ -1236,7 +1236,7 @@ static class GeneratedTypesEmitter
 			.WriteEnum(
 				new(type.Name, TypeDeclarationAccessibility.Public)
 				{
-					Attributes = [new AttributeDeclarationOptions(new TypeIdentity("FlagsAttribute", "System"))],
+					Attributes = [new(new TypeIdentity("FlagsAttribute", "System"))],
 				},
 				new("None", 0, "No telemetry targets are excluded."),
 				new("Activities", 1, "Excludes activity (tracing) targets."),

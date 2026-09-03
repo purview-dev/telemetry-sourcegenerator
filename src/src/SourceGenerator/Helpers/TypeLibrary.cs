@@ -321,11 +321,8 @@ static class TypeLibrary
 			nameof(TelemetryGenerationAttribute),
 			PurviewTelemetryNamespace
 		);
-		public static readonly TypeIdentity TargetsEnum = new(nameof(TargetsEnum), PurviewTelemetryNamespace);
-		public static readonly TypeIdentity NamingConventionEnum = new(
-			nameof(NamingConventionEnum),
-			PurviewTelemetryNamespace
-		);
+		public static readonly TypeIdentity Targets = new(nameof(Targets), PurviewTelemetryNamespace);
+		public static readonly TypeIdentity NamingConvention = new(nameof(NamingConvention), PurviewTelemetryNamespace);
 		public static readonly TypeIdentity ExcludeTargetsAttribute = new(
 			nameof(ExcludeTargetsAttribute),
 			PurviewTelemetryNamespace
@@ -336,8 +333,8 @@ static class TypeLibrary
 				TagAttribute,
 				ExcludeAttribute,
 				TelemetryGenerationAttribute,
-				TargetsEnum,
-				NamingConventionEnum,
+				Targets,
+				NamingConvention,
 				ExcludeTargetsAttribute,
 			];
 	}

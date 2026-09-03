@@ -67,7 +67,7 @@ namespace Testing;
 			.IsFalse()
 			.Because("missing-documentation warnings must be resolved with XML summaries, not pragmas");
 
-		var targetsEnum = generationResult.GetSource("Purview.Telemetry.TargetsEnum.g.cs");
+		var targetsEnum = generationResult.GetSource("Purview.Telemetry.Targets.g.cs");
 		await Assert
 			.That(targetsEnum)
 			.ContainsGeneratedCode("/// <summary>Excludes logging targets.</summary>")
