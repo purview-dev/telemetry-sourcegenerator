@@ -11,17 +11,14 @@ namespace Purview.Telemetry.SourceGenerator.PipelineCLI.Modules;
 [ModuleCategory("Build")]
 [DependsOn<RunTestsModule>]
 [DependsOn<VersionModule>]
-public sealed class PackModule(IOptions<BuildSettings> settings, IOptions<ReleaseSettings> releaseSettings)
-	: Module<CommandResult>
+public sealed class PackModule(IOptions<BuildSettings> settings) : Module<CommandResult>
 {
 	protected override ModuleConfiguration Configure() =>
 		ModuleConfiguration
 			.Create()
 			.WithSkipWhen(_ =>
-				!settings.Value.RunPack || releaseSettings.Value.Mode == ReleaseMode.None
-					? SkipDecision.Skip(
-						"Packing is disabled. Set Build__RunPack=true and Release__Mode to something other than None to enable it."
-					)
+				!settings.Value.RunPack
+					? SkipDecision.Skip("Packing is disabled. Set Build__RunPack=true to enable it.")
 					: SkipDecision.DoNotSkip
 			)
 			.Build();
