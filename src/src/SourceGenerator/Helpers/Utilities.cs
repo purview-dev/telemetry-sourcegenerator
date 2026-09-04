@@ -76,6 +76,9 @@ static partial class Utilities
 			if (attribute.AttributeClass == null)
 				continue;
 
+			if (attribute.AttributeClass.TypeKind == TypeKind.Error)
+				continue;
+
 			var attributeType = TypeReference.Create(attribute.AttributeClass);
 
 			if (IsActivityAttribute(attributeType))

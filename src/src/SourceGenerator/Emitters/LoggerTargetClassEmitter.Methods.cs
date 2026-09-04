@@ -14,7 +14,7 @@ partial class LoggerTargetClassEmitter
 
 		writer.NewLine();
 		using (
-			writer.WriteMethodScope(
+			writer.MethodScope(
 				new(methodTarget.MethodName, returnType, TypeDeclarationAccessibility.Public)
 				{
 					Parameters =
@@ -114,7 +114,7 @@ partial class LoggerTargetClassEmitter
 		writer.NewLine();
 
 		using (
-			writer.WriteMethodScope(
+			writer.MethodScope(
 				new MethodDeclarationOptions(
 					methodName,
 					returnType,
@@ -143,15 +143,10 @@ partial class LoggerTargetClassEmitter
 			}
 			else
 			{
-				writer
-					.Write("if (!")
-					.Write(PropertyLibrary.Logging.LoggerFieldName)
-					.Write(".IsEnabled(")
-					.Write(methodTarget.MSLevel)
-					.WriteLine("))");
-
-				using (writer.OpenBlockScope())
-					writer.WriteLine("return;");
+				writer.IfBlock(
+					"!" + PropertyLibrary.Logging.LoggerFieldName + ".IsEnabled(" + methodTarget.MSLevel + ")",
+					static body => body.Return()
+				);
 
 				writer
 					.NewLine()
@@ -202,7 +197,7 @@ partial class LoggerTargetClassEmitter
 		writer.NewLine();
 
 		using (
-			writer.WriteMethodScope(
+			writer.MethodScope(
 				new MethodDeclarationOptions(methodTarget.MethodName, returnType, TypeDeclarationAccessibility.Public)
 				{
 					Parameters =
@@ -274,7 +269,7 @@ partial class LoggerTargetClassEmitter
 			// Return if scoped
 			if (methodTarget.IsScoped)
 			{
-				writer.NewLine().Write("return loggingResult;");
+				writer.NewLine().Return("loggingResult");
 			}
 		}
 

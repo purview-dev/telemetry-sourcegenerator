@@ -20,15 +20,19 @@ partial class ActivitySourceTargetClassEmitter
 		}
 
 		writer
-			.Write("readonly static ")
-			.Write(TypeLibrary.Activities.SystemDiagnostics.ActivitySource)
-			.Write(' ')
-			.Write(PropertyLibrary.Activities.ActivitySourceFieldName)
-			.Write(" = new ")
-			.Write(TypeLibrary.Activities.SystemDiagnostics.ActivitySource)
-			.Write('(')
-			.Write(activitySourceName!.Wrap())
-			.WriteLine(");")
+			.Field(
+				new FieldDeclarationOptions(
+					PropertyLibrary.Activities.ActivitySourceFieldName,
+					TypeLibrary.Activities.SystemDiagnostics.ActivitySource.AsTypeReference()
+				)
+				{
+					IsStatic = true,
+					IsReadOnly = true,
+					Initializer =
+						$"new {(string)TypeLibrary.Activities.SystemDiagnostics.ActivitySource}({activitySourceName!.Wrap()})",
+					IncludeGeneratedAttributes = false,
+				}
+			)
 			.NewLine();
 	}
 }

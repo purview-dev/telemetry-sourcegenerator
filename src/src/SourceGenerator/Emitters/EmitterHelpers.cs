@@ -43,7 +43,7 @@ static class EmitterHelpers
 		if (SharedHelpers.ShouldEmitClassAttributes(requestingType, generationType))
 			attributes = [EditorBrowsableAttribute()];
 
-		return writer.WriteClassScope(
+		return writer.ClassScope(
 			new TypeDeclarationOptions(className, accessibility)
 			{
 				IncludeGeneratedAttributes = false,

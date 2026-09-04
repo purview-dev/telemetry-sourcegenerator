@@ -11,7 +11,7 @@ static partial class LoggerTargetClassEmitter
 		output.Context.Debug($"Generating logging class for: {target.FullyQualifiedName}");
 
 		var writer = output.CreateWriter();
-		using (writer.WriteBlockNamespaceScope(target.ClassNamespace))
+		using (writer.BlockNamespaceScope(target.ClassNamespace))
 		{
 			List<CodeWriter.BlockScope> parentScopes = [];
 			if (target.TelemetryGeneration.TelemetryNamesNamespace == null)
@@ -19,7 +19,7 @@ static partial class LoggerTargetClassEmitter
 				foreach (var parent in target.ParentClasses)
 				{
 					parentScopes.Add(
-						writer.WriteClassScope(
+						writer.ClassScope(
 							new TypeDeclarationOptions(parent) { IsSealed = false, IncludeGeneratedAttributes = false }
 						)
 					);

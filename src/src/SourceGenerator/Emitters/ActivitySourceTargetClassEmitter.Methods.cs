@@ -45,33 +45,38 @@ partial class ActivitySourceTargetClassEmitter
 
 		output.Context.Debug($"Generating {PropertyLibrary.Activities.RecordExceptionMethodName}.");
 
-		writer
-			.Write("static void ")
-			.Write(PropertyLibrary.Activities.RecordExceptionMethodName)
-			.Write('(')
-			.Write(TypeLibrary.Activities.SystemDiagnostics.Activity.MakeNullable(writer))
-			.Write(" activity, ")
-			.Write(TypeLibrary.System.Exception.MakeNullable(writer))
-			.Write(" exception, ")
-			.Write(PurviewTypeLibrary.System.Boolean)
-			.WriteLine(" escape)");
-
-		using (writer.OpenBlockScope())
+		using (
+			writer.MethodScope(
+				new MethodDeclarationOptions(
+					PropertyLibrary.Activities.RecordExceptionMethodName,
+					PurviewTypeLibrary.System.Void.AsTypeReference()
+				)
+				{
+					IsStatic = true,
+					Parameters =
+					[
+						new ParameterDeclarationOptions(
+							"activity",
+							TypeLibrary.Activities.SystemDiagnostics.Activity.MakeNullable(writer)
+						),
+						new ParameterDeclarationOptions("exception", TypeLibrary.System.Exception.MakeNullable(writer)),
+						new ParameterDeclarationOptions("escape", PurviewTypeLibrary.System.Boolean.AsTypeReference()),
+					],
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
-			writer.WriteLine("if (activity == null || exception == null)");
-			using (writer.OpenBlockScope())
-				writer.WriteLine("return;");
+			writer.IfBlock("activity == null || exception == null", static body => body.Return());
 
 			writer.NewLine();
 
 			const string tagsListVariableName = "tagsCollection";
-			writer
-				.Write(TypeLibrary.Activities.SystemDiagnostics.ActivityTagsCollection)
-				.Write(' ')
-				.Write(tagsListVariableName)
-				.Write(" = new ")
-				.Write(TypeLibrary.Activities.SystemDiagnostics.ActivityTagsCollection)
-				.WriteLine("();");
+			writer.Assignment(
+				TypeLibrary.Activities.SystemDiagnostics.ActivityTagsCollection,
+				tagsListVariableName,
+				"new " + TypeLibrary.Activities.SystemDiagnostics.ActivityTagsCollection + "()"
+			);
 
 			EmitExceptionParam(writer, tagsListVariableName, "escape", "exception");
 
@@ -92,9 +97,9 @@ partial class ActivitySourceTargetClassEmitter
 				// tags:
 				.Write(", tags: ")
 				.Write(tagsListVariableName)
-				.WriteLine(");");
+				.Line(");");
 
-			writer.NewLine().Write("activity.AddEvent(").Write(eventVariableName).WriteLine(");");
+			writer.NewLine().Write("activity.AddEvent(").Write(eventVariableName).Line(");");
 		}
 
 		writer.NewLine();
@@ -113,7 +118,7 @@ partial class ActivitySourceTargetClassEmitter
 			.Write(PropertyLibrary.Activities.Tag_ExceptionEscaped.Wrap())
 			.Write(", ")
 			.Write(escapeParam)
-			.WriteLine(");");
+			.Line(");");
 
 		writer
 			.Write(tagsListVariableName)
@@ -121,15 +126,14 @@ partial class ActivitySourceTargetClassEmitter
 			.Write(PropertyLibrary.Activities.Tag_ExceptionMessage.Wrap())
 			.Write(", ")
 			.Write(exceptionParam)
-			.WriteLine(".Message);");
+			.Line(".Message);");
 
-		writer
-			.Write(tagsListVariableName)
-			.Write(".Add(")
-			.Write(PropertyLibrary.Activities.Tag_ExceptionType.Wrap())
-			.Write(", ")
-			.Write(exceptionParam)
-			.WriteLine(".GetType().FullName);");
+		writer.MethodCallOn(
+			tagsListVariableName,
+			"Add",
+			PropertyLibrary.Activities.Tag_ExceptionType.Wrap(),
+			exceptionParam + ".GetType().FullName"
+		);
 
 		writer
 			.Write(tagsListVariableName)
@@ -137,40 +141,39 @@ partial class ActivitySourceTargetClassEmitter
 			.Write(PropertyLibrary.Activities.Tag_ExceptionStackTrace.Wrap())
 			.Write(", ")
 			.Write(exceptionParam)
-			.WriteLine(".StackTrace);");
+			.Line(".StackTrace);");
 	}
 
 	static void EmitThrowStub(CodeWriter writer, ActivityBasedGenerationTarget methodTarget)
 	{
-		writer.NewLine().Write("public ").Write(methodTarget.ReturnType);
+		writer.NewLine();
 
-		writer.Write(' ').Write(methodTarget.MethodName);
-
-		if (methodTarget.TypeParameters.Count > 0)
+		using (
+			writer.MethodScope(
+				new MethodDeclarationOptions(
+					methodTarget.MethodName,
+					methodTarget.ReturnType,
+					TypeDeclarationAccessibility.Public
+				)
+				{
+					Parameters =
+					[
+						.. methodTarget.Parameters.Select(p => new ParameterDeclarationOptions(
+							p.ParameterName,
+							p.ParameterType
+						)),
+					],
+					GenericTypes = [.. methodTarget.TypeParameters],
+					ExpressionBody = "throw new global::System.NotSupportedException()",
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
-			writer.Write('<');
-			for (var i = 0; i < methodTarget.TypeParameters.Count; i++)
-			{
-				if (i > 0)
-					writer.Write(", ");
-				writer.Write(methodTarget.TypeParameters[i]);
-			}
-			writer.Write('>');
+			//
 		}
 
-		writer.Write('(');
-
-		for (var i = 0; i < methodTarget.Parameters.Count; i++)
-		{
-			if (i > 0)
-				writer.Write(", ");
-			writer
-				.Write(methodTarget.Parameters[i].ParameterType)
-				.Write(' ')
-				.Write(methodTarget.Parameters[i].ParameterName);
-		}
-
-		writer.WriteLine(") => throw new global::System.NotSupportedException();").NewLine();
+		writer.NewLine();
 	}
 
 	static void EmitMethod(
@@ -233,7 +236,7 @@ partial class ActivitySourceTargetClassEmitter
 		context.CancellationToken.ThrowIfCancellationRequested();
 
 		using (
-			writer.WriteMethodScope(
+			writer.MethodScope(
 				new MethodDeclarationOptions(
 					privateMethodName,
 					methodTarget.ReturnType,
@@ -277,7 +280,7 @@ partial class ActivitySourceTargetClassEmitter
 		writer.NewLine();
 
 		using (
-			writer.WriteMethodScope(
+			writer.MethodScope(
 				new MethodDeclarationOptions(
 					methodTarget.MethodName,
 					methodTarget.ReturnType,
@@ -325,24 +328,24 @@ partial class ActivitySourceTargetClassEmitter
 						.Write(methodTarget.MethodName)
 						.Write("_Activity(")
 						.Write(paramList)
-						.WriteLine(");");
+						.Line(");");
 				}
 				else
 				{
-					writer.Write(methodTarget.MethodName).Write("_Activity(").Write(paramList).WriteLine(");");
+					writer.Write(methodTarget.MethodName).Write("_Activity(").Write(paramList).Line(");");
 				}
 			}
 
 			// Call Logging private method
 			if (methodTargets.HasFlag(GenerationType.Logging))
 			{
-				writer.Write(methodTarget.MethodName).Write("_Logging(").Write(loggingMetricsParamList).WriteLine(");");
+				writer.Write(methodTarget.MethodName).Write("_Logging(").Write(loggingMetricsParamList).Line(");");
 			}
 
 			// Call Metrics private method
 			if (methodTargets.HasFlag(GenerationType.Metrics))
 			{
-				writer.Write(methodTarget.MethodName).Write("_Metrics(").Write(loggingMetricsParamList).WriteLine(");");
+				writer.Write(methodTarget.MethodName).Write("_Metrics(").Write(loggingMetricsParamList).Line(");");
 			}
 
 			// Return result if applicable
@@ -365,7 +368,7 @@ partial class ActivitySourceTargetClassEmitter
 	)
 	{
 		using (
-			writer.WriteMethodScope(
+			writer.MethodScope(
 				new(methodTarget.MethodName, methodTarget.ReturnType, TypeDeclarationAccessibility.Public)
 				{
 					Parameters =

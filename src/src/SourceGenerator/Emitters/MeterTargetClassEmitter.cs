@@ -21,7 +21,7 @@ static partial class MeterTargetClassEmitter
 		output.Context.Debug($"Generating metric class for: {target.FullyQualifiedName}");
 
 		var writer = output.CreateWriter();
-		using (writer.WriteBlockNamespaceScope(target.ClassNamespace))
+		using (writer.BlockNamespaceScope(target.ClassNamespace))
 		{
 			List<CodeWriter.BlockScope> parentScopes = [];
 			if (target.TelemetryGeneration.TelemetryNamesNamespace == null)
@@ -29,7 +29,7 @@ static partial class MeterTargetClassEmitter
 				foreach (var parent in target.ParentClasses)
 				{
 					parentScopes.Add(
-						writer.WriteClassScope(
+						writer.ClassScope(
 							new TypeDeclarationOptions(parent) { IsSealed = false, IncludeGeneratedAttributes = false }
 						)
 					);

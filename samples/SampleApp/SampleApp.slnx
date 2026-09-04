@@ -4,6 +4,14 @@
 		<File Path="../../global.json" />
 		<File Path="Directory.Build.props" />
 	</Folder>
+	<!-- The sample apps consume the source generator as an analyzer ProjectReference. Including the
+	     generator projects in the solution gives the solution-configuration blob explicit mappings,
+	     so the analyzer resolves from a single, configuration-consistent output (the .NET SDK would
+	     otherwise default the reference to Debug when building in Release and load both copies). -->
+	<Folder Name="/generator/">
+		<Project Path="../../src/src/SourceGenerator/SourceGenerator.csproj" />
+		<Project Path="../../src/src/SourceGenerator.Refactorings/SourceGenerator.Refactorings.csproj" />
+	</Folder>
 	<Folder Name="/src/">
 		<Project Path="SampleApp.APIService/SampleApp.APIService.csproj" />
 		<Project Path="SampleApp.AppHost/SampleApp.AppHost.csproj" />

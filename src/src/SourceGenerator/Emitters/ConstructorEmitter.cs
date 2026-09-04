@@ -30,7 +30,7 @@ static class ConstructorEmitter
 		}
 
 		writer.NewLine();
-		writer.WriteConstructor(
+		writer.Constructor(
 			new ConstructorDeclarationOptions(classNameToGenerate, TypeDeclarationAccessibility.Public)
 			{
 				Parameters = BuildParameters(generationType, interfaceType, generationContext),

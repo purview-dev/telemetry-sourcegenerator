@@ -9,21 +9,33 @@ partial class MeterTargetClassEmitter
 {
 	static void EmitThrowStub(CodeWriter writer, InstrumentTarget methodTarget)
 	{
-		writer.NewLine().Write("public ").Write(methodTarget.ReturnType);
+		writer.NewLine();
 
-		writer.Write(' ').Write(methodTarget.MethodName).Write('(');
-
-		for (var i = 0; i < methodTarget.Parameters.Count; i++)
+		using (
+			writer.MethodScope(
+				new MethodDeclarationOptions(
+					methodTarget.MethodName,
+					methodTarget.ReturnType,
+					TypeDeclarationAccessibility.Public
+				)
+				{
+					Parameters =
+					[
+						.. methodTarget.Parameters.Select(p => new ParameterDeclarationOptions(
+							p.ParameterName,
+							p.ParameterType
+						)),
+					],
+					ExpressionBody = "throw new global::System.NotSupportedException()",
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
-			if (i > 0)
-				writer.Write(", ");
-			writer
-				.Write(methodTarget.Parameters[i].ParameterType)
-				.Write(' ')
-				.Write(methodTarget.Parameters[i].ParameterName);
+			//
 		}
 
-		writer.Write(") => throw new global::System.NotSupportedException();").NewLine();
+		writer.NewLine();
 	}
 
 	static void EmitMethods(MeterOutputContext output, CodeWriter writer, SourceProductionContext context)
@@ -73,11 +85,12 @@ partial class MeterTargetClassEmitter
 		var dictType = GetDictionaryType(writer);
 		writer
 			.NewLine()
-			.Write("partial void ")
+			.Write("partial")
+			.Write(" void ")
 			.Write(PartialMeterTagsMethod)
 			.Write('(')
 			.Write(dictType)
-			.WriteLine(" meterTags);")
+			.Line(" meterTags);")
 			.NewLine();
 
 		foreach (var instrument in target.InstrumentationMethods)
@@ -89,11 +102,12 @@ partial class MeterTargetClassEmitter
 				continue;
 
 			writer
-				.Write("partial void ")
+				.Write("partial")
+				.Write(" void ")
 				.Write(instrument.TagPopulateMethodName)
 				.Write('(')
 				.Write(dictType)
-				.WriteLine(" instrumentTags);")
+				.Line(" instrumentTags);")
 				.NewLine();
 		}
 	}
@@ -132,7 +146,7 @@ partial class MeterTargetClassEmitter
 		writer.NewLine();
 
 		using (
-			writer.WriteMethodScope(
+			writer.MethodScope(
 				new MethodDeclarationOptions(
 					methodName,
 					returnType,
@@ -212,29 +226,30 @@ partial class MeterTargetClassEmitter
 
 	static void EmitObservableInstrumentBodyTest(CodeWriter writer, InstrumentTarget method)
 	{
-		writer.Write("if (").Write(method.FieldName).WriteLine(" != null)");
-
-		using (writer.OpenBlockScope())
-		{
-			if (method.InstrumentAttribute?.ThrowOnAlreadyInitialized == true)
+		writer.IfBlock(
+			method.FieldName + " != null",
+			body =>
 			{
-				writer
-					.Write("throw new ")
-					.Write(TypeLibrary.System.Exception)
-					.Write("(\"")
-					.Write(method.MetricName)
-					.WriteLine(" has already been initialized.\");");
-			}
-			else
-			{
-				writer.Write("return");
-
-				if (method.ReturnsBool)
-					writer.WriteLine(" false;");
+				if (method.InstrumentAttribute?.ThrowOnAlreadyInitialized == true)
+				{
+					writer
+						.Write("throw new ")
+						.Write(TypeLibrary.System.Exception)
+						.Write("(\"")
+						.Write(method.MetricName)
+						.Line(" has already been initialized.\");");
+				}
 				else
-					writer.Write(";").NewLine();
+				{
+					writer.Write("return");
+
+					if (method.ReturnsBool)
+						writer.Line(" false;");
+					else
+						writer.Write(";").NewLine();
+				}
 			}
-		}
+		);
 
 		writer.NewLine();
 	}
@@ -263,14 +278,14 @@ partial class MeterTargetClassEmitter
 
 		if (tagVariableName != null)
 		{
-			writer.WriteLine().Write(", tags: ").WriteLine(tagVariableName);
+			writer.NewLine().Write(", tags: ").Line(tagVariableName);
 		}
 
-		writer.WriteLine(");");
+		writer.Line(");");
 
 		if (method.ReturnsBool)
 		{
-			writer.NewLine().Write("return true;");
+			writer.NewLine().Return("true");
 		}
 	}
 
@@ -335,7 +350,7 @@ partial class MeterTargetClassEmitter
 
 		if (methodTarget.ReturnsBool)
 		{
-			writer.NewLine().Write("return true;");
+			writer.NewLine().Return("true");
 		}
 	}
 
@@ -358,39 +373,20 @@ partial class MeterTargetClassEmitter
 		}
 
 		var tagVariableName = Utilities.LowercaseFirstChar(methodTarget.MethodName + "TagList");
-		writer
-			.Write(TypeLibrary.System.TagList)
-			.Write(' ')
-			.Write(tagVariableName)
-			.Write(" = new")
-			.WriteLine("();")
-			.NewLine();
+		writer.Assignment(TypeLibrary.System.TagList, tagVariableName, "new()").NewLine();
 
 		foreach (var param in methodTarget.Tags)
 		{
 			if (param.SkipOnNullOrEmpty)
 			{
-				writer.Write("if (").Write(param.ParameterName).WriteLine(" != default)");
-				using (writer.OpenBlockScope())
-				{
-					writer
-						.Write(tagVariableName)
-						.Write(".Add(")
-						.Write(param.GeneratedName.Wrap())
-						.Write(", ")
-						.Write(param.ParameterName)
-						.WriteLine(");");
-				}
+				writer.IfBlock(
+					param.ParameterName + " != default",
+					body => body.MethodCallOn(tagVariableName, "Add", param.GeneratedName.Wrap(), param.ParameterName)
+				);
 			}
 			else
 			{
-				writer
-					.Write(tagVariableName)
-					.Write(".Add(")
-					.Write(param.GeneratedName.Wrap())
-					.Write(", ")
-					.Write(param.ParameterName)
-					.WriteLine(");");
+				writer.MethodCallOn(tagVariableName, "Add", param.GeneratedName.Wrap(), param.ParameterName);
 			}
 		}
 

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Net;
 using Purview.Telemetry;
 
@@ -17,7 +17,7 @@ public interface IWeatherAPIClientTelemetry
 	[Event]
 	[Error]
 	[AutoCounter]
-	void FailedToGetForecast(Activity? activity, Exception ex, [ExcludeTargets(TargetsEnum.Activities)] int? count);
+	void FailedToGetForecast(Activity? activity, Exception ex, [ExcludeTargets(Targets.Activities)] int? count);
 
 	[Event]
 	void RequestComplete(Activity? activity, HttpStatusCode statusCode, bool isSuccessStatusCode);
@@ -34,7 +34,7 @@ public interface IWeatherAPIClientTelemetry
 	void ForecastsRecieved(
 		Activity? activity,
 		int forecastCount,
-		[ExpandEnumerable(100), ExcludeTargets(TargetsEnum.Activities)]
+		[ExpandEnumerable(100), ExcludeTargets(Targets.Activities)]
 #pragma warning disable TSG2008 // Unbounded enumeration possible
 		WeatherForecast[] weatherForecasts
 	);

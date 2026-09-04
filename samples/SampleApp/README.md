@@ -117,7 +117,7 @@ public interface IWeatherAPIClientTelemetry
     [Error]
     [AutoCounter]
     void FailedToGetForecast(Activity? activity, Exception ex,
-        [ExcludeTargets(TargetsEnum.Activities)] int? count);
+        [ExcludeTargets(Targets.Activities)] int? count);
 
     // SINGLE-TARGET: adds ActivityEvent with HTTP status details
     [Event]
@@ -137,7 +137,7 @@ public interface IWeatherAPIClientTelemetry
     [Event(ActivityStatusCode.Ok)]
     [Debug]
     void ForecastsRecieved(Activity? activity, int forecastCount,
-        [ExpandEnumerable(100), ExcludeTargets(TargetsEnum.Activities)] WeatherForecast[] weatherForecasts);
+        [ExpandEnumerable(100), ExcludeTargets(Targets.Activities)] WeatherForecast[] weatherForecasts);
 }
 ```
 

@@ -111,7 +111,7 @@ partial class LoggerGenTargetClassEmitter
 		writer.NewLine();
 
 		using (
-			writer.WriteMethodScope(
+			writer.MethodScope(
 				new MethodDeclarationOptions(
 					methodName,
 					returnType,
@@ -154,15 +154,10 @@ partial class LoggerGenTargetClassEmitter
 				// if (!_logger.IsEnabled(LogLevel.Information)))
 				// { return; };
 				// ...but only if it's not been scoped.
-				writer
-					.Write("if (!")
-					.Write(PropertyLibrary.Logging.LoggerFieldName)
-					.Write(".IsEnabled(")
-					.Write(methodTarget.MSLevel)
-					.WriteLine("))");
-
-				using (writer.OpenBlockScope())
-					writer.WriteLine("return;");
+				writer.IfBlock(
+					"!" + PropertyLibrary.Logging.LoggerFieldName + ".IsEnabled(" + methodTarget.MSLevel + ")",
+					static body => body.Return()
+				);
 
 				writer.NewLine();
 			}
@@ -232,26 +227,27 @@ partial class LoggerGenTargetClassEmitter
 		if (variables.Length > 0)
 		{
 			foreach (var variableDefinition in variables)
-				writer.WriteLine(variableDefinition);
+				writer.Line(variableDefinition);
 
 			writer.NewLine();
 		}
 
 		var formattedMessageVarName = FindUniqueName("formattedMessage", existingParamNames);
-		writer
-			.Write("var ")
-			.WriteLine("formattedMessage = ")
-			.WriteLine("#if NET")
-			.Write("string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
-			.Write(interpolatedMessage.Wrap())
-			.WriteLine(");")
-			.WriteLine("#else")
-			.Write("global::System.FormattableString.Invariant($")
-			.Write(interpolatedMessage.Wrap())
-			.WriteLine(");")
-			.WriteLine("#endif")
-			.Write(";")
-			.NewLine();
+		writer.Write("var ").Line("formattedMessage = ");
+
+		using (writer.HashDefinesScope("NET"))
+		{
+			writer
+				.Write("string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
+				.Write(interpolatedMessage.Wrap())
+				.Line(");");
+
+			writer.HashElse();
+
+			writer.Write("global::System.FormattableString.Invariant($").Write(interpolatedMessage.Wrap()).Line(");");
+		}
+
+		writer.Write(";").NewLine();
 
 		OutputState(
 			writer,
@@ -267,7 +263,7 @@ partial class LoggerGenTargetClassEmitter
 			.Write(PropertyLibrary.Logging.LoggerFieldName)
 			.Write(".BeginScope(")
 			.Write(stateVarName)
-			.WriteLine(");");
+			.Line(");");
 	}
 
 	static void EmitNonScopedBody(
@@ -300,7 +296,7 @@ partial class LoggerGenTargetClassEmitter
 		var eventId = methodTarget.EventId ?? SharedHelpers.GetNonRandomizedHashCode(methodTarget.MethodName);
 		writer
 			.Write(PropertyLibrary.Logging.LoggerFieldName)
-			.WriteLine(".Log(")
+			.Line(".Log(")
 			// Log level
 			.Write(methodTarget.MSLevel.WithComma(andSpace: false))
 			// Event Id
@@ -312,7 +308,7 @@ partial class LoggerGenTargetClassEmitter
 			.Write(eventId.ToString(CultureInfo.InvariantCulture))
 			.Write(", nameof(")
 			.Write(methodTarget.LogName)
-			.WriteLine(")),")
+			.Line(")),")
 			// State
 			.Write(stateVarName.WithComma(andSpace: false))
 			// Exception
@@ -324,31 +320,35 @@ partial class LoggerGenTargetClassEmitter
 			.Write(expressionStateVarName)
 			.Write(", ")
 			.Write(expressionExceptionVarName ?? "_")
-			.WriteLine(") =>")
-			.WriteLine("{");
+			.Line(") =>")
+			.Line("{");
 
 		if (variables.Length > 0)
 		{
 			foreach (var variableDefinition in variables)
-				writer.WriteLine(variableDefinition);
+				writer.Line(variableDefinition);
 
 			writer.NewLine();
 		}
 
-		writer
-			.WriteLine("#if NET")
-			.Write("return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
-			.Write(interpolatedMessage.Wrap())
-			.WriteLine(");")
-			.WriteLine("#else")
-			.Write("return global::System.FormattableString.Invariant($")
-			.Write(interpolatedMessage.Wrap())
-			.WriteLine(");")
-			.WriteLine("#endif")
-			.Write("}")
-			.Write(");");
+		using (writer.HashDefinesScope("NET"))
+		{
+			writer
+				.Write("return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
+				.Write(interpolatedMessage.Wrap())
+				.Line(");");
 
-		writer.NewLine().Write(stateVarName).Write(".Clear();").NewLine();
+			writer.HashElse();
+
+			writer
+				.Write("return global::System.FormattableString.Invariant($")
+				.Write(interpolatedMessage.Wrap())
+				.Line(");");
+		}
+
+		writer.Write("}").Write(");");
+
+		writer.NewLine().MethodCallOn(stateVarName, "Clear").NewLine();
 	}
 
 	static void EmitTypedStateLogCall(
@@ -373,7 +373,7 @@ partial class LoggerGenTargetClassEmitter
 
 		writer
 			.Write(PropertyLibrary.Logging.LoggerFieldName)
-			.WriteLine(".Log(")
+			.Line(".Log(")
 			.Write(methodTarget.MSLevel.WithComma(andSpace: false))
 			.Write(
 				writer.IsNullableContextEnabled is null or true
@@ -383,7 +383,7 @@ partial class LoggerGenTargetClassEmitter
 			.Write(eventId.ToString(CultureInfo.InvariantCulture))
 			.Write(", nameof(")
 			.Write(methodTarget.LogName)
-			.WriteLine(")),")
+			.Line(")),")
 			.Write("new ")
 			.Write(structName)
 			.Write('(');
@@ -395,7 +395,7 @@ partial class LoggerGenTargetClassEmitter
 				writer.Write(", ");
 		}
 
-		writer.WriteLine("),");
+		writer.Line("),");
 		writer.Write(methodTarget.ExceptionParameter.OrNullKeyword().WithComma(andSpace: false));
 
 		writer
@@ -403,19 +403,23 @@ partial class LoggerGenTargetClassEmitter
 			.Write(expressionStateVarName)
 			.Write(", ")
 			.Write(expressionExceptionVarName ?? "_")
-			.WriteLine(") =>")
-			.WriteLine("{")
-			.WriteLine("#if NET")
-			.Write("return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
-			.Write(interpolatedMessage.Wrap())
-			.WriteLine(");")
-			.WriteLine("#else")
-			.Write("return global::System.FormattableString.Invariant($")
-			.Write(interpolatedMessage.Wrap())
-			.WriteLine(");")
-			.WriteLine("#endif")
-			.Write("}")
-			.Write(");");
+			.Line(") =>")
+			.Line("{");
+
+		using (writer.HashDefinesScope("NET"))
+		{
+			writer
+				.Write("return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
+				.Write(interpolatedMessage.Wrap())
+				.Line(");");
+			writer.HashElse();
+
+			writer
+				.Write("return global::System.FormattableString.Invariant($")
+				.Write(interpolatedMessage.Wrap())
+				.Line(");");
+		}
+		writer.Write("}").Write(");");
 
 		writer.NewLine();
 	}
@@ -451,11 +455,11 @@ partial class LoggerGenTargetClassEmitter
 			.Write(" = ")
 			.Write(TypeLibrary.Logging.MicrosoftExtensions.LoggerMessageHelper)
 			.Write('.')
-			.WriteLine("ThreadLocalState;")
+			.Line("ThreadLocalState;")
 			.Write(stateVarName)
 			.Write(".ReserveTagSpace(")
 			.Write(reservationCount.ToString(CultureInfo.InvariantCulture))
-			.WriteLine(");")
+			.Line(");")
 			.NewLine();
 
 		// Original format is always at 0.
@@ -508,7 +512,7 @@ partial class LoggerGenTargetClassEmitter
 			foreach (var nullableLogProperty in postSetProperties)
 			{
 				context.CancellationToken.ThrowIfCancellationRequested();
-				writer.WriteLine(nullableLogProperty);
+				writer.Line(nullableLogProperty);
 			}
 		}
 
@@ -544,28 +548,17 @@ partial class LoggerGenTargetClassEmitter
 				if (shouldSkipNull)
 				{
 					var tmpVarName = FindUniqueName("tmp", existingParamNames);
-					logPropertiesWriter
-						.Write("{")
-						.Write("var ")
-						.Write(tmpVarName)
-						.Write(" = ")
-						.Write(logPropertyValue)
-						.WriteLine(";")
-						.Write("if (")
-						.Write(tmpVarName)
-						.WriteLine(" != null)")
-						.Write("{");
-					logPropertiesWriter.Indent();
-
-					logPropertyValue = tmpVarName;
+					logPropertiesWriter.Write("{");
+					logPropertiesWriter.Write("var ").Write(tmpVarName).Write(" = ").Write(logPropertyValue).Line(";");
+					logPropertiesWriter.IfBlock(
+						tmpVarName + " != null",
+						body => OutputState(body, stateVarName, logPropertyName.Wrap(), tmpVarName, null)
+					);
+					logPropertiesWriter.Write("}");
 				}
-
-				OutputState(logPropertiesWriter, stateVarName, logPropertyName.Wrap(), logPropertyValue, null);
-
-				if (shouldSkipNull)
+				else
 				{
-					logPropertiesWriter.Unindent();
-					logPropertiesWriter.Write("}").Write("}");
+					OutputState(logPropertiesWriter, stateVarName, logPropertyName.Wrap(), logPropertyValue, null);
 				}
 
 				postPropertyDefinitions ??= [];
@@ -639,69 +632,50 @@ partial class LoggerGenTargetClassEmitter
 		CodeWriter snippet = new(GenerationSettings.Create<TelemetrySourceGenerator>(), throwOnUnclosedScopes: false);
 		var iteratorVarName = FindUniqueName("tmp_i", existingParamNames);
 		var iteratorItemVarName = FindUniqueName("item", existingParamNames);
-		snippet.Write("if (").Write(parameter.Name).WriteLine(" != null)").Write("{");
-		snippet.Indent();
-		snippet.Write("var ").Write(iteratorVarName).WriteLine(" = 0;");
+		snippet.IfBlock(
+			parameter.Name + " != null",
+			body =>
+			{
+				body.Write("var ").Write(iteratorVarName).Line(" = 0;");
 
-		var maxCount = parameter.ExpandEnumerableAttribute!.Value.MaximumValueCount;
+				var maxCount = parameter.ExpandEnumerableAttribute!.Value.MaximumValueCount;
 
-		if (maxCount < 1)
-			maxCount = 1;
+				if (maxCount < 1)
+					maxCount = 1;
 
-		if (maxCount > PropertyLibrary.Logging.UnboundedIEnumerableMaxCountBeforeDiagnostic)
-		{
-			output.Context.Diagnostic($"Identified {parameter.Name} that has a large unbounded ienumerable max.");
-		}
+				if (maxCount > PropertyLibrary.Logging.UnboundedIEnumerableMaxCountBeforeDiagnostic)
+				{
+					output.Context.Diagnostic(
+						$"Identified {parameter.Name} that has a large unbounded ienumerable max."
+					);
+				}
 
-		snippet
-			.Write("foreach (var ")
-			.Write(iteratorItemVarName)
-			.Write(" in ")
-			.Write(parameter.Name)
-			.WriteLine(")")
-			.Write("{");
-		snippet.Indent();
-		snippet
-			.Write("if (")
-			.Write(iteratorVarName)
-			.Write(" == ")
-			.Write(maxCount.ToString(CultureInfo.InvariantCulture))
-			.WriteLine(")");
-		snippet.WriteLine("{");
-		snippet.Indent();
-		snippet.WriteLine("break;");
-		snippet.Unindent();
-		snippet.WriteLine("}");
+				body.Foreach(
+					"var " + iteratorItemVarName + " in " + parameter.Name,
+					loopBody =>
+					{
+						loopBody.IfBlock(
+							iteratorVarName + " == " + maxCount.ToString(CultureInfo.InvariantCulture),
+							static breakBody => breakBody.Line("break;")
+						);
 
-		snippet.NewLine();
+						loopBody.NewLine();
 
-		OutputState(snippet, stateVarName, $"$\"{parameter.Name}[{{{iteratorVarName}}}]\"", iteratorItemVarName, null);
+						OutputState(
+							loopBody,
+							stateVarName,
+							$"$\"{parameter.Name}[{{{iteratorVarName}}}]\"",
+							iteratorItemVarName,
+							null
+						);
 
-		snippet.Write(iteratorVarName).WriteLine("++;");
-
-		snippet.Unindent();
-		snippet.Write("}");
-		snippet.Unindent();
-		snippet.Write("}");
+						loopBody.Write(iteratorVarName).Line("++;");
+					}
+				);
+			}
+		);
 
 		return snippet.ToString().TrimEnd('\n');
-	}
-
-	static void EmitParametersAsMethodArgumentList(
-		LogMethodTarget methodTarget,
-		CodeWriter writer,
-		SourceProductionContext context
-	)
-	{
-		for (var i = 0; i < methodTarget.TotalParameterCount; i++)
-		{
-			context.CancellationToken.ThrowIfCancellationRequested();
-
-			writer.Write(methodTarget.Parameters[i].ParameterType).Write(' ').Write(methodTarget.Parameters[i].Name);
-
-			if (i < methodTarget.TotalParameterCount - 1)
-				writer.Write(", ");
-		}
 	}
 
 	static string FindUniqueName(string name, List<string> existingValues)
@@ -888,7 +862,7 @@ partial class LoggerGenTargetClassEmitter
 		writer.NewLine();
 
 		using (
-			writer.WriteStructScope(
+			writer.StructScope(
 				new TypeDeclarationOptions(structName, TypeDeclarationAccessibility.Private)
 				{
 					IsReadOnly = true,
@@ -898,10 +872,15 @@ partial class LoggerGenTargetClassEmitter
 			)
 		)
 		{
-			writer
-				.Write("static readonly string s_originalFormat = ")
-				.Write(methodTarget.MessageTemplate.Wrap())
-				.WriteLine(";");
+			writer.Field(
+				new FieldDeclarationOptions("s_originalFormat", PurviewTypeLibrary.System.String.AsTypeReference())
+				{
+					IsStatic = true,
+					IsReadOnly = true,
+					Initializer = methodTarget.MessageTemplate.Wrap(),
+					IncludeGeneratedAttributes = false,
+				}
+			);
 
 			if (nonExceptionParams.Count > 0)
 			{
@@ -911,103 +890,115 @@ partial class LoggerGenTargetClassEmitter
 				{
 					context.CancellationToken.ThrowIfCancellationRequested();
 
-					writer
-						.Write("public readonly ")
-						.Write(param.ParameterType)
-						.Write(" _")
-						.Write(param.UpperCasedName)
-						.WriteLine(";");
+					writer.Field(
+						new FieldDeclarationOptions($"_{param.UpperCasedName}", param.ParameterType)
+						{
+							Accessibility = TypeDeclarationAccessibility.Public,
+							IsReadOnly = true,
+							IncludeGeneratedAttributes = false,
+						}
+					);
 				}
 
-				writer.NewLine().Write("public ").Write(structName).Write('(');
+				writer.NewLine();
 
-				for (var i = 0; i < nonExceptionParams.Count; i++)
-				{
-					context.CancellationToken.ThrowIfCancellationRequested();
-
-					writer.Write(nonExceptionParams[i].ParameterType).Write(' ').Write(nonExceptionParams[i].Name);
-
-					if (i < nonExceptionParams.Count - 1)
-						writer.Write(", ");
-				}
-
-				writer.Write(")");
-
-				using (writer.OpenBlockScope())
-				{
-					foreach (var param in nonExceptionParams)
+				writer.Constructor(
+					new ConstructorDeclarationOptions(structName, TypeDeclarationAccessibility.Public)
 					{
-						context.CancellationToken.ThrowIfCancellationRequested();
+						Parameters =
+						[
+							.. nonExceptionParams.Select(p => new ParameterDeclarationOptions(p.Name, p.ParameterType)),
+						],
+						IncludeGeneratedAttributes = false,
+					},
+					ctor =>
+					{
+						foreach (var param in nonExceptionParams)
+						{
+							context.CancellationToken.ThrowIfCancellationRequested();
 
-						writer.Write("_").Write(param.UpperCasedName).Write(" = ").Write(param.Name).WriteLine(";");
+							ctor.Write("_").Write(param.UpperCasedName).Write(" = ").Write(param.Name).Line(";");
+						}
 					}
-				}
+				);
 			}
 
 			writer
 				.NewLine()
 				.NewLine()
-				.Write("public int Count => ")
-				.Write(count.ToString(CultureInfo.InvariantCulture))
-				.WriteLine(";")
-				.NewLine()
-				.Write($"public {kvpType} this[int index]");
-
-			using (writer.OpenBlockScope())
-			{
-				if (writer.IsNullableContextEnabled is null or true)
-				{
-					writer.WriteLine("get => index switch {");
-					writer.Indent();
-					writer.WriteLine("0 => new(\"{OriginalFormat}\", s_originalFormat),");
-
-					for (var i = 0; i < nonExceptionParams.Count; i++)
+				.Property(
+					new PropertyDeclarationOptions(
+						"Count",
+						PurviewTypeLibrary.System.Int32.AsTypeReference(),
+						TypeDeclarationAccessibility.Public
+					)
 					{
-						context.CancellationToken.ThrowIfCancellationRequested();
-
-						writer
-							.Write($"{i + 1} => new(")
-							.Write(nonExceptionParams[i].Name.Wrap())
-							.Write(", _")
-							.Write(nonExceptionParams[i].UpperCasedName)
-							.WriteLine("),");
+						ExpressionBody = count.ToString(CultureInfo.InvariantCulture),
+						IncludeGeneratedAttributes = false,
 					}
+				)
+				.NewLine();
 
-					writer.WriteLine("_ => throw new global::System.IndexOutOfRangeException(nameof(index))");
-					writer.Unindent();
-					writer.WriteLine("};");
-				}
-				else
+			writer.Indexer(
+				new IndexerDeclarationOptions(
+					new TypeReference(new TypeIdentity(kvpType, null)),
+					new ParameterDeclarationOptions("index", PurviewTypeLibrary.System.Int32.AsTypeReference())
+				)
 				{
-					writer.Write("get");
-					using (writer.OpenBlockScope())
+					Accessibility = TypeDeclarationAccessibility.Public,
+					IncludeGeneratedAttributes = false,
+				},
+				getter =>
+				{
+					if (writer.IsNullableContextEnabled is null or true)
 					{
-						writer.Write("switch (index)");
-						using (writer.OpenBlockScope())
+						getter.Line("return index switch {");
+						getter.Indent();
+						getter.Line("0 => new(\"{OriginalFormat}\", s_originalFormat),");
+
+						for (var i = 0; i < nonExceptionParams.Count; i++)
 						{
-							writer.WriteLine(
-								"case 0: return new " + kvpType + "(\"{OriginalFormat}\", s_originalFormat);"
-							);
+							context.CancellationToken.ThrowIfCancellationRequested();
+
+							getter
+								.Write($"{i + 1} => new(")
+								.Write(nonExceptionParams[i].Name.Wrap())
+								.Write(", _")
+								.Write(nonExceptionParams[i].UpperCasedName)
+								.Line("),");
+						}
+
+						getter.Line("_ => throw new global::System.IndexOutOfRangeException(nameof(index))");
+						getter.Unindent();
+						getter.Line("};");
+					}
+					else
+					{
+						getter.Write("switch (index)");
+						using (getter.OpenBlockScope())
+						{
+							getter.Line("case 0: return new " + kvpType + "(\"{OriginalFormat}\", s_originalFormat);");
 
 							for (var i = 0; i < nonExceptionParams.Count; i++)
 							{
 								context.CancellationToken.ThrowIfCancellationRequested();
 
-								writer
+								getter
 									.Write($"case {i + 1}: return new " + kvpType + "(")
 									.Write(nonExceptionParams[i].Name.Wrap())
 									.Write(", _")
 									.Write(nonExceptionParams[i].UpperCasedName)
-									.WriteLine(");");
+									.Line(");");
 							}
 
-							writer.WriteLine(
-								"default: throw new global::System.IndexOutOfRangeException(nameof(index));"
-							);
+							getter
+								.Write("default: throw new global::System.IndexOutOfRangeException(nameof(index))")
+								.Line(";");
 						}
 					}
-				}
-			}
+				},
+				null
+			);
 
 			EmitStructEnumerator(writer, structName, kvpType, ienumeratorType, ienumerableType, ienumerableKvpType);
 		}
@@ -1024,12 +1015,10 @@ partial class LoggerGenTargetClassEmitter
 		string ienumerableKvpType
 	)
 	{
-		var currentPropertyType =
-			$"{PurviewTypeLibrary.System.Object.MakeNullable(writer)} global::System.Collections.IEnumerator.Current => Current;";
 		writer.NewLine();
 
 		using (
-			writer.WriteStructScope(
+			writer.StructScope(
 				new TypeDeclarationOptions("Enumerator", TypeDeclarationAccessibility.Public)
 				{
 					IncludeGeneratedAttributes = false,
@@ -1038,49 +1027,120 @@ partial class LoggerGenTargetClassEmitter
 			)
 		)
 		{
-			writer
-				.Write("readonly ")
-				.Write(structName)
-				.WriteLine(" _state;")
-				.Write("int _index;")
-				.NewLine()
-				.Write("public Enumerator(")
-				.Write(structName)
-				.WriteLine(" state)");
+			writer.Field(
+				new FieldDeclarationOptions("_state", new TypeReference(new TypeIdentity(structName, null)))
+				{
+					IsReadOnly = true,
+					IncludeGeneratedAttributes = false,
+				}
+			);
 
-			using (writer.OpenBlockScope())
-			{
-				writer.Write("_state = state;").NewLine();
-				writer.Write("_index = -1;").NewLine();
-			}
+			writer.Field(
+				new FieldDeclarationOptions("_index", PurviewTypeLibrary.System.Int32.AsTypeReference())
+				{
+					IncludeGeneratedAttributes = false,
+				}
+			);
+
+			writer.NewLine();
+
+			writer.Constructor(
+				new ConstructorDeclarationOptions("Enumerator", TypeDeclarationAccessibility.Public)
+				{
+					Parameters =
+					[
+						new ParameterDeclarationOptions("state", new TypeReference(new TypeIdentity(structName, null))),
+					],
+					IncludeGeneratedAttributes = false,
+				},
+				ctor =>
+				{
+					ctor.Assignment("_state", "state").NewLine();
+					ctor.Assignment("_index", "-1").NewLine();
+				}
+			);
 
 			writer
 				.NewLine()
-				.Write($"public {kvpType} Current => _state[_index];")
+				.Property(
+					new PropertyDeclarationOptions(
+						"Current",
+						new TypeReference(new TypeIdentity(kvpType, null)),
+						TypeDeclarationAccessibility.Public
+					)
+					{
+						ExpressionBody = "_state[_index]",
+						IncludeGeneratedAttributes = false,
+					}
+				)
 				.NewLine()
 				.NewLine()
-				.Write(currentPropertyType)
+				.Write(PurviewTypeLibrary.System.Object.MakeNullable(writer))
+				.Write(" global::System.Collections.IEnumerator.Current")
+				.Line(" => Current;")
 				.NewLine()
 				.NewLine()
-				.Write("public bool MoveNext() => ++_index < _state.Count;")
+				.MethodExpression(
+					new MethodDeclarationOptions(
+						"MoveNext",
+						PurviewTypeLibrary.System.Boolean.AsTypeReference(),
+						TypeDeclarationAccessibility.Public
+					)
+					{
+						ExpressionBody = "++_index < _state.Count",
+						IncludeGeneratedAttributes = false,
+					}
+				)
 				.NewLine()
 				.NewLine()
-				.Write("public void Reset() => _index = -1;")
+				.MethodExpression(
+					new MethodDeclarationOptions(
+						"Reset",
+						PurviewTypeLibrary.System.Void.AsTypeReference(),
+						TypeDeclarationAccessibility.Public
+					)
+					{
+						ExpressionBody = "_index = -1",
+						IncludeGeneratedAttributes = false,
+					}
+				)
 				.NewLine()
 				.NewLine()
-				.Write("public void Dispose() { }");
+				.Method(
+					new MethodDeclarationOptions(
+						"Dispose",
+						PurviewTypeLibrary.System.Void.AsTypeReference(),
+						TypeDeclarationAccessibility.Public
+					)
+					{
+						IncludeGeneratedAttributes = false,
+					},
+					_ => { }
+				);
 		}
 
 		writer
 			.NewLine()
 			.NewLine()
-			.Write("public Enumerator GetEnumerator() => new Enumerator(this);")
+			.MethodExpression(
+				new MethodDeclarationOptions(
+					"GetEnumerator",
+					new TypeReference(new TypeIdentity("Enumerator", null)),
+					TypeDeclarationAccessibility.Public
+				)
+				{
+					ExpressionBody = "new Enumerator(this)",
+					IncludeGeneratedAttributes = false,
+				}
+			)
 			.NewLine()
 			.NewLine()
-			.Write($"{ienumeratorType} {ienumerableKvpType}.GetEnumerator() => GetEnumerator();")
+			.Write(ienumeratorType + " " + ienumerableKvpType + ".GetEnumerator() => GetEnumerator()")
+			.Line(";")
 			.NewLine()
 			.NewLine()
-			.Write($"{ienumerableType} global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();");
+			.Write(ienumerableType + " global::System.Collections.IEnumerable.GetEnumerator() => GetEnumerator()")
+			.Line(";");
 	}
 
 	static void EmitScopeStateStruct(CodeWriter writer, LogMethodTarget methodTarget, SourceProductionContext context)
@@ -1099,7 +1159,7 @@ partial class LoggerGenTargetClassEmitter
 		writer.NewLine();
 
 		using (
-			writer.WriteStructScope(
+			writer.StructScope(
 				new TypeDeclarationOptions(structName, TypeDeclarationAccessibility.Private)
 				{
 					IsReadOnly = true,
@@ -1109,10 +1169,15 @@ partial class LoggerGenTargetClassEmitter
 			)
 		)
 		{
-			writer
-				.Write("static readonly string s_originalFormat = ")
-				.Write(methodTarget.MessageTemplate.Wrap())
-				.WriteLine(";");
+			writer.Field(
+				new FieldDeclarationOptions("s_originalFormat", PurviewTypeLibrary.System.String.AsTypeReference())
+				{
+					IsStatic = true,
+					IsReadOnly = true,
+					Initializer = methodTarget.MessageTemplate.Wrap(),
+					IncludeGeneratedAttributes = false,
+				}
+			);
 
 			if (nonExceptionParams.Count > 0)
 			{
@@ -1122,37 +1187,37 @@ partial class LoggerGenTargetClassEmitter
 				{
 					context.CancellationToken.ThrowIfCancellationRequested();
 
-					writer
-						.Write("public readonly ")
-						.Write(param.ParameterType)
-						.Write(" _")
-						.Write(param.UpperCasedName)
-						.WriteLine(";");
+					writer.Field(
+						new FieldDeclarationOptions($"_{param.UpperCasedName}", param.ParameterType)
+						{
+							Accessibility = TypeDeclarationAccessibility.Public,
+							IsReadOnly = true,
+							IncludeGeneratedAttributes = false,
+						}
+					);
 				}
 
-				writer.NewLine().Write("public ").Write(structName).Write('(');
+				writer.NewLine();
 
-				for (var i = 0; i < nonExceptionParams.Count; i++)
-				{
-					context.CancellationToken.ThrowIfCancellationRequested();
-
-					writer.Write(nonExceptionParams[i].ParameterType).Write(' ').Write(nonExceptionParams[i].Name);
-
-					if (i < nonExceptionParams.Count - 1)
-						writer.Write(", ");
-				}
-
-				writer.Write(")");
-
-				using (writer.OpenBlockScope())
-				{
-					foreach (var param in nonExceptionParams)
+				writer.Constructor(
+					new ConstructorDeclarationOptions(structName, TypeDeclarationAccessibility.Public)
 					{
-						context.CancellationToken.ThrowIfCancellationRequested();
+						Parameters =
+						[
+							.. nonExceptionParams.Select(p => new ParameterDeclarationOptions(p.Name, p.ParameterType)),
+						],
+						IncludeGeneratedAttributes = false,
+					},
+					ctor =>
+					{
+						foreach (var param in nonExceptionParams)
+						{
+							context.CancellationToken.ThrowIfCancellationRequested();
 
-						writer.Write("_").Write(param.UpperCasedName).Write(" = ").Write(param.Name).WriteLine(";");
+							ctor.Write("_").Write(param.UpperCasedName).Write(" = ").Write(param.Name).Line(";");
+						}
 					}
-				}
+				);
 			}
 
 			// Lazy ToString() — format is deferred until a provider actually needs the string.
@@ -1163,86 +1228,112 @@ partial class LoggerGenTargetClassEmitter
 				[.. methodTarget.Parameters]
 			);
 
-			writer.NewLine().NewLine().Write("public override string ToString()");
-
-			using (writer.OpenBlockScope())
-			{
-				writer
-					.WriteLine("#if NET")
-					.Write("return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $")
-					.Write(interpolatedMessage.Wrap())
-					.WriteLine(");")
-					.WriteLine("#else")
-					.Write("return global::System.FormattableString.Invariant($")
-					.Write(interpolatedMessage.Wrap())
-					.WriteLine(");")
-					.WriteLine("#endif");
-			}
+			writer
+				.NewLine()
+				.NewLine()
+				.Method(
+					new MethodDeclarationOptions(
+						"ToString",
+						PurviewTypeLibrary.System.String.AsTypeReference(),
+						TypeDeclarationAccessibility.Public
+					)
+					{
+						IsOverride = true,
+						IncludeGeneratedAttributes = false,
+					},
+					body =>
+						body.HashDefines(
+							"NET",
+							hashWriter =>
+								hashWriter
+									.Write(
+										"return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"
+									)
+									.Write(interpolatedMessage.Wrap())
+									.Line(");")
+									.HashElse()
+									.Write("return global::System.FormattableString.Invariant($")
+									.Write(interpolatedMessage.Wrap())
+									.Line(");")
+						)
+				);
 
 			writer
 				.NewLine()
 				.NewLine()
-				.Write("public int Count => ")
-				.Write(count.ToString(CultureInfo.InvariantCulture))
-				.WriteLine(";")
-				.NewLine()
-				.Write($"public {kvpType} this[int index]");
-
-			using (writer.OpenBlockScope())
-			{
-				if (writer.IsNullableContextEnabled is null or true)
-				{
-					writer.WriteLine("get => index switch {");
-					writer.Indent();
-					writer.WriteLine("0 => new(\"{OriginalFormat}\", s_originalFormat),");
-
-					for (var i = 0; i < nonExceptionParams.Count; i++)
+				.Property(
+					new PropertyDeclarationOptions(
+						"Count",
+						PurviewTypeLibrary.System.Int32.AsTypeReference(),
+						TypeDeclarationAccessibility.Public
+					)
 					{
-						context.CancellationToken.ThrowIfCancellationRequested();
-
-						writer
-							.Write($"{i + 1} => new(")
-							.Write(nonExceptionParams[i].Name.Wrap())
-							.Write(", _")
-							.Write(nonExceptionParams[i].UpperCasedName)
-							.WriteLine("),");
+						ExpressionBody = count.ToString(CultureInfo.InvariantCulture),
+						IncludeGeneratedAttributes = false,
 					}
+				)
+				.NewLine();
 
-					writer.WriteLine("_ => throw new global::System.IndexOutOfRangeException(nameof(index))");
-					writer.Unindent();
-					writer.WriteLine("};");
-				}
-				else
+			writer.Indexer(
+				new IndexerDeclarationOptions(
+					new TypeReference(new TypeIdentity(kvpType, null)),
+					new ParameterDeclarationOptions("index", PurviewTypeLibrary.System.Int32.AsTypeReference())
+				)
 				{
-					writer.Write("get");
-					using (writer.OpenBlockScope())
+					Accessibility = TypeDeclarationAccessibility.Public,
+					IncludeGeneratedAttributes = false,
+				},
+				getter =>
+				{
+					if (writer.IsNullableContextEnabled is null or true)
 					{
-						writer.Write("switch (index)");
-						using (writer.OpenBlockScope())
+						getter.Line("return index switch {");
+						getter.Indent();
+						getter.Line("0 => new(\"{OriginalFormat}\", s_originalFormat),");
+
+						for (var i = 0; i < nonExceptionParams.Count; i++)
 						{
-							writer.WriteLine(
-								"case 0: return new " + kvpType + "(\"{OriginalFormat}\", s_originalFormat);"
-							);
+							context.CancellationToken.ThrowIfCancellationRequested();
+
+							getter
+								.Write($"{i + 1} => new(")
+								.Write(nonExceptionParams[i].Name.Wrap())
+								.Write(", _")
+								.Write(nonExceptionParams[i].UpperCasedName)
+								.Line("),");
+						}
+
+						getter.Line("_ => throw new global::System.IndexOutOfRangeException(nameof(index))");
+						getter.Unindent();
+						getter.Line("};");
+					}
+					else
+					{
+						getter.Write("switch (index)");
+						using (getter.OpenBlockScope())
+						{
+							getter.Line("case 0: return new " + kvpType + "(\"{OriginalFormat}\", s_originalFormat);");
 
 							for (var i = 0; i < nonExceptionParams.Count; i++)
 							{
 								context.CancellationToken.ThrowIfCancellationRequested();
 
-								writer
+								getter
 									.Write($"case {i + 1}: return new " + kvpType + "(")
 									.Write(nonExceptionParams[i].Name.Wrap())
 									.Write(", _")
 									.Write(nonExceptionParams[i].UpperCasedName)
-									.WriteLine(");");
+									.Line(");");
 							}
 
-							writer.WriteLine(
-								"default: throw new global::System.IndexOutOfRangeException(nameof(index));"
-							);
+							getter
+								.Write("default: throw new global::System.IndexOutOfRangeException(nameof(index))")
+								.Line(";");
 						}
 					}
-				}
-			}
+				},
+				null
+			);
 
 			EmitStructEnumerator(writer, structName, kvpType, ienumeratorType, ienumerableType, ienumerableKvpType);
 		}
@@ -1259,22 +1350,27 @@ partial class LoggerGenTargetClassEmitter
 	{
 		output.Context.Debug($"Building public delegating logging method: {methodTarget.MethodName}");
 
-		writer.NewLine().Write("public ");
+		var returnType = methodTarget.IsScoped
+			? TypeLibrary.System.IDisposable.MakeNullable(writer)
+			: PurviewTypeLibrary.System.Void.AsTypeReference();
 
-		// When Logging owns the public method (with Metrics), return void
-		// (Logging without Activity means the return type is void or IDisposable for scoped)
-		if (methodTarget.IsScoped)
-			writer.Write(TypeLibrary.System.IDisposable.MakeNullable(writer));
-		else
-			writer.Write(PurviewTypeLibrary.System.Void);
+		writer.NewLine();
 
-		writer.Write(' ').Write(methodTarget.MethodName).Write('(');
-
-		EmitParametersAsMethodArgumentList(methodTarget, writer, context);
-
-		writer.Write(")");
-
-		using (writer.OpenBlockScope())
+		using (
+			writer.MethodScope(
+				new MethodDeclarationOptions(methodTarget.MethodName, returnType, TypeDeclarationAccessibility.Public)
+				{
+					Parameters =
+					[
+						.. methodTarget.Parameters.Select(p => new ParameterDeclarationOptions(
+							p.Name,
+							p.ParameterType
+						)),
+					],
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
 			// Call the private Logging method
 			if (methodTarget.IsScoped)
@@ -1333,7 +1429,7 @@ partial class LoggerGenTargetClassEmitter
 			// Return if scoped
 			if (methodTarget.IsScoped)
 			{
-				writer.NewLine().Write("return loggingResult;");
+				writer.NewLine().Return("loggingResult");
 			}
 		}
 

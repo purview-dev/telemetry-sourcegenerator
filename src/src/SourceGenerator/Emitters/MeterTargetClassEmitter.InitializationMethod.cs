@@ -12,31 +12,38 @@ partial class MeterTargetClassEmitter
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		writer.NewLine().Write("void ").Write(PropertyLibrary.Metrics.MeterInitializationMethod).Write('(');
+		writer.NewLine();
 
-		if (supportsIMeterFactory)
-		{
-			writer
-				.Write(TypeLibrary.Metrics.SystemDiagnostics.IMeterFactory)
-				.Write(' ')
-				.Write(PropertyLibrary.Metrics.MeterFactoryParameterName);
-		}
-
-		writer.Write(")");
-
-		using (writer.OpenBlockScope())
+		using (
+			writer.MethodScope(
+				new MethodDeclarationOptions(
+					PropertyLibrary.Metrics.MeterInitializationMethod,
+					PurviewTypeLibrary.System.Void.AsTypeReference()
+				)
+				{
+					Parameters = supportsIMeterFactory
+						?
+						[
+							new ParameterDeclarationOptions(
+								PropertyLibrary.Metrics.MeterFactoryParameterName,
+								TypeLibrary.Metrics.SystemDiagnostics.IMeterFactory.AsTypeReference()
+							),
+						]
+						: [],
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
 			// Double-init guard: prevents re-initialization when the method path is used
 			// (occurs in Logging+Metrics multi-target where Logging owns the constructor).
-			writer.Write("if (").Write(MeterFieldName).WriteLine(" != null)");
-
-			using (writer.OpenBlockScope())
-			{
-				writer
-					.Write("throw new ")
-					.Write(TypeLibrary.System.Exception)
-					.WriteLine("(\"The meters have already been initialized.\");");
-			}
+			writer.IfBlock(
+				MeterFieldName + " != null",
+				body =>
+					body.Throw(
+						"new " + TypeLibrary.System.Exception + "(\"The meters have already been initialized.\")"
+					)
+			);
 
 			writer.NewLine();
 
@@ -54,19 +61,25 @@ partial class MeterTargetClassEmitter
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
-		writer.NewLine().Write("public ").Write(target.ClassNameToGenerate).Write('(');
+		writer.NewLine();
 
-		if (supportsIMeterFactory)
-		{
-			writer
-				.Write(TypeLibrary.Metrics.SystemDiagnostics.IMeterFactory)
-				.Write(' ')
-				.Write(PropertyLibrary.Metrics.MeterFactoryParameterName);
-		}
-
-		writer.Write(")");
-
-		using (writer.OpenBlockScope())
+		using (
+			writer.ConstructorScope(
+				new ConstructorDeclarationOptions(target.ClassNameToGenerate, TypeDeclarationAccessibility.Public)
+				{
+					Parameters = supportsIMeterFactory
+						?
+						[
+							new ParameterDeclarationOptions(
+								PropertyLibrary.Metrics.MeterFactoryParameterName,
+								TypeLibrary.Metrics.SystemDiagnostics.IMeterFactory.AsTypeReference()
+							),
+						]
+						: [],
+					IncludeGeneratedAttributes = false,
+				}
+			)
+		)
 		{
 			EmitInitializationBodyContent(output, writer);
 		}
@@ -79,16 +92,9 @@ partial class MeterTargetClassEmitter
 		const string meterTagsVariableName = "meterTags";
 
 		var dictType = GetDictionaryType(writer);
-		writer
-			.Write((string)dictType)
-			.Write(' ')
-			.Write(meterTagsVariableName)
-			.Write(" = new ")
-			.Write((string)dictType)
-			.WriteLine("();")
-			.NewLine();
+		writer.Assignment((string)dictType, meterTagsVariableName, "new " + (string)dictType + "()").NewLine();
 
-		writer.Write(PartialMeterTagsMethod).Write('(').Write(meterTagsVariableName).WriteLine(");").NewLine();
+		writer.Write(PartialMeterTagsMethod).Write('(').Write(meterTagsVariableName).Line(");").NewLine();
 
 		if (supportsIMeterFactory)
 		{
@@ -103,8 +109,8 @@ partial class MeterTargetClassEmitter
 				.Write(") {")
 				.NewLine();
 			writer.Indent();
-			writer.WriteLine("Version = null,");
-			writer.WriteLine($"Tags = {meterTagsVariableName}");
+			writer.Line("Version = null,");
+			writer.Line($"Tags = {meterTagsVariableName}");
 			writer.Unindent();
 			writer.Write("});").NewLine();
 		}
@@ -116,7 +122,7 @@ partial class MeterTargetClassEmitter
 				.Write(TypeLibrary.Metrics.SystemDiagnostics.Meter)
 				.Write('(')
 				.Write(target.MeterName!.Wrap())
-				.WriteLine(");")
+				.Line(");")
 				.NewLine();
 		}
 
@@ -137,17 +143,12 @@ partial class MeterTargetClassEmitter
 
 			var dictType = GetDictionaryType(writer);
 			writer
-				.Write((string)dictType)
-				.Write(' ')
-				.Write(tagVariableName)
-				.Write(" = new ")
-				.Write((string)dictType)
-				.WriteLine("();")
+				.Assignment((string)dictType, tagVariableName, "new " + (string)dictType + "()")
 				.NewLine()
 				.Write(method.TagPopulateMethodName)
 				.Write('(')
 				.Write(tagVariableName)
-				.WriteLine(");")
+				.Line(");")
 				.NewLine();
 
 			writer
@@ -166,7 +167,7 @@ partial class MeterTargetClassEmitter
 				.Write(description)
 				.Write(", tags: ")
 				.Write(tagVariableName)
-				.WriteLine(");");
+				.Line(");");
 		}
 	}
 }

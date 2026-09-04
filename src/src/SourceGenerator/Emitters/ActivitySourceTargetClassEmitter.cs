@@ -13,7 +13,7 @@ static partial class ActivitySourceTargetClassEmitter
 		output.Context.Debug($"Generating activity class for: {target.FullyQualifiedName}");
 
 		var writer = output.CreateWriter();
-		using (writer.WriteBlockNamespaceScope(target.ClassNamespace))
+		using (writer.BlockNamespaceScope(target.ClassNamespace))
 		{
 			List<CodeWriter.BlockScope> parentScopes = [];
 			if (target.TelemetryGeneration.TelemetryNamesNamespace == null)
@@ -21,7 +21,7 @@ static partial class ActivitySourceTargetClassEmitter
 				foreach (var parent in target.ParentClasses)
 				{
 					parentScopes.Add(
-						writer.WriteClassScope(new(parent) { IsSealed = false, IncludeGeneratedAttributes = false })
+						writer.ClassScope(new(parent) { IsSealed = false, IncludeGeneratedAttributes = false })
 					);
 				}
 			}

@@ -52,13 +52,14 @@ partial class ActivitySourceTargetClassEmitter
 
 		EmitHasListenersTest(writer, methodTarget);
 
-		writer.Write("if (").Write(activityVariableName).WriteLine(" != null)");
-
-		using (writer.OpenBlockScope())
-		{
-			EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, output);
-			EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, output);
-		}
+		writer.IfBlock(
+			activityVariableName + " != null",
+			body =>
+			{
+				EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, output);
+				EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, output);
+			}
+		);
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
