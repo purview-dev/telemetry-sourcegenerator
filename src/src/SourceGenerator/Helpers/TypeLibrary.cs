@@ -338,12 +338,4 @@ static class TypeLibrary
 				ExcludeTargetsAttribute,
 			];
 	}
-
-	public static ImmutableArray<TypeIdentity> GetAllGeneratedTypes() =>
-		[
-			.. Activities.GetGeneratedTypes(),
-			.. Logging.GetGeneratedTypes(),
-			.. Metrics.GetGeneratedTypes(),
-			.. TelemetryShared.GetGeneratedTypes(),
-		];
 }

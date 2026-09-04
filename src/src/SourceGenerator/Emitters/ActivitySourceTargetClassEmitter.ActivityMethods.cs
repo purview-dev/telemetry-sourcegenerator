@@ -49,7 +49,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		var activityVariableName = "activity" + methodTarget.MethodName;
 
-		writer.WriteAssignment(
+		writer.Assignment(
 			TypeLibrary.Activities.SystemDiagnostics.Activity.MakeNullable(writer),
 			activityVariableName,
 			writeValue: assignmentWriter =>
@@ -106,20 +106,23 @@ partial class ActivitySourceTargetClassEmitter
 
 		if (methodTarget.Tags.Count > 0 || methodTarget.Baggage.Count > 0)
 		{
-			writer.NewLine().Write("if (").Write(activityVariableName).WriteLine(" != null)");
-
-			using (writer.OpenBlockScope())
-			{
-				EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, output);
-				EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, output);
-			}
+			writer
+				.NewLine()
+				.IfBlock(
+					activityVariableName + " != null",
+					body =>
+					{
+						EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, output);
+						EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, output);
+					}
+				);
 		}
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
 		if (methodTarget.ReturnType.Similar(TypeLibrary.Activities.SystemDiagnostics.Activity))
 		{
-			writer.WriteReturn(returnWriter =>
+			writer.Return(returnWriter =>
 				returnWriter.Write(activityVariableName).Write(methodTarget.ReturnType.IsNullable ? null : "!")
 			);
 		}
@@ -188,20 +191,16 @@ partial class ActivitySourceTargetClassEmitter
 			}
 		}
 
-		writer.WriteLine(")");
+		writer.Line(")");
 	}
 
 	static void EmitHasListenersTest(CodeWriter writer, ActivityBasedGenerationTarget methodTarget)
 	{
 		var returnsVoid = methodTarget.ReturnType.Identity.SpecialType == SpecialType.System_Void;
-		writer.Write("if (!").Write(PropertyLibrary.Activities.ActivitySourceFieldName).WriteLine(".HasListeners())");
-
-		using (writer.OpenBlockScope())
-		{
-			writer.WriteLine(
-				"return" + (returnsVoid ? null : " null" + (methodTarget.ReturnType.IsNullable ? null : "!")) + ";"
-			);
-		}
+		writer.IfBlock(
+			"!" + PropertyLibrary.Activities.ActivitySourceFieldName + ".HasListeners()",
+			body => body.Return(returnsVoid ? null : "null" + (methodTarget.ReturnType.IsNullable ? null : "!"))
+		);
 
 		writer.NewLine();
 	}

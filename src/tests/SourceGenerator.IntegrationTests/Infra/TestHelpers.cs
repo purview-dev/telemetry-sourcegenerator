@@ -10,6 +10,7 @@ static class TestHelpers
 		value.Replace(oldValue, newValue, StringComparison.Ordinal);
 #endif
 
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0057:Use range operator")]
 	public static List<string> GetCasePermutations(string input)
 	{
 		List<string> result = [];

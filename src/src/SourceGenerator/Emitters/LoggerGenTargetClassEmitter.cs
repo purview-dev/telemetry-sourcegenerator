@@ -13,7 +13,7 @@ static partial class LoggerGenTargetClassEmitter
 
 		var writer = output.CreateWriter();
 
-		using (writer.WriteBlockNamespaceScope(target.ClassNamespace))
+		using (writer.BlockNamespaceScope(target.ClassNamespace))
 		{
 			List<CodeWriter.BlockScope> parentScopes = [];
 			if (target.TelemetryGeneration.TelemetryNamesNamespace == null)
@@ -21,7 +21,7 @@ static partial class LoggerGenTargetClassEmitter
 				foreach (var parent in target.ParentClasses)
 				{
 					parentScopes.Add(
-						writer.WriteClassScope(
+						writer.ClassScope(
 							new TypeDeclarationOptions(parent) { IsSealed = false, IncludeGeneratedAttributes = false }
 						)
 					);
@@ -81,7 +81,7 @@ static partial class LoggerGenTargetClassEmitter
 		context.CancellationToken.ThrowIfCancellationRequested();
 
 		writer
-			.WriteField(
+			.Field(
 				new FieldDeclarationOptions(
 					PropertyLibrary.Logging.LoggerFieldName,
 					TypeLibrary.Logging.MicrosoftExtensions.ILogger.MakeGeneric(target.InterfaceType).AsTypeReference()

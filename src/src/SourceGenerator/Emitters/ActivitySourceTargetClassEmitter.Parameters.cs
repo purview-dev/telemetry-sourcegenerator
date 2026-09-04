@@ -44,7 +44,7 @@ partial class ActivitySourceTargetClassEmitter
 				writer.Write(".ToString()");
 			}
 
-			writer.WriteLine(");");
+			writer.Line(");");
 		}
 
 		void EmitParameters()
@@ -56,9 +56,7 @@ partial class ActivitySourceTargetClassEmitter
 
 				if (param.SkipOnNullOrEmpty)
 				{
-					writer.Write("if (").Write(param.ParameterName).WriteLine(" != default)");
-					using (writer.OpenBlockScope())
-						EmitParameter(param);
+					writer.IfBlock(param.ParameterName + " != default", _ => EmitParameter(param));
 				}
 				else
 				{
@@ -69,9 +67,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		if (checkForNullableActivity)
 		{
-			writer.NewLine().Write("if (").Write(activityVariableName).WriteLine(" != null)");
-			using (writer.OpenBlockScope())
-				EmitParameters();
+			writer.NewLine().IfBlock(activityVariableName + " != null", _ => EmitParameters());
 		}
 		else
 		{

@@ -58,46 +58,53 @@ partial class ActivitySourceTargetClassEmitter
 
 		EmitHasListenersTest(writer, methodTarget);
 
-		writer.Write("if (").Write(activityVariableName).WriteLine(" != null)");
-
-		using (writer.OpenBlockScope())
-		{
-			var exceptionParam =
-				methodTarget.Parameters.FirstOrDefault(m => m.IsException)
-				?? methodTarget.Tags.FirstOrDefault(m => m.IsException);
-			var tagsParameterName = EmitEventTags(writer, methodTarget, activityVariableName, tagsParam, escapeParam);
-
-			var eventVariableName = "activityEvent" + methodTarget.MethodName;
-
-			writer
-				.NewLine()
-				.Write(TypeLibrary.Activities.SystemDiagnostics.ActivityEvent)
-				.Write(' ')
-				.Write(eventVariableName)
-				.Write(" = new ")
-				// Use explicit type for C# 7.3 compatibility (target-typed new() requires C# 9+)
-				.Write(TypeLibrary.Activities.SystemDiagnostics.ActivityEvent)
-				.Write("(name: ")
-				.Write(methodTarget.ActivityOrEventName.Wrap())
-				// timestamp:
-				.Write(", timestamp: ")
-				.Write(timestampParam?.ParameterName ?? "default")
-				// tags:
-				.Write(", tags: ")
-				.Write(tagsParameterName)
-				.WriteLine(");");
-
-			writer.NewLine().Write(activityVariableName).Write(".AddEvent(").Write(eventVariableName).WriteLine(");");
-
-			if (methodTarget.Baggage.Count > 0)
+		writer.IfBlock(
+			activityVariableName + " != null",
+			body =>
 			{
-				writer.NewLine();
+				var exceptionParam =
+					methodTarget.Parameters.FirstOrDefault(m => m.IsException)
+					?? methodTarget.Tags.FirstOrDefault(m => m.IsException);
+				var tagsParameterName = EmitEventTags(
+					writer,
+					methodTarget,
+					activityVariableName,
+					tagsParam,
+					escapeParam
+				);
 
-				EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, output);
+				var eventVariableName = "activityEvent" + methodTarget.MethodName;
+
+				writer
+					.NewLine()
+					.Write(TypeLibrary.Activities.SystemDiagnostics.ActivityEvent)
+					.Write(' ')
+					.Write(eventVariableName)
+					.Write(" = new ")
+					// Use explicit type for C# 7.3 compatibility (target-typed new() requires C# 9+)
+					.Write(TypeLibrary.Activities.SystemDiagnostics.ActivityEvent)
+					.Write("(name: ")
+					.Write(methodTarget.ActivityOrEventName.Wrap())
+					// timestamp:
+					.Write(", timestamp: ")
+					.Write(timestampParam?.ParameterName ?? "default")
+					// tags:
+					.Write(", tags: ")
+					.Write(tagsParameterName)
+					.Line(");");
+
+				writer.NewLine().Write(activityVariableName).Write(".AddEvent(").Write(eventVariableName).Line(");");
+
+				if (methodTarget.Baggage.Count > 0)
+				{
+					writer.NewLine();
+
+					EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, output);
+				}
+
+				EmitSetStatus(writer, methodTarget, activityVariableName, statusDescriptionParam, exceptionParam);
 			}
-
-			EmitSetStatus(writer, methodTarget, activityVariableName, statusDescriptionParam, exceptionParam);
-		}
+		);
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
@@ -131,7 +138,7 @@ partial class ActivitySourceTargetClassEmitter
 		if (tagsParam != null)
 			writer.Write(tagsParam.ParameterName);
 
-		writer.WriteLine(");");
+		writer.Line(");");
 
 		var useRecordedExceptionRules =
 			methodTarget.EventAttribute?.UseRecordExceptionRules
@@ -151,12 +158,12 @@ partial class ActivitySourceTargetClassEmitter
 				{
 					if (methodTarget.ActivityOrEventName == PropertyLibrary.Activities.Tag_ExceptionEventName)
 					{
-						writer.Write("if (").Write(tagParam.ParameterName).WriteLine(" != null)");
-						using (writer.OpenBlockScope())
-						{
-							// We want the details inside of the current event.
-							EmitExceptionParam(writer, tagsListVariableName, escapeValue, tagParam.ParameterName);
-						}
+						writer.IfBlock(
+							tagParam.ParameterName + " != null",
+							body =>
+								// We want the details inside of the current event.
+								EmitExceptionParam(writer, tagsListVariableName, escapeValue, tagParam.ParameterName)
+						);
 					}
 					else
 					{
@@ -171,17 +178,16 @@ partial class ActivitySourceTargetClassEmitter
 								.Write(tagParam.ParameterName)
 								.Write(", escape: ")
 								.Write(escapeValue)
-								.WriteLine(");");
+								.Line(");");
 						}
 						else
 						{
-							writer
-								.Write(tagsListVariableName)
-								.Write(".Add(")
-								.Write(tagParam.GeneratedName.Wrap())
-								.Write(", ")
-								.Write(tagParam.ParameterName)
-								.WriteLine(".ToString());");
+							writer.MethodCallOn(
+								tagsListVariableName,
+								"Add",
+								tagParam.GeneratedName.Wrap(),
+								tagParam.ParameterName + ".ToString()"
+							);
 						}
 					}
 				}
@@ -193,15 +199,13 @@ partial class ActivitySourceTargetClassEmitter
 						.Write(tagParam.GeneratedName.Wrap())
 						.Write(", ")
 						.Write(tagParam.ParameterName)
-						.WriteLine(");");
+						.Line(");");
 				}
 			}
 
 			if (tagParam.SkipOnNullOrEmpty)
 			{
-				writer.Write("if (").Write(tagParam.ParameterName).WriteLine(" != default)");
-				using (writer.OpenBlockScope())
-					EmitTag();
+				writer.IfBlock(tagParam.ParameterName + " != default", _ => EmitTag());
 			}
 			else
 			{
@@ -247,6 +251,6 @@ partial class ActivitySourceTargetClassEmitter
 			}
 		}
 
-		writer.WriteLine(");");
+		writer.Line(");");
 	}
 }

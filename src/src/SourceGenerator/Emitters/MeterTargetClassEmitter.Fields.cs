@@ -23,7 +23,7 @@ partial class MeterTargetClassEmitter
 		if (readonlyFields)
 		{
 			writer
-				.WriteField(
+				.Field(
 					new FieldDeclarationOptions(
 						MeterFieldName,
 						TypeLibrary.Metrics.SystemDiagnostics.Meter.AsTypeReference()
@@ -38,7 +38,7 @@ partial class MeterTargetClassEmitter
 		else
 		{
 			writer
-				.WriteField(
+				.Field(
 					new FieldDeclarationOptions(
 						MeterFieldName,
 						TypeLibrary.Metrics.SystemDiagnostics.Meter.AsTypeReference()
@@ -75,7 +75,7 @@ partial class MeterTargetClassEmitter
 
 			if (emitReadonly)
 			{
-				writer.WriteField(
+				writer.Field(
 					new FieldDeclarationOptions(method.FieldName, type)
 					{
 						IsReadOnly = true,
@@ -85,7 +85,7 @@ partial class MeterTargetClassEmitter
 			}
 			else
 			{
-				writer.WriteField(
+				writer.Field(
 					new FieldDeclarationOptions(method.FieldName, type)
 					{
 						Initializer = writer.IsNullableContextEnabled is null or true ? "default!" : "default",

@@ -19,11 +19,11 @@ Refactor the selected legacy emitter implementation from manual `string` / `Stri
 ### Requirements
 
 1. Use structured declaration APIs where applicable:
-    - `WriteClass/WriteStruct/WriteRecordClass/WriteInterface/WriteEnum`
-    - `WriteMethod`, `WriteProperty`, `WriteField`, `WriteConstructor`
+    - `Class/Struct/RecordClass/Interface/Enum`
+    - `Method`, `Property`, `Field`, `Constructor`
 2. Use XML helper extensions instead of raw `///` composition:
     - `XmlSummary`, `XmlParam`, `XmlReturn`, `XmlRemarks`, `XmlCode` or `XmlCodeBlock`
-3. Use `TypeReferenceOptions` when type text becomes complex (nullability, generics, arrays).
+3. Use `TypeReference` when type text becomes complex (nullability, generics, arrays).
 4. Ensure writer lifetime is output-scoped (`generationContext.CreateCodeWriter()` inside callback).
 5. Preserve behavior, diagnostics, and generated names.
 6. Keep changes minimal and focused; do not reformat unrelated logic.

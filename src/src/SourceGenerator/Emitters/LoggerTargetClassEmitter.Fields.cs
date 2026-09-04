@@ -14,7 +14,7 @@ partial class LoggerTargetClassEmitter
 		context.CancellationToken.ThrowIfCancellationRequested();
 
 		writer
-			.WriteField(
+			.Field(
 				new FieldDeclarationOptions(
 					PropertyLibrary.Logging.LoggerFieldName,
 					TypeLibrary.Logging.MicrosoftExtensions.ILogger.MakeGeneric(target.InterfaceType).AsTypeReference()
@@ -128,7 +128,7 @@ partial class LoggerTargetClassEmitter
 			+ genericArguments
 			+ $"({arguments})";
 
-		writer.WriteField(
+		writer.Field(
 			new FieldDeclarationOptions(
 				methodTarget.LoggerActionFieldName,
 				new TypeReference(new TypeIdentity(typeName, null))

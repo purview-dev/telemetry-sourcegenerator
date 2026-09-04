@@ -49,16 +49,16 @@ static class DependencyInjectionClassEmitter
 		// When the DI class is placed in a custom namespace (TelemetryNamesNamespace), the
 		// AddSingleton extension method is no longer in scope, so import it explicitly.
 		if (attribute.TelemetryNamesNamespace != null)
-			writer.WriteUsing(PropertyLibrary.DependencyInjection.DependencyInjectionNamespace);
+			writer.Using(PropertyLibrary.DependencyInjection.DependencyInjectionNamespace);
 
 		using (
-			writer.WriteBlockNamespaceScope(
+			writer.BlockNamespaceScope(
 				attribute.TelemetryNamesNamespace ?? PropertyLibrary.DependencyInjection.DependencyInjectionNamespace
 			)
 		)
 		{
 			using (
-				writer.WriteClassScope(
+				writer.ClassScope(
 					new(classNameToGenerate!, classAccessibility)
 					{
 						IsStatic = true,
@@ -102,8 +102,14 @@ static class DependencyInjectionClassEmitter
 
 		generationContext.Debug($"Emitting DI method for {interfaceName}.");
 
+		writer.XmlSummary(
+			$"Registers the generated {XmlSee("global::" + interfaceType.RenderFullName)} implementation with the service collection."
+		);
+		writer.XmlParam("services", "The service collection to register the telemetry implementation with.");
+		writer.XmlReturn("The service collection, for chaining.");
+
 		using (
-			writer.WriteMethodScope(
+			writer.MethodScope(
 				new MethodDeclarationOptions(
 					"Add" + methodName,
 					TypeLibrary.DependencyInjection.IServiceCollection,
@@ -123,13 +129,14 @@ static class DependencyInjectionClassEmitter
 			)
 		)
 		{
-			writer
-				.Write("return services.AddSingleton<")
-				.Write(interfaceType.RenderFullName)
-				.Write(", ")
-				.Write("global::")
-				.Write(BuildImplQualifiedName(telemetryNamesNamespace, interfaceType, className))
-				.WriteLine(">();");
+			writer.Return(
+				"services.AddSingleton<"
+					+ interfaceType.RenderFullName
+					+ ", "
+					+ "global::"
+					+ BuildImplQualifiedName(telemetryNamesNamespace, interfaceType, className)
+					+ ">()"
+			);
 		}
 	}
 

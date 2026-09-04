@@ -21,10 +21,11 @@ static class TelemetryNamesEmitter
 		var writer = output.CreateWriter();
 		var hasNamespace = !string.IsNullOrWhiteSpace(rootNamespace);
 
-		using (writer.WriteBlockNamespaceScope(rootNamespace))
+		using (writer.BlockNamespaceScope(rootNamespace))
 		{
+			writer.XmlSummary("Contains the names of the meters and activity sources generated for the assembly.");
 			using (
-				writer.WriteClassScope(
+				writer.ClassScope(
 					new(className)
 					{
 						IsStatic = true,
@@ -35,7 +36,8 @@ static class TelemetryNamesEmitter
 			)
 			{
 				var stringArrayType = PurviewTypeLibrary.System.String.AsTypeReference().MakeArray();
-				writer.WriteField(
+				writer.XmlSummary("Gets the names of the meters generated for the assembly.");
+				writer.Field(
 					new("MeterNames", stringArrayType, TypeDeclarationAccessibility.Public)
 					{
 						IsStatic = true,
@@ -45,7 +47,8 @@ static class TelemetryNamesEmitter
 					}
 				);
 
-				writer.WriteField(
+				writer.XmlSummary("Gets the names of the activity sources generated for the assembly.");
+				writer.Field(
 					new("ActivitySourceNames", stringArrayType, TypeDeclarationAccessibility.Public)
 					{
 						IsStatic = true,

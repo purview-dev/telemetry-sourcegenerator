@@ -20,7 +20,7 @@ partial class ActivitySourceTargetClassEmitter
 		}
 
 		writer
-			.WriteField(
+			.Field(
 				new FieldDeclarationOptions(
 					PropertyLibrary.Activities.ActivitySourceFieldName,
 					TypeLibrary.Activities.SystemDiagnostics.ActivitySource.AsTypeReference()
