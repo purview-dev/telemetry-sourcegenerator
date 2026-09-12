@@ -107,26 +107,31 @@ static partial class TelemetryRules
 	/// (generic interface, duplicate names, unsupported framework, missing ILogger) and per-method
 	/// rules (generic method, multi-target inference, missing interface source).
 	/// </summary>
-	public static ImmutableArray<DiagnosticInfo> GetStructuralDiagnostics(
+	public static ImmutableArray<ReportableDiagnostic> GetStructuralDiagnostics(
 		INamedTypeSymbol interfaceSymbol,
 		Compilation compilation,
 		CancellationToken token
 	)
 	{
-		var diagnostics = ImmutableArray.CreateBuilder<DiagnosticInfo>();
+		var diagnostics = ImmutableArray.CreateBuilder<ReportableDiagnostic>();
 
 		// TSG1011: unsupported target framework.
 		if (IsUnsupportedTargetFramework(compilation))
 			diagnostics.Add(
-				DiagnosticInfo.Create(DiagnosticLibrary.General.UnsupportedTargetFramework.Descriptor, interfaceSymbol)
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.General.UnsupportedTargetFramework.Descriptor,
+					isBlocking: true,
+					interfaceSymbol
+				)
 			);
 
 		// TSG1004: generic interface - nothing further is meaningful.
 		if (interfaceSymbol.Arity > 0)
 		{
 			diagnostics.Add(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.General.GenericInterfacesNotSupported.Descriptor,
+					isBlocking: true,
 					interfaceSymbol
 				)
 			);
@@ -160,12 +165,16 @@ static partial class TelemetryRules
 			);
 			if (iLoggerSymbol is null)
 				diagnostics.Add(
-					DiagnosticInfo.Create(DiagnosticLibrary.Logging.MSLoggingNotReferenced.Descriptor, interfaceSymbol)
+					ReportableDiagnostic.Create(
+						DiagnosticLibrary.Logging.MSLoggingNotReferenced.Descriptor,
+						isBlocking: true,
+						interfaceSymbol
+					)
 				);
 		}
 
 		// Gather methods grouped by name (for TSG1003 and per-method checks).
-		var methodsByName = new Dictionary<string, List<IMethodSymbol>>(StringComparer.Ordinal);
+		Dictionary<string, List<IMethodSymbol>> methodsByName = new(StringComparer.Ordinal);
 		foreach (var member in interfaceSymbol.GetMembers())
 		{
 			if (member is not IMethodSymbol method)
@@ -189,8 +198,9 @@ static partial class TelemetryRules
 
 			var locations = methods.SelectMany(static m => m.Locations).ToImmutableArray();
 			diagnostics.Add(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.General.DuplicateMethodNamesAreNotSupported.Descriptor,
+					isBlocking: true,
 					locations,
 					kvp.Key
 				)
@@ -216,7 +226,7 @@ static partial class TelemetryRules
 	static void ApplyPerMethodRules(
 		IMethodSymbol method,
 		GenerationType generationType,
-		ImmutableArray<DiagnosticInfo>.Builder diagnostics,
+		ImmutableArray<ReportableDiagnostic>.Builder diagnostics,
 		CancellationToken token
 	)
 	{
@@ -227,7 +237,11 @@ static partial class TelemetryRules
 		if (method.Arity > 0)
 		{
 			diagnostics.Add(
-				DiagnosticInfo.Create(DiagnosticLibrary.General.GenericMethodsNotSupported.Descriptor, method)
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.General.GenericMethodsNotSupported.Descriptor,
+					isBlocking: false,
+					method
+				)
 			);
 			return;
 		}
@@ -236,20 +250,29 @@ static partial class TelemetryRules
 
 		if (targetState.RaiseInferenceNotSupportedWithMultiTargeting)
 			diagnostics.Add(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.General.InferenceNotSupportedWithMultiTargeting.Descriptor,
+					isBlocking: false,
 					method
 				)
 			);
 
 		if (targetState.RaiseMultiGenerationTargetsNotSupported)
 			diagnostics.Add(
-				DiagnosticInfo.Create(DiagnosticLibrary.General.MultiGenerationTargetsNotSupported.Descriptor, method)
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.General.MultiGenerationTargetsNotSupported.Descriptor,
+					isBlocking: false,
+					method
+				)
 			);
 
 		if (targetState.RaiseMissingInterfaceSource)
 			diagnostics.Add(
-				DiagnosticInfo.Create(DiagnosticLibrary.General.MethodTargetNotRegisteredOnInterface.Descriptor, method)
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.General.MethodTargetNotRegisteredOnInterface.Descriptor,
+					isBlocking: false,
+					method
+				)
 			);
 
 		// TSG1008: an Activity parameter on a method with no Activity target will be ignored.
@@ -267,8 +290,9 @@ static partial class TelemetryRules
 				?? Location.None;
 
 			diagnostics.Add(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.General.ActivityParameterWithoutActivityTarget.Descriptor,
+					isBlocking: false,
 					activityParameterLocation,
 					activityParameterName
 				)
@@ -282,7 +306,7 @@ static partial class TelemetryRules
 	static void ApplyExcludeTargetsRules(
 		IMethodSymbol method,
 		GenerationType methodTargets,
-		ImmutableArray<DiagnosticInfo>.Builder diagnostics,
+		ImmutableArray<ReportableDiagnostic>.Builder diagnostics,
 		CancellationToken token
 	)
 	{
@@ -318,8 +342,9 @@ static partial class TelemetryRules
 
 					var location = parameter.Locations.FirstOrDefault(static l => l.IsInSource) ?? Location.None;
 					diagnostics.Add(
-						DiagnosticInfo.Create(
+						ReportableDiagnostic.Create(
 							DiagnosticLibrary.General.ExcludeTargetsTargetNotPresent.Descriptor,
+							isBlocking: false,
 							location,
 							GetGenerationTypeName(target)
 						)
@@ -333,8 +358,9 @@ static partial class TelemetryRules
 			if (parameters.Length > 0 && excludedPerParameter.All(ep => ep.Excluded.HasFlag(target)))
 			{
 				diagnostics.Add(
-					DiagnosticInfo.Create(
+					ReportableDiagnostic.Create(
 						DiagnosticLibrary.General.ExcludeTargetsResultsInEmptyParameterSet.Descriptor,
+						isBlocking: false,
 						method,
 						GetGenerationTypeName(target),
 						method.Name
@@ -360,31 +386,36 @@ static partial class TelemetryRules
 	/// gate <see cref="GeneratorResult{T}.ShouldProcess"/>): generic interface, duplicate method names and
 	/// an unsupported target framework.
 	/// </summary>
-	public static ImmutableArray<DiagnosticInfo> GetInterfaceLevelDiagnostics(
+	public static ImmutableArray<ReportableDiagnostic> GetInterfaceLevelDiagnostics(
 		INamedTypeSymbol interfaceSymbol,
 		Compilation compilation,
 		CancellationToken token
 	)
 	{
-		var diagnostics = ImmutableArray.CreateBuilder<DiagnosticInfo>();
+		var diagnostics = ImmutableArray.CreateBuilder<ReportableDiagnostic>();
 
 		if (IsUnsupportedTargetFramework(compilation))
 			diagnostics.Add(
-				DiagnosticInfo.Create(DiagnosticLibrary.General.UnsupportedTargetFramework.Descriptor, interfaceSymbol)
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.General.UnsupportedTargetFramework.Descriptor,
+					isBlocking: true,
+					interfaceSymbol
+				)
 			);
 
 		if (interfaceSymbol.Arity > 0)
 		{
 			diagnostics.Add(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.General.GenericInterfacesNotSupported.Descriptor,
+					isBlocking: true,
 					interfaceSymbol
 				)
 			);
 			return diagnostics.ToImmutable();
 		}
 
-		var methodsByName = new Dictionary<string, List<IMethodSymbol>>(StringComparer.Ordinal);
+		Dictionary<string, List<IMethodSymbol>> methodsByName = new(StringComparer.Ordinal);
 		foreach (var member in interfaceSymbol.GetMembers())
 		{
 			if (member is not IMethodSymbol method)
@@ -408,8 +439,9 @@ static partial class TelemetryRules
 
 			var locations = kvp.Value.SelectMany(static m => m.Locations).ToImmutableArray();
 			diagnostics.Add(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.General.DuplicateMethodNamesAreNotSupported.Descriptor,
+					isBlocking: true,
 					locations,
 					kvp.Key
 				)

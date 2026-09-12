@@ -239,7 +239,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		if (activitySourceType is null)
 			return [];
 
-		var result = new List<ActivitySourceFieldInfo>();
+		List<ActivitySourceFieldInfo> result = [];
 
 		// Fields
 		foreach (var member in classDecl.Members.OfType<FieldDeclarationSyntax>())
@@ -320,8 +320,8 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		CancellationToken cancellationToken
 	)
 	{
-		var fieldNames = new HashSet<string>(sourceFields.Select(f => f.FieldName), StringComparer.Ordinal);
-		var result = new List<ActivitySourceCallInfo>();
+		HashSet<string> fieldNames = new(sourceFields.Select(f => f.FieldName), StringComparer.Ordinal);
+		List<ActivitySourceCallInfo> result = [];
 
 		foreach (var invocation in classDecl.DescendantNodes().OfType<InvocationExpressionSyntax>())
 		{
@@ -381,9 +381,9 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 
 	static List<(ActivitySourceCallInfo Call, string MethodName)> AssignMethodNames(List<ActivitySourceCallInfo> calls)
 	{
-		var signatureToName = new Dictionary<string, string>(StringComparer.Ordinal);
-		var usedNames = new HashSet<string>(StringComparer.Ordinal);
-		var result = new List<(ActivitySourceCallInfo, string)>(calls.Count);
+		Dictionary<string, string> signatureToName = new(StringComparer.Ordinal);
+		HashSet<string> usedNames = new(StringComparer.Ordinal);
+		List<(ActivitySourceCallInfo, string)> result = new(calls.Count);
 
 		foreach (var call in calls)
 		{
@@ -429,7 +429,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 	{
 		// First split on explicit separators
 		var parts = WordSplitterRegex.Split(name);
-		var words = new List<string>();
+		List<string> words = [];
 		foreach (var part in parts)
 		{
 			if (string.IsNullOrEmpty(part))
@@ -465,7 +465,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		List<(ActivitySourceCallInfo Call, string MethodName)> callsWithMethods
 	)
 	{
-		var sb = new StringBuilder();
+		StringBuilder sb = new();
 
 		sb.AppendLine($"[{TelemetryAttributeNames.Activities.ActivitySourceAttribute.RenderAttributeTypeName}]");
 		sb.AppendLine($"public interface {interfaceName}");
@@ -506,8 +506,8 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		List<(ActivitySourceCallInfo Call, string MethodName)> callsWithMethods
 	)
 	{
-		var sb = new StringBuilder();
-		var emittedSignatures = new HashSet<string>(StringComparer.Ordinal);
+		StringBuilder sb = new();
+		HashSet<string> emittedSignatures = new(StringComparer.Ordinal);
 
 		foreach (var (call, methodName) in callsWithMethods)
 		{
@@ -538,7 +538,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 	)
 	{
 		// Build invocation map: StartActivity("name") → interface method call
-		var invocationMap = new Dictionary<InvocationExpressionSyntax, InvocationExpressionSyntax>(
+		Dictionary<InvocationExpressionSyntax, InvocationExpressionSyntax> invocationMap = new(
 			SyntaxNodeReferenceComparer<InvocationExpressionSyntax>.Instance
 		);
 
@@ -549,7 +549,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		}
 
 		// Build field map
-		var fieldMap = new Dictionary<FieldDeclarationSyntax, FieldDeclarationSyntax>(
+		Dictionary<FieldDeclarationSyntax, FieldDeclarationSyntax> fieldMap = new(
 			SyntaxNodeReferenceComparer<FieldDeclarationSyntax>.Instance
 		);
 		foreach (var field in activitySourceFields)
@@ -561,7 +561,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		}
 
 		// Build property map
-		var propertyMap = new Dictionary<PropertyDeclarationSyntax, PropertyDeclarationSyntax>(
+		Dictionary<PropertyDeclarationSyntax, PropertyDeclarationSyntax> propertyMap = new(
 			SyntaxNodeReferenceComparer<PropertyDeclarationSyntax>.Instance
 		);
 		foreach (var field in activitySourceFields)
@@ -628,18 +628,18 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		SemanticModel semanticModel
 	)
 	{
-		var result = new Dictionary<ParameterSyntax, ParameterSyntax>(
+		Dictionary<ParameterSyntax, ParameterSyntax> result = new(
 			SyntaxNodeReferenceComparer<ParameterSyntax>.Instance
 		);
 
 		// Build a set of qualified type names so we can match by name when
 		// the classDecl has already been rewritten (nodes no longer in the
 		// original semantic model's tree).
-		var fieldTypeNames = new HashSet<string>(
+		HashSet<string> fieldTypeNames = new(
 			activitySourceFields.Select(f => f.TypeSymbol.ToDisplayString()),
 			StringComparer.Ordinal
 		);
-		var fieldTypeShortNames = new HashSet<string>(
+		HashSet<string> fieldTypeShortNames = new(
 			activitySourceFields.Select(f => f.TypeSymbol.Name),
 			StringComparer.Ordinal
 		);

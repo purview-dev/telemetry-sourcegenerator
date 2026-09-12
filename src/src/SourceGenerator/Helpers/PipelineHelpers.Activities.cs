@@ -28,8 +28,9 @@ partial class PipelineHelpers
 		if (interfaceSymbol.Arity > 0)
 		{
 			return GeneratorResult<ActivitySourceTarget?>.Create(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.General.GenericInterfacesNotSupported.Descriptor,
+					isBlocking: true,
 					interfaceSymbol
 				)
 			);

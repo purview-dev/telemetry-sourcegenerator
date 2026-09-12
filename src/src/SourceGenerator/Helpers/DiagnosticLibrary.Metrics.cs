@@ -8,7 +8,7 @@ partial class DiagnosticLibrary
 	// Starts at 4000
 	public static class Metrics
 	{
-		public static readonly DiagnosticInfo NoInstrumentDefined = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic NoInstrumentDefined = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG4000",
 				title: "No instrument defined",
@@ -16,10 +16,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Metrics.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo DoesNotReturnVoid = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic DoesNotReturnVoid = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG4001",
 				title: "Must return void or bool",
@@ -27,10 +28,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Metrics.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo AutoIncrementCountAndMeasurementParam = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic AutoIncrementCountAndMeasurementParam = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG4002",
 				title: "Auto increment counter and measurement defined",
@@ -38,10 +40,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Metrics.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo MoreThanOneMeasurementValueDefined = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic MoreThanOneMeasurementValueDefined = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG4003",
 				title: "Multiple measurement values defined",
@@ -49,10 +52,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Metrics.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo NoMeasurementValueDefined = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic NoMeasurementValueDefined = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG4004",
 				title: "No measurement value defined",
@@ -60,10 +64,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Metrics.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo ObservableRequiredFunc = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic ObservableRequiredFunc = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG4005",
 				title: "Observable instrument requires Func<T>",
@@ -71,10 +76,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Metrics.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo InvalidMeasurementType = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic InvalidMeasurementType = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG4006",
 				title: "Invalid measurement type",
@@ -82,10 +88,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Metrics.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo ObservableCannotReturnBool = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic ObservableCannotReturnBool = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG4007",
 				title: "Observable metrics cannot return bool",
@@ -93,10 +100,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Metrics.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo AutoCounterMustReturnVoid = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic AutoCounterMustReturnVoid = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG4008",
 				title: "AutoCounter must return void",
@@ -104,10 +112,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Metrics.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo InstrumentNameMatchesType = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic InstrumentNameMatchesType = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG4009",
 				title: "Instrument name matches the instrument type name",
@@ -115,7 +124,8 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Warning,
 				category: Categories.Metrics.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 	}
 }

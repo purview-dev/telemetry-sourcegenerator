@@ -2,14 +2,6 @@ namespace Purview.Telemetry.SourceGenerator.Infra;
 
 static class TestHelpers
 {
-	/// <summary>Replaces all occurrences using ordinal semantics (net48 lacks the StringComparison overload).</summary>
-	public static string ReplaceOrdinal(this string value, string oldValue, string newValue) =>
-#if NET48
-		value.Replace(oldValue, newValue);
-#else
-		value.Replace(oldValue, newValue, StringComparison.Ordinal);
-#endif
-
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0057:Use range operator")]
 	public static List<string> GetCasePermutations(string input)
 	{

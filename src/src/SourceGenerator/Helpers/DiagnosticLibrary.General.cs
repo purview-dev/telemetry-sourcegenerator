@@ -6,7 +6,7 @@ partial class DiagnosticLibrary
 {
 	public static class General
 	{
-		public static readonly DiagnosticInfo FatalExecutionDuringExecution = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic FatalExecutionDuringExecution = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG1000",
 				title: "Fatal execution error occurred",
@@ -14,25 +14,28 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: true
 		);
 
-		public static readonly DiagnosticInfo InferenceNotSupportedWithMultiTargeting = DiagnosticInfo.Create(
-			new DiagnosticDescriptor(
-				id: "TSG1001",
-				title: "Inferring generation targets is not supported when using multi-target generation",
-				messageFormat: "When using multiple generation targets - Activities, Logs or Metrics, each method must be either excluded or have an explicit generation target: "
-					+ $"{TypeLibrary.Purview.Telemetry.ActivityAttribute.Name}, {TypeLibrary.Purview.Telemetry.EventAttribute.Name}, {TypeLibrary.Purview.Telemetry.ContextAttribute.Name}, {TypeLibrary.Purview.Telemetry.LogAttribute.Name}, "
-					+ $"{TypeLibrary.Purview.Telemetry.WarningAttribute.Name}, "
-					+ $"{TypeLibrary.Purview.Telemetry.CounterAttribute.Name}, {TypeLibrary.Purview.Telemetry.HistogramAttribute.Name}, {TypeLibrary.Purview.Telemetry.UpDownCounterAttribute.Name}, "
-					+ $"{TypeLibrary.Purview.Telemetry.ObservableCounterAttribute.Name}, {TypeLibrary.Purview.Telemetry.ObservableGaugeAttribute.Name} or {TypeLibrary.Purview.Telemetry.ObservableUpDownCounterAttribute.Name}.",
-				defaultSeverity: DiagnosticSeverity.Error,
-				category: Categories.Usage,
-				isEnabledByDefault: true
-			)
-		);
+		public static readonly ReportableDiagnostic InferenceNotSupportedWithMultiTargeting =
+			ReportableDiagnostic.Create(
+				new DiagnosticDescriptor(
+					id: "TSG1001",
+					title: "Inferring generation targets is not supported when using multi-target generation",
+					messageFormat: "When using multiple generation targets - Activities, Logs or Metrics, each method must be either excluded or have an explicit generation target: "
+						+ $"{TypeLibrary.Purview.Telemetry.ActivityAttribute.Name}, {TypeLibrary.Purview.Telemetry.EventAttribute.Name}, {TypeLibrary.Purview.Telemetry.ContextAttribute.Name}, {TypeLibrary.Purview.Telemetry.LogAttribute.Name}, "
+						+ $"{TypeLibrary.Purview.Telemetry.WarningAttribute.Name}, "
+						+ $"{TypeLibrary.Purview.Telemetry.CounterAttribute.Name}, {TypeLibrary.Purview.Telemetry.HistogramAttribute.Name}, {TypeLibrary.Purview.Telemetry.UpDownCounterAttribute.Name}, "
+						+ $"{TypeLibrary.Purview.Telemetry.ObservableCounterAttribute.Name}, {TypeLibrary.Purview.Telemetry.ObservableGaugeAttribute.Name} or {TypeLibrary.Purview.Telemetry.ObservableUpDownCounterAttribute.Name}.",
+					defaultSeverity: DiagnosticSeverity.Error,
+					category: Categories.Usage,
+					isEnabledByDefault: true
+				),
+				isBlocking: false
+			);
 
-		public static readonly DiagnosticInfo MultiGenerationTargetsNotSupported = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic MultiGenerationTargetsNotSupported = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG1002",
 				title: "Multiple attributes from the same target family are not supported",
@@ -43,10 +46,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo DuplicateMethodNamesAreNotSupported = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic DuplicateMethodNamesAreNotSupported = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG1003",
 				title: "Duplicate method names are not supported",
@@ -54,10 +58,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: true
 		);
 
-		public static readonly DiagnosticInfo GenericInterfacesNotSupported = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic GenericInterfacesNotSupported = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG1004",
 				title: "Generic interfaces are not supported",
@@ -65,10 +70,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: true
 		);
 
-		public static readonly DiagnosticInfo GenericMethodsNotSupported = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic GenericMethodsNotSupported = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG1005",
 				title: "Generic methods are not supported",
@@ -76,10 +82,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo ExcludeTargetsTargetNotPresent = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic ExcludeTargetsTargetNotPresent = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG1006",
 				title: "ExcludeTargets references a target not present on this method",
@@ -87,32 +94,37 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Warning,
 				category: Categories.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo ExcludeTargetsResultsInEmptyParameterSet = DiagnosticInfo.Create(
-			new DiagnosticDescriptor(
-				id: "TSG1007",
-				title: "ExcludeTargets results in an empty or invalid parameter set for a target",
-				messageFormat: "Excluding parameters results in an invalid configuration for the '{0}' target: {1}",
-				defaultSeverity: DiagnosticSeverity.Warning,
-				category: Categories.Usage,
-				isEnabledByDefault: true
-			)
-		);
+		public static readonly ReportableDiagnostic ExcludeTargetsResultsInEmptyParameterSet =
+			ReportableDiagnostic.Create(
+				new DiagnosticDescriptor(
+					id: "TSG1007",
+					title: "ExcludeTargets results in an empty or invalid parameter set for a target",
+					messageFormat: "Excluding parameters results in an invalid configuration for the '{0}' target: {1}",
+					defaultSeverity: DiagnosticSeverity.Warning,
+					category: Categories.Usage,
+					isEnabledByDefault: true
+				),
+				isBlocking: false
+			);
 
-		public static readonly DiagnosticInfo ActivityParameterWithoutActivityTarget = DiagnosticInfo.Create(
-			new DiagnosticDescriptor(
-				id: "TSG1008",
-				title: "Activity parameter has no Activity target",
-				messageFormat: "Parameter '{0}' of type Activity is present, but this method has no Activity attribute ([Activity], [Event], or [Context]). The parameter will be ignored.",
-				defaultSeverity: DiagnosticSeverity.Warning,
-				category: Categories.Usage,
-				isEnabledByDefault: true
-			)
-		);
+		public static readonly ReportableDiagnostic ActivityParameterWithoutActivityTarget =
+			ReportableDiagnostic.Create(
+				new DiagnosticDescriptor(
+					id: "TSG1008",
+					title: "Activity parameter has no Activity target",
+					messageFormat: "Parameter '{0}' of type Activity is present, but this method has no Activity attribute ([Activity], [Event], or [Context]). The parameter will be ignored.",
+					defaultSeverity: DiagnosticSeverity.Warning,
+					category: Categories.Usage,
+					isEnabledByDefault: true
+				),
+				isBlocking: false
+			);
 
-		public static readonly DiagnosticInfo MethodTargetNotRegisteredOnInterface = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic MethodTargetNotRegisteredOnInterface = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG1010",
 				title: "Method target not registered on interface",
@@ -122,9 +134,10 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
-		public static readonly DiagnosticInfo UnsupportedTargetFramework = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic UnsupportedTargetFramework = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG1011",
 				title: "Unsupported target framework",
@@ -134,7 +147,8 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: true
 		);
 	}
 }

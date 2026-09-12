@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -8,8 +7,6 @@ namespace Purview.Telemetry.SourceGenerator.Helpers;
 
 static partial class Utilities
 {
-	static readonly Regex WhitespaceRegex = new(@"\s+", RegexOptions.Compiled, TimeSpan.FromMilliseconds(2000));
-
 	public static TargetGeneration IsValidGenerationTarget(
 		IMethodSymbol method,
 		GenerationType generationType,
@@ -151,10 +148,6 @@ static partial class Utilities
 		return null;
 	}
 
-	public static string WithComma(this string value, bool andSpace = true) => value + ',' + (andSpace ? ' ' : null);
-
-	public static string Wrap(this string value, char c = '"') => c + value + c;
-
 	public static EquatableArray<string> GetParentClasses(TypeDeclarationSyntax classDeclaration)
 	{
 		var parentClass = classDeclaration.Parent as ClassDeclarationSyntax;
@@ -244,68 +237,6 @@ static partial class Utilities
 
 		return fullNamespace;
 	}
-
-	//public static bool IsEnumerableOrArray(string parameterType, string fullTypeName)
-	//	=> IsArray(parameterType, fullTypeName)
-	//		|| IsEnumerable(parameterType, fullTypeName);
-
-	public static bool IsComplexType(this ITypeSymbol typeSymbol)
-	{
-		// Check for class, struct, or record types
-		if (typeSymbol.TypeKind is TypeKind.Class or TypeKind.Struct)
-		{
-			// Exclude primitive types and special types like string
-			if (typeSymbol.SpecialType is SpecialType.None)
-				return true;
-		}
-
-		return false;
-	}
-
-	public static bool IsArray(this ITypeSymbol typeSymbol) =>
-		typeSymbol.SpecialType != SpecialType.System_String && typeSymbol.TypeKind is TypeKind.Array;
-
-	public static bool IsIEnumerable(this ITypeSymbol typeSymbol, Compilation compilation)
-	{
-		if (typeSymbol.SpecialType == SpecialType.System_String)
-			return false;
-
-		if (IsIEnumerable(typeSymbol))
-			return true;
-
-		// Get the `IEnumerable` symbol from the compilation
-		var ienumerableSymbol = compilation.GetTypeByMetadataName("System.Collections.IEnumerable");
-
-		// Check if the type implements `IEnumerable`
-		return ienumerableSymbol != null
-			&& typeSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, ienumerableSymbol));
-	}
-
-	static bool IsIEnumerable(ITypeSymbol typeSymbol)
-	{
-		if (typeSymbol.SpecialType == SpecialType.System_String)
-			return false;
-
-		// Check for common enumerable types
-		return typeSymbol.SpecialType
-			is SpecialType.System_Collections_IEnumerable
-				or SpecialType.System_Collections_Generic_ICollection_T
-				or SpecialType.System_Collections_Generic_IList_T
-				or SpecialType.System_Collections_Generic_IReadOnlyCollection_T
-				or SpecialType.System_Collections_Generic_IReadOnlyList_T
-				or SpecialType.System_Collections_Generic_IEnumerable_T;
-	}
-
-	public static bool IsExceptionType(this ITypeSymbol typeSymbol)
-	{
-		// The type itself, or any base in the hierarchy, derives from System.Exception.
-		return TypeLibrary.System.Exception.Equals(typeSymbol)
-			|| TypeHelpers.InheritsFrom(typeSymbol, TypeLibrary.System.Exception);
-	}
-
-	public static string Flatten(this SyntaxNode syntax) => syntax.WithoutTrivia().ToString().Flatten();
-
-	public static string Flatten(this string value) => WhitespaceRegex.Replace(value, " ");
 
 	public static bool ContainsAttribute(ISymbol symbol, TypeIdentity type, CancellationToken token) =>
 		TryContainsAttribute(symbol, type, token, out _);

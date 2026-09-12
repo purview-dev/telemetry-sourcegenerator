@@ -140,7 +140,7 @@ static class LogMethodModelBuilder
 		}
 
 		// Post-pass: mark duplicate method names as invalid (emitter generates throw stubs; TSG1003 raised by analyzer)
-		var seenNames = new HashSet<string>(StringComparer.Ordinal);
+		HashSet<string> seenNames = new(StringComparer.Ordinal);
 		for (var i = 0; i < methodTargets.Count; i++)
 		{
 			var t = methodTargets[i];

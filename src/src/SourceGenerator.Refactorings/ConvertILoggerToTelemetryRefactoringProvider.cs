@@ -157,7 +157,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 			TelemetryAttributeNames.Logging.ILogger.MetadataFullName
 		);
 
-		var result = new List<ILoggerFieldInfo>();
+		List<ILoggerFieldInfo> result = [];
 
 		foreach (var member in classDecl.Members)
 		{
@@ -280,9 +280,9 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		CancellationToken cancellationToken
 	)
 	{
-		var loggerFieldNames = new HashSet<string>(loggerFields.Select(f => f.FieldName), StringComparer.Ordinal);
+		HashSet<string> loggerFieldNames = new(loggerFields.Select(f => f.FieldName), StringComparer.Ordinal);
 
-		var result = new List<LogCallInfo>();
+		List<LogCallInfo> result = [];
 
 		foreach (var invocation in classDecl.DescendantNodes().OfType<InvocationExpressionSyntax>())
 		{
@@ -370,7 +370,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		idx++;
 
 		// Template arguments
-		var templateArgs = new List<ExpressionSyntax>();
+		List<ExpressionSyntax> templateArgs = [];
 		while (idx < args.Count)
 		{
 			templateArgs.Add(args[idx].Expression);
@@ -379,7 +379,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 		// Match template placeholders to arguments
 		var placeholders = ExtractPlaceholders(template);
-		var parameters = new List<LogParameterInfo>();
+		List<LogParameterInfo> parameters = [];
 
 		if (exceptionExpression is not null)
 		{
@@ -503,9 +503,9 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		// Group calls that represent the same logical log operation (same attribute, template, params).
 		// Identical calls share one interface method; distinct calls that happen to produce the same
 		// base name from the template get a numeric suffix.
-		var signatureToName = new Dictionary<string, string>(StringComparer.Ordinal);
-		var usedNames = new HashSet<string>(StringComparer.Ordinal);
-		var result = new List<(LogCallInfo, string)>(calls.Count);
+		Dictionary<string, string> signatureToName = new(StringComparer.Ordinal);
+		HashSet<string> usedNames = new(StringComparer.Ordinal);
+		List<(LogCallInfo, string)> result = new(calls.Count);
 
 		foreach (var call in calls)
 		{
@@ -564,7 +564,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 
 	static string BuildInterfaceCode(string interfaceName, List<(LogCallInfo Call, string MethodName)> callsWithMethods)
 	{
-		var sb = new StringBuilder();
+		StringBuilder sb = new();
 
 		sb.AppendLine($"[{TelemetryAttributeNames.Logging.LoggerAttribute.RenderAttributeTypeName}]");
 		sb.AppendLine($"public interface {interfaceName}");
@@ -581,8 +581,8 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	/// </summary>
 	internal static string BuildInterfaceMembers(List<(LogCallInfo Call, string MethodName)> callsWithMethods)
 	{
-		var sb = new StringBuilder();
-		var emittedSignatures = new HashSet<string>(StringComparer.Ordinal);
+		StringBuilder sb = new();
+		HashSet<string> emittedSignatures = new(StringComparer.Ordinal);
 
 		foreach (var (call, methodName) in callsWithMethods)
 		{
@@ -664,7 +664,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	/// </example>
 	static string BuildAttributeArgs(string attrName, LogCallInfo call, string? leadingArg)
 	{
-		var args = new List<string>();
+		List<string> args = [];
 		var explicitEventId = call.ExplicitEventId.HasValue
 			? call.ExplicitEventId.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)
 			: null;
@@ -813,7 +813,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		var loggerVariableRemap = BuildLoggerVariableRemap(classDecl, loggerFields);
 
 		// Build a map from invocation → new invocation
-		var invocationMap = new Dictionary<InvocationExpressionSyntax, InvocationExpressionSyntax>(
+		Dictionary<InvocationExpressionSyntax, InvocationExpressionSyntax> invocationMap = new(
 			SyntaxNodeReferenceComparer<InvocationExpressionSyntax>.Instance
 		);
 
@@ -831,7 +831,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		}
 
 		// Build a map from field declarations → new field declarations
-		var fieldMap = new Dictionary<FieldDeclarationSyntax, FieldDeclarationSyntax>(
+		Dictionary<FieldDeclarationSyntax, FieldDeclarationSyntax> fieldMap = new(
 			SyntaxNodeReferenceComparer<FieldDeclarationSyntax>.Instance
 		);
 		foreach (var field in loggerFields)
@@ -844,7 +844,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		}
 
 		// Build a map from property declarations → new property declarations
-		var propertyMap = new Dictionary<PropertyDeclarationSyntax, PropertyDeclarationSyntax>(
+		Dictionary<PropertyDeclarationSyntax, PropertyDeclarationSyntax> propertyMap = new(
 			SyntaxNodeReferenceComparer<PropertyDeclarationSyntax>.Instance
 		);
 		foreach (var field in loggerFields)
@@ -875,7 +875,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		);
 
 		// Remove non-canonical logger parameters from constructor parameter lists.
-		var paramsToRemove = new HashSet<string>(loggerVariableRemap.Keys, StringComparer.Ordinal);
+		HashSet<string> paramsToRemove = new(loggerVariableRemap.Keys, StringComparer.Ordinal);
 		if (paramsToRemove.Count > 0)
 		{
 			// Primary constructor (C# 12+)
@@ -960,13 +960,13 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		SemanticModel semanticModel
 	)
 	{
-		var result = new Dictionary<ParameterSyntax, ParameterSyntax>(
+		Dictionary<ParameterSyntax, ParameterSyntax> result = new(
 			SyntaxNodeReferenceComparer<ParameterSyntax>.Instance
 		);
 
 		// Match parameters by the exact types of the identified logger fields.
 		// This is more precise than re-detecting all ILogger variants from scratch.
-		var loggerFieldTypes = new HashSet<ITypeSymbol>(
+		HashSet<ITypeSymbol> loggerFieldTypes = new(
 			loggerFields.Select(f => f.TypeSymbol),
 			SymbolEqualityComparer.Default
 		);
@@ -1036,8 +1036,8 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		List<ILoggerFieldInfo> loggerFields
 	)
 	{
-		var loggerFieldNames = new HashSet<string>(loggerFields.Select(f => f.FieldName), StringComparer.Ordinal);
-		var remap = new Dictionary<string, string>(StringComparer.Ordinal);
+		HashSet<string> loggerFieldNames = new(loggerFields.Select(f => f.FieldName), StringComparer.Ordinal);
+		Dictionary<string, string> remap = new(StringComparer.Ordinal);
 
 		if (classDecl.ParameterList is { } primaryCtorParams)
 			AddParamListRemap(primaryCtorParams.Parameters, loggerFieldNames, remap);
@@ -1083,7 +1083,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		if (string.IsNullOrEmpty(template))
 			return [];
 
-		var result = new List<string>();
+		List<string> result = [];
 		foreach (Match match in TemplatePlaceholderRegex.Matches(template))
 		{
 			var name = match.Groups["name"].Value;

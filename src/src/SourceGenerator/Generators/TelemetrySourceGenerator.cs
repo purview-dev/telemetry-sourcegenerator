@@ -28,7 +28,11 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator
 		catch (Exception ex)
 		{
 			spc.ReportDiagnostic(
-				DiagnosticInfo.Create(DiagnosticLibrary.General.FatalExecutionDuringExecution.Descriptor, ex.ToString())
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.General.FatalExecutionDuringExecution.Descriptor,
+					isBlocking: true,
+					ex.ToString()
+				)
 			);
 		}
 	}

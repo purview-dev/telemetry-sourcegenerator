@@ -2,23 +2,25 @@
 	<PropertyGroup>
 		<CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
 		<RoslynVersion>5.9.0</RoslynVersion>
-		<TUnitVersion>1.65.51</TUnitVersion>
-		<PurviewSGFVersion>1.0.0-prerelease.37</PurviewSGFVersion>
+		<TUnitVersion>1.66.27</TUnitVersion>
+		<PurviewSGFVersion>1.0.0-prerelease.39</PurviewSGFVersion>
+		<DotnetRuntimeVersion>10.0.12</DotnetRuntimeVersion>
+		<MSExtensionVersion>10.10.0</MSExtensionVersion>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageVersion Include="Purview.SourceGeneratorFramework" Version="$(PurviewSGFVersion)" />
 		<PackageVersion Include="Purview.SourceGeneratorFramework.Testing.TUnit" Version="$(PurviewSGFVersion)" />
-		<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.400" />
+		<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.401" />
 		<PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" />
 		<PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="$(RoslynVersion)" />
 		<PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
 		<PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)" />
 		<PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" />
-		<PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />
-		<PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.11" />
-		<PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.11" />
-		<PackageVersion Include="Microsoft.Extensions.Telemetry.Abstractions" Version="10.9.0" />
-		<PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="10.0.11" />
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="$(DotnetRuntimeVersion)" />
+		<PackageVersion Include="Microsoft.Extensions.Logging" Version="$(DotnetRuntimeVersion)" />
+		<PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="$(DotnetRuntimeVersion)" />
+		<PackageVersion Include="Microsoft.Extensions.Telemetry.Abstractions" Version="$(MSExtensionVersion)" />
+		<PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="$(DotnetRuntimeVersion)" />
 	</ItemGroup>
 	<ItemGroup Label="Testing">
 		<PackageVersion Include="TUnit" Version="$(TUnitVersion)" />
@@ -26,17 +28,17 @@
 		<PackageVersion Include="Bogus" Version="35.6.5" />
 	</ItemGroup>
 	<ItemGroup Label="Samples">
-		<PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.11" />
-		<PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.9.0" />
-		<PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.9.0" />
+		<PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="$(DotnetRuntimeVersion)" />
+		<PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="$(MSExtensionVersion)" />
+		<PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="$(MSExtensionVersion)" />
 		<PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.18.0" />
 		<PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.18.0" />
 		<PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.18.0" />
-		<PackageVersion Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.11.0-beta.2" />
+		<PackageVersion Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.18.0-beta.1" />
 		<PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.18.0" />
-		<PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="1.11.0-beta.2" />
+		<PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="1.18.0-rc.1" />
 		<PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.18.0" />
-		<PackageVersion Include="Scalar.AspNetCore" Version="2.17.2" />
+		<PackageVersion Include="Scalar.AspNetCore" Version="2.17.3" />
 		<PackageVersion Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.2.1" />
 		<PackageVersion Include="ErrorOr" Version="2.1.1" />
 	</ItemGroup>

@@ -222,7 +222,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 			TelemetryAttributeNames.Metrics.UpDownCounter.MetadataFullName
 		);
 
-		var result = new List<MetricsFieldInfo>();
+		List<MetricsFieldInfo> result = [];
 
 		foreach (var member in classDecl.Members.OfType<FieldDeclarationSyntax>())
 		{
@@ -314,7 +314,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 	)
 	{
 		var fieldNames = metricsFields.ToDictionary(f => f.FieldName, StringComparer.Ordinal);
-		var result = new List<MetricsCallInfo>();
+		List<MetricsCallInfo> result = [];
 
 		foreach (var invocation in classDecl.DescendantNodes().OfType<InvocationExpressionSyntax>())
 		{
@@ -370,7 +370,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 	)
 	{
 		// Assign a base method name per field, then deduplicate
-		var fieldNameMap = new Dictionary<string, string>(StringComparer.Ordinal);
+		Dictionary<string, string> fieldNameMap = new(StringComparer.Ordinal);
 		foreach (var field in fields)
 		{
 			if (!fieldNameMap.ContainsKey(field.FieldName))
@@ -411,7 +411,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 	static string[] SplitIntoWords(string name)
 	{
 		var parts = WordSplitterRegex.Split(name);
-		var words = new List<string>();
+		List<string> words = [];
 		foreach (var part in parts)
 		{
 			if (string.IsNullOrEmpty(part))
@@ -455,8 +455,8 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 
 	internal static string BuildInterfaceMembers(List<(MetricsCallInfo Call, string MethodName)> callsWithMethods)
 	{
-		var sb = new StringBuilder();
-		var emitted = new HashSet<string>(StringComparer.Ordinal);
+		StringBuilder sb = new();
+		HashSet<string> emitted = new(StringComparer.Ordinal);
 
 		foreach (var (call, methodName) in callsWithMethods)
 		{
@@ -485,7 +485,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		List<MetricsFieldInfo> _
 	)
 	{
-		var sb = new StringBuilder();
+		StringBuilder sb = new();
 
 		sb.AppendLine($"[{TelemetryAttributeNames.Metrics.MeterAttribute.RenderAttributeTypeName}]");
 		sb.AppendLine($"public interface {interfaceName}");
@@ -554,7 +554,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 	)
 	{
 		// Map each invocation to its replacement
-		var invocationMap = new Dictionary<InvocationExpressionSyntax, InvocationExpressionSyntax>(
+		Dictionary<InvocationExpressionSyntax, InvocationExpressionSyntax> invocationMap = new(
 			SyntaxNodeReferenceComparer<InvocationExpressionSyntax>.Instance
 		);
 
@@ -566,7 +566,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		}
 
 		// Map field declarations
-		var fieldMap = new Dictionary<FieldDeclarationSyntax, FieldDeclarationSyntax>(
+		Dictionary<FieldDeclarationSyntax, FieldDeclarationSyntax> fieldMap = new(
 			SyntaxNodeReferenceComparer<FieldDeclarationSyntax>.Instance
 		);
 		foreach (var field in metricsFields)
@@ -578,7 +578,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		}
 
 		// Map property declarations
-		var propertyMap = new Dictionary<PropertyDeclarationSyntax, PropertyDeclarationSyntax>(
+		Dictionary<PropertyDeclarationSyntax, PropertyDeclarationSyntax> propertyMap = new(
 			SyntaxNodeReferenceComparer<PropertyDeclarationSyntax>.Instance
 		);
 		foreach (var field in metricsFields)
@@ -650,18 +650,15 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		SemanticModel semanticModel
 	)
 	{
-		var result = new Dictionary<ParameterSyntax, ParameterSyntax>(
+		Dictionary<ParameterSyntax, ParameterSyntax> result = new(
 			SyntaxNodeReferenceComparer<ParameterSyntax>.Instance
 		);
 
-		var fieldTypeNames = new HashSet<string>(
+		HashSet<string> fieldTypeNames = new(
 			metricsFields.Select(f => f.TypeSymbol.ToDisplayString()),
 			StringComparer.Ordinal
 		);
-		var fieldTypeShortNames = new HashSet<string>(
-			metricsFields.Select(f => f.TypeSymbol.Name),
-			StringComparer.Ordinal
-		);
+		HashSet<string> fieldTypeShortNames = new(metricsFields.Select(f => f.TypeSymbol.Name), StringComparer.Ordinal);
 
 		foreach (var ctor in classDecl.Members.OfType<ConstructorDeclarationSyntax>())
 			RewriteMatchingParams(
