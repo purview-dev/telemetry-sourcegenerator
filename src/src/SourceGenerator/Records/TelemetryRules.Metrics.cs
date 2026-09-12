@@ -10,13 +10,13 @@ static partial class TelemetryRules
 	/// Metrics-specific diagnostics derived from the pipeline's <see cref="MeterTarget"/> so the instrument
 	/// inference matches generation exactly.
 	/// </summary>
-	public static ImmutableArray<DiagnosticInfo> GetMeterDiagnostics(
+	public static ImmutableArray<ReportableDiagnostic> GetMeterDiagnostics(
 		MeterTarget target,
 		INamedTypeSymbol interfaceSymbol,
 		CancellationToken token
 	)
 	{
-		var diagnostics = ImmutableArray.CreateBuilder<DiagnosticInfo>();
+		var diagnostics = ImmutableArray.CreateBuilder<ReportableDiagnostic>();
 
 		foreach (var instrument in target.InstrumentationMethods)
 		{
@@ -38,14 +38,18 @@ static partial class TelemetryRules
 	static void ApplyInstrumentRules(
 		InstrumentTarget instrument,
 		IMethodSymbol methodSymbol,
-		ImmutableArray<DiagnosticInfo>.Builder diagnostics
+		ImmutableArray<ReportableDiagnostic>.Builder diagnostics
 	)
 	{
 		// TSG4000: no instrument attribute defined.
 		if (instrument.InstrumentAttribute is null)
 		{
 			diagnostics.Add(
-				DiagnosticInfo.Create(DiagnosticLibrary.Metrics.NoInstrumentDefined.Descriptor, methodSymbol)
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.Metrics.NoInstrumentDefined.Descriptor,
+					isBlocking: false,
+					methodSymbol
+				)
 			);
 			return;
 		}
@@ -60,26 +64,39 @@ static partial class TelemetryRules
 		// TSG4001: metrics-owned public method must return void or bool.
 		if (metricsOwnsPublicMethod && !isVoid && !instrument.ReturnsBool)
 			diagnostics.Add(
-				DiagnosticInfo.Create(DiagnosticLibrary.Metrics.DoesNotReturnVoid.Descriptor, methodSymbol)
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.Metrics.DoesNotReturnVoid.Descriptor,
+					isBlocking: false,
+					methodSymbol
+				)
 			);
 
 		// TSG4007: observable instruments cannot return bool.
 		if (instrument.IsObservable && instrument.ReturnsBool)
 			diagnostics.Add(
-				DiagnosticInfo.Create(DiagnosticLibrary.Metrics.ObservableCannotReturnBool.Descriptor, methodSymbol)
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.Metrics.ObservableCannotReturnBool.Descriptor,
+					isBlocking: false,
+					methodSymbol
+				)
 			);
 
 		// TSG4008: auto-counter instruments must return void.
 		if (instrument.InstrumentAttribute.IsAutoIncrement && instrument.ReturnsBool)
 			diagnostics.Add(
-				DiagnosticInfo.Create(DiagnosticLibrary.Metrics.AutoCounterMustReturnVoid.Descriptor, methodSymbol)
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.Metrics.AutoCounterMustReturnVoid.Descriptor,
+					isBlocking: false,
+					methodSymbol
+				)
 			);
 
 		// TSG4002: auto-increment counter cannot also have a measurement parameter.
 		if (instrument.InstrumentAttribute.IsAutoIncrement && instrument.MeasurementParameter != null)
 			diagnostics.Add(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.Metrics.AutoIncrementCountAndMeasurementParam.Descriptor,
+					isBlocking: false,
 					methodSymbol
 				)
 			);
@@ -89,8 +106,9 @@ static partial class TelemetryRules
 		if (measurementParameters.Length > 1)
 		{
 			diagnostics.Add(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.Metrics.MoreThanOneMeasurementValueDefined.Descriptor,
+					isBlocking: false,
 					GetParameterLocation(methodSymbol, measurementParameters[1].ParameterName)
 				)
 			);
@@ -99,21 +117,30 @@ static partial class TelemetryRules
 		// TSG4004: no measurement value defined for a non-auto-increment instrument.
 		if (!instrument.InstrumentAttribute.IsAutoIncrement && instrument.MeasurementParameter is null)
 			diagnostics.Add(
-				DiagnosticInfo.Create(DiagnosticLibrary.Metrics.NoMeasurementValueDefined.Descriptor, methodSymbol)
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.Metrics.NoMeasurementValueDefined.Descriptor,
+					isBlocking: false,
+					methodSymbol
+				)
 			);
 
 		// TSG4005: observable instruments require a Func<T> parameter.
 		if (instrument.IsObservable && !instrument.Parameters.Any(static p => p.IsFunc))
 			diagnostics.Add(
-				DiagnosticInfo.Create(DiagnosticLibrary.Metrics.ObservableRequiredFunc.Descriptor, methodSymbol)
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.Metrics.ObservableRequiredFunc.Descriptor,
+					isBlocking: false,
+					methodSymbol
+				)
 			);
 
 		// TSG4006: the measurement parameter has an invalid measurement type.
 		if (instrument.MeasurementParameter is { IsValidInstrumentType: false } measurement)
 		{
 			diagnostics.Add(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.Metrics.InvalidMeasurementType.Descriptor,
+					isBlocking: false,
 					GetParameterLocation(methodSymbol, measurement.ParameterName)
 				)
 			);
@@ -126,8 +153,9 @@ static partial class TelemetryRules
 			&& string.Equals(instrument.MetricName, instrumentTypeName, StringComparison.OrdinalIgnoreCase)
 		)
 			diagnostics.Add(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.Metrics.InstrumentNameMatchesType.Descriptor,
+					isBlocking: false,
 					methodSymbol,
 					instrument.MetricName
 				)

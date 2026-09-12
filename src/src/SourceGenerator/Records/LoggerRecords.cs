@@ -26,7 +26,7 @@ sealed record LoggerTarget(
 			if (ns == null && ParentClasses.IsEmpty)
 				return null;
 
-			var builder = new System.Text.StringBuilder();
+			System.Text.StringBuilder builder = new();
 			if (ns != null)
 				builder.Append(ns).Append('.');
 

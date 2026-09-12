@@ -8,7 +8,7 @@ partial class DiagnosticLibrary
 	// Start at 3000
 	public static class Activities
 	{
-		public static readonly DiagnosticInfo BaggageParameterShouldBeString = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic BaggageParameterShouldBeString = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3000",
 				title: "Baggage parameter types only accept strings",
@@ -16,10 +16,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Warning,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo NoActivitySourceSpecified = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic NoActivitySourceSpecified = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3001",
 				title: "No activity source specified",
@@ -27,10 +28,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Warning,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo InvalidReturnType = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic InvalidReturnType = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3002",
 				title: "Invalid return type",
@@ -38,10 +40,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo DuplicateParameterTypes = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic DuplicateParameterTypes = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3003",
 				title: "Duplicate reserved parameters defined",
@@ -49,10 +52,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo ActivityParameterNotAllowed = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic ActivityParameterNotAllowed = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3004",
 				title: "Activity parameter is not valid",
@@ -60,10 +64,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo TimestampParameterNotAllowed = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic TimestampParameterNotAllowed = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3005",
 				title: "Timestamp parameter is not valid",
@@ -71,10 +76,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo StartTimeParameterNotAllowed = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic StartTimeParameterNotAllowed = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3006",
 				title: "Start time parameter is not valid on Create activity or Event method",
@@ -82,10 +88,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo ParentContextOrIdParameterNotAllowed = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic ParentContextOrIdParameterNotAllowed = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3007",
 				title: "Parent context or Parent Id parameter is not valid on event",
@@ -93,10 +100,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo LinksParameterNotAllowed = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic LinksParameterNotAllowed = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3008",
 				title: "Activity links parameters are not valid on events or context methods",
@@ -104,10 +112,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo TagsParameterNotAllowed = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic TagsParameterNotAllowed = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3009",
 				title: "Activity tags parameter are not valid on context methods",
@@ -115,10 +124,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo EscapedParameterInvalidType = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic EscapedParameterInvalidType = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3010",
 				title: "Escaped parameters must be a boolean",
@@ -126,10 +136,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo EscapedParameterIsOnlyValidOnEvent = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic EscapedParameterIsOnlyValidOnEvent = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3011",
 				title: "Escaped parameters are only valid on Events, not Activity or Context methods",
@@ -137,10 +148,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo NoActivityMethodsDefined = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic NoActivityMethodsDefined = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3012",
 				title: "There are no Activity methods defined, assumed use of Activity.Current",
@@ -148,10 +160,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Info,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo DoesNotReturnActivity = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic DoesNotReturnActivity = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3013",
 				title: "Should return the created Activity",
@@ -159,10 +172,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Warning,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo DoesNotAcceptActivityParameter = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic DoesNotAcceptActivityParameter = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3014",
 				title: "Should accept an Activity to apply the Event/ Tags/ Baggage too",
@@ -170,10 +184,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Warning,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo ActivityShouldBeTheFirstParameter = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic ActivityShouldBeTheFirstParameter = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3015",
 				title: "Activity should be the first parameter",
@@ -181,10 +196,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Info,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo StatusDescriptionMustBeString = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic StatusDescriptionMustBeString = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3016",
 				title: "Status description parameter should be a string",
@@ -192,10 +208,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo StatusDescriptionParameterInvalidType = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic StatusDescriptionParameterInvalidType = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3017",
 				title: "Status Description parameters are only valid on Events, not Activity or Context methods",
@@ -203,10 +220,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo ActivityReturnTypeShouldBeNullable = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic ActivityReturnTypeShouldBeNullable = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3022",
 				title: "Activity return type should be nullable",
@@ -214,10 +232,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Warning,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo ExceptionEventNotStandardName = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic ExceptionEventNotStandardName = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3021",
 				title: "Exception event does not use OpenTelemetry standard name",
@@ -225,7 +244,8 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Info,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 	}
 }

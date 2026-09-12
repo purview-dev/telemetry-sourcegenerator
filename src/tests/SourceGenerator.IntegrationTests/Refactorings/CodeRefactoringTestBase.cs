@@ -1,7 +1,6 @@
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeRefactorings;
 using Microsoft.CodeAnalysis.CSharp;
-using Purview.Telemetry.SourceGenerator.Infra;
 
 namespace Purview.Telemetry.SourceGenerator.Refactorings;
 
@@ -122,9 +121,9 @@ public abstract class CodeRefactoringTestBase
 		var (project, _) = await CreateProjectAsync(code, cancellationToken);
 		var document = project.Documents.First();
 
-		var actions = new List<CodeAction>();
+		List<CodeAction> actions = [];
 
-		var context = new CodeRefactoringContext(
+		CodeRefactoringContext context = new(
 			document,
 			new Microsoft.CodeAnalysis.Text.TextSpan(cursorIndex, 0),
 			actions.Add,
@@ -137,7 +136,7 @@ public abstract class CodeRefactoringTestBase
 
 	static async Task<(Project, Compilation)> CreateProjectAsync(string code, CancellationToken cancellationToken)
 	{
-		using var workspace = new AdhocWorkspace();
+		using AdhocWorkspace workspace = new();
 		var projectInfo = ProjectInfo
 			.Create(ProjectId.CreateNewId(), VersionStamp.Default, "TestProject", "TestProject", LanguageNames.CSharp)
 			.WithCompilationOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))

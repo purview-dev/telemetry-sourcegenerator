@@ -389,7 +389,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProvider : CodeRefa
 		List<(MetricsCallInfo Call, string MethodName)> metricsCallsWithMethods
 	)
 	{
-		var sb = new StringBuilder();
+		StringBuilder sb = new();
 
 		if (activityCallsWithMethods.Count > 0)
 			sb.AppendLine($"[{TelemetryAttributeNames.Activities.ActivitySourceAttribute.RenderAttributeTypeName}]");

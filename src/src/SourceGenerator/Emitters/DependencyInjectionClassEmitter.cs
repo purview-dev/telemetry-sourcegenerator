@@ -159,7 +159,7 @@ static class DependencyInjectionClassEmitter
 	{
 		var identity = interfaceType.Identity;
 
-		var builder = new StringBuilder();
+		StringBuilder builder = new();
 		var ns = telemetryNamesNamespace ?? identity.Namespace;
 		if (ns != null)
 			builder.Append(ns).Append('.');

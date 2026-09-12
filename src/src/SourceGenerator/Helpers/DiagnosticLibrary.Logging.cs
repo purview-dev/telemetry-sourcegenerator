@@ -8,7 +8,7 @@ partial class DiagnosticLibrary
 	// Start at 2000
 	public static class Logging
 	{
-		public static readonly DiagnosticInfo MultipleExceptionsDefined = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic MultipleExceptionsDefined = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG2000",
 				title: "Too many exception parameters",
@@ -16,10 +16,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Logging.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo MaximumLogEntryParametersExceeded = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic MaximumLogEntryParametersExceeded = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG2001",
 				title: "More than 6 parameters",
@@ -27,10 +28,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Logging.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo InferringErrorLogLevel = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic InferringErrorLogLevel = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG2002",
 				title: "Inferring error log level",
@@ -38,10 +40,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Info,
 				category: Categories.Logging.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo MSLoggingNotReferenced = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic MSLoggingNotReferenced = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG2003",
 				title: "Could not find a reference to Microsoft.Extensions.Logging.ILogger, skipping log generation",
@@ -49,10 +52,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Warning,
 				category: Categories.Logging.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: true
 		);
 
-		public static readonly DiagnosticInfo MixedOrdinalAndNamedProperties = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic MixedOrdinalAndNamedProperties = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG2004",
 				title: "Cannot mix ordinal and named property placeholders",
@@ -60,10 +64,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Logging.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo OrdinalsExceedParameters = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic OrdinalsExceedParameters = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG2005",
 				title: "Ordinal values exceed parameter count",
@@ -71,21 +76,24 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Logging.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo ExpandEnumerableAndLogPropertiesNotSupported = DiagnosticInfo.Create(
-			new DiagnosticDescriptor(
-				id: "TSG2006",
-				title: "Using LogPropertiesAttribute and ExpandEnumerableAttribute on the same parameter is not supported",
-				messageFormat: "Expanding an array/ IEnumerable, and the expanding the complex type of the items in the array are not supported.",
-				defaultSeverity: DiagnosticSeverity.Error,
-				category: Categories.Logging.Usage,
-				isEnabledByDefault: true
-			)
-		);
+		public static readonly ReportableDiagnostic ExpandEnumerableAndLogPropertiesNotSupported =
+			ReportableDiagnostic.Create(
+				new DiagnosticDescriptor(
+					id: "TSG2006",
+					title: "Using LogPropertiesAttribute and ExpandEnumerableAttribute on the same parameter is not supported",
+					messageFormat: "Expanding an array/ IEnumerable, and the expanding the complex type of the items in the array are not supported.",
+					defaultSeverity: DiagnosticSeverity.Error,
+					category: Categories.Logging.Usage,
+					isEnabledByDefault: true
+				),
+				isBlocking: false
+			);
 
-		public static readonly DiagnosticInfo ScopedMethodShouldNotHaveLevel = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic ScopedMethodShouldNotHaveLevel = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG2007",
 				title: "A scoped log shouldn't have a LogLevel, this will be ignored.",
@@ -93,10 +101,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Warning,
 				category: Categories.Logging.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo UnboundedIEnumerableMaxCount = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic UnboundedIEnumerableMaxCount = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG2008",
 				title: "Unbounded enumeration possible",
@@ -104,10 +113,11 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Warning,
 				category: Categories.Logging.Performance,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 
-		public static readonly DiagnosticInfo LogMustReturnVoidOrAsync = DiagnosticInfo.Create(
+		public static readonly ReportableDiagnostic LogMustReturnVoidOrAsync = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG2021",
 				title: "Log method must return void or IDisposable",
@@ -115,7 +125,8 @@ partial class DiagnosticLibrary
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Logging.Usage,
 				isEnabledByDefault: true
-			)
+			),
+			isBlocking: false
 		);
 	}
 }

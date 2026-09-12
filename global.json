@@ -1,11 +1,9 @@
 {
 	"sdk": {
-		"version": "10.0.400",
-		"rollForward": "latestMinor",
 		"allowPrerelease": false
 	},
 	"msbuild-sdks": {
-    "Purview.DotNetProjectSdk": "1.0.0-prerelease.46"
+    "Purview.DotNetProjectSdk": "1.0.0-prerelease.51"
   },
 	"test": {
 		"runner": "Microsoft.Testing.Platform"

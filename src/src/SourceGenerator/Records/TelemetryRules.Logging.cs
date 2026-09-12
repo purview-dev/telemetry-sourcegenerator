@@ -11,13 +11,13 @@ static partial class TelemetryRules
 	/// Logging-specific diagnostics for a logger interface. Reuses the shared attribute parsing so the
 	/// conditions match the pipeline's record-building exactly.
 	/// </summary>
-	public static ImmutableArray<DiagnosticInfo> GetLoggerDiagnostics(
+	public static ImmutableArray<ReportableDiagnostic> GetLoggerDiagnostics(
 		INamedTypeSymbol interfaceSymbol,
 		Compilation compilation,
 		CancellationToken token
 	)
 	{
-		var diagnostics = ImmutableArray.CreateBuilder<DiagnosticInfo>();
+		var diagnostics = ImmutableArray.CreateBuilder<ReportableDiagnostic>();
 
 		if (!Utilities.ContainsAttribute(interfaceSymbol, TypeLibrary.Purview.Telemetry.LoggerAttribute, token))
 			return diagnostics.ToImmutable();
@@ -54,7 +54,7 @@ static partial class TelemetryRules
 	static void ApplyLoggerMethodRules(
 		IMethodSymbol method,
 		int interfaceGenerationMode,
-		ImmutableArray<DiagnosticInfo>.Builder diagnostics,
+		ImmutableArray<ReportableDiagnostic>.Builder diagnostics,
 		CancellationToken token
 	)
 	{
@@ -66,8 +66,9 @@ static partial class TelemetryRules
 
 		if (hasMultipleExceptions)
 			diagnostics.Add(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.Logging.MultipleExceptionsDefined.Descriptor,
+					isBlocking: false,
 					method,
 					method.Name
 				)
@@ -76,8 +77,9 @@ static partial class TelemetryRules
 		// TSG2021: invalid return type.
 		if (IsInvalidLogReturnType(method, token))
 			diagnostics.Add(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.Logging.LogMustReturnVoidOrAsync.Descriptor,
+					isBlocking: false,
 					method.ReturnType.Locations
 				)
 			);
@@ -107,8 +109,9 @@ static partial class TelemetryRules
 		// TSG2001: explicitly V1 with too many non-exception parameters.
 		if (useV1Generation && nonExceptionCount > PropertyLibrary.Logging.MaxNonExceptionParameters)
 			diagnostics.Add(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.Logging.MaximumLogEntryParametersExceeded.Descriptor,
+					isBlocking: false,
 					method,
 					method.Name
 				)
@@ -116,12 +119,22 @@ static partial class TelemetryRules
 
 		// TSG2002: inferred error level (exception present, no explicit level).
 		if (useV1Generation && !isScoped && exceptionParameters.Length == 1 && logAttribute?.LevelOrNull == null)
-			diagnostics.Add(DiagnosticInfo.Create(DiagnosticLibrary.Logging.InferringErrorLogLevel.Descriptor, method));
+			diagnostics.Add(
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.Logging.InferringErrorLogLevel.Descriptor,
+					isBlocking: false,
+					method
+				)
+			);
 
 		// TSG2007: scoped method must not have an explicit level.
 		if (isScoped && logAttribute?.LevelOrNull != null)
 			diagnostics.Add(
-				DiagnosticInfo.Create(DiagnosticLibrary.Logging.ScopedMethodShouldNotHaveLevel.Descriptor, method)
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.Logging.ScopedMethodShouldNotHaveLevel.Descriptor,
+					isBlocking: false,
+					method
+				)
 			);
 
 		// Per-parameter rules.
@@ -138,7 +151,7 @@ static partial class TelemetryRules
 
 	static void ApplyParameterRules(
 		IParameterSymbol parameter,
-		ImmutableArray<DiagnosticInfo>.Builder diagnostics,
+		ImmutableArray<ReportableDiagnostic>.Builder diagnostics,
 		CancellationToken token
 	)
 	{
@@ -149,8 +162,9 @@ static partial class TelemetryRules
 		if (logPropertiesAttribute != null && expandEnumerableAttribute != null)
 		{
 			diagnostics.Add(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.Logging.ExpandEnumerableAndLogPropertiesNotSupported.Descriptor,
+					isBlocking: false,
 					parameter
 				)
 			);
@@ -164,7 +178,11 @@ static partial class TelemetryRules
 		)
 		{
 			diagnostics.Add(
-				DiagnosticInfo.Create(DiagnosticLibrary.Logging.UnboundedIEnumerableMaxCount.Descriptor, parameter)
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.Logging.UnboundedIEnumerableMaxCount.Descriptor,
+					isBlocking: false,
+					parameter
+				)
 			);
 		}
 	}
@@ -172,7 +190,7 @@ static partial class TelemetryRules
 	static void ApplyMessageTemplateRules(
 		IMethodSymbol method,
 		string messageTemplate,
-		ImmutableArray<DiagnosticInfo>.Builder diagnostics
+		ImmutableArray<ReportableDiagnostic>.Builder diagnostics
 	)
 	{
 		var holes = MessageTemplateHole.FromMatches(PropertyLibrary.MessageTemplateMatcher.Matches(messageTemplate));
@@ -185,8 +203,9 @@ static partial class TelemetryRules
 		// TSG2004: mixed ordinal and named placeholders.
 		if (isOrdinalBased && isNamedBased)
 			diagnostics.Add(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.Logging.MixedOrdinalAndNamedProperties.Descriptor,
+					isBlocking: false,
 					method,
 					method.Name
 				)
@@ -198,8 +217,9 @@ static partial class TelemetryRules
 			: 0;
 		if (maxOrdinal > method.Parameters.Length)
 			diagnostics.Add(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.Logging.OrdinalsExceedParameters.Descriptor,
+					isBlocking: false,
 					method,
 					method.Name
 				)

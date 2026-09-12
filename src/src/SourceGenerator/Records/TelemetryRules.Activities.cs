@@ -10,19 +10,20 @@ static partial class TelemetryRules
 	/// Activity-specific diagnostics derived from the pipeline's <see cref="ActivitySourceTarget"/> so the
 	/// parameter inference matches generation exactly.
 	/// </summary>
-	public static ImmutableArray<DiagnosticInfo> GetActivityDiagnostics(
+	public static ImmutableArray<ReportableDiagnostic> GetActivityDiagnostics(
 		ActivitySourceTarget target,
 		INamedTypeSymbol interfaceSymbol,
 		CancellationToken token
 	)
 	{
-		var diagnostics = ImmutableArray.CreateBuilder<DiagnosticInfo>();
+		var diagnostics = ImmutableArray.CreateBuilder<ReportableDiagnostic>();
 
 		// TSG3001: no activity source specified.
 		if (string.IsNullOrWhiteSpace(target.ActivitySourceName))
 			diagnostics.Add(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.Activities.NoActivitySourceSpecified.Descriptor,
+					isBlocking: false,
 					interfaceSymbol
 				)
 			);
@@ -35,7 +36,11 @@ static partial class TelemetryRules
 			&& validMethods.Any(static m => m.MethodType != ActivityMethodType.Activity)
 		)
 			diagnostics.Add(
-				DiagnosticInfo.Create(DiagnosticLibrary.Activities.NoActivityMethodsDefined.Descriptor, interfaceSymbol)
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.Activities.NoActivityMethodsDefined.Descriptor,
+					isBlocking: false,
+					interfaceSymbol
+				)
 			);
 
 		var generateDiagnosticsForMissingActivity =
@@ -62,7 +67,7 @@ static partial class TelemetryRules
 		ActivityBasedGenerationTarget method,
 		IMethodSymbol methodSymbol,
 		bool generateDiagnosticsForMissingActivity,
-		ImmutableArray<DiagnosticInfo>.Builder diagnostics,
+		ImmutableArray<ReportableDiagnostic>.Builder diagnostics,
 		CancellationToken token
 	)
 	{
@@ -79,12 +84,17 @@ static partial class TelemetryRules
 			var returnsActivity = method.ReturnType.Identity.Equals(TypeLibrary.System.Diagnostics.Activity);
 			if (!returnsActivity)
 				diagnostics.Add(
-					DiagnosticInfo.Create(DiagnosticLibrary.Activities.DoesNotReturnActivity.Descriptor, methodSymbol)
+					ReportableDiagnostic.Create(
+						DiagnosticLibrary.Activities.DoesNotReturnActivity.Descriptor,
+						isBlocking: false,
+						methodSymbol
+					)
 				);
 			else if (!method.ReturnType.IsNullable)
 				diagnostics.Add(
-					DiagnosticInfo.Create(
+					ReportableDiagnostic.Create(
 						DiagnosticLibrary.Activities.ActivityReturnTypeShouldBeNullable.Descriptor,
+						isBlocking: false,
 						methodSymbol
 					)
 				);
@@ -92,7 +102,11 @@ static partial class TelemetryRules
 
 		if (!isValidReturnType)
 			diagnostics.Add(
-				DiagnosticInfo.Create(DiagnosticLibrary.Activities.InvalidReturnType.Descriptor, methodSymbol)
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.Activities.InvalidReturnType.Descriptor,
+					isBlocking: false,
+					methodSymbol
+				)
 			);
 
 		// TSG3014/TSG3015: best-practice diagnostics for missing/misplaced Activity parameters,
@@ -101,8 +115,9 @@ static partial class TelemetryRules
 		{
 			if (!method.HasActivityParameter)
 				diagnostics.Add(
-					DiagnosticInfo.Create(
+					ReportableDiagnostic.Create(
 						DiagnosticLibrary.Activities.DoesNotAcceptActivityParameter.Descriptor,
+						isBlocking: false,
 						methodSymbol
 					)
 				);
@@ -112,8 +127,9 @@ static partial class TelemetryRules
 		{
 			if (method.Parameters[0].ParamDestination != ActivityParameterDestination.Activity)
 				diagnostics.Add(
-					DiagnosticInfo.Create(
+					ReportableDiagnostic.Create(
 						DiagnosticLibrary.Activities.ActivityShouldBeTheFirstParameter.Descriptor,
+						isBlocking: false,
 						methodSymbol
 					)
 				);
@@ -125,8 +141,9 @@ static partial class TelemetryRules
 			var recordsException = method.Parameters.Any(static p => p.IsException);
 			if (recordsException && !string.Equals(method.ActivityOrEventName, "exception", StringComparison.Ordinal))
 				diagnostics.Add(
-					DiagnosticInfo.Create(
+					ReportableDiagnostic.Create(
 						DiagnosticLibrary.Activities.ExceptionEventNotStandardName.Descriptor,
+						isBlocking: false,
 						methodSymbol,
 						method.ActivityOrEventName
 					)
@@ -146,7 +163,7 @@ static partial class TelemetryRules
 	static void ApplyBaggageRules(
 		ActivityBasedGenerationTarget method,
 		IMethodSymbol methodSymbol,
-		ImmutableArray<DiagnosticInfo>.Builder diagnostics,
+		ImmutableArray<ReportableDiagnostic>.Builder diagnostics,
 		CancellationToken token
 	)
 	{
@@ -157,8 +174,9 @@ static partial class TelemetryRules
 			if (baggage.ParameterType.Identity.SpecialType != SpecialType.System_String)
 			{
 				diagnostics.Add(
-					DiagnosticInfo.Create(
+					ReportableDiagnostic.Create(
 						DiagnosticLibrary.Activities.BaggageParameterShouldBeString.Descriptor,
+						isBlocking: false,
 						GetParameterLocation(methodSymbol, baggage.ParameterName)
 					)
 				);
@@ -169,7 +187,7 @@ static partial class TelemetryRules
 	static void ApplyDuplicateReservedRules(
 		ActivityBasedGenerationTarget method,
 		IMethodSymbol methodSymbol,
-		ImmutableArray<DiagnosticInfo>.Builder diagnostics
+		ImmutableArray<ReportableDiagnostic>.Builder diagnostics
 	)
 	{
 		var duplicateReserved = method
@@ -185,8 +203,9 @@ static partial class TelemetryRules
 			var secondParameter = group.ElementAt(1);
 
 			diagnostics.Add(
-				DiagnosticInfo.Create(
+				ReportableDiagnostic.Create(
 					DiagnosticLibrary.Activities.DuplicateParameterTypes.Descriptor,
+					isBlocking: false,
 					GetParameterLocation(methodSymbol, secondParameter.ParameterName),
 					names,
 					group.Key.ToString()
@@ -198,7 +217,7 @@ static partial class TelemetryRules
 	static void ApplyReservedParameterRules(
 		ActivityBasedGenerationTarget method,
 		IMethodSymbol methodSymbol,
-		ImmutableArray<DiagnosticInfo>.Builder diagnostics,
+		ImmutableArray<ReportableDiagnostic>.Builder diagnostics,
 		CancellationToken token
 	)
 	{
@@ -214,8 +233,9 @@ static partial class TelemetryRules
 			{
 				case ActivityParameterDestination.Activity when method.MethodType == ActivityMethodType.Activity:
 					diagnostics.Add(
-						DiagnosticInfo.Create(
+						ReportableDiagnostic.Create(
 							DiagnosticLibrary.Activities.ActivityParameterNotAllowed.Descriptor,
+							isBlocking: false,
 							location,
 							parameterName
 						)
@@ -223,8 +243,9 @@ static partial class TelemetryRules
 					break;
 				case ActivityParameterDestination.Timestamp when method.MethodType != ActivityMethodType.Event:
 					diagnostics.Add(
-						DiagnosticInfo.Create(
+						ReportableDiagnostic.Create(
 							DiagnosticLibrary.Activities.TimestampParameterNotAllowed.Descriptor,
+							isBlocking: false,
 							location,
 							parameterName
 						)
@@ -232,8 +253,9 @@ static partial class TelemetryRules
 					break;
 				case ActivityParameterDestination.StartTime when method.MethodType != ActivityMethodType.Activity:
 					diagnostics.Add(
-						DiagnosticInfo.Create(
+						ReportableDiagnostic.Create(
 							DiagnosticLibrary.Activities.StartTimeParameterNotAllowed.Descriptor,
+							isBlocking: false,
 							location,
 							parameterName
 						)
@@ -242,8 +264,9 @@ static partial class TelemetryRules
 				case ActivityParameterDestination.ParentContextOrId
 					when method.MethodType != ActivityMethodType.Activity:
 					diagnostics.Add(
-						DiagnosticInfo.Create(
+						ReportableDiagnostic.Create(
 							DiagnosticLibrary.Activities.ParentContextOrIdParameterNotAllowed.Descriptor,
+							isBlocking: false,
 							location,
 							parameterName
 						)
@@ -251,8 +274,9 @@ static partial class TelemetryRules
 					break;
 				case ActivityParameterDestination.LinksEnumerable when method.MethodType != ActivityMethodType.Activity:
 					diagnostics.Add(
-						DiagnosticInfo.Create(
+						ReportableDiagnostic.Create(
 							DiagnosticLibrary.Activities.LinksParameterNotAllowed.Descriptor,
+							isBlocking: false,
 							location,
 							parameterName
 						)
@@ -260,8 +284,9 @@ static partial class TelemetryRules
 					break;
 				case ActivityParameterDestination.TagsEnumerable when method.MethodType == ActivityMethodType.Context:
 					diagnostics.Add(
-						DiagnosticInfo.Create(
+						ReportableDiagnostic.Create(
 							DiagnosticLibrary.Activities.TagsParameterNotAllowed.Descriptor,
+							isBlocking: false,
 							location,
 							parameterName
 						)
@@ -270,16 +295,18 @@ static partial class TelemetryRules
 				case ActivityParameterDestination.Escape
 					when parameter.ParameterType.Identity.SpecialType != SpecialType.System_Boolean:
 					diagnostics.Add(
-						DiagnosticInfo.Create(
+						ReportableDiagnostic.Create(
 							DiagnosticLibrary.Activities.EscapedParameterInvalidType.Descriptor,
+							isBlocking: false,
 							location
 						)
 					);
 					break;
 				case ActivityParameterDestination.Escape when method.MethodType != ActivityMethodType.Event:
 					diagnostics.Add(
-						DiagnosticInfo.Create(
+						ReportableDiagnostic.Create(
 							DiagnosticLibrary.Activities.EscapedParameterIsOnlyValidOnEvent.Descriptor,
+							isBlocking: false,
 							location,
 							parameterName
 						)
@@ -288,16 +315,18 @@ static partial class TelemetryRules
 				case ActivityParameterDestination.StatusDescription
 					when parameter.ParameterType.Identity.SpecialType != SpecialType.System_String:
 					diagnostics.Add(
-						DiagnosticInfo.Create(
+						ReportableDiagnostic.Create(
 							DiagnosticLibrary.Activities.StatusDescriptionMustBeString.Descriptor,
+							isBlocking: false,
 							location
 						)
 					);
 					break;
 				case ActivityParameterDestination.StatusDescription when method.MethodType != ActivityMethodType.Event:
 					diagnostics.Add(
-						DiagnosticInfo.Create(
+						ReportableDiagnostic.Create(
 							DiagnosticLibrary.Activities.StatusDescriptionParameterInvalidType.Descriptor,
+							isBlocking: false,
 							location,
 							parameterName
 						)
