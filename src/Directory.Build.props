@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<NamespacePrefix>Purview.Telemetry</NamespacePrefix>
 		<!--
-			This comes from Purview.DotnetSdk where we auto include the
+			This comes from Purview.DotNetProjectSdk where we auto include the
 			telemetry... obviously we don't want that here!	
 		-->
 		<ExcludePurviewTelemetry>true</ExcludePurviewTelemetry>

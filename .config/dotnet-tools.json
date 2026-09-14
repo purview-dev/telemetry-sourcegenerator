@@ -8,6 +8,13 @@
         "csharpier"
       ],
       "rollForward": false
+    },
+    "dotnet-inspect": {
+      "version": "0.25.0",
+      "commands": [
+        "dotnet-inspect"
+      ],
+      "rollForward": false
     }
   }
 }

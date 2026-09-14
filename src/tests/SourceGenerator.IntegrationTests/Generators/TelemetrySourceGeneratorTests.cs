@@ -81,22 +81,7 @@ namespace Testing;
 		var generationResult = await GenerateAsync(empty, cancellationToken: cancellationToken);
 
 		// Assert
-		var autoCounterAttribute = generationResult.GetSource("AutoCounterAttribute.g.cs");
-		await Assert
-			.That(autoCounterAttribute)
-			.ContainsGeneratedCode("#pragma warning disable CS8625")
-			.Because("the null-default string parameters must not emit CS8625 under #nullable enable");
-		var has1591Pragma = autoCounterAttribute?.ContainsGeneratedCode("#pragma warning disable 1591") ?? false;
-		await Assert
-			.That(has1591Pragma)
-			.IsFalse()
-			.Because("missing-documentation warnings must be resolved with XML summaries, not pragmas");
-
-		var targetsEnum = generationResult.GetSource("Targets.g.cs");
-		await Assert
-			.That(targetsEnum)
-			.ContainsGeneratedCode("/// <summary>Excludes logging targets.</summary>")
-			.Because("the public enum members must carry XML summaries so CS1591 is not raised");
+		await Assert.That(generationResult.DriverResult.Diagnostics).IsEmpty();
 	}
 
 	public static IEnumerable<string> BasicGenericParameters

@@ -5,15 +5,13 @@ on:
     branches: [main]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
     name: Build and test
     uses: purview-dev/build/.github/workflows/purview-build.yml@main
-    with:
-      build-version: "0.2.1"
     secrets: inherit
 
   samples:

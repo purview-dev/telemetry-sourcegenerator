@@ -518,6 +518,8 @@ dotnet_style_null_propagation = true:warning
 dotnet_style_prefer_is_null_check_over_reference_equality_method = true:warning
 
 [*.g.cs]
+# Generated source-generator output: any diagnostics are worthless, so treat as generated code.
+generated_code = true
 # Missing XML comment for publicly visible type or member 'Type_or_Member'
 dotnet_diagnostic.CS1591.severity = none
 
@@ -971,6 +973,8 @@ dotnet_diagnostic.CA1845.severity = error
 # Prefer AsSpan over Substring
 dotnet_diagnostic.CA1846.severity = error
 
+dotnet_diagnostic.ignore_internalsvisibleto = true
+dotnet_diagnostic.CA1852.ignore_internalsvisibleto = true
 
 # Unsafe DataSet or DataTable in serializable type can be vulnerable to remote code execution attacks
 dotnet_diagnostic.CA2352.severity = error
@@ -1581,6 +1585,7 @@ dotnet_diagnostic.IDE2006.severity = warning
 dotnet_diagnostic.IDE0007.severity = warning
 dotnet_diagnostic.IDE0008.severity = none
 dotnet_diagnostic.PDS0003.severity = warning
+dotnet_diagnostic.PDS0004.severity = warning
 
 # Usage Rules (CA1801, CA1816, CA2200-CA2267)
 # Usage rules support proper usage of .NET
@@ -2652,6 +2657,8 @@ dotnet_diagnostic.CS8618.severity = none
 dotnet_diagnostic.CS8767.severity = none
 
 [**/Migrations/**.{cs,vb}]
+# EF Core migrations (and their .Designer.cs snapshots) are generated; any diagnostics are worthless.
+generated_code = true
 dotnet_diagnostic.CA1062.severity = none
 dotnet_diagnostic.CA1825.severity = none
 dotnet_diagnostic.CA1861.severity = none
@@ -2659,13 +2666,31 @@ dotnet_diagnostic.IDE0053.severity = none
 dotnet_diagnostic.IDE0300.severity = none
 dotnet_diagnostic.RCS1021.severity = none
 dotnet_diagnostic.RCS1205.severity = none
+# PDS0004: Use correct acronym capitalization
+dotnet_diagnostic.PDS0004.severity = none
 
 [**/Extensions/**.{cs,vb}]
+# Files under the Extensions/ namespace-reset convention must not force developers to add pragmas;
+# suppress the namespace-conflict diagnostics that arise from declaring framework-style namespaces.
 dotnet_diagnostic.IDE0130.severity = none
 dotnet_diagnostic.CA1034.severity = none
+dotnet_diagnostic.CA1724.severity = none
+dotnet_diagnostic.CS0436.severity = none
+dotnet_diagnostic.CS1591.severity = none
+dotnet_diagnostic.IDE0005.severity = none
 
 [**/{Extension,Extensions}.{cs,vb}]
 dotnet_diagnostic.CA1034.severity = none
 
 [**/Generated/**/*.{cs,vb}]
+generated_code = true
 dotnet_diagnostic.CS8602.severity = none
+
+[**/*.Designer.cs]
+# Designer/design-time generated content
+generated_code = true
+
+[**/obj/**/*.cs]
+[**/bin/**/*.cs]
+# Compiler/build output (generated AssemblyInfo, GlobalUsings, etc.)
+generated_code = true
