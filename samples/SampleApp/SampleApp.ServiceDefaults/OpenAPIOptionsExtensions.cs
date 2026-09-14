@@ -8,7 +8,7 @@ using Microsoft.Extensions.Primitives;
 namespace Microsoft.Extensions.Configuration;
 
 [EditorBrowsable(EditorBrowsableState.Always)]
-static class OpenApiOptionsExtensions
+static class OpenAPIOptionsExtensions
 {
 	extension(OpenApiOptions options)
 	{
