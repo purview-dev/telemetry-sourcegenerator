@@ -17,7 +17,7 @@
 		<!--<COPYRIGHT_YEAR>2026</COPYRIGHT_YEAR>-->
 		<Title>Purview Telemetry Source Generator</Title>
 		<Description>.NET Source Generator for interface-based telemetry generating tracing, logs, and metrics.</Description>
-		<PackageIcon>purview-logo.jpg</PackageIcon>
+		<PackageIcon>purview-logo.png</PackageIcon>
 		<!--<Authors>Kieron Lanning</Authors>
 		<Company>Purview-Dev</Company>
 		<Copyright>Purview-Dev, $(COPYRIGHT_YEAR) | All rights reserved.</Copyright>-->
@@ -47,7 +47,7 @@
 	     The generator assembly itself is packed by the SDK (Purview.DotNetProjectSdk)
 	     into analyzers/dotnet/cs; only the refactorings assembly is added here. -->
 	<ItemGroup>
-		<None Include="../../../assets/images/purview-logo.jpg" Pack="true" PackagePath="/" />
+		<None Include="../../../assets/images/purview-logo.png" Pack="true" PackagePath="/" />
 		<!-- README.md and LICENSE.md are physical files under Sdk/ and are packed to the package
 		     root automatically by the SDK (PurviewAutoSdkPack); no explicit items are needed. -->
 		<None

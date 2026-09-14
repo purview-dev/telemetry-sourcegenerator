@@ -1,8 +1,9 @@
 # Purview Telemetry Source Generator
 
-Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.activitysource), [`ILogger`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.ilogger), and [`Metrics`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics) based telemetry from methods you define on an interface.
-
+[![NuGet version](https://img.shields.io/nuget/v/Purview.Telemetry.SourceGenerator.svg)](https://www.nuget.org/packages/Purview.Telemetry.SourceGenerator)
 [![Release](https://github.com/purview-dev/telemetry-sourcegenerator/actions/workflows/release.yml/badge.svg)](https://github.com/purview-dev/telemetry-sourcegenerator/actions/workflows/release.yml)
+
+Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.activitysource), [`ILogger`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.ilogger), and [`Metrics`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics) based telemetry from methods you define on an interface.
 
 ## Features
 
@@ -20,14 +21,14 @@ Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system
 
 **Build toolchain requirement:**
 
-- Visual Studio 2022 17.14+ or .NET 10 SDK (Roslyn 4.14.0+)
+- Visual Studio 2026 (18.x) or .NET 10 SDK (Roslyn 5.9.0+)
 
 ## Installation
 
 Add to your `Directory.Build.props` or `.csproj` file:
 
 ```xml
-<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="5.0.0-prerelease.1">
+<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="5.0.0-prerelease.8">
   <PrivateAssets>all</PrivateAssets>
   <IncludeAssets>analyzers</IncludeAssets>
 </PackageReference>
@@ -131,33 +132,29 @@ public class EntityService(IEntityStoreTelemetry telemetry)
 | `[ObservableCounter]`, `[ObservableGauge]`, `[ObservableUpDownCounter]` | Method | Observable instruments |
 
 > [!TIP]
-> For single-target interfaces (only Activities, only Logging, or only Metrics), the generator automatically infers the necessary attributes. See the [wiki](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Multi-Targeting) for details.
+> For single-target interfaces (only Activities, only Logging, or only Metrics), the generator automatically infers the necessary attributes. See the [wiki](https://github.com/purview-dev/telemetry-sourcegenerator/wiki/Multi-Targeting) for details.
 
 ## Documentation
 
-- [Full Wiki](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki)
-- [Generated Output Examples](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Generated-Output)
-- [Multi-Targeting Guide](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Multi-Targeting)
-- [Logging Configuration](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Logging)
+- [Full Wiki](https://github.com/purview-dev/telemetry-sourcegenerator/wiki)
+- [Generated Output Examples](https://github.com/purview-dev/telemetry-sourcegenerator/wiki/Generated-Output)
+- [Multi-Targeting Guide](https://github.com/purview-dev/telemetry-sourcegenerator/wiki/Multi-Targeting)
+- [Logging Configuration](https://github.com/purview-dev/telemetry-sourcegenerator/wiki/Logging)
 
 ## Agent Skills
 
-This repository ships with [Agent Skills](https://agentskills.io/specification) under `src/ProjectAgent/skills/` to help you adopt the generator:
-
-- `telemetry-sourcegenerator-quickstart` — get started with the package, create your first interface, and register it in DI.
-- `telemetry-sourcegenerator-migration` — migrate existing `ILogger`, `ActivitySource`, and metrics code to generated interfaces.
-- `telemetry-sourcegenerator-design` — design best practices, choose between single and per-area interfaces, and apply OpenTelemetry naming conventions.
+This repository ships with [Agent Skills](https://agentskills.io/specification) under `.agents/skills/` covering the source generator, its test framework, and the `Purview.DotNetProjectSdk` build SDK. See [`AGENTS.md`](AGENTS.md) — "Source-generator and testing skills" for the full list and when to load each one.
 
 ## Sample Project
 
-The [.NET Aspire Sample](https://github.com/kjldev/purview-telemetry-sourcegenerator/tree/main/samples/SampleApp) demonstrates Activities, Logs, and Metrics generation working together with the Aspire Dashboard.
+The [.NET Aspire Sample](https://github.com/purview-dev/telemetry-sourcegenerator/tree/main/samples/SampleApp) demonstrates Activities, Logs, and Metrics generation working together with the Aspire Dashboard.
 
 > [!TIP]
 > The sample project has [`EmitCompilerGeneratedFiles`](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration-generator#enable-the-configuration-source-generator) enabled so you can inspect the generated output.
 
 ## Performance
 
-Benchmarked on 13th Gen Intel Core i9-13900KF, .NET SDK 10.0.201. See the [Performance](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Performance) wiki page for full cross-runtime results.
+Benchmarked on 13th Gen Intel Core i9-13900KF, .NET SDK 10.0.201. See the [Performance](https://github.com/purview-dev/telemetry-sourcegenerator/wiki/Performance) wiki page for full cross-runtime results.
 
 ### Activities (.NET 10.0)
 
@@ -292,6 +289,8 @@ public enum NamingConvention
 
 ## Contributing
 
-Contributions are welcome! See the [Contributing guide](https://github.com/kjldev/purview-telemetry-sourcegenerator/wiki/Contributing) for development setup, testing instructions, and the changeset-based release workflow.
+Contributions are welcome! See the [Contributing guide](https://github.com/purview-dev/telemetry-sourcegenerator/wiki/Contributing) for development setup and testing instructions.
 
-Every user-facing change requires a [changeset](docs/release-process.md) — run `just changeset` to create one.
+See [docs/release-process.md](docs/release-process.md) for the release flow, and [`AGENTS.md`](AGENTS.md)
+for the build, validation, and convention rules. Bump the version in `package.json` and run
+`just update-version` to sync it into docs/samples before packaging.

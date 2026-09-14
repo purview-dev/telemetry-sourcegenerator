@@ -3,7 +3,7 @@
 		"Solution": "src/Telemetry.SourceGenerator.slnx",
 		"TestRoot": "src/tests",
 		"TestPatterns": "*Tests.csproj",
-		"TestFilter": "/*/*/*/*/"
+		"TestFilter": "/*/*/*/*"
 	},
 	"Release": {
 		"Mode": "None"

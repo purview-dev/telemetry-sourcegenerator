@@ -3,7 +3,7 @@
 		<TargetFramework>net48</TargetFramework>
 		<NamespacePrefix>SampleApp.Net48</NamespacePrefix>
 		<!--
-			This comes from Purview.DotnetSdk where we auto include the
+			This comes from Purview.DotNetProjectSdk where we auto include the
 			telemetry... the samples consume the local generator via analyzer
 			ProjectReference, so the published package is excluded here.
 		-->
