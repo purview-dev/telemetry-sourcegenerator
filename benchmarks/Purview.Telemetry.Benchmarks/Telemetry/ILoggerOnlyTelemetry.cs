@@ -4,14 +4,13 @@ using Purview.Telemetry;
 namespace Purview.Telemetry.Benchmarks.Telemetry;
 
 /// <summary>
-/// Logger-only interface using the default (v2) code path.
-/// When <c>Microsoft.Extensions.Logging.LogPropertiesAttribute</c> is available
-/// (via <c>Microsoft.Extensions.Telemetry.Abstractions</c>), the source generator emits
-/// the new state-based approach: <c>LoggerMessageHelper.ThreadLocalState</c> is populated
-/// with structured key-value pairs and passed to <see cref="ILogger.Log{TState}"/>.
+/// Logger-only interface using the v2 (state-based) code path.
+/// <see cref="LoggerAttribute.GenerationMode"/> is <see cref="LoggerGenerationMode.V2"/>, so
+/// the source generator emits the state-based approach: <c>LoggerMessageHelper.ThreadLocalState</c>
+/// is populated with structured key-value pairs and passed to <see cref="ILogger.Log{TState}"/>.
 /// This mirrors the output of the built-in <c>[LoggerMessage]</c> source generator.
 /// </summary>
-[Logger]
+[Logger(GenerationMode = LoggerGenerationMode.V2)]
 public interface ILoggerOnlyTelemetry
 {
 	[Info]
