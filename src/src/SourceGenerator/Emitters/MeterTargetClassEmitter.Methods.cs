@@ -155,6 +155,7 @@ partial class MeterTargetClassEmitter
 						: TypeDeclarationAccessibility.Public
 				)
 				{
+					Attributes = [EmitterHelpers.AggressiveInliningAttribute()],
 					Parameters = parameters,
 					IncludeGeneratedAttributes = false,
 				}

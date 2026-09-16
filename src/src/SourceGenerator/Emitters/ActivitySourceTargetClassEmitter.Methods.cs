@@ -53,6 +53,7 @@ partial class ActivitySourceTargetClassEmitter
 				)
 				{
 					IsStatic = true,
+					Attributes = [EmitterHelpers.AggressiveInliningAttribute()],
 					Parameters =
 					[
 						new ParameterDeclarationOptions(
@@ -243,6 +244,7 @@ partial class ActivitySourceTargetClassEmitter
 					TypeDeclarationAccessibility.Private
 				)
 				{
+					Attributes = [EmitterHelpers.AggressiveInliningAttribute()],
 					Parameters =
 					[
 						.. methodTarget.Parameters.Select(p => new ParameterDeclarationOptions(
@@ -287,6 +289,7 @@ partial class ActivitySourceTargetClassEmitter
 					TypeDeclarationAccessibility.Public
 				)
 				{
+					Attributes = [EmitterHelpers.AggressiveInliningAttribute()],
 					Parameters =
 					[
 						.. methodTarget.Parameters.Select(p => new ParameterDeclarationOptions(
@@ -369,6 +372,7 @@ partial class ActivitySourceTargetClassEmitter
 			writer.MethodScope(
 				new(methodTarget.MethodName, methodTarget.ReturnType, TypeDeclarationAccessibility.Public)
 				{
+					Attributes = [EmitterHelpers.AggressiveInliningAttribute()],
 					Parameters =
 					[
 						.. methodTarget.Parameters.Select(p => new ParameterDeclarationOptions(

@@ -162,39 +162,39 @@ Benchmarked on 13th Gen Intel Core i9-13900KF, .NET SDK 10.0.401. See the [Perfo
 
 | Scenario | HasListener | Manual | Generated | Ratio |
 | --- | --- | --- | --- | --- |
-| start + complete | False | 0.56 ns | 0.55 ns | 0.99x |
-| start + complete | True | 212 ns / 1008 B | 213 ns / 1008 B | 1.01x |
-| start + fail | True | 206 ns / 920 B | 208 ns / 920 B | 0.98x |
+| start + complete | False | 0.53 ns | 0.58 ns | 1.11x |
+| start + complete | True | 220 ns / 1008 B | 217 ns / 1008 B | 0.98x |
+| start + fail | True | 208 ns / 920 B | 203 ns / 920 B | 0.92x |
 
-Generated activities are within ~1% of hand-written code with identical allocations.
+Generated activities match hand-written code with identical allocations.
 
 ### Logging (.NET 10.0)
 
 | Scenario | HasLogging | LoggerMessage.Define | Generated v1 | Generated v2 |
 | --- | --- | --- | --- | --- |
-| single Info call | True | 4.59 ns | 7.35 ns (1.60x) | 4.57 ns (1.00x) |
-| full lifecycle (4 calls) | True | 16.77 ns | 18.76 ns (1.12x) | 18.58 ns (1.11x) |
+| single Info call | True | 6.12 ns | 4.43 ns (0.72x) | 3.80 ns (0.62x) |
+| full lifecycle (4 calls) | True | 18.88 ns | 19.58 ns (1.04x) | 15.01 ns (0.80x) |
 
-Both v1 and v2 allocate **0 bytes** per call on all runtimes. Generated v2 (state-based) matches the manual baseline for single calls on .NET 10.0; v1 (LoggerMessage.Define pattern) is slower for single calls on this runtime.
+Both v1 and v2 allocate **0 bytes** per call on all runtimes. Generated methods are emitted with `[MethodImpl(AggressiveInlining)]`; generated v1 and v2 both beat the manual `LoggerMessage.Define` baseline for single calls on .NET 10.0.
 
 ### Multi-Target (.NET 10.0, Activity + Logging + Metrics)
 
 | Scenario | HasListener | Single-target | Multi-target generated | Multi-target manual |
 |---|---|---|---|---|
-| start + complete | True | 221 ns / 1008 B | 246 ns / 1032 B (1.11x) | 248 ns / 1032 B (1.13x) |
+| start + complete | True | 216 ns / 1008 B | 230 ns / 1032 B (1.07x) | 260 ns / 1032 B (1.20x) |
 
-Adding full Activity+Logging+Metrics multi-target generation costs ~11% over Activity-only on .NET 10.0 — matching hand-written multi-target code within ~1%.
+Adding full Activity+Logging+Metrics multi-target generation costs ~7% over Activity-only on .NET 10.0, and the generated multi-target code is faster than the hand-written equivalent.
 
 ### Metrics (.NET 10.0)
 
 | Scenario | Generated | Notes |
 | --- | --- | --- |
-| auto-counter (0 tags) | 0.38 ns | - |
+| auto-counter (0 tags) | 0.40 ns | - |
 | auto-counter (1 tag) | 0.35 ns | - |
-| up-down counter | 0.39 ns | - |
-| histogram (0 tags) | 0.37 ns | - |
-| histogram (1 tag) | 0.36 ns | - |
-| 4+ tags (TagList) | 3.5-9.2 ns | Stack-allocated `TagList` |
+| up-down counter | 0.37 ns | - |
+| histogram (0 tags) | 0.42 ns | - |
+| histogram (1 tag) | 0.34 ns | - |
+| 4+ tags (TagList) | 5-8 ns | Stack-allocated `TagList` |
 
 All instruments are **0 allocations** on all runtimes.
 

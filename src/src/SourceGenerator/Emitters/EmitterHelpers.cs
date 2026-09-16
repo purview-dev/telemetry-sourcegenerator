@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -15,6 +16,16 @@ static class EmitterHelpers
 		new(new TypeIdentity(nameof(EditorBrowsableAttribute), "System.ComponentModel"))
 		{
 			Arguments = [new("global::System.ComponentModel.EditorBrowsableState.Never")],
+		};
+
+	/// <summary>
+	/// The <c>[MethodImpl(MethodImplOptions.AggressiveInlining)]</c> attribute applied to generated
+	/// hot-path telemetry methods so the JIT can inline them into callers.
+	/// </summary>
+	public static AttributeDeclarationOptions AggressiveInliningAttribute() =>
+		new(new TypeIdentity(nameof(MethodImplAttribute), "System.Runtime.CompilerServices"))
+		{
+			Arguments = [new("global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining")],
 		};
 
 	/// <summary>

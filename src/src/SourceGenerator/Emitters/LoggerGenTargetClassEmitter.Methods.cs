@@ -118,6 +118,7 @@ partial class LoggerGenTargetClassEmitter
 					generatePrivateLogging ? TypeDeclarationAccessibility.Private : TypeDeclarationAccessibility.Public
 				)
 				{
+					Attributes = [EmitterHelpers.AggressiveInliningAttribute()],
 					Parameters =
 					[
 						.. methodTarget.Parameters.Select(p => new ParameterDeclarationOptions(
@@ -1360,6 +1361,7 @@ partial class LoggerGenTargetClassEmitter
 			writer.MethodScope(
 				new MethodDeclarationOptions(methodTarget.MethodName, returnType, TypeDeclarationAccessibility.Public)
 				{
+					Attributes = [EmitterHelpers.AggressiveInliningAttribute()],
 					Parameters =
 					[
 						.. methodTarget.Parameters.Select(p => new ParameterDeclarationOptions(

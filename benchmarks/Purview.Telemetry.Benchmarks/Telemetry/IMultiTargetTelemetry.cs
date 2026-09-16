@@ -6,9 +6,11 @@ namespace Purview.Telemetry.Benchmarks.Telemetry;
 /// <summary>
 /// Multi-target interface: Activity + Logging + Metrics in combined methods.
 /// Used to benchmark multi-target generation overhead vs. single-target.
+/// Logging is forced to <see cref="LoggerGenerationMode.V2"/> (state-based) so the
+/// benchmark exercises the v2 code path rather than the v1 default selected by Auto mode.
 /// </summary>
 [ActivitySource("benchmark-multi-target-source")]
-[Logger]
+[Logger(GenerationMode = LoggerGenerationMode.V2)]
 [Meter]
 public interface IMultiTargetTelemetry
 {
