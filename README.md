@@ -156,48 +156,47 @@ The [.NET Aspire Sample](https://github.com/purview-dev/telemetry-sourcegenerato
 
 ## Performance
 
-Benchmarked on 13th Gen Intel Core i9-13900KF, .NET SDK 10.0.201. See the [Performance](https://github.com/purview-dev/telemetry-sourcegenerator/wiki/Performance) wiki page for full cross-runtime results.
+Benchmarked on 13th Gen Intel Core i9-13900KF, .NET SDK 10.0.401. See the [Performance](https://github.com/purview-dev/telemetry-sourcegenerator/wiki/Performance) wiki page for full cross-runtime results.
 
 ### Activities (.NET 10.0)
 
 | Scenario | HasListener | Manual | Generated | Ratio |
 | --- | --- | --- | --- | --- |
 | start + complete | False | 0.56 ns | 0.55 ns | 0.99x |
-| start + complete | True | 218 ns / 1008 B | 204 ns / 1008 B | 0.94x |
-| start + fail | True | 198 ns / 920 B | 189 ns / 920 B | 0.87x |
+| start + complete | True | 212 ns / 1008 B | 213 ns / 1008 B | 1.01x |
+| start + fail | True | 206 ns / 920 B | 208 ns / 920 B | 0.98x |
 
-Generated activities match or outperform hand-written code with identical allocations.
+Generated activities are within ~1% of hand-written code with identical allocations.
 
 ### Logging (.NET 10.0)
 
 | Scenario | HasLogging | LoggerMessage.Define | Generated v1 | Generated v2 |
 | --- | --- | --- | --- | --- |
-| single Info call | False | 0.21 ns | 0.18 ns | 0.21 ns |
-| single Info call | True | 4.29 ns | 4.24 ns (0.99x) | 4.20 ns (0.98x) |
-| full lifecycle (4 calls) | True | 17.73 ns | 19.52 ns (1.10x) | 18.81 ns (1.06x) |
+| single Info call | True | 4.59 ns | 7.35 ns (1.60x) | 4.57 ns (1.00x) |
+| full lifecycle (4 calls) | True | 16.77 ns | 18.76 ns (1.12x) | 18.58 ns (1.11x) |
 
-Both v1 and v2 allocate **0 bytes** per call on all runtimes. Both generated variants are within ~2% of the manual baseline for single calls; full lifecycle cost is within ~10%.
+Both v1 and v2 allocate **0 bytes** per call on all runtimes. Generated v2 (state-based) matches the manual baseline for single calls on .NET 10.0; v1 (LoggerMessage.Define pattern) is slower for single calls on this runtime.
 
 ### Multi-Target (.NET 10.0, Activity + Logging + Metrics)
 
 | Scenario | HasListener | Single-target | Multi-target generated | Multi-target manual |
 |---|---|---|---|---|
-| start + complete | True | 203 ns / 1008 B | 230 ns / 1032 B (1.13x) | 233 ns / 1032 B (1.15x) |
+| start + complete | True | 221 ns / 1008 B | 246 ns / 1032 B (1.11x) | 248 ns / 1032 B (1.13x) |
 
-Adding full Activity+Logging+Metrics multi-target generation costs ~13% over Activity-only on .NET 10.0 — matching hand-written multi-target code within 2%.
+Adding full Activity+Logging+Metrics multi-target generation costs ~11% over Activity-only on .NET 10.0 — matching hand-written multi-target code within ~1%.
 
 ### Metrics (.NET 10.0)
 
 | Scenario | Generated | Notes |
 | --- | --- | --- |
-| auto-counter (0 tags) | 0.37 ns | - |
-| auto-counter (1 tag) | 0.37 ns | - |
-| up-down counter | 0.35 ns | - |
-| histogram (0 tags) | 0.36 ns | - |
+| auto-counter (0 tags) | 0.38 ns | - |
+| auto-counter (1 tag) | 0.35 ns | - |
+| up-down counter | 0.39 ns | - |
+| histogram (0 tags) | 0.37 ns | - |
 | histogram (1 tag) | 0.36 ns | - |
-| 4+ tags (TagList) | 4-7 ns | Stack-allocated `TagList` |
+| 4+ tags (TagList) | 3.5-9.2 ns | Stack-allocated `TagList` |
 
-All instruments are **0 allocations**. Manual baselines are JIT-eliminated on .NET 10.0 (no active listener), so absolute times are shown. On .NET 8/9, generated and manual are within ~25%.
+All instruments are **0 allocations** on all runtimes.
 
 ## v4 Breaking Changes
 
