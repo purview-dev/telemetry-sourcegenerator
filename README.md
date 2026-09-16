@@ -136,6 +136,8 @@ public class EntityService(IEntityStoreTelemetry telemetry)
 
 ## Documentation
 
+- [Homepage](https://purview.dev/projects/telemetry-sourcegenerator/)
+- [Documentation](https://purview.dev/docs/telemetry-sourcegenerator/)
 - [Full Wiki](https://github.com/purview-dev/telemetry-sourcegenerator/wiki)
 - [Generated Output Examples](https://github.com/purview-dev/telemetry-sourcegenerator/wiki/Generated-Output)
 - [Multi-Targeting Guide](https://github.com/purview-dev/telemetry-sourcegenerator/wiki/Multi-Targeting)

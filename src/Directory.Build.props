@@ -13,4 +13,24 @@
 	<PropertyGroup>
 		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
+
+	<PropertyGroup Label="Purview site URL metadata">
+		<PurviewHomepage>https://purview.dev/</PurviewHomepage>
+		<PurviewProjectUrl>$(PurviewHomepage)projects/telemetry-sourcegenerator/</PurviewProjectUrl>
+		<PurviewDocsUrl>$(PurviewHomepage)docs/telemetry-sourcegenerator/</PurviewDocsUrl>
+	</PropertyGroup>
+
+	<PropertyGroup Label="NuGet package metadata">
+		<Authors>Kieron Lanning</Authors>
+		<Company>Purview-Dev</Company>
+		<Copyright>Copyright © $(CurrentYear) Purview-Dev</Copyright>
+		<RepositoryUrl>https://github.com/purview-dev/telemetry-sourcegenerator.git</RepositoryUrl>
+		<PackageProjectUrl>$(PurviewProjectUrl)</PackageProjectUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageIcon>purview-logo.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	</PropertyGroup>
 </Project>

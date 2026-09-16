@@ -17,14 +17,6 @@
 		<!--<COPYRIGHT_YEAR>2026</COPYRIGHT_YEAR>-->
 		<Title>Purview Telemetry Source Generator</Title>
 		<Description>.NET Source Generator for interface-based telemetry generating tracing, logs, and metrics.</Description>
-		<PackageIcon>purview-logo.png</PackageIcon>
-		<!--<Authors>Kieron Lanning</Authors>
-		<Company>Purview-Dev</Company>
-		<Copyright>Purview-Dev, $(COPYRIGHT_YEAR) | All rights reserved.</Copyright>-->
-		<RepositoryUrl>https://github.com/purview-dev/telemetry-sourcegenerator/</RepositoryUrl>
-		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<!--<PackageProjectUrl>https://kjl.dev/projects/purviewtelemetrysourcegenerator/</PackageProjectUrl>-->
 		<PackageTags>logs;log;logger;logging;source-generator;high-performance-logging;otel;open-telemetry;telemetry;traces;tracing;metric;metrics;meter;meters;instrumentation;instruments;events;distributed-traces;distributed-tracing;melt;dotnet;aspnet;</PackageTags>
 		<DisableTelemetryGenerator>true</DisableTelemetryGenerator>
 	</PropertyGroup>
