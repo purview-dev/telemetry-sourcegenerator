@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<IsRoslynComponent>true</IsRoslynComponent>
 		<IsPackable>true</IsPackable>
@@ -36,7 +36,7 @@
 		<Compile Include="..\Shared\TelemetryAttributeNames.cs" Link="Shared\TelemetryAttributeNames.cs" />
 	</ItemGroup>
 	<!-- Package the build output into the "analyser" slot in the NuGet package.
-	     The generator assembly itself is packed by the SDK (Purview.DotNetProjectSdk)
+	     The generator assembly itself is packed by the SDK (Purview.BuildSdk)
 	     into analyzers/dotnet/cs; only the refactorings assembly is added here. -->
 	<ItemGroup>
 		<None Include="../../../assets/images/purview-logo.png" Pack="true" PackagePath="/" />

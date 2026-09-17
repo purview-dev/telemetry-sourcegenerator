@@ -2,12 +2,12 @@
 
 ## Goal
 
-Help a consuming repository adopt or troubleshoot `Purview.DotNetProjectSdk` correctly, without breaking existing build behaviour.
+Help a consuming repository adopt or troubleshoot `Purview.BuildSdk` correctly, without breaking existing build behaviour.
 
 ## Workflow
 
 1. Confirm the SDK is imported in `Directory.Build.props`/`Directory.Build.targets` via
-   `<Import Sdk="Purview.DotNetProjectSdk" Project="Sdk.props" />` and the matching `Sdk.targets` import.
+   `<Import Sdk="Purview.BuildSdk" Project="Sdk.props" />` and the matching `Sdk.targets` import.
 2. Check pre-import bootstrap properties are set **before** the `Sdk.props` import when they must affect
    evaluation: `NamespacePrefix`, `UsePackageJsonVersion`, `RootPackageJson`.
 3. If version resolution looks wrong, verify `package.json` discovery: explicit `RootPackageJson`, then CI

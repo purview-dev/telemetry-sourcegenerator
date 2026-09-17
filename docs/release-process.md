@@ -70,8 +70,8 @@ Merging to `main` triggers `release.yml`, which runs the reusable `purview-relea
 
 ## Versioning
 
-- The version lives in `package.json`. **Current Version:** 5.0.0-prerelease.8
-- It is applied to `Version` / `PackageVersion` by `Purview.DotNetProjectSdk` via package.json
+- The version lives in `package.json`. **Current Version:** 5.0.0-prerelease.10
+- It is applied to `Version` / `PackageVersion` by `Purview.BuildSdk` via package.json
   version detection (`UsePackageJsonVersion`, default `true`).
 - `just version` prints the current version.
 - After bumping `package.json`, run `just update-version` to sync the version into docs/samples.

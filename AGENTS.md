@@ -24,7 +24,7 @@ code to generated telemetry interfaces) in a companion assembly.
 - .NET 10 SDK (projects target `net10.0`; the source generator is a Roslyn component targeting
   `netstandard2.0`)
 - [Bun](https://bun.sh) for the `package.json`/`.build/*.ts` scripts
-- The `Purview.DotNetProjectSdk` MSBuild SDK (pinned in `global.json` under `msbuild-sdks`)
+- The `Purview.BuildSdk` MSBuild SDK (pinned in `global.json` under `msbuild-sdks`)
 - `csharpier` dotnet tool (pinned in `.config/dotnet-tools.json`) for linting/formatting
 
 ## Commands
@@ -62,7 +62,7 @@ conventional-commits check.
 | `just update-version` | Runs `.build/update-version.ts` to sync the version into docs/samples. |
 | `just pack` | Updates the version then packs the NuGet package into `artifacts/`. |
 
-The version lives in `package.json`. **Current Version:** 5.0.0-prerelease.8 — applied to `Version` /
+The version lives in `package.json`. **Current Version:** 5.0.0-prerelease.10 — applied to `Version` /
 `PackageVersion` via the SDK's package.json version detection.
 
 ### Pipelines (reusable `purview-build` tool)
@@ -155,7 +155,7 @@ The sample projects enable `EmitCompilerGeneratedFiles`, so generated telemetry 
 - **Source generator**: targets `netstandard2.0` for broad compiler-host compatibility and uses
   `Purview.SourceGeneratorFramework` (CodeWriter-based emission, incremental pipeline, value-equatable
   models).
-- **SDK**: projects import `Purview.DotNetProjectSdk` via `Directory.Build.props`/`.targets`. The repo
+- **SDK**: projects import `Purview.BuildSdk` via `Directory.Build.props`/`.targets`. The repo
   sets `ExcludePurviewTelemetry=true` (it does not consume the telemetry package it generates) and
   `NamespacePrefix=Purview.Telemetry` under `src/`. See `.agents/skills/sdk-*` for SDK behavior.
 
@@ -171,7 +171,7 @@ Load the relevant skill before doing specialist work:
   modernising existing tests.
 - `.agents/skills/sdk-configuration-reference/SKILL.md`,
   `.agents/skills/sdk-project-behavior-and-detection/SKILL.md`,
-  `.agents/skills/project-placement-defaults/SKILL.md` — `Purview.DotNetProjectSdk` configuration,
+  `.agents/skills/project-placement-defaults/SKILL.md` — `Purview.BuildSdk` configuration,
   project-type detection, and placement rules.
 - `.agents/agents/sdk-consumer-setup.md` — generic agent spec for helping consuming repos adopt the SDK.
 

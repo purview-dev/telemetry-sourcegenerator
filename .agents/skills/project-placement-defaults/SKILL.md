@@ -1,11 +1,11 @@
 ---
 name: project-placement-defaults
-description: "Use when creating, moving, or splitting projects in a repository that uses Purview.DotNetProjectSdk, especially for src/tests placement, test suffix naming, namespace alignment, and automatic project-reference behavior."
+description: "Use when creating, moving, or splitting projects in a repository that uses Purview.BuildSdk, especially for src/tests placement, test suffix naming, namespace alignment, and automatic project-reference behavior."
 ---
 
-# Project placement defaults for Purview.DotNetProjectSdk
+# Project placement defaults for Purview.BuildSdk
 
-Use this skill whenever a task asks to add, move, split, or create a project in a repository that uses `Purview.DotNetProjectSdk` and you need placement, naming, and reference decisions to remain consistent with the SDK's automatic conventions.
+Use this skill whenever a task asks to add, move, split, or create a project in a repository that uses `Purview.BuildSdk` and you need placement, naming, and reference decisions to remain consistent with the SDK's automatic conventions.
 
 ## Core principle
 
