@@ -28,7 +28,7 @@ Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system
 Add to your `Directory.Build.props` or `.csproj` file:
 
 ```xml
-<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="5.0.0-prerelease.8">
+<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="5.0.0-prerelease.10">
   <PrivateAssets>all</PrivateAssets>
   <IncludeAssets>analyzers</IncludeAssets>
 </PackageReference>
@@ -145,7 +145,7 @@ public class EntityService(IEntityStoreTelemetry telemetry)
 
 ## Agent Skills
 
-This repository ships with [Agent Skills](https://agentskills.io/specification) under `.agents/skills/` covering the source generator, its test framework, and the `Purview.DotNetProjectSdk` build SDK. See [`AGENTS.md`](AGENTS.md) — "Source-generator and testing skills" for the full list and when to load each one.
+This repository ships with [Agent Skills](https://agentskills.io/specification) under `.agents/skills/` covering the source generator, its test framework, and the `Purview.BuildSdk` build SDK. See [`AGENTS.md`](AGENTS.md) — "Source-generator and testing skills" for the full list and when to load each one.
 
 ## Sample Project
 

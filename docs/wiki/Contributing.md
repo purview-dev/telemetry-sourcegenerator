@@ -6,7 +6,7 @@ Contributions are welcome! This page covers development setup, build commands, a
 
 - .NET 10 SDK (projects target `net10.0`; the source generator targets `netstandard2.0`)
 - [Bun](https://bun.sh) for the `package.json`/`.build/*.ts` scripts
-- The `Purview.DotNetProjectSdk` MSBuild SDK (pinned in `global.json` under `msbuild-sdks`)
+- The `Purview.BuildSdk` MSBuild SDK (pinned in `global.json` under `msbuild-sdks`)
 - `csharpier` dotnet tool (pinned in `.config/dotnet-tools.json`) for linting/formatting
 
 ## Clone and set up

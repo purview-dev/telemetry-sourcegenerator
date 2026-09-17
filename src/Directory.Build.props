@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<NamespacePrefix>Purview.Telemetry</NamespacePrefix>
 		<!--
-			This comes from Purview.DotNetProjectSdk where we auto include the
+			This comes from Purview.BuildSdk where we auto include the
 			telemetry... obviously we don't want that here!	
 		-->
 		<ExcludePurviewTelemetry>true</ExcludePurviewTelemetry>
@@ -16,7 +16,7 @@
 		<UseArtifactsOutput>false</UseArtifactsOutput>
 	</PropertyGroup>
 
-	<Import Sdk="Purview.DotNetProjectSdk" Project="Sdk.props" />
+	<Import Sdk="Purview.BuildSdk" Project="Sdk.props" />
 
 	<PropertyGroup>
 		<LangVersion>preview</LangVersion>

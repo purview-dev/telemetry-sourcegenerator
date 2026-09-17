@@ -1,6 +1,6 @@
 # sdk-diagnose-agent-folder-copy (generic prompt spec)
 
-Diagnose why the bundled `.agents/**` folder from `Purview.DotNetProjectSdk` did not appear at the expected
+Diagnose why the bundled `.agents/**` folder from `Purview.BuildSdk` did not appear at the expected
 destination in a consuming repository.
 
 ## Required behaviour

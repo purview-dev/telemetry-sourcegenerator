@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<NamespacePrefix>SampleApp</NamespacePrefix>
 		<!--
-			This comes from Purview.DotNetProjectSdk where we auto include the
+			This comes from Purview.BuildSdk where we auto include the
 			telemetry... the samples consume the local generator via analyzer
 			ProjectReference, so the published package is excluded here.
 		-->
@@ -18,5 +18,5 @@
 		<NoWarn>$(NoWarn);CA1031;CA1515;CA1724;CA2007;CA2201;TSG2008;</NoWarn>
 	</PropertyGroup>
 
-	<Import Sdk="Purview.DotNetProjectSdk" Project="Sdk.props" />
+	<Import Sdk="Purview.BuildSdk" Project="Sdk.props" />
 </Project>
