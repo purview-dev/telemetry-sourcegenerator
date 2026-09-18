@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 1050 360"
+   role="img"
+   aria-labelledby="title desc"
+   version="1.1"
+   id="svg4"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs id="defs4">
+    <filter id="steam-soften" x="-30%" y="-20%" width="160%" height="150%"><feGaussianBlur stdDeviation="5" /></filter>
+    <clipPath id="flask-interior"><path d="M200 104h112v102l92 178c13 25-5 54-33 54H141c-28 0-46-29-33-54l92-178Z" /></clipPath>
+    <linearGradient id="steam-fade" x1="0" y1="108" x2="0" y2="218" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#000" /><stop offset=".38" stop-color="#fff" stop-opacity=".28" /><stop offset="1" stop-color="#fff" /></linearGradient>
+    <mask id="p-cutout" maskUnits="userSpaceOnUse" x="120" y="105" width="280" height="285"><rect x="120" y="105" width="280" height="285" fill="url(#steam-fade)" /><path d="M216 314V211h46c38 0 61 19 61 51s-23 52-61 52h-16v50h-30Zm30-76v49h15c21 0 31-8 31-25s-10-24-31-24Z" transform="translate(5 0) translate(256 270) scale(.9) translate(-256 -270) translate(-14 -24)" fill="#000" fill-rule="evenodd" /></mask>
+  </defs>
+  <title
+     id="title">Purview</title>
+  <desc
+     id="desc">Purview wordmark with a bold purple P forming from vapour above liquid in an Erlenmeyer flask.</desc>
+  <style
+     id="style1">
+    :root { color-scheme: light dark; --purview-ink: #17141f; --purview-purple: #8b3dff; --purview-purple-deep: #6820d2; --purview-vapor-edge: #6820d2; }
+    @media (prefers-color-scheme: dark) { :root { --purview-ink: #ffffff; --purview-vapor-edge: #b991ff; } }
+  </style>
+  <g
+     transform="translate(8 -7) scale(.73)"
+     id="g4">
+    <g clip-path="url(#flask-interior)"><g mask="url(#p-cutout)" filter="url(#steam-soften)" fill="none" stroke="var(--purview-purple)" stroke-linecap="round">
+      <path d="M202 374c-35-43 38-65 4-110-29-39 0-76 35-96 22-13 27-29 17-48" stroke-width="76" opacity=".22" />
+      <path d="M281 370c35-40-32-66 5-104 35-36 21-74-14-91-23-11-32-27-22-47" stroke-width="62" opacity=".19" />
+      <path d="M238 375c22-38-17-63 12-94 25-28 4-55-13-75-14-17-8-37 11-57" stroke-width="42" opacity=".30" />
+      <ellipse cx="255" cy="250" rx="92" ry="82" fill="var(--purview-purple)" stroke="none" opacity=".12" />
+    </g></g>
+    <path d="M216 314V211h46c38 0 61 19 61 51s-23 52-61 52h-16v50h-30Zm30-76v49h15c21 0 31-8 31-25s-10-24-31-24Z" transform="translate(5 0) translate(256 270) scale(.9) translate(-256 -270) translate(-14 -24)" fill="none" stroke="var(--purview-vapor-edge)" stroke-width="3.5" stroke-linejoin="round" opacity=".72" />
+    <path
+       d="M118 345c35-21 72-19 108-2 39 19 77 20 119 0 18-8 35-11 51-8l27 53c12 23-5 50-31 50H120c-26 0-43-27-31-50Z"
+       transform="translate(0 12)"
+       fill="var(--purview-purple)"
+       id="path2" />
+    <path
+       d="M91 388l27-43c35-21 72-19 108-2 39 19 77 20 119 0 18-8 35-11 51-8l27 53c12 23-5 50-31 50H120c-14 0-26-8-32-19 9-10 10-20 3-31Z"
+       transform="translate(0 12)"
+       fill="var(--purview-purple-deep)"
+       opacity=".2"
+       id="path3" />
+    <path
+       d="M184 64h144c14 0 25 11 25 25 0 10-6 19-15 23l-16 8v82l93 180c16 31-7 68-42 68H139c-35 0-58-37-42-68l93-180v-82l-16-8c-9-4-15-13-15-23 0-14 11-25 25-25Z"
+       fill="none"
+       stroke="var(--purview-ink)"
+       stroke-width="20"
+       stroke-linecap="round"
+       stroke-linejoin="round"
+       id="outline-foreground" />
+  </g>
+  <path
+     d="M 407.32715,202.06445 V 245 H 379.25391 V 120.36523 h 43.97851 q 47.10742,0 47.10742,39.71973 0,18.77344 -13.55859,30.41992 -13.47168,11.55957 -36.06934,11.55957 z m 0,-60.14453 v 38.85059 h 11.03808 q 22.42383,0 22.42383,-19.64258 0,-19.20801 -22.42383,-19.20801 z M 563.46484,245 h -27.37793 v -13.55859 h -0.43457 q -10.16894,15.73144 -27.2041,15.73144 -30.9414,0 -30.9414,-37.45996 V 156 h 27.37793 v 51.2793 q 0,18.86035 14.94921,18.86035 7.3877,0 11.82032,-5.12793 4.43261,-5.21485 4.43261,-14.08008 V 156 h 27.37793 z m 74.17774,-64.22949 q -4.9541,-2.69434 -11.55957,-2.69434 -8.95215,0 -13.99317,6.60547 -5.04101,6.51856 -5.04101,17.81738 V 245 h -27.46485 v -89 h 27.46485 v 16.51367 h 0.34765 q 6.51856,-18.07812 23.4668,-18.07812 4.3457,0 6.7793,1.04297 z M 735.28711,156 702.17285,245 h -31.28906 l -31.54981,-89 h 29.37696 l 15.4707,54.84277 q 2.60742,9.29981 3.04199,15.81836 h 0.34766 q 0.6084,-6.1709 3.21582,-15.29687 L 706.60547,156 Z m 18.63965,-14.08008 q -6.95313,0 -11.38574,-4.08496 -4.43262,-4.17187 -4.43262,-10.16894 0,-6.1709 4.43262,-10.08204 4.43261,-3.91113 11.38574,-3.91113 7.04004,0 11.38574,3.91113 4.43262,3.91114 4.43262,10.08204 0,6.25781 -4.43262,10.25585 -4.3457,3.99805 -11.38574,3.99805 z M 767.48535,245 h -27.46484 v -89 h 27.46484 z m 96.08008,-36.67773 h -58.05859 q 1.39062,19.38183 24.42285,19.38183 14.68847,0 25.81347,-6.95312 v 19.8164 q -12.34179,6.60547 -32.07129,6.60547 -21.55468,0 -33.46191,-11.90723 -11.90723,-11.99414 -11.90723,-33.375 0,-22.16308 12.86329,-35.11328 12.86328,-12.95019 31.63671,-12.95019 19.46875,0 30.07227,11.55957 10.69043,11.55957 10.69043,31.37598 z m -25.46582,-16.86133 q 0,-19.1211 -15.4707,-19.1211 -6.60547,0 -11.47266,5.47559 -4.78027,5.47559 -5.82324,13.64551 z M 1001.7988,156 976.15918,245 h -28.85547 l -13.12402,-52.14844 q -1.30371,-5.21484 -1.47754,-11.38574 h -0.52149 q -0.60839,6.7793 -1.73828,11.03809 L 916.3623,245 h -28.50781 l -25.11816,-89 h 27.98633 l 12.25488,58.05859 q 0.86914,4.08496 1.30371,9.90821 h 0.52148 q 0.43457,-6.08399 1.56446,-10.25586 L 921.66406,156 h 26.16114 l 13.73242,58.05859 q 0.52148,2.17286 1.21679,10.08203 h 0.6084 q 0.43457,-5.04101 1.39063,-10.08203 L 976.33301,156 Z"
+     id="wordmark"
+     fill="var(--purview-ink)"
+     aria-label="Purview" />
+</svg>

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Purview icon</title>
+  <desc id="desc">A negative-space P appearing within translucent purple steam rising from liquid in a laboratory flask.</desc>
+  <style>
+    :root { color-scheme:light dark; --purview-ink:#17141f; --purview-purple:#8b3dff; --purview-purple-deep:#6820d2; --purview-vapor-edge:#6820d2; }
+    @media (prefers-color-scheme:dark) { :root { --purview-ink:#fff; --purview-vapor-edge:#b991ff; } }
+  </style>
+  <defs>
+    <filter id="steam-soften" x="-30%" y="-20%" width="160%" height="150%"><feGaussianBlur stdDeviation="5"/></filter>
+    <clipPath id="flask-interior"><path d="M200 104h112v102l92 178c13 25-5 54-33 54H141c-28 0-46-29-33-54l92-178Z"/></clipPath>
+    <linearGradient id="steam-fade" x1="0" y1="108" x2="0" y2="218" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#000"/><stop offset=".38" stop-color="#fff" stop-opacity=".28"/><stop offset="1" stop-color="#fff"/></linearGradient>
+    <mask id="p-cutout" maskUnits="userSpaceOnUse" x="120" y="105" width="280" height="285">
+      <rect x="120" y="105" width="280" height="285" fill="url(#steam-fade)"/>
+      <path d="M216 314V211h46c38 0 61 19 61 51s-23 52-61 52h-16v50h-30Zm30-76v49h15c21 0 31-8 31-25s-10-24-31-24Z" transform="translate(5 0) translate(256 270) scale(.9) translate(-256 -270) translate(-14 -24)" fill="#000" fill-rule="evenodd"/>
+    </mask>
+  </defs>
+  <g clip-path="url(#flask-interior)"><g mask="url(#p-cutout)" filter="url(#steam-soften)" fill="none" stroke="var(--purview-purple)" stroke-linecap="round">
+    <path d="M202 374c-35-43 38-65 4-110-29-39 0-76 35-96 22-13 27-29 17-48" stroke-width="76" opacity=".22"/>
+    <path d="M281 370c35-40-32-66 5-104 35-36 21-74-14-91-23-11-32-27-22-47" stroke-width="62" opacity=".19"/>
+    <path d="M238 375c22-38-17-63 12-94 25-28 4-55-13-75-14-17-8-37 11-57" stroke-width="42" opacity=".30"/>
+    <ellipse cx="255" cy="250" rx="92" ry="82" fill="var(--purview-purple)" stroke="none" opacity=".12"/>
+  </g></g>
+  <path d="M216 314V211h46c38 0 61 19 61 51s-23 52-61 52h-16v50h-30Zm30-76v49h15c21 0 31-8 31-25s-10-24-31-24Z" transform="translate(5 0) translate(256 270) scale(.9) translate(-256 -270) translate(-14 -24)" fill="none" stroke="var(--purview-vapor-edge)" stroke-width="3.5" stroke-linejoin="round" opacity=".72"/>
+  <path d="M118 345c35-21 72-19 108-2 39 19 77 20 119 0 18-8 35-11 51-8l27 53c12 23-5 50-31 50H120c-26 0-43-27-31-50Z" transform="translate(0 12)" fill="var(--purview-purple)"/>
+  <path d="M91 388l27-43c35-21 72-19 108-2 39 19 77 20 119 0 18-8 35-11 51-8l27 53c12 23-5 50-31 50H120c-14 0-26-8-32-19 9-10 10-20 3-31Z" transform="translate(0 12)" fill="var(--purview-purple-deep)" opacity=".2"/>
+  <path d="M184 64h144c14 0 25 11 25 25 0 10-6 19-15 23l-16 8v82l93 180c16 31-7 68-42 68H139c-35 0-58-37-42-68l93-180v-82l-16-8c-9-4-15-13-15-23 0-14 11-25 25-25Z" fill="none" stroke="var(--purview-ink)" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

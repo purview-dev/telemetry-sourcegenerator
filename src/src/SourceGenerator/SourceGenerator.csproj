@@ -39,7 +39,7 @@
 	     The generator assembly itself is packed by the SDK (Purview.BuildSdk)
 	     into analyzers/dotnet/cs; only the refactorings assembly is added here. -->
 	<ItemGroup>
-		<None Include="../../../assets/images/purview-logo.png" Pack="true" PackagePath="/" />
+		<None Include="../../../assets/images/purview-logo-light.png" Pack="true" PackagePath="/" />
 		<!-- README.md and LICENSE.md are physical files under Sdk/ and are packed to the package
 		     root automatically by the SDK (PurviewAutoSdkPack); no explicit items are needed. -->
 		<None
