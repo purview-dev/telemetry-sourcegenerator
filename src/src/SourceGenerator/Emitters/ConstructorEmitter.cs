@@ -34,7 +34,6 @@ static class ConstructorEmitter
 			new ConstructorDeclarationOptions(classNameToGenerate, TypeDeclarationAccessibility.Public)
 			{
 				Parameters = BuildParameters(generationType, interfaceType, generationContext),
-				IncludeGeneratedAttributes = false,
 			},
 			body => EmitBody(generationType, body, generationContext)
 		);

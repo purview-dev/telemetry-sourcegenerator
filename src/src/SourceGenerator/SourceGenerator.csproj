@@ -1,11 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<IsRoslynComponent>true</IsRoslynComponent>
 		<IsPackable>true</IsPackable>
-		<!-- The repo's pack validation requires PDBs to be delivered only through the .snupkg. NuGet's
-		     .snupkg only carries build-output (lib) symbols, so this project ships its build output in
-		     lib/ (dual-role, like the SourceGeneratorFramework package) so the .snupkg is populated;
-		     the analyzer PDB must not ship inside the .nupkg under analyzers/dotnet/cs. -->
+		<!-- Pack validation requires PDBs to be delivered only through the .snupkg. NuGet's
+		     .snupkg only carries build-output symbols, so keep the generator as build output
+		     and do not ship the analyzer PDB inside the .nupkg under analyzers/dotnet/cs. -->
 		<IncludeBuildOutput>true</IncludeBuildOutput>
 		<PurviewPackAnalyzerPdb>false</PurviewPackAnalyzerPdb>
 		<IncludeSymbols>true</IncludeSymbols>
@@ -14,7 +13,6 @@
 		     XML doc file is not shipped, and IDE0005 is suppressed rather than failing the build. -->
 		<GenerateDocumentationFile>false</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);IDE0005;EnableGenerateDocumentationFile;</NoWarn>
-		<!--<COPYRIGHT_YEAR>2026</COPYRIGHT_YEAR>-->
 		<Title>Purview Telemetry Source Generator</Title>
 		<Description>.NET Source Generator for interface-based telemetry generating tracing, logs, and metrics.</Description>
 		<PackageTags>logs;log;logger;logging;source-generator;high-performance-logging;otel;open-telemetry;telemetry;traces;tracing;metric;metrics;meter;meters;instrumentation;instruments;events;distributed-traces;distributed-tracing;melt;dotnet;aspnet;</PackageTags>
@@ -40,8 +38,6 @@
 	     into analyzers/dotnet/cs; only the refactorings assembly is added here. -->
 	<ItemGroup>
 		<None Include="../../../assets/images/purview-logo-light.png" Pack="true" PackagePath="/" />
-		<!-- README.md and LICENSE.md are physical files under Sdk/ and are packed to the package
-		     root automatically by the SDK (PurviewAutoSdkPack); no explicit items are needed. -->
 		<None
 			Include="..\SourceGenerator.Refactorings\bin\$(Configuration)\netstandard2.0\Purview.Telemetry.SourceGenerator.Refactorings.dll"
 			Pack="true"

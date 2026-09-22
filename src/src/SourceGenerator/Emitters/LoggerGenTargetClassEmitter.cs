@@ -88,7 +88,6 @@ static partial class LoggerGenTargetClassEmitter
 				)
 				{
 					IsReadOnly = true,
-					IncludeGeneratedAttributes = false,
 				}
 			)
 			.NewLine();

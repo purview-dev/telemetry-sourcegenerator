@@ -63,7 +63,6 @@ partial class ActivitySourceTargetClassEmitter
 						new ParameterDeclarationOptions("exception", TypeLibrary.System.Exception.MakeNullable(writer)),
 						new ParameterDeclarationOptions("escape", TypeLibrary.System.Boolean.AsTypeReference()),
 					],
-					IncludeGeneratedAttributes = false,
 				}
 			)
 		)
@@ -166,7 +165,6 @@ partial class ActivitySourceTargetClassEmitter
 					],
 					GenericTypes = [.. methodTarget.TypeParameters],
 					ExpressionBody = "throw new global::System.NotSupportedException()",
-					IncludeGeneratedAttributes = false,
 				}
 			)
 		)
@@ -252,7 +250,6 @@ partial class ActivitySourceTargetClassEmitter
 							p.ParameterType
 						)),
 					],
-					IncludeGeneratedAttributes = false,
 				}
 			)
 		)
@@ -297,7 +294,6 @@ partial class ActivitySourceTargetClassEmitter
 							p.ParameterType
 						)),
 					],
-					IncludeGeneratedAttributes = false,
 				}
 			)
 		)
@@ -380,7 +376,6 @@ partial class ActivitySourceTargetClassEmitter
 							p.ParameterType
 						)),
 					],
-					IncludeGeneratedAttributes = false,
 				}
 			)
 		)

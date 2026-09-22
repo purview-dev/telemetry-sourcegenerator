@@ -25,7 +25,6 @@ partial class LoggerTargetClassEmitter
 						)),
 					],
 					ExpressionBody = "throw new global::System.NotSupportedException()",
-					IncludeGeneratedAttributes = false,
 				}
 			)
 		)
@@ -129,7 +128,6 @@ partial class LoggerTargetClassEmitter
 							p.ParameterType
 						)),
 					],
-					IncludeGeneratedAttributes = false,
 				}
 			)
 		)
@@ -209,7 +207,6 @@ partial class LoggerTargetClassEmitter
 							p.ParameterType
 						)),
 					],
-					IncludeGeneratedAttributes = false,
 				}
 			)
 		)
