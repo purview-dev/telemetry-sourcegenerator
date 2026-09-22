@@ -3,7 +3,7 @@
 		<CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
 		<RoslynVersion>5.9.0</RoslynVersion>
 		<TUnitVersion>1.67.0</TUnitVersion>
-		<PurviewSGFVersion>1.0.0-prerelease.42</PurviewSGFVersion>
+		<PurviewSGFVersion>1.0.0-prerelease.47</PurviewSGFVersion>
 		<DotnetRuntimeVersion>10.0.12</DotnetRuntimeVersion>
 		<MSExtensionVersion>10.10.0</MSExtensionVersion>
 		<OpenTelemetryVersion>1.18.0</OpenTelemetryVersion>
