@@ -1,14 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<IsRoslynComponent>true</IsRoslynComponent>
+		<IsRoslynComponentOnly>true</IsRoslynComponentOnly>
 		<IsPackable>true</IsPackable>
-		<!-- Pack validation requires PDBs to be delivered only through the .snupkg. NuGet's
-		     .snupkg only carries build-output symbols, so keep the generator as build output
-		     and do not ship the analyzer PDB inside the .nupkg under analyzers/dotnet/cs. -->
-		<IncludeBuildOutput>true</IncludeBuildOutput>
 		<PurviewPackAnalyzerPdb>false</PurviewPackAnalyzerPdb>
-		<IncludeSymbols>true</IncludeSymbols>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<!-- IDE0005 (unused usings) analysis is gated on GenerateDocumentationFile; docs are off so the
 		     XML doc file is not shipped, and IDE0005 is suppressed rather than failing the build. -->
 		<GenerateDocumentationFile>false</GenerateDocumentationFile>

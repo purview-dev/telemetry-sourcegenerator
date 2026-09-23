@@ -10,11 +10,11 @@
 		"RequireSymbolFiles": true,
 		"RequiredContent": {
 			"purview.telemetry.sourcegenerator": [
-				"README.md",
-				"purview-logo-light.png",
+				".agents/**/*",
 				"analyzers/dotnet/cs/Purview.Telemetry.SourceGenerator.dll",
 				"analyzers/dotnet/cs/Purview.Telemetry.SourceGenerator.Refactorings.dll",
-				"lib/netstandard2.0/Purview.Telemetry.SourceGenerator.dll"
+				"README.md",
+				"purview-logo-light.png"
 			]
 		},
 		"ForbiddenContent": {

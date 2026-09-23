@@ -13,7 +13,7 @@
 			DefaultItemExcludes and emitted generator files get globbed into <Compile>,
 			causing duplicate-symbol errors during host builds.
 		-->
-		<!--<UseArtifactsOutput>false</UseArtifactsOutput>-->
+		<UseArtifactsOutput>false</UseArtifactsOutput>
 	</PropertyGroup>
 
 	<Import Sdk="Purview.BuildSdk" Project="Sdk.props" />
