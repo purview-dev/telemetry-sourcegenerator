@@ -29,7 +29,6 @@ partial class MeterTargetClassEmitter
 					)
 					{
 						IsReadOnly = true,
-						IncludeGeneratedAttributes = false,
 					}
 				)
 				.NewLine();
@@ -44,7 +43,6 @@ partial class MeterTargetClassEmitter
 					)
 					{
 						Initializer = writer.IsNullableContextEnabled is null or true ? "default!" : "default",
-						IncludeGeneratedAttributes = false,
 					}
 				)
 				.NewLine();
@@ -74,13 +72,7 @@ partial class MeterTargetClassEmitter
 
 			if (emitReadonly)
 			{
-				writer.Field(
-					new FieldDeclarationOptions(method.FieldName, type)
-					{
-						IsReadOnly = true,
-						IncludeGeneratedAttributes = false,
-					}
-				);
+				writer.Field(new FieldDeclarationOptions(method.FieldName, type) { IsReadOnly = true });
 			}
 			else
 			{
@@ -88,7 +80,6 @@ partial class MeterTargetClassEmitter
 					new FieldDeclarationOptions(method.FieldName, type)
 					{
 						Initializer = writer.IsNullableContextEnabled is null or true ? "default!" : "default",
-						IncludeGeneratedAttributes = false,
 					}
 				);
 			}

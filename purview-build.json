@@ -1,27 +1,23 @@
 {
-  "Build": {
-	"Solution": "src/Telemetry.SourceGenerator.slnx",
-	"TestRoot": "src/tests",
-	"TestPatterns": "*Tests.csproj",
-	"TestFilter": "/*/*/*/*"
-  },
-  "PackValidation": {
-	"RequireSymbolPackage": true,
-	"RequireSymbolFiles": true,
-	"RequiredContent": {
-	  "purview.valueobjects": [
-		"README.md",
-		"purview-logo-light.png",
-		"buildTransitive/Purview.ValueObjects.targets",
-		"analyzers/dotnet/cs/Purview.SourceGeneratorFramework.dll",
-		"analyzers/dotnet/cs/Purview.Telemetry.SourceGenerator.dll",
-		"analyzers/dotnet/cs/Purview.Telemetry.SourceGenerator.Refactorings.dll",
-		"lib/netstandard2.0/Purview.Telemetry.SourceGenerator.Refactorings.dll"
-	  ]
+	"Build": {
+		"Solution": "src/Telemetry.SourceGenerator.slnx",
+		"TestRoot": "src/tests",
+		"TestPatterns": "*Tests.csproj",
+		"TestFilter": "/*/*/*/*"
 	},
-	"ForbiddenContent": {}
-  },
-  "Release": {
-	"Mode": "None"
-  }
+	"PackValidation": {
+		"RequireSymbolPackage": false,
+		"RequiredContent": {
+			"purview.telemetry.sourcegenerator": [
+				".agents/**/*",
+				"analyzers/dotnet/cs/Purview.Telemetry.SourceGenerator.dll",
+				"analyzers/dotnet/cs/Purview.Telemetry.SourceGenerator.Refactorings.dll",
+				"README.md",
+				"purview-logo-light.png"
+			]
+		}
+	},
+	"Release": {
+		"Mode": "None"
+	}
 }

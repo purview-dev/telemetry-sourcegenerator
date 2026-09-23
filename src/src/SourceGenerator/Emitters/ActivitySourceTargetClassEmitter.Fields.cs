@@ -19,22 +19,17 @@ partial class ActivitySourceTargetClassEmitter
 			activitySourceName = PropertyLibrary.Activities.DefaultActivitySourceName;
 		}
 
-#pragma warning disable IDE0002 // Simplify Member Access
-		writer
-			.Field(
-				new FieldDeclarationOptions(
-					PropertyLibrary.Activities.ActivitySourceFieldName,
-					TypeLibrary.System.Diagnostics.ActivitySource.AsTypeReference()
-				)
-				{
-					IsStatic = true,
-					IsReadOnly = true,
-					Initializer =
-						$"new {(string)TypeLibrary.System.Diagnostics.ActivitySource}({activitySourceName!.Wrap()})",
-					IncludeGeneratedAttributes = false,
-				}
+		writer.Field(
+			new(
+				PropertyLibrary.Activities.ActivitySourceFieldName,
+				TypeLibrary.System.Diagnostics.ActivitySource.AsTypeReference()
 			)
-			.NewLine();
-#pragma warning restore IDE0002 // Simplify Member Access
+			{
+				IsStatic = true,
+				IsReadOnly = true,
+				Initializer =
+					$"new {(string)TypeLibrary.System.Diagnostics.ActivitySource}({activitySourceName!.Wrap()})",
+			}
+		);
 	}
 }

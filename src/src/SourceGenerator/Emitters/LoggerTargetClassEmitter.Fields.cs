@@ -21,7 +21,6 @@ partial class LoggerTargetClassEmitter
 				)
 				{
 					IsReadOnly = true,
-					IncludeGeneratedAttributes = false,
 				}
 			)
 			.NewLine()
@@ -137,7 +136,6 @@ partial class LoggerTargetClassEmitter
 				IsStatic = true,
 				IsReadOnly = true,
 				Initializer = initializer,
-				IncludeGeneratedAttributes = false,
 			}
 		);
 	}

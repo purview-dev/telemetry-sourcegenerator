@@ -13,7 +13,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Include="..\Shared\TelemetryAttributeNames.cs" Link="Shared\TelemetryAttributeNames.cs" />
-		<Compile Include="..\SourceGenerator\Helpers\IsExternalInit.cs" Link="Helpers\IsExternalInit.cs" />
 	</ItemGroup>
 	<ItemGroup>
 		<EmbeddedResource Remove="bin\**" />

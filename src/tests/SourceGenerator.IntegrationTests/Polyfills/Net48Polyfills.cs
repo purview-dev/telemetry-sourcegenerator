@@ -10,7 +10,7 @@ namespace System.Runtime.CompilerServices
 {
 	[EditorBrowsable(EditorBrowsableState.Never)]
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-	sealed class ModuleInitializerAttribute : Attribute { }
+	public sealed class ModuleInitializerAttribute : Attribute { }
 }
 #pragma warning restore IDE0130
 
@@ -19,7 +19,7 @@ namespace System.Diagnostics.CodeAnalysis
 {
 	[EditorBrowsable(EditorBrowsableState.Never)]
 	[AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.Field, Inherited = false)]
-	sealed class NotNullAttribute : Attribute { }
+	public sealed class NotNullAttribute : Attribute { }
 }
 #pragma warning restore IDE0130
 

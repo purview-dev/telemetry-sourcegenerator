@@ -393,18 +393,13 @@ static class GeneratedTypesEmitter
 				hashWriter
 					.XmlSummary(summary)
 					.Property(
-						new(name, TypeLibrary.System.String, TypeDeclarationAccessibility.Public)
-						{
-							HasSetter = true,
-							IncludeGeneratedAttributes = false,
-						}
+						new(name, TypeLibrary.System.String, TypeDeclarationAccessibility.Public) { HasSetter = true }
 					)
 					.HashElse()
 					.Property(
 						new(name, TypeLibrary.System.String.MakeNullable(writer), TypeDeclarationAccessibility.Public)
 						{
 							HasSetter = true,
-							IncludeGeneratedAttributes = false,
 						}
 					)
 		);
@@ -424,7 +419,7 @@ static class GeneratedTypesEmitter
 				new(name, TypeLibrary.System.String, TypeDeclarationAccessibility.Public)
 				{
 					HasSetter = true,
-					IncludeGeneratedAttributes = false,
+
 					Initializer = initializer,
 				}
 			);

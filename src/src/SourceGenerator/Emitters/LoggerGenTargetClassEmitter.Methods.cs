@@ -126,7 +126,6 @@ partial class LoggerGenTargetClassEmitter
 							p.ParameterType
 						)),
 					],
-					IncludeGeneratedAttributes = false,
 				}
 			)
 		)
@@ -138,7 +137,7 @@ partial class LoggerGenTargetClassEmitter
 			// exception and output it as the exception parameter in
 			// the Log method.
 
-			List<string> existingParamNames = [with(methodTarget.Parameters.Count)];
+			List<string> existingParamNames = new(methodTarget.Parameters.Count);
 			foreach (var param in methodTarget.Parameters)
 			{
 				existingParamNames.Add(param.Name);
@@ -868,7 +867,6 @@ partial class LoggerGenTargetClassEmitter
 				{
 					IsReadOnly = true,
 					Interfaces = [new TypeReference(new TypeIdentity(iReadOnlyListType, null))],
-					IncludeGeneratedAttributes = false,
 				}
 			)
 		)
@@ -879,7 +877,6 @@ partial class LoggerGenTargetClassEmitter
 					IsStatic = true,
 					IsReadOnly = true,
 					Initializer = methodTarget.MessageTemplate.Wrap(),
-					IncludeGeneratedAttributes = false,
 				}
 			);
 
@@ -896,7 +893,6 @@ partial class LoggerGenTargetClassEmitter
 						{
 							Accessibility = TypeDeclarationAccessibility.Public,
 							IsReadOnly = true,
-							IncludeGeneratedAttributes = false,
 						}
 					);
 				}
@@ -910,7 +906,6 @@ partial class LoggerGenTargetClassEmitter
 						[
 							.. nonExceptionParams.Select(p => new ParameterDeclarationOptions(p.Name, p.ParameterType)),
 						],
-						IncludeGeneratedAttributes = false,
 					},
 					ctor =>
 					{
@@ -935,7 +930,6 @@ partial class LoggerGenTargetClassEmitter
 					)
 					{
 						ExpressionBody = count.ToString(CultureInfo.InvariantCulture),
-						IncludeGeneratedAttributes = false,
 					}
 				)
 				.NewLine();
@@ -947,7 +941,6 @@ partial class LoggerGenTargetClassEmitter
 				)
 				{
 					Accessibility = TypeDeclarationAccessibility.Public,
-					IncludeGeneratedAttributes = false,
 				},
 				getter =>
 				{
@@ -1022,7 +1015,6 @@ partial class LoggerGenTargetClassEmitter
 			writer.StructScope(
 				new TypeDeclarationOptions("Enumerator", TypeDeclarationAccessibility.Public)
 				{
-					IncludeGeneratedAttributes = false,
 					Interfaces = [new TypeReference(new TypeIdentity(ienumeratorType, null))],
 				}
 			)
@@ -1032,16 +1024,10 @@ partial class LoggerGenTargetClassEmitter
 				new FieldDeclarationOptions("_state", new TypeReference(new TypeIdentity(structName, null)))
 				{
 					IsReadOnly = true,
-					IncludeGeneratedAttributes = false,
 				}
 			);
 
-			writer.Field(
-				new FieldDeclarationOptions("_index", TypeLibrary.System.Int32.AsTypeReference())
-				{
-					IncludeGeneratedAttributes = false,
-				}
-			);
+			writer.Field("_index", TypeLibrary.System.Int32);
 
 			writer.NewLine();
 
@@ -1052,7 +1038,6 @@ partial class LoggerGenTargetClassEmitter
 					[
 						new ParameterDeclarationOptions("state", new TypeReference(new TypeIdentity(structName, null))),
 					],
-					IncludeGeneratedAttributes = false,
 				},
 				ctor =>
 				{
@@ -1071,7 +1056,6 @@ partial class LoggerGenTargetClassEmitter
 					)
 					{
 						ExpressionBody = "_state[_index]",
-						IncludeGeneratedAttributes = false,
 					}
 				)
 				.NewLine()
@@ -1089,7 +1073,6 @@ partial class LoggerGenTargetClassEmitter
 					)
 					{
 						ExpressionBody = "++_index < _state.Count",
-						IncludeGeneratedAttributes = false,
 					}
 				)
 				.NewLine()
@@ -1102,7 +1085,6 @@ partial class LoggerGenTargetClassEmitter
 					)
 					{
 						ExpressionBody = "_index = -1",
-						IncludeGeneratedAttributes = false,
 					}
 				)
 				.NewLine()
@@ -1113,9 +1095,7 @@ partial class LoggerGenTargetClassEmitter
 						TypeLibrary.System.Void.AsTypeReference(),
 						TypeDeclarationAccessibility.Public
 					)
-					{
-						IncludeGeneratedAttributes = false,
-					},
+					{ },
 					_ => { }
 				);
 		}
@@ -1131,7 +1111,6 @@ partial class LoggerGenTargetClassEmitter
 				)
 				{
 					ExpressionBody = "new Enumerator(this)",
-					IncludeGeneratedAttributes = false,
 				}
 			)
 			.NewLine()
@@ -1165,7 +1144,6 @@ partial class LoggerGenTargetClassEmitter
 				{
 					IsReadOnly = true,
 					Interfaces = [new TypeReference(new(iReadOnlyListType, null))],
-					IncludeGeneratedAttributes = false,
 				}
 			)
 		)
@@ -1176,7 +1154,6 @@ partial class LoggerGenTargetClassEmitter
 					IsStatic = true,
 					IsReadOnly = true,
 					Initializer = methodTarget.MessageTemplate.Wrap(),
-					IncludeGeneratedAttributes = false,
 				}
 			);
 
@@ -1193,7 +1170,6 @@ partial class LoggerGenTargetClassEmitter
 						{
 							Accessibility = TypeDeclarationAccessibility.Public,
 							IsReadOnly = true,
-							IncludeGeneratedAttributes = false,
 						}
 					);
 				}
@@ -1207,7 +1183,6 @@ partial class LoggerGenTargetClassEmitter
 						[
 							.. nonExceptionParams.Select(p => new ParameterDeclarationOptions(p.Name, p.ParameterType)),
 						],
-						IncludeGeneratedAttributes = false,
 					},
 					ctor =>
 					{
@@ -1240,7 +1215,6 @@ partial class LoggerGenTargetClassEmitter
 					)
 					{
 						IsOverride = true,
-						IncludeGeneratedAttributes = false,
 					},
 					body =>
 						body.HashDefines(
@@ -1270,7 +1244,6 @@ partial class LoggerGenTargetClassEmitter
 					)
 					{
 						ExpressionBody = count.ToString(CultureInfo.InvariantCulture),
-						IncludeGeneratedAttributes = false,
 					}
 				)
 				.NewLine();
@@ -1282,7 +1255,6 @@ partial class LoggerGenTargetClassEmitter
 				)
 				{
 					Accessibility = TypeDeclarationAccessibility.Public,
-					IncludeGeneratedAttributes = false,
 				},
 				getter =>
 				{
@@ -1369,7 +1341,6 @@ partial class LoggerGenTargetClassEmitter
 							p.ParameterType
 						)),
 					],
-					IncludeGeneratedAttributes = false,
 				}
 			)
 		)

@@ -30,7 +30,6 @@ partial class MeterTargetClassEmitter
 							),
 						]
 						: [],
-					IncludeGeneratedAttributes = false,
 				}
 			)
 		)
@@ -76,7 +75,6 @@ partial class MeterTargetClassEmitter
 							),
 						]
 						: [],
-					IncludeGeneratedAttributes = false,
 				}
 			)
 		)

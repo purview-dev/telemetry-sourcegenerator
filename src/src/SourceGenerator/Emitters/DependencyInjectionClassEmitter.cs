@@ -133,7 +133,6 @@ static class DependencyInjectionClassEmitter
 							IsThis = true,
 						},
 					],
-					IncludeGeneratedAttributes = false,
 				}
 			)
 		)

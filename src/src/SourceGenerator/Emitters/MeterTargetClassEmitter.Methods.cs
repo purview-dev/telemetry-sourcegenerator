@@ -27,7 +27,6 @@ partial class MeterTargetClassEmitter
 						)),
 					],
 					ExpressionBody = "throw new global::System.NotSupportedException()",
-					IncludeGeneratedAttributes = false,
 				}
 			)
 		)
@@ -157,7 +156,6 @@ partial class MeterTargetClassEmitter
 				{
 					Attributes = [EmitterHelpers.AggressiveInliningAttribute()],
 					Parameters = parameters,
-					IncludeGeneratedAttributes = false,
 				}
 			)
 		)
