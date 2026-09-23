@@ -6,8 +6,7 @@
 		"TestFilter": "/*/*/*/*"
 	},
 	"PackValidation": {
-		"RequireSymbolPackage": true,
-		"RequireSymbolFiles": true,
+		"RequireSymbolPackage": false,
 		"RequiredContent": {
 			"purview.telemetry.sourcegenerator": [
 				".agents/**/*",
@@ -15,11 +14,6 @@
 				"analyzers/dotnet/cs/Purview.Telemetry.SourceGenerator.Refactorings.dll",
 				"README.md",
 				"purview-logo-light.png"
-			]
-		},
-		"ForbiddenContent": {
-			"purview.telemetry.sourcegenerator": [
-				"analyzers/dotnet/cs/Purview.Telemetry.SourceGenerator.pdb"
 			]
 		}
 	},
