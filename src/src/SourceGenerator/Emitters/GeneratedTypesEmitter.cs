@@ -6,7 +6,7 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 /// <summary>
 /// Emits the marker-attribute templates injected into consuming compilations. Each template
 /// previously shipped as a static embedded resource; it is now built in memory with a
-/// <see cref="CodeWriter"/> inside <c>RegisterPostInitializationOutput</c>.
+/// <c>CodeWriter</c> inside <c>RegisterPostInitializationOutput</c>.
 /// </summary>
 static class GeneratedTypesEmitter
 {
