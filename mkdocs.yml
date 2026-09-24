@@ -1,0 +1,21 @@
+site_name: Telemetry Source Generator
+site_description: Developer documentation for the Purview Telemetry Source Generator
+repo_url: https://github.com/purview-dev/telemetry-sourcegenerator
+edit_uri: edit/main/docs/wiki/
+docs_dir: docs/wiki
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: cyan
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: cyan
+  features: [navigation.instant, navigation.sections, navigation.top, search.highlight, search.suggest, content.code.copy]
+
+plugins: [search, techdocs-core]
+markdown_extensions: [admonition, attr_list, md_in_html, pymdownx.details, pymdownx.superfences]
