@@ -29,7 +29,7 @@ static class EmitterHelpers
 		};
 
 	/// <summary>
-	/// Adds a finished <see cref="CodeWriter"/> as a generated source file. The writer's
+	/// Adds a finished <c>CodeWriter</c> as a generated source file. The writer's
 	/// disposable scopes must all be closed before calling this; materializing the source
 	/// validates that they are.
 	/// </summary>
