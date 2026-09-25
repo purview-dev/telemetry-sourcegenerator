@@ -12,6 +12,12 @@
 		<Description>.NET Source Generator for interface-based telemetry generating tracing, logs, and metrics.</Description>
 		<PackageTags>logs;log;logger;logging;source-generator;high-performance-logging;otel;open-telemetry;telemetry;traces;tracing;metric;metrics;meter;meters;instrumentation;instruments;events;distributed-traces;distributed-tracing;melt;dotnet;aspnet;</PackageTags>
 		<DisableTelemetryGenerator>true</DisableTelemetryGenerator>
+		<!--
+			The generator assembly itself is packed as a self-contained merged analyzer by
+			Purview.SourceGeneratorFramework/Purview.BuildSdk. The companion refactorings assembly is
+			contributed by PackTelemetryRefactoringGenerator below.
+		-->
+		<TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackTelemetryRefactoringGenerator</TargetsForTfmSpecificContentInPackage>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
@@ -19,8 +25,9 @@
 		<PackageReference Include="Purview.SourceGeneratorFramework" PrivateAssets="all" />
 	</ItemGroup>
 	<ItemGroup>
-		<!-- Build-order only dependency: the refactorings assembly ships inside this package,
-		     so its DLL is packed explicitly below (it is not referenced by generator code). -->
+		<!-- Build-order only dependency: the refactorings assembly ships inside this package, so its
+		     merged output is packed explicitly by PackTelemetryRefactoringGenerator below (it is not
+		     referenced by generator code). -->
 		<ProjectReference
 			Include="..\SourceGenerator.Refactorings\SourceGenerator.Refactorings.csproj"
 			ReferenceOutputAssembly="false"
@@ -28,16 +35,32 @@
 		/>
 		<Compile Include="..\Shared\TelemetryAttributeNames.cs" Link="Shared\TelemetryAttributeNames.cs" />
 	</ItemGroup>
-	<!-- Package the build output into the "analyser" slot in the NuGet package.
-	     The generator assembly itself is packed by the SDK (Purview.BuildSdk)
-	     into analyzers/dotnet/cs; only the refactorings assembly is added here. -->
 	<ItemGroup>
 		<None Include="../../../assets/images/purview-logo-light.png" Pack="true" PackagePath="/" />
-		<None
-			Include="..\SourceGenerator.Refactorings\bin\$(Configuration)\netstandard2.0\Purview.Telemetry.SourceGenerator.Refactorings.dll"
-			Pack="true"
-			PackagePath="analyzers/dotnet/cs"
-			Visible="false"
-		/>
 	</ItemGroup>
+
+	<!--
+		Packs the merged, self-contained refactorings assembly under analyzers/dotnet/cs.
+
+		Packing the refactorings project's bin output would ship the *unmerged* assembly, which still
+		references Purview.SourceGeneratorFramework while the package ships no framework assembly
+		beneath analyzers/, so a consumer's compiler host fails to load it (CS8784
+		FileNotFoundException / a dead code-fix). GetPurviewMergedAnalyzerFile returns the merged,
+		content-internalized assembly without touching the refactorings project's bin output.
+	-->
+	<Target Name="PackTelemetryRefactoringGenerator" Label="Packs the self-contained telemetry refactorings assembly.">
+		<MSBuild
+			Projects="..\SourceGenerator.Refactorings\SourceGenerator.Refactorings.csproj"
+			Targets="GetPurviewMergedAnalyzerFile"
+			Properties="Configuration=$(Configuration)"
+			RemoveProperties="TargetFramework;TargetFrameworks;RuntimeIdentifier;SelfContained"
+		>
+			<Output TaskParameter="TargetOutputs" ItemName="_PurviewTelemetryMergedRefactorings" />
+		</MSBuild>
+		<ItemGroup Condition="'@(_PurviewTelemetryMergedRefactorings)' != ''">
+			<TfmSpecificPackageFile Include="@(_PurviewTelemetryMergedRefactorings)">
+				<PackagePath>analyzers/dotnet/cs/</PackagePath>
+			</TfmSpecificPackageFile>
+		</ItemGroup>
+	</Target>
 </Project>
