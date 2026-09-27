@@ -55,7 +55,10 @@ When an `Exception` parameter is present, the default behaviour follows the [Ope
 - `exception.stacktrace` — the value of `Exception.StackTrace`.
 - `exception.type` — the `Type.FullName` of the exception.
 
-This behaviour can be overridden with the `EventAttribute` options (see below).
+This behaviour can be overridden with the `EventAttribute` options (see below). The standard `exception` event is only required when the exception is recorded with the OpenTelemetry rules: naming the event `exception` with `[Event(Name = "exception")]` attaches the tags above to *that* event instead of adding a separate one, and `TSG3021` suggests doing so when the name differs. The diagnostic and the standard name do not apply when `UseRecordExceptionRules` is `false`, when the exception is a `[Baggage]` parameter, or when the parameter is excluded from the Activities target with `[ExcludeTargets(Targets.Activities)]`.
+
+> [!NOTE]
+> `Name` on a *logging* attribute (`[Error]`, `[Log]`, `[Info]`, …) renames the **log entry** — its `EventId` name and default message template — not the activity event. The event name always comes from `[Event(Name = "…")]`.
 
 ### Context
 

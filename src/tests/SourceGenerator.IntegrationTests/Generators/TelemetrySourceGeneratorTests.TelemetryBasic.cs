@@ -300,7 +300,9 @@ public interface ITestTelemetry
 		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
-		await Assert.That(generationResult).HasDiagnostic("TSG3021");
+		// With the OpenTelemetry exception rules disabled the exception is emitted as an ordinary tag,
+		// so the standard 'exception' event name is not required (TSG3021 does not apply).
+		await Assert.That(generationResult).DoesNotHaveDiagnostic("TSG3021");
 	}
 
 	[Test]

@@ -97,6 +97,8 @@ Excludes a parameter from specific telemetry targets. See [Multi-Targeting](Mult
 string verboseMessage;  // excluded from metrics only
 ```
 
+The parameter stays part of the generated method signature, but it is not applied to the excluded target: for the Activities target that means it is not set as a tag, not added as baggage, and not used as a reserved parameter such as `tags`, `parentContext`, `startTime`, or `[Escape]`. Excluding it from Activities also stops the Activities-specific diagnostics (`TSG3000`, `TSG3003`–`TSG3011`, `TSG3016`, `TSG3017`, `TSG3021`) for that parameter.
+
 ## `[ExpandEnumerable]`
 
 Applied to an array or `IEnumerable` parameter on a log method, it logs the individual elements. See [Logging Generation v2](Logging-Generation-v2.md#expandenumerable).

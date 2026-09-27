@@ -97,29 +97,35 @@ partial class ActivitySourceTargetClassEmitter
 		escapeParam = null;
 		statusDescriptionParam = null;
 
-		var activityParams = methodTarget
-			.Parameters.Where(m => m.ParamDestination == ActivityParameterDestination.Activity)
+		// Parameters excluded from the Activities target are part of the generated method signature but
+		// are never passed to the ActivitySource, so they are not considered here.
+		var applicableParameters = methodTarget
+			.Parameters.Where(static p => !p.ExcludedFromActivities)
 			.ToImmutableArray();
-		var parentContextOrIdParams = methodTarget
-			.Parameters.Where(m => m.ParamDestination == ActivityParameterDestination.ParentContextOrId)
+
+		var activityParams = applicableParameters
+			.Where(m => m.ParamDestination == ActivityParameterDestination.Activity)
 			.ToImmutableArray();
-		var tagsParams = methodTarget
-			.Parameters.Where(m => m.ParamDestination == ActivityParameterDestination.TagsEnumerable)
+		var parentContextOrIdParams = applicableParameters
+			.Where(m => m.ParamDestination == ActivityParameterDestination.ParentContextOrId)
 			.ToImmutableArray();
-		var linksParams = methodTarget
-			.Parameters.Where(m => m.ParamDestination == ActivityParameterDestination.LinksEnumerable)
+		var tagsParams = applicableParameters
+			.Where(m => m.ParamDestination == ActivityParameterDestination.TagsEnumerable)
 			.ToImmutableArray();
-		var startTimeParams = methodTarget
-			.Parameters.Where(m => m.ParamDestination == ActivityParameterDestination.StartTime)
+		var linksParams = applicableParameters
+			.Where(m => m.ParamDestination == ActivityParameterDestination.LinksEnumerable)
 			.ToImmutableArray();
-		var timestampParams = methodTarget
-			.Parameters.Where(m => m.ParamDestination == ActivityParameterDestination.Timestamp)
+		var startTimeParams = applicableParameters
+			.Where(m => m.ParamDestination == ActivityParameterDestination.StartTime)
 			.ToImmutableArray();
-		var escapeParams = methodTarget
-			.Parameters.Where(m => m.ParamDestination == ActivityParameterDestination.Escape)
+		var timestampParams = applicableParameters
+			.Where(m => m.ParamDestination == ActivityParameterDestination.Timestamp)
 			.ToImmutableArray();
-		var statusDescriptionParams = methodTarget
-			.Parameters.Where(m => m.ParamDestination == ActivityParameterDestination.StatusDescription)
+		var escapeParams = applicableParameters
+			.Where(m => m.ParamDestination == ActivityParameterDestination.Escape)
+			.ToImmutableArray();
+		var statusDescriptionParams = applicableParameters
+			.Where(m => m.ParamDestination == ActivityParameterDestination.StatusDescription)
 			.ToImmutableArray();
 
 		if (activityParams.Length > 1)

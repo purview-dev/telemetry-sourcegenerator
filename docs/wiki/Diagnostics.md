@@ -60,7 +60,7 @@ The package ships a single Roslyn analyzer, `TelemetryDiagnosticAnalyzer`, which
 | `TSG3015` | Info | Activity should be the first parameter. Opt-in via `GenerateDiagnosticsForMissingActivity`. |
 | `TSG3016` | Error | Status description parameter should be a string. |
 | `TSG3017` | Error | Status Description parameters are only valid on Events, not Activity or Context methods. |
-| `TSG3021` | Info | Exception event does not use OpenTelemetry standard name. An `[Event]` method records an exception but the event name is not the standard `"exception"` (suggest `[Event(Name = "exception")]`). |
+| `TSG3021` | Info | Exception event does not use OpenTelemetry standard name. An `[Event]` method records an exception under the OpenTelemetry exception rules but the event name is not the standard `"exception"` (suggest `[Event(Name = "exception")]`). Not raised when `UseRecordExceptionRules` is disabled, for `[Baggage]` exceptions, or when the exception parameter is excluded from the Activities target. |
 | `TSG3022` | Warning | Activity return type should be nullable. An Activity method returns non-nullable `Activity`; use `Activity?` because the Activity can be null when no listeners are active. |
 
 ## Metrics diagnostics (TSG4xxx)
@@ -106,6 +106,25 @@ Two or more methods share the same name, which is used to generate members on th
 ### TSG3013 / TSG3014 — missing Activity
 
 An Activity method does not return the created `Activity`, or an Event/Context method has no `Activity` parameter. Return the `Activity`/`Activity?` and pass it to Event/Context methods. These best-practice diagnostics are controlled by `ActivitySourceGeneration.GenerateDiagnosticsForMissingActivity`.
+
+### TSG3021 — exception event name
+
+Rename the event with `[Event(Name = "exception")]` so the OpenTelemetry exception tags (`exception.type`, `exception.message`, `exception.stacktrace`, `exception.escaped`) are attached to that event instead of a separate event named `exception`.
+
+```csharp
+[Event(Name = "exception")]                       // ✅ the event carries the exception tags
+void FailedToRetrieve(Activity? activity, Exception exception);
+```
+
+A `Name` set on a *logging* attribute does not name the event — it renames the log entry:
+
+```csharp
+[Event]                                           // ❌ event name is the method name
+[Error(Name = "exception")]                       // the log entry is named 'exception'
+void FailedToRetrieve(Activity? activity, Exception exception);
+```
+
+The diagnostic is not raised when the exception is not recorded using the OpenTelemetry exception rules: `[Event(UseRecordExceptionRules = false)]`, a `[Baggage]` exception parameter, or an exception parameter excluded from the Activities target (`[ExcludeTargets(Targets.Activities)]`).
 
 ### TSG3022 — non-nullable Activity return
 

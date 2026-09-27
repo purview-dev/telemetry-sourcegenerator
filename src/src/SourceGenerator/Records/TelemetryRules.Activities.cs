@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
 
 namespace Purview.Telemetry.SourceGenerator;
@@ -125,7 +126,10 @@ static partial class TelemetryRules
 
 		if (generateDiagnosticsForMissingActivity && method.HasActivityParameter && method.Parameters.Count > 0)
 		{
-			if (method.Parameters[0].ParamDestination != ActivityParameterDestination.Activity)
+			// Parameters excluded from the Activities target keep their declared position in the generated
+			// signature, so the first applicable parameter is the one that can satisfy this rule.
+			var firstApplicableParameter = method.Parameters.FirstOrDefault(static p => !p.ExcludedFromActivities);
+			if (firstApplicableParameter?.ParamDestination != ActivityParameterDestination.Activity)
 				diagnostics.Add(
 					ReportableDiagnostic.Create(
 						DiagnosticLibrary.Activities.ActivityShouldBeTheFirstParameter.Descriptor,
@@ -135,17 +139,32 @@ static partial class TelemetryRules
 				);
 		}
 
-		// TSG3021: an event recording an exception should use the OpenTelemetry standard name.
+		// TSG3021: an event recording an exception should use the OpenTelemetry standard name. This only
+		// applies when the exception is recorded using the OpenTelemetry exception rules: with
+		// UseRecordExceptionRules disabled the exception is emitted as a plain tag, a baggage exception is
+		// set as baggage, and a parameter excluded from the Activities target is not applied at all.
 		if (method.MethodType == ActivityMethodType.Event)
 		{
-			var recordsException = method.Parameters.Any(static p => p.IsException);
-			if (recordsException && !string.Equals(method.ActivityOrEventName, "exception", StringComparison.Ordinal))
+			var useRecordExceptionRules =
+				method.EventAttribute?.UseRecordExceptionRules
+				?? PropertyLibrary.Activities.UseRecordExceptionRulesDefault;
+
+			var recordsException =
+				useRecordExceptionRules
+				&& method.Parameters.Any(static p =>
+					p.IsException
+					&& !p.ExcludedFromActivities
+					&& p.ParamDestination != ActivityParameterDestination.Baggage
+				);
+
+			if (recordsException && !IsStandardExceptionEventName(method.ActivityOrEventName))
 				diagnostics.Add(
 					ReportableDiagnostic.Create(
 						DiagnosticLibrary.Activities.ExceptionEventNotStandardName.Descriptor,
 						isBlocking: false,
 						methodSymbol,
-						method.ActivityOrEventName
+						method.ActivityOrEventName,
+						GetExceptionEventNameHint(methodSymbol, token)
 					)
 				);
 		}
@@ -192,7 +211,8 @@ static partial class TelemetryRules
 	{
 		var duplicateReserved = method
 			.Parameters.Where(static p =>
-				p.ParamDestination is not (ActivityParameterDestination.Tag or ActivityParameterDestination.Baggage)
+				!p.ExcludedFromActivities
+				&& p.ParamDestination is not (ActivityParameterDestination.Tag or ActivityParameterDestination.Baggage)
 			)
 			.GroupBy(static p => p.ParamDestination)
 			.Where(static g => g.Count() > 1);
@@ -224,6 +244,10 @@ static partial class TelemetryRules
 		foreach (var parameter in method.Parameters)
 		{
 			token.ThrowIfCancellationRequested();
+
+			// Only parameters applied to the Activities target are considered.
+			if (parameter.ExcludedFromActivities)
+				continue;
 
 			var location = GetParameterLocation(methodSymbol, parameter.ParameterName);
 			var parameterName = parameter.GeneratedName;
@@ -335,5 +359,59 @@ static partial class TelemetryRules
 			}
 #pragma warning restore IDE0010 // Add missing cases
 		}
+	}
+
+	static bool IsStandardExceptionEventName(string? name) =>
+		string.Equals(name, PropertyLibrary.Activities.Tag_ExceptionEventName, StringComparison.Ordinal);
+
+	/// <summary>
+	/// Returns the optional hint appended to TSG3021. A <c>Name</c> on a logging attribute (such as
+	/// <c>[Error]</c>) renames the log entry, not the activity event, so surface that when it looks like
+	/// the name was applied to the wrong attribute.
+	/// </summary>
+	static string GetExceptionEventNameHint(IMethodSymbol methodSymbol, CancellationToken token)
+	{
+		if (
+			!Utilities.TryContainsAttribute(
+				methodSymbol,
+				TypeLibrary.Purview.Telemetry.LogAttributeTargets,
+				token,
+				out var matchingType,
+				out var attributeData
+			)
+		)
+			return string.Empty;
+
+		if (!IsStandardExceptionEventName(GetLogEntryName(methodSymbol, attributeData!, token)))
+			return string.Empty;
+
+		return $" The Name on [{matchingType.RenderAttributeTypeName}] renames the log entry, not the activity event.";
+	}
+
+	/// <summary>
+	/// Gets the name configured on a logging attribute. The parsed log-attribute models historically
+	/// resolved <c>name</c> from the constructor first, so an explicitly-set <c>Name</c> property is read
+	/// directly from the attribute's named arguments as well.
+	/// </summary>
+	/// <remarks>
+	/// The framework's attribute-data model generator now prefers the named argument (see
+	/// <c>sourcegenerator-framework</c>); this fallback keeps the hint working for the pinned version.
+	/// </remarks>
+	static string? GetLogEntryName(IMethodSymbol methodSymbol, AttributeData attributeData, CancellationToken token)
+	{
+		var fromModel = SharedHelpers.GetLogAttribute(methodSymbol, token)?.Name;
+		if (fromModel is not null)
+			return fromModel;
+
+		foreach (var namedArgument in attributeData.NamedArguments)
+		{
+			if (
+				string.Equals(namedArgument.Key, "Name", StringComparison.Ordinal)
+				&& namedArgument.Value.Value is string name
+			)
+				return name;
+		}
+
+		return null;
 	}
 }

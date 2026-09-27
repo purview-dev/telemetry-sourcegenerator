@@ -64,7 +64,15 @@ sealed record ActivityBasedParameterTarget(
 	bool SkipOnNullOrEmpty,
 	bool IsException,
 	GenerationType ExcludedTargets
-);
+)
+{
+	/// <summary>
+	/// True when the parameter opts out of the Activities target via
+	/// <c>[ExcludeTargets(Targets.Activities)]</c>. The parameter stays part of the generated method
+	/// signature (it is declared on the interface) but is never applied to the Activity or ActivityEvent.
+	/// </summary>
+	public bool ExcludedFromActivities => ExcludedTargets.HasFlag(GenerationType.Activities);
+}
 
 enum ActivityParameterDestination
 {

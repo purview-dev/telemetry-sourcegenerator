@@ -236,11 +236,14 @@ partial class DiagnosticLibrary
 			isBlocking: false
 		);
 
+		// The trailing '{1}' placeholder carries an optional hint supplied by the rule (for example when
+		// the 'Name' was applied to a logging attribute); rules pass string.Empty when there is no
+		// additional context.
 		public static readonly ReportableDiagnostic ExceptionEventNotStandardName = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG3021",
 				title: "Exception event does not use OpenTelemetry standard name",
-				messageFormat: "Event '{0}' records an exception but does not use the OpenTelemetry standard name 'exception'. Consider using [Event(Name = \"exception\")] for better observability.",
+				messageFormat: "Event '{0}' records an exception but does not use the OpenTelemetry standard name 'exception'. Consider using [Event(Name = \"exception\")] for better observability.{1}",
 				defaultSeverity: DiagnosticSeverity.Info,
 				category: Categories.Activity.Usage,
 				isEnabledByDefault: true
