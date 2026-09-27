@@ -160,6 +160,16 @@ v5 adds `MeterName` and `MeterNameGenerationType` to `[MeterGeneration]`, contro
 
 The new `TSG3022` warning recommends returning `Activity?` from Activity methods. It is a warning, not an error, but plan to move to nullable Activity return types as the Activity can be `null` when no listeners are active.
 
+### Activities targets now honour parameter-level `[ExcludeTargets]`
+
+`[ExcludeTargets(Targets.Activities)]` on a parameter is now applied consistently: the parameter is no longer set as a tag, added as baggage, or used as a reserved parameter (`tags`, `parentContext`, `links`, `startTime`, `timestamp`, `[Escape]`, `[StatusDescription]`) for the Activity/ActivityEvent. It stays part of the generated method signature and is still passed to the Logging and Metrics targets.
+
+**Impact:** Low — the generated Activity tags/baggage change for interfaces that already use `[ExcludeTargets(Targets.Activities)]` (previously the attribute was ignored for the Activities target). Activities-specific diagnostics for the excluded parameter (`TSG3000`, `TSG3003`–`TSG3011`, `TSG3016`, `TSG3017`, `TSG3021`) are no longer raised.
+
+### `TSG3021` only applies when the OpenTelemetry exception rules are used
+
+`TSG3021` (exception event should be named `exception`) is no longer raised when the exception is not recorded using the OpenTelemetry exception rules — that is, when `[Event(UseRecordExceptionRules = false)]` is used, when the exception parameter is `[Baggage]`, or when it is excluded from the Activities target. When the `Name` was set on a *logging* attribute instead of `[Event]`, the diagnostic now says so explicitly.
+
 ## v1 and v2 to v3
 
 ### Logging event-name generation

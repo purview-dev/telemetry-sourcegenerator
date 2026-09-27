@@ -147,11 +147,6 @@ partial class ActivitySourceTargetClassEmitter
 		var escapeValue = escapeParam?.ParameterName ?? "true";
 		foreach (var tagParam in methodTarget.Tags)
 		{
-			var emitTag =
-				tagParam.IsException
-				&& methodTarget.ActivityOrEventName != PropertyLibrary.Activities.Tag_ExceptionEventName
-				&& useRecordedExceptionRules;
-
 			void EmitTag()
 			{
 				if (tagParam.IsException)

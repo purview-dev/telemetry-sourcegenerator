@@ -166,11 +166,14 @@ partial class PipelineHelpers
 				namingConvention,
 				token
 			);
+			// Parameters can opt out of the Activities target to be used by the other target families
+			// only: they remain part of the generated method signature but are not applied to the
+			// Activity or ActivityEvent.
 			var baggageParameters = parameters
-				.Where(m => m.ParamDestination == ActivityParameterDestination.Baggage)
+				.Where(m => m.ParamDestination == ActivityParameterDestination.Baggage && !m.ExcludedFromActivities)
 				.ToImmutableArray();
 			var tagParameters = parameters
-				.Where(m => m.ParamDestination == ActivityParameterDestination.Tag)
+				.Where(m => m.ParamDestination == ActivityParameterDestination.Tag && !m.ExcludedFromActivities)
 				.ToImmutableArray();
 
 			var targetGenerationState = Utilities.IsValidGenerationTarget(
