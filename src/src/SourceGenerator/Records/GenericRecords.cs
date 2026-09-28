@@ -45,7 +45,12 @@ public readonly record struct MessageTemplateHole(
 			throw new Exception("Destructure and Stringify cannot both be true.");
 	}
 
-	public static EquatableArray<MessageTemplateHole> FromMatches(MatchCollection matches)
+	/// <summary>
+	/// Projects the regex matches into the hole records. Internal because the returned
+	/// <c>EquatableArray</c> is a framework type the merge internalizes in the shipped analyzer (seen by
+	/// <c>PSGFR41</c>); the BuildSdk grants the test assemblies access to internals.
+	/// </summary>
+	internal static EquatableArray<MessageTemplateHole> FromMatches(MatchCollection matches)
 	{
 		List<MessageTemplateHole>? holes = null;
 		if (matches != null)
