@@ -28,7 +28,7 @@ Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system
 Add to your `Directory.Build.props` or `.csproj` file:
 
 ```xml
-<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="5.0.0-prerelease.13">
+<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="5.0.0">
   <PrivateAssets>all</PrivateAssets>
   <IncludeAssets>analyzers</IncludeAssets>
 </PackageReference>
@@ -132,16 +132,15 @@ public class EntityService(IEntityStoreTelemetry telemetry)
 | `[ObservableCounter]`, `[ObservableGauge]`, `[ObservableUpDownCounter]` | Method | Observable instruments |
 
 > [!TIP]
-> For single-target interfaces (only Activities, only Logging, or only Metrics), the generator automatically infers the necessary attributes. See the [wiki](https://github.com/purview-dev/telemetry-sourcegenerator/wiki/Multi-Targeting) for details.
+> For single-target interfaces (only Activities, only Logging, or only Metrics), the generator automatically infers the necessary attributes. See the [Multi-Targeting guide](https://purview.dev/docs/telemetry-sourcegenerator/multi-targeting/) for details.
 
 ## Documentation
 
 - [Homepage](https://purview.dev/projects/telemetry-sourcegenerator/)
 - [Documentation](https://purview.dev/docs/telemetry-sourcegenerator/)
-- [Full Wiki](https://github.com/purview-dev/telemetry-sourcegenerator/wiki)
-- [Generated Output Examples](https://github.com/purview-dev/telemetry-sourcegenerator/wiki/Generated-Output)
-- [Multi-Targeting Guide](https://github.com/purview-dev/telemetry-sourcegenerator/wiki/Multi-Targeting)
-- [Logging Configuration](https://github.com/purview-dev/telemetry-sourcegenerator/wiki/Logging)
+- [Generated Output Examples](https://purview.dev/docs/telemetry-sourcegenerator/generated-output/)
+- [Multi-Targeting Guide](https://purview.dev/docs/telemetry-sourcegenerator/multi-targeting/)
+- [Logging Configuration](https://purview.dev/docs/telemetry-sourcegenerator/logging/)
 
 ## Agent Skills
 
@@ -156,7 +155,7 @@ The [.NET Aspire Sample](https://github.com/purview-dev/telemetry-sourcegenerato
 
 ## Performance
 
-Benchmarked on 13th Gen Intel Core i9-13900KF, .NET SDK 10.0.401. See the [Performance](https://github.com/purview-dev/telemetry-sourcegenerator/wiki/Performance) wiki page for full cross-runtime results.
+Benchmarked on 13th Gen Intel Core i9-13900KF, .NET SDK 10.0.401. See the [Performance](https://purview.dev/docs/telemetry-sourcegenerator/performance/) page for full cross-runtime results.
 
 ### Activities (.NET 10.0)
 
@@ -290,7 +289,7 @@ public enum NamingConvention
 
 ## Contributing
 
-Contributions are welcome! See the [Contributing guide](https://github.com/purview-dev/telemetry-sourcegenerator/wiki/Contributing) for development setup and testing instructions.
+Contributions are welcome! See the [Contributing guide](https://purview.dev/docs/telemetry-sourcegenerator/contributing/) for development setup and testing instructions.
 
 See [docs/release-process.md](docs/release-process.md) for the release flow, and [`AGENTS.md`](AGENTS.md)
 for the build, validation, and convention rules. Bump the version in `package.json` and run

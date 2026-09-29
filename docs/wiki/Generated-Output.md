@@ -1,6 +1,6 @@
 # Generated Output
 
-This page shows real generated output from the [sample application](Sample-Application.md), produced by `5.0.0-prerelease.8`. The interface:
+This page shows real generated output from the [sample application](Sample-Application.md), produced by `5.0.0`. The interface:
 
 ```csharp
 [ActivitySource]

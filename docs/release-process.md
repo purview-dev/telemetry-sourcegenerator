@@ -70,11 +70,24 @@ Merging to `main` triggers `release.yml`, which runs the reusable `purview-relea
 
 ## Versioning
 
-- The version lives in `package.json`. **Current Version:** 5.0.0-prerelease.13
+- The version lives in `package.json`. **Current Version:** 5.0.0
 - It is applied to `Version` / `PackageVersion` by `Purview.BuildSdk` via package.json
   version detection (`UsePackageJsonVersion`, default `true`).
 - `just version` prints the current version.
 - After bumping `package.json`, run `just update-version` to sync the version into docs/samples.
+
+### Analyzer release tracking
+
+The `TSG` diagnostics are tracked in `src/src/SourceGenerator/AnalyzerReleases.Shipped.md` and
+`src/src/SourceGenerator/AnalyzerReleases.Unshipped.md`. The files are wired up as `AdditionalFiles`,
+so the Roslyn release-tracking analyzers validate them on every build (`EnforceExtendedAnalyzerRules`
+is enabled by `Purview.BuildSdk`).
+
+1. Add new rules to `AnalyzerReleases.Unshipped.md`.
+2. At release time, create a new `## Release <version>` section in `AnalyzerReleases.Shipped.md`,
+   move the unshipped entries into it, and leave the unshipped file empty.
+3. Keep the rule ID, category, and severity in sync with the `DiagnosticDescriptor`s in
+   `src/src/SourceGenerator/Helpers/DiagnosticLibrary.*.cs`.
 
 ## Building the package locally
 

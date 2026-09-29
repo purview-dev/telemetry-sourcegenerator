@@ -7,7 +7,15 @@
 		<!-- IDE0005 (unused usings) analysis is gated on GenerateDocumentationFile; docs are off so the
 		     XML doc file is not shipped, and IDE0005 is suppressed rather than failing the build. -->
 		<GenerateDocumentationFile>false</GenerateDocumentationFile>
-		<NoWarn>$(NoWarn);IDE0005;EnableGenerateDocumentationFile;</NoWarn>
+		<!--
+			RS2003 is disabled: the release-tracking analyzer maps a shipped rule to a supported
+			diagnostic by reading each DiagnosticAnalyzer's SupportedDiagnostics property. Telemetry's
+			descriptors are wrapped by Purview.SourceGeneratorFramework's ReportableDiagnostic and the
+			analyzer exposes them through TelemetryRules.GetAllSupportedDescriptors(), which the
+			release-tracking analyzer cannot follow, so every shipped rule is reported as unsupported.
+			The rules are still tracked as shipped in AnalyzerReleases.Shipped.md.
+		-->
+		<NoWarn>$(NoWarn);IDE0005;EnableGenerateDocumentationFile;RS2003;</NoWarn>
 		<Title>Purview Telemetry Source Generator</Title>
 		<Description>.NET Source Generator for interface-based telemetry generating tracing, logs, and metrics.</Description>
 		<PackageTags>logs;log;logger;logging;source-generator;high-performance-logging;otel;open-telemetry;telemetry;traces;tracing;metric;metrics;meter;meters;instrumentation;instruments;events;distributed-traces;distributed-tracing;melt;dotnet;aspnet;</PackageTags>
@@ -21,8 +29,12 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
-		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" />
+		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
 		<PackageReference Include="Purview.SourceGeneratorFramework" PrivateAssets="all" />
+	</ItemGroup>
+	<ItemGroup Label="Analyzer Release Files">
+		<AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
+		<AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
 	</ItemGroup>
 	<ItemGroup>
 		<!-- Build-order only dependency: the refactorings assembly ships inside this package, so its
