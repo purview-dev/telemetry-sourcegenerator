@@ -110,7 +110,7 @@ interface IEntityStoreTelemetry
 	}
 
 	[Test]
-	public async Task Generate_FromWikiActivitiesSection_GeneratesTelemetry(CancellationToken cancellationToken)
+	public async Task Generate_FromDocsActivitiesSection_GeneratesTelemetry(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicTelemetry = """
@@ -150,7 +150,7 @@ interface IActivityTelemetry
 	}
 
 	[Test]
-	public async Task Generate_FromWikiLoggingSection_GeneratesTelemetry(CancellationToken cancellationToken)
+	public async Task Generate_FromDocsLoggingSection_GeneratesTelemetry(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicTelemetry =
@@ -210,7 +210,7 @@ enum ItemTypes
 	}
 
 	[Test]
-	public async Task Generate_FromWikiMetricsSection_GeneratesTelemetry(CancellationToken cancellationToken)
+	public async Task Generate_FromDocsMetricsSection_GeneratesTelemetry(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicTelemetry =
@@ -291,7 +291,7 @@ interface IMeterTelemetry
 	}
 
 	[Test]
-	public async Task Generate_FromWikiMultiTargetingSection_GeneratesTelemetry(CancellationToken cancellationToken)
+	public async Task Generate_FromDocsMultiTargetingSection_GeneratesTelemetry(CancellationToken cancellationToken)
 	{
 		// Arrange
 		const string basicTelemetry = """

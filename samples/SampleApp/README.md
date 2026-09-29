@@ -284,7 +284,7 @@ dotnet-counters monitor --process-id <PID> --counters SampleApp.APIService.Servi
 ## Learn More
 
 - [Purview Telemetry Source Generator docs](../../README.md)
-- [Wiki: Sample Application](https://github.com/purview-dev/telemetry-sourcegenerator/wiki/Sample-Application) — annotated walkthroughs, sequence diagrams, dashboard screenshots
-- [Wiki: Generated Output](https://github.com/purview-dev/telemetry-sourcegenerator/wiki/Generated-Output) — full annotated examples of generated code
+- [Sample Application](https://purview.dev/docs/telemetry-sourcegenerator/sample-application/) — annotated walkthroughs, sequence diagrams, dashboard screenshots
+- [Generated Output](https://purview.dev/docs/telemetry-sourcegenerator/generated-output/) — full annotated examples of generated code
 - [.NET Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/)
 

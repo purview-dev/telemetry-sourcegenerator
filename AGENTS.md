@@ -62,7 +62,7 @@ conventional-commits check.
 | `just update-version` | Runs `.build/update-version.ts` to sync the version into docs/samples. |
 | `just pack` | Updates the version then packs the NuGet package into `artifacts/`. |
 
-The version lives in `package.json`. **Current Version:** 5.0.0-prerelease.13 — applied to `Version` /
+The version lives in `package.json`. **Current Version:** 5.0.0 — applied to `Version` /
 `PackageVersion` via the SDK's package.json version detection.
 
 ### Pipelines (reusable `purview-build` tool)
@@ -100,6 +100,8 @@ src/
 ├── src/
 │   ├── SourceGenerator/                    # Main incremental source generator (netstandard2.0, Roslyn)
 │   │   ├── Analyzers/                      # Diagnostic analyzers for telemetry interfaces
+│   │   ├── AnalyzerReleases.Shipped.md     # Roslyn analyzer release tracking (shipped TSG rules)
+│   │   ├── AnalyzerReleases.Unshipped.md   # Roslyn analyzer release tracking (upcoming TSG rules)
 │   │   ├── Emitters/                       # CodeWriter-based code emission
 │   │   ├── Generators/                     # Incremental generator pipeline
 │   │   └── Sdk/                            # SDK-style package content (props/targets)
@@ -158,6 +160,12 @@ The sample projects enable `EmitCompilerGeneratedFiles`, so generated telemetry 
 - **SDK**: projects import `Purview.BuildSdk` via `Directory.Build.props`/`.targets`. The repo
   sets `ExcludePurviewTelemetry=true` (it does not consume the telemetry package it generates) and
   `NamespacePrefix=Purview.Telemetry` under `src/`. See `.agents/skills/sdk-*` for SDK behavior.
+- **Analyzer release tracking**: the `TSG` rules are tracked in
+  `src/src/SourceGenerator/AnalyzerReleases.{Shipped,Unshipped}.md` (wired as `AdditionalFiles`, so
+  the Roslyn RS2000-series checks run under `EnforceExtendedAnalyzerRules=true`). Add new rules to
+  `AnalyzerReleases.Unshipped.md`, then move them into a new `## Release x.y.z` section in
+  `AnalyzerReleases.Shipped.md` at release time. `RS2003` is suppressed — see the comment in
+  `src/src/SourceGenerator/SourceGenerator.csproj`.
 
 ## Source-generator and testing skills
 
