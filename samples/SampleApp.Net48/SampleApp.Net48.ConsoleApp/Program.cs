@@ -10,7 +10,7 @@ namespace SampleApp.Net48.ConsoleApp
 	{
 		static void Main()
 		{
-			using var activityListener = new ActivityListener
+			using ActivityListener activityListener = new()
 			{
 				ShouldListenTo = source => source.Name == TelemetryNames.ActivitySourceNames[0],
 				Sample = (ref options) => ActivitySamplingResult.AllDataAndRecorded,
@@ -23,7 +23,7 @@ namespace SampleApp.Net48.ConsoleApp
 			};
 			ActivitySource.AddActivityListener(activityListener);
 
-			using var meterListener = new MeterListener();
+			using MeterListener meterListener = new();
 			meterListener.InstrumentPublished = (instrument, listener) =>
 			{
 				if (Array.IndexOf(TelemetryNames.MeterNames, instrument.Meter.Name) >= 0)
@@ -39,7 +39,7 @@ namespace SampleApp.Net48.ConsoleApp
 			);
 			meterListener.Start();
 
-			var services = new ServiceCollection();
+			ServiceCollection services = new();
 
 			services.AddLogging(logging => logging.AddConsole().SetMinimumLevel(LogLevel.Trace));
 

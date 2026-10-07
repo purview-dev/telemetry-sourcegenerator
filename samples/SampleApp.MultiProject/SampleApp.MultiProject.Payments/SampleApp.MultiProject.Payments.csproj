@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<!-- Tracing and metrics only, so the generator's logging support — and its dependency on
+		     Microsoft.Extensions.Logging.Abstractions — is excluded. -->
+		<DefineConstants>$(DefineConstants);EXCLUDE_PURVIEW_TELEMETRY_LOGGING</DefineConstants>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- The generator and its Purview.SourceGeneratorFramework runtime dependencies are resolved
+		     from the generator's build output via the SDK's GetSourceGeneratorAnalyzerFiles target,
+		     always built with the referencing configuration, so no bin/ paths are hard-coded.
+		     Switch to a PackageReference for production use. -->
+		<ProjectReference
+			Include="..\..\..\src\src\SourceGenerator\SourceGenerator.csproj"
+			OutputItemType="Analyzer"
+			ReferenceOutputAssembly="false"
+		/>
+		<ProjectReference Include="..\SampleApp.MultiProject.Notifications\SampleApp.MultiProject.Notifications.csproj" />
+		<ProjectReference Include="..\SampleApp.MultiProject.Observability\SampleApp.MultiProject.Observability.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.Abstractions" />
+	</ItemGroup>
+</Project>

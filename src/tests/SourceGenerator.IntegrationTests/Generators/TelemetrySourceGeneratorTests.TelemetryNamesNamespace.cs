@@ -11,7 +11,7 @@ partial class TelemetrySourceGeneratorTests
 		const string source = """
 			using Purview.Telemetry;
 
-			[assembly: TelemetryGeneration(GenerateDependencyExtension = true, TelemetryNamesNamespace = "Custom.Telemetry")]
+			[assembly: TelemetryGeneration(GenerateDependencyExtension = true, GenerateTelemetryNamesClass = true, TelemetryNamesNamespace = "Custom.Telemetry")]
 
 			namespace Testing;
 
@@ -56,7 +56,7 @@ partial class TelemetrySourceGeneratorTests
 			.ContainsGeneratedCode("namespace Custom.Telemetry");
 
 		await Assert
-			.That(generationResult.GetSource("TelemetryNames.g.cs"))
+			.That(generationResult.GetSource("Custom.Telemetry.TelemetryNames.g.cs"))
 			.ContainsGeneratedCode("namespace Custom.Telemetry");
 	}
 

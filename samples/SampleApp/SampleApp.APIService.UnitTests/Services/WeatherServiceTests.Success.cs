@@ -21,4 +21,21 @@ partial class WeatherServiceTests
 		// Assert
 		telemetry.GettingWeatherForecast(Any<string>(), Is(requestCount)).WasCalled(Times.Once);
 	}
+
+	[Test]
+	public async Task GetWeatherForecastsAsync_GivenRequestCountIsWithinRange_CallsSharedLibraryTelemetry(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		const int requestCount = 10;
+		var forecastTelemetry = CreateForecastTelemetry();
+		var service = CreateService(CreateTelemetry(), forecastTelemetry: forecastTelemetry);
+
+		// Act
+		await service.GetWeatherForecastsAsync(requestCount, cancellationToken);
+
+		// Assert
+		forecastTelemetry.ForecastsValidated(Is(requestCount)).WasCalled(Times.Once);
+	}
 }

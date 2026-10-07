@@ -109,6 +109,9 @@ partial class TypeLibraryGenerator
 	static readonly TypeIdentity TelemetryGenerationAttribute = default;
 
 	[TypeRef(PurviewTelemetryNamespace, includeInGetTypes: true)]
+	static readonly TypeIdentity GeneratedTelemetryNamesAttribute = default;
+
+	[TypeRef(PurviewTelemetryNamespace, includeInGetTypes: true)]
 	static readonly TypeIdentity Targets = default;
 
 	[TypeRef(PurviewTelemetryNamespace, includeInGetTypes: true)]

@@ -13,16 +13,10 @@
 		     for the generator (and analyzer) to see the attribute usages. -->
 		<DefineConstants>$(DefineConstants);PURVIEW_TELEMETRY_ATTRIBUTES</DefineConstants>
 		<!--
-			CA1303: Console app — no resource table needed for literal strings.
-			CA1515: Console app — public types are fine (no assembly boundary concerns).
-			CA1812: WeatherService is instantiated via DI, not directly.
+			CA1031: the demo catches broadly so a simulated upstream failure doesn't end the run.
 			CA5394: Random is fine for simulation / demo purposes.
-			CS1574: cref resolution differences in net48 XML doc comments (in generated code).
-			CS8618: the sample's WeatherForecast DTO declares a non-nullable Summary that is
-			populated before use (sample-code relaxation; not from generated code).
-			TSG3022: Activity? vs Activity — net48 disables nullable, so Activity is used here.
 		-->
-		<NoWarn>$(NoWarn);CA1031;CA1303;CA1515;CA1812;CA2007;CA2201;CA5394;CS1574;CS8618;TSG3022;</NoWarn>
+		<NoWarn>$(NoWarn);CA1031;CA5394;</NoWarn>
 	</PropertyGroup>
 
 	<Import Sdk="Purview.BuildSdk" Project="Sdk.props" />

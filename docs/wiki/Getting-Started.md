@@ -121,11 +121,18 @@ A single method call can emit an Activity, a log entry, and a metric simultaneou
 
 ## Register names with OpenTelemetry
 
-The generator also produces a `TelemetryNames` static class containing the meter and activity source names:
+The generator records the generated meter and activity source names in every assembly's metadata. In the project that registers them, opt into the `TelemetryNames` class, which aggregates its own names with those of every assembly it references:
+
+```csharp
+// Program.cs or Properties/AssemblyInfo.cs
+[assembly: TelemetryGeneration(GenerateTelemetryNamesClass = true)]
+```
 
 ```csharp
 builder.AddServiceDefaults(TelemetryNames.MeterNames, TelemetryNames.ActivitySourceNames);
 ```
+
+See [Generation](Generation.md#telemetry-names) for the full behaviour across multi-project solutions.
 
 ## Common patterns
 

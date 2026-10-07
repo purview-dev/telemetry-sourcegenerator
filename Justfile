@@ -9,6 +9,8 @@ pipeline_feed := "https://api.nuget.org/v3/index.json"
 pipeline_tool := ".tools/purview-build/purview-build"
 
 sample_solution_file := "./samples/SampleApp/SampleApp.slnx"
+multiproject_sample_solution_file := "./samples/SampleApp.MultiProject/SampleApp.MultiProject.slnx"
+multiproject_sample_project := "./samples/SampleApp.MultiProject/SampleApp.MultiProject.ConsoleApp"
 artifact_folder := "./artifacts/"
 benchmark_solution := "./benchmarks/Purview.Telemetry.Benchmarks/Purview.Telemetry.Benchmarks.csproj"
 
@@ -135,6 +137,20 @@ test-s:
     echo "Running tests for {{ BLUE }}{{ sample_solution_file }}{{ NORMAL }} with {{ YELLOW }}{{ build_configuration }}{{ NORMAL }}..."
     dotnet test --solution "{{ sample_solution_file }}" --configuration "{{ build_configuration }}"
 
+# Builds the multi-project sample solution with the specified configuration
+
+[group('Samples - Build and Test')]
+build-mp:
+    echo "Building {{ BLUE }}{{ multiproject_sample_solution_file }}{{ NORMAL }} with {{ YELLOW }}{{ build_configuration }}{{ NORMAL }}..."
+    dotnet build "{{ multiproject_sample_solution_file }}" --configuration "{{ build_configuration }}"
+
+# Runs the multi-project sample, printing the aggregated telemetry names
+
+[group('Samples - Build and Test')]
+run-mp:
+    echo "Running {{ BLUE }}{{ multiproject_sample_project }}{{ NORMAL }} with {{ YELLOW }}{{ build_configuration }}{{ NORMAL }}..."
+    dotnet run --project "{{ multiproject_sample_project }}" --configuration "{{ build_configuration }}"
+
 # -----------------------------------------------------------------------------
 # Formatting
 # -----------------------------------------------------------------------------
@@ -188,11 +204,16 @@ code:
     code "{{ root_folder }}"
 
 # Opens the sample solution in the default associated application
-
 [group('Utilities')]
 vs-s:
     echo "Opening {{ BLUE }}{{ sample_solution_file }}{{ NORMAL }}..."
     open "{{ sample_solution_file }}"
+
+# Opens the multiproject sample solution in the default associated application
+[group('Utilities')]
+vs-mp:
+    echo "Opening {{ BLUE }}{{ multiproject_sample_solution_file }}{{ NORMAL }}..."
+    open "{{ multiproject_sample_solution_file }}"
 
 # Clean up the repository by removing build artifacts, bin/obj folders etc, and shutting down the build server
 [group('Utilities')]

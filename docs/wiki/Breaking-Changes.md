@@ -7,6 +7,7 @@ This page documents breaking changes between major versions to help you migrate 
 - [v3 to v4](#v3-to-v4)
   - [Namespace consolidation](#namespace-consolidation)
   - [OpenTelemetry-aligned naming](#opentelemetry-aligned-naming)
+- [v5.0.1 to v5.0.2](#v501-to-v502)
 - [v4 to v5](#v4-to-v5)
 - [v1 and v2 to v3](#v1-and-v2-to-v3)
 
@@ -130,6 +131,22 @@ public enum NamingConvention
 
 > [!TIP]
 > For high-impact scenarios, consider using `NamingConvention.Legacy` initially, then gradually migrating to OpenTelemetry conventions during a planned maintenance window.
+
+## v5.0.1 to v5.0.2
+
+**Impact:** Low — affects projects that consume the generated `TelemetryNames` class
+
+### `TelemetryNames` is now opt-in
+
+The generator now records each assembly's generated activity source and meter names in an assembly-level `[GeneratedTelemetryNames]` attribute (`GenerateTelemetryNamesAttribute`, default `true`), which downstream compilations read to aggregate the names of everything they reference. Because that attribute replaces the per-assembly class as the way names travel, `GenerateTelemetryNamesClass` now defaults to `false`.
+
+If a project uses `TelemetryNames.MeterNames` / `TelemetryNames.ActivitySourceNames`, opt it back in:
+
+```csharp
+[assembly: TelemetryGeneration(GenerateTelemetryNamesClass = true)]
+```
+
+The class it generates now also includes the names recorded by referenced assemblies, so a host project no longer needs one `TelemetryNames` reference per library. Set `AggregateReferencedTelemetryNames = false` for the previous assembly-only behaviour. See [Generation](Generation.md#telemetry-names).
 
 ## v4 to v5
 

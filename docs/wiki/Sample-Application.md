@@ -9,7 +9,7 @@ The [.NET Aspire sample](https://github.com/purview-dev/telemetry-sourcegenerato
 | `SampleApp.AppHost` | The Aspire orchestrator. |
 | `SampleApp.APIService` | Backend service exposing the telemetry interfaces and the generated `TelemetryNames` registration. |
 | `SampleApp.APIService.UnitTests` | TUnit + NSubstitute unit tests over the generated interfaces. |
-| `SampleApp.Shared` | Shared DTOs (e.g. `WeatherForecast`). |
+| `SampleApp.Shared` | Shared DTOs (e.g. `WeatherForecast`) plus `IWeatherForecastTelemetry` — a library-owned ActivitySource and Meter, aggregated by each host. |
 | `SampleApp.Web` | Frontend client that also generates its own telemetry. |
 | `SampleApp.ServiceDefaults` | Aspire service defaults; registers the generated meter/activity source names. |
 
@@ -134,11 +134,37 @@ public interface IWeatherAPIClientTelemetry
 
 ## Registering names with Aspire
 
-`SampleApp.ServiceDefaults` wires the generated names into Aspire's OpenTelemetry setup:
+`SampleApp.ServiceDefaults` is referenced *by* the projects that own the telemetry, so it cannot discover their names itself. Instead, each host project opts into the generated `TelemetryNames` class and passes the arrays in. In `SampleApp.APIService/Properties/AssemblyInfo.cs`:
+
+```csharp
+[assembly: TelemetryGeneration(GenerateTelemetryNamesClass = true)]
+```
 
 ```csharp
 builder.AddServiceDefaults(TelemetryNames.MeterNames, TelemetryNames.ActivitySourceNames);
 ```
+
+The class aggregates the host's own names with the names recorded by every assembly it references. `SampleApp.Shared` ships its own `IWeatherForecastTelemetry` (an ActivitySource and a Meter, both named after that assembly), consumed by its `WeatherForecastValidator` which `WeatherService` calls. The library registers its services with `builder.Services.AddWeatherForecastValidation()` but never registers its names with OpenTelemetry — those arrive through the project reference:
+
+```csharp
+public static readonly string[] MeterNames = new string[] { "SampleApp.APIService", "SampleApp.Shared" };
+
+public static readonly string[] ActivitySourceNames = new string[] { "SampleApp.APIService", "SampleApp.Shared" };
+```
+
+`SampleApp.Web` references `SampleApp.Shared` for the DTOs only, so it aggregates the same names without emitting from them — the aggregate follows the reference graph, not usage, and registering a source that stays quiet costs nothing.
+
+See [Generation](Generation.md#telemetry-names).
+
+## Multi-project sample
+
+`samples/SampleApp.MultiProject` is a smaller console solution dedicated to this aggregation, for solutions with many projects and differing telemetry requirements. Four assemblies own telemetry — two of them reachable from the host only transitively — and a `ServiceDefaults`-style project that every one of them references receives the complete set of names:
+
+```bash
+just run-mp
+```
+
+See its [README](https://github.com/purview-dev/purview-telemetry-sourcegenerator/tree/main/samples/SampleApp.MultiProject) for the reference graph and the generated output.
 
 ## Unit testing
 

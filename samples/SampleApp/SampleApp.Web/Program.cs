@@ -12,10 +12,9 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 // Configure typed HttpClient for the API service with resiliency
 // ServiceDefaults configures standard resilience handler (retries, circuit breaker, timeout) by default
 builder.Services.AddHttpClient<WeatherAPIClient>(client =>
-{
 	// Use service discovery to resolve the API service URL
-	client.BaseAddress = new Uri("https+http://api-service");
-});
+	client.BaseAddress = new Uri("https+http://api-service")
+);
 
 builder.Services.AddWeatherAPIClientTelemetry();
 

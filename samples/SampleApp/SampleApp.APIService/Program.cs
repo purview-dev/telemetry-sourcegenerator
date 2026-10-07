@@ -7,6 +7,10 @@ builder.AddServiceDefaults(TelemetryNames.MeterNames, TelemetryNames.ActivitySou
 
 builder.Services.AddScoped<IWeatherService, WeatherService>().AddWeatherServiceTelemetry();
 
+// The shared library registers its own services and telemetry; its generated names already arrived
+// in TelemetryNames above, through the project reference.
+builder.Services.AddWeatherForecastValidation();
+
 var app = builder.Build();
 
 app.UseHttpsRedirection();
