@@ -70,6 +70,7 @@ public static class TelemetryNamesReference
 		if (!emitResult.Success)
 			throw new InvalidOperationException(Describe(emitResult));
 
+		// The stream is left open so that the reference can be used after this method returns.
 		return MetadataReference.CreateFromImage(stream.ToArray());
 	}
 

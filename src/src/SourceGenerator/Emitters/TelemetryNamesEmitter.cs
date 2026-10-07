@@ -47,11 +47,11 @@ static class TelemetryNamesEmitter
 			);
 			using (
 				writer.ClassScope(
-					new(className)
+					new(className, TypeDeclarationAccessibility.Internal)
 					{
 						IsStatic = true,
 						IncludeGeneratedAttributes = true,
-						Attributes = [EmitterHelpers.EditorBrowsableAttribute()],
+						IncludeEmbeddedAttribute = true,
 					}
 				)
 			)
