@@ -218,6 +218,8 @@ Each assembly records its own generated names in metadata (`[assembly: Generated
 builder.AddServiceDefaults(TelemetryNames.MeterNames, TelemetryNames.ActivitySourceNames);
 ```
 
+That project needs no telemetry interfaces of its own — the assembly-level attribute is enough, and the class is filled from what its references recorded.
+
 Libraries need no configuration at all, however many of them there are and however complex their telemetry. The aggregate is built at compile time, so it is safe under trimming and native AOT, and it covers transitive references too.
 
 `samples/SampleApp.MultiProject` is a runnable example: four assemblies own telemetry, two of them only transitively referenced by the host, and one `ServiceDefaults`-style project receives the complete set of names (`just run-mp`).

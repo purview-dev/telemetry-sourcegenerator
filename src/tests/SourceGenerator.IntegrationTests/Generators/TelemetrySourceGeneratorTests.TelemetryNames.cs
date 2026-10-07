@@ -177,6 +177,63 @@ partial class TelemetrySourceGeneratorTests
 	}
 
 	[Test]
+	public async Task Generate_GivenNoTargetsOfItsOwn_AggregatesReferencedAssemblyNamesIntoTheClass(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		// The opt-in lives on the assembly alone: a host project that only wires up the telemetry its
+		// references generate has no interface of its own to carry [TelemetryGeneration].
+		const string noTelemetry = "namespace Testing;";
+		var options = TelemetryNamesOptions("GenerateTelemetryNamesClass = true") with
+		{
+			AdditionalReferences =
+			[
+				TelemetryNamesReference.Create(
+					"Referenced.Telemetry",
+					["referenced-activity-source"],
+					["referenced-meter"]
+				),
+			],
+		};
+
+		// Act
+		var generationResult = await GenerateAsync(noTelemetry, options, cancellationToken: cancellationToken);
+
+		// Assert
+		await Assert
+			.That(generationResult.Generated().HasClass("TelemetryNames", "TestAssembly"))
+			.IsTrue()
+			.Because("the assembly-level opt-in must apply without a local activity source or meter");
+
+		var classSource = generationResult.GetSource(ClassHintName);
+		await Assert.That(classSource).ContainsGeneratedCode("\"referenced-activity-source\"");
+		await Assert.That(classSource).ContainsGeneratedCode("\"referenced-meter\"");
+	}
+
+	[Test]
+	public async Task Generate_GivenNoTargetsOfItsOwnAndNoReferencedNames_DoesNotGenerateTheClass(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		const string noTelemetry = "namespace Testing;";
+
+		// Act
+		var generationResult = await GenerateAsync(
+			noTelemetry,
+			TelemetryNamesOptions("GenerateTelemetryNamesClass = true"),
+			cancellationToken: cancellationToken
+		);
+
+		// Assert
+		await Assert
+			.That(generationResult.Generated().HasClass("TelemetryNames", "TestAssembly"))
+			.IsFalse()
+			.Because("there is nothing to name: neither this assembly nor its references generated any");
+	}
+
+	[Test]
 	public async Task Generate_GivenAggregationDisabled_ExcludesReferencedAssemblyNames(
 		CancellationToken cancellationToken
 	)

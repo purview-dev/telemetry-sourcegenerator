@@ -24,9 +24,25 @@ readonly record struct MeterOutputContext(MeterTarget Target, GenerationContext<
 }
 
 /// <summary>
+/// The subset of the assembly-level <c>[TelemetryGeneration]</c> that governs the telemetry names.
+/// Resolved straight off the compilation's assembly symbol so that an assembly with no telemetry
+/// targets of its own — one that only aggregates the names of its references — can still opt in.
+/// Deliberately narrower than <see cref="TelemetryGenerationAttributeData"/>: the unrelated settings
+/// would needlessly invalidate the cached names when they change.
+/// </summary>
+readonly record struct AssemblyTelemetryNamesSettings(
+	bool GenerateAttribute,
+	bool GenerateClass,
+	bool AggregateReferencedNames,
+	string? ClassName,
+	string? Namespace
+);
+
+/// <summary>
 /// The telemetry names and the <c>[TelemetryGeneration]</c> settings that govern them, resolved from
-/// the activity source and meter targets. Holds nothing but strings and flags, so the pipeline caches
-/// on the names themselves rather than on the targets that produced them.
+/// the assembly-level attribute and the activity source and meter targets. Holds nothing but strings
+/// and flags, so the pipeline caches on the names themselves rather than on the targets that produced
+/// them.
 /// </summary>
 readonly record struct ResolvedTelemetryNames(
 	EquatableArray<string> ActivitySourceNames,

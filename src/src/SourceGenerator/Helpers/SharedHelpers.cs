@@ -132,6 +132,16 @@ static partial class SharedHelpers
 		if (typeData.Exists)
 			return Normalize(typeData);
 
+		return GetAssemblyTelemetryGenerationAttribute(compilation);
+	}
+
+	/// <summary>
+	/// Reads the assembly-level <c>[TelemetryGeneration]</c>, falling back to the defaults. The
+	/// telemetry-names pipeline needs this independently of any target: an assembly that only consumes
+	/// telemetry from referenced projects has no interface to hang the settings off.
+	/// </summary>
+	public static TelemetryGenerationAttributeData GetAssemblyTelemetryGenerationAttribute(Compilation compilation)
+	{
 		var assemblyData = TelemetryGenerationAttributeData.FromAttributeData(compilation.Assembly);
 		return assemblyData.Exists ? Normalize(assemblyData) : DefaultTelemetryGeneration;
 	}

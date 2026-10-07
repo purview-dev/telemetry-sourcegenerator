@@ -33,11 +33,19 @@ partial class TelemetrySourceGenerator
 		// so we don't re-run the attribute generation on every compilation change.
 		var assemblyNameProvider = context.CompilationProvider.Select(static (c, _) => c.AssemblyName ?? string.Empty);
 
-		// Depends on the target providers alone, so an unrelated edit leaves it cached.
+		// The assembly-level [TelemetryGeneration] has to be read independently of the targets: an
+		// assembly that only consumes telemetry from its references has no target to carry it.
+		// Projected down to the names-related settings so unrelated changes leave the result cached.
+		var assemblySettings = context
+			.CompilationProvider.Select(static (compilation, _) => ResolveAssemblySettings(compilation))
+			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_TelemetryNamesAssemblySettings");
+
+		// Depends on the target providers and those settings alone, so an unrelated edit leaves it cached.
 		var resolvedNames = meterTargets
 			.Collect()
 			.Combine(activityTargets.Collect())
-			.Select(static (targets, token) => ResolveNames(targets.Left, targets.Right, token))
+			.Combine(assemblySettings)
+			.Select(static (tuple, token) => ResolveNames(tuple.Left.Left, tuple.Left.Right, tuple.Right, token))
 			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_TelemetryNamesResolved");
 
 		var attributeOutput = resolvedNames
@@ -69,12 +77,30 @@ partial class TelemetrySourceGenerator
 	}
 
 	/// <summary>
+	/// Projects the assembly-level <c>[TelemetryGeneration]</c> down to the settings that govern the
+	/// telemetry names.
+	/// </summary>
+	static AssemblyTelemetryNamesSettings ResolveAssemblySettings(Compilation compilation)
+	{
+		var generation = SharedHelpers.GetAssemblyTelemetryGenerationAttribute(compilation);
+
+		return new(
+			GenerateAttribute: generation.GenerateTelemetryNamesAttribute,
+			GenerateClass: generation.GenerateTelemetryNamesClass,
+			AggregateReferencedNames: generation.AggregateReferencedTelemetryNames,
+			ClassName: generation.TelemetryNamesClassName,
+			Namespace: generation.TelemetryNamesNamespace
+		);
+	}
+
+	/// <summary>
 	/// Resolves the distinct activity source and meter names generated for this compilation, along
 	/// with the <c>[TelemetryGeneration]</c> settings that control the <c>TelemetryNames</c> class.
 	/// </summary>
 	static ResolvedTelemetryNames ResolveNames(
 		ImmutableArray<GeneratorResult<MeterTarget?>> meterTargets,
 		ImmutableArray<GeneratorResult<ActivitySourceTarget?>> activityTargets,
+		AssemblyTelemetryNamesSettings assemblySettings,
 		CancellationToken token
 	)
 	{
@@ -90,14 +116,15 @@ partial class TelemetrySourceGenerator
 			.Select(static m => m.Value!)
 			.ToArray();
 
-		// The class is opt-in, so any target asking for it is enough; the attribute and the
-		// aggregation are opt-out, so any target declining them turns them off. The first custom
-		// class name/ namespace wins.
-		var generateAttribute = true;
-		var generateClass = false;
-		var aggregateReferencedNames = true;
-		string? className = null;
-		string? classNamespace = null;
+		// The assembly-level attribute seeds the settings — it is the only source when there are no
+		// targets at all. On top of that: the class is opt-in, so any target asking for it is enough;
+		// the attribute and the aggregation are opt-out, so any target declining them turns them off.
+		// The assembly's custom class name/namespace wins, otherwise the first target to name one does.
+		var generateAttribute = assemblySettings.GenerateAttribute;
+		var generateClass = assemblySettings.GenerateClass;
+		var aggregateReferencedNames = assemblySettings.AggregateReferencedNames;
+		var className = assemblySettings.ClassName;
+		var classNamespace = assemblySettings.Namespace;
 
 		foreach (
 			var generation in processedMeters

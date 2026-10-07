@@ -125,6 +125,8 @@ The class is opt-in because only the project that registers the names needs it. 
 
 The names are deduplicated and ordered, and the aggregate covers the whole reference graph that the compiler was handed — which includes transitive project and package references in a normal MSBuild build.
 
+The host project does not need telemetry of its own. An API or console project that defines no `[ActivitySource]` or `[Meter]` interface still gets the class from the assembly-level attribute alone, containing the names its references recorded. If neither the project nor its references generated any names, nothing is emitted.
+
 > [!NOTE]
 > The reference direction still applies: an Aspire-style `ServiceDefaults` project is referenced *by* the projects that own the telemetry, so it cannot aggregate them. Generate the class in the host project and pass the arrays into `ServiceDefaults`, as the [sample application](Sample-Application.md) does.
 
