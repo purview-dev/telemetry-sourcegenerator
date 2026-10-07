@@ -43,11 +43,15 @@ These are the most important configurable properties exposed by the SDK:
 
 - `NamespacePrefix` — required unless `DisableNamespacePrefixCheck=true`
 - `DisableNamespacePrefixCheck` — default `false`
+- `DisablePurviewStylePolicyValidation` — default `false`; set to `true` to stop the build failing (`PRSGD0006`-`PRSGD0009`) when the repository `.editorconfig` overrides the modifier policy (`dotnet_style_require_accessibility_modifiers` other than `omit_if_default`), hides `IDE0040`/`IDE1006`, disables the Style category in bulk, weakens the `_camelCase` private instance field naming rule, or adds the accessibility rules to `NoWarn`. Entries the SDK injects itself (the test-context rule set for test/shared-testing projects, `CA1515` for Aspire hosts and CLI apps) are ignored
 - `TargetFramework` — defaults to `net10.0` when neither `TargetFramework` nor `TargetFrameworks` is set; projects explicitly declaring `IsRoslynComponent=true` default to `netstandard2.0`
 - `IsRoslynComponent` — when explicitly `true`, applies source-generator defaults: a single `netstandard2.0` target, `LangVersion=latest`, `Nullable=enable`, `TreatWarningsAsErrors=true`, `Deterministic=true`, extended analyzer rules, SourceLink with `EmbedUntrackedSources=true`, no dependency file, compiler-generated output under the framework-specific intermediate directory, telemetry exclusion, and `PrivateAssets=all` applied to `Microsoft.CodeAnalysis.*` / `Microsoft.CodeAnalysis.Analyzers` references. Packable Roslyn components automatically pack the built analyzer assembly and PDB into `analyzers/dotnet/cs/`; a pack-time validation (`ValidateRoslynComponentCompilerSettings`) fails the pack if the compiler defaults are missing unless `DisableRoslynCompilerDefaultsValidation=true`
 - `IsRoslynComponentOnly` — defaults to `true` for Roslyn components and creates an analyzer-only package: it sets `IncludeBuildOutput=false`, `IncludeSymbols=false`, and packages the portable PDB alongside the analyzer under `analyzers/dotnet/cs/`. Set it to `false` for a dual-role Roslyn component that uses normal library symbol packaging.
 - `PackProjectReferencedSourceGenerators` — default `true`; packable projects automatically include analyzer `ProjectReference` outputs and runtime dependencies under `analyzers/dotnet/cs/`. Set it to `false` globally or use `Pack="false"` on one analyzer reference to opt out.
 - `EnableAssemblyNameGeneration` — default `true`; when `true`, `AssemblyName` and default `PackageId` follow the fully evaluated `RootNamespace` (or the full logical project name when suffix-stripping removed a segment, e.g. `Shared`/`ServiceDefaults`). Set `false` before the SDK import to use the standard project-name behaviour
+- `PurviewSharedTestingOutputType` — default `Library`; forced onto `IsSharedTestingProject` projects (with `IsTestProject`/`IsTestingPlatformApplication` cleared), because the test packages otherwise flip them into an executable test host. Set it to `Exe` before the SDK import to keep that package-driven shape
+- `PurviewTestContextNoWarn` — default `CA1002;CA1012;CA1034;CA1047;CA1050;CA1051;CA1062;CA1064;CA1515;CA1707`; the production API-surface rules exempted in test and shared-testing projects. Test projects keep the strict style contract (`IDE0040`, field naming, formatting, `IDE1006`), but are context aware: public test classes/fixtures, `Method_Scenario_Expectation` names, exposed fields and unvalidated helper parameters are allowed. Override before the SDK import to narrow or extend the set
+- `DisablePurviewTestContextRuleSet` — default `false`; set to `true` to make test and shared-testing projects enforce the production API-surface rules as well
 - `DisableProjectFileNamingConventionCheck` — default `false`; disables the directory-name/file-name match validation
 - `DisableGenerateAssemblyInfoClass` — default `false`; disables generated `AssemblyInfo`
 - `DisableAutoInternalsVisibleTo` — default `false`; disables automatic friend assembly generation
@@ -73,6 +77,16 @@ Primary settings:
 - `TestingFramework` — default `TUnit`; supported values: `TUnit`, `Xunit`, `None`
 - `SubstituteFramework` — default `TUnitMocks`; supported values: `TUnitMocks`, `NSubstitute`, `None`
 - `TestDataFramework` — default `Bogus`; supported values: `Bogus`, `None`
+
+Default outcome for standard test projects:
+
+- `TUnit`
+- `TUnit.Mocks`
+- `Bogus`
+- Microsoft.Testing.Platform integration
+
+Specialised packages such as `TUnit.Aspire` and `Testcontainers` are not automatic defaults; they remain
+explicit choices based on the project's purpose.
 
 Related toggles and derived settings:
 
@@ -147,6 +161,9 @@ When explaining SDK behavior, prefer these derived values over guessing:
 - `PurviewNamespacePrefix`
 - `PurviewProjectShortName`
 - `PurviewTestType`
+- `PurviewSharedTestingOutputType` (default `Library`; `Exe` keeps the test packages' executable/test-host shape)
+- `PurviewTestContextNoWarn` (production API-surface rules exempted in test/shared-testing projects)
+- `PurviewPolicyExemptNoWarn` (SDK-injected `NoWarn` entries that `ValidatePurviewStylePolicy` accepts)
 - `RootNamespace`
 - `AssemblyName`
 - `PackageVersion`
@@ -183,3 +200,5 @@ When changing SDK configuration:
 2. Keep README, SDK property declarations, validation, and any shipped skills aligned.
 3. If you add a new user-facing property, update both the configuration docs and the bundled skills.
 4. If the property affects import-time behavior, document that it must be set before the SDK import.
+5. Keep repository policy guidance aligned with the engineering-principles documentation, and keep low-level
+   property explanations aligned with the wiki reference pages.

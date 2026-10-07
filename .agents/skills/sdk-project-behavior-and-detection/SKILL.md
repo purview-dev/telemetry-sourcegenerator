@@ -5,7 +5,7 @@ description: "Use when explaining why Purview.BuildSdk classified a project as t
 
 # Purview.BuildSdk project behavior and detection
 
-Use this skill when a task asks **why** the SDK applied a behavior automatically, or when adding/moving projects in a repo that relies on Purview’s naming and project-type inference.
+Use this skill when a task asks **why** the SDK applied a behavior automatically, or when adding/moving projects in a repo that relies on the SDK's naming and project-type inference.
 
 ## Project-type detection rules
 
@@ -163,6 +163,16 @@ This is why consistent naming and placement matter so much in repos that use the
 - For TUnit test projects, enables Microsoft.Testing.Platform integration properties automatically
 - For shared-testing projects, skips the runnable test package and marks them with a skip/category pattern appropriate to the selected test framework
 
+For the default configuration, standard test projects receive:
+
+- `TUnit`
+- `TUnit.Mocks`
+- `Bogus`
+- Microsoft.Testing.Platform integration
+
+Specialized testing dependencies such as `TUnit.Aspire` and `Testcontainers` are still explicit additions by
+project purpose.
+
 ### For special project types
 
 - CLI projects default to `OutputType=Exe` and include `appsettings*.json` as content
@@ -200,3 +210,5 @@ When adding or moving projects in a repo using this SDK:
 3. Use test project suffixes intentionally so auto-detection and auto-references work.
 4. Keep shared helpers in exact shared/shared-testing names if you want the corresponding SDK behavior.
 5. If you change a naming rule in the SDK, update the README and the shipped skills together.
+6. If the question is really about repository policy rather than one computed property, point the user to the
+   engineering-principles documentation first, then explain the specific SDK mechanics.

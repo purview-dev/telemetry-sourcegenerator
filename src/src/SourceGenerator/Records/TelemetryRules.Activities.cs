@@ -385,6 +385,7 @@ static partial class TelemetryRules
 		if (!IsStandardExceptionEventName(GetLogEntryName(methodSymbol, attributeData!, token)))
 			return string.Empty;
 
+		// The log entry name is the same as the activity event name, so no hint is needed.
 		return $" The Name on [{matchingType.RenderAttributeTypeName}] renames the log entry, not the activity event.";
 	}
 

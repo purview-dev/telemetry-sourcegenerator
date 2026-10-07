@@ -9,12 +9,10 @@
 		     (Microsoft.Extensions.*, Scalar.AspNetCore, etc.), so the SDK's namespace-prefix
 		     global using is not resolvable here. -->
 		<AutoIncludeUsings>false</AutoIncludeUsings>
-		<!-- C# 14 extension blocks compile to nested static classes (CA1034), and the extension
-		     methods deliberately live in framework namespaces that do not match the folder (IDE0130).
-		     AV0027/AV0029/AV0030: Asp.Versioning advisories that recommend a richer versioning
+		<!-- AV0027/AV0029/AV0030: Asp.Versioning advisories that recommend a richer versioning
 		     pipeline (DescribeApiVersions, per-version OpenAPI documents); the sample keeps the
 		     simple single-document setup. -->
-		<NoWarn>$(NoWarn);CA1034;IDE0130;AV0027;AV0029;AV0030;</NoWarn>
+		<NoWarn>$(NoWarn);IDE0130;AV0027;AV0029;AV0030;</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />

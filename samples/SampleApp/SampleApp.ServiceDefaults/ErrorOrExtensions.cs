@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,16 +7,13 @@ namespace ErrorOr;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public static class ErrorOrExtensions
 {
-	extension(Error error)
-	{
-		public ProblemDetails ToProblemDetails() =>
-			new()
-			{
-				Status = GetStatusCode(error),
-				Title = error.Code,
-				Detail = error.Description,
-			};
-	}
+	public static ProblemDetails ToProblemDetails(this Error error) =>
+		new()
+		{
+			Status = GetStatusCode(error),
+			Title = error.Code,
+			Detail = error.Description,
+		};
 
 	static int GetStatusCode(Error error)
 	{
