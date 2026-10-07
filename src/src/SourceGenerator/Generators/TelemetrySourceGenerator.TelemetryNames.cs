@@ -169,8 +169,8 @@ partial class TelemetrySourceGenerator
 			assemblyName,
 			names with
 			{
-				ActivitySourceNames = new(activitySourceNames.ToImmutableArray()),
-				MeterNames = new(meterNames.ToImmutableArray()),
+				ActivitySourceNames = new([.. activitySourceNames]),
+				MeterNames = new([.. meterNames]),
 			},
 			context
 		);

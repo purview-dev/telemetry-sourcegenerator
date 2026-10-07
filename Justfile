@@ -204,11 +204,16 @@ code:
     code "{{ root_folder }}"
 
 # Opens the sample solution in the default associated application
-
 [group('Utilities')]
 vs-s:
     echo "Opening {{ BLUE }}{{ sample_solution_file }}{{ NORMAL }}..."
     open "{{ sample_solution_file }}"
+
+# Opens the multiproject sample solution in the default associated application
+[group('Utilities')]
+vs-mp:
+    echo "Opening {{ BLUE }}{{ multiproject_sample_solution_file }}{{ NORMAL }}..."
+    open "{{ multiproject_sample_solution_file }}"
 
 # Clean up the repository by removing build artifacts, bin/obj folders etc, and shutting down the build server
 [group('Utilities')]
