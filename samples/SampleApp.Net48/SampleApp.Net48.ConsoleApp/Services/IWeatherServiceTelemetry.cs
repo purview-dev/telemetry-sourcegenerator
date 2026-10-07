@@ -12,30 +12,30 @@ namespace SampleApp.Net48.ConsoleApp.Services
 	[ActivitySource]
 	[Logger]
 	[Meter]
-	public interface IWeatherServiceTelemetry
+	interface IWeatherServiceTelemetry
 	{
 		// --> MULTI-TARGET: Activity + Info log
 		[Activity(ActivityKind.Client)]
 		[Info]
-		Activity GettingWeatherForecast([Baggage] string requestId, int requestedCount);
+		Activity? GettingWeatherForecast([Baggage] string requestId, int requestedCount);
 
 		// --> SINGLE-TARGET: Event
 		[Event]
-		void ForecastReceived(Activity activity, int minTempInC, int maxTempInC);
+		void ForecastReceived(Activity? activity, int minTempInC, int maxTempInC);
 
 		// --> SINGLE-TARGET: Event (Error)
 		[Event(ActivityStatusCode.Error)]
-		void FailedToRetrieveForecast(Activity activity, Exception ex);
+		void FailedToRetrieveForecast(Activity? activity, Exception ex);
 
 		// --> SINGLE-TARGET: Event (Ok)
 		[Event(ActivityStatusCode.Ok)]
-		void TemperaturesReceived(Activity activity, TimeSpan elapsed);
+		void TemperaturesReceived(Activity? activity, TimeSpan elapsed);
 
 		// --> MULTI-TARGET: AutoCounter + Warning log + Event
 		[AutoCounter]
 		[Warning]
 		[Event]
-		void ItsTooCold(Activity activity, int minTempInC, int tooColdCount);
+		void ItsTooCold(Activity? activity, int minTempInC, int tooColdCount);
 
 		// --> SINGLE-TARGET: Histogram
 		[Histogram]
