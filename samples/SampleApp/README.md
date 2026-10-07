@@ -150,7 +150,7 @@ public interface IWeatherAPIClientTelemetry
 5. **`[ExcludeTargets]`** — exclude a parameter from specific telemetry types in multi-target methods
 6. **`[ExpandEnumerable]`** — log individual array/IEnumerable elements as separate properties
 7. **DI registration** — generated `Add*Telemetry()` extension methods
-8. **`TelemetryNames`** — opt-in generated static class aggregating this project's meter and activity source names with those of every assembly it references (e.g. `SampleApp.Shared`), for OTel registration
+8. **`TelemetryNames`** — opt-in generated static class aggregating this project's meter and activity source names with those of every assembly it references (`SampleApp.Shared` owns and uses its own telemetry, and the hosts pick its names up through the project reference), for OTel registration
 9. **Unit testing** — mock telemetry interfaces with NSubstitute; see `SampleApp.APIService.UnitTests`
 
 ## Project Structure
@@ -179,7 +179,8 @@ SampleApp/
 │   │   └── AssemblyInfo.cs
 │   └── Program.cs
 ├── SampleApp.ServiceDefaults/              # OpenTelemetry, health checks, resilience
-├── SampleApp.Shared/                       # WeatherForecast DTO + library-owned ActivitySource
+├── SampleApp.Shared/                       # WeatherForecast DTO + library-owned telemetry (IWeatherForecastTelemetry,
+│                                           #   consumed by WeatherForecastValidator)
 └── SampleApp.APIService.UnitTests/         # Unit tests with telemetry mocking
 ```
 
@@ -245,7 +246,7 @@ obj/Release/net10.0/generated/Purview.Telemetry.SourceGenerator/Purview.Telemetr
   SampleApp.Web.TelemetryNames.g.cs
 ```
 
-`GeneratedTelemetryNames.g.cs` records the project's names in its assembly metadata — `SampleApp.Shared` gets one of these too, which is how its `sample-shared-library` ActivitySource reaches the hosts. `TelemetryNames.g.cs` is the opt-in aggregate (`[assembly: TelemetryGeneration(GenerateTelemetryNamesClass = true)]`) whose arrays `Program.cs` passes to OpenTelemetry:
+`GeneratedTelemetryNames.g.cs` records the project's names in its assembly metadata — `SampleApp.Shared` gets one of these too, which is how its `IWeatherForecastTelemetry` ActivitySource and Meter (both named `SampleApp.Shared`) reach the hosts. `TelemetryNames.g.cs` is the opt-in aggregate (`[assembly: TelemetryGeneration(GenerateTelemetryNamesClass = true)]`) whose arrays `Program.cs` passes to OpenTelemetry:
 
 ```csharp
 builder.AddServiceDefaults(TelemetryNames.MeterNames, TelemetryNames.ActivitySourceNames);

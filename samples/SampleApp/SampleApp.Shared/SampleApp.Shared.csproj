@@ -1,10 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-		<!-- This library only ships tracing, so the logging support (and its dependency on
-		     Microsoft.Extensions.Logging.Abstractions) is excluded. -->
+		<!-- This library ships tracing and metrics but no logging, so the logging support (and its
+		     dependency on Microsoft.Extensions.Logging.Abstractions) is excluded. -->
 		<DefineConstants>$(DefineConstants);EXCLUDE_PURVIEW_TELEMETRY_LOGGING</DefineConstants>
 	</PropertyGroup>
+	<ItemGroup>
+		<!-- The generated metric class takes an IMeterFactory, and the generated dependency-injection
+		     extension needs the service-collection abstractions. -->
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.Abstractions" />
+	</ItemGroup>
 	<ItemGroup>
 		<!-- The generator and its Purview.SourceGeneratorFramework runtime dependencies are resolved
 		     from the generator's build output via the SDK's GetSourceGeneratorAnalyzerFiles target,

@@ -3,7 +3,11 @@ using System.Security.Cryptography;
 
 namespace SampleApp.APIService.Services;
 
-sealed class WeatherService(IWeatherServiceTelemetry telemetry, Func<int>? rng = null) : IWeatherService
+sealed class WeatherService(
+	IWeatherServiceTelemetry telemetry,
+	WeatherForecastValidator validator,
+	Func<int>? rng = null
+) : IWeatherService
 {
 	const int TooColdTempInC = -10;
 
@@ -75,22 +79,29 @@ sealed class WeatherService(IWeatherServiceTelemetry telemetry, Func<int>? rng =
 			})
 			.ToArray();
 
-		foreach (var wf in results)
+		// The shared library owns this validation and its own telemetry. This host never registers
+		// SampleApp.Shared's activity source or meter — they arrive in TelemetryNames through the
+		// project reference.
+		var forecasts = validator.Validate(results);
+		if (forecasts.Count == 0)
+			return Error.Failure("WeatherForecast.Implausible", "No plausible weather forecasts were produced.");
+
+		foreach (var wf in forecasts)
 			telemetry.HistogramOfTemperature(wf.TemperatureC);
 
-		var minTempInC = results.Min(m => m.TemperatureC);
+		var minTempInC = forecasts.Min(m => m.TemperatureC);
 
 		// MULTI-TARGET: This single call adds event to activity + logs info
-		telemetry.ForecastReceived(activity, minTempInC, results.Max(wf => wf.TemperatureC));
+		telemetry.ForecastReceived(activity, minTempInC, forecasts.Max(wf => wf.TemperatureC));
 
 		if (minTempInC < TooColdTempInC)
 		{
 			// MULTI-TARGET: This single call increments counter + logs warning
-			telemetry.ItsTooCold(activity, minTempInC, results.Count(wf => wf.TemperatureC < TooColdTempInC));
+			telemetry.ItsTooCold(activity, minTempInC, forecasts.Count(wf => wf.TemperatureC < TooColdTempInC));
 		}
 		else
 		{
-			telemetry.TemperaturesWithinRange([.. results.Select(m => m.TemperatureC)]);
+			telemetry.TemperaturesWithinRange([.. forecasts.Select(m => m.TemperatureC)]);
 		}
 
 		sw.Stop();
@@ -98,7 +109,7 @@ sealed class WeatherService(IWeatherServiceTelemetry telemetry, Func<int>? rng =
 		// MULTI-TARGET: This single call adds OK event to activity + logs info
 		telemetry.TemperaturesReceived(activity, sw.Elapsed);
 
-		return results.ToArray();
+		return forecasts.ToArray();
 	}
 
 	bool ShouldThrow()

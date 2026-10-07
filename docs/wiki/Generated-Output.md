@@ -254,14 +254,14 @@ namespace SampleApp.APIService
 {
 	public static partial class TelemetryNames
 	{
-		public static readonly string[] MeterNames = new string[] { "SampleApp.APIService" };
+		public static readonly string[] MeterNames = new string[] { "SampleApp.APIService", "SampleApp.Shared" };
 
-		public static readonly string[] ActivitySourceNames = new string[] { "SampleApp.APIService", "sample-shared-library" };
+		public static readonly string[] ActivitySourceNames = new string[] { "SampleApp.APIService", "SampleApp.Shared" };
 	}
 }
 ```
 
-`sample-shared-library` comes from the referenced `SampleApp.Shared` project: the class aggregates this assembly's names with the names recorded by everything it references. See [Generation](Generation.md#telemetry-names).
+`SampleApp.Shared` comes from the referenced project of the same name, whose `IWeatherForecastTelemetry` declares an ActivitySource and a Meter: the class aggregates this assembly's names with the names recorded by everything it references. See [Generation](Generation.md#telemetry-names).
 
 ## See also
 
