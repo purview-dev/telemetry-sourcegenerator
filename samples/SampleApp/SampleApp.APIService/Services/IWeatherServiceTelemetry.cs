@@ -13,7 +13,7 @@ namespace SampleApp.APIService.Services;
 [ActivitySource]
 [Logger]
 [Meter]
-public interface IWeatherServiceTelemetry
+interface IWeatherServiceTelemetry
 {
 	// --> MULTI-TARGET: Activity, with Trace log entry
 	// Single Activity method
@@ -26,7 +26,7 @@ public interface IWeatherServiceTelemetry
 	void ForecastReceived(Activity? activity, int minTempInC, int maxTempInC);
 
 	// --> SINGLE-TARGET: Event (Error)
-	[Event(ActivityStatusCode.Error)]
+	[Event("exception", StatusCode = ActivityStatusCode.Error)]
 	void FailedToRetrieveForecast(Activity? activity, Exception exception);
 
 	// --> SINGLE-TARGET: Event (Ok)

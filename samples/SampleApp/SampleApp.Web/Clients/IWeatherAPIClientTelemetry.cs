@@ -7,14 +7,14 @@ namespace SampleApp.Web.Clients;
 [ActivitySource]
 [Logger]
 [Meter(InstrumentPrefix = "weather")]
-public interface IWeatherAPIClientTelemetry
+interface IWeatherAPIClientTelemetry
 {
 	[Activity(ActivityKind.Client)]
 	[Info]
 	[AutoCounter]
 	Activity? GetWeatherForecasts(int? count);
 
-	[Event]
+	[Event("exception")]
 	[Error]
 	[AutoCounter]
 	void FailedToGetForecast(Activity? activity, Exception ex, [ExcludeTargets(Targets.Activities)] int? count);

@@ -1,6 +1,6 @@
-﻿namespace SampleApp.APIService.Services;
+namespace SampleApp.APIService.Services;
 
-public interface IWeatherService
+interface IWeatherService
 {
 	Task<ErrorOr<IEnumerable<WeatherForecast>>> GetWeatherForecastsAsync(
 		int requestCount,
