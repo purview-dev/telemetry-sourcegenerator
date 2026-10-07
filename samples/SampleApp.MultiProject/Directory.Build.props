@@ -1,0 +1,19 @@
+<Project>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<NamespacePrefix>SampleApp.MultiProject</NamespacePrefix>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<!--
+			This comes from Purview.BuildSdk where we auto include the
+			telemetry... the samples consume the local generator via analyzer
+			ProjectReference, so the published package is excluded here.
+		-->
+		<ExcludePurviewTelemetry>true</ExcludePurviewTelemetry>
+		<!--
+			CA1303: console sample — no resource table needed for literal strings.
+		-->
+		<NoWarn>$(NoWarn);CA1303;</NoWarn>
+	</PropertyGroup>
+
+	<Import Sdk="Purview.BuildSdk" Project="Sdk.props" />
+</Project>

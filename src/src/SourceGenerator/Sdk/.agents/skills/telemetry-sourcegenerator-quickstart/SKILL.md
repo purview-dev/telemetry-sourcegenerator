@@ -121,11 +121,18 @@ public class OrderService(IOrderServiceTelemetry telemetry)
 
 ## Register names with OpenTelemetry
 
-The generator also produces a `TelemetryNames` static class containing the meter and activity source names:
+The generator records the generated meter and activity source names in every assembly's metadata via `[assembly: GeneratedTelemetryNames]`. In the project that registers them with OpenTelemetry, opt into the `TelemetryNames` class — it aggregates that project's names with the names recorded by every assembly it references:
+
+```csharp
+// Program.cs or Properties/AssemblyInfo.cs of the host project
+[assembly: TelemetryGeneration(GenerateTelemetryNamesClass = true)]
+```
 
 ```csharp
 builder.AddServiceDefaults(TelemetryNames.MeterNames, TelemetryNames.ActivitySourceNames);
 ```
+
+Libraries need no configuration: they publish their names through the attribute, and the host picks them up. A project referenced *by* the telemetry owners (an Aspire-style `ServiceDefaults`) cannot aggregate them — generate the class in the host and pass the arrays down.
 
 ## Next steps
 

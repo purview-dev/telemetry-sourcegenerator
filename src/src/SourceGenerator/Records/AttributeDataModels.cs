@@ -55,9 +55,11 @@ readonly partial record struct TelemetryGenerationAttributeData(
 	[Argument("dependencyInjectionClassName")] [Property] string? DependencyInjectionClassName,
 	[Property(DefaultValue = false)] bool DependencyInjectionClassIsPublic,
 	[Property(DefaultValue = 1)] int NamingConvention,
-	[Property(DefaultValue = true)] bool GenerateTelemetryNamesClass,
+	[Property(DefaultValue = true)] bool GenerateTelemetryNamesAttribute,
+	[Property(DefaultValue = false)] bool GenerateTelemetryNamesClass,
 	[Property] string? TelemetryNamesClassName,
-	[Property] string? TelemetryNamesNamespace
+	[Property] string? TelemetryNamesNamespace,
+	[Property(DefaultValue = true)] bool AggregateReferencedTelemetryNames
 );
 
 [Generate("Purview.Telemetry.TagAttribute")]

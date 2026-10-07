@@ -31,6 +31,10 @@ static class GeneratedTypesEmitter
 				)
 		);
 		yield return (TypeLibrary.Purview.Telemetry.TelemetryGenerationAttribute, WriteTelemetryGenerationAttribute);
+		yield return (
+			TypeLibrary.Purview.Telemetry.GeneratedTelemetryNamesAttribute,
+			WriteGeneratedTelemetryNamesAttribute
+		);
 		yield return (TypeLibrary.Purview.Telemetry.Targets, WriteTargetsEnum);
 		yield return (TypeLibrary.Purview.Telemetry.NamingConvention, WriteNamingConventionEnum);
 		yield return (TypeLibrary.Purview.Telemetry.ExcludeTargetsAttribute, WriteExcludeTargetsAttribute);
@@ -216,7 +220,8 @@ static class GeneratedTypesEmitter
 		Action<CodeWriter> body,
 		string summary,
 		bool wrapInExcludeLoggingGuard = false,
-		bool includeSuppressMessage = true
+		bool includeSuppressMessage = true,
+		bool includeConditional = true
 	)
 	{
 #if DEBUG
@@ -229,7 +234,8 @@ static class GeneratedTypesEmitter
 			: writer.EmptyScope();
 
 		var attributes = ImmutableArray<AttributeDeclarationOptions>.Empty;
-		attributes = attributes.Add(ConditionalAttribute());
+		if (includeConditional)
+			attributes = attributes.Add(ConditionalAttribute());
 		if (includeSuppressMessage)
 			attributes = attributes.Add(SuppressMessageAttribute());
 
@@ -572,10 +578,17 @@ static class GeneratedTypesEmitter
 				);
 				WritePublicProperty(
 					body,
+					"GenerateTelemetryNamesAttribute",
+					TypeLibrary.System.Boolean,
+					"Determines whether the assembly-level attribute recording the generated telemetry names is emitted. Defaults to <see langword=\"true\"/>, so downstream assemblies can aggregate the names of everything they reference.",
+					"true"
+				);
+				WritePublicProperty(
+					body,
 					"GenerateTelemetryNamesClass",
 					TypeLibrary.System.Boolean,
-					"Determines whether a telemetry names class is generated.",
-					"true"
+					"Determines whether a telemetry names class is generated. Defaults to <see langword=\"false\"/>; the generated names are always recorded in assembly metadata, so only the project that registers them with OpenTelemetry needs the class.",
+					"false"
 				);
 				WriteNullableStringProperty(
 					body,
@@ -587,8 +600,70 @@ static class GeneratedTypesEmitter
 					"TelemetryNamesNamespace",
 					"The namespace of the generated telemetry names class."
 				);
+				WritePublicProperty(
+					body,
+					"AggregateReferencedTelemetryNames",
+					TypeLibrary.System.Boolean,
+					"Determines whether the generated telemetry names class includes the names generated for referenced assemblies, in addition to this assembly's own names.",
+					"true"
+				);
 			},
 			"Specifies the telemetry generation behaviour for an interface or assembly."
+		);
+	}
+
+	/// <summary>
+	/// Writes the attribute the generator applies to the assembly, recording the activity source and
+	/// meter names generated for it. Unlike every other marker attribute this one is deliberately
+	/// <em>not</em> <c>[Conditional]</c>: the applied attribute has to survive into the assembly's
+	/// metadata so downstream compilations can read the names back out and aggregate them.
+	/// </summary>
+	static void WriteGeneratedTelemetryNamesAttribute(CodeWriter writer, TypeIdentity type)
+	{
+		var stringArrayType = TypeLibrary.System.String.AsTypeReference().MakeArray();
+
+		EmitAttribute(
+			writer,
+			type,
+			AttributeTargets.Assembly,
+			body =>
+			{
+				body.XmlSummary(
+						$"Constructs a new instance specifying the {XmlSee("ActivitySourceNames")} and {XmlSee("MeterNames")}."
+					)
+					.XmlParam("activitySourceNames", $"The {XmlSee("ActivitySourceNames")}.")
+					.XmlParam("meterNames", $"The {XmlSee("MeterNames")}.")
+					.Constructor(
+						new(type.Name, TypeDeclarationAccessibility.Public)
+						{
+							Parameters =
+							[
+								new("activitySourceNames", stringArrayType),
+								new("meterNames", stringArrayType),
+							],
+						},
+						ctor =>
+						{
+							ctor.Assignment("ActivitySourceNames", "activitySourceNames");
+							ctor.Assignment("MeterNames", "meterNames");
+						}
+					);
+
+				WritePublicProperty(
+					body,
+					"ActivitySourceNames",
+					stringArrayType,
+					"Gets the names of the activity sources generated for the assembly."
+				);
+				WritePublicProperty(
+					body,
+					"MeterNames",
+					stringArrayType,
+					"Gets the names of the meters generated for the assembly."
+				);
+			},
+			summary: "Records the activity source and meter names generated for an assembly, so a downstream assembly can aggregate the names of everything it references.",
+			includeConditional: false
 		);
 	}
 

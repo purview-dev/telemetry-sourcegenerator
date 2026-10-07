@@ -1,1 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" />
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<!-- This library only ships tracing, so the logging support (and its dependency on
+		     Microsoft.Extensions.Logging.Abstractions) is excluded. -->
+		<DefineConstants>$(DefineConstants);EXCLUDE_PURVIEW_TELEMETRY_LOGGING</DefineConstants>
+	</PropertyGroup>
+	<ItemGroup>
+		<!-- The generator and its Purview.SourceGeneratorFramework runtime dependencies are resolved
+		     from the generator's build output via the SDK's GetSourceGeneratorAnalyzerFiles target,
+		     always built with the referencing configuration, so no bin/ paths are hard-coded. -->
+		<ProjectReference
+			Include="..\..\..\src\src\SourceGenerator\SourceGenerator.csproj"
+			OutputItemType="Analyzer"
+			ReferenceOutputAssembly="false"
+		/>
+	</ItemGroup>
+</Project>

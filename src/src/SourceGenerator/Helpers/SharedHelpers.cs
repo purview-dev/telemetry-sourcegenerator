@@ -113,9 +113,11 @@ static partial class SharedHelpers
 		DependencyInjectionClassName: null,
 		DependencyInjectionClassIsPublic: false,
 		NamingConvention: 1, // Default to OpenTelemetry
-		GenerateTelemetryNamesClass: true,
+		GenerateTelemetryNamesAttribute: true,
+		GenerateTelemetryNamesClass: false,
 		TelemetryNamesClassName: null,
-		TelemetryNamesNamespace: null
+		TelemetryNamesNamespace: null,
+		AggregateReferencedTelemetryNames: true
 	);
 
 	public static TelemetryGenerationAttributeData GetTelemetryGenerationAttribute(

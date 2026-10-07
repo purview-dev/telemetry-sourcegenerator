@@ -39,6 +39,8 @@ All `just` recipes read the repository's [`Justfile`](Justfile). Configuration d
 | `just test` | Runs the test solution (Debug) with a tree-node filter. |
 | `just build-s` | Builds `samples/SampleApp/SampleApp.slnx`. |
 | `just test-s` | Runs the sample test solution. |
+| `just build-mp` | Builds `samples/SampleApp.MultiProject/SampleApp.MultiProject.slnx`. |
+| `just run-mp` | Runs the multi-project sample, printing the aggregated telemetry names. |
 | `just clean` | Cleans the main solution. |
 | `just restore` | Restores packages for the main solution. |
 | `just scrub` | Removes `bin`/`obj` folders, cleans, restores, and shuts down build servers. |
@@ -62,7 +64,7 @@ conventional-commits check.
 | `just update-version` | Runs `.build/update-version.ts` to sync the version into docs/samples. |
 | `just pack` | Updates the version then packs the NuGet package into `artifacts/`. |
 
-The version lives in `package.json`. **Current Version:** 5.0.0 — applied to `Version` /
+The version lives in `package.json`. **Current Version:** 5.0.2 — applied to `Version` /
 `PackageVersion` via the SDK's package.json version detection.
 
 ### Pipelines (reusable `purview-build` tool)
@@ -114,6 +116,8 @@ src/
 samples/
 ├── SampleApp/                              # .NET Aspire demo (AppHost, APIService, Web, Shared, ServiceDefaults, UnitTests)
 │   └── SampleApp.slnx
+├── SampleApp.MultiProject/                 # .NET 10 console demo of TelemetryNames aggregation across projects
+│   └── SampleApp.MultiProject.slnx         #   (Observability, Notifications, Payments, Ordering, ConsoleApp)
 └── SampleApp.Net48/                        # .NET Framework 4.8 console demo
     └── SampleApp.Net48.slnx
 

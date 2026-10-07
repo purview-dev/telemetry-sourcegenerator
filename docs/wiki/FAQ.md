@@ -204,6 +204,28 @@ interface IOrderMetrics
 
 The default `MeterNameGenerationType.DotNet` does not add the meter-name prefix. See [Metrics](Metrics.md#meter-naming).
 
+## Registering names
+
+### How do I register the names from every project in a large solution?
+
+Each assembly records its own generated names in metadata (`[assembly: GeneratedTelemetryNames]`), and the `TelemetryNames` class aggregates them across the reference graph. Opt the project that registers telemetry into the class:
+
+```csharp
+[assembly: TelemetryGeneration(GenerateTelemetryNamesClass = true)]
+```
+
+```csharp
+builder.AddServiceDefaults(TelemetryNames.MeterNames, TelemetryNames.ActivitySourceNames);
+```
+
+Libraries need no configuration at all, however many of them there are and however complex their telemetry. The aggregate is built at compile time, so it is safe under trimming and native AOT, and it covers transitive references too.
+
+`samples/SampleApp.MultiProject` is a runnable example: four assemblies own telemetry, two of them only transitively referenced by the host, and one `ServiceDefaults`-style project receives the complete set of names (`just run-mp`).
+
+### Why can't my `ServiceDefaults` project generate the names itself?
+
+Because of the reference direction: an Aspire-style `ServiceDefaults` is referenced *by* the projects that own the telemetry, so their assemblies are not in its reference graph. Generate the class in each host (executable) project and pass the arrays into `ServiceDefaults`, as the [sample application](Sample-Application.md#registering-names-with-aspire) does.
+
 ## Multi-targeting
 
 ### Can I generate Activities, Logging, AND Metrics from one interface?

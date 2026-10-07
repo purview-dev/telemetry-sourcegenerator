@@ -31,9 +31,11 @@ interface IOrderServiceTelemetry { }
 | `DependencyInjectionClassName` | `null` | Overrides the DI extension class name. When unset, the name is `{implementationClassName}DIExtension`. |
 | `DependencyInjectionClassIsPublic` | `false` | When `true` the DI extension class is `public`; otherwise it is `internal`. |
 | `NamingConvention` | `NamingConvention.OpenTelemetry` | Controls generated telemetry names; see [Naming conventions](#naming-conventions). |
-| `GenerateTelemetryNamesClass` | `true` | When `false`, suppresses the whole-assembly `TelemetryNames` class. |
+| `GenerateTelemetryNamesAttribute` | `true` | Emits the assembly-level `[GeneratedTelemetryNames]` attribute recording this assembly's generated names, so downstream assemblies can aggregate them. Set to `false` to keep the names out of the assembly's metadata. |
+| `GenerateTelemetryNamesClass` | `false` | When `true`, emits the whole-assembly `TelemetryNames` class. Opt-in: the names are already recorded in assembly metadata, so only the project that registers them needs the class. |
 | `TelemetryNamesClassName` | `null` | Custom name for the `TelemetryNames` class (default `TelemetryNames`). |
 | `TelemetryNamesNamespace` | `null` | When set, relocates the implementation classes, the DI extension class, and the `TelemetryNames` class into this namespace. |
+| `AggregateReferencedTelemetryNames` | `true` | When `true`, the `TelemetryNames` class also includes the names recorded by referenced assemblies. Set to `false` for this assembly's names only. |
 
 Resolution order is interface-level first, then assembly-level, then built-in defaults.
 
@@ -84,9 +86,21 @@ public static class OrderServiceTelemetryCoreDIExtension
 - The generated registration is `services.AddSingleton<IFace, Impl>()`.
 - Set `GenerateDependencyExtension = false` to disable it, or `DependencyInjectionClassIsPublic = true` to make the class public.
 
-## The `TelemetryNames` class
+## Telemetry names
 
-When a compilation contains at least one `[ActivitySource]` or `[Meter]` target, the generator emits a single `TelemetryNames` static class per assembly with the distinct source names:
+### `[assembly: GeneratedTelemetryNames]`
+
+When a compilation contains at least one `[ActivitySource]` or `[Meter]` target, the generator records that assembly's distinct source names in an assembly-level attribute:
+
+```csharp
+[assembly: GeneratedTelemetryNames(new string[] { "MyApp.Orders" }, new string[] { "MyApp.Orders" })]
+```
+
+This is emitted for every assembly by default (`GenerateTelemetryNamesAttribute = true`) and needs no configuration. It is a compile-time record — no reflection and no assembly scanning — so it works under trimming and native AOT, and it is what lets one project collect the names of everything it references. Set `GenerateTelemetryNamesAttribute = false` to keep an assembly's names out of its metadata.
+
+### The `TelemetryNames` class
+
+Set `GenerateTelemetryNamesClass = true` to also emit a static class of names, aggregating this assembly's names with the names recorded by every referenced assembly:
 
 ```csharp
 public static class TelemetryNames
@@ -102,7 +116,19 @@ It is used to register names with OpenTelemetry/ServiceDefaults:
 builder.AddServiceDefaults(TelemetryNames.MeterNames, TelemetryNames.ActivitySourceNames);
 ```
 
-Control it with `GenerateTelemetryNamesClass`, `TelemetryNamesClassName`, and `TelemetryNamesNamespace`.
+The class is opt-in because only the project that registers the names needs it. Turn it on in the executable or host project — the libraries it references publish their names through the attribute:
+
+```csharp
+// Program.cs or Properties/AssemblyInfo.cs of the host project
+[assembly: TelemetryGeneration(GenerateTelemetryNamesClass = true)]
+```
+
+The names are deduplicated and ordered, and the aggregate covers the whole reference graph that the compiler was handed — which includes transitive project and package references in a normal MSBuild build.
+
+> [!NOTE]
+> The reference direction still applies: an Aspire-style `ServiceDefaults` project is referenced *by* the projects that own the telemetry, so it cannot aggregate them. Generate the class in the host project and pass the arrays into `ServiceDefaults`, as the [sample application](Sample-Application.md) does.
+
+Control the two outputs with `GenerateTelemetryNamesAttribute` (default `true`) and `GenerateTelemetryNamesClass` (default `false`), plus `TelemetryNamesClassName`, `TelemetryNamesNamespace`, and `AggregateReferencedTelemetryNames` for the class.
 
 ## `[Exclude]`
 

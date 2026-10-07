@@ -28,7 +28,7 @@ interface IEntityStoreTelemetry
 }
 ```
 
-generates one partial `EntityStoreTelemetryCore` class split across Activity, Logging, and Metric files, plus a DI extension class and an assembly-level `TelemetryNames` class.
+generates one partial `EntityStoreTelemetryCore` class split across Activity, Logging, and Metric files, plus a DI extension class and an assembly-level `[GeneratedTelemetryNames]` attribute recording the generated names.
 
 > [!NOTE]
 > To inspect the generated output in your own project, enable `EmitCompilerGeneratedFiles` and look under `obj/<Configuration>/<tfm>/generated/Purview.Telemetry.SourceGenerator/Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator/`.
@@ -237,7 +237,17 @@ namespace Microsoft.Extensions.DependencyInjection
 }
 ```
 
+## Recorded names (`SampleApp.APIService.GeneratedTelemetryNames.g.cs`)
+
+```csharp
+[assembly: global::Purview.Telemetry.GeneratedTelemetryNamesAttribute(new string[] { "SampleApp.APIService" }, new string[] { "SampleApp.APIService" })]
+```
+
+Emitted for every assembly that generates an ActivitySource or a Meter, so downstream assemblies can read the names back out of metadata. Both names default to the assembly name here; an assembly-level `[ActivitySourceGeneration]` or `[MeterGeneration]`, or a name on the interface attribute, overrides them.
+
 ## Telemetry names (`SampleApp.APIService.TelemetryNames.g.cs`)
+
+Opt in with `[assembly: TelemetryGeneration(GenerateTelemetryNamesClass = true)]`:
 
 ```csharp
 namespace SampleApp.APIService
@@ -246,12 +256,12 @@ namespace SampleApp.APIService
 	{
 		public static readonly string[] MeterNames = new string[] { "SampleApp.APIService" };
 
-		public static readonly string[] ActivitySourceNames = new string[] { "sample-weather-app-api" };
+		public static readonly string[] ActivitySourceNames = new string[] { "SampleApp.APIService", "sample-shared-library" };
 	}
 }
 ```
 
-The assembly-level `[assembly: ActivitySourceGeneration("sample-weather-app-api")]` supplies the ActivitySource name; the meter name defaults to the assembly name.
+`sample-shared-library` comes from the referenced `SampleApp.Shared` project: the class aggregates this assembly's names with the names recorded by everything it references. See [Generation](Generation.md#telemetry-names).
 
 ## See also
 

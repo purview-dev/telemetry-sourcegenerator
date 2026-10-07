@@ -30,6 +30,13 @@
 	</ItemGroup>
 	<ItemGroup Label="Samples">
 		<PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="$(DotnetRuntimeVersion)" />
+		<PackageVersion
+			Include="Microsoft.Extensions.DependencyInjection.Abstractions"
+			Version="$(DotnetRuntimeVersion)"
+		/>
+		<PackageVersion Include="Microsoft.Extensions.Diagnostics" Version="$(DotnetRuntimeVersion)" />
+		<PackageVersion Include="Microsoft.Extensions.Diagnostics.Abstractions" Version="$(DotnetRuntimeVersion)" />
+		<PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(DotnetRuntimeVersion)" />
 		<PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="$(MSExtensionVersion)" />
 		<PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="$(MSExtensionVersion)" />
 		<PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="$(OpenTelemetryVersion)" />

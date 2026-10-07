@@ -122,6 +122,12 @@ services.AddOrderServiceTelemetry();
 
 ### .NET Aspire
 
+Opt the host project into the `TelemetryNames` class — it aggregates the names of every assembly it references — then pass the arrays into `ServiceDefaults`:
+
+```csharp
+[assembly: TelemetryGeneration(GenerateTelemetryNamesClass = true)]
+```
+
 ```csharp
 builder.AddServiceDefaults(TelemetryNames.MeterNames, TelemetryNames.ActivitySourceNames);
 ```

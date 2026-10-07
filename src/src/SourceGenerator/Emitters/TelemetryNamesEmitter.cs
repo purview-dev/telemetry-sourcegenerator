@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Records;
 
@@ -6,24 +5,46 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 
 static class TelemetryNamesEmitter
 {
+	/// <summary>
+	/// Emits <c>[assembly: GeneratedTelemetryNames]</c> with the names generated for this assembly.
+	/// The attribute is the compile-time record downstream assemblies read to build their aggregate.
+	/// </summary>
+	public static void GenerateAssemblyAttribute(TelemetryNamesOutputContext output, SourceProductionContext spc)
+	{
+		output.Context.Debug($"Generating the telemetry names attribute for '{output.AssemblyName}'.");
+
+		var writer = output.CreateWriter();
+
+		var attributeType = TypeLibrary.Purview.Telemetry.GeneratedTelemetryNamesAttribute.RenderFullName;
+		var activitySourceNames = BuildAttributeArrayArgument(output.Names.ActivitySourceNames);
+		var meterNames = BuildAttributeArrayArgument(output.Names.MeterNames);
+
+		writer.Line($"[assembly: {attributeType}({activitySourceNames}, {meterNames})]");
+
+		var hintName = string.IsNullOrWhiteSpace(output.AssemblyName)
+			? "GeneratedTelemetryNames.g.cs"
+			: $"{output.AssemblyName}.GeneratedTelemetryNames.g.cs";
+
+		spc.AddSource(hintName, writer);
+	}
+
 	public static void GenerateClass(
 		TelemetryNamesOutputContext output,
-		ImmutableArray<string> meterNames,
-		ImmutableArray<string> activitySourceNames,
 		string className,
 		string? rootNamespace,
-		SourceProductionContext spc,
-		GenerationContext<TelemetryCapabilities> generationContext
+		SourceProductionContext spc
 	)
 	{
-		generationContext.Debug($"Generating Telemetry Names using class '{className}'.");
+		output.Context.Debug($"Generating Telemetry Names using class '{className}'.");
 
 		var writer = output.CreateWriter();
 		var hasNamespace = !string.IsNullOrWhiteSpace(rootNamespace);
 
 		using (writer.BlockNamespaceScope(rootNamespace))
 		{
-			writer.XmlSummary("Contains the names of the meters and activity sources generated for the assembly.");
+			writer.XmlSummary(
+				"Contains the names of the meters and activity sources generated for the assembly, and for the assemblies it references."
+			);
 			using (
 				writer.ClassScope(
 					new(className)
@@ -42,7 +63,7 @@ static class TelemetryNamesEmitter
 					{
 						IsStatic = true,
 						IsReadOnly = true,
-						Initializer = BuildArrayInitializer(meterNames),
+						Initializer = BuildArrayInitializer(output.Names.MeterNames),
 						IncludeGeneratedAttributes = true,
 					}
 				);
@@ -53,7 +74,7 @@ static class TelemetryNamesEmitter
 					{
 						IsStatic = true,
 						IsReadOnly = true,
-						Initializer = BuildArrayInitializer(activitySourceNames),
+						Initializer = BuildArrayInitializer(output.Names.ActivitySourceNames),
 						IncludeGeneratedAttributes = true,
 					}
 				);
@@ -67,8 +88,17 @@ static class TelemetryNamesEmitter
 		spc.AddSource(hintName, writer);
 	}
 
-	static string BuildArrayInitializer(ImmutableArray<string> values) =>
-		values.Length == 0
-			? "global::System.Array.Empty<string>()"
-			: "new string[] { " + string.Join(", ", values.Select(v => "\"" + v + "\"")) + " }";
+	/// <summary>
+	/// Builds the array argument for the assembly attribute. Attribute arguments must be constant
+	/// expressions, so an empty array is written as <c>new string[0]</c> rather than
+	/// <c>Array.Empty&lt;string&gt;()</c>.
+	/// </summary>
+	static string BuildAttributeArrayArgument(EquatableArray<string> values) =>
+		values.IsEmpty ? "new string[0]" : BuildArray(values);
+
+	static string BuildArrayInitializer(EquatableArray<string> values) =>
+		values.IsEmpty ? "global::System.Array.Empty<string>()" : BuildArray(values);
+
+	static string BuildArray(EquatableArray<string> values) =>
+		"new string[] { " + string.Join(", ", values.Select(static v => "\"" + v + "\"")) + " }";
 }
