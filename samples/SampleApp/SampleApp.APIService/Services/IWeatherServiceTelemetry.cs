@@ -13,7 +13,7 @@ namespace SampleApp.APIService.Services;
 [ActivitySource]
 [Logger]
 [Meter]
-public interface IWeatherServiceTelemetry
+interface IWeatherServiceTelemetry
 {
 	// --> MULTI-TARGET: Activity, with Trace log entry
 	// Single Activity method

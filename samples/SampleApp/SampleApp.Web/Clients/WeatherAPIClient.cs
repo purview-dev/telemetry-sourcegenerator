@@ -4,7 +4,7 @@ namespace SampleApp.Web.Clients;
 /// Typed HTTP client for communicating with the Weather API service.
 /// Uses Aspire service discovery and HTTP resiliency (retries, circuit breaker).
 /// </summary>
-public sealed class WeatherAPIClient(HttpClient httpClient, IWeatherAPIClientTelemetry telemetry)
+sealed class WeatherAPIClient(HttpClient httpClient, IWeatherAPIClientTelemetry telemetry)
 {
 	/// <summary>
 	/// Gets weather forecasts from the API service.
