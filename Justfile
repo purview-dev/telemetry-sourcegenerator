@@ -5,8 +5,7 @@ solution_file := root_folder + "Telemetry.SourceGenerator.slnx"
 test_solution := solution_file
 build_configuration := "Debug"
 
-pipeline_feed := "https://api.nuget.org/v3/index.json"
-pipeline_tool := ".tools/purview-build/purview-build"
+pipeline_tool := "dotnet purview-build"
 
 sample_solution_file := "./samples/SampleApp/SampleApp.slnx"
 multiproject_sample_solution_file := "./samples/SampleApp.MultiProject/SampleApp.MultiProject.slnx"
@@ -20,33 +19,31 @@ benchmark_solution := "./benchmarks/Purview.Telemetry.Benchmarks/Purview.Telemet
 default:
     just --list
 
-# Install the shared Purview.Build tool (authenticated to the Purview-Dev feed) if not present
+# Restore the repository's .NET local tools (.config/dotnet-tools.json)
 [private]
 ensure-pipeline-tool:
-    if [ ! -x "{{ pipeline_tool }}" ]; then \
-        dotnet tool install Purview.Build --tool-path .tools/purview-build --add-source "{{ pipeline_feed }}"; \
-    fi
+    dotnet tool restore
 
 # Run the PR pipeline (restore, build, lint, tests)
 [group('Pipeline')]
 pipeline-pr *args:
     just ensure-pipeline-tool
     echo "Running PR pipeline..."
-    "{{ pipeline_tool }}" {{ args }}
+    {{ pipeline_tool }} {{ args }}
 
 # Run the build pipeline (restore, build, lint)
 [group('Pipeline')]
 pipeline-build *args:
     just ensure-pipeline-tool
     echo "Running build pipeline..."
-    "{{ pipeline_tool }}" --Build:RunTests=false --Release:Mode=None {{ args }}
+    {{ pipeline_tool }} --Build:RunTests=false --Release:Mode=None {{ args }}
 
 # Run the release pipeline (restore, build, lint, tests, pack, publish, GitHub release)
 [group('Pipeline')]
 pipeline-release *args:
     just ensure-pipeline-tool
     echo "Running release pipeline..."
-    "{{ pipeline_tool }}" --Release:Mode=NuGet {{ args }}
+    {{ pipeline_tool }} --Release:Mode=NuGet {{ args }}
 
 # Run the release pipeline (restore, build, lint, tests, pack, local nuget publish)
 # Note: `just` runs recipes through the shell, which strips backslashes from unquoted arguments.
@@ -56,21 +53,21 @@ pipeline-release *args:
 pipeline-local-release *args:
     just ensure-pipeline-tool
     echo "Running local release pipeline..."
-    "{{ pipeline_tool }}" --Release:Mode=LocalNuGet {{ args }}
+    {{ pipeline_tool }} --Release:Mode=LocalNuGet {{ args }}
 
 # Run the pipeline with tests enabled
 [group('Pipeline')]
 pipeline-tests *args:
     just ensure-pipeline-tool
     echo "Running tests pipeline..."
-    "{{ pipeline_tool }}" --Build:RunTests=true --Release:Mode=None {{ args }}
+    {{ pipeline_tool }} --Build:RunTests=true --Release:Mode=None {{ args }}
 
 # Run the pipeline through pack + validate (restore, build, lint, tests, pack, validate pack contents) without publishing/releasing
 [group('Pipeline')]
 pipeline-pack-validate *args:
     just ensure-pipeline-tool
     echo "Running pack + validate pipeline..."
-    "{{ pipeline_tool }}" --Build:RunPack=true --Build:ValidatePack=true --Release:Mode=None {{ args }}
+    {{ pipeline_tool }} --Build:RunPack=true --Build:ValidatePack=true --Release:Mode=None {{ args }}
 
 # -----------------------------------------------------------------------------
 # Build and Test

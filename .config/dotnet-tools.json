@@ -15,6 +15,13 @@
         "dotnet-inspect"
       ],
       "rollForward": false
+    },
+    "purview.build": {
+      "version": "0.5.2",
+      "commands": [
+        "purview-build"
+      ],
+      "rollForward": false
     }
   }
 }
