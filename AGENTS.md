@@ -64,8 +64,9 @@ conventional-commits check.
 | `just update-version` | Runs `.build/update-version.ts` to sync the version into docs/samples. |
 | `just pack` | Updates the version then packs the NuGet package into `artifacts/`. |
 
-The version lives in `package.json`. **Current Version:** 5.0.2 — applied to `Version` /
-`PackageVersion` via the SDK's package.json version detection.
+The version lives in `package.json`. **Current Version:** `*` — read from `package.json` at build
+time and applied to `Version` / `PackageVersion` via the SDK's package.json version detection. Run
+`just version` to print the current value; it is deliberately not duplicated here.
 
 ### Pipelines (reusable `purview-build` tool)
 

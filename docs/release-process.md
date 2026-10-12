@@ -70,7 +70,7 @@ Merging to `main` triggers `release.yml`, which runs the reusable `purview-relea
 
 ## Versioning
 
-- The version lives in `package.json`. **Current Version:** 5.0.2
+- The version lives in `package.json`. **Current Version:** `*` (run `just version` to print it)
 - It is applied to `Version` / `PackageVersion` by `Purview.BuildSdk` via package.json
   version detection (`UsePackageJsonVersion`, default `true`).
 - `just version` prints the current version.
