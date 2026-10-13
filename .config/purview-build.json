@@ -6,6 +6,10 @@
 		"TestFilter": "/*/*/*/*"
 	},
 	"PackValidation": {
+		// Explicit because Purview.Build 0.5.3 defaults RequiredCompilerFlags to empty. Earlier
+		// versions forced this check on and could not be configured off, so these packages have
+		// always been validated against it; declaring it keeps that behaviour.
+		"RequiredCompilerFlags": ["optimization=release"],
 		"RequireSymbolPackage": false,
 		"RequiredContent": {
 			"purview.telemetry.sourcegenerator": [

@@ -15,7 +15,7 @@ Feature branch
 | --- | --- | --- |
 | PR gate | `.github/workflows/pr.yml` | Runs the reusable `purview-dev/build` `purview-build.yml` pipeline (restore, build, lint, tests) and builds/tests the sample solution. |
 | CD pipeline | `.github/workflows/release.yml` | Runs the reusable `purview-dev/build` `purview-release.yml` pipeline on push to `main`. |
-| Local pipeline | `Justfile` `pipeline-*` recipes | Mirror the CI/CD pipelines locally via the `Purview.Build` tool (`.tools/purview-build`). |
+| Local pipeline | `Justfile` `pipeline-*` recipes | Mirror the CI/CD pipelines locally via the `Purview.Build` local tool (`dotnet purview-build`). |
 
 ## Developer workflow
 
@@ -27,7 +27,7 @@ Feature branch
 
 ## Versioning
 
-- The version lives in `package.json`. **Current Version:** 5.0.0
+- The version lives in `package.json`. **Current Version:** `*` (run `just version` to print it)
 - It is applied to `Version`/`PackageVersion` by `Purview.BuildSdk` via package.json version detection.
 - `just version` prints the current version.
 - After bumping `package.json`, run `just update-version` to sync the version into docs/samples.
