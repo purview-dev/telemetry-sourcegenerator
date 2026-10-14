@@ -126,7 +126,8 @@ benchmarks/
 └── Purview.Telemetry.Benchmarks/           # BenchmarkDotNet project (net48/net8.0/net9.0/net10.0)
 
 .build/                                     # TS scripts (build-pack.ts, update-version.ts)
-.agents/                                    # Agent skills/prompts/agents (see "Agent instructions")
+.agents/                                    # Package-delivered skills/prompts/agents (gitignored mirror)
+skills/                                     # Authored skills shipped by this package (see "Authoring skills")
 .config/                                    # dotnet-tools.json, lefthook.yml
 .github/workflows/                          # pr.yml, release.yml (reusable purview-dev/build workflows)
 scripts/                                    # setup-release.* (legacy changesets DSC scripts)
@@ -187,6 +188,29 @@ Load the relevant skill before doing specialist work:
   `.agents/skills/project-placement-defaults/SKILL.md` — `Purview.BuildSdk` configuration,
   project-type detection, and placement rules.
 - `.agents/agents/sdk-consumer-setup.md` — generic agent spec for helping consuming repos adopt the SDK.
+
+Those paths are the **mirrored** copies, delivered by the packages this repository restores. They are
+gitignored; do not edit them here.
+
+## Authoring skills
+
+This repository ships three skills with `Purview.Telemetry.SourceGenerator`:
+`telemetry-sourcegenerator-quickstart`, `telemetry-sourcegenerator-design` and
+`telemetry-sourcegenerator-migration`.
+
+**They are authored in the repository-root `skills/` folder**, not under `Sdk/.agents/skills/`. The skills
+CLI (`npx skills`) only discovers skills at a root `skills/` folder, and `.agents/` is gitignored — so it is
+absent from a git clone and cannot be the published source. One authored copy serves both routes: the git
+clone for the CLI, and the package for the existing `.agents/` mirror.
+
+To add a skill: create `skills/<name>/SKILL.md`, then add the name to `PurviewSkillsToPack` in
+`src/src/SourceGenerator/SourceGenerator.csproj`. A skill not named there is installable from git but ships
+in no package.
+
+Packing is done by the `IncludeRepositorySkillsInPackage` target in `src/Directory.Build.targets`. That is an
+**interim shim**: `global.json` pins `Purview.BuildSdk` 1.0.5, which has no SDK-side equivalent yet. It uses
+the same `PurviewSkillsToPack` property name the newer SDK does, so adopting it means setting
+`PurviewPackRepositorySkills=true` on the same project and deleting the shim.
 
 ## Benchmarking and performance documentation
 
