@@ -25,7 +25,7 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert: GenerateAsync's EnsureValid (default) verifies generated code compiles under C# 7.3.
 		var query = generationResult.Generated();

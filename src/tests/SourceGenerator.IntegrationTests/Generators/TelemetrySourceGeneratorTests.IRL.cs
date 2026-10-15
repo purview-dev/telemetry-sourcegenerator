@@ -83,7 +83,7 @@ public interface ICacheServiceProviderTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicTelemetry,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken

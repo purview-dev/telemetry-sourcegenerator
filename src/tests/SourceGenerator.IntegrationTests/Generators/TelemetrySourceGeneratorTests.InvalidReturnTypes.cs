@@ -26,7 +26,7 @@ public interface IInvalidTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -55,7 +55,7 @@ public interface IInvalidTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -84,7 +84,7 @@ public interface IInvalidTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -113,7 +113,7 @@ public interface IInvalidTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -142,7 +142,7 @@ public interface IInvalidTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -171,7 +171,7 @@ public interface IInvalidTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -201,7 +201,7 @@ public interface IInvalidTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -233,7 +233,7 @@ public interface IInvalidTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -266,7 +266,7 @@ public interface IInvalidTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(code, cancellationToken: cancellationToken);
 
 		// Assert - this should succeed since void-returning logs are valid non-scoped logs
 		var query = generationResult.Generated();
@@ -296,7 +296,7 @@ public interface IInvalidTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -325,7 +325,7 @@ public interface IInvalidTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -360,7 +360,7 @@ public interface IInvalidTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -396,7 +396,7 @@ public interface IInvalidTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -424,7 +424,7 @@ public interface IInvalidTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -452,7 +452,7 @@ public interface IInvalidTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -483,7 +483,7 @@ public interface IInvalidTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -514,7 +514,7 @@ public interface IInvalidTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -545,7 +545,7 @@ public interface IInvalidTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken

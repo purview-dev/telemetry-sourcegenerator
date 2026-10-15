@@ -13,7 +13,6 @@
 		"RequireSymbolPackage": false,
 		"RequiredContent": {
 			"purview.telemetry.sourcegenerator": [
-				".agents/**/*",
 				"analyzers/dotnet/cs/Purview.Telemetry.SourceGenerator.dll",
 				"analyzers/dotnet/cs/Purview.Telemetry.SourceGenerator.Refactorings.dll",
 				"README.md",

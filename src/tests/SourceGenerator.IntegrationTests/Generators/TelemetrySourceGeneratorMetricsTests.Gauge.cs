@@ -28,7 +28,7 @@ public interface ITestMetrics {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicMetric, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();

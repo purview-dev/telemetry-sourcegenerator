@@ -15,7 +15,7 @@ public partial class TelemetrySourceGeneratorTests : IncrementalSourceGeneratorT
 		var generatedAttributes = TypeLibrary.Purview.Telemetry.GetTypes().Select(m => m.Identity);
 
 		// Act
-		var generationResult = await GenerateAsync(empty, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(empty, cancellationToken: cancellationToken);
 		var query = generationResult.Generated();
 
 		// Assert
@@ -42,7 +42,7 @@ namespace Testing;
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(empty, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(empty, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -78,7 +78,7 @@ namespace Testing;
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(empty, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(empty, cancellationToken: cancellationToken);
 
 		// Assert
 		await Assert.That(generationResult.DriverResult.Diagnostics).IsEmpty();

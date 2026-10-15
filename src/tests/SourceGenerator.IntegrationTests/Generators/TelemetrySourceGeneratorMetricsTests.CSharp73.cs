@@ -38,7 +38,7 @@ public interface ITestMetrics {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicMetrics, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicMetrics, cancellationToken: cancellationToken);
 
 		// Assert: GenerateAsync's EnsureValid (default) verifies generated code compiles under C# 7.3.
 		var query = generationResult.Generated();

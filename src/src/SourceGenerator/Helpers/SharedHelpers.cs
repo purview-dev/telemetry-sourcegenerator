@@ -132,6 +132,7 @@ static partial class SharedHelpers
 		if (typeData.Exists)
 			return Normalize(typeData);
 
+		// If the type doesn't have the attribute, fall back to the assembly-level attribute or defaults.
 		return GetAssemblyTelemetryGenerationAttribute(compilation);
 	}
 

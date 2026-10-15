@@ -61,7 +61,7 @@ partial interface ITestTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			[partialInterfaceDef, partialInterfaceActivities, partialInterfaceLogging, partialInterfaceMetric],
 			cancellationToken: cancellationToken
 		);
@@ -125,7 +125,7 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -188,7 +188,7 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -237,7 +237,7 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		await Assert.That(generationResult).HasDiagnostic("TSG3021");
@@ -267,7 +267,7 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		await Assert.That(generationResult).HasDiagnostic("TSG3021");
@@ -297,7 +297,7 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		// With the OpenTelemetry exception rules disabled the exception is emitted as an ordinary tag,
@@ -329,7 +329,7 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -363,7 +363,7 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -416,7 +416,7 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicTelemetry,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken

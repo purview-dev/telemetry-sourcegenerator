@@ -45,7 +45,7 @@ partial class TelemetrySourceGeneratorTests
 	)
 	{
 		// Act
-		var generationResult = await GenerateAsync(TelemetryNamesSource, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(TelemetryNamesSource, cancellationToken: cancellationToken);
 
 		// Assert
 		var attributeSource = generationResult.GetSource(AttributeHintName);
@@ -76,7 +76,7 @@ partial class TelemetrySourceGeneratorTests
 			""";
 
 		// Act
-		var generationResult = await GenerateAsync(source, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(source, cancellationToken: cancellationToken);
 
 		// Assert
 		var hintNames = generationResult
@@ -95,7 +95,7 @@ partial class TelemetrySourceGeneratorTests
 	)
 	{
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			TelemetryNamesSource,
 			TelemetryNamesOptions("GenerateTelemetryNamesAttribute = false"),
 			cancellationToken: cancellationToken
@@ -116,7 +116,7 @@ partial class TelemetrySourceGeneratorTests
 	public async Task Generate_GivenDefaults_DoesNotGenerateTheTelemetryNamesClass(CancellationToken cancellationToken)
 	{
 		// Act
-		var generationResult = await GenerateAsync(TelemetryNamesSource, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(TelemetryNamesSource, cancellationToken: cancellationToken);
 
 		// Assert
 		await Assert
@@ -129,7 +129,7 @@ partial class TelemetrySourceGeneratorTests
 	public async Task Generate_GivenGenerateTelemetryNamesClass_GeneratesTheClass(CancellationToken cancellationToken)
 	{
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			TelemetryNamesSource,
 			TelemetryNamesOptions("GenerateTelemetryNamesClass = true"),
 			cancellationToken: cancellationToken
@@ -162,7 +162,11 @@ partial class TelemetrySourceGeneratorTests
 		};
 
 		// Act
-		var generationResult = await GenerateAsync(TelemetryNamesSource, options, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(
+			TelemetryNamesSource,
+			options,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		var classSource = generationResult.GetSource(ClassHintName);
@@ -198,7 +202,7 @@ partial class TelemetrySourceGeneratorTests
 		};
 
 		// Act
-		var generationResult = await GenerateAsync(noTelemetry, options, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(noTelemetry, options, cancellationToken: cancellationToken);
 
 		// Assert
 		await Assert
@@ -220,7 +224,7 @@ partial class TelemetrySourceGeneratorTests
 		const string noTelemetry = "namespace Testing;";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			noTelemetry,
 			TelemetryNamesOptions("GenerateTelemetryNamesClass = true"),
 			cancellationToken: cancellationToken
@@ -254,7 +258,11 @@ partial class TelemetrySourceGeneratorTests
 		};
 
 		// Act
-		var generationResult = await GenerateAsync(TelemetryNamesSource, options, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(
+			TelemetryNamesSource,
+			options,
+			cancellationToken: cancellationToken
+		);
 
 		// Assert
 		var classSource = generationResult.GetSource(ClassHintName);

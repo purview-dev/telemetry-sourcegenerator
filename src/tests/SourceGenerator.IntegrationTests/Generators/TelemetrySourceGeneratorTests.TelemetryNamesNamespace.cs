@@ -34,7 +34,7 @@ partial class TelemetrySourceGeneratorTests
 			""";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			source,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
@@ -80,7 +80,7 @@ partial class TelemetrySourceGeneratorTests
 			""";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			source,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken

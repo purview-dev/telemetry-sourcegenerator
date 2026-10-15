@@ -29,7 +29,7 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		await Assert.That(generationResult).HasNoDiagnostics();
@@ -72,7 +72,7 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicActivity,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken

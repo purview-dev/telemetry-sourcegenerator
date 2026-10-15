@@ -126,7 +126,8 @@ benchmarks/
 └── Purview.Telemetry.Benchmarks/           # BenchmarkDotNet project (net48/net8.0/net9.0/net10.0)
 
 .build/                                     # TS scripts (build-pack.ts, update-version.ts)
-.agents/                                    # Agent skills/prompts/agents (see "Agent instructions")
+.agents/                                    # Package-delivered skills/prompts/agents (gitignored mirror)
+skills/                                     # Authored skills shipped by this package (see "Authoring skills")
 .config/                                    # dotnet-tools.json, lefthook.yml
 .github/workflows/                          # pr.yml, release.yml (reusable purview-dev/build workflows)
 scripts/                                    # setup-release.* (legacy changesets DSC scripts)
@@ -172,21 +173,57 @@ The sample projects enable `EmitCompilerGeneratedFiles`, so generated telemetry 
   `AnalyzerReleases.Shipped.md` at release time. `RS2003` is suppressed — see the comment in
   `src/src/SourceGenerator/SourceGenerator.csproj`.
 
-## Source-generator and testing skills
+## Skills from other repositories
 
-Load the relevant skill before doing specialist work:
+Specialist source-generator and SDK guidance — `CodeWriter` emission, incremental pipeline design,
+test runners and `CodeQuery`, `Purview.BuildSdk` configuration — is published by the repositories
+that own it. Install what you need through the skills CLI; it lands in `.agents/skills/`, which is
+gitignored and recorded in `skills-lock.json`:
 
-- `.agents/skills/source-generator-codewriter-modernization/SKILL.md` — CodeWriter/XmlCommentWriter
-  emission, incremental pipeline design, value equality, Roslyn best practices.
-- `.agents/skills/source-generator-testing/SKILL.md` — picking the right runner/base, configuring
-  options, `CodeQuery`, asserting incremental caching.
-- `.agents/skills/tunit-test-authoring/SKILL.md` — TUnit base classes, assertion extensions,
-  modernising existing tests.
-- `.agents/skills/sdk-configuration-reference/SKILL.md`,
-  `.agents/skills/sdk-project-behavior-and-detection/SKILL.md`,
-  `.agents/skills/project-placement-defaults/SKILL.md` — `Purview.BuildSdk` configuration,
-  project-type detection, and placement rules.
-- `.agents/agents/sdk-consumer-setup.md` — generic agent spec for helping consuming repos adopt the SDK.
+```bash
+npx skills add purview-dev/sourcegenerator-framework
+npx skills add purview-dev/build-sdk
+```
+
+Do not edit anything under `.agents/skills/` — the CLI is its only writer.
+
+## Authoring skills
+
+Authored skills live in the repository-root `skills/` folder. **Nothing packs them into a NuGet
+package.** `Purview.BuildSdk` 1.0.6 removed skill packaging outright — the skills CLI clones the
+*git* repository and only discovers a root `skills/` folder, so that is the one delivery route.
+`PurviewSkillsToPack`, the `IncludeRepositorySkillsInPackage` shim in `src/Directory.Build.targets`,
+and the `.agents/**/*` entry in `.config/purview-build.json` went with it.
+
+```bash
+npx skills add purview-dev/telemetry-sourcegenerator
+```
+
+| Skill | Answers |
+| --- | --- |
+| `skills/purview-telemetry-quickstart/` | adding the package, a first telemetry interface, registering it in DI |
+| `skills/purview-telemetry-design/` | one interface or several, naming, structuring multi-target methods |
+| `skills/purview-telemetry-migration/` | converting existing `ILogger`, `ActivitySource` or instrument code |
+| `skills/purview-telemetry-multi-targeting/` | emitting an Activity, a log and a metric from one method |
+| `skills/purview-telemetry-diagnostics/` | what a `TSG` diagnostic means and how to fix it |
+
+Every skill carries the `purview-telemetry` prefix. Skills install into one flat directory per agent,
+shared with every skill a developer has installed from anywhere, so an unprefixed name collides and
+the loser is whichever installed second.
+
+To add a skill: create `skills/<name>/SKILL.md` with spec-legal frontmatter, and nothing else. There
+is no per-project registration any more.
+
+`src/tests/Repository.UnitTests/SkillTests.cs` validates every skill on every test run, through
+`Purview.Skills.Testing`'s rule set (the Agent Skills specification: frontmatter fields, name and
+description constraints, bundled links, body size). The `[InheritsTests]` attribute on that class is
+load-bearing — TUnit does not walk base types during discovery, so without it the run is green and
+nothing is checked. That project is single-targeted at `net10.0`, because it asserts something about
+the repository rather than about the runtime's reach.
+
+A relative link from one `SKILL.md` into another skill's folder is a rule violation: only a skill's
+own folder is installed with it, so such a link works here and nowhere else. Name the other skill in
+prose instead, and keep deep detail in the skill's own `references/`.
 
 ## Benchmarking and performance documentation
 

@@ -49,7 +49,7 @@ public interface ITestMetrics
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -111,7 +111,7 @@ public interface ITestMetrics<{{genericTypeDef}}>  {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicMeter,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -144,7 +144,7 @@ public interface ITestMetrics<{{genericTypeDef}}>  {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicMeter,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
