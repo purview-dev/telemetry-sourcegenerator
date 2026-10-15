@@ -30,7 +30,7 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicActivity,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
@@ -91,7 +91,7 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicActivity,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
@@ -145,7 +145,7 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicActivity,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
@@ -199,7 +199,7 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicActivity,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
@@ -251,7 +251,7 @@ public interface ITestActivities {
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicActivity,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken

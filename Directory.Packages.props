@@ -2,17 +2,16 @@
 	<PropertyGroup>
 		<CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
 		<RoslynVersion>5.9.0</RoslynVersion>
-		<!-- Purview.Skills.Testing 1.0.6 depends on TUnit.Assertions/TUnit.Core 1.75.0. -->
 		<TUnitVersion>1.75.0</TUnitVersion>
-		<PurviewSGFVersion>1.1.0</PurviewSGFVersion>
-		<DotnetRuntimeVersion>10.0.12</DotnetRuntimeVersion>
-		<MSExtensionVersion>10.10.0</MSExtensionVersion>
+		<PurviewSGFVersion>1.1.1</PurviewSGFVersion>
+		<DotnetRuntimeVersion>10.0.13</DotnetRuntimeVersion>
+		<MSExtensionVersion>10.11.0</MSExtensionVersion>
 		<OpenTelemetryVersion>1.18.0</OpenTelemetryVersion>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageVersion Include="Purview.SourceGeneratorFramework" Version="$(PurviewSGFVersion)" />
 		<PackageVersion Include="Purview.SourceGeneratorFramework.Testing.TUnit" Version="$(PurviewSGFVersion)" />
-		<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.401" />
+		<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.402" />
 		<PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" />
 		<PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="$(RoslynVersion)" />
 		<PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
@@ -28,7 +27,6 @@
 		<PackageVersion Include="TUnit" Version="$(TUnitVersion)" />
 		<PackageVersion Include="TUnit.Mocks" Version="$(TUnitVersion)" />
 		<PackageVersion Include="Bogus" Version="35.6.5" />
-		<!-- The Agent Skills conformance rule set, shipped alongside Purview.BuildSdk. -->
 		<PackageVersion Include="Purview.Skills.Testing" Version="1.0.6" />
 	</ItemGroup>
 	<ItemGroup Label="Samples">

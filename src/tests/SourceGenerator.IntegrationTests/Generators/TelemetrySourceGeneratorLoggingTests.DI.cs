@@ -24,7 +24,7 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicLog,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
@@ -69,7 +69,7 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicLog,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
@@ -118,7 +118,7 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicLog,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
@@ -167,7 +167,7 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicLog,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken

@@ -23,7 +23,7 @@ public interface ITestLogger {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -56,7 +56,7 @@ public class BadLuckException : Exception { }
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -92,7 +92,7 @@ public class BadLuckException : Exception { }
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicLogger,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken

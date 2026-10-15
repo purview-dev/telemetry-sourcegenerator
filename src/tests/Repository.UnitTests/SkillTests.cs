@@ -1,6 +1,6 @@
 using Purview.Skills.Testing;
 
-namespace Purview.Telemetry;
+namespace Purview.Telemetry.Repository;
 
 /// <summary>
 /// Runs the Agent Skills conformance rule set against this repository's authored skills in

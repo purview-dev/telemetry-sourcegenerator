@@ -29,7 +29,7 @@ public interface ITestActivities {
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert: validates the generated code compiles. The source uses C# 7.3-style syntax
 		// (block namespaces, no nullable annotations). TSG3022 (non-nullable Activity return

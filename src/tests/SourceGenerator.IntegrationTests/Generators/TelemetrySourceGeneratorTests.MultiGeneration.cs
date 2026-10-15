@@ -31,7 +31,7 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -68,7 +68,7 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -105,7 +105,7 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -146,7 +146,7 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -187,7 +187,7 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert - should generate both activity and logging for this method
 		var query = generationResult.Generated();
@@ -220,7 +220,7 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert - should generate both activity and counter for this method
 		var query = generationResult.Generated();
@@ -253,7 +253,7 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert - should generate both logging and counter for this method
 		var query = generationResult.Generated();
@@ -288,7 +288,7 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert - should generate activity, logging, and counter for this method
 		var query = generationResult.Generated();
@@ -332,7 +332,7 @@ partial class MultiTelemetryCore
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			multiGen,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -385,7 +385,7 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -466,7 +466,7 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -538,7 +538,7 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -606,7 +606,7 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -659,7 +659,7 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -715,7 +715,7 @@ partial class MultiTelemetryCore
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -756,7 +756,7 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			multiGen,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -798,7 +798,7 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -843,7 +843,7 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			multiGen,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -879,7 +879,7 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(multiGen, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -922,7 +922,7 @@ public interface IMultiTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			multiGen,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -956,7 +956,7 @@ public interface ITelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -990,7 +990,7 @@ public interface ITelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -1024,7 +1024,7 @@ public interface ITelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken
@@ -1056,7 +1056,7 @@ public interface ITelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			code,
 			TelemetrySourceGeneratorTestOptions.NoValidation,
 			cancellationToken: cancellationToken

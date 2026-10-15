@@ -35,7 +35,7 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -81,7 +81,7 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -129,7 +129,7 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -177,7 +177,7 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -217,7 +217,7 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -257,7 +257,7 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		await Assert.That(generationResult).HasDiagnostic("TSG3021");
@@ -288,7 +288,7 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		await Assert.That(generationResult).HasDiagnostic("TSG3021");
@@ -322,7 +322,7 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -367,7 +367,7 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
 		// Assert
 		await Assert.That(generationResult).DoesNotHaveDiagnostic("TSG3021");
@@ -401,7 +401,7 @@ public interface ITestTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		await Assert.That(generationResult).HasDiagnostic("TSG3021");
@@ -439,7 +439,7 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		await Assert.That(generationResult).DoesNotHaveDiagnostic("TSG3021");
@@ -468,7 +468,7 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		await Assert.That(generationResult).DoesNotHaveDiagnostic("TSG3021");
@@ -499,7 +499,7 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		await Assert.That(generationResult).DoesNotHaveDiagnostic("TSG3021");
@@ -547,7 +547,7 @@ public interface ITestActivities
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicTelemetry, cancellationToken: cancellationToken);
 
 		// Assert
 		await Assert

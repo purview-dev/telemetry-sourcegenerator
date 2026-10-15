@@ -67,7 +67,7 @@ interface IEntityStoreTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicTelemetry,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
@@ -139,7 +139,7 @@ interface IActivityTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicTelemetry,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
@@ -183,7 +183,7 @@ enum ItemTypes
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicTelemetry,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
@@ -248,7 +248,7 @@ interface IMeterTelemetry
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicTelemetry,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken
@@ -322,7 +322,7 @@ interface IServiceTelemetry
 """;
 
 		// Act
-		var generationResult = await GenerateAsync(
+		using var generationResult = await GenerateAsync(
 			basicTelemetry,
 			GenerateDependencyInjection(),
 			cancellationToken: cancellationToken

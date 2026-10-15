@@ -26,7 +26,7 @@ public interface ITestLogger {{
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -65,7 +65,7 @@ public partial class TestClass1 {{
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
@@ -108,7 +108,7 @@ public partial class TestClass1 {{
 ";
 
 		// Act
-		var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
+		using var generationResult = await GenerateAsync(basicLogger, cancellationToken: cancellationToken);
 
 		// Assert
 		var query = generationResult.Generated();
