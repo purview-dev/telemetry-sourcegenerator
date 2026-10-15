@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<!-- Single-targeted on purpose. These tests assert something about the repository itself - its
+		     skills/ folder - not about the runtime's reach, so running them once is the whole job, and
+		     Purview.Skills.Testing ships net10.0 only. -->
+		<TargetFramework>net10.0</TargetFramework>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- The Agent Skills conformance rule set, shipped by Purview.BuildSdk. The rules live in the
+		     package so they are defined once rather than reimplemented here. -->
+		<PackageReference Include="Purview.Skills.Testing" />
+	</ItemGroup>
+</Project>

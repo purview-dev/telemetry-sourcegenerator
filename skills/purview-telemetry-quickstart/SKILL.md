@@ -1,7 +1,7 @@
 ---
-name: telemetry-sourcegenerator-quickstart
+name: purview-telemetry-quickstart
 description: Get started with Purview.Telemetry.SourceGenerator in a C# project. Use when adding the package, creating a first telemetry interface, registering it in DI, or asking how to begin with Purview telemetry.
-license: ISC
+license: MIT
 compatibility: C# projects using Purview.Telemetry.SourceGenerator.
 metadata:
   author: Purview-Dev

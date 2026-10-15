@@ -1,7 +1,7 @@
 ---
-name: telemetry-sourcegenerator-design
+name: purview-telemetry-design
 description: Design best practices for Purview.Telemetry.SourceGenerator interfaces. Use when deciding between a single telemetry interface and per-area interfaces, choosing telemetry names, designing multi-target methods, or reviewing telemetry structure in a C# project.
-license: ISC
+license: MIT
 compatibility: C# projects using Purview.Telemetry.SourceGenerator.
 metadata:
   author: Purview-Dev

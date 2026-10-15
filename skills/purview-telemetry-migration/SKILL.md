@@ -1,7 +1,7 @@
 ---
-name: telemetry-sourcegenerator-migration
+name: purview-telemetry-migration
 description: Migrate existing ILogger, ActivitySource, or System.Diagnostics.Metrics instrument code to Purview.Telemetry.SourceGenerator interfaces. Use when converting hand-written telemetry to generated telemetry interfaces, or when a user wants to replace ILogger, ActivitySource, or Counter/Histogram/UpDownCounter usage with Purview telemetry.
-license: ISC
+license: MIT
 compatibility: C# projects using Purview.Telemetry.SourceGenerator.
 metadata:
   author: Purview-Dev

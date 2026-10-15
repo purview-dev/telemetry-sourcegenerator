@@ -15,5 +15,6 @@
 	</Folder>
 	<Folder Name="/tests/">
 		<Project Path="tests/SourceGenerator.IntegrationTests/SourceGenerator.IntegrationTests.csproj" />
+		<Project Path="tests/Repository.UnitTests/Repository.UnitTests.csproj" />
 	</Folder>
 </Solution>

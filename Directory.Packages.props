@@ -2,7 +2,8 @@
 	<PropertyGroup>
 		<CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
 		<RoslynVersion>5.9.0</RoslynVersion>
-		<TUnitVersion>1.74.0</TUnitVersion>
+		<!-- Purview.Skills.Testing 1.0.6 depends on TUnit.Assertions/TUnit.Core 1.75.0. -->
+		<TUnitVersion>1.75.0</TUnitVersion>
 		<PurviewSGFVersion>1.1.0</PurviewSGFVersion>
 		<DotnetRuntimeVersion>10.0.12</DotnetRuntimeVersion>
 		<MSExtensionVersion>10.10.0</MSExtensionVersion>
@@ -27,6 +28,8 @@
 		<PackageVersion Include="TUnit" Version="$(TUnitVersion)" />
 		<PackageVersion Include="TUnit.Mocks" Version="$(TUnitVersion)" />
 		<PackageVersion Include="Bogus" Version="35.6.5" />
+		<!-- The Agent Skills conformance rule set, shipped alongside Purview.BuildSdk. -->
+		<PackageVersion Include="Purview.Skills.Testing" Version="1.0.6" />
 	</ItemGroup>
 	<ItemGroup Label="Samples">
 		<PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="$(DotnetRuntimeVersion)" />
