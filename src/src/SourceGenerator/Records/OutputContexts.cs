@@ -58,6 +58,21 @@ readonly record struct ResolvedTelemetryNames(
 }
 
 /// <summary>
+/// This assembly's name, and the telemetry names every referenced assembly recorded in its metadata.
+/// </summary>
+/// <remarks>
+/// Projected out of the <c>Compilation</c> for the same reason <c>assemblyNameProvider</c> is: a
+/// <c>Compilation</c> in a pipeline value is never equatable between runs, so the stage holding it can
+/// never report cached and everything downstream recomputes on every keystroke (<c>PSGFR33</c>). Strings
+/// compare by value, so this caches until a reference actually changes.
+/// </remarks>
+readonly record struct ReferencedTelemetryNamesContext(
+	string AssemblyName,
+	EquatableArray<string> ActivitySourceNames,
+	EquatableArray<string> MeterNames
+);
+
+/// <summary>
 /// Carries the names for one of the two telemetry-names outputs. For the
 /// <c>[assembly: GeneratedTelemetryNames]</c> attribute the names are this assembly's only; for the
 /// <c>TelemetryNames</c> class they already include the names aggregated from referenced assemblies.
