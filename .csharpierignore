@@ -1,3 +1,0 @@
-# Ignore template source files - these are embedded resources and should not be formatted
-
-src/src/SourceGenerator/Templates/Sources/

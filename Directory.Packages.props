@@ -1,8 +1,7 @@
 <Project>
 	<PropertyGroup>
-		<CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
 		<RoslynVersion>5.9.0</RoslynVersion>
-		<TUnitVersion>1.75.0</TUnitVersion>
+		<TUnitVersion>1.76.0</TUnitVersion>
 		<PurviewSGFVersion>1.2.0</PurviewSGFVersion>
 		<DotnetRuntimeVersion>10.0.13</DotnetRuntimeVersion>
 		<MSExtensionVersion>10.11.0</MSExtensionVersion>
