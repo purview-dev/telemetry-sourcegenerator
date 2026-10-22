@@ -1,3 +1,23 @@
+# Purview.BuildSdk 1.1.0 - managed file, do not edit
+#
+# This file is written by Purview.BuildSdk and is replaced whenever the SDK version changes. The version
+# on the first line is how the SDK recognises a file it owns: a .editorconfig without that marker is
+# yours, and is never touched.
+#
+# To add your own rules, create a second .editorconfig in a subdirectory - `src/.editorconfig` is the
+# usual choice - without `root = true`. EditorConfig applies the nearest file last, so your settings win
+# over these, and nothing you write is lost when this file is updated.
+#
+# To stop the SDK updating this file, set one of:
+#   <PurviewEditorConfigAutoUpdate>false</PurviewEditorConfigAutoUpdate>   keep this file as it is
+#   <PurviewRepoBootstrapMode>Never</PurviewRepoBootstrapMode>            opt out of all bootstrapping
+#   <BootstrapEditorConfigToRepoRoot>false</BootstrapEditorConfigToRepoRoot>
+#
+# Deleting the first line also works: without the marker the SDK treats the file as yours. You then own
+# every rule in it, including the ones a future SDK version would have fixed.
+#
+# See https://github.com/purview-dev/build-sdk#editorconfig for the full description.
+
 root = true
 
 # Base Configuration - General Settings, File Formatting, and Naming Conventions
@@ -27,8 +47,10 @@ dotnet_search_reference_assemblies = true
 # Nullability settings
 dotnet_build_property.Nullable = enable
 
-# Enable or disable the analyzers
-dotnet_analyzer_diagnostic.severity = warning
+# Per-rule severity is authoritative in this file. The SDK sets AnalysisMode/AnalysisLevel as
+# MSBuild properties, and the .NET SDK ignores bulk 'dotnet_analyzer_diagnostic.*' severity
+# configuration whenever those properties are present. Do not re-add a bulk entry here: it
+# silently does nothing and hides which severities are actually enforced.
 
 # Visual Studio XML Project Files
 [*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
@@ -76,23 +98,20 @@ indent_style = tab
 dotnet_naming_rule.non_private_static_fields_should_be_pascal_case.severity = warning
 dotnet_naming_rule.non_private_static_fields_should_be_pascal_case.style = non_private_static_field_style
 dotnet_naming_rule.non_private_static_fields_should_be_pascal_case.symbols = non_private_static_fields
-dotnet_naming_rule.private_fields.severity = warning
-dotnet_naming_rule.private_fields.style = camel_case_underscore
-dotnet_naming_rule.private_fields.symbols = private_fields
-dotnet_naming_rule.private_fields_style.severity = warning
-dotnet_naming_rule.private_fields_style.style = camel_case
-dotnet_naming_rule.private_fields_style.symbols = private_fields
 dotnet_naming_style.non_private_static_field_style.capitalization = pascal_case
+# NOTE: the private-field rules that used to sit here referenced a style ('camel_case_underscore')
+# and a symbol group ('private_fields') that were never defined, so they never applied. The real
+# private-field rules are declared in the "StyleCop Field Naming Rules" section below.
 dotnet_naming_symbols.non_private_static_fields.applicable_accessibilities = public, protected, internal, protected_internal, private_protected
 dotnet_naming_symbols.non_private_static_fields.applicable_kinds = field
 dotnet_naming_symbols.non_private_static_fields.required_modifiers = static
 
-# Constants are PascalCase
+# Constants are PascalCase (field constants; local constants are locals and stay camelCase)
 dotnet_naming_rule.constants_should_be_pascal_case.severity = warning
 dotnet_naming_rule.constants_should_be_pascal_case.style = non_private_static_field_style
 dotnet_naming_rule.constants_should_be_pascal_case.symbols = constants
 dotnet_naming_style.constant_style.capitalization = pascal_case
-dotnet_naming_symbols.constants.applicable_kinds = field, local
+dotnet_naming_symbols.constants.applicable_kinds = field
 dotnet_naming_symbols.constants.required_modifiers = const
 
 # Locals and parameters are camelCase
@@ -102,9 +121,7 @@ dotnet_naming_rule.locals_should_be_camel_case.severity = warning
 
 # camel_case_style - Define the camelCase style
 dotnet_naming_style.camel_case_style.capitalization = camel_case
-dotnet_naming_style.static_field_style.required_prefix = s_
 dotnet_naming_symbols.locals_and_parameters.applicable_kinds = parameter, local
-dotnet_naming_symbols.static_fields.required_modifiers = static
 
 # first_upper_style - The first character must start with an upper-case character
 dotnet_naming_style.first_upper_style.capitalization = first_word_upper
@@ -152,22 +169,22 @@ dotnet_naming_symbols.other_public_protected_fields_group.applicable_kinds = fie
 
 # StyleCop Field Naming Rules
 
-# All constant fields must be PascalCase
-dotnet_naming_rule.private_or_internal_field_should_be__fieldname.severity = warning
-dotnet_naming_rule.private_or_internal_field_should_be__fieldname.style = _fieldname
-dotnet_naming_rule.private_or_internal_field_should_be__fieldname.symbols = private_or_internal_field
+# All non-private constant fields must be PascalCase. Private constants are owned by
+# 'private_static_fields_group' below - a field must be covered by exactly one rule, otherwise the
+# same violation is reported once per matching rule.
 dotnet_naming_rule.stylecop_constant_fields_must_be_pascal_case_rule.severity = warning
 dotnet_naming_rule.stylecop_constant_fields_must_be_pascal_case_rule.style = non_private_static_field_style
 dotnet_naming_rule.stylecop_constant_fields_must_be_pascal_case_rule.symbols = stylecop_constant_fields_group
-dotnet_naming_symbols.stylecop_constant_fields_group.applicable_accessibilities = public, internal, protected_internal, protected, private_protected, private
+dotnet_naming_symbols.stylecop_constant_fields_group.applicable_accessibilities = public, internal, protected_internal, protected, private_protected
 dotnet_naming_symbols.stylecop_constant_fields_group.applicable_kinds = field
 dotnet_naming_symbols.stylecop_constant_fields_group.required_modifiers = const
 
-# All static readonly fields must be PascalCase
+# All non-private static readonly fields must be PascalCase. Private static readonly fields are
+# owned by 'private_static_fields_group' below (see the note on the constant rule above).
 dotnet_naming_rule.stylecop_static_readonly_fields_must_be_pascal_case_rule.severity = warning
 dotnet_naming_rule.stylecop_static_readonly_fields_must_be_pascal_case_rule.style = non_private_static_field_style
 dotnet_naming_rule.stylecop_static_readonly_fields_must_be_pascal_case_rule.symbols = stylecop_static_readonly_fields_group
-dotnet_naming_symbols.stylecop_static_readonly_fields_group.applicable_accessibilities = public, internal, protected_internal, protected, private_protected, private
+dotnet_naming_symbols.stylecop_static_readonly_fields_group.applicable_accessibilities = public, internal, protected_internal, protected, private_protected
 dotnet_naming_symbols.stylecop_static_readonly_fields_group.applicable_kinds = field
 dotnet_naming_symbols.stylecop_static_readonly_fields_group.required_modifiers = static, readonly
 
@@ -178,12 +195,22 @@ dotnet_naming_rule.stylecop_instance_fields_must_be_private_rule.symbols = style
 dotnet_naming_symbols.stylecop_fields_must_be_private_group.applicable_accessibilities = public, internal, protected_internal, protected, private_protected
 dotnet_naming_symbols.stylecop_fields_must_be_private_group.applicable_kinds = field
 
-# Private fields must be camelCase
-dotnet_naming_rule.stylecop_private_fields_must_be_camel_case_rule.severity = warning
-dotnet_naming_rule.stylecop_private_fields_must_be_camel_case_rule.style = camel_case_style
-dotnet_naming_rule.stylecop_private_fields_must_be_camel_case_rule.symbols = stylecop_private_fields_group
-dotnet_naming_symbols.stylecop_private_fields_group.applicable_accessibilities = private
-dotnet_naming_symbols.stylecop_private_fields_group.applicable_kinds = field
+# Private static fields are PascalCase: they are type-level state and are never qualified with 'this.'
+dotnet_naming_rule.private_static_fields_must_be_pascal_case_rule.severity = warning
+dotnet_naming_rule.private_static_fields_must_be_pascal_case_rule.style = non_private_static_field_style
+dotnet_naming_rule.private_static_fields_must_be_pascal_case_rule.symbols = private_static_fields_group
+dotnet_naming_symbols.private_static_fields_group.applicable_accessibilities = private
+dotnet_naming_symbols.private_static_fields_group.applicable_kinds = field
+dotnet_naming_symbols.private_static_fields_group.required_modifiers = static
+
+# Private instance fields must be camelCase with a leading underscore: '_name', never 'name'. The
+# prefix keeps field access unambiguous (so the noisy 'this.' qualifier is never needed) and keeps
+# fields distinguishable from locals and parameters.
+dotnet_naming_rule.private_instance_fields_must_be_camel_case_with_underscore_prefix.severity = warning
+dotnet_naming_rule.private_instance_fields_must_be_camel_case_with_underscore_prefix.style = camel_case_underscore_style
+dotnet_naming_rule.private_instance_fields_must_be_camel_case_with_underscore_prefix.symbols = private_instance_fields_group
+dotnet_naming_symbols.private_instance_fields_group.applicable_accessibilities = private
+dotnet_naming_symbols.private_instance_fields_group.applicable_kinds = field
 
 # Local variables must be camelCase
 dotnet_naming_rule.stylecop_local_fields_must_be_camel_case_rule.severity = silent
@@ -232,25 +259,14 @@ dotnet_naming_style.type_parameter_style.required_prefix = T
 dotnet_naming_symbols.type_parameter_symbol.applicable_accessibilities = *
 dotnet_naming_symbols.type_parameter_symbol.applicable_kinds = type_parameter
 
-# Instance fields are camelCase and start with _
-dotnet_naming_rule.camel_case_for_private_internal_fields.severity = suggestion
-dotnet_naming_rule.camel_case_for_private_internal_fields.style = camel_case_underscore_style
-dotnet_naming_rule.camel_case_for_private_internal_fields.symbols = private_internal_fields
-dotnet_naming_rule.instance_fields_should_be_camel_case.severity = suggestion
-dotnet_naming_rule.instance_fields_should_be_camel_case.style = camel_case_underscore_style
-dotnet_naming_rule.instance_fields_should_be_camel_case.symbols = instance_fields
+# Naming style shared by the private-field rules: camelCase with a required '_' prefix.
 dotnet_naming_style.camel_case_underscore_style.capitalization = camel_case
 dotnet_naming_style.camel_case_underscore_style.required_prefix = _
-dotnet_naming_style.instance_field_style.capitalization = camel_case
-dotnet_naming_style.instance_field_style.required_prefix = _
-dotnet_naming_symbols.instance_fields.applicable_kinds = field
-dotnet_naming_symbols.private_internal_fields.applicable_accessibilities = private, internal
-dotnet_naming_symbols.private_internal_fields.applicable_kinds = field
 
 # Local functions are PascalCase
 dotnet_naming_rule.local_functions_should_be_pascal_case.severity = warning
-dotnet_naming_rule.local_functions_should_be_pascal_case.style = non_private_static_field_style
-dotnet_naming_rule.local_functions_should_be_pascal_case.symbols = all_members
+dotnet_naming_rule.local_functions_should_be_pascal_case.style = local_function_style
+dotnet_naming_rule.local_functions_should_be_pascal_case.symbols = local_functions
 dotnet_naming_style.local_function_style.capitalization = pascal_case
 dotnet_naming_symbols.local_functions.applicable_kinds = local_function
 
@@ -264,12 +280,10 @@ dotnet_style_qualification_for_property = false:silent
 dotnet_style_operator_placement_when_wrapping = end_of_line
 
 # Naming styles
-dotnet_naming_rule.interface_should_be_begins_with_i.severity = warning
-dotnet_naming_rule.interface_should_be_begins_with_i.style = prefix_interface_with_i_style
-dotnet_naming_rule.interface_should_be_begins_with_i.symbols = interface
-dotnet_naming_rule.types_should_be_pascal_case.severity = warning
-dotnet_naming_rule.types_should_be_pascal_case.style = non_private_static_field_style
-dotnet_naming_rule.types_should_be_pascal_case.symbols = types
+# NOTE: a 'types_should_be_pascal_case' rule (symbol group 'types') and an
+# 'interface_should_be_begins_with_i' rule (symbol group 'interface') used to sit here, but neither
+# symbol group was ever defined, so neither rule applied. Types are covered by 'element_rule' and
+# interfaces by 'interface_rule' above.
 
 # By default, name items with PascalCase
 dotnet_naming_rule.non_field_members_should_be_pascal_case.severity = warning
@@ -278,7 +292,6 @@ dotnet_naming_rule.non_field_members_should_be_pascal_case.symbols = non_field_m
 
 # pascal_case_style - Define the PascalCase style
 dotnet_naming_style.pascal_case_style.capitalization = pascal_case
-dotnet_naming_symbols.all_members.applicable_kinds = *
 
 # Symbol specifications
 dotnet_naming_symbols.non_field_members.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
@@ -286,7 +299,6 @@ dotnet_naming_symbols.non_field_members.applicable_kinds = property, event, meth
 dotnet_naming_symbols.non_field_members.required_modifiers = *
 
 # Naming styles
-dotnet_naming_style._fieldname.capitalization = camel_case
 dotnet_naming_style.begins_with_i.capitalization = pascal_case
 dotnet_naming_style.begins_with_i.required_prefix = I
 dotnet_naming_style.begins_with_i.required_suffix =
@@ -314,9 +326,11 @@ dotnet_code_quality.prefer_const = true
 dotnet_code_quality.prefer_inferred_anonymous_type_member_names = true
 dotnet_code_quality.prefer_inferred_tuple_names = true
 dotnet_code_quality.prefer_readonly = true
-dotnet_code_quality.require_accessibility_modifiers = true
+# The real modifier policy is 'dotnet_style_require_accessibility_modifiers' (declared under
+# "Modifier preferences" below). The 'require_accessibility_modifiers' and
+# 'require_explicit_visibility' entries that used to live here are not .NET analyzer options:
+# declaring them only pretended to enforce a policy that was never applied, so they were removed.
 dotnet_code_quality.require_explicit_type_arguments = true
-dotnet_code_quality.require_explicit_visibility = true
 dotnet_code_quality.require_variable_declaration_for_explicit_type = false
 dotnet_code_quality_unused_parameters = all:warning
 dotnet_enable_roslyn_analyzers = true
@@ -366,11 +380,7 @@ dotnet_style_require_accessibility_modifiers = omit_if_default:warning
 # Code-block preferences
 csharp_prefer_braces = when_multiline:suggestion
 csharp_prefer_simple_using_statement = false:silent
-csharp_prefer_system_threading_lock = true
 dotnet_style_prefer_collection_expression = true:suggestion
-
-# Enable foreach explicit cast preference
-dotnet_style_prefer_foreach_explicit_cast_in_source = when_strongly_typed:warning
 
 # Prefer System.Threading.Lock
 csharp_prefer_system_threading_lock = true:warning
@@ -503,7 +513,7 @@ dotnet_style_prefer_auto_properties = true:warning
 dotnet_style_prefer_compound_assignment = true:warning
 dotnet_style_prefer_conditional_expression_over_assignment = true:suggestion
 dotnet_style_prefer_conditional_expression_over_return = true:suggestion
-dotnet_style_prefer_foreach_explicit_cast_in_source = when_strongly_typed
+dotnet_style_prefer_foreach_explicit_cast_in_source = when_strongly_typed:warning
 dotnet_style_prefer_inferred_anonymous_type_member_names = true:warning
 dotnet_style_prefer_inferred_tuple_names = true:warning
 dotnet_style_prefer_simplified_boolean_expressions = false:silent
@@ -587,10 +597,14 @@ dotnet_diagnostic.CA1030.severity = suggestion
 dotnet_diagnostic.CA1031.severity = error
 
 # Implement standard exception constructors
-dotnet_diagnostic.CA1032.severity = suggestion
+# Raised to warning: the public API surface of exceptions is part of the accessibility policy and
+# must not be invisible to command-line builds.
+dotnet_diagnostic.CA1032.severity = warning
 
 # Interface methods should be callable by child types
-dotnet_diagnostic.CA1033.severity = suggestion
+# Raised to warning: explicit interface implementations that hide the member from derived types are
+# an accessibility problem, not a style preference.
+dotnet_diagnostic.CA1033.severity = warning
 
 # Nested types should not be visible
 dotnet_diagnostic.CA1034.severity = error
@@ -599,7 +613,9 @@ dotnet_diagnostic.CA1034.severity = error
 dotnet_diagnostic.CA1036.severity = suggestion
 
 # Avoid empty interfaces
-dotnet_diagnostic.CA1040.severity = suggestion
+# Raised to warning: empty interfaces are unenforceable contracts and were previously invisible to
+# command-line builds.
+dotnet_diagnostic.CA1040.severity = warning
 
 # Provide ObsoleteAttribute message
 dotnet_diagnostic.CA1041.severity = warning
@@ -794,7 +810,9 @@ dotnet_diagnostic.CA1513.severity = warning
 dotnet_diagnostic.CA1514.severity = warning
 
 # Consider making public types internal
-dotnet_diagnostic.CA1515.severity = suggestion
+# Reported as a real build warning (not a suggestion) so accessibility hygiene cannot be ignored:
+# a public type in an application or test assembly should be made internal rather than suppressed.
+dotnet_diagnostic.CA1515.severity = warning
 
 # Naming Rules (CA1700-CA1727 and IDE0130)
 # Naming rules support adherence to the naming conventions of the .NET design guidelines
@@ -973,8 +991,9 @@ dotnet_diagnostic.CA1845.severity = error
 # Prefer AsSpan over Substring
 dotnet_diagnostic.CA1846.severity = error
 
-dotnet_diagnostic.ignore_internalsvisibleto = true
-dotnet_diagnostic.CA1852.ignore_internalsvisibleto = true
+# CA1852 (seal internal types) is intentionally not suppressed for internal types that are exposed
+# to other assemblies through InternalsVisibleTo: those types must still be sealed. The blanket
+# suppression that used to sit here relied on a malformed key, so it never even applied.
 
 # Unsafe DataSet or DataTable in serializable type can be vulnerable to remote code execution attacks
 dotnet_diagnostic.CA2352.severity = error
@@ -1319,8 +1338,9 @@ dotnet_diagnostic.IDE0038.severity = warning
 # Use local function instead of lambda
 dotnet_diagnostic.IDE0039.severity = suggestion
 
-# Add accessibility modifiers
-dotnet_diagnostic.IDE0040.severity = error
+# IDE0040 is declared exactly once, in the "Accessibility modifiers" section above. A second entry
+# here used to override that value (later entries win), which made the effective modifier policy
+# ambiguous and let repos believe the rule had been turned off.
 
 # Use is null check
 dotnet_diagnostic.IDE0041.severity = suggestion
@@ -1557,8 +1577,9 @@ dotnet_diagnostic.IDE0380.severity = warning
 # Remove unnecessary suppression (null-forgiving operator)
 dotnet_diagnostic.IDE0370.severity = warning
 
-# Naming rule violation
-dotnet_diagnostic.IDE1006.severity = silent
+# Naming rule violation - must stay visible: the field-naming policy is only enforced when this
+# diagnostic is reported, because naming rules without their own severity inherit this one.
+dotnet_diagnostic.IDE1006.severity = warning
 
 # Embedded statements must be on their own line
 dotnet_diagnostic.IDE2001.severity = warning
@@ -2638,7 +2659,7 @@ trim_trailing_whitespace = false
 
 # If it's a settings, model, dto, etc file, ignore the 'properties' cannot have arrays
 # and other annoying rules - the following section is duplicated
-[**/*{ValueObjects,Settings,Options,Model,Models,DTO,Entity,Response,Request}.{cs,vb},]
+[**/*{ValueObjects,Settings,Options,Model,Models,DTO,Entity,Response,Request}{.Nav,}.{cs,vb}]
 dotnet_diagnostic.CA1002.severity = none
 dotnet_diagnostic.CA1024.severity = none
 dotnet_diagnostic.CA1056.severity = none
@@ -2671,16 +2692,13 @@ dotnet_diagnostic.PDS0004.severity = none
 
 [**/Extensions/**.{cs,vb}]
 # Files under the Extensions/ namespace-reset convention must not force developers to add pragmas;
-# suppress the namespace-conflict diagnostics that arise from declaring framework-style namespaces.
+# suppress only the namespace-conflict diagnostics that arise from declaring framework-style
+# namespaces. Accessibility/design rules (for example CA1034) are deliberately not suppressed here.
 dotnet_diagnostic.IDE0130.severity = none
-dotnet_diagnostic.CA1034.severity = none
 dotnet_diagnostic.CA1724.severity = none
 dotnet_diagnostic.CS0436.severity = none
 dotnet_diagnostic.CS1591.severity = none
 dotnet_diagnostic.IDE0005.severity = none
-
-[**/{Extension,Extensions}.{cs,vb}]
-dotnet_diagnostic.CA1034.severity = none
 
 [**/Generated/**/*.{cs,vb}]
 generated_code = true

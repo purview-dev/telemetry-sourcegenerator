@@ -27,7 +27,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: "10.0.x"
+          # global.json is the source of truth: the repo targets net11.0, and a floating
+          # 10.0.x here leaves the SDK pinned by global.json uninstalled.
+          global-json-file: global.json
 
       - name: Build SampleApp
         run: dotnet build samples/SampleApp/SampleApp.slnx --configuration Release
