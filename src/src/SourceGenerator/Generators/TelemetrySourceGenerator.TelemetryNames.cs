@@ -61,12 +61,19 @@ partial class TelemetrySourceGenerator
 			action: static (spc, output) => GenerateTelemetryNamesAttribute(output, spc)
 		);
 
+		// The names referenced assemblies recorded, projected to strings before they reach a cached node.
+		// Combining the Compilation itself here meant this stage could never report cached, because a
+		// Compilation is compared by reference and is a new instance on every keystroke (PSGFR33).
+		var referencedNames = context
+			.CompilationProvider.Select(static (compilation, token) => CollectReferencedNames(compilation, token))
+			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_TelemetryNamesReferenced");
+
 		var classOutput = resolvedNames
-			.Combine(context.CompilationProvider)
+			.Combine(referencedNames)
 			.Combine(generationContext)
 			.Select(
 				static (tuple, token) =>
-					Aggregate(names: tuple.Left.Left, compilation: tuple.Left.Right, context: tuple.Right, token: token)
+					Aggregate(names: tuple.Left.Left, referenced: tuple.Left.Right, context: tuple.Right, token: token)
 			)
 			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_TelemetryNamesOutput");
 
@@ -176,24 +183,24 @@ partial class TelemetrySourceGenerator
 	/// </summary>
 	static TelemetryNamesOutputContext Aggregate(
 		ResolvedTelemetryNames names,
-		Compilation compilation,
+		ReferencedTelemetryNamesContext referenced,
 		GenerationContext<TelemetryCapabilities> context,
 		CancellationToken token
 	)
 	{
 		token.ThrowIfCancellationRequested();
 
-		var assemblyName = compilation.AssemblyName ?? string.Empty;
 		if (!names.GenerateClass || !names.AggregateReferencedNames)
-			return new(assemblyName, names, context);
+			return new(referenced.AssemblyName, names, context);
 
 		SortedSet<string> activitySourceNames = new(names.ActivitySourceNames, StringComparer.Ordinal);
 		SortedSet<string> meterNames = new(names.MeterNames, StringComparer.Ordinal);
 
-		ReferencedTelemetryNames.Collect(compilation, activitySourceNames, meterNames, token);
+		activitySourceNames.UnionWith(referenced.ActivitySourceNames);
+		meterNames.UnionWith(referenced.MeterNames);
 
 		return new(
-			assemblyName,
+			referenced.AssemblyName,
 			names with
 			{
 				ActivitySourceNames = new([.. activitySourceNames]),
@@ -201,6 +208,30 @@ partial class TelemetrySourceGenerator
 			},
 			context
 		);
+	}
+
+	/// <summary>
+	/// Reads the telemetry names every referenced assembly recorded, and this assembly's name, into a
+	/// value-equatable context.
+	/// </summary>
+	/// <remarks>
+	/// This runs for every compilation rather than only when the aggregated class is being generated,
+	/// which is the cost of keeping the <c>Compilation</c> out of the pipeline's cached values. The work
+	/// is a scan of referenced assembly attributes and its result caches on the names themselves, so a
+	/// keystroke that changes no reference leaves every downstream stage cached — which the previous
+	/// shape could never achieve, because the stage holding the <c>Compilation</c> was recomputed every
+	/// time regardless.
+	/// </remarks>
+	static ReferencedTelemetryNamesContext CollectReferencedNames(Compilation compilation, CancellationToken token)
+	{
+		token.ThrowIfCancellationRequested();
+
+		SortedSet<string> activitySourceNames = new(StringComparer.Ordinal);
+		SortedSet<string> meterNames = new(StringComparer.Ordinal);
+
+		ReferencedTelemetryNames.Collect(compilation, activitySourceNames, meterNames, token);
+
+		return new(compilation.AssemblyName ?? string.Empty, new([.. activitySourceNames]), new([.. meterNames]));
 	}
 
 	static void GenerateTelemetryNamesAttribute(TelemetryNamesOutputContext output, SourceProductionContext spc)
