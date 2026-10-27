@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<RoslynVersion>5.9.0</RoslynVersion>
 		<TUnitVersion>1.76.0</TUnitVersion>
-		<PurviewSGFVersion>1.2.0</PurviewSGFVersion>
+		<PurviewSGFVersion>1.2.1</PurviewSGFVersion>
 		<DotnetRuntimeVersion>10.0.13</DotnetRuntimeVersion>
 		<MSExtensionVersion>10.11.0</MSExtensionVersion>
 		<OpenTelemetryVersion>1.18.0</OpenTelemetryVersion>
