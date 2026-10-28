@@ -20,7 +20,35 @@ The meter name is resolved in this order:
 interface IInventoryMetrics { }
 ```
 
-When the `NamingConvention.OpenTelemetry` naming convention is combined with `MeterNameGenerationType.OpenTelemetry`, instrument names are generated with the meter name as a dot-separated prefix (for example, `myapp.products.record.count`).
+### Instrument naming
+
+An instrument name is built from up to four dot-separated parts, outermost first:
+
+1. The meter name - **only** with `[assembly: MeterGeneration(MeterNameGenerationType = MeterNameGenerationType.OpenTelemetry)]`. The default, `MeterNameGenerationType.DotNet`, leaves it out: the meter already identifies its instruments.
+2. `MeterGenerationAttribute.InstrumentPrefix` (assembly), unless `MeterAttribute.IncludeAssemblyInstrumentPrefix` is `false`.
+3. The interface prefix: `MeterAttribute.InstrumentPrefix` when set, otherwise derived from the interface name by removing the leading `I` and a trailing `Telemetry` or `Logs` (`IProductTelemetry` becomes `product`).
+4. The instrument's `Name`, or the method name.
+
+With the default `NamingConvention.OpenTelemetry`, word boundaries in every part become underscores (`RecordCount` becomes `record_count`, `MyApp.Products` becomes `my_app.products`); `NamingConvention.Legacy` only lowercases them. `LowercaseInstrumentName = false` keeps every part as written.
+
+```csharp
+[Meter("MyApp.Products")]
+interface IProductTelemetry
+{
+    [Counter]
+    void RecordCount([InstrumentMeasurement] int count);
+}
+```
+
+| Configuration | Instrument name |
+| --- | --- |
+| Defaults | `product.record_count` |
+| `MeterNameGenerationType.OpenTelemetry` | `my_app.products.product.record_count` |
+| `NamingConvention.Legacy` | `product.recordcount` |
+
+These three names are pinned by the `Generate_GivenTheDocumentedExample*` tests in `TelemetrySourceGeneratorMetricsTests.MeterNaming.cs`.
+
+`MeterNameGenerationType.OpenTelemetry` also lowercases a meter name that falls back to the assembly name.
 
 ## Initialisation
 

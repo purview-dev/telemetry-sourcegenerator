@@ -187,22 +187,24 @@ telemetry.QueueDepth(() => _queue.Count);
 
 ### When do metric names include the meter name?
 
-Instrument names are generated with the meter name as a lowercase dot-separated prefix when using `NamingConvention.OpenTelemetry` combined with `MeterNameGenerationType.OpenTelemetry`:
+Only when you opt in with `[assembly: MeterGeneration(MeterNameGenerationType = MeterNameGenerationType.OpenTelemetry)]`. The default, `MeterNameGenerationType.DotNet`, prefixes instrument names with the interface name instead:
 
 ```csharp
-[Meter("MyApp.Orders")]
-interface IOrderMetrics
+[Meter("MyApp.Products")]
+interface IProductTelemetry
 {
     [Counter]
-    void OrderProcessed([InstrumentMeasurement]int count);
+    void RecordCount([InstrumentMeasurement] int count);
 }
 
-// Generated name: "myapp.orders.order.processed"
-//                  ^^^^^^^^^^^^^^^ meter prefix (lowercase)
-//                                 ^^^^^^^^^^^^^^^^ instrument name
+// Default:                               "product.record_count"
+// MeterNameGenerationType.OpenTelemetry: "my_app.products.product.record_count"
+//                                         ^^^^^^^^^^^^^^^ meter name (snake_case), outermost
+//                                                         ^^^^^^^ interface prefix (IProductTelemetry)
+//                                                                 ^^^^^^^^^^^^ instrument name
 ```
 
-The default `MeterNameGenerationType.DotNet` does not add the meter-name prefix. See [Metrics](Metrics.md#meter-naming).
+See [Instrument naming](Metrics.md#instrument-naming) for the full rules.
 
 ## Registering names
 

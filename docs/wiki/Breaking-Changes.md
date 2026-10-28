@@ -67,7 +67,7 @@ v4 defaults to **OpenTelemetry semantic conventions** for generated telemetry na
 | ActivitySource name | Assembly name lowercased | Assembly name casing preserved | `"myapp"` → `"MyApp"` |
 | Activity names | Method name lowercased | Method name casing preserved | `"getentity"` → `"GetEntity"` |
 | Tag/baggage keys | Lowercased, smashed compounds | snake_case with underscores | `"entityid"` → `"entity_id"` |
-| Metric instrument names | Lowercased, smashed | Hierarchical with meter prefix | `"recordcount"` → `"myapp.products.record.count"` |
+| Metric instrument names | Lowercased, smashed | Interface prefix + snake_case, no meter prefix | `"product.recordcount"` → `"product.record_count"` (`IProductTelemetry.RecordCount`) |
 | Metric tag keys | Lowercased, smashed | snake_case with underscores | `"requestcount"` → `"request_count"` |
 
 #### Examples

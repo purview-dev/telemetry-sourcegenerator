@@ -64,7 +64,7 @@ static class InstrumentMethodModelBuilder
 			if (string.IsNullOrWhiteSpace(instrumentName))
 				instrumentName = method.Name;
 
-			(instrumentName, prefix) = ResolveInstrumentName(
+			(instrumentName, prefix, var meterPrefix) = ResolveInstrumentName(
 				instrumentName!,
 				prefix,
 				lowercaseInstrumentName,
@@ -91,7 +91,7 @@ static class InstrumentMethodModelBuilder
 					FieldName: fieldName,
 					InstrumentMeasurementType: instrumentMeasurementType,
 					IsObservable: instrumentAttribute?.IsObservable == true,
-					MetricName: prefix + instrumentName!,
+					MetricName: meterPrefix + prefix + instrumentName!,
 					InstrumentAttribute: instrumentAttribute,
 					Parameters: parameters,
 					Tags: tagParameters,
@@ -113,7 +113,16 @@ static class InstrumentMethodModelBuilder
 		return [.. methodTargets];
 	}
 
-	static (string InstrumentName, string? Prefix) ResolveInstrumentName(
+	/// <summary>
+	/// Resolves the casing of an instrument name and its prefixes. The full name is
+	/// <c>MeterPrefix + Prefix + InstrumentName</c>.
+	/// </summary>
+	/// <remarks>
+	/// <c>MeterPrefix</c> is returned separately rather than folded into either of the other two: <c>Prefix</c> is
+	/// shared by every instrument on the interface (so it must not accumulate), and the meter name is the outermost
+	/// namespace, so it belongs ahead of the interface prefix rather than between it and the instrument name.
+	/// </remarks>
+	static (string InstrumentName, string? Prefix, string MeterPrefix) ResolveInstrumentName(
 		string instrumentName,
 		string? prefix,
 		bool lowercaseInstrumentName,
@@ -123,13 +132,13 @@ static class InstrumentMethodModelBuilder
 	)
 	{
 		if (!lowercaseInstrumentName)
-			return (instrumentName, prefix);
+			return (instrumentName, prefix, string.Empty);
 
 		if (isLegacy)
 		{
 			// Legacy: Just lowercase without word-boundary splitting
 #pragma warning disable CA1308 // Intentional lowercase for legacy compatibility
-			return (instrumentName.ToLowerInvariant(), prefix?.ToLowerInvariant());
+			return (instrumentName.ToLowerInvariant(), prefix?.ToLowerInvariant(), string.Empty);
 #pragma warning restore CA1308
 		}
 
@@ -140,16 +149,14 @@ static class InstrumentMethodModelBuilder
 		if (!string.IsNullOrEmpty(prefix))
 			prefix = Utilities.ConvertToSeparatedLowercase(prefix!, '_');
 
-		// For OpenTelemetry convention only: Prepend meter name as namespace with dot separator
-		// e.g., meter "myapp.products" + instrument "pricing_page_requests" -> "myapp_products.pricing_page_requests"
+		// MeterNameGenerationType.OpenTelemetry only (the default is DotNet): prepend the meter name as the
+		// outermost namespace, e.g. meter "MyApp.Products" + interface IProductTelemetry + method RecordCount
+		// -> "my_app.products.product.record_count".
 		var meterNameGenType = meterGenerationAttribute?.MeterNameGenerationType ?? 1; // Default to DotNet
-		if (meterNameGenType == 0 && !string.IsNullOrWhiteSpace(meterName)) // OpenTelemetry only
-		{
-			var meterPrefix = Utilities.ConvertToSeparatedLowercase(meterName, '_');
-			instrumentName = $"{meterPrefix}.{instrumentName}";
-		}
+		if (meterNameGenType == 0 && !string.IsNullOrWhiteSpace(meterName))
+			return (instrumentName, prefix, Utilities.ConvertToSeparatedLowercase(meterName, '_') + ".");
 
-		return (instrumentName, prefix);
+		return (instrumentName, prefix, string.Empty);
 	}
 
 	static ImmutableArray<InstrumentParameterTarget> GetInstrumentParameters(

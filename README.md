@@ -238,10 +238,21 @@ v4 defaults to **OpenTelemetry semantic conventions** for generated telemetry na
 | ---------------- | ------------- | ------------ | -------- |
 | **ActivitySource Name** | Assembly name lowercased: `"myapp"` | Assembly name preserved: `"MyApp"` | ActivitySource names change casing |
 | **Tag/Baggage Keys** | Lowercased, smashed: `"entityid"` | snake_case: `"entity_id"` | Tag keys have underscores for word boundaries |
-| **Metric Instrument Names** | Lowercased, smashed: `"recordhistogram"` | Hierarchical dot.separated: `"myapp.products.record.histogram"` | Includes meter name prefix + word boundaries |
+| **Metric Instrument Names** | Lowercased, smashed: `"product.recordcount"` | Dot-separated namespaces, snake_case words: `"product.record_count"` | Word boundaries become underscores |
 | **Metric Tag Keys** | Lowercased, smashed: `"requestcount"` | snake_case: `"request_count"` | Metric tag keys have underscores |
 
 #### Examples
+
+Given this interface:
+
+```csharp
+[Meter("MyApp.Products")]
+interface IProductTelemetry
+{
+    [Counter]
+    void RecordCount([InstrumentMeasurement] int count);
+}
+```
 
 **Before (v3/Legacy):**
 
@@ -249,21 +260,37 @@ v4 defaults to **OpenTelemetry semantic conventions** for generated telemetry na
 // Generated code:
 new ActivitySource("myapp")           // lowercase
 activity.SetTag("entityid", ...)      // smashed compound
-var meter = meterFactory.Create("MyApp.Products");
-meter.CreateCounter<int>("recordcount")  // smashed compound, no meter prefix
+var meter = meterFactory.Create(new MeterOptions("MyApp.Products") { ... });
+meter.CreateCounter<int>("product.recordcount")  // smashed compound
 ```
 
-**After (v4 OpenTelemetry mode - DEFAULT):**
+**After (v4 OpenTelemetry naming - DEFAULT):**
 
 ```csharp
 // Generated code:
 new ActivitySource("MyApp")           // preserves casing
 activity.SetTag("entity_id", ...)     // snake_case
-var meter = meterFactory.Create("MyApp.Products");
-meter.CreateCounter<int>("myapp.products.record.count")  // hierarchical: meter + instrument
+var meter = meterFactory.Create(new MeterOptions("MyApp.Products") { ... });
+meter.CreateCounter<int>("product.record_count")  // interface prefix + snake_case instrument
 ```
 
-**Note**: In OpenTelemetry mode, instrument names automatically include the meter name prefix (converted to lowercase dot.separated), following OpenTelemetry best practices for hierarchical metric naming.
+An instrument name is built from, in order: the assembly `[MeterGeneration(InstrumentPrefix = ...)]`, the
+interface prefix, and the instrument name. The interface prefix is `[Meter(InstrumentPrefix = ...)]` when set,
+otherwise it is derived from the interface name: the leading `I` and a trailing `Telemetry` or `Logs` are
+removed, so `IProductTelemetry` becomes `product`. The instrument name is the attribute's `Name`, or the method
+name in snake_case.
+
+**The meter name is not part of the instrument name by default.** The meter already identifies the instruments
+it owns, and `MeterNameGenerationType` defaults to `DotNet`. Opt in to the meter name as the outermost namespace
+with `MeterNameGenerationType.OpenTelemetry`, which also lowercases a meter name derived from the assembly name:
+
+```csharp
+[assembly: MeterGeneration(MeterNameGenerationType = MeterNameGenerationType.OpenTelemetry)]
+
+// The interface above now generates "my_app.products.product.record_count".
+```
+
+See [Metrics](https://purview.dev/docs/telemetry-sourcegenerator/metrics/#meter-naming) for the full rules.
 
 #### Reverting to v3 Naming (Legacy Mode)
 

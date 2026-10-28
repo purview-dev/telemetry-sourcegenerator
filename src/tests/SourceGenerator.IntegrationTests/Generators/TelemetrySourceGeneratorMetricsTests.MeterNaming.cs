@@ -370,6 +370,133 @@ interface ITestMetrics
 			.Because("the instrument name must be generated for the DotNet-convention meter name");
 	}
 
+	/// <summary>
+	/// The interface every naming example in README.md, docs/wiki/Metrics.md and docs/wiki/FAQ.md uses, so the
+	/// documented names are pinned by the generator itself.
+	/// </summary>
+	const string DocumentedProductTelemetry = """
+		[Meter("MyApp.Products")]
+		interface IProductTelemetry
+		{
+			[Counter]
+			void RecordCount([InstrumentMeasurement] int count);
+		}
+		""";
+
+	[Test]
+	public async Task Generate_GivenTheDocumentedExampleWithDefaults_PrefixesTheInterfaceNameButNotTheMeterName(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		const string source = $"""
+			namespace Testing;
+
+			{DocumentedProductTelemetry}
+			""";
+
+		// Act
+		using var generationResult = await GenerateAsync(source, cancellationToken: cancellationToken);
+
+		// Assert
+		var generated = generationResult.GetSource("ProductTelemetryCore.Metric.g.cs");
+		await Assert
+			.That(generated)
+			.ContainsGeneratedCode("\"product.record_count\"")
+			.Because(
+				"the default (OpenTelemetry naming, MeterNameGenerationType.DotNet) is the interface-derived prefix and the snake_case method name, without the meter name"
+			);
+		await Assert
+			.That(generated)
+			.ContainsGeneratedCode("\"MyApp.Products\"")
+			.Because("the meter keeps the name it was given");
+		await Assert.That(generated).DoesNotContain("my_app.products.");
+	}
+
+	[Test]
+	public async Task Generate_GivenTheDocumentedExampleWithOpenTelemetryMeterNames_PrependsTheMeterName(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		const string source = $"""
+			[assembly: MeterGeneration(MeterNameGenerationType = MeterNameGenerationType.OpenTelemetry)]
+
+			namespace Testing;
+
+			{DocumentedProductTelemetry}
+			""";
+
+		// Act
+		using var generationResult = await GenerateAsync(source, cancellationToken: cancellationToken);
+
+		// Assert
+		await Assert
+			.That(generationResult.GetSource("ProductTelemetryCore.Metric.g.cs"))
+			.ContainsGeneratedCode("\"my_app.products.product.record_count\"")
+			.Because(
+				"MeterNameGenerationType.OpenTelemetry prepends the snake_cased meter name as the outermost namespace, ahead of the interface prefix"
+			);
+	}
+
+	[Test]
+	public async Task Generate_GivenTheDocumentedExampleWithLegacyNaming_LowercasesWithoutWordBoundaries(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		// Interface-level, because the test options already declare the assembly-level [TelemetryGeneration].
+		const string source = $"""
+			namespace Testing;
+
+			[TelemetryGeneration(NamingConvention = NamingConvention.Legacy)]
+			{DocumentedProductTelemetry}
+			""";
+
+		// Act
+		using var generationResult = await GenerateAsync(source, cancellationToken: cancellationToken);
+
+		// Assert
+		await Assert
+			.That(generationResult.GetSource("ProductTelemetryCore.Metric.g.cs"))
+			.ContainsGeneratedCode("\"product.recordcount\"")
+			.Because("the legacy convention lowercases the name and the interface prefix without splitting words");
+	}
+
+	[Test]
+	public async Task Generate_GivenOpenTelemetryMeterNamesAndSeveralInstruments_PrefixesEachInstrumentOnce(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		const string source = """
+			[assembly: MeterGeneration(MeterNameGenerationType = MeterNameGenerationType.OpenTelemetry)]
+
+			namespace Testing;
+
+			[Meter("orders")]
+			interface IOrderTelemetry
+			{
+				[AutoCounter]
+				void Placed();
+
+				[AutoCounter]
+				void Shipped();
+			}
+			""";
+
+		// Act
+		using var generationResult = await GenerateAsync(source, cancellationToken: cancellationToken);
+
+		// Assert
+		var generated = generationResult.GetSource("OrderTelemetryCore.Metric.g.cs");
+		await Assert.That(generated).ContainsGeneratedCode("\"orders.order.placed\"");
+		await Assert
+			.That(generated)
+			.ContainsGeneratedCode("\"orders.order.shipped\"")
+			.Because("the meter name must not accumulate across the interface's instruments");
+	}
+
 	[Test]
 	public async Task Generate_GivenInterfaceMeterNameOverridesAssemblyDefault(CancellationToken cancellationToken)
 	{
