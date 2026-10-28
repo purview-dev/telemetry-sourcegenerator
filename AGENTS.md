@@ -79,6 +79,9 @@ These mirror the GitHub CI/CD workflows and are the supported way to run a full 
 | `just pipeline-tests` | Build with tests enabled. |
 | `just pipeline-release` | Full release: build, test, pack, publish, GitHub release. |
 | `just pipeline-local-release` | Pack + publish to a local NuGet feed (see the Justfile note on argument quoting). |
+| `just smoke-packed-consumers` | The packed-consumer gate: Native AOT, Blazor WebAssembly and Blazor Server consumers of the `.nupkg`. |
+| `just verify-pack-rules` | Proves every `PackValidation` `ForbiddenContent` rule rejects an injected file. |
+| `just scan-compiler-host-leaks <dir>...` | Fails when build/publish output carries a generator, SGF or Roslyn assembly. |
 
 ### Benchmarks
 
@@ -130,7 +133,8 @@ benchmarks/
 skills/                                     # Authored skills shipped by this package (see "Authoring skills")
 .config/                                    # dotnet-tools.json, lefthook.yml
 .github/workflows/                          # pr.yml, release.yml (reusable purview-dev/build workflows)
-scripts/                                    # setup-release.* (legacy changesets DSC scripts)
+scripts/                                    # release-gate scripts (see "Quality gates"), legacy setup-release.*
+└── packed-consumers/                       # Native AOT, Blazor WebAssembly and Blazor Server consumers of the .nupkg
 docs/release-process.md                     # Release process documentation
 ```
 
@@ -145,6 +149,36 @@ After making changes to the source generator:
 
 The sample projects enable `EmitCompilerGeneratedFiles`, so generated telemetry can be inspected in
 `obj/*/generated/` to sanity-check generator output.
+
+## Quality gates
+
+Treat work as incomplete until every gate relevant to it passes. Before a release, all of them:
+
+- `just scrub`, then `just pipeline-local-release --PublishLocalNuGet:LocalFeedPath=p:/_sync-projects/.local-nuget/`
+  — restore, build with no new warnings, lint, tests, pack and pack validation (`RequiredContent` and
+  `ForbiddenContent`).
+- `just smoke-packed-consumers` — packs the generator to an isolated feed and cache and proves the
+  `.nupkg` itself works: a Native AOT console (published with `-warnaserror`, then run, asserting the
+  emitted activities, metrics and log entries, log-level gating and multi-target methods), a Blazor
+  WebAssembly app (trimmed and `RunAOTCompilation`; no generated member trimmed away, every generated
+  method AOT-compiled) and a Blazor Server host (page rendered on a `TestServer`, telemetry asserted).
+  Every consumer's bin and publish output is leak-scanned. Set `LOCAL_NUGET_FEED_PATH` (or
+  `TELEMETRY_PRERELEASE_FEED`) while Purview.SourceGeneratorFramework or Purview.BuildSdk is not on
+  nuget.org yet. It needs the Native AOT toolchain and, for the WebAssembly AOT step, the `wasm-tools`
+  workload.
+- `just verify-pack-rules` after any change to `PackValidation` in `.config/purview-build.json`.
+- `just build-s && just test-s` — the samples, which reference the generator as an analyzer project.
+- `just lint` — CSharpier reports no change (`just lint-fix` to apply it).
+
+Compiler-host assemblies (`Purview.SourceGeneratorFramework*`, `Microsoft.CodeAnalysis*`, and this
+repository's `Purview.Telemetry.SourceGenerator*` generator and refactorings) must never reach an
+application's build or publish output. `scripts/assert-no-compiler-host-assemblies.ps1` is the check;
+any CI job that builds the samples or publishes an application must run it on what it wrote, and
+`src/tests/Repository.UnitTests/ReleaseGateTests.cs` fails the test run when one does not. The same
+tests keep the leak scan honest against crafted leaks, keep the `packed-consumers` job, the Justfile
+recipes and every `ForbiddenContent` rule wired up, and require the consumers in
+`scripts/packed-consumers/` to reference the generator as a package, never as a project. The full
+table of gates is in [`docs/wiki/Release-Flow.md`](docs/wiki/Release-Flow.md#release-gates).
 
 ### Test project details
 

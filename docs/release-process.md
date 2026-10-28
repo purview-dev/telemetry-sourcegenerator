@@ -99,11 +99,22 @@ is enabled by `Purview.BuildSdk`).
 
 ## Pre-release validation
 
-Before a release, validate locally:
+Before a release, validate locally on a clean tree. Each step must pass.
 
-1. `just pipeline-pr` — restore, build, lint, tests.
-2. `just build-s && just test-s` — sample solution build and tests.
-3. `just pipeline-local-release` — confirm the pack + local publish succeed.
+1. `just scrub` — delete `bin`/`obj`, clean, force-restore, stop build servers.
+2. `just pipeline-local-release --PublishLocalNuGet:LocalFeedPath=p:/_sync-projects/.local-nuget/` —
+   restore, build, lint, tests, pack, pack validation (including `ForbiddenContent`), local publish.
+3. `just smoke-packed-consumers` — the packed-consumer gate: Native AOT, Blazor WebAssembly (trimmed
+   and `RunAOTCompilation`) and Blazor Server consumers of the `.nupkg`, each leak-scanned for
+   compiler-host assemblies.
+4. `just build-s && just test-s` — sample solution build and tests.
+5. `just lint` — CSharpier reports no change.
+
+After changing `PackValidation`, also run `just verify-pack-rules` (pass `-PackagesFolder <feed>` after
+`just pipeline-local-release`, which moves the package out of `artifacts/`).
+
+What each gate proves, and where CI runs it, is in the wiki's
+[Release Flow — Release gates](wiki/Release-Flow.md#release-gates).
 
 ## Releasing
 

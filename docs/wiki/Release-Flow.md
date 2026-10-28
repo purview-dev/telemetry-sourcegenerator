@@ -13,7 +13,7 @@ Feature branch
 
 | Component | File | Purpose |
 | --- | --- | --- |
-| PR gate | `.github/workflows/pr.yml` | Runs the reusable `purview-dev/build` `purview-build.yml` pipeline (restore, build, lint, tests) and builds/tests the sample solution. |
+| PR gate | `.github/workflows/pr.yml` | Runs the reusable `purview-dev/build` `purview-build.yml` pipeline (restore, build, lint, tests), builds/tests the samples and leak-scans their output, and runs the packed-consumer gate (see [Release gates](#release-gates)). |
 | CD pipeline | `.github/workflows/release.yml` | Runs the reusable `purview-dev/build` `purview-release.yml` pipeline on push to `main`. |
 | Local pipeline | `Justfile` `pipeline-*` recipes | Mirror the CI/CD pipelines locally via the `Purview.Build` local tool (`dotnet purview-build`). |
 
@@ -40,13 +40,55 @@ Feature branch
 | `just pipeline-local-release` | Packs and publishes to a local NuGet feed (see the Justfile note on argument quoting for the feed path). |
 | `just pipeline-release` | Full release pipeline (build, test, pack, publish, GitHub release). |
 
+## Release gates
+
+Each gate proves one thing the others cannot. The tests and the samples reference the generator project, which is
+fast and debuggable but is not what ships; the packed gates consume the `.nupkg` itself. A gate that has nothing to
+check fails rather than passing.
+
+| Gate | What it proves | Local | CI |
+| --- | --- | --- | --- |
+| Build, lint and tests | The solution builds warning-free, CSharpier reports no change, and every test project passes. | `just build`, `just lint`, `just test` | `pr.yml` `build` |
+| Pack and pack validation | The package packs; `purview-build.json` `PackValidation` finds exactly the declared content (`RequiredContent`, `RequireExplicitContent`) and none of the `ForbiddenContent`. | `just pipeline-pack-validate` | `pr.yml` `build` |
+| Forbidden-content rule proof | Every `ForbiddenContent` rule rejects a package: a matching file is injected into scratch copies of the package and the real `purview-build` validation must fail, per package and per rule. | `just verify-pack-rules` | `pr.yml` `packed-consumers` |
+| Packed consumers | The package, packed to an isolated feed and cache, works for consumers that reference it as a package - each with a class library of its own generated telemetry. (a) A **Native AOT** console publishes with `-warnaserror` and no IL2xxx/IL3xxx warning, then runs with an in-process `ActivityListener`, `MeterListener` and capturing logger provider and checks the multi-target method (Activity, Information log and counter from one call), tags, baggage, events and the OpenTelemetry exception event, every metric measurement, v1 and v2 logging, log-level gating and the `TelemetryNames` aggregation. (b) A **Blazor WebAssembly** app, using the telemetry from a page and a service, publishes trimmed with `-warnaserror` and with `RunAOTCompilation=true`: the trimmed assemblies keep every generated member, and the WebAssembly AOT compiler compiles every generated method. (c) A **Blazor Server** host renders its page on an in-memory `TestServer`, and the telemetry the page emitted is checked as in (a). (d) Every bin and publish folder is leak-scanned. | `just smoke-packed-consumers` | `pr.yml` `packed-consumers` (linux-x64, `-WasmAot Require`) |
+| Compiler-host leak scan | No generator, refactorings, Purview.SourceGeneratorFramework or Roslyn assembly reaches build or publish output, by file name or in a `deps.json`, `runtimeconfig.json` or boot manifest (`blazor.boot.json`, `dotnet.boot.js`, `dotnet.js`). Purview.SourceGeneratorFramework 1.2.1 put its DLL in every sample's `bin` while every build passed. | `just scan-compiler-host-leaks <dir>...` | the `samples` job (every sample's `bin`) and every consumer in `packed-consumers`; `ReleaseGateTests` fails a job that builds the samples or publishes without it |
+
+`ReleaseGateTests` (in `src/tests/Repository.UnitTests`, so `just test` runs it) guards the gates themselves: the leak
+scan must catch each kind of leak it claims to, every workflow job that builds the samples or publishes must scan its
+output, the `packed-consumers` job must run the gate and the rule proof, the Justfile recipes must run their scripts,
+the consumers must reference the generator as a package and never the repository's projects, and `ForbiddenContent`
+must keep every rule.
+
+### Prerelease build dependencies
+
+The generator is built against the Purview.SourceGeneratorFramework version `Directory.Packages.props` pins, with the
+Purview.BuildSdk version `global.json` pins. Until those versions are on nuget.org, CI cannot restore them: the
+`packed-consumers` job fails at its first step with what to do, rather than skipping. Publish them, or set the
+`TELEMETRY_PRERELEASE_FEED` repository variable to a feed that has them. Locally, `just smoke-packed-consumers` also
+reads `TELEMETRY_PRERELEASE_FEED` or `LOCAL_NUGET_FEED_PATH`, and uses that feed for those packages only.
+
+The consumers target `net11.0` and take their ASP.NET Core package versions from the `Packed consumers` group in
+`Directory.Packages.props`, so bump those with the .NET 11 SDK in `global.json`.
+
 ## Pre-release validation
 
-Before a release, validate locally:
+Run these on a clean tree before bumping and merging a release. Each must pass.
 
-1. `just pipeline-pr` — restore, build, lint, tests.
-2. `just build-s && just test-s` — sample solution build and tests.
-3. `just pipeline-local-release` — confirm the pack + local publish succeed.
+```powershell
+$env:LOCAL_NUGET_FEED_PATH = 'P:\_sync-projects\.local-nuget'   # wherever the prerelease build dependencies are
+
+just scrub                                    # delete bin/obj, clean, force-restore, stop build servers
+just pipeline-local-release --PublishLocalNuGet:LocalFeedPath=p:/_sync-projects/.local-nuget/
+                                              # restore, build, lint, tests, pack, pack validation, local publish
+just smoke-packed-consumers                   # Native AOT, Blazor WebAssembly (trimmed and AOT) and Blazor Server
+just build-s && just test-s                   # sample solution build and tests
+just lint                                     # CSharpier reports no change
+```
+
+`just verify-pack-rules` re-proves the forbidden-content rules against the package in `artifacts/` (after
+`just pipeline-local-release`, which moves it to the local feed, pass `-PackagesFolder <feed>`); run it after changing
+`PackValidation`.
 
 ## Releasing
 
