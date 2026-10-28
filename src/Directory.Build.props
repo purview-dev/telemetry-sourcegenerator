@@ -21,6 +21,11 @@
 			error, the build fails instead. ReleaseGateTests keeps this setting in place.
 		-->
 		<PurviewMergePublicSurfaceSeverity>error</PurviewMergePublicSurfaceSeverity>
+		<!--
+			Installed skills live in the universal .agents/skills/ folder only, and are committed. The
+			SDK's default (*) would make InstallPurviewSkills write a copy into every agent's folder.
+		-->
+		<PurviewSkillsAgents>universal</PurviewSkillsAgents>
 	</PropertyGroup>
 
 	<Import Sdk="Purview.BuildSdk" Project="Sdk.props" />
