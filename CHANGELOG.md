@@ -7,6 +7,28 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Ver
 5.0.7; earlier releases are described by their [GitHub releases](https://github.com/purview-dev/telemetry-sourcegenerator/releases)
 and, for breaking changes, by [Breaking Changes](docs/wiki/Breaking-Changes.md).
 
+## [5.0.7-prerelease.3] - 2026-10-28
+
+The `TSG1011` message no longer offers an opt-out that never existed, and the define it named is
+gone. Generated code is unchanged for every project that did not define it.
+
+### Changed
+
+- **`TSG1011` (unsupported target framework) has a new message.** It said that defining
+  `PURVIEW_TELEMETRY_NON_NULLABLE` suppresses the error. Nothing ever implemented that: the check reads
+  only `NET8_0_OR_GREATER` and `NET48_OR_GREATER`, so the diagnostic was raised regardless. The message
+  now says no telemetry is generated for the target, and that a project must target `net8.0`+ or
+  `net48`+, with a multi-targeted library referencing the package only from its supported targets.
+  The rule's ID, title, category and severity are unchanged, so the analyzer release files are too.
+
+### Removed
+
+- **`PURVIEW_TELEMETRY_NON_NULLABLE`.** Beyond the false `TSG1011` claim, its one effect was on the
+  generated marker attributes: it dropped `#nullable enable` and declared their optional members as
+  `string` rather than `string?`. The attributes now switch on `NET48_OR_GREATER` alone. A `net8.0`+
+  project that defined it gets the `string?` declarations every other modern project gets, which
+  accept every value the plain `string` ones did. `net48` projects are unaffected.
+
 ## [5.0.7-prerelease.2] - 2026-10-28
 
 .NET 11 support. Generated code is unchanged unless you opt in to the new option. The one
@@ -94,5 +116,6 @@ generator. This release changes how the package is built and what has to pass be
 - A `packed-consumers` job in `pr.yml`, and `SampleApp.MultiProject` built and leak-scanned in the
   `samples` job.
 
+[5.0.7-prerelease.3]: https://github.com/purview-dev/telemetry-sourcegenerator/compare/v5.0.7-prerelease.2...v5.0.7-prerelease.3
 [5.0.7-prerelease.2]: https://github.com/purview-dev/telemetry-sourcegenerator/compare/v5.0.7-prerelease.1...v5.0.7-prerelease.2
 [5.0.7-prerelease.1]: https://github.com/purview-dev/telemetry-sourcegenerator/compare/v5.0.6...v5.0.7-prerelease.1
