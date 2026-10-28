@@ -25,8 +25,9 @@ diagnostics in four families:
 | `TSG4xxx` | metrics |
 
 Every rule is tracked in `AnalyzerReleases.Shipped.md` / `AnalyzerReleases.Unshipped.md` with its ID,
-category and severity, validated by the Roslyn release-tracking analyzers on every build. A new or
-changed diagnostic must be recorded there in the same change.
+category and severity, validated by the Roslyn release-tracking analyzers on every build. A new
+rule, or a changed category or severity, must be recorded there in the same change. The files do not
+carry the message, so a reworded message is recorded in the CHANGELOG instead.
 
 ## General — `TSG1xxx`
 
@@ -42,7 +43,7 @@ changed diagnostic must be recorded there in the same change.
 | `TSG1007` | Warning | `ExcludeTargets` leaves a target with an empty or invalid parameter set. |
 | `TSG1008` | Warning | An `Activity`-typed parameter on a method with no `[Activity]`/`[Event]`/`[Context]`. |
 | `TSG1010` | Error | A method carries an attribute for a target family the interface does not register. |
-| `TSG1011` | Error | The compilation targets neither .NET 8+ nor .NET Framework 4.8+. Define `PURVIEW_TELEMETRY_NON_NULLABLE` to opt out. |
+| `TSG1011` | Error | The compilation targets neither .NET 8+ nor .NET Framework 4.8+, so nothing is generated. There is no opt-out: target `net8.0`+ or `net48`+, and reference the package only from those targets of a multi-targeted library. |
 
 ## Logging — `TSG2xxx`
 
@@ -156,6 +157,21 @@ measured the cost.
 
 `[AutoCounter]` — equivalently `[Counter(AutoIncrement = true)]` — must declare no measurement
 parameter. The measurement is fixed at 1.
+
+### `TSG1011` — unsupported target framework
+
+Raised for a compilation that targets neither `net8.0`+ nor `net48`+ (typically `netstandard2.0`).
+It cannot be suppressed by a define; no telemetry is generated for that target. A library that has
+to keep such a target references the generator only from its supported ones:
+
+```xml
+<PackageReference Include="Purview.Telemetry.SourceGenerator"
+                  Condition="'$(TargetFramework)' != 'netstandard2.0'"
+                  PrivateAssets="all" IncludeAssets="analyzers" />
+```
+
+The telemetry interfaces then need the same condition (or an `#if`), because the attributes are
+generated only where the generator runs.
 
 ### `TSG1003` — duplicate method names
 

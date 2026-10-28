@@ -97,14 +97,18 @@ Define this constant to disable logging generation entirely. This is useful when
 </PropertyGroup>
 ```
 
-### `PURVIEW_TELEMETRY_NON_NULLABLE`
+### Unsupported target frameworks
 
-Define this constant to opt out of the `TSG1011` unsupported-target-framework check for non-net8+/net48+ compilations:
+A compilation that targets neither `net8.0`+ nor `net48`+ (for example `netstandard2.0`) reports
+[`TSG1011`](Diagnostics.md#tsg1011) and generates nothing. No define suppresses it. A library that
+keeps such a target references the package only from its supported targets, and puts its telemetry
+interfaces under the same condition:
 
 ```xml
-<PropertyGroup>
-  <DefineConstants>$(DefineConstants);PURVIEW_TELEMETRY_NON_NULLABLE</DefineConstants>
-</PropertyGroup>
+<PackageReference Include="Purview.Telemetry.SourceGenerator" Condition="'$(TargetFramework)' != 'netstandard2.0'">
+  <PrivateAssets>all</PrivateAssets>
+  <IncludeAssets>analyzers</IncludeAssets>
+</PackageReference>
 ```
 
 ## Project-type snippets

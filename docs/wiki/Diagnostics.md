@@ -26,7 +26,7 @@ The package ships a single Roslyn analyzer, `TelemetryDiagnosticAnalyzer`, which
 | `TSG1007`<a id="tsg1007"></a> | Warning | `ExcludeTargets` results in an empty or invalid parameter set for a target. |
 | `TSG1008`<a id="tsg1008"></a> | Warning | Activity parameter has no Activity target. A parameter of type `Activity` is present on a method with no `[Activity]`/`[Event]`/`[Context]` attribute. |
 | `TSG1010`<a id="tsg1010"></a> | Error | Method target not registered on interface. A method carries an attribute for a target family that is not registered on the interface. |
-| `TSG1011`<a id="tsg1011"></a> | Error | Unsupported target framework. The compilation targets neither .NET 8+ nor .NET Framework 4.8+; define `PURVIEW_TELEMETRY_NON_NULLABLE` to opt out. |
+| `TSG1011`<a id="tsg1011"></a> | Error | Unsupported target framework. The compilation targets neither .NET 8+ nor .NET Framework 4.8+ (for example `netstandard2.0`), so no telemetry is generated for it. There is no opt-out. Target `net8.0` or later, or `net48` or later; a multi-targeted library references the package only from its supported targets (a `Condition` on the `PackageReference`), with the telemetry interfaces under the same condition. See [Platform Support](Platform-Support.md). |
 
 ## Logging diagnostics (TSG2xxx)
 
