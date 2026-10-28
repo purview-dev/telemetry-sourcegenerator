@@ -67,6 +67,15 @@ smoke-packed-consumers *args:
     echo "Running the packed consumer gate..."
     pwsh -NoProfile -File scripts/test-packed-consumers.ps1 {{ args }}
 
+# Prove every PackValidation ForbiddenContent rule in .config/purview-build.json rejects a package: injects a matching
+# file into scratch copies of the packed package and runs the real purview-build validation on them. Reads artifacts/,
+# so pack first (`just pipeline-pack-validate`). `just pipeline-local-release` moves its packages to the local feed, so
+# pass -PackagesFolder p:/_sync-projects/.local-nuget after it.
+[group('Pipeline')]
+verify-pack-rules *args:
+    echo "Proving the pack-validation forbidden-content rules..."
+    pwsh -NoProfile -File scripts/test-pack-validation-rules.ps1 {{ args }}
+
 # Run the pipeline with tests enabled
 [group('Pipeline')]
 pipeline-tests *args:
