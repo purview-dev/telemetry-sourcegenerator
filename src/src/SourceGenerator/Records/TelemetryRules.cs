@@ -175,11 +175,8 @@ static partial class TelemetryRules
 
 		// Gather methods grouped by name (for TSG1003 and per-method checks).
 		Dictionary<string, List<IMethodSymbol>> methodsByName = new(StringComparer.Ordinal);
-		foreach (var member in interfaceSymbol.GetMembers())
+		foreach (var method in PipelineHelpers.GetInstanceMethods(interfaceSymbol))
 		{
-			if (member is not IMethodSymbol method)
-				continue;
-
 			if (!methodsByName.TryGetValue(method.Name, out var list))
 			{
 				list = [];
@@ -416,11 +413,8 @@ static partial class TelemetryRules
 		}
 
 		Dictionary<string, List<IMethodSymbol>> methodsByName = new(StringComparer.Ordinal);
-		foreach (var member in interfaceSymbol.GetMembers())
+		foreach (var method in PipelineHelpers.GetInstanceMethods(interfaceSymbol))
 		{
-			if (member is not IMethodSymbol method)
-				continue;
-
 			if (!methodsByName.TryGetValue(method.Name, out var list))
 			{
 				list = [];

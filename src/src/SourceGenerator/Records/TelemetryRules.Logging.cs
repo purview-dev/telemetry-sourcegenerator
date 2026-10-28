@@ -29,9 +29,8 @@ static partial class TelemetryRules
 		var interfaceGenerationMode =
 			loggerAttribute?.GenerationModeOrNull ?? loggerGenerationAttribute?.GenerationModeOrNull ?? 0;
 
-		var methods = interfaceSymbol
-			.GetMembers()
-			.OfType<IMethodSymbol>()
+		var methods = PipelineHelpers
+			.GetInstanceMethods(interfaceSymbol)
 			.Where(m => !TypeHelpers.HasAttribute(m, TypeLibrary.Purview.Telemetry.ExcludeAttribute) && m.Arity == 0);
 
 		foreach (var method in methods)
