@@ -130,7 +130,8 @@ benchmarks/
 └── Purview.Telemetry.Benchmarks/           # BenchmarkDotNet project (net48/net8.0/net9.0/net10.0)
 
 .build/                                     # TS scripts (build-pack.ts, update-version.ts)
-.agents/                                    # Package-delivered skills/prompts/agents (gitignored mirror)
+.agents/skills/                             # Installed skills from other repos, committed (see "Installed skills")
+skills-lock.json                            # The skills CLI lockfile for .agents/skills/, committed
 skills/                                     # Authored skills shipped by this package (see "Authoring skills")
 .config/                                    # dotnet-tools.json, lefthook.yml
 .github/workflows/                          # pr.yml, release.yml (reusable purview-dev/build workflows)
@@ -208,7 +209,7 @@ table of gates is in [`docs/wiki/Release-Flow.md`](docs/wiki/Release-Flow.md#rel
   models).
 - **SDK**: projects import `Purview.BuildSdk` via `Directory.Build.props`/`.targets`. The repo
   sets `ExcludePurviewTelemetry=true` (it does not consume the telemetry package it generates) and
-  `NamespacePrefix=Purview.Telemetry` under `src/`. See `.agents/skills/sdk-*` for SDK behavior.
+  `NamespacePrefix=Purview.Telemetry` under `src/`. See `.agents/skills/purview-buildsdk-*` for SDK behavior.
 - **Analyzer release tracking**: the `TSG` rules are tracked in
   `src/src/SourceGenerator/AnalyzerReleases.{Shipped,Unshipped}.md` (wired as `AdditionalFiles`, so
   the Roslyn RS2000-series checks run under `EnforceExtendedAnalyzerRules=true`). Add new rules to
@@ -216,19 +217,48 @@ table of gates is in [`docs/wiki/Release-Flow.md`](docs/wiki/Release-Flow.md#rel
   `AnalyzerReleases.Shipped.md` at release time. `RS2003` is suppressed — see the comment in
   `src/src/SourceGenerator/SourceGenerator.csproj`.
 
-## Skills from other repositories
+## Installed skills (`.agents/skills/`)
 
 Specialist source-generator and SDK guidance — `CodeWriter` emission, incremental pipeline design,
 test runners and `CodeQuery`, `Purview.BuildSdk` configuration — is published by the repositories
-that own it. Install what you need through the skills CLI; it lands in `.agents/skills/`, which is
-gitignored and recorded in `skills-lock.json`:
+that own it, and installed here by the skills CLI. The installed skills are **committed**:
+`.agents/skills/**` and the CLI's `skills-lock.json` (source, skill path and content hash of every
+entry) are both in source, so a clone has them without running anything.
+
+| Skill | Source | Load before |
+| --- | --- | --- |
+| `purview-sourcegenerator-codewriter` | `purview-dev/sourcegenerator-framework` | writing or reviewing emitter code (`CodeWriter`, scopes, `Emitters/`) |
+| `purview-sourcegenerator-pipeline` | `purview-dev/sourcegenerator-framework` | changing the incremental pipeline or its value-equatable models |
+| `purview-sourcegenerator-diagnostics` | `purview-dev/sourcegenerator-framework` | adding or changing a `TSG` diagnostic or the analyzer |
+| `purview-sourcegenerator-packaging` | `purview-dev/sourcegenerator-framework` | changing how the generator is packed or merged |
+| `purview-sourcegenerator-testing` | `purview-dev/sourcegenerator-framework` | writing generator, analyzer or refactoring tests (`CodeQuery`) |
+| `purview-sourcegenerator-tunit-tests` | `purview-dev/sourcegenerator-framework` | the TUnit base classes and assertion extensions |
+| `purview-buildsdk-*` (8 skills) | `purview-dev/build-sdk` | build/SDK configuration, project layout and detection, testing, skill installation and skill tests |
+
+Skills are installed into the universal `.agents/skills/` location **only**. Never install copies
+into `.claude/` or any other per-agent folder; `/.claude/` is gitignored for that reason. Pass
+`-a universal`, which writes `.agents/skills/` and nothing else:
 
 ```bash
-npx skills add purview-dev/sourcegenerator-framework
-npx skills add purview-dev/build-sdk
+# add or update every skill from a source
+npx -y skills@1 add purview-dev/sourcegenerator-framework -s '*' -a universal -y
+npx -y skills@1 add purview-dev/build-sdk -s '*' -a universal -y
+
+# restore the committed set from skills-lock.json
+npx -y skills@1 experimental_install
 ```
 
-Do not edit anything under `.agents/skills/` — the CLI is its only writer.
+Commit the changed `.agents/skills/**` and `skills-lock.json` together, in their own `chore` commit.
+Do not edit anything under `.agents/skills/` by hand — the CLI is its only writer, and a hand edit
+no longer matches the lockfile's hash. This repository's *own* skills are never installed here; they
+live in `skills/` (below). `Purview.BuildSdk`'s `InstallPurviewSkills` target delegates to the same
+CLI; `src/Directory.Build.props` sets `PurviewSkillsAgents=universal` so it is restricted the same
+way rather than defaulting to every agent (`*`). None of the restored packages ship skills, so
+`ListPurviewSkills` has nothing to recommend and the set above is chosen by hand.
+
+`src/tests/Repository.UnitTests/InstalledSkillTests.cs` keeps this honest: every `skills-lock.json`
+entry has its `.agents/skills/<name>/SKILL.md`, every installed folder is in the lockfile, and no
+`.claude/skills/` copy exists.
 
 ## Authoring skills
 
