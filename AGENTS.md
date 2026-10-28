@@ -234,6 +234,9 @@ entry) are both in source, so a clone has them without running anything.
 | `purview-sourcegenerator-testing` | `purview-dev/sourcegenerator-framework` | writing generator, analyzer or refactoring tests (`CodeQuery`) |
 | `purview-sourcegenerator-tunit-tests` | `purview-dev/sourcegenerator-framework` | the TUnit base classes and assertion extensions |
 | `purview-buildsdk-*` (8 skills) | `purview-dev/build-sdk` | build/SDK configuration, project layout and detection, testing, skill installation and skill tests |
+| `purview-architecture`, `purview-architecture-testing`, `purview-engineering-principles`, `purview-persistence`, `purview-telemetry`, `purview-testing-conventions` | `purview-dev/engineering-playbook` | solution shape, architecture tests, engineering conventions, persistence, telemetry and testing conventions |
+
+This repository's own skills in `skills/` are authored for **consumers** of its packages, not for use while working on this repository. They are never installed into this repository's `.agents/skills/`, which holds only skills installed from other repositories; `InstalledSkillTests` enforces this.
 
 Skills are installed into the universal `.agents/skills/` location **only**. Never install copies
 into `.claude/` or any other per-agent folder; `/.claude/` is gitignored for that reason. Pass
@@ -243,6 +246,7 @@ into `.claude/` or any other per-agent folder; `/.claude/` is gitignored for tha
 # add or update every skill from a source
 npx -y skills@1 add purview-dev/sourcegenerator-framework -s '*' -a universal -y
 npx -y skills@1 add purview-dev/build-sdk -s '*' -a universal -y
+npx -y skills@1 add purview-dev/engineering-playbook -s '*' -a universal -y
 
 # restore the committed set from skills-lock.json
 npx -y skills@1 experimental_install
