@@ -17,11 +17,26 @@ Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system
 **Consumer runtime targets:**
 
 - .NET Framework 4.8
-- .NET 8 or higher
+- .NET 8 or higher, including .NET 11
+
+**Hosting models:** console, ASP.NET Core, .NET Aspire, Native AOT, Blazor WebAssembly (trimmed and AOT-compiled)
+and Blazor Server. The generated code uses no reflection and adds no trim or AOT warnings, and no compiler-host
+assembly reaches your application's output. See
+[Platform Support](https://purview.dev/docs/telemetry-sourcegenerator/platform-support/) for the full matrix.
 
 **Build toolchain requirement:**
 
-- Visual Studio 2026 (18.x) or .NET 10 SDK (Roslyn 5.9.0+)
+- Visual Studio 2026 (18.x) or .NET 10 SDK or later (Roslyn 5.9.0+)
+
+## What's new for .NET 11
+
+- **`ActivitySourceFactory`** - opt in with
+  `[assembly: ActivitySourceGeneration("MyApp", UseActivitySourceFactory = true)]` and register the factory with
+  `services.AddTracing()`. The generated classes then create their sources from the injected .NET 11 factory instead
+  of a static `ActivitySource`. When the type isn't available, `TSG3023` reports it and the static source is kept.
+- **C# 15 static interface members** are ignored rather than implemented.
+- **Validated on .NET 11**: the tests run on `net11.0`, and Native AOT, Blazor WebAssembly and Blazor Server
+  consumers of the package are built on every release.
 
 ## Installation
 
@@ -93,17 +108,25 @@ services.AddEntityStoreTelemetry();
 Then inject and use - a single method call emits an Activity, Log, and Metric simultaneously:
 
 ```csharp
-public class EntityService(IEntityStoreTelemetry telemetry)
+public sealed record Entity(int Id, float TotalValue, int LastUpdatedByUserId, int SizeInBytes);
+
+public interface IEntityRepository
 {
-    public async Task<Entity> GetEntityAsync(int id, string serviceUrl, CancellationToken cancellationToken)
+    Task<Entity?> GetAsync(int id, CancellationToken cancellationToken);
+}
+
+public class EntityService(IEntityStoreTelemetry telemetry, IEntityRepository repository)
+{
+    public async Task<Entity?> GetEntityAsync(int id, string serviceUrl, CancellationToken cancellationToken)
     {
         // Single call creates Activity AND logs AND increments counter
         using var activity = telemetry.GettingEntityFromStore(id, serviceUrl);
-        
-        var entity = await _repository.GetAsync(id, cancellationToken);
-                        
+
+        var stopwatch = Stopwatch.StartNew();
+        var entity = await repository.GetAsync(id, cancellationToken);
+
         // Adds event to activity AND logs duration
-        telemetry.GetDuration(activity, stopwatch.ElapsedMilliseconds);
+        telemetry.GetDuration(activity, (int)stopwatch.ElapsedMilliseconds);
 
         if (entity == null)
         {
@@ -114,7 +137,7 @@ public class EntityService(IEntityStoreTelemetry telemetry)
 
         // Activity context addition
         telemetry.RetrievedEntity(activity, entity.TotalValue, entity.LastUpdatedByUserId);
-        
+
         // Histogram only records size
         telemetry.RecordEntitySize(entity.SizeInBytes);
 
@@ -150,10 +173,18 @@ public class EntityService(IEntityStoreTelemetry telemetry)
 - [Generated Output Examples](https://purview.dev/docs/telemetry-sourcegenerator/generated-output/)
 - [Multi-Targeting Guide](https://purview.dev/docs/telemetry-sourcegenerator/multi-targeting/)
 - [Logging Configuration](https://purview.dev/docs/telemetry-sourcegenerator/logging/)
+- [Platform Support and .NET 11](https://purview.dev/docs/telemetry-sourcegenerator/platform-support/)
 
 ## Agent Skills
 
-This repository ships with [Agent Skills](https://agentskills.io/specification) under `.agents/skills/` covering the source generator, its test framework, and the `Purview.BuildSdk` build SDK. See [`AGENTS.md`](AGENTS.md) — "Source-generator and testing skills" for the full list and when to load each one.
+This repository publishes [Agent Skills](https://agentskills.io/specification) for using the generator - quick
+start, interface design, migration, multi-targeting and diagnostics. Install them with:
+
+```bash
+npx skills add purview-dev/telemetry-sourcegenerator
+```
+
+See [`AGENTS.md`](https://github.com/purview-dev/telemetry-sourcegenerator/blob/main/AGENTS.md) for the list.
 
 ## Sample Project
 

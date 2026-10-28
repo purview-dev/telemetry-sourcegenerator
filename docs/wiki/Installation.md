@@ -7,13 +7,13 @@ This page covers supported frameworks, installation methods, per-feature depende
 **Consumer runtime targets:**
 
 - .NET Framework 4.8
-- .NET 8 or higher
+- .NET 8 or higher, including .NET 11
 
 **Build toolchain requirement:**
 
-- Visual Studio 2026 (18.x) or the .NET 10 SDK (Roslyn 5.9.0+)
+- Visual Studio 2026 (18.x) or the .NET 10 SDK or later (Roslyn 5.9.0+)
 
-The generator itself is a Roslyn component targeting `netstandard2.0`, so it works in any supported compiler host.
+The generator itself is a Roslyn component targeting `netstandard2.0`, so it works in any supported compiler host. See [Platform Support and .NET 11](Platform-Support.md) for the hosting models (Native AOT, Blazor WebAssembly, Blazor Server, Aspire) and the trim/AOT guarantees.
 
 ## Install the package
 
@@ -45,9 +45,10 @@ Install-Package Purview.Telemetry.SourceGenerator
 | Telemetry type | Required reference | Notes |
 | --- | --- | --- |
 | Activities | `System.Diagnostics.DiagnosticSource` | Included in the SDK for .NET 5+ |
-| Logging | `Microsoft.Extensions.Logging.Abstractions` | Required for `[Logger]` interfaces; `TSG2003` is raised if `ILogger` cannot be resolved |
+| Logging | `Microsoft.Extensions.Logging.Abstractions` | Required for `[Logger]` interfaces; `TSG2003` is raised if `ILogger` cannot be resolved. Part of the shared framework on .NET 11, so no reference is needed there (an explicit one reports `NU1510`) |
 | Logging (v2) | `Microsoft.Extensions.Telemetry.Abstractions` | Required for state-based v2 generation (`LoggerMessageHelper`, `[LogProperties]`) |
 | Metrics | `System.Diagnostics.Metrics` | Included in the SDK for .NET 8+ |
+| Activities from `ActivitySourceFactory` (opt-in) | `Microsoft.Extensions.Diagnostics` 11 (`services.AddTracing()`) | Only with `UseActivitySourceFactory`; see [Activities](Activities.md#creating-sources-with-activitysourcefactory-net-11) |
 
 ## Verifying the install
 

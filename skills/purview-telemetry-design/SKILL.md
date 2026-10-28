@@ -58,7 +58,9 @@ Default to the OpenTelemetry naming convention (`NamingConvention.OpenTelemetry`
 - ActivitySource names: preserve assembly casing (e.g., `MyApp`).
 - Activity names: descriptive, sentence-case-ish, no spaces: `placing-order`.
 - Log message templates: human-readable, with `{PascalCase}` placeholders.
-- Metric instrument names: hierarchical, dot-separated, lowercase: `myapp.orders.placed`.
+- Metric instrument names: dot-separated, snake_case words. The generator prefixes them with the interface name, not
+  the meter name: `IOrderTelemetry.OrdersPlaced` becomes `order.orders_placed`. Opt in to a meter-name prefix with
+  `MeterNameGenerationType.OpenTelemetry`.
 - Tag/baggage keys: `snake_case`.
 
 Only use `NamingConvention.Legacy` for exact v3 backward compatibility.

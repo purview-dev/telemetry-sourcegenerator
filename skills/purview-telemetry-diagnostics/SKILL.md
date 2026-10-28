@@ -83,6 +83,7 @@ changed diagnostic must be recorded there in the same change.
 | `TSG3017` | Error | Status-description parameters on an Activity or Context method — Events only. |
 | `TSG3021` | Info | An `[Event]` records an exception under the OpenTelemetry rules but is not named `"exception"`. |
 | `TSG3022` | Warning | An Activity method returns non-nullable `Activity`. |
+| `TSG3023` | Warning | `UseActivitySourceFactory` is set but `System.Diagnostics.ActivitySourceFactory` (.NET 11, or DiagnosticSource 11+) cannot be resolved; a static `ActivitySource` is generated instead. Target `net11.0` or remove the option. |
 
 ## Metrics — `TSG4xxx`
 

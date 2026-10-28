@@ -12,10 +12,13 @@ This approach allows for:
 
 ## Supported frameworks
 
-- .NET 8 or higher
+- .NET 8 or higher, including .NET 11
 - .NET Framework 4.8 or higher
 
-**Build toolchain requirement:** Visual Studio 2026 (18.x) or the .NET 10 SDK (Roslyn 5.9.0+).
+**Build toolchain requirement:** Visual Studio 2026 (18.x) or the .NET 10 SDK or later (Roslyn 5.9.0+).
+
+Native AOT, trimmed and AOT-compiled Blazor WebAssembly, and Blazor Server are supported. See
+[Platform Support and .NET 11](Platform-Support.md) for the full matrix, the trim/AOT guarantees and what's new for .NET 11.
 
 ## Documentation
 
@@ -23,6 +26,7 @@ This approach allows for:
 
 - [Getting Started](Getting-Started.md) — install, first interface, and common patterns
 - [Installation](Installation.md) — supported frameworks, per-feature dependencies, and build configuration
+- [Platform Support and .NET 11](Platform-Support.md) — support matrix, trim/AOT guarantees, .NET 11 features
 - [Sample Application](Sample-Application.md) — full .NET Aspire demo application
 
 ### Core features

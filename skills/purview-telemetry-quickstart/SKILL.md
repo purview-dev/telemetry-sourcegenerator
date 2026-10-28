@@ -14,21 +14,30 @@ This skill helps you bootstrap telemetry generation in a C# project using `Purvi
 
 ## Installation
 
-Add the analyzer package to your project:
+Add the analyzer package to your project. `dotnet add package` writes the latest version; never copy a version
+number from documentation, it goes stale:
+
+```bash
+dotnet add package Purview.Telemetry.SourceGenerator
+```
+
+Then make the reference analyzer-only (keep the `Version` that `dotnet add package` wrote, or set it in
+`Directory.Packages.props` under Central Package Management):
 
 ```xml
-<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="4.5.0">
+<PackageReference Include="Purview.Telemetry.SourceGenerator">
   <PrivateAssets>all</PrivateAssets>
   <IncludeAssets>analyzers</IncludeAssets>
 </PackageReference>
 ```
 
-Also add runtime dependencies for the telemetry types you use:
+Consumers can target .NET Framework 4.8 or .NET 8 and later, .NET 11 included, and the generated code works under
+Native AOT and in trimmed or AOT-compiled Blazor WebAssembly. Runtime dependencies for the telemetry types you use:
 
-- `System.Diagnostics.DiagnosticSource` for Activities
-- `Microsoft.Extensions.Logging.Abstractions` for ILogger
-- `System.Diagnostics.Metrics` for metrics (built-in on .NET 6+)
-
+- Activities: `System.Diagnostics.DiagnosticSource` (in-box on .NET).
+- Logging: `Microsoft.Extensions.Logging.Abstractions`. It is in the shared framework on .NET 11, so do not reference
+  it there (NuGet reports `NU1510`). Add `Microsoft.Extensions.Telemetry.Abstractions` for the faster v2 logging.
+- Metrics: `System.Diagnostics.Metrics` (in-box on .NET 8+). Register `services.AddMetrics()` for the `IMeterFactory`.
 ## Define a telemetry interface
 
 Create a `public interface` and decorate it with class-level attributes. The generator creates the implementation and a DI registration extension.
@@ -105,6 +114,16 @@ The generator creates an extension method named `Add{InterfaceNameWithoutI}()`:
 services.AddOrderServiceTelemetry();
 ```
 
+On .NET 11 you can opt in to creating activity sources from the injected `ActivitySourceFactory`. This changes the
+generated constructor, so also register the factory:
+
+```csharp
+[assembly: ActivitySourceGeneration("MyApp.Orders", UseActivitySourceFactory = true)]
+
+// in the host
+services.AddTracing();
+```
+
 Inject the interface into your service:
 
 ```csharp
@@ -136,5 +155,5 @@ Libraries need no configuration: they publish their names through the attribute,
 
 ## Next steps
 
-- To migrate existing `ILogger`, `ActivitySource`, or metrics code, use `telemetry-sourcegenerator-migration`.
-- For design guidance and best practices, use `telemetry-sourcegenerator-design`.
+- To migrate existing `ILogger`, `ActivitySource`, or metrics code, use the `purview-telemetry-migration` skill.
+- For design guidance and best practices, use the `purview-telemetry-design` skill.

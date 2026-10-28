@@ -21,8 +21,9 @@ code to generated telemetry interfaces) in a companion assembly.
 
 ## Prerequisites
 
-- .NET 10 SDK (projects target `net10.0`; the source generator is a Roslyn component targeting
-  `netstandard2.0`)
+- The .NET 11 SDK pinned in `global.json` (currently an RC, `rollForward: latestMajor`), plus the .NET 8, 9 and
+  10 runtimes for the test legs. Projects target `net10.0` by default; the source generator is a Roslyn component
+  targeting `netstandard2.0`. Consumers need Visual Studio 2026 / the .NET 10 SDK or later (Roslyn 5.9.0+).
 - [Bun](https://bun.sh) for the `package.json`/`.build/*.ts` scripts
 - The `Purview.BuildSdk` MSBuild SDK (pinned in `global.json` under `msbuild-sdks`)
 - `csharpier` dotnet tool (pinned in `.config/dotnet-tools.json`) for linting/formatting
@@ -136,6 +137,7 @@ skills/                                     # Authored skills shipped by this pa
 scripts/                                    # release-gate scripts (see "Quality gates"), legacy setup-release.*
 └── packed-consumers/                       # Native AOT, Blazor WebAssembly and Blazor Server consumers of the .nupkg
 docs/release-process.md                     # Release process documentation
+docs/wiki/                                  # User documentation (Platform-Support.md: TFM/hosting matrix, .NET 11)
 ```
 
 ## Build and validation workflow
@@ -182,7 +184,14 @@ table of gates is in [`docs/wiki/Release-Flow.md`](docs/wiki/Release-Flow.md#rel
 
 ### Test project details
 
-- Integration tests target `net8.0;net9.0;net10.0`, plus `net48` on Windows only.
+- Integration tests target `net8.0;net9.0;net10.0;net11.0`, plus `net48` on Windows only. The `net11.0` leg is the
+  only one whose references carry `System.Diagnostics.ActivitySourceFactory`, so the `UseActivitySourceFactory`
+  tests (`[RequiresActivitySourceFactory]`) run there and the fallback tests (`[RequiresNoActivitySourceFactory]`,
+  `TSG3023`) run on the earlier legs.
+- Gate new emitted APIs on the compilation (`Compilation.GetTypeByMetadataName`, surfaced through
+  `TelemetryCapabilities`), not on the target framework: the System.Diagnostics.DiagnosticSource package brings .NET 11
+  types to `net462`/`netstandard2.0`. The supported matrix and the list of .NET 11 features that are not generated
+  yet live in [`docs/wiki/Platform-Support.md`](docs/wiki/Platform-Support.md); update it with any such change.
 - Tests use `Purview.SourceGeneratorFramework.Testing.TUnit` (TUnit + the framework's `CodeQuery`
   syntax-lookup API and assertion extensions). There is no Verify/snapshot library; refactoring tests
   use the framework's `CodeRefactoringTestBase` snapshot approach.

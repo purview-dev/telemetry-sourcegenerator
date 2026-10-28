@@ -15,6 +15,34 @@ In v5 the ActivitySource name defaults to the **assembly name with casing preser
 > [!NOTE]
 > `purview` is only used as a fallback when no assembly name is available, in which case the `TSG3001` diagnostic is generated.
 
+## Creating sources with `ActivitySourceFactory` (.NET 11)
+
+By default each generated class owns a `static readonly ActivitySource`. .NET 11 adds
+[`ActivitySourceFactory`](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-11/libraries#activity-tracing-configuration),
+the tracing counterpart of `IMeterFactory`: registered by `services.AddTracing()` (Microsoft.Extensions.Diagnostics
+11), it creates *local* sources that the container owns and that `AddTracing` rules can enable or disable. Opt in at
+the assembly level:
+
+```csharp
+[assembly: ActivitySourceGeneration("MyApp.Orders", UseActivitySourceFactory = true)]
+```
+
+The generated class then takes an `ActivitySourceFactory` constructor parameter (after `ILogger<T>` and
+`IMeterFactory`, when the interface also targets logging or metrics) and creates its source with
+`activitySourceFactory.Create(new ActivitySourceOptions(name))`. Register the factory before resolving the telemetry:
+
+```csharp
+builder.Services.AddTracing();
+builder.Services.AddOrderTelemetry();
+```
+
+- The factory owns the source; the generated class never disposes it.
+- The option is opt-in because it changes the generated constructor. Without it, nothing changes when you move to .NET 11.
+- It is gated on the compilation, not the target framework: it needs `System.Diagnostics.ActivitySourceFactory`, which
+  ships in .NET 11 and in the System.Diagnostics.DiagnosticSource 11 package (net462, netstandard2.0, net10.0). When the
+  type cannot be resolved the generator keeps the static source and reports [`TSG3023`](Diagnostics.md#tsg3023).
+- Listeners registered with `ActivitySource.AddActivityListener` (OpenTelemetry's included) still see factory-created sources.
+
 ## Activity, Event, or Context
 
 There are three method types:
@@ -121,6 +149,7 @@ Defines ActivitySource defaults at the assembly level.
 | `BaggageAndTagSeparator` | `string` | Separator used when generating prefixes. Default `.`. |
 | `LowercaseBaggageAndTagKeys` | `bool` | Whether tag/baggage names are lower-cased. Default `true`. |
 | `GenerateDiagnosticsForMissingActivity` | `bool` | Whether diagnostics (`TSG3014`/`TSG3015`) are raised when Activity parameters or return values are missing. Default `true`. |
+| `UseActivitySourceFactory` | `bool` | .NET 11: create each generated source from the injected `System.Diagnostics.ActivitySourceFactory` instead of a static `ActivitySource` (see below). Default `false`. |
 
 ### `[Baggage]`
 
