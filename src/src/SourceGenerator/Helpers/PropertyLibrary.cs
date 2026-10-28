@@ -53,6 +53,8 @@ static class PropertyLibrary
 		public const string DefaultActivitySourceName = "purview";
 		public const int DefaultActivityKind = 0;
 		public const string ActivitySourceFieldName = "_activitySource";
+		public const string ActivitySourceInitializationMethod = "InitializeActivitySource";
+		public const string ActivitySourceFactoryParameterName = "activitySourceFactory";
 		public const string ActivityVariableName = "activity";
 		public const string ParentIdParameterName = "parentId";
 		public const string StartTimeParameterName = "startTime";

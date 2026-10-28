@@ -76,7 +76,12 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 			var result = PipelineHelpers.BuildActivityTarget(interfaceSymbol, compilation, token);
 			if (result.HasValue && result.Value is { } activityTarget)
 			{
-				var diagnostics = TelemetryRules.GetActivityDiagnostics(activityTarget, interfaceSymbol, token);
+				var diagnostics = TelemetryRules.GetActivityDiagnostics(
+					activityTarget,
+					interfaceSymbol,
+					compilation,
+					token
+				);
 				foreach (var diagnostic in diagnostics)
 					context.ReportDiagnostic(diagnostic.ToDiagnostic());
 			}

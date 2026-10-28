@@ -57,6 +57,7 @@ static partial class TelemetryRules
 			DiagnosticLibrary.Activities.StatusDescriptionParameterInvalidType.Descriptor,
 			DiagnosticLibrary.Activities.ExceptionEventNotStandardName.Descriptor,
 			DiagnosticLibrary.Activities.ActivityReturnTypeShouldBeNullable.Descriptor,
+			DiagnosticLibrary.Activities.ActivitySourceFactoryNotAvailable.Descriptor,
 			DiagnosticLibrary.Metrics.NoInstrumentDefined.Descriptor,
 			DiagnosticLibrary.Metrics.DoesNotReturnVoid.Descriptor,
 			DiagnosticLibrary.Metrics.AutoIncrementCountAndMeasurementParam.Descriptor,

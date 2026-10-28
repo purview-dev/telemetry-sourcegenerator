@@ -8,12 +8,17 @@ namespace PackedTelemetry;
 
 public sealed record CapturedEvent(string Name, IReadOnlyDictionary<string, string?> Tags);
 
+/// <param name="CreatedByFactory">
+/// Whether the activity's source was created by an <see cref="ActivitySourceFactory"/> (.NET 11), which records itself
+/// as the source's <see cref="ActivitySource.Scope"/>; a static <c>new ActivitySource(...)</c> has no scope.
+/// </param>
 public sealed record CapturedActivity(
 	string Source,
 	string Name,
 	IReadOnlyDictionary<string, string?> Tags,
 	IReadOnlyDictionary<string, string?> Baggage,
-	IReadOnlyList<CapturedEvent> Events
+	IReadOnlyList<CapturedEvent> Events,
+	bool CreatedByFactory
 );
 
 public sealed record CapturedMeasurement(
@@ -68,7 +73,8 @@ public sealed class TelemetryCapture : ILoggerProvider
 						activity.OperationName,
 						ToDictionary(activity.TagObjects),
 						ToDictionary(activity.Baggage),
-						[.. activity.Events.Select(static e => new CapturedEvent(e.Name, ToDictionary(e.Tags)))]
+						[.. activity.Events.Select(static e => new CapturedEvent(e.Name, ToDictionary(e.Tags)))],
+						activity.Source.Scope is ActivitySourceFactory
 					)
 				),
 		};

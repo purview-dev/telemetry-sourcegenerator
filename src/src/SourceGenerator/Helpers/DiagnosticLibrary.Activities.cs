@@ -236,6 +236,18 @@ partial class DiagnosticLibrary
 			isBlocking: false
 		);
 
+		public static readonly ReportableDiagnostic ActivitySourceFactoryNotAvailable = ReportableDiagnostic.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3023",
+				title: "ActivitySourceFactory is not available",
+				messageFormat: $"UseActivitySourceFactory is set, but System.Diagnostics.ActivitySourceFactory cannot be resolved. It needs .NET 11, or System.Diagnostics.DiagnosticSource 11 or later. A static {TypeLibrary.System.Diagnostics.ActivitySource.Name} is generated instead.",
+				defaultSeverity: DiagnosticSeverity.Warning,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			),
+			isBlocking: false
+		);
+
 		// The trailing '{1}' placeholder carries an optional hint supplied by the rule (for example when
 		// the 'Name' was applied to a logging attribute); rules pass string.Empty when there is no
 		// additional context.

@@ -30,8 +30,10 @@
 	       in-process ActivityListener, MeterListener and a capturing logger provider it checks the multi-target method
 	       (an Activity, an Information log entry and a counter from one call), activity tags, baggage and events
 	       (including the OpenTelemetry exception event), every metric measurement and its tags, the v1 and v2 log
-	       entries, log-level gating (a Debug entry must not be written when only Information is enabled) and the
-	       TelemetryNames aggregation of both assemblies. It exits non-zero on any mismatch.
+	       entries, log-level gating (a Debug entry must not be written when only Information is enabled), the
+	       TelemetryNames aggregation of both assemblies, and that IOrderTelemetry's source was created by the .NET 11
+	       ActivitySourceFactory (UseActivitySourceFactory) while the library's stayed static. It exits non-zero on any
+	       mismatch.
 	   (b) BlazorWasm - a Blazor WebAssembly app using the generated telemetry from a page and a service. Published
 	       trimmed with -warnaserror, then again with RunAOTCompilation=true. _framework must hold both assemblies; the
 	       assemblies ILLink wrote must still define every generated telemetry member (the library is IsTrimmable, so it
@@ -109,13 +111,16 @@ function Get-VersionProperty([string] $name) {
 }
 
 $sgfVersion = Get-VersionProperty 'PurviewSGFVersion'
-$extensionsVersion = Get-VersionProperty 'DotnetRuntimeVersion'
 $extensionsTelemetryVersion = Get-VersionProperty 'MSExtensionVersion'
 $aspNetCoreVersion = Get-PackageVersion 'Microsoft.AspNetCore.Components.WebAssembly'
 $testHostVersion = Get-PackageVersion 'Microsoft.AspNetCore.TestHost'
 if ($testHostVersion -ne $aspNetCoreVersion) {
 	throw "Microsoft.AspNetCore.TestHost ($testHostVersion) and Microsoft.AspNetCore.Components.WebAssembly ($aspNetCoreVersion) must share a version in Directory.Packages.props."
 }
+# The consumers target net11.0, so their Microsoft.Extensions.* packages are the .NET 11 ones, versioned with ASP.NET
+# Core: services.AddTracing() - which registers the ActivitySourceFactory the generated code takes - is new in
+# Microsoft.Extensions.Diagnostics 11.
+$extensionsVersion = $aspNetCoreVersion
 
 $globalJson = Get-Content (Join-Path $repositoryRoot 'global.json') -Raw | ConvertFrom-Json
 $sdk = $globalJson.sdk
@@ -216,9 +221,11 @@ function Assert-Contains([string] $directory, [string] $pattern, [string] $what)
 # dependency injection.
 $generatedMembers = [ordered]@{
 	PackedTelemetryWasm = [ordered]@{
+		# IOrderTelemetry opts in to the .NET 11 ActivitySourceFactory, so its source is created per instance by
+		# InitializeActivitySource; the library's InventoryTelemetryCore keeps the static source.
 		'PackedTelemetry.OrderTelemetryCore' = @(
-			'.ctor', 'InitializeMeters', 'PlacingOrder', 'OrderValidated', 'OrderTotal', 'OrdersInFlight', 'OrderShipped',
-			'OrderFailed', '_activitySource', '_logger', '_meter'
+			'.ctor', 'InitializeMeters', 'InitializeActivitySource', 'PlacingOrder', 'OrderValidated', 'OrderTotal',
+			'OrdersInFlight', 'OrderShipped', 'OrderFailed', '_activitySource', '_logger', '_meter'
 		)
 	}
 	'PackedTelemetry.Library' = [ordered]@{

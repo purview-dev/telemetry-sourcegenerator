@@ -19,6 +19,9 @@ using var capture = new TelemetryCapture(Expectations.Names);
 ServiceCollection services = new();
 services.AddLogging(logging => logging.ClearProviders().SetMinimumLevel(LogLevel.Trace).AddProvider(capture));
 services.AddMetrics();
+
+// .NET 11: the ActivitySourceFactory IOrderTelemetry's generated constructor takes (UseActivitySourceFactory).
+services.AddTracing();
 services.AddOrderTelemetry();
 services.AddInventory();
 services.AddSingleton<OrderWorkflow>();

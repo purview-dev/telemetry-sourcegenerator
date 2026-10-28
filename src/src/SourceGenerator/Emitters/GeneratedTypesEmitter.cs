@@ -775,6 +775,16 @@ static class GeneratedTypesEmitter
 					"Determines whether diagnostics are generated for missing activity definitions.",
 					"true"
 				);
+				WritePublicProperty(
+					body,
+					"UseActivitySourceFactory",
+					TypeLibrary.System.Boolean,
+					"Determines whether each generated activity source is created by the dependency-injected "
+						+ "System.Diagnostics.ActivitySourceFactory (.NET 11, or System.Diagnostics.DiagnosticSource 11 "
+						+ "and later) instead of as a static ActivitySource. The factory must be registered, for example "
+						+ "with services.AddTracing(). Ignored, and reported as TSG3023, when the factory type is unavailable.",
+					"false"
+				);
 			},
 			"Specifies the default activity source generation behaviour for an assembly."
 		);

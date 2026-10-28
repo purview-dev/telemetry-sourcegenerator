@@ -11,6 +11,17 @@ partial class TypeLibraryGenerator
 	[TypeRef(SystemDiagnosticsNamespace)]
 	static readonly TypeIdentity ActivitySource = default;
 
+	/// <summary>
+	/// .NET 11 (System.Diagnostics.DiagnosticSource 11): the dependency-injected creator of activity sources,
+	/// the tracing counterpart of <c>IMeterFactory</c>. Emitted only when the compilation can resolve it.
+	/// </summary>
+	[TypeRef(SystemDiagnosticsNamespace)]
+	static readonly TypeIdentity ActivitySourceFactory = default;
+
+	/// <summary>.NET 10 (System.Diagnostics.DiagnosticSource 10): the options an activity source is created from.</summary>
+	[TypeRef(SystemDiagnosticsNamespace)]
+	static readonly TypeIdentity ActivitySourceOptions = default;
+
 	[TypeRef(SystemDiagnosticsNamespace)]
 	static readonly TypeIdentity ActivityEvent = default;
 

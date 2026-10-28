@@ -1,6 +1,12 @@
 using System.Diagnostics;
 using Purview.Telemetry;
 
+// .NET 11: every consumer assembly - and so IOrderTelemetry - creates its activity sources through the injected
+// System.Diagnostics.ActivitySourceFactory, registered by services.AddTracing(). PackedTelemetry.Library does not opt
+// in, so each application also runs a generated static ActivitySource, and the gate checks both shapes (trimmed,
+// Native AOT and WebAssembly AOT).
+[assembly: ActivitySourceGeneration("packed.orders", UseActivitySourceFactory = true)]
+
 namespace PackedTelemetry;
 
 /// <summary>

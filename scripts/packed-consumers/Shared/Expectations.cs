@@ -32,6 +32,10 @@ public static class Expectations
 		{
 			var activity = order[0];
 			Check(
+				activity.CreatedByFactory,
+				$"'{OrdersName}' was not created by the injected ActivitySourceFactory (UseActivitySourceFactory)"
+			);
+			Check(
 				Get(activity.Tags, "order_id") == orderId,
 				$"order.place tag order_id is '{Get(activity.Tags, "order_id")}', not '{orderId}'"
 			);
@@ -73,10 +77,16 @@ public static class Expectations
 			$"expected one '{InventoryName}/stock.reserve' activity (the library's), got {reserve.Length}"
 		);
 		if (reserve.Length == 1)
+		{
 			Check(
 				Get(reserve[0].Tags, "sku") == OrderWorkflow.Sku,
 				$"stock.reserve tag sku is '{Get(reserve[0].Tags, "sku")}'"
 			);
+			Check(
+				!reserve[0].CreatedByFactory,
+				$"'{InventoryName}' does not opt in to UseActivitySourceFactory, so it must stay a static ActivitySource"
+			);
+		}
 
 		// Metrics. Instrument names carry the prefix the generator derives from the interface name (IOrderTelemetry ->
 		// "order", IInventoryTelemetry -> "inventory"); the meter name is only prepended with

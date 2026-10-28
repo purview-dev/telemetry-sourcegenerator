@@ -20,6 +20,9 @@ if (selfTest)
 builder.Logging.ClearProviders().SetMinimumLevel(LogLevel.Trace).AddProvider(capture);
 
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+
+// .NET 11: the ActivitySourceFactory IOrderTelemetry's generated constructor takes (UseActivitySourceFactory).
+builder.Services.AddTracing();
 builder.Services.AddOrderTelemetry();
 builder.Services.AddInventory();
 builder.Services.AddSingleton<OrderWorkflow>();
