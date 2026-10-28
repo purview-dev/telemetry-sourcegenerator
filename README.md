@@ -25,14 +25,23 @@ Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system
 
 ## Installation
 
-Add to your `Directory.Build.props` or `.csproj` file:
+```bash
+dotnet add package Purview.Telemetry.SourceGenerator
+```
+
+`dotnet add package` writes the latest version (shown on the NuGet badge above) into your project. The
+generator is a compile-time dependency only, so mark the reference as analyzer-only:
 
 ```xml
-<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="5.0.7-prerelease.1">
+<PackageReference Include="Purview.Telemetry.SourceGenerator">
   <PrivateAssets>all</PrivateAssets>
   <IncludeAssets>analyzers</IncludeAssets>
 </PackageReference>
 ```
+
+The `Version` attribute that `dotnet add package` adds stays on that element; with
+[Central Package Management](https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management)
+it lives in `Directory.Packages.props` instead.
 
 ## Quick Start
 
