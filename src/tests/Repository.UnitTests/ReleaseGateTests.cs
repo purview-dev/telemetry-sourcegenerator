@@ -413,6 +413,36 @@ public sealed partial class ReleaseGateTests
 			.Because($"ForbiddenContent[\"*\"] no longer forbids: {string.Join(", ", missing)}");
 	}
 
+	/// <summary>
+	/// The merge that makes the shipped analyzers self-contained reports a public type exposing a
+	/// Purview.SourceGeneratorFramework type (PSGFR41) as a plain message by default, which is how
+	/// <c>MessageTemplateHole</c> shipped. As an error it fails the build, so the setting must not be dropped.
+	/// </summary>
+	[Test]
+	public async Task BuildProps_GivenTheMergedAnalyzers_FailTheBuildOnAPublicSurfaceLeak(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		var document = XDocument.Parse(
+			await File.ReadAllTextAsync(
+				System.IO.Path.Combine(RepositoryRoot.Value, "src", "Directory.Build.props"),
+				cancellationToken
+			)
+		);
+
+		// Act
+		var severities = document
+			.Descendants("PurviewMergePublicSurfaceSeverity")
+			.Select(static element => element.Value.Trim())
+			.ToArray();
+		var disabled = document.Descendants("PurviewMergePublicSurfaceValidation").Select(static e => e.Value.Trim());
+
+		// Assert
+		await Assert.That(severities).IsEquivalentTo(["error"]);
+		await Assert.That(disabled).DoesNotContain("false");
+	}
+
 	static TemporaryDirectory CleanOutput()
 	{
 		TemporaryDirectory output = new();

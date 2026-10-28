@@ -14,6 +14,13 @@
 			causing duplicate-symbol errors during host builds.
 		-->
 		<UseArtifactsOutput>false</UseArtifactsOutput>
+		<!--
+			The merge that makes the generator and refactorings self-contained reports a public type whose
+			signature exposes a Purview.SourceGeneratorFramework type (PSGFR41). The framework's default
+			severity is a plain message, which nobody reads; MessageTemplateHole shipped like that. As an
+			error, the build fails instead. ReleaseGateTests keeps this setting in place.
+		-->
+		<PurviewMergePublicSurfaceSeverity>error</PurviewMergePublicSurfaceSeverity>
 	</PropertyGroup>
 
 	<Import Sdk="Purview.BuildSdk" Project="Sdk.props" />
