@@ -7,6 +7,44 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Ver
 5.0.7; earlier releases are described by their [GitHub releases](https://github.com/purview-dev/telemetry-sourcegenerator/releases)
 and, for breaking changes, by [Breaking Changes](docs/wiki/Breaking-Changes.md).
 
+## [5.0.7-prerelease.2] - 2026-10-28
+
+.NET 11 support. Generated code is unchanged unless you opt in to the new option. The one
+exception is the opt-in `MeterNameGenerationType.OpenTelemetry` naming, which was fixed (see below).
+
+### Added
+
+- **`ActivitySourceFactory` (.NET 11).**
+  `[assembly: ActivitySourceGeneration(..., UseActivitySourceFactory = true)]` makes the generated
+  classes take a `System.Diagnostics.ActivitySourceFactory` constructor parameter and create their
+  source with `Create(new ActivitySourceOptions(name))`, instead of a static `ActivitySource`.
+  Register the factory with `services.AddTracing()`. The option is gated on the compilation resolving
+  the type (.NET 11, or System.Diagnostics.DiagnosticSource 11+). When the type is unavailable,
+  the static source is kept and the new warning **`TSG3023`** reports it.
+- [Platform Support and .NET 11](docs/wiki/Platform-Support.md): the target-framework and hosting
+  matrix, the trim/AOT guarantees, the .NET 11 features and what is not supported yet.
+- The integration tests run on a `net11.0` leg.
+- The packed-consumer gate exercises `UseActivitySourceFactory` under Native AOT, Blazor
+  WebAssembly (trimmed and AOT) and Blazor Server, alongside a static source in the library.
+
+### Fixed
+
+- `MeterNameGenerationType.OpenTelemetry` placed the meter name between the interface prefix and
+  the instrument name (`product.my_app.products.record_count`). It is now the outermost namespace
+  (`my_app.products.product.record_count`), as documented. The default (`DotNet`) is unchanged.
+  **If you opted in, your instrument names change.**
+- The README and wiki said OpenTelemetry naming prefixes instrument names with the meter name by
+  default. It never has; the docs now describe the interface-derived prefix
+  (`IProductTelemetry.RecordCount` becomes `product.record_count`), and tests pin the examples.
+- Static interface members are ignored. They were implemented as instance methods and reported as
+  duplicates (`TSG1003`). This matters now because C# 15 allows them on every runtime.
+- The packaged README no longer pins a package version. 5.0.6 shipped a README telling consumers to
+  install 5.0.5. `PackagedDocumentationTests` now fails on any version in a packaged document.
+- `MessageTemplateHole` is internal. As a public type it exposed a Purview.SourceGeneratorFramework
+  type on the merged analyzer's surface (`PSGFR41`). `PurviewMergePublicSurfaceSeverity` is now
+  `error`, so such a leak fails the build.
+- The benchmarks build again. They loaded a `Purview.SourceGeneratorFramework.Shared.dll` that no
+  framework version ships, and now use the merged generator. Their `net48` target compiles too.
 ## [5.0.7-prerelease.1] - 2026-10-28
 
 No change to the generated code or to the package's contents: consumers of the package see the same
@@ -56,4 +94,5 @@ generator. This release changes how the package is built and what has to pass be
 - A `packed-consumers` job in `pr.yml`, and `SampleApp.MultiProject` built and leak-scanned in the
   `samples` job.
 
+[5.0.7-prerelease.2]: https://github.com/purview-dev/telemetry-sourcegenerator/compare/v5.0.7-prerelease.1...v5.0.7-prerelease.2
 [5.0.7-prerelease.1]: https://github.com/purview-dev/telemetry-sourcegenerator/compare/v5.0.6...v5.0.7-prerelease.1
