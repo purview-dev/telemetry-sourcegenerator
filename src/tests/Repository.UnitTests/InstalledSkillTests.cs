@@ -5,7 +5,7 @@ namespace Purview.Telemetry.Repository;
 /// <summary>
 /// Guards the skills installed from other repositories. They are installed by the skills CLI into the
 /// universal <c>.agents/skills/</c> folder only, and that folder and the CLI's <c>skills-lock.json</c>
-/// are committed, so the two must agree and no per-agent copy may appear beside them.
+/// are committed, so the two must agree and no per-agent copy or instruction file may appear beside them.
 /// </summary>
 /// <remarks>
 /// <c>SkillTests</c> validates this repository's own skills in <c>skills/</c>; these are someone else's,
@@ -77,6 +77,55 @@ public sealed class InstalledSkillTests
 			.Because(
 				"skills are installed into .agents/skills/ only. A .claude/skills/ folder means the CLI ran without "
 					+ "`-a universal`; delete it and reinstall with `-a universal`"
+			);
+	}
+
+	[Test]
+	public async Task AgentsSkills_GivenTheAuthoredSkills_HoldsNoCopyOfThem(CancellationToken cancellationToken)
+	{
+		// Arrange
+		cancellationToken.ThrowIfCancellationRequested();
+		var authored = Directory
+			.GetDirectories(Path.Combine(RepositoryRoot.Value, "skills"))
+			.Select(static path => Path.GetFileName(path))
+			.ToArray();
+
+		// Act
+		var copied = authored
+			.Where(static name => Directory.Exists(Path.Combine(AgentsSkillsFolder(), name)))
+			.ToArray();
+
+		// Assert
+		await Assert
+			.That(copied)
+			.IsEmpty()
+			.Because(
+				"this repository's own skills live in skills/ only; a copy in .agents/skills/ would drift from "
+					+ $"the authored one: {string.Join(", ", copied)}"
+			);
+	}
+
+	[Test]
+	public async Task Repository_GivenAgentInstructions_HasNoClaudeMd(CancellationToken cancellationToken)
+	{
+		// Arrange
+		cancellationToken.ThrowIfCancellationRequested();
+		string[] candidates =
+		[
+			Path.Combine(RepositoryRoot.Value, "CLAUDE.md"),
+			Path.Combine(RepositoryRoot.Value, ".github", "CLAUDE.md"),
+		];
+
+		// Act
+		var present = candidates.Where(File.Exists).ToArray();
+
+		// Assert
+		await Assert
+			.That(present)
+			.IsEmpty()
+			.Because(
+				"this repository is not agent-specific: AGENTS.md is its one instruction file, so a CLAUDE.md "
+					+ $"must not be added: {string.Join(", ", present)}"
 			);
 	}
 
