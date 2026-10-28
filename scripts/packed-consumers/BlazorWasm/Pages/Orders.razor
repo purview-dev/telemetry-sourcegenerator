@@ -1,0 +1,30 @@
+@page "/"
+@inject OrderWorkflow Workflow
+@inject IOrderTelemetry Telemetry
+
+<h1>Orders</h1>
+
+<button @onclick="Place">Place an order</button>
+<p role="status">@_status</p>
+
+@code {
+	int _placed;
+	string _status = "No order placed.";
+
+	protected override void OnInitialized() => Place();
+
+	void Place()
+	{
+		var orderId = $"ord-wasm-{++_placed}";
+
+		// From the page: the generated telemetry directly.
+		Telemetry.OrdersInFlight(1);
+		Telemetry.OrderTotal(42, "GBP");
+
+		// From a service: the generated telemetry, and the library's.
+		Workflow.Place(orderId, "cust-wasm", 42);
+
+		Telemetry.OrdersInFlight(-1);
+		_status = $"Placed {orderId}.";
+	}
+}

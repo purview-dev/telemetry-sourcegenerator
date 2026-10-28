@@ -50,4 +50,14 @@
 		<PackageVersion Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.2.1" />
 		<PackageVersion Include="ErrorOr" Version="2.1.1" />
 	</ItemGroup>
+	<!--
+		No project in the repository references these: scripts/test-packed-consumers.ps1 reads them and hands them to
+		the consumers in scripts/packed-consumers/, which build outside the repository with central package
+		management off. They live here so the versions are bumped with everything else. The consumers target net11.0,
+		so these follow the .NET 11 SDK that global.json selects, and must share one version.
+	-->
+	<ItemGroup Label="Packed consumers">
+		<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="11.0.0-rc.3.26522.148" />
+		<PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="11.0.0-rc.3.26522.148" />
+	</ItemGroup>
 </Project>

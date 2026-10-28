@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<!--
+		Packed-consumer gate (scripts/test-packed-consumers.ps1): a class library with its own generated telemetry,
+		referenced by every consumer, so the packed generator runs in two assemblies of one application. It references
+		Purview.Telemetry.SourceGenerator as a package, exactly as the package README says, and nothing else from the
+		repository. IsAotCompatible turns on the trim, single-file and AOT analyzers over the generated code, and every
+		warning is an error.
+	-->
+	<PropertyGroup>
+		<TargetFramework>net11.0</TargetFramework>
+		<AssemblyName>PackedTelemetry.Library</AssemblyName>
+		<RootNamespace>PackedTelemetry.Library</RootNamespace>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<IsAotCompatible>true</IsAotCompatible>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference
+			Include="Purview.Telemetry.SourceGenerator"
+			Version="$(TelemetryPackageVersion)"
+			PrivateAssets="all"
+			IncludeAssets="analyzers"
+		/>
+		<!-- IServiceCollection and IMeterFactory: on net11.0 these abstractions ship with the platform, so NuGet
+		     prunes an explicit reference (NU1510) and none is declared. -->
+	</ItemGroup>
+
+	<Target Name="RequirePackageVersions" BeforeTargets="CollectPackageReferences;Restore">
+		<Error
+			Condition="'$(TelemetryPackageVersion)' == ''"
+			Text="TelemetryPackageVersion is not set. Run this consumer through scripts/test-packed-consumers.ps1."
+		/>
+	</Target>
+</Project>

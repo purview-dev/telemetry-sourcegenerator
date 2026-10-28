@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<!--
+		Packed-consumer gate (scripts/test-packed-consumers.ps1), consumer (a): a Native AOT console that references
+		Purview.Telemetry.SourceGenerator as a package, and nothing else from the repository. The script copies the
+		packed-consumers folder outside the repository, beside guard Directory.Build.props/.targets and
+		Directory.Packages.props files that stop any inheritance, and supplies the version it has just packed as
+		$(TelemetryPackageVersion).
+
+		Every warning fails the publish, including each IL2xxx (trim) and IL3xxx (AOT) warning ILC reports over the
+		generated code; the native binary then exits non-zero on any telemetry mismatch.
+	-->
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net11.0</TargetFramework>
+		<AssemblyName>PackedTelemetryAot</AssemblyName>
+		<RootNamespace>PackedTelemetry</RootNamespace>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<PublishAot>true</PublishAot>
+		<InvariantGlobalization>true</InvariantGlobalization>
+		<TrimmerSingleWarn>false</TrimmerSingleWarn>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<ILLinkTreatWarningsAsErrors>true</ILLinkTreatWarningsAsErrors>
+		<IlcTreatWarningsAsErrors>true</IlcTreatWarningsAsErrors>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Include="../Shared/*.cs" Link="Shared/%(Filename)%(Extension)" />
+		<ProjectReference Include="../Library/Library.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference
+			Include="Purview.Telemetry.SourceGenerator"
+			Version="$(TelemetryPackageVersion)"
+			PrivateAssets="all"
+			IncludeAssets="analyzers"
+		/>
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsVersion)" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics" Version="$(MicrosoftExtensionsVersion)" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)" />
+		<!-- The v2 (state-based) logging generation uses LoggerMessageHelper from this package. -->
+		<PackageReference
+			Include="Microsoft.Extensions.Telemetry.Abstractions"
+			Version="$(MicrosoftExtensionsTelemetryVersion)"
+		/>
+	</ItemGroup>
+
+	<Target Name="RequirePackageVersions" BeforeTargets="CollectPackageReferences;Restore">
+		<Error
+			Condition="'$(TelemetryPackageVersion)' == '' or '$(MicrosoftExtensionsVersion)' == '' or '$(MicrosoftExtensionsTelemetryVersion)' == ''"
+			Text="TelemetryPackageVersion, MicrosoftExtensionsVersion and MicrosoftExtensionsTelemetryVersion must be set. Run this consumer through scripts/test-packed-consumers.ps1."
+		/>
+	</Target>
+</Project>
