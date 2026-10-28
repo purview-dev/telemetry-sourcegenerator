@@ -48,7 +48,13 @@ static class BenchmarkHelpers
 		var logger = CreateEnabledLogger<IMultiTargetTelemetry>();
 		var meterFactory = new SimpleMeterFactory();
 
+#if NETFRAMEWORK
+		// IMeterFactory is a .NET 8+ host concept, so on .NET Framework the generator emits a
+		// constructor without it and creates the Meter itself.
+		var generated = new MultiTargetTelemetryCore(logger);
+#else
 		var generated = new MultiTargetTelemetryCore(logger, meterFactory);
+#endif
 		var manual = new ManualMultiTargetTelemetry(logger, meterFactory);
 
 		return (generated, manual);
@@ -59,9 +65,14 @@ static class BenchmarkHelpers
 	/// </summary>
 	public static (IMetricsFewTagsTelemetry FewTags, IMetricsManyTagsTelemetry ManyTags) CreateMetricsTelemetry()
 	{
+#if NETFRAMEWORK
+		var fewTags = new MetricsFewTagsTelemetryCore();
+		var manyTags = new MetricsManyTagsTelemetryCore();
+#else
 		var meterFactory = new SimpleMeterFactory();
 		var fewTags = new MetricsFewTagsTelemetryCore(meterFactory);
 		var manyTags = new MetricsManyTagsTelemetryCore(meterFactory);
+#endif
 		return (fewTags, manyTags);
 	}
 
@@ -76,7 +87,11 @@ static class BenchmarkHelpers
 	) CreateMetricsBenchmarkTelemetry()
 	{
 		var meterFactory = new SimpleMeterFactory();
+#if NETFRAMEWORK
+		var generated = new MetricsBenchmarkTelemetryCore();
+#else
 		var generated = new MetricsBenchmarkTelemetryCore(meterFactory);
+#endif
 		var manual = new ManualMetricsTelemetry(meterFactory);
 		return (generated, manual);
 	}
@@ -136,8 +151,13 @@ static class BenchmarkHelpers
 		var loggerManual = CreateEnabledLogger<ManualMultiTargetTelemetry>();
 		var meterFactory = new SimpleMeterFactory();
 
+#if NETFRAMEWORK
+		var generatedV2 = new MultiTargetTelemetryCore(loggerV2);
+		var generatedV1 = new MultiTargetV1TelemetryCore(loggerV1);
+#else
 		var generatedV2 = new MultiTargetTelemetryCore(loggerV2, meterFactory);
 		var generatedV1 = new MultiTargetV1TelemetryCore(loggerV1, meterFactory);
+#endif
 		var manual = new ManualMultiTargetTelemetry(loggerManual, meterFactory);
 
 		return (generatedV2, generatedV1, manual);

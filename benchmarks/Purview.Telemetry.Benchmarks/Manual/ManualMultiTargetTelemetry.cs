@@ -44,8 +44,9 @@ public sealed class ManualMultiTargetTelemetry : IDisposable
 
 	public ManualMultiTargetTelemetry(ILogger logger, IMeterFactory meterFactory)
 	{
-		ArgumentNullException.ThrowIfNull(logger);
-		ArgumentNullException.ThrowIfNull(meterFactory);
+		// Not ArgumentNullException.ThrowIfNull: the project also targets net48, which lacks it.
+		_ = logger ?? throw new ArgumentNullException(nameof(logger));
+		_ = meterFactory ?? throw new ArgumentNullException(nameof(meterFactory));
 
 		_logger = logger;
 		_meter = meterFactory.Create(new MeterOptions("Purview.Telemetry.Benchmarks.Manual"));
