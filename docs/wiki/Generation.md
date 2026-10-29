@@ -55,7 +55,7 @@ public enum NamingConvention
 | --- | --- | --- |
 | ActivitySource name | Assembly name lowercased: `"myapp"` | Assembly name preserved: `"MyApp"` |
 | Tag / baggage keys | Lowercased, smashed: `"entityid"` | snake_case: `"entity_id"` |
-| Metric instrument names | Lowercased, smashed: `"recordhistogram"` | Hierarchical dot.separated: `"myapp.products.record.histogram"` |
+| Metric instrument names | Lowercased, smashed: `"product.recordcount"` | Interface prefix + snake_case: `"product.record_count"` (see [Instrument naming](Metrics.md#instrument-naming)) |
 | Metric tag keys | Lowercased, smashed: `"requestcount"` | snake_case: `"request_count"` |
 
 ```csharp

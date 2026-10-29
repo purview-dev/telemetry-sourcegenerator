@@ -18,6 +18,51 @@
 				"README.md",
 				"purview-logo-light.png"
 			]
+		},
+		// Every package ("*"). RequireExplicitContent (on by default) already rejects anything RequiredContent does not
+		// declare; these rules hold even if a RequiredContent glob is ever widened. Globs are
+		// Microsoft.Extensions.FileSystemGlobbing patterns: "*" stays within one path segment, "**" spans any number,
+		// including none. scripts/test-pack-validation-rules.ps1 injects a file for every rule into a scratch copy of
+		// each package and proves the validation fails; ReleaseGateTests proves no rule is removed.
+		"ForbiddenContent": {
+			"*": [
+				// The generator and the refactorings ship IL-merged, with Purview.SourceGeneratorFramework internalized
+				// into them; a loose copy under analyzers/ means the merge did not run.
+				"analyzers/**/Purview.SourceGeneratorFramework*",
+				// The compiler supplies Roslyn to analyzers; a packed copy would shadow or conflict with it.
+				"analyzers/**/Microsoft.CodeAnalysis*",
+				// Compiler-host assemblies never appear outside analyzers/: anywhere else NuGet hands them to the
+				// application, which is how Purview.SourceGeneratorFramework.dll reaches app and Blazor WebAssembly
+				// output and breaks WebAssembly AOT compilation.
+				"Purview.SourceGeneratorFramework*",
+				"Microsoft.CodeAnalysis*",
+				"lib/**/Purview.SourceGeneratorFramework*",
+				"lib/**/Microsoft.CodeAnalysis*",
+				"ref/**/Purview.SourceGeneratorFramework*",
+				"ref/**/Microsoft.CodeAnalysis*",
+				"runtimes/**/Purview.SourceGeneratorFramework*",
+				"runtimes/**/Microsoft.CodeAnalysis*",
+				"build/**/Purview.SourceGeneratorFramework*",
+				"build/**/Microsoft.CodeAnalysis*",
+				"buildTransitive/**/Purview.SourceGeneratorFramework*",
+				"buildTransitive/**/Microsoft.CodeAnalysis*",
+				"buildMultiTargeting/**/Purview.SourceGeneratorFramework*",
+				"buildMultiTargeting/**/Microsoft.CodeAnalysis*",
+				"tools/**/Purview.SourceGeneratorFramework*",
+				"tools/**/Microsoft.CodeAnalysis*",
+				"content/**/Purview.SourceGeneratorFramework*",
+				"content/**/Microsoft.CodeAnalysis*",
+				"contentFiles/**/Purview.SourceGeneratorFramework*",
+				"contentFiles/**/Microsoft.CodeAnalysis*",
+				"staticwebassets/**/Purview.SourceGeneratorFramework*",
+				"staticwebassets/**/Microsoft.CodeAnalysis*",
+				// The generator and the refactorings (Purview.Telemetry.SourceGenerator.Refactorings) run only inside the
+				// compiler, so they ship under analyzers/ alone: under lib/, ref/ or runtimes/ every application would
+				// load them.
+				"lib/**/Purview.Telemetry.SourceGenerator*",
+				"ref/**/Purview.Telemetry.SourceGenerator*",
+				"runtimes/**/Purview.Telemetry.SourceGenerator*"
+			]
 		}
 	},
 	"Release": {

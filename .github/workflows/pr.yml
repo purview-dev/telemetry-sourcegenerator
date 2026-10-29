@@ -34,5 +34,66 @@ jobs:
       - name: Build SampleApp
         run: dotnet build samples/SampleApp/SampleApp.slnx --configuration Release
 
+      - name: Build SampleApp.MultiProject
+        run: dotnet build samples/SampleApp.MultiProject/SampleApp.MultiProject.slnx --configuration Release
+
+      # The samples reference the generator project as an analyzer, which is exactly how
+      # Purview.SourceGeneratorFramework.dll reached every sample's bin with SGF 1.2.1. Scan
+      # every sample project's build output for compiler-host assemblies.
+      - name: Scan the sample build output for compiler-host assemblies
+        shell: pwsh
+        run: >-
+          ./scripts/assert-no-compiler-host-assemblies.ps1
+          -Path (Get-ChildItem samples/SampleApp, samples/SampleApp.MultiProject -Directory |
+          ForEach-Object { Join-Path $_.FullName bin } | Where-Object { Test-Path $_ })
+
       - name: Test SampleApp
         run: dotnet test samples/SampleApp/SampleApp.slnx --configuration Release --no-build
+
+  packed-consumers:
+    name: Packed consumers (Native AOT, Blazor WebAssembly, Blazor Server)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      # An extra feed for Purview.SourceGeneratorFramework and Purview.BuildSdk only, for versions
+      # that are not on nuget.org yet. Unset, the gate restores them from nuget.org alone.
+      TELEMETRY_PRERELEASE_FEED: ${{ vars.TELEMETRY_PRERELEASE_FEED }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      # First, before any toolchain is installed: the generator is built against the
+      # Purview.SourceGeneratorFramework version Directory.Packages.props pins, with the
+      # Purview.BuildSdk version global.json pins, so nothing can be packed until both restore.
+      # This fails with what to do (publish them to nuget.org, or set the
+      # TELEMETRY_PRERELEASE_FEED repository variable) rather than skipping.
+      - name: Check the prerelease build dependencies restore
+        shell: pwsh
+        run: ./scripts/test-packed-consumers.ps1 -PreflightOnly
+
+      # Native AOT links with clang and needs the zlib headers; the hosted image may not carry both.
+      - name: Install the Native AOT prerequisites
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang zlib1g-dev
+
+      # RunAOTCompilation needs the Emscripten toolchain and the Mono AOT cross compiler.
+      # -WasmAot Require below makes a missing workload an error instead of a skipped step.
+      - name: Install the wasm-tools workload
+        run: dotnet workload install wasm-tools
+
+      - name: Pack, then publish, run and leak-scan consumers of the package
+        shell: pwsh
+        run: >-
+          ./scripts/test-packed-consumers.ps1 -RuntimeIdentifier linux-x64 -WasmAot Require
+          -PackOutput artifacts/packed
+
+      - name: Prove every pack-validation forbidden-content rule rejects a package
+        shell: pwsh
+        run: |
+          dotnet tool restore
+          ./scripts/test-pack-validation-rules.ps1 -PackagesFolder artifacts/packed

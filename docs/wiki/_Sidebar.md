@@ -1,6 +1,7 @@
 - [Home](Home.md)
 - [Getting Started](Getting-Started.md)
 - [Installation](Installation.md)
+- [Platform Support and .NET 11](Platform-Support.md)
 - [Generation](Generation.md)
 - [Activities](Activities.md)
 - [Logging](Logging.md)

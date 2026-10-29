@@ -24,7 +24,18 @@ readonly record struct TargetGeneration(
 	bool RaiseMissingInterfaceSource = false
 );
 
-public readonly record struct MessageTemplateHole(
+/// <summary>
+/// A hole (<c>{Name}</c> or <c>{0}</c>) parsed from a log message template.
+/// </summary>
+/// <remarks>
+/// Internal, like every other pipeline model here. It was the generator's only public non-component type, and its
+/// positional properties have <c>init</c> accessors whose required modifier references
+/// <c>System.Runtime.CompilerServices.IsExternalInit</c> - a type Purview.SourceGeneratorFramework defines publicly and
+/// the merge internalizes - so a public declaration put a framework type on the shipped analyzer's public surface
+/// (<c>PSGFR41</c>). Nothing outside this assembly uses it: the template tests parse into their own
+/// <c>TestMessageTemplateHole</c>.
+/// </remarks>
+readonly record struct MessageTemplateHole(
 	string? Name,
 	int? Ordinal,
 	int? Alignment,
@@ -46,11 +57,9 @@ public readonly record struct MessageTemplateHole(
 	}
 
 	/// <summary>
-	/// Projects the regex matches into the hole records. Internal because the returned
-	/// <c>EquatableArray</c> is a framework type the merge internalizes in the shipped analyzer (seen by
-	/// <c>PSGFR41</c>); the BuildSdk grants the test assemblies access to internals.
+	/// Projects the regex matches into the hole records.
 	/// </summary>
-	internal static EquatableArray<MessageTemplateHole> FromMatches(MatchCollection matches)
+	public static EquatableArray<MessageTemplateHole> FromMatches(MatchCollection matches)
 	{
 		List<MessageTemplateHole>? holes = null;
 		if (matches != null)

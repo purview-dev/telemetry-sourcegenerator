@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
@@ -57,29 +58,41 @@ partial class MeterTargetClassEmitter
 	{
 		var target = output.Target;
 		var supportsIMeterFactory = output.Context.Capabilities.SupportsIMeterFactory;
+		var needsActivitySourceFactory = ConstructorEmitter.NeedsActivitySourceFactory(
+			target.GenerationType,
+			output.Context
+		);
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
 		writer.NewLine();
 
+		var parameters = ImmutableArray.CreateBuilder<ParameterDeclarationOptions>();
+		if (supportsIMeterFactory)
+			parameters.Add(
+				new ParameterDeclarationOptions(
+					PropertyLibrary.Metrics.MeterFactoryParameterName,
+					TypeLibrary.System.Diagnostics.Metrics.IMeterFactory.AsTypeReference()
+				)
+			);
+
+		// Activities + Metrics: Metrics owns the constructor, so it also receives the .NET 11 ActivitySourceFactory.
+		if (needsActivitySourceFactory)
+			parameters.Add(ConstructorEmitter.ActivitySourceFactoryParameter());
+
 		using (
 			writer.ConstructorScope(
 				new ConstructorDeclarationOptions(target.ClassNameToGenerate, TypeDeclarationAccessibility.Public)
 				{
-					Parameters = supportsIMeterFactory
-						?
-						[
-							new ParameterDeclarationOptions(
-								PropertyLibrary.Metrics.MeterFactoryParameterName,
-								TypeLibrary.System.Diagnostics.Metrics.IMeterFactory.AsTypeReference()
-							),
-						]
-						: [],
+					Parameters = parameters.ToImmutable(),
 				}
 			)
 		)
 		{
 			EmitInitializationBodyContent(output, writer);
+
+			if (needsActivitySourceFactory)
+				ConstructorEmitter.EmitActivitySourceInitializationCall(writer);
 		}
 	}
 

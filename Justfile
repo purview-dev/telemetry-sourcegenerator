@@ -55,6 +55,27 @@ pipeline-local-release *args:
     echo "Running local release pipeline..."
     {{ pipeline_tool }} --Release:Mode=LocalNuGet {{ args }}
 
+# Pack the generator to an isolated feed and cache, then build, publish and run throwaway consumers that reference
+# the package only: a Native AOT console, a Blazor WebAssembly app (trimmed, plus RunAOTCompilation when wasm-tools is
+# installed) and a Blazor Server host, each leak-scanned for compiler-host assemblies.
+#
+# The tests and samples reference the generator project; this is the gate that proves what ships. The CI
+# `packed-consumers` job runs it for linux-x64. Purview.SourceGeneratorFramework and Purview.BuildSdk are restored
+# from nuget.org, plus TELEMETRY_PRERELEASE_FEED or LOCAL_NUGET_FEED_PATH when set (or pass -PrereleaseFeed).
+[group('Pipeline')]
+smoke-packed-consumers *args:
+    echo "Running the packed consumer gate..."
+    pwsh -NoProfile -File scripts/test-packed-consumers.ps1 {{ args }}
+
+# Prove every PackValidation ForbiddenContent rule in .config/purview-build.json rejects a package: injects a matching
+# file into scratch copies of the packed package and runs the real purview-build validation on them. Reads artifacts/,
+# so pack first (`just pipeline-pack-validate`). `just pipeline-local-release` moves its packages to the local feed, so
+# pass -PackagesFolder p:/_sync-projects/.local-nuget after it.
+[group('Pipeline')]
+verify-pack-rules *args:
+    echo "Proving the pack-validation forbidden-content rules..."
+    pwsh -NoProfile -File scripts/test-pack-validation-rules.ps1 {{ args }}
+
 # Run the pipeline with tests enabled
 [group('Pipeline')]
 pipeline-tests *args:
@@ -90,6 +111,12 @@ restore *args:
 test filter="/*/*/*/*/" *args:
     echo "Running tests for {{ BLUE }}{{ test_solution }}{{ NORMAL }} with {{ YELLOW }}{{ build_configuration }}{{ NORMAL }}..."
     dotnet test --solution "{{ test_solution }}" --configuration "{{ build_configuration }}" --treenode-filter={{ filter }} {{ args }}
+
+# Scan build or publish output for compiler-host assemblies (the generator, the refactorings,
+# Purview.SourceGeneratorFramework, Roslyn) that must never reach an application.
+[group('Build and Test')]
+scan-compiler-host-leaks +paths:
+    pwsh -NoProfile -File scripts/assert-no-compiler-host-assemblies.ps1 -Path {{ paths }}
 
 # Cleans the solution with the specified configuration (default: Release)
 [group('Build and Test')]

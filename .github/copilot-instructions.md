@@ -7,11 +7,11 @@ root. Read it first and treat it as the source of truth for:
 - Project structure and layout
 - Build and validation workflow
 - Conventions (conventional commits, csharpier, `.slnx`, SDK behaviour)
-- Source-generator and testing skills (`.agents/skills/`)
+- Installed source-generator, testing and SDK skills (`.agents/skills/`, committed)
 - Benchmarking and performance documentation rules
 - Release process
 
 If you are working on source generators, analyzers, code fixes, refactorings, or tests for Roslyn
-components, load the relevant skill listed under "Source-generator and testing skills" in `AGENTS.md`
+components, load the relevant skill listed under "Installed skills" in `AGENTS.md`
 before starting. Fall back to searching the repository only when `AGENTS.md` does not match what you
 observe.

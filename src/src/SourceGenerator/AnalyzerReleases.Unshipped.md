@@ -5,3 +5,4 @@
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
+TSG3023 | Activity.Usage | Warning | [ActivitySourceFactory is not available](https://purview.dev/docs/telemetry-sourcegenerator/diagnostics/#tsg3023)

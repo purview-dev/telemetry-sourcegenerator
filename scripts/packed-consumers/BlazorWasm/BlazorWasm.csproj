@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+	<!--
+		Packed-consumer gate (scripts/test-packed-consumers.ps1), consumer (b): a standalone Blazor WebAssembly app that
+		uses the generated telemetry from a page (IOrderTelemetry injected directly) and from a service (OrderWorkflow),
+		and references Purview.Telemetry.SourceGenerator as a package. The script copies the packed-consumers folder
+		outside the repository, beside guard files that stop any inheritance, and supplies the versions.
+
+		It is published trimmed with every warning an error, and again with RunAOTCompilation=true:
+		Purview.SourceGeneratorFramework.dll once leaked into exactly this kind of output and broke the AOT compile. The
+		script then reads the trimmed assembly ILLink wrote, and fails if a generated telemetry member was trimmed away.
+	-->
+	<PropertyGroup>
+		<TargetFramework>net11.0</TargetFramework>
+		<AssemblyName>PackedTelemetryWasm</AssemblyName>
+		<RootNamespace>PackedTelemetry</RootNamespace>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<PublishTrimmed>true</PublishTrimmed>
+		<TrimmerSingleWarn>false</TrimmerSingleWarn>
+		<InvariantGlobalization>true</InvariantGlobalization>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<ILLinkTreatWarningsAsErrors>true</ILLinkTreatWarningsAsErrors>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile
+			Include="../Shared/IOrderTelemetry.cs;../Shared/OrderWorkflow.cs"
+			Link="Shared/%(Filename)%(Extension)"
+		/>
+		<ProjectReference Include="../Library/Library.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference
+			Include="Purview.Telemetry.SourceGenerator"
+			Version="$(TelemetryPackageVersion)"
+			PrivateAssets="all"
+			IncludeAssets="analyzers"
+		/>
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="$(AspNetCorePackageVersion)" />
+		<!-- Microsoft.Extensions.Diagnostics (AddMetrics, for the IMeterFactory the generated meters are created
+		     from) comes with Microsoft.AspNetCore.Components.WebAssembly, so it is not referenced again here. -->
+		<!-- The v2 (state-based) logging generation uses LoggerMessageHelper from this package. -->
+		<PackageReference
+			Include="Microsoft.Extensions.Telemetry.Abstractions"
+			Version="$(MicrosoftExtensionsTelemetryVersion)"
+		/>
+	</ItemGroup>
+
+	<Target Name="RequirePackageVersions" BeforeTargets="CollectPackageReferences;Restore">
+		<Error
+			Condition="'$(TelemetryPackageVersion)' == '' or '$(AspNetCorePackageVersion)' == '' or '$(MicrosoftExtensionsTelemetryVersion)' == ''"
+			Text="TelemetryPackageVersion, AspNetCorePackageVersion and MicrosoftExtensionsTelemetryVersion must be set. Run this consumer through scripts/test-packed-consumers.ps1."
+		/>
+	</Target>
+</Project>

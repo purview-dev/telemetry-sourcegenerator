@@ -27,7 +27,8 @@ readonly partial record struct ActivitySourceGenerationAttributeData(
 	[Argument("lowercaseBaggageAndTagKeys")] [Property(DefaultValue = true)] bool LowercaseBaggageAndTagKeys,
 	[Argument("generateDiagnosticsForMissingActivity")]
 	[Property(DefaultValue = true)]
-		bool GenerateDiagnosticsForMissingActivity
+		bool GenerateDiagnosticsForMissingActivity,
+	[Property(DefaultValue = false)] bool UseActivitySourceFactory
 );
 
 [Generate("Purview.Telemetry.ActivityAttribute")]

@@ -21,8 +21,9 @@ code to generated telemetry interfaces) in a companion assembly.
 
 ## Prerequisites
 
-- .NET 10 SDK (projects target `net10.0`; the source generator is a Roslyn component targeting
-  `netstandard2.0`)
+- The .NET 11 SDK pinned in `global.json` (currently an RC, `rollForward: latestMajor`), plus the .NET 8, 9 and
+  10 runtimes for the test legs. Projects target `net10.0` by default; the source generator is a Roslyn component
+  targeting `netstandard2.0`. Consumers need Visual Studio 2026 / the .NET 10 SDK or later (Roslyn 5.9.0+).
 - [Bun](https://bun.sh) for the `package.json`/`.build/*.ts` scripts
 - The `Purview.BuildSdk` MSBuild SDK (pinned in `global.json` under `msbuild-sdks`)
 - `csharpier` dotnet tool (pinned in `.config/dotnet-tools.json`) for linting/formatting
@@ -79,6 +80,9 @@ These mirror the GitHub CI/CD workflows and are the supported way to run a full 
 | `just pipeline-tests` | Build with tests enabled. |
 | `just pipeline-release` | Full release: build, test, pack, publish, GitHub release. |
 | `just pipeline-local-release` | Pack + publish to a local NuGet feed (see the Justfile note on argument quoting). |
+| `just smoke-packed-consumers` | The packed-consumer gate: Native AOT, Blazor WebAssembly and Blazor Server consumers of the `.nupkg`. |
+| `just verify-pack-rules` | Proves every `PackValidation` `ForbiddenContent` rule rejects an injected file. |
+| `just scan-compiler-host-leaks <dir>...` | Fails when build/publish output carries a generator, SGF or Roslyn assembly. |
 
 ### Benchmarks
 
@@ -126,12 +130,15 @@ benchmarks/
 └── Purview.Telemetry.Benchmarks/           # BenchmarkDotNet project (net48/net8.0/net9.0/net10.0)
 
 .build/                                     # TS scripts (build-pack.ts, update-version.ts)
-.agents/                                    # Package-delivered skills/prompts/agents (gitignored mirror)
+.agents/skills/                             # Installed skills from other repos, committed (see "Installed skills")
+skills-lock.json                            # The skills CLI lockfile for .agents/skills/, committed
 skills/                                     # Authored skills shipped by this package (see "Authoring skills")
 .config/                                    # dotnet-tools.json, lefthook.yml
 .github/workflows/                          # pr.yml, release.yml (reusable purview-dev/build workflows)
-scripts/                                    # setup-release.* (legacy changesets DSC scripts)
+scripts/                                    # release-gate scripts (see "Quality gates"), legacy setup-release.*
+└── packed-consumers/                       # Native AOT, Blazor WebAssembly and Blazor Server consumers of the .nupkg
 docs/release-process.md                     # Release process documentation
+docs/wiki/                                  # User documentation (Platform-Support.md: TFM/hosting matrix, .NET 11)
 ```
 
 ## Build and validation workflow
@@ -146,9 +153,46 @@ After making changes to the source generator:
 The sample projects enable `EmitCompilerGeneratedFiles`, so generated telemetry can be inspected in
 `obj/*/generated/` to sanity-check generator output.
 
+## Quality gates
+
+Treat work as incomplete until every gate relevant to it passes. Before a release, all of them:
+
+- `just scrub`, then `just pipeline-local-release --PublishLocalNuGet:LocalFeedPath=p:/_sync-projects/.local-nuget/`
+  — restore, build with no new warnings, lint, tests, pack and pack validation (`RequiredContent` and
+  `ForbiddenContent`).
+- `just smoke-packed-consumers` — packs the generator to an isolated feed and cache and proves the
+  `.nupkg` itself works: a Native AOT console (published with `-warnaserror`, then run, asserting the
+  emitted activities, metrics and log entries, log-level gating and multi-target methods), a Blazor
+  WebAssembly app (trimmed and `RunAOTCompilation`; no generated member trimmed away, every generated
+  method AOT-compiled) and a Blazor Server host (page rendered on a `TestServer`, telemetry asserted).
+  Every consumer's bin and publish output is leak-scanned. Set `LOCAL_NUGET_FEED_PATH` (or
+  `TELEMETRY_PRERELEASE_FEED`) while Purview.SourceGeneratorFramework or Purview.BuildSdk is not on
+  nuget.org yet. It needs the Native AOT toolchain and, for the WebAssembly AOT step, the `wasm-tools`
+  workload.
+- `just verify-pack-rules` after any change to `PackValidation` in `.config/purview-build.json`.
+- `just build-s && just test-s` — the samples, which reference the generator as an analyzer project.
+- `just lint` — CSharpier reports no change (`just lint-fix` to apply it).
+
+Compiler-host assemblies (`Purview.SourceGeneratorFramework*`, `Microsoft.CodeAnalysis*`, and this
+repository's `Purview.Telemetry.SourceGenerator*` generator and refactorings) must never reach an
+application's build or publish output. `scripts/assert-no-compiler-host-assemblies.ps1` is the check;
+any CI job that builds the samples or publishes an application must run it on what it wrote, and
+`src/tests/Repository.UnitTests/ReleaseGateTests.cs` fails the test run when one does not. The same
+tests keep the leak scan honest against crafted leaks, keep the `packed-consumers` job, the Justfile
+recipes and every `ForbiddenContent` rule wired up, and require the consumers in
+`scripts/packed-consumers/` to reference the generator as a package, never as a project. The full
+table of gates is in [`docs/wiki/Release-Flow.md`](docs/wiki/Release-Flow.md#release-gates).
+
 ### Test project details
 
-- Integration tests target `net8.0;net9.0;net10.0`, plus `net48` on Windows only.
+- Integration tests target `net8.0;net9.0;net10.0;net11.0`, plus `net48` on Windows only. The `net11.0` leg is the
+  only one whose references carry `System.Diagnostics.ActivitySourceFactory`, so the `UseActivitySourceFactory`
+  tests (`[RequiresActivitySourceFactory]`) run there and the fallback tests (`[RequiresNoActivitySourceFactory]`,
+  `TSG3023`) run on the earlier legs.
+- Gate new emitted APIs on the compilation (`Compilation.GetTypeByMetadataName`, surfaced through
+  `TelemetryCapabilities`), not on the target framework: the System.Diagnostics.DiagnosticSource package brings .NET 11
+  types to `net462`/`netstandard2.0`. The supported matrix and the list of .NET 11 features that are not generated
+  yet live in [`docs/wiki/Platform-Support.md`](docs/wiki/Platform-Support.md); update it with any such change.
 - Tests use `Purview.SourceGeneratorFramework.Testing.TUnit` (TUnit + the framework's `CodeQuery`
   syntax-lookup API and assertion extensions). There is no Verify/snapshot library; refactoring tests
   use the framework's `CodeRefactoringTestBase` snapshot approach.
@@ -165,7 +209,7 @@ The sample projects enable `EmitCompilerGeneratedFiles`, so generated telemetry 
   models).
 - **SDK**: projects import `Purview.BuildSdk` via `Directory.Build.props`/`.targets`. The repo
   sets `ExcludePurviewTelemetry=true` (it does not consume the telemetry package it generates) and
-  `NamespacePrefix=Purview.Telemetry` under `src/`. See `.agents/skills/sdk-*` for SDK behavior.
+  `NamespacePrefix=Purview.Telemetry` under `src/`. See `.agents/skills/purview-buildsdk-*` for SDK behavior.
 - **Analyzer release tracking**: the `TSG` rules are tracked in
   `src/src/SourceGenerator/AnalyzerReleases.{Shipped,Unshipped}.md` (wired as `AdditionalFiles`, so
   the Roslyn RS2000-series checks run under `EnforceExtendedAnalyzerRules=true`). Add new rules to
@@ -173,19 +217,52 @@ The sample projects enable `EmitCompilerGeneratedFiles`, so generated telemetry 
   `AnalyzerReleases.Shipped.md` at release time. `RS2003` is suppressed — see the comment in
   `src/src/SourceGenerator/SourceGenerator.csproj`.
 
-## Skills from other repositories
+## Installed skills (`.agents/skills/`)
 
 Specialist source-generator and SDK guidance — `CodeWriter` emission, incremental pipeline design,
 test runners and `CodeQuery`, `Purview.BuildSdk` configuration — is published by the repositories
-that own it. Install what you need through the skills CLI; it lands in `.agents/skills/`, which is
-gitignored and recorded in `skills-lock.json`:
+that own it, and installed here by the skills CLI. The installed skills are **committed**:
+`.agents/skills/**` and the CLI's `skills-lock.json` (source, skill path and content hash of every
+entry) are both in source, so a clone has them without running anything.
+
+| Skill | Source | Load before |
+| --- | --- | --- |
+| `purview-sourcegenerator-codewriter` | `purview-dev/sourcegenerator-framework` | writing or reviewing emitter code (`CodeWriter`, scopes, `Emitters/`) |
+| `purview-sourcegenerator-pipeline` | `purview-dev/sourcegenerator-framework` | changing the incremental pipeline or its value-equatable models |
+| `purview-sourcegenerator-diagnostics` | `purview-dev/sourcegenerator-framework` | adding or changing a `TSG` diagnostic or the analyzer |
+| `purview-sourcegenerator-packaging` | `purview-dev/sourcegenerator-framework` | changing how the generator is packed or merged |
+| `purview-sourcegenerator-testing` | `purview-dev/sourcegenerator-framework` | writing generator, analyzer or refactoring tests (`CodeQuery`) |
+| `purview-sourcegenerator-tunit-tests` | `purview-dev/sourcegenerator-framework` | the TUnit base classes and assertion extensions |
+| `purview-buildsdk-*` (8 skills) | `purview-dev/build-sdk` | build/SDK configuration, project layout and detection, testing, skill installation and skill tests |
+| `purview-architecture`, `purview-architecture-testing`, `purview-engineering-principles`, `purview-persistence`, `purview-telemetry`, `purview-testing-conventions` | `purview-dev/engineering-playbook` | solution shape, architecture tests, engineering conventions, persistence, telemetry and testing conventions |
+
+This repository's own skills in `skills/` are authored for **consumers** of its packages, not for use while working on this repository. They are never installed into this repository's `.agents/skills/`, which holds only skills installed from other repositories; `InstalledSkillTests` enforces this.
+
+Skills are installed into the universal `.agents/skills/` location **only**. Never install copies
+into `.claude/` or any other per-agent folder; `/.claude/` is gitignored for that reason. Pass
+`-a universal`, which writes `.agents/skills/` and nothing else:
 
 ```bash
-npx skills add purview-dev/sourcegenerator-framework
-npx skills add purview-dev/build-sdk
+# add or update every skill from a source
+npx -y skills@1 add purview-dev/sourcegenerator-framework -s '*' -a universal -y
+npx -y skills@1 add purview-dev/build-sdk -s '*' -a universal -y
+npx -y skills@1 add purview-dev/engineering-playbook -s '*' -a universal -y
+
+# restore the committed set from skills-lock.json
+npx -y skills@1 experimental_install
 ```
 
-Do not edit anything under `.agents/skills/` — the CLI is its only writer.
+Commit the changed `.agents/skills/**` and `skills-lock.json` together, in their own `chore` commit.
+Do not edit anything under `.agents/skills/` by hand — the CLI is its only writer, and a hand edit
+no longer matches the lockfile's hash. This repository's *own* skills are never installed here; they
+live in `skills/` (below). `Purview.BuildSdk`'s `InstallPurviewSkills` target delegates to the same
+CLI; `src/Directory.Build.props` sets `PurviewSkillsAgents=universal` so it is restricted the same
+way rather than defaulting to every agent (`*`). None of the restored packages ship skills, so
+`ListPurviewSkills` has nothing to recommend and the set above is chosen by hand.
+
+`src/tests/Repository.UnitTests/InstalledSkillTests.cs` keeps this honest: every `skills-lock.json`
+entry has its `.agents/skills/<name>/SKILL.md`, every installed folder is in the lockfile, and no
+`.claude/skills/` copy exists.
 
 ## Authoring skills
 

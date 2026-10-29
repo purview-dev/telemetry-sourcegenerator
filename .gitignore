@@ -199,3 +199,7 @@ node_modules/
 BenchmarkDotNet.Artifacts/!scripts/*
 !build/
 .tools/
+
+# Agent skills are installed into the universal .agents/skills/ folder only, and that folder and
+# skills-lock.json are committed. Per-agent folders (and Claude Code's local settings) stay out.
+/.claude/

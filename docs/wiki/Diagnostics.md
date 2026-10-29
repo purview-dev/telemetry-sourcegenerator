@@ -26,7 +26,7 @@ The package ships a single Roslyn analyzer, `TelemetryDiagnosticAnalyzer`, which
 | `TSG1007`<a id="tsg1007"></a> | Warning | `ExcludeTargets` results in an empty or invalid parameter set for a target. |
 | `TSG1008`<a id="tsg1008"></a> | Warning | Activity parameter has no Activity target. A parameter of type `Activity` is present on a method with no `[Activity]`/`[Event]`/`[Context]` attribute. |
 | `TSG1010`<a id="tsg1010"></a> | Error | Method target not registered on interface. A method carries an attribute for a target family that is not registered on the interface. |
-| `TSG1011`<a id="tsg1011"></a> | Error | Unsupported target framework. The compilation targets neither .NET 8+ nor .NET Framework 4.8+; define `PURVIEW_TELEMETRY_NON_NULLABLE` to opt out. |
+| `TSG1011`<a id="tsg1011"></a> | Error | Unsupported target framework. The compilation targets neither .NET 8+ nor .NET Framework 4.8+ (for example `netstandard2.0`), so no telemetry is generated for it. There is no opt-out. Target `net8.0` or later, or `net48` or later; a multi-targeted library references the package only from its supported targets (a `Condition` on the `PackageReference`), with the telemetry interfaces under the same condition. See [Platform Support](Platform-Support.md). |
 
 ## Logging diagnostics (TSG2xxx)
 
@@ -67,6 +67,7 @@ The package ships a single Roslyn analyzer, `TelemetryDiagnosticAnalyzer`, which
 | `TSG3017`<a id="tsg3017"></a> | Error | Status Description parameters are only valid on Events, not Activity or Context methods. |
 | `TSG3021`<a id="tsg3021"></a> | Info | Exception event does not use OpenTelemetry standard name. An `[Event]` method records an exception under the OpenTelemetry exception rules but the event name is not the standard `"exception"` (suggest `[Event(Name = "exception")]`). Not raised when `UseRecordExceptionRules` is disabled, for `[Baggage]` exceptions, or when the exception parameter is excluded from the Activities target. |
 | `TSG3022`<a id="tsg3022"></a> | Warning | Activity return type should be nullable. An Activity method returns non-nullable `Activity`; use `Activity?` because the Activity can be null when no listeners are active. |
+| `TSG3023`<a id="tsg3023"></a> | Warning | ActivitySourceFactory is not available. `UseActivitySourceFactory` is set but `System.Diagnostics.ActivitySourceFactory` (.NET 11, or System.Diagnostics.DiagnosticSource 11+) cannot be resolved; a static `ActivitySource` is generated instead. |
 
 ## Metrics diagnostics (TSG4xxx)
 
@@ -134,6 +135,13 @@ The diagnostic is not raised when the exception is not recorded using the OpenTe
 ### TSG3022 — non-nullable Activity return
 
 Return `Activity?` so callers can handle the `null` case when no listeners are active.
+
+### TSG3023 — ActivitySourceFactory is not available
+
+`[assembly: ActivitySourceGeneration(..., UseActivitySourceFactory = true)]` asks for sources created by
+`System.Diagnostics.ActivitySourceFactory`, but the compilation cannot resolve that type, so a static `ActivitySource`
+is generated instead. Target `net11.0`, or reference System.Diagnostics.DiagnosticSource 11 or later; or remove the
+option. See [Creating sources with ActivitySourceFactory](Activities.md#creating-sources-with-activitysourcefactory-net-11).
 
 ### TSG4002 — auto-increment counter with a measurement
 

@@ -20,7 +20,8 @@ public sealed class ManualMetricsTelemetry : IDisposable
 
 	public ManualMetricsTelemetry(IMeterFactory meterFactory)
 	{
-		ArgumentNullException.ThrowIfNull(meterFactory);
+		// Not ArgumentNullException.ThrowIfNull: the project also targets net48, which lacks it.
+		_ = meterFactory ?? throw new ArgumentNullException(nameof(meterFactory));
 
 		_meter = meterFactory.Create(new MeterOptions("benchmark-manual-metrics"));
 

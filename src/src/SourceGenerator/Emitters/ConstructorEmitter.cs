@@ -63,8 +63,36 @@ static class ConstructorEmitter
 			);
 		}
 
+		if (NeedsActivitySourceFactory(generationType, generationContext))
+			builder.Add(ActivitySourceFactoryParameter());
+
 		return builder.ToImmutable();
 	}
+
+	/// <summary>
+	/// Whether the constructor receives an <c>ActivitySourceFactory</c>: the interface targets Activities and the
+	/// assembly opted in to (and can resolve) the .NET 11 factory.
+	/// </summary>
+	public static bool NeedsActivitySourceFactory(
+		GenerationType generationType,
+		GenerationContext<TelemetryCapabilities> generationContext
+	) => generationType.HasFlag(GenerationType.Activities) && generationContext.Capabilities.UseActivitySourceFactory;
+
+	/// <summary>The <c>ActivitySourceFactory activitySourceFactory</c> constructor parameter.</summary>
+	public static ParameterDeclarationOptions ActivitySourceFactoryParameter() =>
+		new(
+			PropertyLibrary.Activities.ActivitySourceFactoryParameterName,
+			TypeLibrary.System.Diagnostics.ActivitySourceFactory
+		);
+
+	/// <summary>Writes the call that creates the activity source from the injected factory.</summary>
+	public static void EmitActivitySourceInitializationCall(CodeWriter writer) =>
+		writer
+			.Write(PropertyLibrary.Activities.ActivitySourceInitializationMethod)
+			.Write('(')
+			.Write(PropertyLibrary.Activities.ActivitySourceFactoryParameterName)
+			.Write(");")
+			.NewLine();
 
 	static void EmitBody(
 		GenerationType generationType,
@@ -91,5 +119,8 @@ static class ConstructorEmitter
 
 			writer.Write(");").NewLine();
 		}
+
+		if (NeedsActivitySourceFactory(generationType, generationContext))
+			EmitActivitySourceInitializationCall(writer);
 	}
 }

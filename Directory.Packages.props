@@ -2,15 +2,15 @@
 	<PropertyGroup>
 		<RoslynVersion>5.9.0</RoslynVersion>
 		<TUnitVersion>1.76.0</TUnitVersion>
-		<PurviewSGFVersion>1.2.1</PurviewSGFVersion>
-		<DotnetRuntimeVersion>10.0.13</DotnetRuntimeVersion>
+		<PurviewSGFVersion>1.2.2</PurviewSGFVersion>
+		<DotnetRuntimeVersion>10.0.14</DotnetRuntimeVersion>
 		<MSExtensionVersion>10.11.0</MSExtensionVersion>
-		<OpenTelemetryVersion>1.18.0</OpenTelemetryVersion>
+		<OpenTelemetryVersion>1.20.1</OpenTelemetryVersion>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageVersion Include="Purview.SourceGeneratorFramework" Version="$(PurviewSGFVersion)" />
 		<PackageVersion Include="Purview.SourceGeneratorFramework.Testing.TUnit" Version="$(PurviewSGFVersion)" />
-		<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.402" />
+		<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.403" />
 		<PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" />
 		<PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="$(RoslynVersion)" />
 		<PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
@@ -26,7 +26,8 @@
 		<PackageVersion Include="TUnit" Version="$(TUnitVersion)" />
 		<PackageVersion Include="TUnit.Mocks" Version="$(TUnitVersion)" />
 		<PackageVersion Include="Bogus" Version="35.6.5" />
-		<PackageVersion Include="Purview.Skills.Testing" Version="1.1.0" />
+		<PackageVersion Include="Purview.Skills.Testing" Version="1.2.0" />
+		<PackageVersion Include="CliWrap" Version="3.10.5" />
 	</ItemGroup>
 	<ItemGroup Label="Samples">
 		<PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="$(DotnetRuntimeVersion)" />
@@ -49,5 +50,17 @@
 		<PackageVersion Include="Scalar.AspNetCore" Version="2.17.3" />
 		<PackageVersion Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.2.1" />
 		<PackageVersion Include="ErrorOr" Version="2.1.1" />
+	</ItemGroup>
+	<!--
+		No project in the repository references these: scripts/test-packed-consumers.ps1 reads them and hands them to
+		the consumers in scripts/packed-consumers/, which build outside the repository with central package
+		management off. They live here so the versions are bumped with everything else. The consumers target net11.0,
+		so these follow the .NET 11 SDK that global.json selects, and must share one version. The consumers'
+		Microsoft.Extensions.* packages (DependencyInjection, Diagnostics - for services.AddTracing() - and Logging) use
+		the same version.
+	-->
+	<ItemGroup Label="Packed consumers">
+		<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="11.0.0-rc.3.26522.148" />
+		<PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="11.0.0-rc.3.26522.148" />
 	</ItemGroup>
 </Project>

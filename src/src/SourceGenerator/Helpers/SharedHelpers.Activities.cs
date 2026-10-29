@@ -10,6 +10,30 @@ partial class SharedHelpers
 		CancellationToken token
 	) => GetActivitySourceGenerationAttribute(compilation.Assembly, token);
 
+	/// <summary>
+	/// Whether the compilation can resolve <c>System.Diagnostics.ActivitySourceFactory</c> (.NET 11, or
+	/// System.Diagnostics.DiagnosticSource 11+ on any target).
+	/// </summary>
+	public static bool IsActivitySourceFactoryAvailable(Compilation compilation) =>
+		compilation.GetTypeByMetadataName(TypeLibrary.System.Diagnostics.ActivitySourceFactory.MetadataFullName)
+			is not null
+		&& compilation.GetTypeByMetadataName(TypeLibrary.System.Diagnostics.ActivitySourceOptions.MetadataFullName)
+			is not null;
+
+	/// <summary>
+	/// Whether the assembly opted in with <c>[ActivitySourceGeneration(UseActivitySourceFactory = true)]</c>.
+	/// </summary>
+	public static bool IsActivitySourceFactoryRequested(Compilation compilation, CancellationToken token) =>
+		GetActivitySourceGenerationAttribute(compilation, token)?.UseActivitySourceFactory == true;
+
+	/// <summary>
+	/// Whether generated activity sources are created by an injected <c>ActivitySourceFactory</c>: requested and
+	/// available. A request the compilation cannot honour falls back to a static <c>ActivitySource</c> (and the analyzer
+	/// reports <c>TSG3023</c>).
+	/// </summary>
+	public static bool UseActivitySourceFactory(Compilation compilation, CancellationToken token) =>
+		IsActivitySourceFactoryRequested(compilation, token) && IsActivitySourceFactoryAvailable(compilation);
+
 	public static ActivitySourceAttributeData? GetActivitySourceAttribute(ISymbol symbol, CancellationToken token)
 	{
 		if (

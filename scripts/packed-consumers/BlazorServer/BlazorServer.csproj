@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+	<!--
+		Packed-consumer gate (scripts/test-packed-consumers.ps1), consumer (c): a Blazor Web App with interactive server
+		rendering whose page places an order through a service using the generated telemetry. It references
+		Purview.Telemetry.SourceGenerator as a package, and nothing else from the repository.
+
+		The script publishes it and runs it with self-test: the host starts on an in-memory TestServer, the page is
+		requested (and so rendered on the server), and the process exits non-zero unless the page rendered and the
+		generated activities, metrics and log entries were emitted - captured in-process, as in the Native AOT console.
+	-->
+	<PropertyGroup>
+		<TargetFramework>net11.0</TargetFramework>
+		<AssemblyName>PackedTelemetryServer</AssemblyName>
+		<RootNamespace>PackedTelemetry</RootNamespace>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Include="../Shared/*.cs" Link="Shared/%(Filename)%(Extension)" />
+		<ProjectReference Include="../Library/Library.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference
+			Include="Purview.Telemetry.SourceGenerator"
+			Version="$(TelemetryPackageVersion)"
+			PrivateAssets="all"
+			IncludeAssets="analyzers"
+		/>
+		<PackageReference Include="Microsoft.AspNetCore.TestHost" Version="$(AspNetCorePackageVersion)" />
+		<!-- The v2 (state-based) logging generation uses LoggerMessageHelper from this package. -->
+		<PackageReference
+			Include="Microsoft.Extensions.Telemetry.Abstractions"
+			Version="$(MicrosoftExtensionsTelemetryVersion)"
+		/>
+	</ItemGroup>
+
+	<Target Name="RequirePackageVersions" BeforeTargets="CollectPackageReferences;Restore">
+		<Error
+			Condition="'$(TelemetryPackageVersion)' == '' or '$(AspNetCorePackageVersion)' == '' or '$(MicrosoftExtensionsTelemetryVersion)' == ''"
+			Text="TelemetryPackageVersion, AspNetCorePackageVersion and MicrosoftExtensionsTelemetryVersion must be set. Run this consumer through scripts/test-packed-consumers.ps1."
+		/>
+	</Target>
+</Project>

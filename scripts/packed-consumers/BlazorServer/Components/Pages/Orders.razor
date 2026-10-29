@@ -1,0 +1,22 @@
+@page "/"
+@inject OrderWorkflow Workflow
+
+<h1>Orders</h1>
+
+<p role="status">@_status</p>
+
+@code {
+	public const string OrderId = "ord-server";
+	public const string CustomerId = "cust-server";
+	public const double Total = 64.25;
+
+	string _status = "No order placed.";
+
+	// Runs once while the page is rendered on the server for the request; the generated telemetry is emitted by the
+	// service, captured in-process by the host.
+	protected override void OnInitialized()
+	{
+		Workflow.Place(OrderId, CustomerId, Total);
+		_status = $"Placed {OrderId}.";
+	}
+}

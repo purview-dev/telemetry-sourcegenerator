@@ -4,8 +4,10 @@
 		<!-- The Purview SDK defaults TargetFramework to net10.0 before this file is evaluated;
 		     clear it so the multi-targeted TargetFrameworks below take effect. -->
 		<TargetFramework></TargetFramework>
-		<!-- net48 can only be built and run on Windows, so it is excluded on other platforms. -->
-		<TargetFrameworks>net8.0;net9.0;net10.0;</TargetFrameworks>
+		<!-- net48 can only be built and run on Windows, so it is excluded on other platforms. net11.0 is the
+		     only leg whose references carry System.Diagnostics.ActivitySourceFactory, so it is the one that
+		     exercises the UseActivitySourceFactory generation; the earlier legs exercise its fallback. -->
+		<TargetFrameworks>net8.0;net9.0;net10.0;net11.0;</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">net48;$(TargetFrameworks)</TargetFrameworks>
 	</PropertyGroup>
 	<ItemGroup>

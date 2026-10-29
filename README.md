@@ -17,22 +17,46 @@ Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system
 **Consumer runtime targets:**
 
 - .NET Framework 4.8
-- .NET 8 or higher
+- .NET 8 or higher, including .NET 11
+
+**Hosting models:** console, ASP.NET Core, .NET Aspire, Native AOT, Blazor WebAssembly (trimmed and AOT-compiled)
+and Blazor Server. The generated code uses no reflection and adds no trim or AOT warnings, and no compiler-host
+assembly reaches your application's output. See
+[Platform Support](https://purview.dev/docs/telemetry-sourcegenerator/platform-support/) for the full matrix.
 
 **Build toolchain requirement:**
 
-- Visual Studio 2026 (18.x) or .NET 10 SDK (Roslyn 5.9.0+)
+- Visual Studio 2026 (18.x) or .NET 10 SDK or later (Roslyn 5.9.0+)
+
+## What's new for .NET 11
+
+- **`ActivitySourceFactory`** - opt in with
+  `[assembly: ActivitySourceGeneration("MyApp", UseActivitySourceFactory = true)]` and register the factory with
+  `services.AddTracing()`. The generated classes then create their sources from the injected .NET 11 factory instead
+  of a static `ActivitySource`. When the type isn't available, `TSG3023` reports it and the static source is kept.
+- **C# 15 static interface members** are ignored rather than implemented.
+- **Validated on .NET 11**: the tests run on `net11.0`, and Native AOT, Blazor WebAssembly and Blazor Server
+  consumers of the package are built on every release.
 
 ## Installation
 
-Add to your `Directory.Build.props` or `.csproj` file:
+```bash
+dotnet add package Purview.Telemetry.SourceGenerator
+```
+
+`dotnet add package` writes the latest version (shown on the NuGet badge above) into your project. The
+generator is a compile-time dependency only, so mark the reference as analyzer-only:
 
 ```xml
-<PackageReference Include="Purview.Telemetry.SourceGenerator" Version="5.0.5">
+<PackageReference Include="Purview.Telemetry.SourceGenerator">
   <PrivateAssets>all</PrivateAssets>
   <IncludeAssets>analyzers</IncludeAssets>
 </PackageReference>
 ```
+
+The `Version` attribute that `dotnet add package` adds stays on that element; with
+[Central Package Management](https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management)
+it lives in `Directory.Packages.props` instead.
 
 ## Quick Start
 
@@ -84,17 +108,25 @@ services.AddEntityStoreTelemetry();
 Then inject and use - a single method call emits an Activity, Log, and Metric simultaneously:
 
 ```csharp
-public class EntityService(IEntityStoreTelemetry telemetry)
+public sealed record Entity(int Id, float TotalValue, int LastUpdatedByUserId, int SizeInBytes);
+
+public interface IEntityRepository
 {
-    public async Task<Entity> GetEntityAsync(int id, string serviceUrl, CancellationToken cancellationToken)
+    Task<Entity?> GetAsync(int id, CancellationToken cancellationToken);
+}
+
+public class EntityService(IEntityStoreTelemetry telemetry, IEntityRepository repository)
+{
+    public async Task<Entity?> GetEntityAsync(int id, string serviceUrl, CancellationToken cancellationToken)
     {
         // Single call creates Activity AND logs AND increments counter
         using var activity = telemetry.GettingEntityFromStore(id, serviceUrl);
-        
-        var entity = await _repository.GetAsync(id, cancellationToken);
-                        
+
+        var stopwatch = Stopwatch.StartNew();
+        var entity = await repository.GetAsync(id, cancellationToken);
+
         // Adds event to activity AND logs duration
-        telemetry.GetDuration(activity, stopwatch.ElapsedMilliseconds);
+        telemetry.GetDuration(activity, (int)stopwatch.ElapsedMilliseconds);
 
         if (entity == null)
         {
@@ -105,7 +137,7 @@ public class EntityService(IEntityStoreTelemetry telemetry)
 
         // Activity context addition
         telemetry.RetrievedEntity(activity, entity.TotalValue, entity.LastUpdatedByUserId);
-        
+
         // Histogram only records size
         telemetry.RecordEntitySize(entity.SizeInBytes);
 
@@ -141,10 +173,18 @@ public class EntityService(IEntityStoreTelemetry telemetry)
 - [Generated Output Examples](https://purview.dev/docs/telemetry-sourcegenerator/generated-output/)
 - [Multi-Targeting Guide](https://purview.dev/docs/telemetry-sourcegenerator/multi-targeting/)
 - [Logging Configuration](https://purview.dev/docs/telemetry-sourcegenerator/logging/)
+- [Platform Support and .NET 11](https://purview.dev/docs/telemetry-sourcegenerator/platform-support/)
 
 ## Agent Skills
 
-This repository ships with [Agent Skills](https://agentskills.io/specification) under `.agents/skills/` covering the source generator, its test framework, and the `Purview.BuildSdk` build SDK. See [`AGENTS.md`](AGENTS.md) — "Source-generator and testing skills" for the full list and when to load each one.
+This repository publishes [Agent Skills](https://agentskills.io/specification) for using the generator - quick
+start, interface design, migration, multi-targeting and diagnostics. Install them with:
+
+```bash
+npx skills add purview-dev/telemetry-sourcegenerator
+```
+
+See [`AGENTS.md`](https://github.com/purview-dev/telemetry-sourcegenerator/blob/main/AGENTS.md) for the list.
 
 ## Sample Project
 
@@ -229,10 +269,21 @@ v4 defaults to **OpenTelemetry semantic conventions** for generated telemetry na
 | ---------------- | ------------- | ------------ | -------- |
 | **ActivitySource Name** | Assembly name lowercased: `"myapp"` | Assembly name preserved: `"MyApp"` | ActivitySource names change casing |
 | **Tag/Baggage Keys** | Lowercased, smashed: `"entityid"` | snake_case: `"entity_id"` | Tag keys have underscores for word boundaries |
-| **Metric Instrument Names** | Lowercased, smashed: `"recordhistogram"` | Hierarchical dot.separated: `"myapp.products.record.histogram"` | Includes meter name prefix + word boundaries |
+| **Metric Instrument Names** | Lowercased, smashed: `"product.recordcount"` | Dot-separated namespaces, snake_case words: `"product.record_count"` | Word boundaries become underscores |
 | **Metric Tag Keys** | Lowercased, smashed: `"requestcount"` | snake_case: `"request_count"` | Metric tag keys have underscores |
 
 #### Examples
+
+Given this interface:
+
+```csharp
+[Meter("MyApp.Products")]
+interface IProductTelemetry
+{
+    [Counter]
+    void RecordCount([InstrumentMeasurement] int count);
+}
+```
 
 **Before (v3/Legacy):**
 
@@ -240,21 +291,37 @@ v4 defaults to **OpenTelemetry semantic conventions** for generated telemetry na
 // Generated code:
 new ActivitySource("myapp")           // lowercase
 activity.SetTag("entityid", ...)      // smashed compound
-var meter = meterFactory.Create("MyApp.Products");
-meter.CreateCounter<int>("recordcount")  // smashed compound, no meter prefix
+var meter = meterFactory.Create(new MeterOptions("MyApp.Products") { ... });
+meter.CreateCounter<int>("product.recordcount")  // smashed compound
 ```
 
-**After (v4 OpenTelemetry mode - DEFAULT):**
+**After (v4 OpenTelemetry naming - DEFAULT):**
 
 ```csharp
 // Generated code:
 new ActivitySource("MyApp")           // preserves casing
 activity.SetTag("entity_id", ...)     // snake_case
-var meter = meterFactory.Create("MyApp.Products");
-meter.CreateCounter<int>("myapp.products.record.count")  // hierarchical: meter + instrument
+var meter = meterFactory.Create(new MeterOptions("MyApp.Products") { ... });
+meter.CreateCounter<int>("product.record_count")  // interface prefix + snake_case instrument
 ```
 
-**Note**: In OpenTelemetry mode, instrument names automatically include the meter name prefix (converted to lowercase dot.separated), following OpenTelemetry best practices for hierarchical metric naming.
+An instrument name is built from, in order: the assembly `[MeterGeneration(InstrumentPrefix = ...)]`, the
+interface prefix, and the instrument name. The interface prefix is `[Meter(InstrumentPrefix = ...)]` when set,
+otherwise it is derived from the interface name: the leading `I` and a trailing `Telemetry` or `Logs` are
+removed, so `IProductTelemetry` becomes `product`. The instrument name is the attribute's `Name`, or the method
+name in snake_case.
+
+**The meter name is not part of the instrument name by default.** The meter already identifies the instruments
+it owns, and `MeterNameGenerationType` defaults to `DotNet`. Opt in to the meter name as the outermost namespace
+with `MeterNameGenerationType.OpenTelemetry`, which also lowercases a meter name derived from the assembly name:
+
+```csharp
+[assembly: MeterGeneration(MeterNameGenerationType = MeterNameGenerationType.OpenTelemetry)]
+
+// The interface above now generates "my_app.products.product.record_count".
+```
+
+See [Metrics](https://purview.dev/docs/telemetry-sourcegenerator/metrics/#meter-naming) for the full rules.
 
 #### Reverting to v3 Naming (Legacy Mode)
 

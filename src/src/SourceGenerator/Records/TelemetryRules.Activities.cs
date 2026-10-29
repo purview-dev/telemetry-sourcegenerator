@@ -14,10 +14,25 @@ static partial class TelemetryRules
 	public static ImmutableArray<ReportableDiagnostic> GetActivityDiagnostics(
 		ActivitySourceTarget target,
 		INamedTypeSymbol interfaceSymbol,
+		Compilation compilation,
 		CancellationToken token
 	)
 	{
 		var diagnostics = ImmutableArray.CreateBuilder<ReportableDiagnostic>();
+
+		// TSG3023: the factory was requested but the compilation cannot resolve it, so the generator falls
+		// back to a static ActivitySource.
+		if (
+			target.ActivitySourceGenerationAttribute?.UseActivitySourceFactory == true
+			&& !SharedHelpers.IsActivitySourceFactoryAvailable(compilation)
+		)
+			diagnostics.Add(
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.Activities.ActivitySourceFactoryNotAvailable.Descriptor,
+					isBlocking: false,
+					interfaceSymbol
+				)
+			);
 
 		// TSG3001: no activity source specified.
 		if (string.IsNullOrWhiteSpace(target.ActivitySourceName))

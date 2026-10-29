@@ -71,7 +71,7 @@ The repo mirrors its GitHub CI/CD pipelines locally with the reusable `purview-b
 
 ## Source-generator skills
 
-Before doing specialist work, load the relevant skill from `.agents/skills/` — see `AGENTS.md` ("Source-generator and testing skills") for the full list and when to load each one.
+Before doing specialist work, load the relevant skill from `.agents/skills/` — see `AGENTS.md` ("Installed skills") for the full list, when to load each one, and how to add or update them. The installed skills and `skills-lock.json` are committed; install only into `.agents/` (`-a universal`), never into `.claude/` or another per-agent folder.
 
 ## Release process
 

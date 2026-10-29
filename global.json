@@ -1,11 +1,11 @@
 {
 	"sdk": {
-		"version": "11.0.100-rc.2.26504.105",
+		"version": "11.0.100-rc.3.26522.148",
 		"rollForward": "latestMajor",
 		"allowPrerelease": true
 	},
 	"msbuild-sdks": {
-		"Purview.BuildSdk": "1.1.0"
+		"Purview.BuildSdk": "1.2.0"
 	},
 	"test": {
 		"runner": "Microsoft.Testing.Platform"

@@ -43,7 +43,7 @@ consuming project. Because `NET48_OR_GREATER` is automatically defined by the SD
 
 ```csharp
 // In the injected ErrorAttribute.g.cs:
-#if NET48_OR_GREATER || PURVIEW_TELEMETRY_NON_NULLABLE
+#if NET48_OR_GREATER
 public string MessageTemplate { get; set; }
 #else
 public string? MessageTemplate { get; set; }
@@ -53,17 +53,6 @@ public string? MessageTemplate { get; set; }
 The attribute files are decorated with `[Conditional("PURVIEW_TELEMETRY_ATTRIBUTES")]`, so the
 sample defines `PURVIEW_TELEMETRY_ATTRIBUTES` in `Directory.Build.props` to keep the attribute
 usages visible to the generator's incremental pipeline.
-
-### Opt-out for any project
-
-Projects that prefer non-nullable attribute files regardless of target framework can define
-`PURVIEW_TELEMETRY_NON_NULLABLE` in their project file:
-
-```xml
-<PropertyGroup>
-  <DefineConstants>$(DefineConstants);PURVIEW_TELEMETRY_NON_NULLABLE</DefineConstants>
-</PropertyGroup>
-```
 
 ## Project structure
 
