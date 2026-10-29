@@ -256,7 +256,7 @@ public sealed partial class ReleaseGateTests
 	}
 
 	[Test]
-	public async Task PrWorkflow_GivenThePackedConsumersJob_RunsTheGateAndTheRuleProof(
+	public async Task PrWorkflow_GivenThePackedConsumersJob_RunsTheGateWithoutTheRuleProof(
 		CancellationToken cancellationToken
 	)
 	{
@@ -272,8 +272,83 @@ public sealed partial class ReleaseGateTests
 		// Assert
 		await Assert.That(job).Contains($"./{PackedConsumersScript} -PreflightOnly");
 		await Assert.That(job).Contains("-WasmAot Require");
-		await Assert.That(job).Contains($"./{PackRulesScript}");
 		await Assert.That(job).Contains("dotnet workload install wasm-tools");
+
+		// The proof is minutes of work against a package; this job is half an hour of Native AOT and WebAssembly AOT
+		// publishing. Behind it, a broken rule can only fail after all of that, so the proof has a job of its own.
+		await Assert
+			.That(job)
+			.DoesNotContain(PackRulesScript)
+			.Because("the rule proof must not sit behind the packed-consumer gate");
+	}
+
+	/// <summary>
+	/// The rule proof needs nothing a plain pack does not, so it packs its own package and runs in parallel with the
+	/// consumer gate. Watching it cost seven minutes of AOT publishing in the pull request that introduced it.
+	/// </summary>
+	[Test]
+	public async Task PrWorkflow_GivenThePackValidationJob_ProvesTheRulesFromItsOwnPack(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		var text = await File.ReadAllTextAsync(
+			System.IO.Path.Combine(RepositoryRoot.Value, ".github", "workflows", "pr.yml"),
+			cancellationToken
+		);
+
+		// Act
+		var job = Jobs(text).SingleOrDefault(static j => j.Name == "pack-validation").Body ?? string.Empty;
+
+		// Assert
+		await Assert.That(job).IsNotEmpty().Because("pr.yml has no 'pack-validation' job");
+		await Assert.That(job).Contains($"./{PackRulesScript}");
+		await Assert.That(job).Contains("--Build:RunPack=true").Because("the proof needs packages to inject into");
+		await Assert.That(job).Contains("--Build:ValidatePack=true");
+		await Assert
+			.That(job)
+			.DoesNotContain("dotnet workload install")
+			.Because("the proof must stay cheap: no Native AOT or WebAssembly toolchain");
+		await Assert
+			.That(job)
+			.DoesNotContain("dotnet publish")
+			.Because("the proof must stay cheap: it does not publish a consumer");
+
+		// A bare `dotnet tool restore` in a pwsh step leaves a non-zero $LASTEXITCODE for GitHub's trailing
+		// `exit $LASTEXITCODE`, which is how a green step was reported as a failure. Check the code, not the message.
+		await Assert
+			.That(job)
+			.Contains("if ($LASTEXITCODE -ne 0)")
+			.Because("a failed tool restore must raise, not be inherited by the step's exit code");
+	}
+
+	/// <summary>
+	/// GitHub's pwsh shell appends <c>if ((Test-Path -LiteralPath variable:\LASTEXITCODE)) { exit $LASTEXITCODE }</c>
+	/// to every step. These gates run commands that fail on purpose - the rule proof's validations must each be
+	/// rejected - so a script that falls through reports success as exit code 1.
+	/// </summary>
+	[Test]
+	[Arguments(PackedConsumersScript)]
+	[Arguments(PackRulesScript)]
+	public async Task GateScript_GivenCommandsThatFailByDesign_EndsWithAnExplicitExit(
+		string script,
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		var lines = await File.ReadAllLinesAsync(
+			System.IO.Path.Combine(RepositoryRoot.Value, script),
+			cancellationToken
+		);
+
+		// Act
+		var last = lines.Reverse().FirstOrDefault(static line => !string.IsNullOrWhiteSpace(line))?.Trim();
+
+		// Assert
+		await Assert
+			.That(last)
+			.IsEqualTo("exit 0")
+			.Because($"{script} must state its exit code rather than leave $LASTEXITCODE to the shell");
 	}
 
 	[Test]
