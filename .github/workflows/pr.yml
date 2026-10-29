@@ -79,7 +79,7 @@ jobs:
         run: |
           dotnet tool restore
           if ($LASTEXITCODE -ne 0) {
-            throw 'dotnet tool restore failed: a transient NuGet failure, or the manifest asks for a command the pinned package does not carry.'
+            throw 'dotnet tool restore failed; the message above names the command and the package it is missing from.'
           }
           dotnet purview-build `
             --Build:RunPack=true `
