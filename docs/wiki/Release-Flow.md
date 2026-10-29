@@ -49,24 +49,27 @@ check fails rather than passing.
 | Gate | What it proves | Local | CI |
 | --- | --- | --- | --- |
 | Build, lint and tests | The solution builds warning-free, CSharpier reports no change, and every test project passes. | `just build`, `just lint`, `just test` | `pr.yml` `build` |
-| Pack and pack validation | The package packs; `purview-build.json` `PackValidation` finds exactly the declared content (`RequiredContent`, `RequireExplicitContent`) and none of the `ForbiddenContent`. | `just pipeline-pack-validate` | `pr.yml` `build` |
-| Forbidden-content rule proof | Every `ForbiddenContent` rule rejects a package: a matching file is injected into scratch copies of the package and the real `purview-build` validation must fail, per package and per rule. | `just verify-pack-rules` | `pr.yml` `packed-consumers` |
+| Pack and pack validation | The package packs; `purview-build.json` `PackValidation` finds exactly the declared content (`RequiredContent`, `RequireExplicitContent`) and none of the `ForbiddenContent`. | `just pipeline-pack-validate` (which also runs the rule proof) | `pr.yml` `build` |
+| Forbidden-content rule proof | Every `ForbiddenContent` rule rejects a package: a matching file is injected into scratch copies of the package and the real `purview-build` validation must fail, per package and per rule. | `just verify-pack-rules` (and the end of `just pipeline-pack-validate`) | `pr.yml` `pack-validation`, in parallel with the consumer gate |
 | Packed consumers | The package, packed to an isolated feed and cache, works for consumers that reference it as a package - each with a class library of its own generated telemetry. (a) A **Native AOT** console publishes with `-warnaserror` and no IL2xxx/IL3xxx warning, then runs with an in-process `ActivityListener`, `MeterListener` and capturing logger provider and checks the multi-target method (Activity, Information log and counter from one call), tags, baggage, events and the OpenTelemetry exception event, every metric measurement, v1 and v2 logging, log-level gating and the `TelemetryNames` aggregation. (b) A **Blazor WebAssembly** app, using the telemetry from a page and a service, publishes trimmed with `-warnaserror` and with `RunAOTCompilation=true`: the trimmed assemblies keep every generated member, and the WebAssembly AOT compiler compiles every generated method. (c) A **Blazor Server** host renders its page on an in-memory `TestServer`, and the telemetry the page emitted is checked as in (a). (d) Every bin and publish folder is leak-scanned. | `just smoke-packed-consumers` | `pr.yml` `packed-consumers` (linux-x64, `-WasmAot Require`) |
 | Compiler-host leak scan | No generator, refactorings, Purview.SourceGeneratorFramework or Roslyn assembly reaches build or publish output, by file name or in a `deps.json`, `runtimeconfig.json` or boot manifest (`blazor.boot.json`, `dotnet.boot.js`, `dotnet.js`). Purview.SourceGeneratorFramework 1.2.1 put its DLL in every sample's `bin` while every build passed. | `just scan-compiler-host-leaks <dir>...` | the `samples` job (every sample's `bin`) and every consumer in `packed-consumers`; `ReleaseGateTests` fails a job that builds the samples or publishes without it |
 
 `ReleaseGateTests` (in `src/tests/Repository.UnitTests`, so `just test` runs it) guards the gates themselves: the leak
 scan must catch each kind of leak it claims to, every workflow job that builds the samples or publishes must scan its
-output, the `packed-consumers` job must run the gate and the rule proof, the Justfile recipes must run their scripts,
-the consumers must reference the generator as a package and never the repository's projects, and `ForbiddenContent`
-must keep every rule.
+output, the `packed-consumers` job must run the gate and the rule proof must have a cheap job of its own, the Justfile
+recipes must run their scripts, every gate script must state its exit code rather than inherit a non-zero
+`$LASTEXITCODE` (GitHub's `pwsh` shell exits with it, which reported a green proof as a failed step), the consumers
+must reference the generator as a package and never the repository's projects, and `ForbiddenContent` must keep every
+rule.
 
 ### Prerelease build dependencies
 
 The generator is built against the Purview.SourceGeneratorFramework version `Directory.Packages.props` pins, with the
-Purview.BuildSdk version `global.json` pins. Until those versions are on nuget.org, CI cannot restore them: the
-`packed-consumers` job fails at its first step with what to do, rather than skipping. Publish them, or set the
-`TELEMETRY_PRERELEASE_FEED` repository variable to a feed that has them. Locally, `just smoke-packed-consumers` also
-reads `TELEMETRY_PRERELEASE_FEED` or `LOCAL_NUGET_FEED_PATH`, and uses that feed for those packages only.
+Purview.BuildSdk version `global.json` pins. Until those versions are on nuget.org, nothing can be packed, so the
+`packed-consumers` job fails at its first step with what to do, rather than skipping. Publish them to nuget.org, or
+rely on the organisation's GitHub Packages source, which the shared `build` workflow registers when required. Locally,
+`just smoke-packed-consumers` reads `LOCAL_NUGET_FEED_PATH` (or takes `-PrereleaseFeed`) and uses that feed for those
+packages only.
 
 The consumers target `net11.0` and take their ASP.NET Core package versions from the `Packed consumers` group in
 `Directory.Packages.props`, so bump those with the .NET 11 SDK in `global.json`.

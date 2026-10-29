@@ -69,8 +69,8 @@ smoke-packed-consumers *args:
 
 # Prove every PackValidation ForbiddenContent rule in .config/purview-build.json rejects a package: injects a matching
 # file into scratch copies of the packed package and runs the real purview-build validation on them. Reads artifacts/,
-# so pack first (`just pipeline-pack-validate`). `just pipeline-local-release` moves its packages to the local feed, so
-# pass -PackagesFolder p:/_sync-projects/.local-nuget after it.
+# so pack first (`just pipeline-pack-validate`, which runs this recipe itself). `just pipeline-local-release` moves its
+# packages to the local feed, so pass -PackagesFolder p:/_sync-projects/.local-nuget after it.
 [group('Pipeline')]
 verify-pack-rules *args:
     echo "Proving the pack-validation forbidden-content rules..."
@@ -83,12 +83,15 @@ pipeline-tests *args:
     echo "Running tests pipeline..."
     {{ pipeline_tool }} --Build:RunTests=true --Release:Mode=None {{ args }}
 
-# Run the pipeline through pack + validate (restore, build, lint, tests, pack, validate pack contents) without publishing/releasing
+# Run the pipeline through pack + validate (restore, build, lint, tests, pack, validate pack contents) without
+# publishing/releasing. Finishes by proving every ForbiddenContent rule rejects a package (`verify-pack-rules`, which
+# reads artifacts/ - pass -Build:ArtifactsFolder to that recipe if args moved this run's packages somewhere else).
 [group('Pipeline')]
 pipeline-pack-validate *args:
     just ensure-pipeline-tool
     echo "Running pack + validate pipeline..."
     {{ pipeline_tool }} --Build:RunPack=true --Build:ValidatePack=true --Release:Mode=None {{ args }}
+    just verify-pack-rules
 
 # -----------------------------------------------------------------------------
 # Build and Test

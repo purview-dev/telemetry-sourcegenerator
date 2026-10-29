@@ -50,14 +50,52 @@ jobs:
       - name: Test SampleApp
         run: dotnet test samples/SampleApp/SampleApp.slnx --configuration Release --no-build
 
+  # Proving that each ForbiddenContent rule bites is cheap - pack the generator, then validate injected copies of it -
+  # so it runs in its own job rather than as the last step of `packed-consumers`. There it could only fail after the
+  # Native AOT and WebAssembly AOT publishes had already spent seven minutes.
+  #
+  # Like `samples`, it needs no feed wiring of its own: the shared `build` job registers the organisation's GitHub
+  # Packages source when a pinned version is not on nuget.org yet, and the pack below fails in seconds, naming the
+  # package and version, if one cannot be restored.
+  pack-validation:
+    name: Pack validation rule proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      # Restore before pack: a pwsh step that left `dotnet tool restore`'s non-zero exit code to the shell's
+      # trailing `exit $LASTEXITCODE` is what made this gate report a green run as a failure. Reaching a step at
+      # all must mean it succeeded, so the failure is raised here, with the message above it.
+      - name: Pack the generator and validate its content
+        shell: pwsh
+        run: |
+          dotnet tool restore
+          if ($LASTEXITCODE -ne 0) {
+            throw 'dotnet tool restore failed: a transient NuGet failure, or the manifest asks for a command the pinned package does not carry.'
+          }
+          dotnet purview-build `
+            --Build:RunPack=true `
+            --Build:ValidatePack=true `
+            --Build:RunTests=false `
+            --Build:RunLint=false `
+            --Release:Mode=None
+
+      - name: Prove every pack-validation forbidden-content rule rejects a package
+        shell: pwsh
+        run: ./scripts/test-pack-validation-rules.ps1 -PackagesFolder artifacts
+
   packed-consumers:
     name: Packed consumers (Native AOT, Blazor WebAssembly, Blazor Server)
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    env:
-      # An extra feed for Purview.SourceGeneratorFramework and Purview.BuildSdk only, for versions
-      # that are not on nuget.org yet. Unset, the gate restores them from nuget.org alone.
-      TELEMETRY_PRERELEASE_FEED: ${{ vars.TELEMETRY_PRERELEASE_FEED }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -71,8 +109,7 @@ jobs:
       # First, before any toolchain is installed: the generator is built against the
       # Purview.SourceGeneratorFramework version Directory.Packages.props pins, with the
       # Purview.BuildSdk version global.json pins, so nothing can be packed until both restore.
-      # This fails with what to do (publish them to nuget.org, or set the
-      # TELEMETRY_PRERELEASE_FEED repository variable) rather than skipping.
+      # This fails with what to do rather than skipping.
       - name: Check the prerelease build dependencies restore
         shell: pwsh
         run: ./scripts/test-packed-consumers.ps1 -PreflightOnly
@@ -91,9 +128,3 @@ jobs:
         run: >-
           ./scripts/test-packed-consumers.ps1 -RuntimeIdentifier linux-x64 -WasmAot Require
           -PackOutput artifacts/packed
-
-      - name: Prove every pack-validation forbidden-content rule rejects a package
-        shell: pwsh
-        run: |
-          dotnet tool restore
-          ./scripts/test-pack-validation-rules.ps1 -PackagesFolder artifacts/packed

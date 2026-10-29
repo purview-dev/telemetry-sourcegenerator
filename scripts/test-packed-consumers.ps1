@@ -56,7 +56,7 @@
 .PARAMETER PrereleaseFeed
 	A NuGet feed (folder or URL) to restore Purview.SourceGeneratorFramework and Purview.BuildSdk from, in addition to
 	nuget.org - for versions that are not on nuget.org yet. The feed is used for those packages only. Defaults to
-	$env:TELEMETRY_PRERELEASE_FEED, then $env:LOCAL_NUGET_FEED_PATH.
+	$env:LOCAL_NUGET_FEED_PATH.
 
 .PARAMETER WasmAot
 	Auto (default) runs the WebAssembly AOT publish when the wasm-tools workload is installed and says so when it is
@@ -82,7 +82,7 @@
 param (
 	[string] $Configuration = 'Release',
 	[string] $RuntimeIdentifier = [System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier,
-	[string] $PrereleaseFeed = ($env:TELEMETRY_PRERELEASE_FEED ? $env:TELEMETRY_PRERELEASE_FEED : $env:LOCAL_NUGET_FEED_PATH),
+	[string] $PrereleaseFeed = $env:LOCAL_NUGET_FEED_PATH,
 	[ValidateSet('Auto', 'Require', 'Skip')]
 	[string] $WasmAot = 'Auto',
 	[string] $PackOutput,
@@ -433,9 +433,9 @@ try {
 				"Purview.SourceGeneratorFramework $sgfVersion (Directory.Packages.props) or Purview.BuildSdk $buildSdkVersion " +
 				"(global.json) could not be restored from $from. The generator is built with both, so nothing can be " +
 				'packed. If a version is not on nuget.org yet, publish it there, or point this gate at a feed that has ' +
-				'it: -PrereleaseFeed <folder or URL>, or set TELEMETRY_PRERELEASE_FEED (LOCAL_NUGET_FEED_PATH is used ' +
-				'when set). Purview.BuildSdk is resolved by MSBuild through the normal NuGet configuration, so that feed ' +
-				'must also be a configured source for the pack itself.'
+				'it: -PrereleaseFeed <folder or URL>, or set LOCAL_NUGET_FEED_PATH. Purview.BuildSdk is resolved by ' +
+				'MSBuild through the normal NuGet configuration, so that feed must also be a configured source for the ' +
+				'pack itself.'
 			)
 		}
 	}
@@ -643,3 +643,7 @@ finally {
 if ($exitCode -ne 0) { exit $exitCode }
 
 Write-Host 'Packed-consumer gate passed.' -ForegroundColor Green
+
+# The last native command was a restore in the finally block; state the exit code rather than inherit it, because
+# GitHub's pwsh shell exits with $LASTEXITCODE when a script falls through.
+exit 0

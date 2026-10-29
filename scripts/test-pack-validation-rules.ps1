@@ -20,6 +20,10 @@
 
 	The packages in -PackagesFolder are never modified.
 
+	Every validation run is expected to fail, so $LASTEXITCODE is left non-zero on the way out. The script therefore
+	exits explicitly: GitHub appends `if ((Test-Path -LiteralPath variable:\LASTEXITCODE)) { exit $LASTEXITCODE }` to a
+	pwsh step, which would otherwise report a green proof as a failed step.
+
 .PARAMETER PackagesFolder
 	Folder holding the packed .nupkg (and any .snupkg) files of the current version. Defaults to artifacts/, where
 	`just pipeline-pack-validate` and `just pack` write them. `just pipeline-local-release` moves them to the local feed,
@@ -93,7 +97,13 @@ function Invoke-Validation([string] $name, [System.IO.FileInfo[]] $nupkgs, [stri
 
 	Push-Location $root
 	try {
-		& dotnet tool restore | Out-Null
+		# Fatal, not ignored: a restore that failed silently would leave the runs below using whatever version the
+		# local tool store already holds, so a stale purview-build could report rules this repository no longer has.
+		$restore = & dotnet tool restore 2>&1 | ForEach-Object { "$_" }
+		if ($LASTEXITCODE -ne 0) {
+			throw "dotnet tool restore failed in '$root', so the pinned purview.build could not be installed:`n$($restore -join "`n")"
+		}
+
 		$output = & dotnet purview-build `
 			--Build:Solution=empty.slnx `
 			--Build:ArtifactsFolder=artifacts `
@@ -177,3 +187,6 @@ if ($failures.Count -gt 0) {
 }
 
 Write-Host "Every ForbiddenContent rule ($($cases.Count)) rejected its file, in every package ($($packages.Count))." -ForegroundColor Green
+
+# See the header: every run above failed on purpose, so the non-zero $LASTEXITCODE must not become the exit code.
+exit 0

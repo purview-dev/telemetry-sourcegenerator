@@ -165,11 +165,11 @@ Treat work as incomplete until every gate relevant to it passes. Before a releas
   emitted activities, metrics and log entries, log-level gating and multi-target methods), a Blazor
   WebAssembly app (trimmed and `RunAOTCompilation`; no generated member trimmed away, every generated
   method AOT-compiled) and a Blazor Server host (page rendered on a `TestServer`, telemetry asserted).
-  Every consumer's bin and publish output is leak-scanned. Set `LOCAL_NUGET_FEED_PATH` (or
-  `TELEMETRY_PRERELEASE_FEED`) while Purview.SourceGeneratorFramework or Purview.BuildSdk is not on
-  nuget.org yet. It needs the Native AOT toolchain and, for the WebAssembly AOT step, the `wasm-tools`
-  workload.
-- `just verify-pack-rules` after any change to `PackValidation` in `.config/purview-build.json`.
+  Every consumer's bin and publish output is leak-scanned. Set `LOCAL_NUGET_FEED_PATH` while
+  Purview.SourceGeneratorFramework or Purview.BuildSdk is not on nuget.org yet. It needs the Native AOT
+  toolchain and, for the WebAssembly AOT step, the `wasm-tools` workload.
+- `just verify-pack-rules` after any change to `PackValidation` in `.config/purview-build.json` (it is also the last
+  step of `just pipeline-pack-validate`, so packing locally proves the rules without a second command).
 - `just build-s && just test-s` — the samples, which reference the generator as an analyzer project.
 - `just lint` — CSharpier reports no change (`just lint-fix` to apply it).
 
