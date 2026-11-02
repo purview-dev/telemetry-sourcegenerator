@@ -6,10 +6,11 @@ on:
 
 permissions:
   contents: write
-  # The shared release workflow pushes the same packages to nuget.org and, when
-  # PURVIEW_PUBLISH_GITHUB_PACKAGES=true, to GitHub Packages. A reusable workflow cannot grant
-  # more than its caller, so the permission is declared here.
+  # Neither a reusable workflow nor a composite action can grant a scope, so the caller owns these:
+  # `packages: write` for the GitHub Packages mirror, `id-token: write` for the nuget.org Trusted
+  # Publishing exchange, which GitHub withholds by default.
   packages: write
+  id-token: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,8 +19,23 @@ concurrency:
 jobs:
   release:
     name: Release packages
-    uses: purview-dev/build/.github/workflows/purview-release.yml@main
-    with:
-      release-mode: NuGet
-      release-branch: main
-    secrets: inherit
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      # A composite action, not a reusable workflow: nuget.org validates the OIDC `job_workflow_ref`
+      # claim against the registered Trusted Publishing policy, and inside a called workflow that
+      # claim names the called repository. Running it here keeps the claim on this file, which is the
+      # file name the policy is registered against.
+      - uses: purview-dev/build/actions/purview-release@main
+        with:
+          release-mode: NuGet
+          trusted-publishing: true
+          # The nuget.org profile name, not the sign-in email.
+          nuget-user: kieronlanning
+          # A composite action has no `secrets` context, so the read token is passed explicitly.
+          packages-read-token: ${{ secrets.PURVIEW_PACKAGES_READ_TOKEN }}
+          # A composite action has no `vars` context, so repository variables are passed here.
+          source-mapping: ${{ vars.PURVIEW_NUGET_SOURCE_MAPPING }}
+          github-packages: ${{ vars.PURVIEW_PUBLISH_GITHUB_PACKAGES == 'true' }}
+          github-packages-keep-versions: ${{ vars.PURVIEW_GITHUB_PACKAGES_KEEP_VERSIONS || '1' }}
+          github-packages-retention-hours: ${{ vars.PURVIEW_GITHUB_PACKAGES_RETENTION_HOURS || '24' }}
