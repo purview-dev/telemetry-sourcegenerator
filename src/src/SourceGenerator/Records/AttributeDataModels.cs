@@ -164,6 +164,8 @@ readonly partial record struct ErrorAttributeData([NestedModel] LogAttributeData
 		Log with
 		{
 			Level = TypeLibrary.Purview.Telemetry.LogLevelMap[TypeLibrary.Purview.Telemetry.ErrorAttribute].Value,
+			MessageTemplate = SharedHelpers.NullIfWhitespace(Log.MessageTemplate),
+			Name = SharedHelpers.NullIfWhitespace(Log.Name),
 		};
 }
 

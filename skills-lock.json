@@ -73,6 +73,12 @@
       "skillPath": "skills/purview-persistence/SKILL.md",
       "computedHash": "0523ecc210bf3571e2fccb859128a499fd80694e9d4089b377a8d39d73c028f4"
     },
+    "purview-sourcegenerator-attribute-data-models": {
+      "source": "purview-dev/sourcegenerator-framework",
+      "sourceType": "github",
+      "skillPath": "skills/purview-sourcegenerator-attribute-data-models/SKILL.md",
+      "computedHash": "84c309a0094a44a8ca76f0078c1fccee1f3c99b96b13a90b5b01260274c0cda6"
+    },
     "purview-sourcegenerator-codewriter": {
       "source": "purview-dev/sourcegenerator-framework",
       "sourceType": "github",
@@ -83,13 +89,13 @@
       "source": "purview-dev/sourcegenerator-framework",
       "sourceType": "github",
       "skillPath": "skills/purview-sourcegenerator-diagnostics/SKILL.md",
-      "computedHash": "c3c7920701e0e688f34ddece9e448472e010e69767e8c08914638128d34a8f17"
+      "computedHash": "c3d035e053ebcde99de95399c46e9d822d01c9837154ecff5792f5f0dfafa0ca"
     },
     "purview-sourcegenerator-packaging": {
       "source": "purview-dev/sourcegenerator-framework",
       "sourceType": "github",
       "skillPath": "skills/purview-sourcegenerator-packaging/SKILL.md",
-      "computedHash": "e0e6372e92aefc8df026a73010d9e7436b0a8c2378a96fdebd8b4de9e025d4a0"
+      "computedHash": "ee2440f1e0aa0cea731eb3eae2ea3c4e9ea77502867abc21e9f0a3c61f20c640"
     },
     "purview-sourcegenerator-pipeline": {
       "source": "purview-dev/sourcegenerator-framework",
@@ -101,13 +107,13 @@
       "source": "purview-dev/sourcegenerator-framework",
       "sourceType": "github",
       "skillPath": "skills/purview-sourcegenerator-testing/SKILL.md",
-      "computedHash": "d88bf2353073013ff9ddf9d3fe1a2e9415eb60d319bbd053baa105f50fa3f889"
+      "computedHash": "8ea0b5a51f045721c730a3bc57e3a14e79195b9b99738430fbb056263785b75c"
     },
     "purview-sourcegenerator-tunit-tests": {
       "source": "purview-dev/sourcegenerator-framework",
       "sourceType": "github",
       "skillPath": "skills/purview-sourcegenerator-tunit-tests/SKILL.md",
-      "computedHash": "14809d3727643e9a779d590b6627b3283af7b36c835e902cb80162552cb45b4f"
+      "computedHash": "5b801f9bf792f2ae0baeb2a3835680b9f95dbaed2e57ced43815449e64e19132"
     },
     "purview-telemetry": {
       "source": "purview-dev/engineering-playbook",

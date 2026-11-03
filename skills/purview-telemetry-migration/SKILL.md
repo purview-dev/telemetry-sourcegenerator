@@ -33,10 +33,13 @@ using Purview.Telemetry;
 [Logger]
 public interface IOrderServiceLogs
 {
-    [Info]
+    [Info("Order {OrderId} placed for {CustomerName}")]
     void OrderPlaced(int orderId, string customerName);
 }
 ```
+
+A literal message template and a literal event id carry over. Without a template the generator writes
+`OrderPlaced: OrderId = {OrderId}, CustomerName = {CustomerName}`.
 
 The original class is rewritten to use the interface:
 
@@ -77,5 +80,22 @@ If the refactoring does not cover a call pattern, convert it manually:
 | `Counter<T>.Add(...)` | `[Counter]` or `[AutoCounter]` for `Add(1)` |
 | `Histogram<T>.Record(...)` | `[Histogram]` |
 | `UpDownCounter<T>.Add(...)` | `[UpDownCounter]` |
+
+## Keeping the message, event id and name
+
+Each level attribute takes the original template, event id and log name, positionally, by parameter
+name, or as named arguments:
+
+```csharp
+[Info("Order {OrderId} placed")]                                  // logger.LogInformation("Order {OrderId} placed", id)
+[Warning(7, "Retrying {Attempt}")]                                // logger.LogWarning(new EventId(7), "Retrying {Attempt}", n)
+[Error(MessageTemplate = "Failed {OrderId}", EventId = 9, Name = "OrderFailed")]
+```
+
+**Check the generated text after migrating.** Versions 5.0.0 to 5.1.0 ignore every argument on
+`[Trace]`, `[Debug]`, `[Info]`, `[Warning]`, `[Error]` and `[Critical]` except the level, with no
+diagnostic: the template falls back to the default form and the event id is 0. On those versions use
+`[Log]`, which is unaffected: `[Log(LogLevel.Information, "Order {OrderId} placed")]`. Named
+`EventId = n` needs the release after 5.1.0; earlier ones accept only the constructor form.
 
 See [references/REFERENCE.md](references/REFERENCE.md) for detailed before/after examples and common conversions.

@@ -178,6 +178,15 @@ generated only where the generator runs.
 The method name becomes a member on the generated implementation class, so two methods cannot share
 one. Rename.
 
+## No diagnostic, but the log message is wrong
+
+The log reads `Method: Param = {Param}` despite `[Info("…")]`, and the event id is 0. Versions 5.0.0
+to 5.1.0 drop every argument of `[Trace]`, `[Debug]`, `[Info]`, `[Warning]`, `[Error]` and
+`[Critical]` except the level: template, event id, `Name` and `GenerationMode`. Upgrade, or on those
+versions use `[Log(LogLevel.Information, "…")]`, which is unaffected. Do not fall back to
+`[LoggerMessage]` or `ILogger.Log*`. To confirm, set `EmitCompilerGeneratedFiles` and read the template
+in the generated `*.Logging.g.cs` under `obj/*/generated/`.
+
 ## Related skills
 
 `purview-telemetry-quickstart` to get an interface wired up, `purview-telemetry-design` for

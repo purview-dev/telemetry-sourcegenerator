@@ -71,7 +71,7 @@ The repo mirrors its GitHub CI/CD pipelines locally with the reusable `purview-b
 
 ## Source-generator skills
 
-Before doing specialist work, load the relevant skill from `.agents/skills/` — see `AGENTS.md` ("Installed skills") for the full list, when to load each one, and how to add or update them. The installed skills and `skills-lock.json` are committed; install only into `.agents/` (`-a universal`), never into `.claude/` or another per-agent folder.
+Before doing specialist work, load the relevant skill from `.agents/skills/` — see `AGENTS.md` ("Installed skills") for the full list, when to load each one, and how to add or update them. The installed skills and `skills-lock.json` are committed; install only into `.agents/` (`-a universal`), never into `.claude/` or another per-agent folder. Claude Code reads only `.claude/skills/`, so link it to `.agents/skills/` rather than copying (the commands are in `AGENTS.md`).
 
 ## Release process
 

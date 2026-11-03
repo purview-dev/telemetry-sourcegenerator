@@ -76,10 +76,14 @@ identity. Both are `IsRoslynComponent`; only the generator references the framew
 - The referenced component is returned as **its own merged assembly** and is never IL-merged into the
   dependent one — that would duplicate its types, including `InternalsVisibleTo`-visible internals,
   inside a second analyzer in the same host.
-- The framework assembly is declared as copy-to-output content beside the generator's `bin`, and
-  content with `CopyToOutputDirectory` flows transitively through `ProjectReference`. That is what
-  lets Visual Studio load the dependent code-fix provider from its own `bin` without a
-  `FileNotFoundException` for the framework assembly.
+- The framework assembly is copied beside the generator's `bin` (a plain copy, not copy-to-output
+  content). A dependent component that references the generator as an assembly gets it copied
+  beside its own `bin` by ordinary assembly-reference resolution, which is what lets Visual Studio
+  load the dependent code-fix provider without a `FileNotFoundException` for the framework assembly.
+- A project that references a component only as an analyzer (`ReferenceOutputAssembly="false"`)
+  never receives the framework assembly, and neither does any application downstream of it. Since
+  1.2.2 it no longer leaks into app build output, `deps.json`, publish output, single-file bundles or
+  Blazor WebAssembly `_framework`, where it broke Native AOT and WebAssembly AOT publishing.
 - Visual Studio's project system resolves an `OutputItemType=Analyzer` project reference to the
   referenced project's **unmerged** `bin` assembly and adds it to the compiler's analyzers — the
   command-line build does not. `Purview.BuildSdk` removes that item before adding the resolved
