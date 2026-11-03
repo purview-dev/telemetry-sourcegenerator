@@ -229,6 +229,7 @@ entry) are both in source, so a clone has them without running anything.
 | --- | --- | --- |
 | `purview-sourcegenerator-codewriter` | `purview-dev/sourcegenerator-framework` | writing or reviewing emitter code (`CodeWriter`, scopes, `Emitters/`) |
 | `purview-sourcegenerator-pipeline` | `purview-dev/sourcegenerator-framework` | changing the incremental pipeline or its value-equatable models |
+| `purview-sourcegenerator-attribute-data-models` | `purview-dev/sourcegenerator-framework` | changing or testing a `[Generate]` attribute-data model (`Records/AttributeDataModels.cs`, `[NestedModel]`) |
 | `purview-sourcegenerator-diagnostics` | `purview-dev/sourcegenerator-framework` | adding or changing a `TSG` diagnostic or the analyzer |
 | `purview-sourcegenerator-packaging` | `purview-dev/sourcegenerator-framework` | changing how the generator is packed or merged |
 | `purview-sourcegenerator-testing` | `purview-dev/sourcegenerator-framework` | writing generator, analyzer or refactoring tests (`CodeQuery`) |
@@ -239,8 +240,8 @@ entry) are both in source, so a clone has them without running anything.
 This repository's own skills in `skills/` are authored for **consumers** of its packages, not for use while working on this repository. They are never installed into this repository's `.agents/skills/`, which holds only skills installed from other repositories; `InstalledSkillTests` enforces this.
 
 Skills are installed into the universal `.agents/skills/` location **only**. Never install copies
-into `.claude/` or any other per-agent folder; `/.claude/` is gitignored for that reason. Pass
-`-a universal`, which writes `.agents/skills/` and nothing else:
+into `.claude/` or any other per-agent folder. Pass `-a universal`, which writes `.agents/skills/`
+and nothing else:
 
 ```bash
 # add or update every skill from a source
@@ -260,9 +261,31 @@ CLI; `src/Directory.Build.props` sets `PurviewSkillsAgents=universal` so it is r
 way rather than defaulting to every agent (`*`). None of the restored packages ship skills, so
 `ListPurviewSkills` has nothing to recommend and the set above is chosen by hand.
 
+Claude Code is the exception: it reads skills from `.claude/skills/`, not `.agents/skills/`. Give it
+**links**, never copies, so there is still one installed copy and the lockfile stays its record.
+`/.claude/` is gitignored, so the links are per-clone; create or refresh them after an install:
+
+```powershell
+# Windows: junctions need no elevation
+New-Item -ItemType Directory -Force .claude/skills | Out-Null
+Get-ChildItem .agents/skills -Directory | ForEach-Object {
+  $link = Join-Path .claude/skills $_.Name
+  if (-not (Test-Path $link)) { New-Item -ItemType Junction -Path $link -Target $_.FullName | Out-Null }
+}
+```
+
+```bash
+# macOS/Linux
+mkdir -p .claude/skills
+for d in .agents/skills/*/; do n=$(basename "$d"); [ -e ".claude/skills/$n" ] || ln -s "../../.agents/skills/$n" ".claude/skills/$n"; done
+```
+
+To remove a link, delete the link itself (`[System.IO.Directory]::Delete($link)` or `rm`), never
+`Remove-Item -Recurse`, which can follow a junction into `.agents/skills/`.
+
 `src/tests/Repository.UnitTests/InstalledSkillTests.cs` keeps this honest: every `skills-lock.json`
-entry has its `.agents/skills/<name>/SKILL.md`, every installed folder is in the lockfile, and no
-`.claude/skills/` copy exists.
+entry has its `.agents/skills/<name>/SKILL.md`, every installed folder is in the lockfile, and every
+entry in `.claude/skills/`, when the folder exists, is a link to the same skill in `.agents/skills/`.
 
 ## Authoring skills
 

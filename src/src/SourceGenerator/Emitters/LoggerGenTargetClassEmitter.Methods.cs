@@ -306,9 +306,10 @@ partial class LoggerGenTargetClassEmitter
 					: "new " + TypeLibrary.Microsoft.Extensions.Logging.EventId + "("
 			)
 			.Write(eventId.ToString(CultureInfo.InvariantCulture))
-			.Write(", nameof(")
-			.Write(methodTarget.LogName)
-			.Line(")),")
+			.Write(", ")
+			// A literal, not nameof: the log name can be a custom Name or carry a prefix.
+			.Write(methodTarget.LogName.Wrap())
+			.Line("),")
 			// State
 			.Write(stateVarName.WithComma(andSpace: false))
 			// Exception
@@ -381,9 +382,9 @@ partial class LoggerGenTargetClassEmitter
 					: "new " + TypeLibrary.Microsoft.Extensions.Logging.EventId + "("
 			)
 			.Write(eventId.ToString(CultureInfo.InvariantCulture))
-			.Write(", nameof(")
-			.Write(methodTarget.LogName)
-			.Line(")),")
+			.Write(", ")
+			.Write(methodTarget.LogName.Wrap())
+			.Line("),")
 			.Write("new ")
 			.Write(structName)
 			.Write('(');

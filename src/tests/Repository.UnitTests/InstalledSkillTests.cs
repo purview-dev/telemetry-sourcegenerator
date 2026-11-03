@@ -6,6 +6,8 @@ namespace Purview.Telemetry.Repository;
 /// Guards the skills installed from other repositories. They are installed by the skills CLI into the
 /// universal <c>.agents/skills/</c> folder only, and that folder and the CLI's <c>skills-lock.json</c>
 /// are committed, so the two must agree and no per-agent copy or instruction file may appear beside them.
+/// Claude Code only reads <c>.claude/skills/</c>, so that gitignored folder may hold links into
+/// <c>.agents/skills/</c>, never copies.
 /// </summary>
 /// <remarks>
 /// <c>SkillTests</c> validates this repository's own skills in <c>skills/</c>; these are someone else's,
@@ -61,22 +63,29 @@ public sealed class InstalledSkillTests
 	}
 
 	[Test]
-	public async Task ClaudeFolder_GivenTheInstalledSkills_HoldsNoCopy(CancellationToken cancellationToken)
+	public async Task ClaudeFolder_GivenTheInstalledSkills_HoldsOnlyLinksToThem(CancellationToken cancellationToken)
 	{
-		// Arrange
+		// Arrange: Claude Code reads .claude/skills/, not .agents/skills/, so a local (gitignored) folder of
+		// links is allowed. A real copy is not: it drifts from skills-lock.json the moment the CLI updates.
 		cancellationToken.ThrowIfCancellationRequested();
 		var claudeSkills = Path.Combine(RepositoryRoot.Value, ".claude", "skills");
+		if (!Directory.Exists(claudeSkills))
+			return;
 
 		// Act
-		var exists = Directory.Exists(claudeSkills);
+		var notLinks = Directory
+			.GetFileSystemEntries(claudeSkills)
+			.Where(static path => !IsLinkToInstalledSkill(path))
+			.Select(static path => Path.GetFileName(path))
+			.ToArray();
 
 		// Assert
 		await Assert
-			.That(exists)
-			.IsFalse()
+			.That(notLinks)
+			.IsEmpty()
 			.Because(
-				"skills are installed into .agents/skills/ only. A .claude/skills/ folder means the CLI ran without "
-					+ "`-a universal`; delete it and reinstall with `-a universal`"
+				"every entry in .claude/skills/ must be a link to the same skill in .agents/skills/, not a copy. "
+					+ $"Replace these with links (see AGENTS.md): {string.Join(", ", notLinks)}"
 			);
 	}
 
@@ -130,6 +139,18 @@ public sealed class InstalledSkillTests
 	}
 
 	static string AgentsSkillsFolder() => Path.Combine(RepositoryRoot.Value, ".agents", "skills");
+
+	static bool IsLinkToInstalledSkill(string path)
+	{
+		var linkTarget = new DirectoryInfo(path).LinkTarget;
+		if (linkTarget is null)
+			return false;
+
+		var resolved = Path.GetFullPath(linkTarget, Path.GetDirectoryName(path)!);
+		var expected = Path.Combine(AgentsSkillsFolder(), Path.GetFileName(path));
+
+		return string.Equals(Path.TrimEndingDirectorySeparator(resolved), expected, StringComparison.OrdinalIgnoreCase);
+	}
 
 	static async Task<string[]> ReadLockfileSkillsAsync(CancellationToken cancellationToken)
 	{

@@ -7,6 +7,32 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Ver
 5.0.7; earlier releases are described by their [GitHub releases](https://github.com/purview-dev/telemetry-sourcegenerator/releases)
 and, for breaking changes, by [Breaking Changes](docs/wiki/Breaking-Changes.md).
 
+## [Unreleased]
+
+The level-specific logging attributes honour their arguments again. Generated log messages and event
+ids change for every method that passed a template, event id, name or generation mode to one of them.
+
+### Fixed
+
+- **`[Trace]`, `[Debug]`, `[Info]`, `[Warning]`, `[Error]` and `[Critical]` ignored every argument
+  but the level** (since 5.0.0). `[Info("Order {OrderId} placed")]` emitted the default
+  `"Method: OrderId = {OrderId}"` template, every such method logged with `EventId` 0 rather than the
+  id derived from its name, and `Name` and `GenerationMode` were dropped. `[Log]` was unaffected. The
+  cause was Purview.SourceGeneratorFramework's nested-model parsing, fixed in 1.3.0, which this release
+  builds on. Output now matches 4.x.
+- **V2 logging named the `EventId` with `nameof(...)`**, so a custom `Name` failed to compile (CS0103)
+  and a prefixed name such as `ITestLogger.Log` lost its prefix. The name is now emitted as a string,
+  as V1 does.
+- `[Error]` now treats a whitespace-only `MessageTemplate` or `Name` as unset, like the other
+  level-specific attributes.
+
+### Changed
+
+- **`EventId` on `[Log]` and the level-specific attributes is `int`, not `int?`.** A nullable property
+  cannot be set as a named attribute argument, so `[Info(EventId = 42)]` failed with CS0655 and only
+  the constructor overloads worked. Omitting it, or passing a negative value, still uses the id derived
+  from the method name.
+
 ## [5.0.7-prerelease.3] - 2026-10-28
 
 The `TSG1011` message no longer offers an opt-out that never existed, and the define it named is

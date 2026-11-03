@@ -1,7 +1,7 @@
 ---
 name: purview-sourcegenerator-diagnostics
 description: >-
-  Use when a Purview.SourceGeneratorFramework build reports a PSGFR, PSGF, PRSGD or TLB diagnostic,
+  Use when a Purview.SourceGeneratorFramework build reports a PSGFR, PSGF, PRSGD, TLB or ADM diagnostic,
   when choosing which code fix applies, or when a source generator, diagnostic analyzer or code fix
   provider is silently not running at all.
 metadata:
@@ -106,8 +106,21 @@ Opt out with `PurviewSourceGeneratorFrameworkAnalyzerValidation=false` (`PRSGD00
 ## Type-library and attribute-model diagnostics
 
 The bundled generators carry their own families: `TypeLibraryValidationAnalyzer`
-(`TLB0001`–`TLB0019`, plus `TLB0021`) and the attribute-data-model validation analyzers. They are
-documented on their own wiki pages, `Type-Library.md` and `Attribute-Data-Models.md`.
+(`TLB0001`–`TLB0019`, plus `TLB0021`) and the attribute-data-model analyzers. They are documented on their
+own wiki pages, `Type-Library.md` and `Attribute-Data-Models.md`.
+
+The attribute-data-model rules come from three analyzers:
+
+| Rules | Analyzer | Covers |
+| --- | --- | --- |
+| `ADM0001`–`ADM0009` | `AttributeDataModelValidationAnalyzer` | the target, property types, defaults, explicit constructor members |
+| `ADM0010` | `AttributeDataModelSymbolPropertyAnalyzer` | non-cacheable `ISymbol`/`Type` properties |
+| `ADM0011`–`ADM0015` | `AttributeDataModelNamingAnalyzer` | mapped names the generated code would never find, generated-member name clashes, `[NestedModel]` mappings the outer attribute does not line up with |
+
+Treat the naming rules as real defects: the generated code reads names case-sensitively and silently falls
+back to a default, so a naming mistake never fails the build on its own. `ADM0013` is `Info` because a
+nested model may deliberately read a value the outer attribute does not have; check each one. The
+`purview-sourcegenerator-attribute-data-models` skill has the full table and the fix for each rule.
 
 ## Code fixes
 
@@ -139,4 +152,5 @@ Most rules above have a fix in `Purview.SourceGeneratorFramework.CodeFixers`:
 ## Related skills
 
 `purview-sourcegenerator-codewriter` for the emission patterns the `CodeWriter` rules push you
-towards, and `purview-sourcegenerator-testing` for proving a pipeline actually caches.
+towards, `purview-sourcegenerator-testing` for proving a pipeline actually caches, and
+`purview-sourcegenerator-attribute-data-models` for the `ADM` rules.

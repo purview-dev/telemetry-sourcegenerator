@@ -3,7 +3,8 @@ name: purview-sourcegenerator-tunit-tests
 description: >-
   Use when writing TUnit tests for source generators, diagnostic analyzers, code fixes or
   refactorings built on Purview.SourceGeneratorFramework - choosing the correct TUnit base class and
-  method, customising SourceGeneratorTestOptions, using the TUnit assertion extensions, and
+  method, customising SourceGeneratorTestOptions, using the TUnit assertion extensions (including
+  attribute-argument assertions for testing attribute-data models), and
   modernising existing tests.
 metadata:
   product: Purview.SourceGeneratorFramework.Testing.TUnit
@@ -125,6 +126,21 @@ when awaited.
   ```
 - **`DiagnosticAssertions`** — `HasDiagnostic(descriptor|id)`, `HasDiagnostics(count)`,
   `DoesNotHaveDiagnostic`, `HasNoDiagnostics`, `HasNoErrorDiagnostics` on generator/analyzer/code-fix results.
+- **`AttributeDataAssertions`** — on an `AttributeData` (typically from `AttributeDataFactory`):
+  `HasConstructorArgument(ordinal, expected)`, `HasConstructorArgument(parameterName, expected[, form])`,
+  `DoesNotHaveConstructorArgument(parameterName)` (defaulted or absent), `HasNamedArgument(name, expected)`,
+  `DoesNotHaveNamedArgument(name)`. Each returns the matched `AttributeArgument`, and a failure lists every
+  argument of the application with how it was supplied. Pin the attribute side with these before asserting
+  on the model, so a failure says which half is wrong:
+  ```csharp
+  var attribute = AttributeDataFactory.FromUsage("[Info(\"custom {Value}\")]", options);
+
+  await Assert.That(attribute).HasConstructorArgument("messageTemplate", "custom {Value}");
+  await Assert.That(attribute).HasConstructorArgument("eventId", -1, AttributeArgumentForm.Defaulted);
+  await Assert.That(attribute).DoesNotHaveNamedArgument("Name");
+
+  await Assert.That(InfoAttributeData.FromAttributeData(attribute).Log.MessageTemplate).IsEqualTo("custom {Value}");
+  ```
 - **`TypeIdentityAssertions`** — `HasSymbol(TypeIdentity)` / `HasSymbol("Namespace.Type")`.
 - **`GeneratedCodeAssertionsExtensions`** — `GeneratesCode(expected)`, `ContainsGeneratedCode(expected)`
   (whitespace-flattened string comparison).

@@ -1193,8 +1193,8 @@ static class GeneratedTypesEmitter
 				WritePublicProperty(
 					body,
 					"EventId",
-					TypeLibrary.System.Int32.MakeNullable(writer),
-					"Gets or sets the event identifier of the log entry."
+					TypeLibrary.System.Int32,
+					"Gets or sets the event identifier of the log entry. A negative value, or none, uses an identifier derived from the method name."
 				);
 				WriteNullableStringProperty(body, "Name", "Gets or sets the name of the log entry.");
 				WritePublicProperty(
@@ -1281,8 +1281,8 @@ static class GeneratedTypesEmitter
 				WritePublicProperty(
 					body,
 					"EventId",
-					TypeLibrary.System.Int32.MakeNullable(writer),
-					"Gets or sets the event identifier of the log entry."
+					TypeLibrary.System.Int32,
+					"Gets or sets the event identifier of the log entry. A negative value, or none, uses an identifier derived from the method name."
 				);
 				WriteNullableStringProperty(body, "Name", "Gets or sets the name of the log entry.");
 				WritePublicProperty(
