@@ -156,7 +156,7 @@ partial class LoggerTargetClassEmitter
 
 			foreach (var parameter in methodTarget.ParametersSansException)
 			{
-				writer.Write(", ").Write(parameter.Name);
+				writer.Write(", ").Write(parameter.RenderValueExpression());
 			}
 
 			if (methodTarget.ExceptionParameter != null)

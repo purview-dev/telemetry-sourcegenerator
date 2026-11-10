@@ -248,6 +248,22 @@ partial class DiagnosticLibrary
 			isBlocking: false
 		);
 
+		public static readonly ReportableDiagnostic ActivitySourceOptionsRequireFactory = ReportableDiagnostic.Create(
+			new DiagnosticDescriptor(
+				id: "TSG3024",
+				title: "ActivitySourceOptions require UseActivitySourceFactory",
+				messageFormat: $"'{0}' is set, but UseActivitySourceFactory is not. Version and TelemetrySchemaUrl are "
+					+ $"passed to {TypeLibrary.System.Diagnostics.ActivitySourceOptions.Name} for a source created by "
+					+ $"{TypeLibrary.System.Diagnostics.ActivitySourceFactory.Name}, so a static "
+					+ $"{TypeLibrary.System.Diagnostics.ActivitySource.Name} ignores them. Set "
+					+ "UseActivitySourceFactory = true, or remove the option.",
+				defaultSeverity: DiagnosticSeverity.Warning,
+				category: Categories.Activity.Usage,
+				isEnabledByDefault: true
+			),
+			isBlocking: false
+		);
+
 		// The trailing '{1}' placeholder carries an optional hint supplied by the rule (for example when
 		// the 'Name' was applied to a logging attribute); rules pass string.Empty when there is no
 		// additional context.

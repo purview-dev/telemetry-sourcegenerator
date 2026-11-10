@@ -21,9 +21,12 @@ BenchmarkDotNet v0.15.8, Windows 11 (10.0.28020.2991)
 13th Gen Intel Core i9-13900KF 3.00GHz, 1 CPU, 32 logical and 24 physical cores
 .NET SDK 10.0.401
   .NET 10.0 : .NET 10.0.12 (10.0.12, 10.0.1226.42308), X64 RyuJIT x86-64-v3
-  .NET 8.0  : .NET 8.0.31 (8.0.31, 8.0.3126.42015), X64 RyuJIT x86-64-v3
-  .NET 9.0  : .NET 9.0.20 (9.0.20, 9.0.2026.41315), X64 RyuJIT x86-64-v3
 ```
+
+> **Note:** these are the numbers from the run recorded above. The `.NET 8.0` and `.NET 9.0` jobs and their
+> rows were removed when support for those frameworks was dropped, so the tables are a subset of that run,
+> not a fresh one. Run `just benchmark-docs` before quoting them for a specific machine/SDK combination.
+> `.NET 11.0` is not measured yet: BenchmarkDotNet 0.15.8 has no `RuntimeMoniker.Net11_0`.
 
 > **Note:** the .NET Framework 4.7/4.8 jobs were executed but produced no results in this run and are excluded from the tables below.
 
@@ -41,26 +44,10 @@ Compares the source-generator-produced `ActivityOnlyTelemetryCore` against a han
 | Generated: start + complete | .NET 10.0 | False | 0.58 ns | 1.11 | - |
 | Manual: start + fail | .NET 10.0 | False | 0.75 ns | 1.43 | - |
 | Generated: start + fail | .NET 10.0 | False | 0.55 ns | 1.04 | - |
-| Manual: start + complete | .NET 8.0 | False | 0.78 ns | 1.00 | - |
-| Generated: start + complete | .NET 8.0 | False | 0.88 ns | 1.12 | - |
-| Manual: start + fail | .NET 8.0 | False | 0.93 ns | 1.19 | - |
-| Generated: start + fail | .NET 8.0 | False | 0.76 ns | 0.97 | - |
-| Manual: start + complete | .NET 9.0 | False | 0.55 ns | 1.00 | - |
-| Generated: start + complete | .NET 9.0 | False | 0.77 ns | 1.40 | - |
-| Manual: start + fail | .NET 9.0 | False | 0.35 ns | 0.63 | - |
-| Generated: start + fail | .NET 9.0 | False | 0.59 ns | 1.07 | - |
 | **Manual: start + complete** | **.NET 10.0** | **True** | **220.37 ns** | **1.00** | **1008 B** |
 | Generated: start + complete | .NET 10.0 | True | 216.69 ns | 0.98 | 1008 B |
 | Manual: start + fail | .NET 10.0 | True | 207.55 ns | 0.94 | 920 B |
 | Generated: start + fail | .NET 10.0 | True | 203.12 ns | 0.92 | 920 B |
-| Manual: start + complete | .NET 8.0 | True | 259.23 ns | 1.00 | 1008 B |
-| Generated: start + complete | .NET 8.0 | True | 262.84 ns | 1.01 | 1008 B |
-| Manual: start + fail | .NET 8.0 | True | 229.10 ns | 0.88 | 920 B |
-| Generated: start + fail | .NET 8.0 | True | 241.07 ns | 0.93 | 920 B |
-| Manual: start + complete | .NET 9.0 | True | 226.38 ns | 1.00 | 1008 B |
-| Generated: start + complete | .NET 9.0 | True | 229.96 ns | 1.02 | 1008 B |
-| Manual: start + fail | .NET 9.0 | True | 219.02 ns | 0.97 | 920 B |
-| Generated: start + fail | .NET 9.0 | True | 211.70 ns | 0.94 | 920 B |
 
 **Interpretation:** Generated activities match hand-written code within ~2% and allocate identically across all tested runtimes. When a listener is active the absolute times are dominated by the framework's Activity creation, not the generated code.
 
@@ -78,18 +65,6 @@ Compares three logging approaches: hand-written `LoggerMessage.Define` (gold-sta
 | Manual: full lifecycle (4 calls) | .NET 10.0 | True | 18.88 ns | 3.08 | - |
 | Generated v1 — full lifecycle | .NET 10.0 | True | 19.58 ns | 3.20 | - |
 | Generated v2 — full lifecycle | .NET 10.0 | True | 15.01 ns | 2.45 | - |
-| Manual: single Info call | .NET 8.0 | True | 7.55 ns | 1.00 | - |
-| Generated v1 — single Info call | .NET 8.0 | True | 7.51 ns | 0.99 | - |
-| Generated v2 — single Info call | .NET 8.0 | True | 5.10 ns | 0.68 | - |
-| Manual: full lifecycle | .NET 8.0 | True | 29.98 ns | 3.97 | - |
-| Generated v1 — full lifecycle | .NET 8.0 | True | 30.72 ns | 4.07 | - |
-| Generated v2 — full lifecycle | .NET 8.0 | True | 22.11 ns | 2.93 | - |
-| Manual: single Info call | .NET 9.0 | True | 6.88 ns | 1.00 | - |
-| Generated v1 — single Info call | .NET 9.0 | True | 6.50 ns | 0.95 | - |
-| Generated v2 — single Info call | .NET 9.0 | True | 5.06 ns | 0.74 | - |
-| Manual: full lifecycle | .NET 9.0 | True | 25.55 ns | 3.72 | - |
-| Generated v1 — full lifecycle | .NET 9.0 | True | 24.88 ns | 3.62 | - |
-| Generated v2 — full lifecycle | .NET 9.0 | True | 22.79 ns | 3.31 | - |
 
 **Interpretation:** Generated v1 and v2 both allocate **zero bytes** per call across all runtimes. On .NET 10.0 the generated variants are **faster** than the hand-written `LoggerMessage.Define` baseline for single calls (v1 0.72x, v2 0.62x) thanks to `[MethodImpl(AggressiveInlining)]`; v2 (state-based) is the fastest path on every runtime. The full-lifecycle cost is dominated by the four `IsEnabled` checks and message-formatting paths that all three implementations share.
 
@@ -106,12 +81,6 @@ Measures the overhead of emitting Activity + Logging + Metrics from a single met
 | Multi-target (manual): start + complete | .NET 10.0 | True | 260.18 ns | 1.20 | 1032 B | 1.02 |
 | Multi-target (generated): start + complete + record latency | .NET 10.0 | True | 229.65 ns | 1.06 | 1032 B | 1.02 |
 | Multi-target (manual): start + complete + record latency | .NET 10.0 | True | 234.58 ns | 1.09 | 1032 B | 1.02 |
-| Single-target (generated): start + complete | .NET 8.0 | True | 258.36 ns | 1.00 | 1008 B | 1.00 |
-| Multi-target (generated): start + complete | .NET 8.0 | True | 260.21 ns | 1.01 | 1032 B | 1.02 |
-| Multi-target (manual): start + complete | .NET 8.0 | True | 267.22 ns | 1.03 | 1032 B | 1.02 |
-| Single-target (generated): start + complete | .NET 9.0 | True | 220.24 ns | 1.00 | 1008 B | 1.00 |
-| Multi-target (generated): start + complete | .NET 9.0 | True | 249.15 ns | 1.13 | 1032 B | 1.02 |
-| Multi-target (manual): start + complete | .NET 9.0 | True | 257.27 ns | 1.17 | 1032 B | 1.02 |
 
 **Interpretation:** When an Activity listener is active (production path), multi-target generation adds ~7% overhead over single-target Activity-only on .NET 10.0 — the real cost of the extra log call and metric increment, not generated-code overhead. The generated multi-target code is faster than the hand-written multi-target baseline (~1.07x vs ~1.20x of single-target). See the [Generated Output](Generated-Output.md) page for what the multi-target implementation looks like.
 
@@ -140,24 +109,24 @@ Compares single-target logging-only vs. multi-target (Activity + Logging + Metri
 
 All instruments are **0 allocations** on every runtime.
 
-| Scenario | Generated (.NET 10.0) | Generated (.NET 8.0) | Generated (.NET 9.0) |
-| --- | --- | --- | --- |
-| auto-counter (0 tags) | 0.40 ns | 0.55 ns | 0.21 ns |
-| auto-counter (1 tag) | 0.35 ns | 0.56 ns | 0.30 ns |
-| up-down counter | 0.37 ns | 0.39 ns | 0.20 ns |
-| histogram (0 tags) | 0.42 ns | 0.35 ns | 0.18 ns |
-| histogram (1 tag) | 0.34 ns | 0.36 ns | 0.37 ns |
+| Scenario | Generated (.NET 10.0) |
+| --- | --- |
+| auto-counter (0 tags) | 0.40 ns |
+| auto-counter (1 tag) | 0.35 ns |
+| up-down counter | 0.37 ns |
+| histogram (0 tags) | 0.42 ns |
+| histogram (1 tag) | 0.34 ns |
 
 The source generator uses a tag-count optimization: methods with fewer than 4 tags pass inline `KeyValuePair` parameters (no heap allocation), while methods with 4 or more tags use a stack-allocated [`TagList`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.taglist) struct.
 
-| Scenario | .NET 10.0 | .NET 8.0 | .NET 9.0 |
-| --- | --- | --- | --- |
-| 0 tags: histogram record | 0.38 ns | 0.56 ns | 0.19 ns |
-| 1 tag: auto-counter add | 0.41 ns | 0.35 ns | 0.19 ns |
-| 3 tags: histogram record | 0.84 ns | 0.74 ns | 0.55 ns |
-| 4 tags (TagList): auto-counter add | 7.91 ns | 7.79 ns | 3.62 ns |
-| 5 tags (TagList): auto-counter add | 5.46 ns | 8.95 ns | 9.37 ns |
-| 6 tags (TagList): histogram record | 6.37 ns | 4.32 ns | 3.99 ns |
+| Scenario | .NET 10.0 |
+| --- | --- |
+| 0 tags: histogram record | 0.38 ns |
+| 1 tag: auto-counter add | 0.41 ns |
+| 3 tags: histogram record | 0.84 ns |
+| 4 tags (TagList): auto-counter add | 7.91 ns |
+| 5 tags (TagList): auto-counter add | 5.46 ns |
+| 6 tags (TagList): histogram record | 6.37 ns |
 
 The TagList path costs 14–21× more CPU than the inline path on .NET 10.0, but both remain in the single-digit-nanosecond range with zero allocations.
 

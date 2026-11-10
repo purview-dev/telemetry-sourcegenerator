@@ -8,7 +8,7 @@ partial class ActivitySourceTargetClassEmitter
 {
 	static void EmitActivityMethodBody(
 		ActivityOutputContext output,
-		ActivityBasedGenerationTarget methodTarget,
+		StartActivityMethod methodTarget,
 		CodeWriter writer,
 		SourceProductionContext context
 	)
@@ -126,7 +126,7 @@ partial class ActivitySourceTargetClassEmitter
 		}
 	}
 
-	static void AddActivityNameParameter(CodeWriter writer, ActivityBasedGenerationTarget methodTarget, bool useName)
+	static void AddActivityNameParameter(CodeWriter writer, ActivityMethodTarget methodTarget, bool useName)
 	{
 		if (useName)
 			writer.Write("name: ");
@@ -136,7 +136,7 @@ partial class ActivitySourceTargetClassEmitter
 
 	static void EmitActivityCall(
 		CodeWriter writer,
-		ActivityBasedGenerationTarget methodTarget,
+		ActivityMethodTarget methodTarget,
 		bool createOnly,
 		bool useParentContext,
 		string parentContextParameterName,
@@ -192,7 +192,7 @@ partial class ActivitySourceTargetClassEmitter
 		writer.Line(")");
 	}
 
-	static void EmitHasListenersTest(CodeWriter writer, ActivityBasedGenerationTarget methodTarget)
+	static void EmitHasListenersTest(CodeWriter writer, ActivityMethodTarget methodTarget)
 	{
 		var returnsVoid = methodTarget.ReturnType.Identity.SpecialType == SpecialType.System_Void;
 		writer.IfBlock(

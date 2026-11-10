@@ -92,7 +92,7 @@ public sealed class TelemetryDiagnosticAnalyzer : DiagnosticAnalyzer
 			var result = PipelineHelpers.BuildMeterTarget(interfaceSymbol, compilation, token);
 			if (result.HasValue && result.Value is { } meterTarget)
 			{
-				var diagnostics = TelemetryRules.GetMeterDiagnostics(meterTarget, interfaceSymbol, token);
+				var diagnostics = TelemetryRules.GetMeterDiagnostics(meterTarget, interfaceSymbol, compilation, token);
 				foreach (var diagnostic in diagnostics)
 					context.ReportDiagnostic(diagnostic.ToDiagnostic());
 			}

@@ -31,13 +31,13 @@ Then make the reference analyzer-only (keep the `Version` that `dotnet add packa
 </PackageReference>
 ```
 
-Consumers can target .NET Framework 4.8 or .NET 8 and later, .NET 11 included, and the generated code works under
+Consumers can target .NET Framework 4.8 or .NET 10 and later, .NET 11 included, and the generated code works under
 Native AOT and in trimmed or AOT-compiled Blazor WebAssembly. Runtime dependencies for the telemetry types you use:
 
 - Activities: `System.Diagnostics.DiagnosticSource` (in-box on .NET).
 - Logging: `Microsoft.Extensions.Logging.Abstractions`. It is in the shared framework on .NET 11, so do not reference
   it there (NuGet reports `NU1510`). Add `Microsoft.Extensions.Telemetry.Abstractions` for the faster v2 logging.
-- Metrics: `System.Diagnostics.Metrics` (in-box on .NET 8+). Register `services.AddMetrics()` for the `IMeterFactory`.
+- Metrics: `System.Diagnostics.Metrics` (in-box on .NET 10+). Register `services.AddMetrics()` for the `IMeterFactory`.
 ## Define a telemetry interface
 
 Create a `public interface` and decorate it with class-level attributes. The generator creates the implementation and a DI registration extension.

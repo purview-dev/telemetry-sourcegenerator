@@ -70,6 +70,13 @@ partial class MeterTargetClassEmitter
 				);
 			}
 
+			if (!IsInstrumentAvailable(methodTarget, output.Context))
+			{
+				// Gauge<T> is unavailable: TSG4010 reports it, and the method still has to satisfy the interface.
+				EmitThrowStub(writer, methodTarget);
+				continue;
+			}
+
 			EmitMethod(output, methodTarget, writer, context);
 		}
 	}
@@ -261,9 +268,7 @@ partial class MeterTargetClassEmitter
 		writer
 			.Write(method.FieldName)
 			.Write(" = ")
-			.Write(MeterFieldName)
-			.Write(".Create")
-			.Write(method.InstrumentAttribute!.InstrumentType.ToString())
+			.Write(MeterFieldName + "." + method.InstrumentAttribute!.CreationMethodName)
 			.Write('<')
 			.Write(method.InstrumentMeasurementType)
 			.Write(">(")
@@ -295,8 +300,7 @@ partial class MeterTargetClassEmitter
 		bool emitNullable = true
 	)
 	{
-		var instrumentMeasureMethodName =
-			methodTarget.InstrumentAttribute!.InstrumentType == InstrumentTypes.Histogram ? "Record" : "Add";
+		var instrumentMeasureMethodName = methodTarget.InstrumentAttribute!.UsesRecordMethod ? "Record" : "Add";
 
 		var tagCount = methodTarget.Tags.Count;
 		var hasConditionalTags = methodTarget.Tags.Any(t => t.SkipOnNullOrEmpty);
@@ -328,7 +332,7 @@ partial class MeterTargetClassEmitter
 					.Write(kvpType)
 					.Write(tag.GeneratedName.Wrap())
 					.Write(", ")
-					.Write(tag.ParameterName)
+					.Write(tag.RenderTagValueExpression())
 					.Write(')');
 			}
 
@@ -380,12 +384,23 @@ partial class MeterTargetClassEmitter
 			{
 				writer.IfBlock(
 					param.ParameterName + " != default",
-					body => body.MethodCallOn(tagVariableName, "Add", param.GeneratedName.Wrap(), param.ParameterName)
+					body =>
+						body.MethodCallOn(
+							tagVariableName,
+							"Add",
+							param.GeneratedName.Wrap(),
+							param.RenderTagValueExpression()
+						)
 				);
 			}
 			else
 			{
-				writer.MethodCallOn(tagVariableName, "Add", param.GeneratedName.Wrap(), param.ParameterName);
+				writer.MethodCallOn(
+					tagVariableName,
+					"Add",
+					param.GeneratedName.Wrap(),
+					param.RenderTagValueExpression()
+				);
 			}
 		}
 

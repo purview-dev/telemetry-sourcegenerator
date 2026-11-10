@@ -70,19 +70,17 @@ sealed record InstrumentParameterTarget(
 	string GeneratedName,
 	InstrumentParameterDestination ParamDestination,
 	bool SkipOnNullOrEmpty,
-	GenerationType ExcludedTargets
-);
-
-enum InstrumentTypes
+	GenerationType ExcludedTargets,
+	UnionTargetRecord? Union = null
+)
 {
-	Counter,
-	UpDownCounter,
-	Histogram,
-
-	ObservableCounter,
-	ObservableGauge,
-	ObservableUpDownCounter,
-}
+	/// <summary>
+	/// The expression that yields the tag value recorded for this parameter: the parameter itself, or the
+	/// union's case value when the parameter is a union type.
+	/// </summary>
+	public string RenderTagValueExpression() =>
+		Union is null ? ParameterName : Union.RenderValueExpression(ParameterName);
+};
 
 enum InstrumentParameterDestination
 {

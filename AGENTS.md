@@ -21,9 +21,10 @@ code to generated telemetry interfaces) in a companion assembly.
 
 ## Prerequisites
 
-- The .NET 11 SDK pinned in `global.json` (currently an RC, `rollForward: latestMajor`), plus the .NET 8, 9 and
-  10 runtimes for the test legs. Projects target `net10.0` by default; the source generator is a Roslyn component
+- The .NET 11 SDK pinned in `global.json` (`11.0.100`, `rollForward: latestMajor`), plus the .NET 10 and 11
+  runtimes for the test legs. Projects target `net10.0` by default; the source generator is a Roslyn component
   targeting `netstandard2.0`. Consumers need Visual Studio 2026 / the .NET 10 SDK or later (Roslyn 5.9.0+).
+  **.NET 8 and .NET 9 are not supported** — consumer compilations that target them report `TSG1011`.
 - [Bun](https://bun.sh) for the `package.json`/`.build/*.ts` scripts
 - The `Purview.BuildSdk` MSBuild SDK (pinned in `global.json` under `msbuild-sdks`)
 - `csharpier` dotnet tool (pinned in `.config/dotnet-tools.json`) for linting/formatting
@@ -127,7 +128,7 @@ samples/
     └── SampleApp.Net48.slnx
 
 benchmarks/
-└── Purview.Telemetry.Benchmarks/           # BenchmarkDotNet project (net48/net8.0/net9.0/net10.0)
+└── Purview.Telemetry.Benchmarks/           # BenchmarkDotNet project (net48/net10.0)
 
 .build/                                     # TS scripts (build-pack.ts, update-version.ts)
 .agents/skills/                             # Installed skills from other repos, committed (see "Installed skills")
@@ -185,7 +186,7 @@ table of gates is in [`docs/wiki/Release-Flow.md`](docs/wiki/Release-Flow.md#rel
 
 ### Test project details
 
-- Integration tests target `net8.0;net9.0;net10.0;net11.0`, plus `net48` on Windows only. The `net11.0` leg is the
+- Integration tests target `net10.0;net11.0`, plus `net48` on Windows only. The `net11.0` leg is the
   only one whose references carry `System.Diagnostics.ActivitySourceFactory`, so the `UseActivitySourceFactory`
   tests (`[RequiresActivitySourceFactory]`) run there and the fallback tests (`[RequiresNoActivitySourceFactory]`,
   `TSG3023`) run on the earlier legs.
@@ -202,14 +203,32 @@ table of gates is in [`docs/wiki/Release-Flow.md`](docs/wiki/Release-Flow.md#rel
 
 - **Conventional commits**: enforced by commitlint (`.config/lefthook.yml`). Types: `build`, `chore`,
   `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`, `test`.
-- **Formatting**: C# is formatted with csharpier; check with `just lint`.
+- **Formatting**: C# is formatted with csharpier; check with `just lint`. CSharpier 1.3.0 (the newest release)
+  parses with a Roslyn that predates C# 15, so the two files that declare a `closed` hierarchy are listed in
+  `.csharpierignore` rather than reported as syntax errors; `dotnet format` (`just format`) still covers them,
+  and the entries come out when CSharpier supports C# 15.
 - **Solutions**: `.slnx` solution files are used.
 - **Source generator**: targets `netstandard2.0` for broad compiler-host compatibility and uses
   `Purview.SourceGeneratorFramework` (CodeWriter-based emission, incremental pipeline, value-equatable
   models).
+- **Union parameters**: a parameter whose type carries `[System.Runtime.CompilerServices.Union]` is
+  recorded as its case value, never as the union struct. `Helpers/UnionHelpers.cs` detects it
+  (case types from the nested `IUnionMembers` provider when there is one, otherwise from the union's
+  single-parameter constructors, and whether it declares the non-boxing `HasValue`/`TryGetValue` pattern);
+  `Emitters/UnionAccessorEmitter.cs` emits one private accessor per union type into each generated class;
+  every target renders the value through `UnionTargetRecord.RenderValueExpression()` rather than the
+  parameter name. Detection is by symbol, never by target framework. Whether a union is a *declared*
+  `union` or hand-written decides only whether the accessor reads `TryGetValue` or `Value`.
 - **SDK**: projects import `Purview.BuildSdk` via `Directory.Build.props`/`.targets`. The repo
   sets `ExcludePurviewTelemetry=true` (it does not consume the telemetry package it generates) and
   `NamespacePrefix=Purview.Telemetry` under `src/`. See `.agents/skills/purview-buildsdk-*` for SDK behavior.
+- **C# 15 `closed` hierarchies**: the two tagged unions are closed. `Records/ActivityRecords.cs` declares
+  `closed record ActivityMethodTarget` with `StartActivityMethod` / `ActivityEventMethod` / `ActivityContextMethod`,
+  and `Records/MetricAttributeRecords.cs` declares `closed record InstrumentAttributeRecord` with one case per
+  instrument. Emitters switch over them, which the compiler checks for exhaustiveness. `closed` needs
+  `IsClosedTypeAttribute` and `CompilerFeatureRequiredAttribute`, which `Compatibility/ClosedTypeAttribute.cs`
+  declares internally for `netstandard2.0`; `IDE0010` does not model `closed` yet, so a switch over one carries
+  `#pragma warning disable IDE0010`.
 - **Analyzer release tracking**: the `TSG` rules are tracked in
   `src/src/SourceGenerator/AnalyzerReleases.{Shipped,Unshipped}.md` (wired as `AdditionalFiles`, so
   the Roslyn RS2000-series checks run under `EnforceExtendedAnalyzerRules=true`). Add new rules to

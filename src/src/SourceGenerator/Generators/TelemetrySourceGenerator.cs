@@ -96,7 +96,12 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator
 			//|| parseOptions.LanguageVersion >= LanguageVersion.CSharp8,
 			SupportsIMeterFactory: parseOptions is null
 				|| !parseOptions.PreprocessorSymbolNames.Contains("NET48_OR_GREATER"),
-			UseActivitySourceFactory: SharedHelpers.UseActivitySourceFactory(compilation, token)
+			UseActivitySourceFactory: SharedHelpers.UseActivitySourceFactory(compilation, token),
+			SupportsGauge: SharedHelpers.IsTypeAvailable(compilation, TypeLibrary.System.Diagnostics.Metrics.Gauge),
+			SupportsInstrumentAdvice: SharedHelpers.IsTypeAvailable(
+				compilation,
+				TypeLibrary.System.Diagnostics.Metrics.InstrumentAdvice
+			)
 		);
 	}
 }

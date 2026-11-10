@@ -31,6 +31,15 @@ static partial class SharedHelpers
 	}
 
 	/// <summary>
+	/// Whether the compilation can resolve a type. Gate every emitted API on this rather than on the target
+	/// framework: an analyzer-only package reference never brings a type to the consumer, and the
+	/// System.Diagnostics.DiagnosticSource package carries .NET 9/10/11 types all the way down to
+	/// <c>net462</c> and <c>netstandard2.0</c>.
+	/// </summary>
+	public static bool IsTypeAvailable(Compilation compilation, TypeIdentity identity) =>
+		compilation.GetTypeByMetadataName(identity.MetadataFullName) is not null;
+
+	/// <summary>
 	/// Returns the single target that "owns" shared emission (DI extension, class attributes,
 	/// constructor, throw stubs) for a multi-target interface. Only one target emits these to
 	/// avoid duplicate definitions across the generated partial classes.

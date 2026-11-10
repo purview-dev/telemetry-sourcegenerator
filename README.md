@@ -17,7 +17,7 @@ Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system
 **Consumer runtime targets:**
 
 - .NET Framework 4.8
-- .NET 8 or higher, including .NET 11
+- .NET 10 or higher, including .NET 11 (.NET 8 and .NET 9 are no longer supported)
 
 **Hosting models:** console, ASP.NET Core, .NET Aspire, Native AOT, Blazor WebAssembly (trimmed and AOT-compiled)
 and Blazor Server. The generated code uses no reflection and adds no trim or AOT warnings, and no compiler-host
@@ -35,8 +35,13 @@ assembly reaches your application's output. See
   `services.AddTracing()`. The generated classes then create their sources from the injected .NET 11 factory instead
   of a static `ActivitySource`. When the type isn't available, `TSG3023` reports it and the static source is kept.
 - **C# 15 static interface members** are ignored rather than implemented.
+- **C# 15 union types** are unwrapped to their case value for tags, baggage, log values and metric tags.
+  A union that declares the non-boxing `TryGetValue`/`HasValue` pattern is read without boxing the union
+  struct. See [Union types](https://purview.dev/docs/telemetry-sourcegenerator/tags-and-baggage/#union-types).
 - **Validated on .NET 11**: the tests run on `net11.0`, and Native AOT, Blazor WebAssembly and Blazor Server
   consumers of the package are built on every release.
+- **.NET 8 and .NET 9 are no longer supported**: target `net10.0`+ or `net48`+. `TSG1011` reports a
+  compilation that targets either dropped framework.
 
 ## Installation
 

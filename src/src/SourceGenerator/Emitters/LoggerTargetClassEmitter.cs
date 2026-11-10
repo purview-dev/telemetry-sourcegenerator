@@ -39,6 +39,11 @@ static partial class LoggerTargetClassEmitter
 			{
 				EmitFields(output, writer, context);
 
+				UnionAccessorEmitter.EmitAccessors(
+					writer,
+					target.LogMethods.SelectMany(static m => m.Parameters).Select(static p => p.Union)
+				);
+
 				ConstructorEmitter.EmitCtor(
 					GenerationType.Logging,
 					target.GenerationType,

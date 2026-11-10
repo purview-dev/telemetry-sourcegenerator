@@ -82,10 +82,24 @@ sealed record LogParameterTarget(
 	EquatableArray<LogPropertiesParameterDetails>? LogProperties,
 	ExpandEnumerableAttributeData? ExpandEnumerableAttribute,
 	GenerationType ExcludedTargets,
-	EquatableArray<MessageTemplateHole> ReferencedHoles = default
+	EquatableArray<MessageTemplateHole> ReferencedHoles = default,
+	UnionTargetRecord? Union = null
 )
 {
 	public bool UsedInTemplate => !ReferencedHoles.IsEmpty;
+
+	/// <summary>
+	/// The expression that yields the value logged for this parameter: the parameter itself, or the union's
+	/// case value when the parameter is a union type.
+	/// </summary>
+	public string RenderValueExpression() => Union is null ? Name : Union.RenderValueExpression(Name);
+
+	/// <summary>
+	/// The type the log state carries for this parameter. A union is logged as its case value, so the state
+	/// holds <c>object?</c> instead of the union struct — which is also what the logger would otherwise
+	/// format, because a union struct's <c>ToString</c> is not its contents.
+	/// </summary>
+	public bool RequiresObjectState => Union is not null;
 }
 
 readonly record struct LogPropertiesParameterDetails(string PropertyName, bool IsNullable);

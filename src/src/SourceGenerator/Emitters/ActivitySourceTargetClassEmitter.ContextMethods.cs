@@ -7,7 +7,7 @@ partial class ActivitySourceTargetClassEmitter
 {
 	static void EmitContextMethodBody(
 		ActivityOutputContext output,
-		ActivityBasedGenerationTarget methodTarget,
+		ActivityMethodTarget methodTarget,
 		CodeWriter writer,
 		SourceProductionContext context
 	)

@@ -24,8 +24,6 @@ namespace Purview.Telemetry.Benchmarks.Benchmarks;
 [HideColumns("Error", "StdDev", "Median", "RatioSD")]
 [SimpleJob(RuntimeMoniker.Net47)]
 [SimpleJob(RuntimeMoniker.Net48)]
-[SimpleJob(RuntimeMoniker.Net80)]
-[SimpleJob(RuntimeMoniker.Net90)]
 [SimpleJob(RuntimeMoniker.Net10_0)]
 public class TagListBenchmarks
 {

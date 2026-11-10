@@ -17,9 +17,9 @@ partial class ActivitySourceTargetClassEmitter
 		var validActivityMethods = target.ActivityMethods.Where(m => m.TargetGenerationState.IsValid).ToArray();
 
 		// Check for TSG3012: Event/Context methods exist but no Activity method
-		if (!validActivityMethods.Any(m => m.MethodType == ActivityMethodType.Activity))
+		if (!validActivityMethods.Any(m => m is StartActivityMethod))
 		{
-			if (validActivityMethods.Any(m => m.MethodType != ActivityMethodType.Activity))
+			if (validActivityMethods.Any(m => m is not StartActivityMethod))
 			{
 				output.Context.Diagnostic(
 					"There are no Activity methods defined, however there are Events/ Context methods."
@@ -144,7 +144,7 @@ partial class ActivitySourceTargetClassEmitter
 			.Line(".StackTrace);");
 	}
 
-	static void EmitThrowStub(CodeWriter writer, ActivityBasedGenerationTarget methodTarget)
+	static void EmitThrowStub(CodeWriter writer, ActivityMethodTarget methodTarget)
 	{
 		writer.NewLine();
 
@@ -177,7 +177,7 @@ partial class ActivitySourceTargetClassEmitter
 
 	static void EmitMethod(
 		ActivityOutputContext output,
-		ActivityBasedGenerationTarget methodTarget,
+		ActivityMethodTarget methodTarget,
 		CodeWriter writer,
 		SourceProductionContext context
 	)
@@ -226,7 +226,7 @@ partial class ActivitySourceTargetClassEmitter
 
 	static void EmitPrivateActivityMethod(
 		ActivityOutputContext output,
-		ActivityBasedGenerationTarget methodTarget,
+		ActivityMethodTarget methodTarget,
 		CodeWriter writer,
 		SourceProductionContext context
 	)
@@ -254,12 +254,22 @@ partial class ActivitySourceTargetClassEmitter
 			)
 		)
 		{
-			if (methodTarget.MethodType == ActivityMethodType.Activity)
-				EmitActivityMethodBody(output, methodTarget, writer, context);
-			else if (methodTarget.MethodType == ActivityMethodType.Event)
-				EmitEventMethodBody(output, methodTarget, writer, context);
-			else if (methodTarget.MethodType == ActivityMethodType.Context)
-				EmitContextMethodBody(output, methodTarget, writer, context);
+			// The hierarchy is closed, so the compiler requires every case and the switch needs no default arm.
+			// IDE0010 does not model `closed` hierarchies yet, so it still offers to add a default arm.
+#pragma warning disable IDE0010
+			switch (methodTarget)
+			{
+				case StartActivityMethod startActivity:
+					EmitActivityMethodBody(output, startActivity, writer, context);
+					break;
+				case ActivityEventMethod activityEvent:
+					EmitEventMethodBody(output, activityEvent, writer, context);
+					break;
+				case ActivityContextMethod activityContext:
+					EmitContextMethodBody(output, activityContext, writer, context);
+					break;
+			}
+#pragma warning restore IDE0010
 		}
 
 		writer.NewLine();
@@ -267,7 +277,7 @@ partial class ActivitySourceTargetClassEmitter
 
 	static void EmitPublicDelegatingMethod(
 		ActivityOutputContext output,
-		ActivityBasedGenerationTarget methodTarget,
+		ActivityMethodTarget methodTarget,
 		GenerationType methodTargets,
 		CodeWriter writer,
 		SourceProductionContext context
@@ -359,7 +369,7 @@ partial class ActivitySourceTargetClassEmitter
 
 	static void EmitPublicActivityMethod(
 		ActivityOutputContext output,
-		ActivityBasedGenerationTarget methodTarget,
+		ActivityMethodTarget methodTarget,
 		CodeWriter writer,
 		SourceProductionContext context
 	)
@@ -380,18 +390,28 @@ partial class ActivitySourceTargetClassEmitter
 			)
 		)
 		{
-			if (methodTarget.MethodType == ActivityMethodType.Activity)
-				EmitActivityMethodBody(output, methodTarget, writer, context);
-			else if (methodTarget.MethodType == ActivityMethodType.Event)
-				EmitEventMethodBody(output, methodTarget, writer, context);
-			else if (methodTarget.MethodType == ActivityMethodType.Context)
-				EmitContextMethodBody(output, methodTarget, writer, context);
+			// The hierarchy is closed, so the compiler requires every case and the switch needs no default arm.
+			// IDE0010 does not model `closed` hierarchies yet, so it still offers to add a default arm.
+#pragma warning disable IDE0010
+			switch (methodTarget)
+			{
+				case StartActivityMethod startActivity:
+					EmitActivityMethodBody(output, startActivity, writer, context);
+					break;
+				case ActivityEventMethod activityEvent:
+					EmitEventMethodBody(output, activityEvent, writer, context);
+					break;
+				case ActivityContextMethod activityContext:
+					EmitContextMethodBody(output, activityContext, writer, context);
+					break;
+			}
+#pragma warning restore IDE0010
 		}
 
 		writer.NewLine();
 	}
 
-	static bool GuardMethod(ActivityBasedGenerationTarget methodTarget, ActivityOutputContext output)
+	static bool GuardMethod(ActivityMethodTarget methodTarget, ActivityOutputContext output)
 	{
 		var target = output.Target;
 
@@ -415,7 +435,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		// Event methods must return void only
 		// Activity and Context methods can return void or Activity?
-		var isEvent = methodTarget.MethodType == ActivityMethodType.Event;
+		var isEvent = methodTarget is ActivityEventMethod;
 
 		var isValidReturnType = isEvent
 			? methodTarget.ReturnType.Identity.SpecialType == SpecialType.System_Void
@@ -434,7 +454,7 @@ partial class ActivitySourceTargetClassEmitter
 		if (target.ActivitySourceGenerationAttribute?.GenerateDiagnosticsForMissingActivity ?? true)
 		{
 			// Here we're opting in to generate diagnostics for missing activity return/ params.
-			if (methodTarget.MethodType == ActivityMethodType.Activity)
+			if (methodTarget is StartActivityMethod)
 			{
 				if (!methodTarget.ReturnType.Identity.Equals(TypeLibrary.System.Diagnostics.Activity))
 				{

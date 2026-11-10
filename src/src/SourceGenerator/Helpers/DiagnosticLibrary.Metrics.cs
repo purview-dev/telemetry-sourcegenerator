@@ -127,5 +127,41 @@ partial class DiagnosticLibrary
 			),
 			isBlocking: false
 		);
+
+		public static readonly ReportableDiagnostic GaugeNotAvailable = ReportableDiagnostic.Create(
+			new DiagnosticDescriptor(
+				id: "TSG4010",
+				title: "Gauge is not available",
+				messageFormat: "A gauge needs System.Diagnostics.Metrics.Gauge<T>, which .NET 9 and System.Diagnostics.DiagnosticSource 9 (or later) provide. The instrument is not generated, and the method throws NotSupportedException.",
+				defaultSeverity: DiagnosticSeverity.Warning,
+				category: Categories.Metrics.Usage,
+				isEnabledByDefault: true
+			),
+			isBlocking: false
+		);
+
+		public static readonly ReportableDiagnostic InstrumentAdviceNotAvailable = ReportableDiagnostic.Create(
+			new DiagnosticDescriptor(
+				id: "TSG4011",
+				title: "HistogramBucketBoundaries is not available",
+				messageFormat: "HistogramBucketBoundaries needs System.Diagnostics.Metrics.InstrumentAdvice<T>, which .NET 9 and System.Diagnostics.DiagnosticSource 9 (or later) provide. The histogram is generated without bucket boundaries.",
+				defaultSeverity: DiagnosticSeverity.Warning,
+				category: Categories.Metrics.Usage,
+				isEnabledByDefault: true
+			),
+			isBlocking: false
+		);
+
+		public static readonly ReportableDiagnostic InvalidHistogramBucketBoundaries = ReportableDiagnostic.Create(
+			new DiagnosticDescriptor(
+				id: "TSG4012",
+				title: "HistogramBucketBoundaries is not a list of numbers",
+				messageFormat: "HistogramBucketBoundaries must be a comma-separated list of ascending, positive numbers, for example \"0.005, 0.01, 0.1, 1\". The value could not be parsed, so no bucket boundaries are generated.",
+				defaultSeverity: DiagnosticSeverity.Warning,
+				category: Categories.Metrics.Usage,
+				isEnabledByDefault: true
+			),
+			isBlocking: false
+		);
 	}
 }

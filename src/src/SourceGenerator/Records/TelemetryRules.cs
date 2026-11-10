@@ -58,6 +58,7 @@ static partial class TelemetryRules
 			DiagnosticLibrary.Activities.ExceptionEventNotStandardName.Descriptor,
 			DiagnosticLibrary.Activities.ActivityReturnTypeShouldBeNullable.Descriptor,
 			DiagnosticLibrary.Activities.ActivitySourceFactoryNotAvailable.Descriptor,
+			DiagnosticLibrary.Activities.ActivitySourceOptionsRequireFactory.Descriptor,
 			DiagnosticLibrary.Metrics.NoInstrumentDefined.Descriptor,
 			DiagnosticLibrary.Metrics.DoesNotReturnVoid.Descriptor,
 			DiagnosticLibrary.Metrics.AutoIncrementCountAndMeasurementParam.Descriptor,
@@ -68,6 +69,9 @@ static partial class TelemetryRules
 			DiagnosticLibrary.Metrics.ObservableCannotReturnBool.Descriptor,
 			DiagnosticLibrary.Metrics.AutoCounterMustReturnVoid.Descriptor,
 			DiagnosticLibrary.Metrics.InstrumentNameMatchesType.Descriptor,
+			DiagnosticLibrary.Metrics.GaugeNotAvailable.Descriptor,
+			DiagnosticLibrary.Metrics.InstrumentAdviceNotAvailable.Descriptor,
+			DiagnosticLibrary.Metrics.InvalidHistogramBucketBoundaries.Descriptor,
 		];
 
 	static IMethodSymbol? FindMethod(INamedTypeSymbol interfaceSymbol, string methodName) =>
@@ -84,7 +88,7 @@ static partial class TelemetryRules
 		?? Location.None;
 
 	/// <summary>
-	/// Determines whether the target framework of the compilation is supported (net8.0+/net48+).
+	/// Determines whether the target framework of the compilation is supported (net10.0+/net48+).
 	/// A compilation with no target-framework symbols is treated as supported.
 	/// </summary>
 	public static bool IsUnsupportedTargetFramework(Compilation compilation)
@@ -94,7 +98,7 @@ static partial class TelemetryRules
 			if (tree.Options is CSharpParseOptions options)
 			{
 				var symbols = options.PreprocessorSymbolNames;
-				return !symbols.Contains("NET8_0_OR_GREATER")
+				return !symbols.Contains("NET10_0_OR_GREATER")
 					&& !symbols.Contains("NET48_OR_GREATER")
 					&& symbols.Any(static s => s.StartsWith("NET", StringComparison.Ordinal));
 			}

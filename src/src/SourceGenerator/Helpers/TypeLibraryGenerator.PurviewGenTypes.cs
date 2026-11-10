@@ -90,6 +90,9 @@ partial class TypeLibraryGenerator
 	static readonly TypeIdentity HistogramAttribute = default;
 
 	[TypeRef(PurviewTelemetryNamespace, includeInGetTypes: true)]
+	static readonly TypeIdentity GaugeAttribute = default;
+
+	[TypeRef(PurviewTelemetryNamespace, includeInGetTypes: true)]
 	static readonly TypeIdentity ObservableCounterAttribute = default;
 
 	[TypeRef(PurviewTelemetryNamespace, includeInGetTypes: true)]

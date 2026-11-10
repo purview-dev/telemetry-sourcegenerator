@@ -119,6 +119,82 @@ Marks a `bool` parameter as the escape value for an exception event on an Event 
 
 Marks a `string` parameter as the status description for an Event that sets an error status code. See [Activities](Activities.md#statusdescription).
 
+## Union types
+
+A parameter whose type is a C# 15 union — declared with the `union` keyword on .NET 11, or a hand-written
+type carrying `[System.Runtime.CompilerServices.Union]` — is recorded as its **case value**, never as the
+union struct. The generator emits one private, aggressively inlined accessor per union type and calls it
+wherever the parameter's value is recorded, so a union behaves like the value it holds:
+
+```csharp
+public record class Ordered(string OrderId);
+public record class Rejected(string Reason);
+
+public union OrderStatus(Ordered, Rejected);
+
+[ActivitySource("OrderService")]
+interface IOrderTelemetry
+{
+    [Activity]
+    void Submit([Tag] OrderStatus status);
+}
+```
+
+Generated:
+
+```csharp
+static object? UnwrapUnion_OrderStatus(OrderStatus value) => value.Value;
+
+// ...
+activity.SetTag("status", UnwrapUnion_OrderStatus(status));
+```
+
+### Non-boxing access pattern
+
+A union declared with the `union` keyword always stores `object?`, so reading it boxes nothing new — the
+case is already boxed. A hand-written union can do better by declaring the **non-boxing access pattern**:
+a `bool HasValue` property plus a `TryGetValue(out T)`, `bool`-returning overload per case type. When it
+does, the generated accessor calls those instead of `Value`, so the union struct itself is never boxed:
+
+```csharp
+[System.Runtime.CompilerServices.Union]
+public struct OrderStatus
+{
+    public bool HasValue { get; }
+    public bool TryGetValue(out Ordered value);
+    public bool TryGetValue(out Rejected value);
+    public object? Value { get; }
+}
+```
+
+```csharp
+static object? UnwrapUnion_OrderStatus(OrderStatus value)
+{
+    if (value.HasValue)
+    {
+        if (value.TryGetValue(out global::Ordered caseValue0)) return caseValue0;
+        if (value.TryGetValue(out global::Rejected caseValue1)) return caseValue1;
+    }
+
+    return null;
+}
+```
+
+A union with no value (a default struct, or a `TryGetValue` that matches nothing) records `null`, so a
+`[Tag]`/`[Baggage]` union parameter behaves like a `null` value and `SkipOnNullOrEmpty` applies to it.
+Baggage converts the case value with `?.ToString()`, as it does for any non-`string` parameter.
+
+### Where unions are supported
+
+| Target | Behaviour |
+| --- | --- |
+| Activities tags and baggage | The case value is recorded; baggage converts it to a `string`. |
+| Metrics tags | The case value is recorded. A union is never a measurement value: instruments require a numeric type. |
+| Logging v1 and v2 | The log state carries `object?` and the case value is logged, so `{Status}` renders the case, not the union struct. |
+
+Unions are detected by symbol, not target framework: the same union works on `net48` and `net11.0` as long
+as the consumer's compiler can see the type. Declaring one with the `union` keyword needs C# 15.
+
 ## See also
 
 - [Activities](Activities.md) — tags/baggage in Activity generation

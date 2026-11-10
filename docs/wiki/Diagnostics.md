@@ -26,7 +26,7 @@ The package ships a single Roslyn analyzer, `TelemetryDiagnosticAnalyzer`, which
 | `TSG1007`<a id="tsg1007"></a> | Warning | `ExcludeTargets` results in an empty or invalid parameter set for a target. |
 | `TSG1008`<a id="tsg1008"></a> | Warning | Activity parameter has no Activity target. A parameter of type `Activity` is present on a method with no `[Activity]`/`[Event]`/`[Context]` attribute. |
 | `TSG1010`<a id="tsg1010"></a> | Error | Method target not registered on interface. A method carries an attribute for a target family that is not registered on the interface. |
-| `TSG1011`<a id="tsg1011"></a> | Error | Unsupported target framework. The compilation targets neither .NET 8+ nor .NET Framework 4.8+ (for example `netstandard2.0`), so no telemetry is generated for it. There is no opt-out. Target `net8.0` or later, or `net48` or later; a multi-targeted library references the package only from its supported targets (a `Condition` on the `PackageReference`), with the telemetry interfaces under the same condition. See [Platform Support](Platform-Support.md). |
+| `TSG1011`<a id="tsg1011"></a> | Error | Unsupported target framework. The compilation targets neither .NET 10+ nor .NET Framework 4.8+ (for example `netstandard2.0`, `net8.0` or `net9.0`), so no telemetry is generated for it. There is no opt-out. Target `net10.0` or later, or `net48` or later; a multi-targeted library references the package only from its supported targets (a `Condition` on the `PackageReference`), with the telemetry interfaces under the same condition. See [Platform Support](Platform-Support.md). |
 
 ## Logging diagnostics (TSG2xxx)
 
@@ -68,6 +68,7 @@ The package ships a single Roslyn analyzer, `TelemetryDiagnosticAnalyzer`, which
 | `TSG3021`<a id="tsg3021"></a> | Info | Exception event does not use OpenTelemetry standard name. An `[Event]` method records an exception under the OpenTelemetry exception rules but the event name is not the standard `"exception"` (suggest `[Event(Name = "exception")]`). Not raised when `UseRecordExceptionRules` is disabled, for `[Baggage]` exceptions, or when the exception parameter is excluded from the Activities target. |
 | `TSG3022`<a id="tsg3022"></a> | Warning | Activity return type should be nullable. An Activity method returns non-nullable `Activity`; use `Activity?` because the Activity can be null when no listeners are active. |
 | `TSG3023`<a id="tsg3023"></a> | Warning | ActivitySourceFactory is not available. `UseActivitySourceFactory` is set but `System.Diagnostics.ActivitySourceFactory` (.NET 11, or System.Diagnostics.DiagnosticSource 11+) cannot be resolved; a static `ActivitySource` is generated instead. |
+| `TSG3024`<a id="tsg3024"></a> | Warning | ActivitySourceOptions require UseActivitySourceFactory. `Version` or `TelemetrySchemaUrl` is set but the assembly kept the static `ActivitySource`, which has nowhere to pass them. |
 
 ## Metrics diagnostics (TSG4xxx)
 
@@ -83,6 +84,9 @@ The package ships a single Roslyn analyzer, `TelemetryDiagnosticAnalyzer`, which
 | `TSG4007`<a id="tsg4007"></a> | Error | Observable metrics cannot return bool. |
 | `TSG4008`<a id="tsg4008"></a> | Error | AutoCounter must return void. |
 | `TSG4009`<a id="tsg4009"></a> | Warning | Instrument name matches the instrument type name. Use a name that describes what is measured. |
+| `TSG4010`<a id="tsg4010"></a> | Warning | Gauge is not available. `[Gauge]` needs `System.Diagnostics.Metrics.Gauge<T>` (.NET 9, or System.Diagnostics.DiagnosticSource 9+); the instrument is not generated and the method throws `NotSupportedException`. |
+| `TSG4011`<a id="tsg4011"></a> | Warning | HistogramBucketBoundaries is not available. It needs `InstrumentAdvice<T>` (.NET 9, or System.Diagnostics.DiagnosticSource 9+); the histogram is generated without bucket boundaries. |
+| `TSG4012`<a id="tsg4012"></a> | Warning | HistogramBucketBoundaries is not a list of numbers. It must be a comma-separated list of ascending, positive numbers, for example `"0.005, 0.01, 0.1, 1"`. |
 
 ## Common resolutions
 
@@ -142,6 +146,14 @@ Return `Activity?` so callers can handle the `null` case when no listeners are a
 `System.Diagnostics.ActivitySourceFactory`, but the compilation cannot resolve that type, so a static `ActivitySource`
 is generated instead. Target `net11.0`, or reference System.Diagnostics.DiagnosticSource 11 or later; or remove the
 option. See [Creating sources with ActivitySourceFactory](Activities.md#creating-sources-with-activitysourcefactory-net-11).
+
+### TSG3024 — ActivitySourceOptions require UseActivitySourceFactory
+
+`Version` or `TelemetrySchemaUrl` on `[assembly: ActivitySourceGeneration(...)]` is only consumed by
+`System.Diagnostics.ActivitySourceOptions`, which a factory-created source passes to
+`ActivitySourceFactory.Create`. A static `ActivitySource` has nowhere to put them, so they are ignored. Set
+`UseActivitySourceFactory = true`, or remove the option. See
+[Creating sources with ActivitySourceFactory](Activities.md#creating-sources-with-activitysourcefactory-net-11).
 
 ### TSG4002 — auto-increment counter with a measurement
 

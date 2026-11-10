@@ -6,6 +6,19 @@ release; see [Release Flow](Release-Flow.md#release-gates).
 
 ## What's new for .NET 11
 
+- **`ActivitySourceOptions` for factory-created sources.** `[assembly: ActivitySourceGeneration(..., Version = "1.2.3",
+  TelemetrySchemaUrl = "https://...")]` passes the source's version and telemetry schema URL to the .NET 11 factory.
+  Setting either without `UseActivitySourceFactory` reports `TSG3024`, because a static source has nowhere to put them.
+- **`Gauge<T>` and `InstrumentAdvice<T>`.** `[Gauge]` records a value without accumulating it, and
+  `HistogramBucketBoundaries = "0.005, 0.01, 0.1"` on `[Histogram]` supplies the histogram's bucket boundaries. Both are
+  .NET 9 APIs, gated on the compilation: `TSG4010`/`TSG4011` report a compilation that cannot resolve them, and
+  `TSG4012` reports boundaries that do not parse.
+- **C# 15 union types as tag, baggage, log and metric-tag values.** A union parameter is recorded as its
+  case value, never as the union struct. When the union declares the non-boxing access pattern
+  (`bool HasValue` plus a `TryGetValue(out T)` overload per case type) the generated accessor calls those,
+  so the union struct is never boxed to read it; a union declared with the `union` keyword falls back to
+  its `Value` property, which the language form already holds boxed. See
+  [Tags, Baggage, and Parameter Attributes](Tags-and-Baggage.md#union-types).
 - **`ActivitySourceFactory` (opt-in).** `[assembly: ActivitySourceGeneration(..., UseActivitySourceFactory = true)]`
   makes the generated classes create their sources from the injected .NET 11 factory, registered with
   `services.AddTracing()`, instead of a static `ActivitySource`. See
@@ -26,24 +39,27 @@ release; see [Release Flow](Release-Flow.md#release-gates).
 
 ### Target frameworks
 
+`.NET 8` and `.NET 9` are no longer supported: `TSG1011` reports a `net8.0`/`net9.0` compilation, and the
+test legs and benchmarks no longer build them. The generated code still works on `net48`, so the floor is
+`net10.0` on the modern side and `net48` on .NET Framework.
+
 | Consumer target | Activities | Logging v1 | Logging v2 | Metrics | Meters from `IMeterFactory` | `UseActivitySourceFactory` | Verified by |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | .NET Framework 4.8 (`net48`+) | Yes | Yes | Yes¹ | Yes | No (`new Meter(...)`) | With System.Diagnostics.DiagnosticSource 11+ | Integration tests (`net48` leg, Windows), `SampleApp.Net48` |
-| .NET 8, .NET 9 | Yes | Yes | Yes¹ | Yes | Yes | Not supported² | Integration tests (`net8.0`, `net9.0` legs) |
-| .NET 10 | Yes | Yes | Yes¹ | Yes | Yes | With System.Diagnostics.DiagnosticSource 11+ | Integration tests, `SampleApp`, `SampleApp.MultiProject` |
+| .NET 10 | Yes | Yes | Yes¹ | Yes | Yes | With System.Diagnostics.DiagnosticSource 11+ | Integration tests (`net10.0` leg), `SampleApp`, `SampleApp.MultiProject` |
 | .NET 11 | Yes | Yes | Yes¹ | Yes | Yes | Yes | Integration tests (`net11.0` leg), packed-consumer gate |
-| `netstandard2.0` and other TFMs | Not supported: reported as [`TSG1011`](Diagnostics.md) (unsupported target framework). Multi-target the library to `net48`/`net8.0`+ instead. | | | | | | - |
+| `.NET 8`, `.NET 9` | Not supported: reported as [`TSG1011`](Diagnostics.md) (unsupported target framework). Target `net10.0`+ or `net48`+. | | | | | | - |
+| `netstandard2.0` and other TFMs | Not supported: reported as [`TSG1011`](Diagnostics.md) (unsupported target framework). Multi-target the library to `net48`/`net10.0`+ instead. | | | | | | - |
 
 The `UseActivitySourceFactory` entries for `net48` and `net10.0` follow from the package's assets and are not run by a gate; only `net11.0` is.
 
 ¹ Logging v2 needs `Microsoft.Extensions.Telemetry.Abstractions` (`LoggerMessageHelper`); without it the generator
 uses v1. See [Logging Generation v2](Logging-Generation-v2.md).
 
-² The System.Diagnostics.DiagnosticSource 11 package has no `net8.0`/`net9.0` asset. Those targets would get its
-`netstandard2.0` asset, and the package's build targets warn that the framework is unsupported.
-
 **Build toolchain:** Visual Studio 2026 (18.x) or the .NET 10 SDK or later (Roslyn 5.9.0+). The generator itself is a
 `netstandard2.0` Roslyn component. This repository builds and validates with the .NET 11 SDK pinned in `global.json`.
+Declaring a union with the `union` keyword needs C# 15 (the .NET 11 SDK); a hand-written `[Union]` type works on
+any compiler that can see its declaration.
 
 ### Hosting and render models
 
@@ -82,6 +98,9 @@ source and a static one.
 
 | Feature | Generator support | Minimum | Source |
 | --- | --- | --- | --- |
+| C# 15 union types (`union` declarations and hand-written `[Union]` types) as tag, baggage, log and metric-tag values | Implemented: the case value is recorded, read through the non-boxing `TryGetValue`/`HasValue` pattern when the union declares one | `net48`+, any TFM the type resolves on | [Union types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/union) |
+| `ActivitySourceOptions`, `services.AddTracing()` | Implemented: `UseActivitySourceFactory` with `Version`/`TelemetrySchemaUrl`, diagnostics `TSG3023`/`TSG3024` | `net11.0`, or System.Diagnostics.DiagnosticSource 11 + Microsoft.Extensions.Diagnostics 11 | [What's new in .NET 11 libraries](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-11/libraries#activity-tracing-configuration) |
+| `Gauge<T>` (.NET 9) and `InstrumentAdvice<T>` histogram buckets (.NET 9) | Implemented: `[Gauge]`, `[Histogram(HistogramBucketBoundaries = ...)]`, diagnostics `TSG4010`-`TSG4012` | `net48`+ with System.Diagnostics.DiagnosticSource 9 | [Instruments](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/metrics-instrumentation) |
 | `ActivitySourceFactory`, `services.AddTracing()` | Implemented: `UseActivitySourceFactory`, diagnostic `TSG3023` | `net11.0`, or System.Diagnostics.DiagnosticSource 11 + Microsoft.Extensions.Diagnostics 11 | [What's new in .NET 11 libraries](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-11/libraries#activity-tracing-configuration) |
 | C# 15 non-virtual static interface members on older runtimes | Implemented: static members are skipped | C# 15 (.NET 11 SDK) | [What's new in C# 15](https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-15) |
 | Logging and diagnostics abstractions in the shared framework | Documented: no reference is needed on `net11.0` | `net11.0` | [Breaking change](https://learn.microsoft.com/en-us/dotnet/core/compatibility/extensions/11/extensions-in-shared-framework) |
@@ -93,10 +112,9 @@ source and a static one.
 | --- | --- | --- |
 | Generic logging methods (the .NET 11 `[LoggerMessage]` generator supports them) | Generic interface methods still report `TSG1005`. Supporting them needs generic implementations across all three targets, not only logging. | [What's new in .NET 11 libraries](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-11/libraries#generic-source-generated-logging-methods) |
 | Parity with the new `[LoggerMessage]` diagnostics for `params`/`scoped` and `ref struct` parameters (SYSLIB1028, SYSLIB1029) | No equivalent `TSG` rule exists yet. Such parameters are not rejected up front. | [`DiagnosticDescriptors.cs` (release/11.0)](https://github.com/dotnet/runtime/blob/release/11.0/src/libraries/Microsoft.Extensions.Logging.Abstractions/gen/DiagnosticDescriptors.cs) |
-| C# 15 union types as tag, baggage or log values | A union is a struct implementing `IUnion`. It is recorded as the boxed struct rather than its case value. Unwrapping it needs a design for each target. | [What's new in C# 15](https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-15) |
-| `ActivitySourceOptions` version, tags and `TelemetrySchemaUrl` for factory-created sources | Only the name is passed today, matching the static source. | [What's new in .NET 11 libraries](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-11/libraries) |
+| `ActivitySourceOptions` version, tags and `TelemetrySchemaUrl` for factory-created sources | Version and `TelemetrySchemaUrl` are implemented; `Tags` are not, because an attribute cannot express the `IEnumerable<KeyValuePair<string, object?>>` the option takes. Set them in `AddTracing` configuration instead. | [What's new in .NET 11 libraries](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-11/libraries) |
 | `AddTracing` rules from generated registrations | Rules are application configuration, so the generated `Add{Interface}()` does not call `AddTracing()`. Call it yourself. | [Distributed tracing configuration](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/distributed-tracing-configuration) |
 | `ActivityTraceFlags.RandomTraceId` / `Activity.HasRandomizedTraceId` | Nothing to generate: the runtime sets the flag on the activities it creates, and generated code never rewrites trace flags. | [dotnet/runtime#124509](https://github.com/dotnet/runtime/issues/124509) |
-| New `System.Diagnostics.Metrics` APIs | .NET 11 adds none. The earlier `Gauge<T>` (.NET 9) and `InstrumentAdvice<T>` histogram buckets (.NET 9) are not generated yet either. | [What's new in .NET 11 libraries](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-11/libraries) |
+| New `System.Diagnostics.Metrics` APIs | `Gauge<T>` and `InstrumentAdvice<T>` are generated (see above). `ObservableGauge<T>` receiving the underlying value instead of `Measurement<T>` is not. | [What's new in .NET 11 libraries](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-11/libraries) |
 | `Activity.AddException` (.NET 9) | Exception events are built with the OpenTelemetry `exception.*` tags directly, which works on every target, `net48` included. | [`Activity.AddException`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.activity.addexception) |
 | A `Microsoft.Extensions.Telemetry.Abstractions` 11 line | None is published yet. Logging v2 uses the 10.x package on every target. | [dotnet/extensions releases](https://github.com/dotnet/extensions/releases) |

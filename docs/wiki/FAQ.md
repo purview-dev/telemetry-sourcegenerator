@@ -20,8 +20,11 @@ A .NET incremental source generator that produces implementation code for Activi
 
 ### What .NET versions are supported?
 
-- .NET 8 or higher
+- .NET 10 or higher, including .NET 11
 - .NET Framework 4.8 or higher
+
+.NET 8 and .NET 9 were dropped. Targeting either reports [`TSG1011`](Diagnostics.md#tsg1011) and generates
+nothing; multi-target the library to `net10.0` or later.
 
 ### Is this compatible with OpenTelemetry?
 

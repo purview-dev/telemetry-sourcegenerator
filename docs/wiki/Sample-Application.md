@@ -19,6 +19,14 @@ The sample targets `net10.0` and enables `EmitCompilerGeneratedFiles`, so genera
 obj/<Configuration>/net10.0/generated/Purview.Telemetry.SourceGenerator/Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator/
 ```
 
+`SampleApp/Directory.Build.props` pins `<TargetFramework>net10.0</TargetFramework>` and clears `TargetFrameworks`, because
+`Purview.BuildSdk` otherwise resolves its curated `Current` target set (`net10.0;net11.0`) into every project here. An
+Aspire AppHost **must not cross-target**: the outer cross-targeting pass imports
+`Microsoft.NET.Sdk.BeforeCommonCrossTargeting.targets` instead of `BeforeCommon.targets`, so
+`Microsoft.NET.RuntimeIdentifierInference.targets` — the only declaration of the
+`Microsoft.NET.Build.Tasks.PickBestRid` task the AppHost SDK runs during restore — is never imported, and restore fails
+with `MSB4036`.
+
 ## Telemetry interfaces
 
 ### `IEntityStoreTelemetry` (APIService)

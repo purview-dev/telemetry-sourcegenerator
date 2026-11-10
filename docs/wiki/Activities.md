@@ -43,6 +43,31 @@ builder.Services.AddOrderTelemetry();
   type cannot be resolved the generator keeps the static source and reports [`TSG3023`](Diagnostics.md#tsg3023).
 - Listeners registered with `ActivitySource.AddActivityListener` (OpenTelemetry's included) still see factory-created sources.
 
+### Version and telemetry schema URL
+
+`ActivitySourceOptions` also carries the source's version and its telemetry schema URL. Set them on the assembly
+attribute; they reach the factory with the name:
+
+```csharp
+[assembly: ActivitySourceGeneration(
+    "MyApp.Orders",
+    UseActivitySourceFactory = true,
+    Version = "1.2.3",
+    TelemetrySchemaUrl = "https://purview.dev/schemas/telemetry/1.0")]
+```
+
+```csharp
+_activitySource = activitySourceFactory.Create(new global::System.Diagnostics.ActivitySourceOptions("MyApp.Orders")
+{
+    Version = "1.2.3",
+    TelemetrySchemaUrl = "https://purview.dev/schemas/telemetry/1.0",
+});
+```
+
+Both are only consumed by the factory: a static `ActivitySource` has nowhere to put them, so setting either without
+`UseActivitySourceFactory` reports [`TSG3024`](Diagnostics.md#tsg3024). `ActivitySourceOptions.Tags` is not expressible
+from an attribute; add tags through `AddTracing` configuration instead.
+
 ## Activity, Event, or Context
 
 There are three method types:
@@ -150,6 +175,8 @@ Defines ActivitySource defaults at the assembly level.
 | `LowercaseBaggageAndTagKeys` | `bool` | Whether tag/baggage names are lower-cased. Default `true`. |
 | `GenerateDiagnosticsForMissingActivity` | `bool` | Whether diagnostics (`TSG3014`/`TSG3015`) are raised when Activity parameters or return values are missing. Default `true`. |
 | `UseActivitySourceFactory` | `bool` | .NET 11: create each generated source from the injected `System.Diagnostics.ActivitySourceFactory` instead of a static `ActivitySource` (see below). Default `false`. |
+| `Version` | `string?` | The source's version, passed to `ActivitySourceOptions` for a factory-created source. Ignored, and reported as `TSG3024`, without `UseActivitySourceFactory`. |
+| `TelemetrySchemaUrl` | `string?` | The source's telemetry schema URL, passed to `ActivitySourceOptions` for a factory-created source. Ignored, and reported as `TSG3024`, without `UseActivitySourceFactory`. |
 
 ### `[Baggage]`
 

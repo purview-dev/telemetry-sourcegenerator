@@ -46,7 +46,7 @@ After making changes to the source generator:
 
 ## Testing
 
-Integration tests live in `src/tests/SourceGenerator.IntegrationTests` and target `net8.0;net9.0;net10.0`, plus `net48` on Windows only. They use `Purview.SourceGeneratorFramework.Testing.TUnit` (TUnit + the framework's `CodeQuery` syntax-lookup API and assertion extensions). There is no Verify/snapshot library; refactoring tests use the framework's `CodeRefactoringTestBase` snapshot approach.
+Integration tests live in `src/tests/SourceGenerator.IntegrationTests` and target `net10.0;net11.0`, plus `net48` on Windows only. They use `Purview.SourceGeneratorFramework.Testing.TUnit` (TUnit + the framework's `CodeQuery` syntax-lookup API and assertion extensions). There is no Verify/snapshot library; refactoring tests use the framework's `CodeRefactoringTestBase` snapshot approach.
 
 When generator behaviour changes, add or update tests in `src/tests/SourceGenerator.IntegrationTests/`.
 

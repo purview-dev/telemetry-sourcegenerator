@@ -110,10 +110,18 @@ restore *args:
     dotnet restore {{ solution_file }} {{ args }}
 
 # Runs tests for the solution with the specified configuration (default: Release)
+#
+# Uses the .NET 11 Microsoft.Testing.Platform run-level switches. They apply to the whole run across every
+# test application (net48, net10.0, net11.0 and Repository.UnitTests):
+#   --timeout                             caps total execution time, so a hung test application cannot stall CI
+#   --maximum-failed-tests                stops at the first N failures instead of burning the whole run
+#   --results-directory-layout per-module gives every project/TFM its own <project>/<tfm>_<rid> folder, so the
+#                                         four legs can no longer overwrite one another's report files
+# These are not VSTest switches: VSTest mode rejects them.
 [group('Build and Test')]
 test filter="/*/*/*/*/" *args:
     echo "Running tests for {{ BLUE }}{{ test_solution }}{{ NORMAL }} with {{ YELLOW }}{{ build_configuration }}{{ NORMAL }}..."
-    dotnet test --solution "{{ test_solution }}" --configuration "{{ build_configuration }}" --treenode-filter={{ filter }} {{ args }}
+    dotnet test --solution "{{ test_solution }}" --configuration "{{ build_configuration }}" --treenode-filter={{ filter }} --timeout 30m --maximum-failed-tests 25 --results-directory-layout per-module {{ args }}
 
 # Scan build or publish output for compiler-host assemblies (the generator, the refactorings,
 # Purview.SourceGeneratorFramework, Roslyn) that must never reach an application.

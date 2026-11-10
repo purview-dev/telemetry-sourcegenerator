@@ -92,9 +92,7 @@ partial class LoggerTargetClassEmitter
 			(methodTarget.IsScoped ? "global::System.Func<" : "global::System.Action<")
 			+ TypeLibrary.Microsoft.Extensions.Logging.ILogger.RenderFullNameForNullable(useNullable)
 			+ string.Concat(
-				methodTarget.ParametersSansException.Select(p =>
-					", " + p.ParameterType.RenderFullNameForNullable(useNullable)
-				)
+				methodTarget.ParametersSansException.Select(p => ", " + UnionHelpers.RenderLogStateType(p, useNullable))
 			)
 			+ ", "
 			+ (
@@ -110,7 +108,7 @@ partial class LoggerTargetClassEmitter
 					+ string.Join(
 						", ",
 						methodTarget.ParametersSansException.Select(p =>
-							p.ParameterType.RenderFullNameForNullable(useNullable)
+							UnionHelpers.RenderLogStateType(p, useNullable)
 						)
 					)
 					+ ">"

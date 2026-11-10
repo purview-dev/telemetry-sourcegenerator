@@ -43,7 +43,7 @@ carry the message, so a reworded message is recorded in the CHANGELOG instead.
 | `TSG1007` | Warning | `ExcludeTargets` leaves a target with an empty or invalid parameter set. |
 | `TSG1008` | Warning | An `Activity`-typed parameter on a method with no `[Activity]`/`[Event]`/`[Context]`. |
 | `TSG1010` | Error | A method carries an attribute for a target family the interface does not register. |
-| `TSG1011` | Error | The compilation targets neither .NET 8+ nor .NET Framework 4.8+, so nothing is generated. There is no opt-out: target `net8.0`+ or `net48`+, and reference the package only from those targets of a multi-targeted library. |
+| `TSG1011` | Error | The compilation targets neither .NET 10+ nor .NET Framework 4.8+, so nothing is generated. There is no opt-out: target `net10.0`+ or `net48`+, and reference the package only from those targets of a multi-targeted library. |
 
 ## Logging — `TSG2xxx`
 
@@ -160,7 +160,7 @@ parameter. The measurement is fixed at 1.
 
 ### `TSG1011` — unsupported target framework
 
-Raised for a compilation that targets neither `net8.0`+ nor `net48`+ (typically `netstandard2.0`).
+Raised for a compilation that targets neither `net10.0`+ nor `net48`+ (typically `netstandard2.0`, or the dropped `net8.0`/`net9.0`).
 It cannot be suppressed by a define; no telemetry is generated for that target. A library that has
 to keep such a target references the generator only from its supported ones:
 

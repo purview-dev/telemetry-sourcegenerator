@@ -11,9 +11,10 @@ partial class ActivitySourceTargetClassEmitter
 		CodeWriter writer,
 		string activityVariableName,
 		bool populateTags,
-		ActivityBasedGenerationTarget method,
+		ActivityMethodTarget method,
 		bool checkForNullableActivity,
-		ActivityOutputContext output
+		ActivityOutputContext output,
+		EventAttributeData? eventAttribute = null
 	)
 	{
 		var parameters = populateTags ? method.Tags : method.Baggage;
@@ -21,7 +22,7 @@ partial class ActivitySourceTargetClassEmitter
 			return;
 
 		var useRecordedExceptionRules =
-			method.EventAttribute?.UseRecordExceptionRules ?? PropertyLibrary.Activities.UseRecordExceptionRulesDefault;
+			eventAttribute?.UseRecordExceptionRules ?? PropertyLibrary.Activities.UseRecordExceptionRulesDefault;
 
 		void EmitParameter(ActivityBasedParameterTarget param)
 		{
@@ -32,13 +33,15 @@ partial class ActivitySourceTargetClassEmitter
 				.Write('(')
 				.Write(param.GeneratedName.Wrap())
 				.Write(", ")
-				.Write(param.ParameterName);
+				.Write(param.RenderValueExpression());
 
 			if (!populateTags && param.ParameterType.Identity.SpecialType != SpecialType.System_String)
 			{
 				output.Context.Diagnostic("Found a baggage parameter type that is not a string.");
 
-				if (param.ParameterType.IsNullable)
+				// A union parameter is recorded as its case value, which the accessor returns as object?,
+				// so the null-conditional is always needed; a plain parameter only when it is nullable.
+				if (param.Union is not null || param.ParameterType.IsNullable)
 					writer.Write('?');
 
 				writer.Write(".ToString()");
@@ -76,7 +79,7 @@ partial class ActivitySourceTargetClassEmitter
 	}
 
 	static bool GuardParameters(
-		ActivityBasedGenerationTarget methodTarget,
+		ActivityMethodTarget methodTarget,
 		ActivityOutputContext output,
 		out ActivityBasedParameterTarget? activityParam,
 		out ActivityBasedParameterTarget? parentContextOrId,
@@ -188,7 +191,7 @@ partial class ActivitySourceTargetClassEmitter
 					return false;
 				}
 
-				if (methodTarget.MethodType != ActivityMethodType.Event)
+				if (methodTarget is not ActivityEventMethod)
 				{
 					return false;
 				}
@@ -211,7 +214,7 @@ partial class ActivitySourceTargetClassEmitter
 					return false;
 				}
 
-				if (methodTarget.MethodType != ActivityMethodType.Event)
+				if (methodTarget is not ActivityEventMethod)
 				{
 					return false;
 				}

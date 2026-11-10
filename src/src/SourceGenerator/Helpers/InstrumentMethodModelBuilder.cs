@@ -41,8 +41,7 @@ static class InstrumentMethodModelBuilder
 				continue;
 
 			var instrumentAttribute = SharedHelpers.GetInstrumentAttribute(method, token);
-			var validAutoCounter =
-				instrumentAttribute?.InstrumentType is InstrumentTypes.Counter && instrumentAttribute.IsAutoIncrement;
+			var validAutoCounter = instrumentAttribute is CounterInstrumentAttributeRecord { AutoIncrement: true };
 
 			var parameters = GetInstrumentParameters(
 				method,
@@ -226,7 +225,8 @@ static class InstrumentMethodModelBuilder
 					GeneratedName: generatedName,
 					ParamDestination: destination,
 					SkipOnNullOrEmpty: PipelineHelpers.GetSkipOnNullOrEmptyValue(tagAttribute),
-					ExcludedTargets: excludeTargets?.ExcludedTargets ?? GenerationType.None
+					ExcludedTargets: excludeTargets?.ExcludedTargets ?? GenerationType.None,
+					Union: UnionHelpers.GetUnionTarget(parameter.Type, token)
 				)
 			);
 		}

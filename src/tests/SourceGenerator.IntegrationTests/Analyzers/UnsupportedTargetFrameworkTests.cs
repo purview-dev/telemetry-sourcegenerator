@@ -14,9 +14,9 @@ public class UnsupportedTargetFrameworkTests
 {
 	/// <summary>The exact TSG1011 message. It names the supported targets and offers no opt-out.</summary>
 	const string ExpectedMessage =
-		"Purview Telemetry Source Generator requires .NET 8.0 or higher, or .NET Framework 4.8 or higher. "
+		"Purview Telemetry Source Generator requires .NET 10.0 or higher, or .NET Framework 4.8 or higher. "
 		+ "The current target framework is not supported, so no telemetry is generated for it. "
-		+ "Target net8.0 or later, or net48 or later; a library that also targets another framework "
+		+ "Target net10.0 or later, or net48 or later; a library that also targets another framework "
 		+ "(such as netstandard2.0) must reference the generator only from its supported targets.";
 
 	const string TelemetryInterface = """
@@ -67,7 +67,7 @@ public class UnsupportedTargetFrameworkTests
 	}
 
 	[Test]
-	[Arguments("NET;NET8_0;NET8_0_OR_GREATER;NETCOREAPP")]
+	[Arguments("NET;NET10_0;NET10_0_OR_GREATER;NETCOREAPP")]
 	[Arguments("NETFRAMEWORK;NET48;NET48_OR_GREATER")]
 	public async Task Analyze_GivenSupportedTargetFramework_DoesNotRaiseTSG1011(
 		string preprocessorSymbols,

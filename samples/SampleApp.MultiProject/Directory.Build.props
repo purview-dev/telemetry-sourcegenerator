@@ -16,4 +16,14 @@
 	</PropertyGroup>
 
 	<Import Sdk="Purview.BuildSdk" Project="Sdk.props" />
+
+	<PropertyGroup>
+		<!--
+			Purview.BuildSdk resolves its curated 'Current' target set (net10.0;net11.0) into TargetFrameworks
+			whenever that property is empty at the import above: it detects a project's own TargetFramework
+			declaration from the project file, never from this file. Clear it afterwards so restore and build
+			agree on one framework instead of restore resolving assets for two.
+		-->
+		<TargetFrameworks></TargetFrameworks>
+	</PropertyGroup>
 </Project>

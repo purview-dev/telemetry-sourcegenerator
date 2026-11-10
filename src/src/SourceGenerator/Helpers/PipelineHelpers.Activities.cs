@@ -95,7 +95,7 @@ partial class PipelineHelpers
 		);
 	}
 
-	static ImmutableArray<ActivityBasedGenerationTarget> BuildActivityMethods(
+	static ImmutableArray<ActivityMethodTarget> BuildActivityMethods(
 		GenerationType generationType,
 		ActivitySourceAttributeData activitySourceAttribute,
 		ActivitySourceGenerationAttributeData? activitySourceGenerationAttribute,
@@ -114,22 +114,21 @@ partial class PipelineHelpers
 
 		var lowercaseBaggageAndTagKeys = activitySourceAttribute.LowercaseBaggageAndTagKeys;
 
-		List<ActivityBasedGenerationTarget> methodTargets = [];
+		List<ActivityMethodTarget> methodTargets = [];
 		foreach (var method in GetAllInterfaceMethods(interfaceSymbol, token))
 		{
 			token.ThrowIfCancellationRequested();
 
 			if (method.Arity > 0)
 			{
+				// A generic method cannot be implemented for any target, so it is carried as a context method with
+				// an invalid generation state: the emitter reports it and generates a throw stub.
 				methodTargets.Add(
-					new(
+					new ActivityContextMethod(
 						MethodName: method.Name,
 						ReturnType: TypeReference.Create(method.ReturnType),
 						ActivityOrEventName: method.Name,
 						HasActivityParameter: false,
-						ActivityAttribute: null,
-						EventAttribute: null,
-						MethodType: ActivityMethodType.Activity,
 						Parameters: ImmutableArray<ActivityBasedParameterTarget>.Empty,
 						Baggage: ImmutableArray<ActivityBasedParameterTarget>.Empty,
 						Tags: ImmutableArray<ActivityBasedParameterTarget>.Empty,
@@ -182,23 +181,50 @@ partial class PipelineHelpers
 				GenerationType.Activities
 			);
 
-			methodTargets.Add(
-				new(
+			var returnType = TypeReference.Create(method.ReturnType);
+			var hasActivityParameter = parameters.Any(m =>
+				m.ParameterType.Identity.Equals(TypeLibrary.System.Diagnostics.Activity)
+			);
+
+			// The payload decides the case, so an activity attribute and an event attribute can never both be set,
+			// and a method that has neither is a context method rather than an activity with a null attribute.
+			ActivityMethodTarget methodTarget =
+				methodType == ActivityMethodType.Activity
+					? new StartActivityMethod(
+						MethodName: method.Name,
+						ReturnType: returnType,
+						ActivityOrEventName: activityOrEventName!,
+						HasActivityParameter: hasActivityParameter,
+						Parameters: parameters,
+						Baggage: baggageParameters,
+						Tags: tagParameters,
+						TargetGenerationState: targetGenerationState,
+						ActivityAttribute: activityAttribute
+					)
+				: methodType == ActivityMethodType.Event
+					? new ActivityEventMethod(
+						MethodName: method.Name,
+						ReturnType: returnType,
+						ActivityOrEventName: activityOrEventName!,
+						HasActivityParameter: hasActivityParameter,
+						Parameters: parameters,
+						Baggage: baggageParameters,
+						Tags: tagParameters,
+						TargetGenerationState: targetGenerationState,
+						EventAttribute: eventAttribute
+					)
+				: new ActivityContextMethod(
 					MethodName: method.Name,
-					ReturnType: TypeReference.Create(method.ReturnType),
+					ReturnType: returnType,
 					ActivityOrEventName: activityOrEventName!,
-					HasActivityParameter: parameters.Any(m =>
-						m.ParameterType.Identity.Equals(TypeLibrary.System.Diagnostics.Activity)
-					),
-					ActivityAttribute: activityAttribute,
-					EventAttribute: eventAttribute,
-					MethodType: methodType,
+					HasActivityParameter: hasActivityParameter,
 					Parameters: parameters,
 					Baggage: baggageParameters,
 					Tags: tagParameters,
 					TargetGenerationState: targetGenerationState
-				)
-			);
+				);
+
+			methodTargets.Add(methodTarget);
 		}
 
 		return [.. methodTargets];
@@ -244,12 +270,24 @@ partial class PipelineHelpers
 					ParamDestination: destination,
 					SkipOnNullOrEmpty: GetSkipOnNullOrEmptyValue(tagOrBaggageAttribute),
 					IsException: parameter.Type.IsExceptionType(),
-					ExcludedTargets: excludeTargets?.ExcludedTargets ?? GenerationType.None
+					ExcludedTargets: excludeTargets?.ExcludedTargets ?? GenerationType.None,
+					Union: UnionHelpers.GetUnionTarget(parameter.Type, token)
 				)
 			);
 		}
 
 		return [.. parameterTargets];
+	}
+
+	/// <summary>
+	/// How a method participates in an activity interface. This is a construction-time decision: the closed
+	/// <see cref="ActivityMethodTarget"/> hierarchy carries it in the type, so nothing downstream switches on it.
+	/// </summary>
+	enum ActivityMethodType
+	{
+		Activity,
+		Event,
+		Context,
 	}
 
 	static (ActivityMethodType, bool) GetMethodType(

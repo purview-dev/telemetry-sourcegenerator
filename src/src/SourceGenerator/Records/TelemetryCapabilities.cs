@@ -19,8 +19,19 @@ namespace Purview.Telemetry.SourceGenerator.Records;
 /// here, rather than on the activity target, because the constructor that receives the factory is emitted by
 /// whichever target owns the constructor.
 /// </param>
+/// <param name="SupportsGauge">
+/// Whether the compilation can resolve <c>System.Diagnostics.Metrics.Gauge&lt;T&gt;</c> (.NET 9, or
+/// System.Diagnostics.DiagnosticSource 9+ on any target). Gated on the symbol, not the target framework, because an
+/// analyzer-only package reference does not bring the type to a consumer that pins an older DiagnosticSource.
+/// </param>
+/// <param name="SupportsInstrumentAdvice">
+/// Whether the compilation can resolve <c>System.Diagnostics.Metrics.InstrumentAdvice&lt;T&gt;</c> (.NET 9, or
+/// System.Diagnostics.DiagnosticSource 9+). Gates the histogram bucket boundaries.
+/// </param>
 sealed record TelemetryCapabilities(
 	//bool SupportsNullableAnnotations,
 	bool SupportsIMeterFactory,
-	bool UseActivitySourceFactory = false
+	bool UseActivitySourceFactory = false,
+	bool SupportsGauge = false,
+	bool SupportsInstrumentAdvice = false
 ) : IGenerationCapabilities;

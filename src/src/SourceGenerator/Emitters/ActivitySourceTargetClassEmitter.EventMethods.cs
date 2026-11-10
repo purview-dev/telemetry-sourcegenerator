@@ -8,7 +8,7 @@ partial class ActivitySourceTargetClassEmitter
 {
 	static void EmitEventMethodBody(
 		ActivityOutputContext output,
-		ActivityBasedGenerationTarget methodTarget,
+		ActivityEventMethod methodTarget,
 		CodeWriter writer,
 		SourceProductionContext context
 	)
@@ -116,7 +116,7 @@ partial class ActivitySourceTargetClassEmitter
 
 	static string EmitEventTags(
 		CodeWriter writer,
-		ActivityBasedGenerationTarget methodTarget,
+		ActivityEventMethod methodTarget,
 		string activityVariableName,
 		ActivityBasedParameterTarget? tagsParam,
 		ActivityBasedParameterTarget? escapeParam
@@ -213,7 +213,7 @@ partial class ActivitySourceTargetClassEmitter
 
 	static void EmitSetStatus(
 		CodeWriter writer,
-		ActivityBasedGenerationTarget methodTarget,
+		ActivityEventMethod methodTarget,
 		string activityVariableName,
 		ActivityBasedParameterTarget? statusDescriptionParam,
 		ActivityBasedParameterTarget? exceptionParam

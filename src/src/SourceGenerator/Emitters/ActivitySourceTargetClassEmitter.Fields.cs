@@ -111,7 +111,33 @@ partial class ActivitySourceTargetClassEmitter
 				.Write(TypeLibrary.System.Diagnostics.ActivitySourceOptions)
 				.Write("(")
 				.Write(activitySourceName.Wrap())
-				.Line("));");
+				.Write(')');
+
+			// .NET 11's ActivitySourceOptions carries the source's version and telemetry schema URL. They are
+			// emitted only when the assembly set them, so a source whose assembly set neither keeps the
+			// single-argument constructor.
+			var version = output.Target.ActivitySourceGenerationAttribute?.Version;
+			var telemetrySchemaUrl = output.Target.ActivitySourceGenerationAttribute?.TelemetrySchemaUrl;
+
+			if (!string.IsNullOrWhiteSpace(version) || !string.IsNullOrWhiteSpace(telemetrySchemaUrl))
+			{
+				writer
+					.Write(' ')
+					.Line("{")
+					.Indented(body =>
+					{
+						if (!string.IsNullOrWhiteSpace(version))
+							body.Write("Version = ").Line(version!.Wrap() + ",");
+
+						if (!string.IsNullOrWhiteSpace(telemetrySchemaUrl))
+							body.Write("TelemetrySchemaUrl = ").Line(telemetrySchemaUrl!.Wrap() + ",");
+					})
+					.Line("});");
+			}
+			else
+			{
+				writer.Line(");");
+			}
 		}
 	}
 }

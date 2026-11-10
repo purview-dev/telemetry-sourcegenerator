@@ -138,12 +138,16 @@ partial class MeterTargetClassEmitter
 		}
 
 		foreach (var method in target.InstrumentationMethods)
-			EmitInitialiseInstrumentVariable(method, writer);
+			EmitInitialiseInstrumentVariable(method, writer, output.Context);
 	}
 
-	static void EmitInitialiseInstrumentVariable(InstrumentTarget method, CodeWriter writer)
+	static void EmitInitialiseInstrumentVariable(
+		InstrumentTarget method,
+		CodeWriter writer,
+		GenerationContext<TelemetryCapabilities> context
+	)
 	{
-		if (!method.TargetGenerationState.IsValid)
+		if (!method.TargetGenerationState.IsValid || !IsInstrumentAvailable(method, context))
 			return;
 
 		if (!method.IsObservable)
@@ -166,8 +170,7 @@ partial class MeterTargetClassEmitter
 				.Write(method.FieldName)
 				.Write(" = ")
 				.Write(MeterFieldName)
-				.Write(".Create")
-				.Write(method.InstrumentAttribute!.InstrumentType.ToString())
+				.Write("." + method.InstrumentAttribute!.CreationMethodName)
 				.Write('<')
 				.Write(method.InstrumentMeasurementType)
 				.Write(">(name: ")
@@ -177,8 +180,59 @@ partial class MeterTargetClassEmitter
 				.Write(", description: ")
 				.Write(description)
 				.Write(", tags: ")
-				.Write(tagVariableName)
-				.Line(");");
+				.Write(tagVariableName);
+
+			EmitInstrumentAdvice(method, writer, context);
+
+			writer.Line(");");
 		}
 	}
+
+	/// <summary>
+	/// Appends <c>advice:</c> for a histogram whose <c>HistogramBucketBoundaries</c> parsed. Only emitted when the
+	/// compilation resolves <c>InstrumentAdvice&lt;T&gt;</c>, so an older analyzer-only
+	/// System.Diagnostics.DiagnosticSource still compiles (and <c>TSG4011</c> reports the omission).
+	/// </summary>
+	static void EmitInstrumentAdvice(
+		InstrumentTarget method,
+		CodeWriter writer,
+		GenerationContext<TelemetryCapabilities> context
+	)
+	{
+		if (!context.Capabilities.SupportsInstrumentAdvice)
+			return;
+
+		if (
+			method.InstrumentAttribute
+			is not HistogramInstrumentAttributeRecord { HistogramBucketBoundaries: { Count: > 0 } boundaries }
+		)
+			return;
+
+		writer
+			.NewLine()
+			.Write(", advice: new ")
+			.Write(
+				TypeLibrary.System.Diagnostics.Metrics.InstrumentAdvice.MakeGeneric(method.InstrumentMeasurementType)
+			)
+			.Write(" { HistogramBucketBoundaries = new double[] { ");
+
+		for (var i = 0; i < boundaries.Count; i++)
+		{
+			if (i > 0)
+				writer.Write(", ");
+
+			writer.Write(boundaries[i].ToString("R", System.Globalization.CultureInfo.InvariantCulture) + "d");
+		}
+
+		writer.Write(" } }");
+	}
+
+	/// <summary>
+	/// Whether the compilation can carry this instrument: a gauge needs <c>Gauge&lt;T&gt;</c>. A method whose
+	/// instrument cannot be generated gets a throw stub instead, and <c>TSG4010</c> explains why.
+	/// </summary>
+	internal static bool IsInstrumentAvailable(
+		InstrumentTarget method,
+		GenerationContext<TelemetryCapabilities> context
+	) => method.InstrumentAttribute is not GaugeInstrumentAttributeRecord || context.Capabilities.SupportsGauge;
 }

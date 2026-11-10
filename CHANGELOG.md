@@ -9,11 +9,61 @@ and, for breaking changes, by [Breaking Changes](docs/wiki/Breaking-Changes.md).
 
 ## [Unreleased]
 
-The level-specific logging attributes honour their arguments again. Generated log messages and event
-ids change for every method that passed a template, event id, name or generation mode to one of them.
+.NET 8 and .NET 9 are dropped, C# 15 union types are supported as telemetry values, and the samples build again.
+
+### Added
+
+- **`[Gauge]` and `HistogramBucketBoundaries`.** A `[Gauge]` method generates the .NET 9 `Gauge<T>` instrument, which
+  records a value instead of accumulating one. `[Histogram(HistogramBucketBoundaries = "0.005, 0.01, 0.1")]` passes the
+  bucket boundaries to `InstrumentAdvice<T>`. Both are gated on the compilation: `TSG4010` reports a gauge without
+  `Gauge<T>`, `TSG4011` a histogram whose boundaries cannot be applied, and `TSG4012` boundaries that do not parse.
+- **`Version` and `TelemetrySchemaUrl` on `[assembly: ActivitySourceGeneration(...)]`.** They are passed to
+  `System.Diagnostics.ActivitySourceOptions` for a factory-created source, which previously received only the name.
+  Setting either without `UseActivitySourceFactory` reports `TSG3024`.
+- **C# 15 union types are recorded as their case value.** A parameter whose type carries
+  `[System.Runtime.CompilerServices.Union]` — a `union` declaration, or a hand-written union — is unwrapped
+  for activity tags and baggage, metric tags, and logging v1 and v2 values instead of being recorded as the
+  union struct, which had no meaningful `ToString`. The generator emits one private, aggressively inlined
+  accessor per union type. When the union declares the non-boxing access pattern (`bool HasValue` plus a
+  `bool TryGetValue(out T)` overload per case) the accessor calls those, so the union struct is never boxed
+  to read it; otherwise it reads `Value`. A union that holds no value records `null`.
+  See [Union types](docs/wiki/Tags-and-Baggage.md#union-types).
+
+### Changed
+
+- **The generator's two tagged unions are C# 15 `closed` hierarchies.** An activity method is exactly one of
+  `StartActivityMethod`, `ActivityEventMethod` or `ActivityContextMethod`, and an instrument is exactly one of the eight
+  `InstrumentAttributeRecord` cases, each carrying its own payload, creation method and instrument type. A method that
+  starts an activity can no longer be read for an event's attribute, and emitting an instrument's factory call no longer
+  depends on an enum member's name. Generated code is unchanged.
+- **`.NET 8` and `.NET 9` are no longer supported.** `TSG1011` now requires `net10.0`+ or `net48`+ and its
+  message says so; a `net8.0`/`net9.0` compilation reports it and generates nothing. The integration tests
+  target `net10.0;net11.0` (plus `net48` on Windows), and the benchmarks target `net48;net10.0`.
+- **Package versions follow the lowest supported framework line again.** `System.Diagnostics.DiagnosticSource`,
+  `Microsoft.Extensions.*` and the ASP.NET Core packages are pinned to `10.0.15`, the latest `net10.0`
+  servicing patch, rather than the `11.0.0` line: a package reference raises a consumer's floor, and
+  `net10.0` is the lowest target this generator supports. `net11.0` consumers still get the `11.0.x`
+  packages when they reference them themselves.
+- **`Microsoft.SourceLink.GitHub` moves to `11.0.100`** to match the .NET 11 SDK the repository pins.
+- **`EventId` on `[Log]` and the level-specific attributes is `int`, not `int?`.** A nullable property
+  cannot be set as a named attribute argument, so `[Info(EventId = 42)]` failed with CS0655 and only
+  the constructor overloads worked. Omitting it, or passing a negative value, still uses the id derived
+  from the method name.
 
 ### Fixed
 
+The level-specific logging attributes honour their arguments again. Generated log messages and event
+ids change for every method that passed a template, event id, name or generation mode to one of them.
+
+- **The Aspire `SampleApp.AppHost` builds and runs again.** `Purview.BuildSdk` 2.0.0 resolves its curated `Current`
+  target set (`net10.0;net11.0`) into `TargetFrameworks` for every project that does not declare a target framework in
+  its own file, which made the sample projects cross-targeting. An Aspire AppHost cannot cross-target: the outer
+  cross-targeting pass imports `Microsoft.NET.Sdk.BeforeCommonCrossTargeting.targets` instead of
+  `BeforeCommon.targets`, so `Microsoft.NET.RuntimeIdentifierInference.targets` — the only declaration of the
+  `Microsoft.NET.Build.Tasks.PickBestRid` task the AppHost SDK runs during restore — is never imported, and restore
+  failed with `MSB4036`. The samples now pin `net10.0` (and clear `TargetFrameworks`) as documented.
+- **The generated `[Histogram]` attribute's `HistogramBucketBoundaries` XML comment is well-formed.** It named
+  `InstrumentAdvice<T>` unescaped, which `CS1570` rejected in a consumer that generates documentation files.
 - **`[Trace]`, `[Debug]`, `[Info]`, `[Warning]`, `[Error]` and `[Critical]` ignored every argument
   but the level** (since 5.0.0). `[Info("Order {OrderId} placed")]` emitted the default
   `"Method: OrderId = {OrderId}"` template, every such method logged with `EventId` 0 rather than the
@@ -25,13 +75,6 @@ ids change for every method that passed a template, event id, name or generation
   as V1 does.
 - `[Error]` now treats a whitespace-only `MessageTemplate` or `Name` as unset, like the other
   level-specific attributes.
-
-### Changed
-
-- **`EventId` on `[Log]` and the level-specific attributes is `int`, not `int?`.** A nullable property
-  cannot be set as a named attribute argument, so `[Info(EventId = 42)]` failed with CS0655 and only
-  the constructor overloads worked. Omitting it, or passing a negative value, still uses the id derived
-  from the method name.
 
 ## [5.0.7-prerelease.3] - 2026-10-28
 

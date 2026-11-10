@@ -28,7 +28,9 @@ readonly partial record struct ActivitySourceGenerationAttributeData(
 	[Argument("generateDiagnosticsForMissingActivity")]
 	[Property(DefaultValue = true)]
 		bool GenerateDiagnosticsForMissingActivity,
-	[Property(DefaultValue = false)] bool UseActivitySourceFactory
+	[Property(DefaultValue = false)] bool UseActivitySourceFactory,
+	[Property] string? Version,
+	[Property] string? TelemetrySchemaUrl
 );
 
 [Generate("Purview.Telemetry.ActivityAttribute")]
@@ -231,6 +233,14 @@ readonly partial record struct UpDownCounterAttributeData(
 
 [Generate("Purview.Telemetry.HistogramAttribute")]
 readonly partial record struct HistogramAttributeData(
+	[Argument("name")] [Property] string? Name,
+	[Argument("unit")] [Property] string? Unit,
+	[Argument("description")] [Property] string? Description,
+	[Property] string? HistogramBucketBoundaries
+);
+
+[Generate("Purview.Telemetry.GaugeAttribute")]
+readonly partial record struct GaugeAttributeData(
 	[Argument("name")] [Property] string? Name,
 	[Argument("unit")] [Property] string? Unit,
 	[Argument("description")] [Property] string? Description

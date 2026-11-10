@@ -23,6 +23,12 @@ partial class TypeLibraryGenerator
 	[TypeRef(SystemDiagnosticsMetricsNamespace)]
 	static readonly TypeIdentity Histogram = default;
 
+	[TypeRef(SystemDiagnosticsMetricsNamespace, 1)]
+	static readonly TypeIdentity Gauge = default;
+
+	[TypeRef(SystemDiagnosticsMetricsNamespace, 1)]
+	static readonly TypeIdentity InstrumentAdvice = default;
+
 	[TypeRef(SystemDiagnosticsMetricsNamespace)]
 	static readonly TypeIdentity ObservableCounter = default;
 

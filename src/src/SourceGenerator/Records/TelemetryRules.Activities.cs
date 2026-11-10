@@ -34,6 +34,31 @@ static partial class TelemetryRules
 				)
 			);
 
+		// TSG3024: the options are only consumed by a factory-created source, so setting them on an assembly
+		// that kept the static ActivitySource would silently do nothing.
+		if (target.ActivitySourceGenerationAttribute?.UseActivitySourceFactory != true)
+		{
+			if (!string.IsNullOrWhiteSpace(target.ActivitySourceGenerationAttribute?.Version))
+				diagnostics.Add(
+					ReportableDiagnostic.Create(
+						DiagnosticLibrary.Activities.ActivitySourceOptionsRequireFactory.Descriptor,
+						isBlocking: false,
+						interfaceSymbol,
+						"Version"
+					)
+				);
+
+			if (!string.IsNullOrWhiteSpace(target.ActivitySourceGenerationAttribute?.TelemetrySchemaUrl))
+				diagnostics.Add(
+					ReportableDiagnostic.Create(
+						DiagnosticLibrary.Activities.ActivitySourceOptionsRequireFactory.Descriptor,
+						isBlocking: false,
+						interfaceSymbol,
+						"TelemetrySchemaUrl"
+					)
+				);
+		}
+
 		// TSG3001: no activity source specified.
 		if (string.IsNullOrWhiteSpace(target.ActivitySourceName))
 			diagnostics.Add(
@@ -48,8 +73,8 @@ static partial class TelemetryRules
 
 		// TSG3012: event/context methods exist but no Activity method.
 		if (
-			!validMethods.Any(static m => m.MethodType == ActivityMethodType.Activity)
-			&& validMethods.Any(static m => m.MethodType != ActivityMethodType.Activity)
+			!validMethods.Any(static m => m is StartActivityMethod)
+			&& validMethods.Any(static m => m is not StartActivityMethod)
 		)
 			diagnostics.Add(
 				ReportableDiagnostic.Create(
@@ -80,7 +105,7 @@ static partial class TelemetryRules
 	}
 
 	static void ApplyActivityMethodRules(
-		ActivityBasedGenerationTarget method,
+		ActivityMethodTarget method,
 		IMethodSymbol methodSymbol,
 		bool generateDiagnosticsForMissingActivity,
 		ImmutableArray<ReportableDiagnostic>.Builder diagnostics,
@@ -88,14 +113,14 @@ static partial class TelemetryRules
 	)
 	{
 		// TSG3002: invalid return type. Events must return void; activity/context methods may return void or Activity.
-		var isEvent = method.MethodType == ActivityMethodType.Event;
+		var isEvent = method is ActivityEventMethod;
 		var isValidReturnType = isEvent
 			? method.ReturnType.Identity.SpecialType == SpecialType.System_Void
 			: method.ReturnType.Identity.SpecialType == SpecialType.System_Void
 				|| method.ReturnType.Identity.Equals(TypeLibrary.System.Diagnostics.Activity);
 
 		// TSG3013/TSG3022: activity methods should return a nullable Activity.
-		if (method.MethodType == ActivityMethodType.Activity && isValidReturnType)
+		if (method is StartActivityMethod && isValidReturnType)
 		{
 			var returnsActivity = method.ReturnType.Identity.Equals(TypeLibrary.System.Diagnostics.Activity);
 			if (!returnsActivity)
@@ -127,7 +152,7 @@ static partial class TelemetryRules
 
 		// TSG3014/TSG3015: best-practice diagnostics for missing/misplaced Activity parameters,
 		// opt-in via [ActivitySourceGeneration(GenerateDiagnosticsForMissingActivity = ...)].
-		if (generateDiagnosticsForMissingActivity && method.MethodType != ActivityMethodType.Activity)
+		if (generateDiagnosticsForMissingActivity && method is not StartActivityMethod)
 		{
 			if (!method.HasActivityParameter)
 				diagnostics.Add(
@@ -158,10 +183,10 @@ static partial class TelemetryRules
 		// applies when the exception is recorded using the OpenTelemetry exception rules: with
 		// UseRecordExceptionRules disabled the exception is emitted as a plain tag, a baggage exception is
 		// set as baggage, and a parameter excluded from the Activities target is not applied at all.
-		if (method.MethodType == ActivityMethodType.Event)
+		if (method is ActivityEventMethod activityEventMethod)
 		{
 			var useRecordExceptionRules =
-				method.EventAttribute?.UseRecordExceptionRules
+				activityEventMethod.EventAttribute?.UseRecordExceptionRules
 				?? PropertyLibrary.Activities.UseRecordExceptionRulesDefault;
 
 			var recordsException =
@@ -195,7 +220,7 @@ static partial class TelemetryRules
 	}
 
 	static void ApplyBaggageRules(
-		ActivityBasedGenerationTarget method,
+		ActivityMethodTarget method,
 		IMethodSymbol methodSymbol,
 		ImmutableArray<ReportableDiagnostic>.Builder diagnostics,
 		CancellationToken token
@@ -219,7 +244,7 @@ static partial class TelemetryRules
 	}
 
 	static void ApplyDuplicateReservedRules(
-		ActivityBasedGenerationTarget method,
+		ActivityMethodTarget method,
 		IMethodSymbol methodSymbol,
 		ImmutableArray<ReportableDiagnostic>.Builder diagnostics
 	)
@@ -250,7 +275,7 @@ static partial class TelemetryRules
 	}
 
 	static void ApplyReservedParameterRules(
-		ActivityBasedGenerationTarget method,
+		ActivityMethodTarget method,
 		IMethodSymbol methodSymbol,
 		ImmutableArray<ReportableDiagnostic>.Builder diagnostics,
 		CancellationToken token
@@ -270,7 +295,7 @@ static partial class TelemetryRules
 #pragma warning disable IDE0010 // Add missing cases
 			switch (parameter.ParamDestination)
 			{
-				case ActivityParameterDestination.Activity when method.MethodType == ActivityMethodType.Activity:
+				case ActivityParameterDestination.Activity when method is StartActivityMethod:
 					diagnostics.Add(
 						ReportableDiagnostic.Create(
 							DiagnosticLibrary.Activities.ActivityParameterNotAllowed.Descriptor,
@@ -280,7 +305,7 @@ static partial class TelemetryRules
 						)
 					);
 					break;
-				case ActivityParameterDestination.Timestamp when method.MethodType != ActivityMethodType.Event:
+				case ActivityParameterDestination.Timestamp when method is not ActivityEventMethod:
 					diagnostics.Add(
 						ReportableDiagnostic.Create(
 							DiagnosticLibrary.Activities.TimestampParameterNotAllowed.Descriptor,
@@ -290,7 +315,7 @@ static partial class TelemetryRules
 						)
 					);
 					break;
-				case ActivityParameterDestination.StartTime when method.MethodType != ActivityMethodType.Activity:
+				case ActivityParameterDestination.StartTime when method is not StartActivityMethod:
 					diagnostics.Add(
 						ReportableDiagnostic.Create(
 							DiagnosticLibrary.Activities.StartTimeParameterNotAllowed.Descriptor,
@@ -300,8 +325,7 @@ static partial class TelemetryRules
 						)
 					);
 					break;
-				case ActivityParameterDestination.ParentContextOrId
-					when method.MethodType != ActivityMethodType.Activity:
+				case ActivityParameterDestination.ParentContextOrId when method is not StartActivityMethod:
 					diagnostics.Add(
 						ReportableDiagnostic.Create(
 							DiagnosticLibrary.Activities.ParentContextOrIdParameterNotAllowed.Descriptor,
@@ -311,7 +335,7 @@ static partial class TelemetryRules
 						)
 					);
 					break;
-				case ActivityParameterDestination.LinksEnumerable when method.MethodType != ActivityMethodType.Activity:
+				case ActivityParameterDestination.LinksEnumerable when method is not StartActivityMethod:
 					diagnostics.Add(
 						ReportableDiagnostic.Create(
 							DiagnosticLibrary.Activities.LinksParameterNotAllowed.Descriptor,
@@ -321,7 +345,7 @@ static partial class TelemetryRules
 						)
 					);
 					break;
-				case ActivityParameterDestination.TagsEnumerable when method.MethodType == ActivityMethodType.Context:
+				case ActivityParameterDestination.TagsEnumerable when method is ActivityContextMethod:
 					diagnostics.Add(
 						ReportableDiagnostic.Create(
 							DiagnosticLibrary.Activities.TagsParameterNotAllowed.Descriptor,
@@ -341,7 +365,7 @@ static partial class TelemetryRules
 						)
 					);
 					break;
-				case ActivityParameterDestination.Escape when method.MethodType != ActivityMethodType.Event:
+				case ActivityParameterDestination.Escape when method is not ActivityEventMethod:
 					diagnostics.Add(
 						ReportableDiagnostic.Create(
 							DiagnosticLibrary.Activities.EscapedParameterIsOnlyValidOnEvent.Descriptor,
@@ -361,7 +385,7 @@ static partial class TelemetryRules
 						)
 					);
 					break;
-				case ActivityParameterDestination.StatusDescription when method.MethodType != ActivityMethodType.Event:
+				case ActivityParameterDestination.StatusDescription when method is not ActivityEventMethod:
 					diagnostics.Add(
 						ReportableDiagnostic.Create(
 							DiagnosticLibrary.Activities.StatusDescriptionParameterInvalidType.Descriptor,

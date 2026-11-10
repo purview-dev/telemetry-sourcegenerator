@@ -141,9 +141,9 @@ partial class DiagnosticLibrary
 			new DiagnosticDescriptor(
 				id: "TSG1011",
 				title: "Unsupported target framework",
-				messageFormat: "Purview Telemetry Source Generator requires .NET 8.0 or higher, or .NET Framework 4.8 or higher. "
+				messageFormat: "Purview Telemetry Source Generator requires .NET 10.0 or higher, or .NET Framework 4.8 or higher. "
 					+ "The current target framework is not supported, so no telemetry is generated for it. "
-					+ "Target net8.0 or later, or net48 or later; a library that also targets another framework "
+					+ "Target net10.0 or later, or net48 or later; a library that also targets another framework "
 					+ "(such as netstandard2.0) must reference the generator only from its supported targets.",
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Usage,

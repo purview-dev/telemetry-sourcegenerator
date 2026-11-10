@@ -7,7 +7,7 @@ This page covers supported frameworks, installation methods, per-feature depende
 **Consumer runtime targets:**
 
 - .NET Framework 4.8
-- .NET 8 or higher, including .NET 11
+- .NET 10 or higher, including .NET 11 (.NET 8 and .NET 9 are no longer supported)
 
 **Build toolchain requirement:**
 
@@ -47,7 +47,7 @@ Install-Package Purview.Telemetry.SourceGenerator
 | Activities | `System.Diagnostics.DiagnosticSource` | Included in the SDK for .NET 5+ |
 | Logging | `Microsoft.Extensions.Logging.Abstractions` | Required for `[Logger]` interfaces; `TSG2003` is raised if `ILogger` cannot be resolved. Part of the shared framework on .NET 11, so no reference is needed there (an explicit one reports `NU1510`) |
 | Logging (v2) | `Microsoft.Extensions.Telemetry.Abstractions` | Required for state-based v2 generation (`LoggerMessageHelper`, `[LogProperties]`) |
-| Metrics | `System.Diagnostics.Metrics` | Included in the SDK for .NET 8+ |
+| Metrics | `System.Diagnostics.Metrics` | Included in the SDK for .NET 10+ |
 | Activities from `ActivitySourceFactory` (opt-in) | `Microsoft.Extensions.Diagnostics` 11 (`services.AddTracing()`) | Only with `UseActivitySourceFactory`; see [Activities](Activities.md#creating-sources-with-activitysourcefactory-net-11) |
 
 ## Verifying the install
@@ -99,10 +99,10 @@ Define this constant to disable logging generation entirely. This is useful when
 
 ### Unsupported target frameworks
 
-A compilation that targets neither `net8.0`+ nor `net48`+ (for example `netstandard2.0`) reports
-[`TSG1011`](Diagnostics.md#tsg1011) and generates nothing. No define suppresses it. A library that
-keeps such a target references the package only from its supported targets, and puts its telemetry
-interfaces under the same condition:
+A compilation that targets neither `net10.0`+ nor `net48`+ (for example `netstandard2.0`, `net8.0` or
+`net9.0`) reports [`TSG1011`](Diagnostics.md#tsg1011) and generates nothing. No define suppresses it. A
+library that keeps such a target references the package only from its supported targets, and puts its
+telemetry interfaces under the same condition:
 
 ```xml
 <PackageReference Include="Purview.Telemetry.SourceGenerator" Condition="'$(TargetFramework)' != 'netstandard2.0'">

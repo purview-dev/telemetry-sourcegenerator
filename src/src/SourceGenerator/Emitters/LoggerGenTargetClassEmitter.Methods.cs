@@ -207,7 +207,7 @@ partial class LoggerGenTargetClassEmitter
 			{
 				context.CancellationToken.ThrowIfCancellationRequested();
 
-				writer.Write(scopeNonExceptionParams[i].Name);
+				writer.Write(scopeNonExceptionParams[i].RenderValueExpression());
 				if (i < scopeNonExceptionParams.Count - 1)
 					writer.Write(", ");
 			}
@@ -391,7 +391,7 @@ partial class LoggerGenTargetClassEmitter
 
 		for (var i = 0; i < nonExceptionParams.Count; i++)
 		{
-			writer.Write(nonExceptionParams[i].Name);
+			writer.Write(nonExceptionParams[i].RenderValueExpression());
 			if (i < nonExceptionParams.Count - 1)
 				writer.Write(", ");
 		}
@@ -481,7 +481,14 @@ partial class LoggerGenTargetClassEmitter
 
 			var isEnumerable = parameter.IsArray || parameter.IsIEnumerable;
 			// Need to match the name against the value.
-			OutputState(writer, stateVarName, parameter.Name.Wrap(), parameter.Name, ++idx, isEnumerable: isEnumerable);
+			OutputState(
+				writer,
+				stateVarName,
+				parameter.Name.Wrap(),
+				parameter.RenderValueExpression(),
+				++idx,
+				isEnumerable: isEnumerable
+			);
 
 			if (isEnumerable)
 			{
@@ -890,7 +897,12 @@ partial class LoggerGenTargetClassEmitter
 					context.CancellationToken.ThrowIfCancellationRequested();
 
 					writer.Field(
-						new FieldDeclarationOptions($"_{param.UpperCasedName}", param.ParameterType)
+						new FieldDeclarationOptions(
+							$"_{param.UpperCasedName}",
+							param.RequiresObjectState
+								? TypeLibrary.System.Object.AsTypeReference().Nullable(writer)
+								: param.ParameterType
+						)
 						{
 							Accessibility = TypeDeclarationAccessibility.Public,
 							IsReadOnly = true,
@@ -905,7 +917,12 @@ partial class LoggerGenTargetClassEmitter
 					{
 						Parameters =
 						[
-							.. nonExceptionParams.Select(p => new ParameterDeclarationOptions(p.Name, p.ParameterType)),
+							.. nonExceptionParams.Select(p => new ParameterDeclarationOptions(
+								p.Name,
+								p.RequiresObjectState
+									? TypeLibrary.System.Object.AsTypeReference().Nullable(writer)
+									: p.ParameterType
+							)),
 						],
 					},
 					ctor =>
@@ -1167,7 +1184,12 @@ partial class LoggerGenTargetClassEmitter
 					context.CancellationToken.ThrowIfCancellationRequested();
 
 					writer.Field(
-						new FieldDeclarationOptions($"_{param.UpperCasedName}", param.ParameterType)
+						new FieldDeclarationOptions(
+							$"_{param.UpperCasedName}",
+							param.RequiresObjectState
+								? TypeLibrary.System.Object.AsTypeReference().Nullable(writer)
+								: param.ParameterType
+						)
 						{
 							Accessibility = TypeDeclarationAccessibility.Public,
 							IsReadOnly = true,
@@ -1182,7 +1204,12 @@ partial class LoggerGenTargetClassEmitter
 					{
 						Parameters =
 						[
-							.. nonExceptionParams.Select(p => new ParameterDeclarationOptions(p.Name, p.ParameterType)),
+							.. nonExceptionParams.Select(p => new ParameterDeclarationOptions(
+								p.Name,
+								p.RequiresObjectState
+									? TypeLibrary.System.Object.AsTypeReference().Nullable(writer)
+									: p.ParameterType
+							)),
 						],
 					},
 					ctor =>

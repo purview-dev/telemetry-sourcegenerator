@@ -149,7 +149,17 @@ static class GeneratedTypesEmitter
 		);
 		yield return (
 			TypeLibrary.Purview.Telemetry.HistogramAttribute,
-			(writer, type) => WriteCounterLikeAttribute(writer, type, "Marks a method as a histogram instrument.")
+			(writer, type) =>
+				WriteCounterLikeAttribute(
+					writer,
+					type,
+					"Marks a method as a histogram instrument.",
+					writeHistogramBucketBoundaries: true
+				)
+		);
+		yield return (
+			TypeLibrary.Purview.Telemetry.GaugeAttribute,
+			(writer, type) => WriteGaugeAttribute(writer, type, "Marks a method as a gauge instrument.")
 		);
 		yield return (
 			TypeLibrary.Purview.Telemetry.ObservableCounterAttribute,
@@ -781,6 +791,18 @@ static class GeneratedTypesEmitter
 						+ "and later) instead of as a static ActivitySource. The factory must be registered, for example "
 						+ "with services.AddTracing(). Ignored, and reported as TSG3023, when the factory type is unavailable.",
 					"false"
+				);
+				WriteNullableStringProperty(
+					body,
+					"Version",
+					"The version passed to System.Diagnostics.ActivitySourceOptions for factory-created sources. "
+						+ "Ignored, and reported as TSG3024, unless UseActivitySourceFactory is set."
+				);
+				WriteNullableStringProperty(
+					body,
+					"TelemetrySchemaUrl",
+					"The telemetry schema URL passed to System.Diagnostics.ActivitySourceOptions for factory-created "
+						+ "sources. Ignored, and reported as TSG3024, unless UseActivitySourceFactory is set."
 				);
 			},
 			"Specifies the default activity source generation behaviour for an assembly."
@@ -1492,7 +1514,12 @@ static class GeneratedTypesEmitter
 		);
 	}
 
-	static void WriteCounterLikeAttribute(CodeWriter writer, TypeIdentity type, string summary)
+	static void WriteCounterLikeAttribute(
+		CodeWriter writer,
+		TypeIdentity type,
+		string summary,
+		bool writeHistogramBucketBoundaries = false
+	)
 	{
 #if DEUBG
 		if (string.IsNullOrWhiteSpace(summary))
@@ -1530,6 +1557,40 @@ static class GeneratedTypesEmitter
 					TypeLibrary.System.Boolean,
 					"Determines whether the counter auto-increments."
 				);
+				WriteNullableStringProperty(body, "Name", "Gets or sets the name of the instrument.");
+				WriteNullableStringProperty(body, "Unit", "Gets or sets the measurement unit of the instrument.");
+				WriteNullableStringProperty(body, "Description", "Gets or sets the description of the instrument.");
+
+				if (writeHistogramBucketBoundaries)
+					WriteNullableStringProperty(
+						body,
+						"HistogramBucketBoundaries",
+						"The histogram's bucket boundaries as a comma-separated list of ascending, positive numbers, "
+							+ "for example \"0.005, 0.01, 0.1, 1\". Passed to the InstrumentAdvice histogram bucket "
+							+ "boundaries on .NET 9 and later; ignored, and reported as TSG4011, when "
+							+ "System.Diagnostics.Metrics.InstrumentAdvice cannot be resolved."
+					);
+			},
+			summary
+		);
+	}
+
+	static void WriteGaugeAttribute(CodeWriter writer, TypeIdentity type, string summary)
+	{
+		EmitAttribute(
+			writer,
+			type,
+			AttributeTargets.Method,
+			body =>
+			{
+				WriteEmptyConstructor(body, type, $"Constructs a new instance of the {XmlSee(type.Name)}.");
+				WriteNameConstructor(body, type, "The name of the instrument.");
+				WriteNameUnitDescriptionConstructor(
+					body,
+					type,
+					$"Constructs a new instance specifying the {XmlSee("Name")}, {XmlSee("Unit")} and {XmlSee("Description")}."
+				);
+
 				WriteNullableStringProperty(body, "Name", "Gets or sets the name of the instrument.");
 				WriteNullableStringProperty(body, "Unit", "Gets or sets the measurement unit of the instrument.");
 				WriteNullableStringProperty(body, "Description", "Gets or sets the description of the instrument.");

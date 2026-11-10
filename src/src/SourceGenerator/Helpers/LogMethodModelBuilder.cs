@@ -488,7 +488,8 @@ static class LogMethodModelBuilder
 					LogProperties: logProperties != null ? new([.. logProperties]) : [],
 					ExpandEnumerableAttribute: expandEnumerableAttribute,
 					ExcludedTargets: SharedHelpers.GetExcludeTargetsAttribute(parameter, token)?.ExcludedTargets
-						?? GenerationType.None
+						?? GenerationType.None,
+					Union: UnionHelpers.GetUnionTarget(parameter.Type, token)
 				)
 			);
 
