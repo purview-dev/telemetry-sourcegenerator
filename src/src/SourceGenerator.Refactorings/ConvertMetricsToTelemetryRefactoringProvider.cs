@@ -370,7 +370,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 	)
 	{
 		// Assign a base method name per field, then deduplicate
-		Dictionary<string, string> fieldNameMap = new(StringComparer.Ordinal);
+		Dictionary<string, string> fieldNameMap = [with(StringComparer.Ordinal)];
 		foreach (var field in fields)
 		{
 			if (!fieldNameMap.ContainsKey(field.FieldName))
@@ -456,7 +456,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 	internal static string BuildInterfaceMembers(List<(MetricsCallInfo Call, string MethodName)> callsWithMethods)
 	{
 		StringBuilder sb = new();
-		HashSet<string> emitted = new(StringComparer.Ordinal);
+		HashSet<string> emitted = [with(StringComparer.Ordinal)];
 
 		foreach (var (call, methodName) in callsWithMethods)
 		{
@@ -554,9 +554,10 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 	)
 	{
 		// Map each invocation to its replacement
-		Dictionary<InvocationExpressionSyntax, InvocationExpressionSyntax> invocationMap = new(
-			SyntaxNodeReferenceComparer<InvocationExpressionSyntax>.Instance
-		);
+		Dictionary<InvocationExpressionSyntax, InvocationExpressionSyntax> invocationMap =
+		[
+			with(SyntaxNodeReferenceComparer<InvocationExpressionSyntax>.Instance),
+		];
 
 		foreach (var (call, methodName) in callsWithMethods)
 		{
@@ -566,9 +567,10 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		}
 
 		// Map field declarations
-		Dictionary<FieldDeclarationSyntax, FieldDeclarationSyntax> fieldMap = new(
-			SyntaxNodeReferenceComparer<FieldDeclarationSyntax>.Instance
-		);
+		Dictionary<FieldDeclarationSyntax, FieldDeclarationSyntax> fieldMap =
+		[
+			with(SyntaxNodeReferenceComparer<FieldDeclarationSyntax>.Instance),
+		];
 		foreach (var field in metricsFields)
 		{
 			if (field.FieldDeclaration is null)
@@ -578,9 +580,10 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		}
 
 		// Map property declarations
-		Dictionary<PropertyDeclarationSyntax, PropertyDeclarationSyntax> propertyMap = new(
-			SyntaxNodeReferenceComparer<PropertyDeclarationSyntax>.Instance
-		);
+		Dictionary<PropertyDeclarationSyntax, PropertyDeclarationSyntax> propertyMap =
+		[
+			with(SyntaxNodeReferenceComparer<PropertyDeclarationSyntax>.Instance),
+		];
 		foreach (var field in metricsFields)
 		{
 			if (field.PropertyDeclaration is null)
@@ -650,9 +653,10 @@ public sealed class ConvertMetricsToTelemetryRefactoringProvider : CodeRefactori
 		SemanticModel semanticModel
 	)
 	{
-		Dictionary<ParameterSyntax, ParameterSyntax> result = new(
-			SyntaxNodeReferenceComparer<ParameterSyntax>.Instance
-		);
+		Dictionary<ParameterSyntax, ParameterSyntax> result =
+		[
+			with(SyntaxNodeReferenceComparer<ParameterSyntax>.Instance),
+		];
 
 		HashSet<string> fieldTypeNames = new(
 			metricsFields.Select(f => f.TypeSymbol.ToDisplayString()),

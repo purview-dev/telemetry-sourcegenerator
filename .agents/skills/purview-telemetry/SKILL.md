@@ -9,6 +9,7 @@ license: MIT
 metadata:
   author: Purview-Dev
   version: "1.0"
+  repository: purview-dev/engineering-playbook
 ---
 
 # Purview telemetry
@@ -120,4 +121,4 @@ Instrumentation is identical across all three rows. Only the right-hand column g
 ## See also
 
 - `purview-architecture` — establishing project context and scale before deciding
-- [Purview.Telemetry.SourceGenerator](https://github.com/purview-dev/purview-telemetry-sourcegenerator)
+- [Purview.Telemetry.SourceGenerator](https://github.com/purview-dev/telemetry-sourcegenerator)

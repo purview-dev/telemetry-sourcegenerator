@@ -41,7 +41,7 @@ in `Directory.Build.props` unless the setting is deliberately project-specific.
 | `TestingFramework` | `TUnit` | `TUnit`, `Xunit` or `None` |
 | `SubstituteFramework` | `TUnitMocks` | `TUnitMocks`, `NSubstitute` or `None` |
 | `TestDataFramework` | `Bogus` | `Bogus` or `None` |
-| `TargetFramework` | `net10.0` | `netstandard2.0` when `IsRoslynComponent=true` |
+| `TargetFramework` | `net10.0;net11.0` | `netstandard2.0` when `IsRoslynComponent=true` |
 | `IsPackable` | `false` | Opts a project into the packable defaults |
 | `UsePackageJsonVersion` | `true` | `true`, `false` or `Strict` — version from `package.json` |
 | `ExcludePurviewTelemetry` | `false` | Drops the telemetry source generator |
@@ -50,6 +50,11 @@ in `Directory.Build.props` unless the setting is deliberately project-specific.
 | `PurviewBrowserSafe` | *(unset)* | On a class library a WebAssembly client downloads: trim, AOT and browser-unsupported APIs fail the build |
 | `IsBffProject` | name ends `Bff` | Classifies a BFF host; `false` opts out |
 | `PurviewBrowserSafeReferenceCheckAsError` | `false` | Makes `PRBLZ0001` (a client reference that is not browser-safe) an error |
+| `MemorySafetyRules` | `2` | C# 15 memory-safety tier on `net11.0`+: `0` off, `1` preview syntax, `2` updated rules |
+| `PurviewRuntimeAsync` | `true` | `runtime-async=on` on `net11.0`+ |
+| `IsClientSideProject` | *(computed)* | Whether the project's assemblies can reach a browser; overrides the `ServerShared` classification |
+| `PurviewAutoServerSharedReference` | `true` | Adds a sibling `ServerShared` reference to a non-client-side project |
+| `PurviewMultiThreadedBuild` | `true` | Bootstraps a `Directory.Build.rsp` enabling MSBuild `-mt` |
 
 The full set, grouped by area and with the behaviour each one changes, is in
 [references/properties.md](references/properties.md). Read it rather than guessing a property name —
@@ -89,11 +94,15 @@ is the SDK's answer, and it stays correct when the rules change. The exported se
 
 ## Repository bootstrap
 
-The SDK bootstraps two repository-wide files from the package: `.editorconfig` and `global.json`.
+The SDK bootstraps three repository-wide files from the package: `.editorconfig`, `global.json` and
+`Directory.Build.rsp`.
 
 - `PurviewRepoBootstrapMode` — `IfMissing` (default), `Always`, `WarnOnDrift`, `Never`
 - `DisableAutoCopySdkFiles` — the master off switch
 - `PurviewRepoBootstrapCopyRetries` / `...RetryDelayMilliseconds` / `...FailureAsError`
+- `BootstrapMultiThreadedBuildRspToRepoRoot` / `PurviewMultiThreadedBuild` — the response file that
+  enables MSBuild `-mt` (and `-nr:false`, which avoids a `RoslynCodeTaskFactory` cache left by a
+  non-`-mt` build)
 
 Every project in a solution writes those same destinations, so the write is race-tolerant by
 design: an existing file is never overwritten unless asked, each write is staged into a temporary
@@ -104,6 +113,18 @@ reported.
 the repository; that is gone, along with `EnableAgentFolderInPackage`, `AgentPackDestinationFolder`
 and the `PurviewAgentFolder*` properties. Skills have exactly one installer, the skills CLI — see
 `purview-buildsdk-skill-installation`.
+
+The skill targets read their settings when they run, so these can go in `Directory.Build.props` or
+on the command line, and a repository-wide choice belongs in `Directory.Build.props`:
+
+| Property | Default | Controls |
+| -- | -- | -- |
+| `PurviewSkillsRunner` | `bun` (`bun x skills`) | Which package runner launches the skills CLI |
+| `PurviewSkillsAgents` | empty — the CLI auto-detects | Agents to install to; when set, the only agent directories `CheckPurviewSkills` allows |
+| `PurviewSkillsDryRun` | `false` | Install and update print commands instead of running them |
+
+On a command line, `dotnet msbuild -p:` splits values on `,` and `;` — write
+`-p:PurviewSkillsAgents=claude-code%2Ccodex`. For `just` recipes, see `purview-buildsdk-skills-justfile`.
 
 ## Guidance when changing SDK configuration
 

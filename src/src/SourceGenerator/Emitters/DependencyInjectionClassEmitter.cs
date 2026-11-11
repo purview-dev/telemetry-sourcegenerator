@@ -137,6 +137,23 @@ static class DependencyInjectionClassEmitter
 			)
 		)
 		{
+			if (interfaceType.Identity.GenericArity > 0)
+			{
+				// An open generic cannot be named with type arguments here, and this static extension cannot repeat the
+				// class's type parameters, so the registration is the open-generic form.
+				var identity = interfaceType.Identity;
+				var openInterfaceName =
+					"global::" + (identity.Namespace is { } ns ? ns + "." : string.Empty) + identity.Name + "<>";
+				var openClassName =
+					"global::" + BuildImplQualifiedName(telemetryNamesNamespace, interfaceType, className) + "<>";
+
+				writer.Return(
+					"services.AddSingleton(typeof(" + openInterfaceName + "), typeof(" + openClassName + "))"
+				);
+
+				return;
+			}
+
 			writer.Return(
 				"services.AddSingleton<"
 					+ interfaceType.RenderFullName

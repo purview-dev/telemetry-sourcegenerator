@@ -44,11 +44,6 @@ static class LogMethodModelBuilder
 					continue;
 			}
 
-			if (method.Arity > 0)
-			{
-				continue;
-			}
-
 			// Validate return type - don't skip; let through with UnknownReturnType flag so the emitter can report the diagnostic
 			var invalidReturnType = TelemetryRules.IsInvalidLogReturnType(method, token);
 
@@ -103,6 +98,16 @@ static class LogMethodModelBuilder
 				GenerationType.Logging
 			);
 
+			// TSG2022 / TSG2023: a 'params', by-ref ('ref'/'out'/'in'/'scoped') or ref struct parameter cannot be
+			// represented in the generated state, so the method is carried as invalid and the emitter writes a throw
+			// stub rather than code that fails to compile. The analyzer reports the diagnostic.
+			if (
+				method.Parameters.Any(static parameter =>
+					parameter.IsParams || parameter.RefKind != RefKind.None || parameter.Type.IsRefLikeType
+				)
+			)
+				targetGenerationState = targetGenerationState with { IsValid = false };
+
 			// Resolve per-method generation mode.
 			// Priority: method GenerationMode > interface/assembly GenerationMode > Auto (per-method param analysis).
 			var useV1Generation = ResolveUseV1Generation(
@@ -111,6 +116,17 @@ static class LogMethodModelBuilder
 				hasMultipleExceptions,
 				methodParameters
 			);
+
+			// LoggerMessage.Define cannot carry an open generic, so a generic method is always state-based.
+			if (method.Arity > 0)
+				useV1Generation = false;
+
+			// TSG1005: a type parameter whose constraint the generator cannot re-declare. The method is carried as
+			// invalid so the emitter writes a throw stub rather than an unimplemented interface member.
+			if (!TypeParameterHelpers.AreSupported(method.TypeParameters))
+				targetGenerationState = targetGenerationState with { IsValid = false };
+
+			var typeParameters = TypeParameterHelpers.FromMethod(method);
 
 			methodTargets.Add(
 				new(
@@ -134,13 +150,15 @@ static class LogMethodModelBuilder
 					InferredErrorLevel: inferredErrorLevel,
 					TargetGenerationState: targetGenerationState,
 					UseV1Generation: useV1Generation,
-					HasExplicitLevel: hasExplicitLevel
+					HasExplicitLevel: hasExplicitLevel,
+					SkipEnabledCheck: logAttribute?.SkipEnabledCheck ?? false,
+					TypeParameters: typeParameters
 				)
 			);
 		}
 
 		// Post-pass: mark duplicate method names as invalid (emitter generates throw stubs; TSG1003 raised by analyzer)
-		HashSet<string> seenNames = new(StringComparer.Ordinal);
+		HashSet<string> seenNames = [with(StringComparer.Ordinal)];
 		for (var i = 0; i < methodTargets.Count; i++)
 		{
 			var t = methodTargets[i];
@@ -171,8 +189,8 @@ static class LogMethodModelBuilder
 	)
 	{
 		var logName = GetLogName(interfaceName, className, loggerTarget, logAttribute, methodName, defaultPrefixType);
-		var messageTemplate =
-			logAttribute?.MessageTemplate ?? GenerateTemplateMessage(logName, isScoped, methodParameters);
+		var messageTemplate = logAttribute?.MessageTemplate
+			?? GenerateTemplateMessage(logName, isScoped, methodParameters);
 		var hasMultipleExceptions = !isScoped && methodParameters.Count(m => m.IsException) > 1;
 		var exceptionParam =
 			hasMultipleExceptions ? null
@@ -192,23 +210,20 @@ static class LogMethodModelBuilder
 		int defaultLogLevel
 	)
 	{
-		var stubParams = ImmutableArray.CreateRange(
-			method.Parameters,
-			p => new LogParameterTarget(
-				Name: p.Name,
-				UpperCasedName: Utilities.UppercaseFirstChar(p.Name),
-				ParameterType: TypeReference.Create(p.Type),
-				IsException: false,
-				IsFirstException: false,
-				IsIEnumerable: false,
-				IsArray: false,
-				IsComplexType: false,
-				LogPropertiesAttribute: null,
-				LogProperties: null,
-				ExpandEnumerableAttribute: null,
-				ExcludedTargets: GenerationType.None
-			)
-		);
+		var stubParams = ImmutableArray.CreateRange(method.Parameters, p => new LogParameterTarget(
+			Name: p.Name,
+			UpperCasedName: Utilities.UppercaseFirstChar(p.Name),
+			ParameterType: TypeReference.Create(p.Type),
+			IsException: false,
+			IsFirstException: false,
+			IsIEnumerable: false,
+			IsArray: false,
+			IsComplexType: false,
+			LogPropertiesAttribute: null,
+			LogProperties: null,
+			ExpandEnumerableAttribute: null,
+			ExcludedTargets: GenerationType.None
+		));
 
 		return new(
 			MethodName: method.Name,
@@ -233,7 +248,8 @@ static class LogMethodModelBuilder
 				RaiseMultiGenerationTargetsNotSupported: false
 			),
 			UseV1Generation: false,
-			HasLogPropertiesAndExpandEnumerable: true
+			HasLogPropertiesAndExpandEnumerable: true,
+			TypeParameters: TypeParameterHelpers.FromMethod(method)
 		);
 	}
 
@@ -295,6 +311,12 @@ static class LogMethodModelBuilder
 		ImmutableArray<LogParameterTarget> methodParameters
 	)
 	{
+		// LoggerMessage.Define carries a fixed parameter list and no tag bag, so a parameter whose tags are produced at
+		// run time cannot be logged through it. This wins over an explicit v1 request rather than silently dropping the
+		// provider's tags.
+		if (methodParameters.Any(p => p.TagProvider != null))
+			return false;
+
 		if (methodGenMode == 1) // V1 forced at method level
 			return true;
 		if (methodGenMode == 2) // V2 forced at method level
@@ -420,7 +442,7 @@ static class LogMethodModelBuilder
 			token.ThrowIfCancellationRequested();
 
 			// Skip Activity-related parameters and TagList - they are not valid for logging
-			var parameterType = TypeReference.Create(parameter.Type);
+			var parameterType = SharedHelpers.ToTypeReference(parameter.Type);
 			if (
 				parameterType.Identity.Equals(TypeLibrary.System.Diagnostics.Activity)
 				|| parameterType.Identity.Equals(TypeLibrary.System.Diagnostics.ActivityContext)
@@ -434,6 +456,7 @@ static class LogMethodModelBuilder
 
 			var logPropertiesAttribute = SharedHelpers.GetLogPropertiesAttribute(parameter, token);
 			var expandEnumerableAttribute = SharedHelpers.GetExpandEnumerableAttribute(parameter, token);
+			var tagProviderAttribute = SharedHelpers.GetTagProviderAttribute(parameter, token);
 
 			if (logPropertiesAttribute != null && expandEnumerableAttribute != null)
 			{
@@ -441,38 +464,28 @@ static class LogMethodModelBuilder
 				break;
 			}
 
+			TagProviderTarget? tagProvider = null;
+			if (tagProviderAttribute != null)
+			{
+				var resolution = TagProviderResolver.Resolve(parameter, tagProviderAttribute.Value, compilation, token);
+
+				// An unusable provider is reported by TSG2024/TSG2025/TSG2026; the parameter is still logged, just
+				// without the extra tags, so the method itself stays valid.
+				tagProvider = resolution.Target;
+			}
+
 			List<LogPropertiesParameterDetails>? logProperties = null;
 			if (logPropertiesAttribute != null)
 			{
 				// At this point, we know the caller wants to expand the properties for the given type.
-				// So we can find the names of all the properties and their types.
+				// So we can find the names of all the properties and their types - transitively, when asked.
+				var flattened = LogPropertiesFlattener.Flatten(parameter.Type, logPropertiesAttribute.Value, token);
 
-				var type = parameter.Type;
-				foreach (var property in type.GetMembers().OfType<IPropertySymbol>())
-				{
-					var propertyName = property.Name;
-					if (
-						Utilities.ContainsAttribute(
-							property,
-							TypeLibrary.Microsoft.Extensions.Logging.LogPropertyIgnoreAttribute,
-							token
-						)
-					)
-					{
-						continue;
-					}
-
-					var isNullable =
-						property.Type.IsReferenceType
-						|| property.Type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T;
-
-					logProperties ??= [];
-
-					logProperties.Add(new(PropertyName: propertyName, IsNullable: isNullable));
-				}
+				if (!flattened.IsEmpty)
+					logProperties = [.. flattened];
 			}
 
-			var logParameterType = TypeReference.Create(parameter.Type);
+			var logParameterType = SharedHelpers.ToTypeReference(parameter.Type);
 			var isException = parameter.Type.IsExceptionType();
 			parameters.Add(
 				new(
@@ -489,7 +502,8 @@ static class LogMethodModelBuilder
 					ExpandEnumerableAttribute: expandEnumerableAttribute,
 					ExcludedTargets: SharedHelpers.GetExcludeTargetsAttribute(parameter, token)?.ExcludedTargets
 						?? GenerationType.None,
-					Union: UnionHelpers.GetUnionTarget(parameter.Type, token)
+					Union: UnionHelpers.GetUnionTarget(parameter.Type, token),
+					TagProvider: tagProvider
 				)
 			);
 

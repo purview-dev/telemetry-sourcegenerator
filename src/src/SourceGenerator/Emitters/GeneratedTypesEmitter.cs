@@ -13,22 +13,18 @@ static class GeneratedTypesEmitter
 	static IEnumerable<(TypeIdentity Type, Action<CodeWriter, TypeIdentity> Emitter)> GetEmitters()
 	{
 		// Telemetry Shared
-		yield return (
-			TypeLibrary.Purview.Telemetry.TagAttribute,
-			(writer, type) =>
-				WriteTagLikeAttribute(writer, type, "Marks a parameter as a tag for an activity, event or instrument.")
+		yield return (TypeLibrary.Purview.Telemetry.TagAttribute, (writer, type) =>
+			WriteTagLikeAttribute(writer, type, "Marks a parameter as a tag for an activity, event or instrument.")
 		);
 
-		yield return (
-			TypeLibrary.Purview.Telemetry.ExcludeAttribute,
-			(writer, type) =>
-				WriteSimpleAttribute(
-					writer,
-					type,
-					AttributeTargets.Method,
-					includeSuppressMessage: false,
-					"Marks a method to be excluded from telemetry generation."
-				)
+		yield return (TypeLibrary.Purview.Telemetry.ExcludeAttribute, (writer, type) =>
+			WriteSimpleAttribute(
+				writer,
+				type,
+				AttributeTargets.Method,
+				includeSuppressMessage: false,
+				"Marks a method to be excluded from telemetry generation."
+			)
 		);
 		yield return (TypeLibrary.Purview.Telemetry.TelemetryGenerationAttribute, WriteTelemetryGenerationAttribute);
 		yield return (
@@ -40,10 +36,8 @@ static class GeneratedTypesEmitter
 		yield return (TypeLibrary.Purview.Telemetry.ExcludeTargetsAttribute, WriteExcludeTargetsAttribute);
 
 		// Activities
-		yield return (
-			TypeLibrary.Purview.Telemetry.BaggageAttribute,
-			(writer, type) =>
-				WriteTagLikeAttribute(writer, type, "Marks a parameter as baggage to be attached to an activity.")
+		yield return (TypeLibrary.Purview.Telemetry.BaggageAttribute, (writer, type) =>
+			WriteTagLikeAttribute(writer, type, "Marks a parameter as baggage to be attached to an activity.")
 		);
 		yield return (
 			TypeLibrary.Purview.Telemetry.ActivitySourceGenerationAttribute,
@@ -52,38 +46,32 @@ static class GeneratedTypesEmitter
 		yield return (TypeLibrary.Purview.Telemetry.ActivitySourceAttribute, WriteActivitySourceAttribute);
 		yield return (TypeLibrary.Purview.Telemetry.ActivityAttribute, WriteActivityAttribute);
 		yield return (TypeLibrary.Purview.Telemetry.EventAttribute, WriteEventAttribute);
-		yield return (
-			TypeLibrary.Purview.Telemetry.ContextAttribute,
-			(writer, type) =>
-				WriteSimpleAttribute(
-					writer,
-					type,
-					AttributeTargets.Method,
-					includeSuppressMessage: false,
-					"Marks a parameter as an activity context."
-				)
+		yield return (TypeLibrary.Purview.Telemetry.ContextAttribute, (writer, type) =>
+			WriteSimpleAttribute(
+				writer,
+				type,
+				AttributeTargets.Method,
+				includeSuppressMessage: false,
+				"Marks a parameter as an activity context."
+			)
 		);
-		yield return (
-			TypeLibrary.Purview.Telemetry.EscapeAttribute,
-			(writer, type) =>
-				WriteSimpleAttribute(
-					writer,
-					type,
-					AttributeTargets.Parameter,
-					includeSuppressMessage: false,
-					"Marks a parameter as the escape flag for a recorded exception."
-				)
+		yield return (TypeLibrary.Purview.Telemetry.EscapeAttribute, (writer, type) =>
+			WriteSimpleAttribute(
+				writer,
+				type,
+				AttributeTargets.Parameter,
+				includeSuppressMessage: false,
+				"Marks a parameter as the escape flag for a recorded exception."
+			)
 		);
-		yield return (
-			TypeLibrary.Purview.Telemetry.StatusDescriptionAttribute,
-			(writer, type) =>
-				WriteSimpleAttribute(
-					writer,
-					type,
-					AttributeTargets.Parameter,
-					includeSuppressMessage: false,
-					"Marks a parameter as the status description of an activity or event."
-				)
+		yield return (TypeLibrary.Purview.Telemetry.StatusDescriptionAttribute, (writer, type) =>
+			WriteSimpleAttribute(
+				writer,
+				type,
+				AttributeTargets.Parameter,
+				includeSuppressMessage: false,
+				"Marks a parameter as the status description of an activity or event."
+			)
 		);
 
 		// Logging
@@ -93,92 +81,70 @@ static class GeneratedTypesEmitter
 		yield return (TypeLibrary.Purview.Telemetry.LogPrefixType, WriteLogPrefixTypeEnum);
 		yield return (TypeLibrary.Purview.Telemetry.LoggerGenerationMode, WriteLoggerGenerationModeEnum);
 		yield return (TypeLibrary.Purview.Telemetry.ExpandEnumerableAttribute, WriteExpandEnumerableAttribute);
-		yield return (
-			TypeLibrary.Purview.Telemetry.TraceAttribute,
-			(writer, type) => WriteSpecificLogAttribute(writer, type, "Marks a method as a trace-level log method.")
+		yield return (TypeLibrary.Purview.Telemetry.TraceAttribute, (writer, type) =>
+			WriteSpecificLogAttribute(writer, type, "Marks a method as a trace-level log method.")
 		);
-		yield return (
-			TypeLibrary.Purview.Telemetry.DebugAttribute,
-			(writer, type) => WriteSpecificLogAttribute(writer, type, "Marks a method as a debug-level log method.")
+		yield return (TypeLibrary.Purview.Telemetry.DebugAttribute, (writer, type) =>
+			WriteSpecificLogAttribute(writer, type, "Marks a method as a debug-level log method.")
 		);
-		yield return (
-			TypeLibrary.Purview.Telemetry.InfoAttribute,
-			(writer, type) => WriteSpecificLogAttribute(writer, type, "Marks a method as an informational log method.")
+		yield return (TypeLibrary.Purview.Telemetry.InfoAttribute, (writer, type) =>
+			WriteSpecificLogAttribute(writer, type, "Marks a method as an informational log method.")
 		);
-		yield return (
-			TypeLibrary.Purview.Telemetry.WarningAttribute,
-			(writer, type) => WriteSpecificLogAttribute(writer, type, "Marks a method as a warning-level log method.")
+		yield return (TypeLibrary.Purview.Telemetry.WarningAttribute, (writer, type) =>
+			WriteSpecificLogAttribute(writer, type, "Marks a method as a warning-level log method.")
 		);
-		yield return (
-			TypeLibrary.Purview.Telemetry.ErrorAttribute,
-			(writer, type) => WriteSpecificLogAttribute(writer, type, "Marks a method as an error-level log method.")
+		yield return (TypeLibrary.Purview.Telemetry.ErrorAttribute, (writer, type) =>
+			WriteSpecificLogAttribute(writer, type, "Marks a method as an error-level log method.")
 		);
-		yield return (
-			TypeLibrary.Purview.Telemetry.CriticalAttribute,
-			(writer, type) => WriteSpecificLogAttribute(writer, type, "Marks a method as a critical-level log method.")
+		yield return (TypeLibrary.Purview.Telemetry.CriticalAttribute, (writer, type) =>
+			WriteSpecificLogAttribute(writer, type, "Marks a method as a critical-level log method.")
 		);
 
 		// Metrics
 		yield return (TypeLibrary.Purview.Telemetry.MeterGenerationAttribute, WriteMeterGenerationAttribute);
 		yield return (TypeLibrary.Purview.Telemetry.MeterAttribute, WriteMeterAttribute);
 		yield return (TypeLibrary.Purview.Telemetry.MeterNameGenerationType, WriteMeterNameGenerationTypeEnum);
-		yield return (
-			TypeLibrary.Purview.Telemetry.InstrumentMeasurementAttribute,
-			(writer, type) =>
-				WriteSimpleAttribute(
-					writer,
-					type,
-					AttributeTargets.Parameter,
-					includeSuppressMessage: false,
-					"Marks a parameter as the measurement value of an instrument."
-				)
+		yield return (TypeLibrary.Purview.Telemetry.InstrumentMeasurementAttribute, (writer, type) =>
+			WriteSimpleAttribute(
+				writer,
+				type,
+				AttributeTargets.Parameter,
+				includeSuppressMessage: false,
+				"Marks a parameter as the measurement value of an instrument."
+			)
 		);
-		yield return (
-			TypeLibrary.Purview.Telemetry.AutoCounterAttribute,
-			(writer, type) =>
-				WriteAutoCounterAttribute(writer, type, "Marks a method as an auto-incrementing counter instrument.")
+		yield return (TypeLibrary.Purview.Telemetry.AutoCounterAttribute, (writer, type) =>
+			WriteAutoCounterAttribute(writer, type, "Marks a method as an auto-incrementing counter instrument.")
 		);
-		yield return (
-			TypeLibrary.Purview.Telemetry.CounterAttribute,
-			(writer, type) => WriteCounterLikeAttribute(writer, type, "Marks a method as a counter instrument.")
+		yield return (TypeLibrary.Purview.Telemetry.CounterAttribute, (writer, type) =>
+			WriteCounterLikeAttribute(writer, type, "Marks a method as a counter instrument.", writeAutoIncrement: true)
 		);
-		yield return (
-			TypeLibrary.Purview.Telemetry.UpDownCounterAttribute,
-			(writer, type) =>
-				WriteCounterLikeAttribute(writer, type, "Marks a method as an up-down counter instrument.")
+		yield return (TypeLibrary.Purview.Telemetry.UpDownCounterAttribute, (writer, type) =>
+			WriteCounterLikeAttribute(writer, type, "Marks a method as an up-down counter instrument.")
 		);
-		yield return (
-			TypeLibrary.Purview.Telemetry.HistogramAttribute,
-			(writer, type) =>
-				WriteCounterLikeAttribute(
-					writer,
-					type,
-					"Marks a method as a histogram instrument.",
-					writeHistogramBucketBoundaries: true
-				)
+		yield return (TypeLibrary.Purview.Telemetry.HistogramAttribute, (writer, type) =>
+			WriteCounterLikeAttribute(
+				writer,
+				type,
+				"Marks a method as a histogram instrument.",
+				writeHistogramBucketBoundaries: true
+			)
 		);
-		yield return (
-			TypeLibrary.Purview.Telemetry.GaugeAttribute,
-			(writer, type) => WriteGaugeAttribute(writer, type, "Marks a method as a gauge instrument.")
+		yield return (TypeLibrary.Purview.Telemetry.GaugeAttribute, (writer, type) =>
+			WriteGaugeAttribute(writer, type, "Marks a method as a gauge instrument.")
 		);
-		yield return (
-			TypeLibrary.Purview.Telemetry.ObservableCounterAttribute,
-			(writer, type) =>
-				WriteObservableCounterLikeAttribute(writer, type, "Marks a method as an observable counter instrument.")
+		yield return (TypeLibrary.Purview.Telemetry.ObservableCounterAttribute, (writer, type) =>
+			WriteObservableCounterLikeAttribute(writer, type, "Marks a method as an observable counter instrument.")
 		);
-		yield return (
-			TypeLibrary.Purview.Telemetry.ObservableUpDownCounterAttribute,
-			(writer, type) =>
-				WriteObservableCounterLikeAttribute(
-					writer,
-					type,
-					"Marks a method as an observable up-down counter instrument."
-				)
+		yield return (TypeLibrary.Purview.Telemetry.ObservableUpDownCounterAttribute, (writer, type) =>
+			WriteObservableCounterLikeAttribute(
+				writer,
+				type,
+				"Marks a method as an observable up-down counter instrument."
+			)
 		);
-		yield return (
-			TypeLibrary.Purview.Telemetry.ObservableGaugeAttribute,
-			(writer, type) =>
-				WriteObservableCounterLikeAttribute(writer, type, "Marks a method as an observable gauge instrument.")
+		yield return (TypeLibrary.Purview.Telemetry.ObservableGaugeAttribute, (writer, type) =>
+			WriteObservableCounterLikeAttribute(writer, type, "Marks a method as an observable gauge instrument.")
 		);
 	}
 
@@ -400,21 +366,19 @@ static class GeneratedTypesEmitter
 			throw new ArgumentException("Summary must be provided for public properties.", nameof(summary));
 #endif
 
-		writer.HashDefines(
-			"NET48_OR_GREATER",
-			hashWriter =>
-				hashWriter
-					.XmlSummary(summary)
-					.Property(
-						new(name, TypeLibrary.System.String, TypeDeclarationAccessibility.Public) { HasSetter = true }
-					)
-					.HashElse()
-					.Property(
-						new(name, TypeLibrary.System.String.MakeNullable(writer), TypeDeclarationAccessibility.Public)
-						{
-							HasSetter = true,
-						}
-					)
+		writer.HashDefines("NET48_OR_GREATER", hashWriter =>
+			hashWriter
+				.XmlSummary(summary)
+				.Property(
+					new(name, TypeLibrary.System.String, TypeDeclarationAccessibility.Public) { HasSetter = true }
+				)
+				.HashElse()
+				.Property(
+					new(name, TypeLibrary.System.String.MakeNullable(writer), TypeDeclarationAccessibility.Public)
+					{
+						HasSetter = true,
+					}
+				)
 		);
 	}
 
@@ -736,9 +700,8 @@ static class GeneratedTypesEmitter
 						},
 						ctor =>
 						{
-							ctor.IfBlock(
-								"string.IsNullOrWhiteSpace(name)",
-								static body => body.Throw("new System.ArgumentNullException(nameof(name))")
+							ctor.IfBlock("string.IsNullOrWhiteSpace(name)", static body =>
+								body.Throw("new System.ArgumentNullException(nameof(name))")
 							);
 							ctor.Assignment("Name", "name");
 							ctor.Assignment("DefaultToTags", "defaultToTags");
@@ -804,6 +767,13 @@ static class GeneratedTypesEmitter
 					"The telemetry schema URL passed to System.Diagnostics.ActivitySourceOptions for factory-created "
 						+ "sources. Ignored, and reported as TSG3024, unless UseActivitySourceFactory is set."
 				);
+				WriteNullableStringProperty(
+					body,
+					"Tags",
+					"The tags passed to System.Diagnostics.ActivitySourceOptions for factory-created sources, as a "
+						+ "comma-separated list of key=value pairs. Ignored, and reported as TSG3024, unless "
+						+ "UseActivitySourceFactory is set."
+				);
 			},
 			"Specifies the default activity source generation behaviour for an assembly."
 		);
@@ -823,11 +793,8 @@ static class GeneratedTypesEmitter
 					$"Constructs a new instance of the {XmlSee("ActivitySourceAttribute")}."
 				);
 
-				WriteNameConstructor(
-					body,
-					type,
-					$"Constructs a new instance specifying the {XmlSee("Name")}.",
-					w => w.XmlParam("name", $"The {XmlSee("Name")}.")
+				WriteNameConstructor(body, type, $"Constructs a new instance specifying the {XmlSee("Name")}.", w =>
+					w.XmlParam("name", $"The {XmlSee("Name")}.")
 				);
 
 				WriteNullableStringProperty(body, "Name", "Optional. Gets the name of the activity source.");
@@ -877,11 +844,8 @@ static class GeneratedTypesEmitter
 			{
 				WriteEmptyConstructor(body, type, $"Constructs a new instance of the {XmlSee("ActivityAttribute")}.");
 
-				WriteNameConstructor(
-					body,
-					type,
-					$"Constructs a new instance specifying the {XmlSee("Name")}.",
-					w => w.XmlParam("name", $"The {XmlSee("Name")}.")
+				WriteNameConstructor(body, type, $"Constructs a new instance specifying the {XmlSee("Name")}.", w =>
+					w.XmlParam("name", $"The {XmlSee("Name")}.")
 				);
 
 				body.XmlSummary($"Constructs a new instance specifying the {XmlSee("Kind")}.")
@@ -1096,9 +1060,8 @@ static class GeneratedTypesEmitter
 						{
 							ctor.Assignment("DefaultLevel", "defaultLevel");
 							ctor.Assignment("CustomPrefix", "customPrefix");
-							ctor.IfBlock(
-								"!string.IsNullOrWhiteSpace(CustomPrefix)",
-								block => block.Assignment("PrefixType", $"{logPrefixType.RenderFullName}.Custom")
+							ctor.IfBlock("!string.IsNullOrWhiteSpace(CustomPrefix)", block =>
+								block.Assignment("PrefixType", $"{logPrefixType.RenderFullName}.Custom")
 							);
 						}
 					);
@@ -1225,6 +1188,12 @@ static class GeneratedTypesEmitter
 					TypeLibrary.Purview.Telemetry.LoggerGenerationMode,
 					"Gets or sets the log generation mode used for the log entry."
 				);
+				WritePublicProperty(
+					body,
+					"SkipEnabledCheck",
+					TypeLibrary.System.Boolean,
+					"Skips the generated IsEnabled check when the caller has already checked the level, as [LoggerMessage(SkipEnabledCheck = true)] does."
+				);
 			},
 			wrapInExcludeLoggingGuard: true,
 			summary: "Marks a method as a log method."
@@ -1313,6 +1282,12 @@ static class GeneratedTypesEmitter
 					TypeLibrary.Purview.Telemetry.LoggerGenerationMode,
 					"Gets or sets the log generation mode used for the log entry."
 				);
+				WritePublicProperty(
+					body,
+					"SkipEnabledCheck",
+					TypeLibrary.System.Boolean,
+					"Skips the generated IsEnabled check when the caller has already checked the level, as [LoggerMessage(SkipEnabledCheck = true)] does."
+				);
 			},
 			wrapInExcludeLoggingGuard: true,
 			summary: summary
@@ -1357,7 +1332,6 @@ static class GeneratedTypesEmitter
 	// -------------------------------------------------------------------------------------------
 	// Metrics templates
 	// -------------------------------------------------------------------------------------------
-
 	static void WriteMeterGenerationAttribute(CodeWriter writer, TypeIdentity type)
 	{
 		var nameGenerationType = TypeLibrary.Purview.Telemetry.MeterNameGenerationType;
@@ -1438,6 +1412,16 @@ static class GeneratedTypesEmitter
 					"Determines whether tag keys are lowercased.",
 					"true"
 				);
+				WriteNullableStringProperty(
+					body,
+					"Version",
+					"Gets or sets the meter version passed to MeterOptions.Version (and to the Meter constructor when no IMeterFactory is available)."
+				);
+				WriteNullableStringProperty(
+					body,
+					"Tags",
+					"Gets or sets the meter tags passed to MeterOptions.Tags, as a comma-separated list of key=value pairs."
+				);
 			},
 			"Specifies the default meter generation behaviour for an assembly."
 		);
@@ -1481,6 +1465,16 @@ static class GeneratedTypesEmitter
 					"Determines whether tag keys are lowercased.",
 					"true"
 				);
+				WriteNullableStringProperty(
+					body,
+					"Version",
+					"Gets or sets the meter version passed to MeterOptions.Version (and to the Meter constructor when no IMeterFactory is available)."
+				);
+				WriteNullableStringProperty(
+					body,
+					"Tags",
+					"Gets or sets the meter tags passed to MeterOptions.Tags, as a comma-separated list of key=value pairs."
+				);
 			},
 			"Marks an interface as a meter."
 		);
@@ -1518,7 +1512,8 @@ static class GeneratedTypesEmitter
 		CodeWriter writer,
 		TypeIdentity type,
 		string summary,
-		bool writeHistogramBucketBoundaries = false
+		bool writeHistogramBucketBoundaries = false,
+		bool writeAutoIncrement = false
 	)
 	{
 #if DEUBG
@@ -1533,30 +1528,41 @@ static class GeneratedTypesEmitter
 			body =>
 			{
 				WriteEmptyConstructor(body, type, $"Constructs a new instance of the {XmlSee(type.Name)}.");
-				body.XmlSummary(
-						$"Constructs a new instance specifying whether the counter auto-increments ({XmlSee("AutoIncrement")})."
-					)
-					.XmlParam("autoIncrement", $"Whether the counter auto-increments ({XmlSee("AutoIncrement")}).")
-					.Constructor(
-						new(type.Name, TypeDeclarationAccessibility.Public)
-						{
-							Parameters = [new("autoIncrement", TypeLibrary.System.Boolean)],
-						},
-						ctor => ctor.Assignment("AutoIncrement", "autoIncrement")
-					);
+				if (writeAutoIncrement)
+				{
+					body.XmlSummary(
+							$"Constructs a new instance specifying whether the counter auto-increments ({XmlSee("AutoIncrement")})."
+						)
+						.XmlParam("autoIncrement", $"Whether the counter auto-increments ({XmlSee("AutoIncrement")}).")
+						.Constructor(
+							new(type.Name, TypeDeclarationAccessibility.Public)
+							{
+								Parameters = [new("autoIncrement", TypeLibrary.System.Boolean)],
+							},
+							ctor => ctor.Assignment("AutoIncrement", "autoIncrement")
+						);
+				}
+
 				WriteNameUnitDescriptionConstructor(
 					body,
 					type,
-					appendAutoIncrement: true,
-					summary: $"Constructs a new instance specifying the {XmlSee("Name")}, {XmlSee("Unit")}, {XmlSee("Description")} and whether the counter auto-increments."
+					appendAutoIncrement: writeAutoIncrement,
+					summary: writeAutoIncrement
+						? $"Constructs a new instance specifying the {XmlSee("Name")}, {XmlSee("Unit")}, {XmlSee("Description")} and whether the counter auto-increments."
+						: $"Constructs a new instance specifying the {XmlSee("Name")}, {XmlSee("Unit")} and {XmlSee("Description")}."
 				);
 
-				WritePublicProperty(
-					body,
-					"AutoIncrement",
-					TypeLibrary.System.Boolean,
-					"Determines whether the counter auto-increments."
-				);
+				// AutoIncrement belongs to [Counter] alone: [UpDownCounter] and [Histogram] hard-code it to false in
+				// their instrument records, so a settable property here was inert surface a consumer could set and
+				// never see take effect.
+				if (writeAutoIncrement)
+					WritePublicProperty(
+						body,
+						"AutoIncrement",
+						TypeLibrary.System.Boolean,
+						"Determines whether the counter auto-increments."
+					);
+
 				WriteNullableStringProperty(body, "Name", "Gets or sets the name of the instrument.");
 				WriteNullableStringProperty(body, "Unit", "Gets or sets the measurement unit of the instrument.");
 				WriteNullableStringProperty(body, "Description", "Gets or sets the description of the instrument.");
@@ -1618,12 +1624,6 @@ static class GeneratedTypesEmitter
 					type,
 					appendThrowOnAlreadyInitialized: true,
 					summary: $"Constructs a new instance specifying the {XmlSee("Name")}, {XmlSee("Unit")}, {XmlSee("Description")} and whether initializing twice throws."
-				);
-				WritePublicProperty(
-					body,
-					"AutoIncrement",
-					TypeLibrary.System.Boolean,
-					"Determines whether the counter auto-increments."
 				);
 				WriteNullableStringProperty(body, "Name", "Gets or sets the name of the instrument.");
 				WriteNullableStringProperty(body, "Unit", "Gets or sets the measurement unit of the instrument.");
@@ -1747,45 +1747,41 @@ static class GeneratedTypesEmitter
 
 	static void WriteLogPrefixTypeEnum(CodeWriter writer, TypeIdentity type)
 	{
-		writer.HashDefines(
-			"!EXCLUDE_PURVIEW_TELEMETRY_LOGGING",
-			hashWriter =>
-				hashWriter
-					.FileScopedNamespace(TypeLibrary.Purview.Telemetry.Namespace)
-					.XmlSummary("Determines the mode used to generate or override the prefix for the log entry.")
-					.Enum(
-						type.Name,
-						TypeDeclarationAccessibility.Public,
-						fields:
-						[
-							new("Default", 0, "Uses the default log prefix."),
-							new("Interface", 1, "Uses the interface name as the log prefix."),
-							new("Class", 2, "Uses the class name as the log prefix."),
-							new("Custom", 3, "Uses a custom log prefix."),
-							new("TrimmedClassName", 4, "Uses the trimmed class name as the log prefix."),
-						]
-					)
+		writer.HashDefines("!EXCLUDE_PURVIEW_TELEMETRY_LOGGING", hashWriter =>
+			hashWriter
+				.FileScopedNamespace(TypeLibrary.Purview.Telemetry.Namespace)
+				.XmlSummary("Determines the mode used to generate or override the prefix for the log entry.")
+				.Enum(
+					type.Name,
+					TypeDeclarationAccessibility.Public,
+					fields:
+					[
+						new("Default", 0, "Uses the default log prefix."),
+						new("Interface", 1, "Uses the interface name as the log prefix."),
+						new("Class", 2, "Uses the class name as the log prefix."),
+						new("Custom", 3, "Uses a custom log prefix."),
+						new("TrimmedClassName", 4, "Uses the trimmed class name as the log prefix."),
+					]
+				)
 		);
 	}
 
 	static void WriteLoggerGenerationModeEnum(CodeWriter writer, TypeIdentity type)
 	{
-		writer.HashDefines(
-			"!EXCLUDE_PURVIEW_TELEMETRY_LOGGING",
-			hashWriter =>
-				hashWriter
-					.FileScopedNamespace(TypeLibrary.Purview.Telemetry.Namespace)
-					.XmlSummary("Controls the generation mode used for log methods.")
-					.Enum(
-						type.Name,
-						TypeDeclarationAccessibility.Public,
-						fields:
-						[
-							new("Auto", 0, "Automatically selects the log generation mode."),
-							new("V1", 1, "Uses the first-generation log implementation."),
-							new("V2", 2, "Uses the second-generation log implementation."),
-						]
-					)
+		writer.HashDefines("!EXCLUDE_PURVIEW_TELEMETRY_LOGGING", hashWriter =>
+			hashWriter
+				.FileScopedNamespace(TypeLibrary.Purview.Telemetry.Namespace)
+				.XmlSummary("Controls the generation mode used for log methods.")
+				.Enum(
+					type.Name,
+					TypeDeclarationAccessibility.Public,
+					fields:
+					[
+						new("Auto", 0, "Automatically selects the log generation mode."),
+						new("V1", 1, "Uses the first-generation log implementation."),
+						new("V2", 2, "Uses the second-generation log implementation."),
+					]
+				)
 		);
 	}
 

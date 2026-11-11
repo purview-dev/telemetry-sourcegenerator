@@ -37,7 +37,10 @@ assembly reaches your application's output. See
 - **C# 15 static interface members** are ignored rather than implemented.
 - **C# 15 union types** are unwrapped to their case value for tags, baggage, log values and metric tags.
   A union that declares the non-boxing `TryGetValue`/`HasValue` pattern is read without boxing the union
-  struct. See [Union types](https://purview.dev/docs/telemetry-sourcegenerator/tags-and-baggage/#union-types).
+  struct. **Purview.Unions `[GenerateUnion]` types** work too: the case list is read from the surface that is
+  in source — the attribute's `typeof` list, partial static factories, a nested `IUnionMembers` provider, then
+  the constructors — so no reference to that package is taken and no other generator's output is needed. See
+  [Union types](https://purview.dev/docs/telemetry-sourcegenerator/tags-and-baggage/#union-types).
 - **Validated on .NET 11**: the tests run on `net11.0`, and Native AOT, Blazor WebAssembly and Blazor Server
   consumers of the package are built on every release.
 - **.NET 8 and .NET 9 are no longer supported**: target `net10.0`+ or `net48`+. `TSG1011` reports a

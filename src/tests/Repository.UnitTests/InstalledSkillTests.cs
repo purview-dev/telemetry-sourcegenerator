@@ -10,12 +10,27 @@ namespace Purview.Telemetry.Repository;
 /// <c>.agents/skills/</c>, never copies.
 /// </summary>
 /// <remarks>
+/// <para>
 /// <c>SkillTests</c> validates this repository's own skills in <c>skills/</c>; these are someone else's,
 /// so their content is not checked here, only that the installed set is the recorded set.
+/// </para>
+/// <para>
+/// <see cref="DeveloperSkills"/> are the exception: skills written here for people working on the
+/// generator. They are not consumer guidance and are never published, so they cannot live in
+/// <c>skills/</c> (which the skills CLI ships) or in the lockfile (which the CLI writes). They live in
+/// <c>.agents/skills/</c> because that is the one folder every agent reads.
+/// </para>
 /// </remarks>
 public sealed class InstalledSkillTests
 {
 	static readonly Lazy<string> RepositoryRoot = new(FindRepositoryRoot);
+
+	/// <summary>
+	/// Skills committed here for this repository's own developers. Each is authored in place, is not in
+	/// <c>skills-lock.json</c> (no CLI wrote it) and must never appear in <c>skills/</c>, because anything
+	/// there is published to consumers.
+	/// </summary>
+	static readonly string[] DeveloperSkills = ["purview-telemetry-benchmarks"];
 
 	[Test]
 	public async Task Lockfile_GivenEveryEntry_HasItsSkillInstalledUnderAgents(CancellationToken cancellationToken)
@@ -50,6 +65,7 @@ public sealed class InstalledSkillTests
 			.GetDirectories(AgentsSkillsFolder())
 			.Select(static path => Path.GetFileName(path))
 			.Where(name => !recorded.Contains(name, StringComparer.Ordinal))
+			.Where(name => !DeveloperSkills.Contains(name, StringComparer.Ordinal))
 			.ToArray();
 
 		// Assert
@@ -58,7 +74,36 @@ public sealed class InstalledSkillTests
 			.IsEmpty()
 			.Because(
 				"every folder in .agents/skills/ must be written by the skills CLI, which records it in "
-					+ $"skills-lock.json: {string.Join(", ", unrecorded)}"
+					+ "skills-lock.json, or declared in InstalledSkillTests.DeveloperSkills as a "
+					+ $"developer skill of this repository: {string.Join(", ", unrecorded)}"
+			);
+	}
+
+	[Test]
+	public async Task DeveloperSkills_GivenEachOne_IsPresentAndNeverPublished(CancellationToken cancellationToken)
+	{
+		// Arrange
+		cancellationToken.ThrowIfCancellationRequested();
+
+		// Act: a developer skill has to be loadable by an agent, and it must not also be a consumer skill.
+		var notLoadable = DeveloperSkills
+			.Where(static name => !File.Exists(Path.Combine(AgentsSkillsFolder(), name, "SKILL.md")))
+			.ToArray();
+		var published = DeveloperSkills
+			.Where(static name => Directory.Exists(Path.Combine(RepositoryRoot.Value, "skills", name)))
+			.ToArray();
+
+		// Assert
+		await Assert
+			.That(notLoadable)
+			.IsEmpty()
+			.Because($"a developer skill must ship its SKILL.md in .agents/skills/: {string.Join(", ", notLoadable)}");
+		await Assert
+			.That(published)
+			.IsEmpty()
+			.Because(
+				"a developer skill is for this repository only, so it must never sit in skills/, which the "
+					+ $"skills CLI publishes to consumers: {string.Join(", ", published)}"
 			);
 	}
 

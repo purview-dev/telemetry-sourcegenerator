@@ -47,7 +47,8 @@ static class EmitterHelpers
 		GenerationType generationType,
 		string className,
 		TypeReference interfaceType,
-		TypeDeclarationAccessibility accessibility
+		TypeDeclarationAccessibility accessibility,
+		EquatableArray<TypeParameterTarget> interfaceTypeParameters = default
 	)
 	{
 		ImmutableArray<AttributeDeclarationOptions> attributes = [];
@@ -60,6 +61,8 @@ static class EmitterHelpers
 				IncludeGeneratedAttributes = false,
 				Interfaces = [interfaceType],
 				Attributes = attributes,
+				// A generic interface makes the generated class generic over the same type parameters.
+				GenericTypes = TypeParameterHelpers.ToOptions(interfaceTypeParameters),
 			}
 		);
 	}

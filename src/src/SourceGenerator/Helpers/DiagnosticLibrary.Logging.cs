@@ -128,5 +128,77 @@ partial class DiagnosticLibrary
 			),
 			isBlocking: false
 		);
+
+		public static readonly ReportableDiagnostic ParamsParameterNotSupported = ReportableDiagnostic.Create(
+			new DiagnosticDescriptor(
+				id: "TSG2022",
+				title: "params parameters are not supported",
+				messageFormat: "A logging parameter cannot be declared 'params'. The generated method re-declares the parameter without the modifier, so the params call form would stop compiling; take an array and mark it [ExpandEnumerable] instead.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Logging.Usage,
+				isEnabledByDefault: true
+			),
+			isBlocking: false
+		);
+
+		public static readonly ReportableDiagnostic ByRefParameterNotSupported = ReportableDiagnostic.Create(
+			new DiagnosticDescriptor(
+				id: "TSG2023",
+				title: "ref, out and ref struct parameters are not supported",
+				messageFormat: "A logging parameter cannot be 'ref', 'out', 'in', 'scoped', or a ref struct such as Span<T>. The generated state struct cannot capture it, and LoggerMessage.Define cannot carry it.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Logging.Usage,
+				isEnabledByDefault: true
+			),
+			isBlocking: false
+		);
+
+		public static readonly ReportableDiagnostic TagProviderTypeNotFound = ReportableDiagnostic.Create(
+			new DiagnosticDescriptor(
+				id: "TSG2024",
+				title: "TagProvider type could not be resolved",
+				messageFormat: "The [TagProvider] on parameter '{0}' names the type '{1}', which cannot be resolved. The parameter is logged without the extra tags.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Logging.Usage,
+				isEnabledByDefault: true
+			),
+			isBlocking: false
+		);
+
+		public static readonly ReportableDiagnostic TagProviderMethodNotFound = ReportableDiagnostic.Create(
+			new DiagnosticDescriptor(
+				id: "TSG2025",
+				title: "TagProvider method could not be found",
+				messageFormat: "The [TagProvider] on parameter '{0}' names the method '{1}' on '{2}', which does not exist. The parameter is logged without the extra tags.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Logging.Usage,
+				isEnabledByDefault: true
+			),
+			isBlocking: false
+		);
+
+		public static readonly ReportableDiagnostic TagProviderMethodInvalidSignature = ReportableDiagnostic.Create(
+			new DiagnosticDescriptor(
+				id: "TSG2026",
+				title: "TagProvider method has an invalid signature",
+				messageFormat: "The [TagProvider] method '{0}' on '{1}' must be a visible static method taking one '{2}' parameter and returning IEnumerable<KeyValuePair<string, object?>> or IEnumerable<KeyValuePair<string, string>>. The parameter is logged without the extra tags.",
+				defaultSeverity: DiagnosticSeverity.Error,
+				category: Categories.Logging.Usage,
+				isEnabledByDefault: true
+			),
+			isBlocking: false
+		);
+
+		public static readonly ReportableDiagnostic TagProviderNotOnLoggingMethod = ReportableDiagnostic.Create(
+			new DiagnosticDescriptor(
+				id: "TSG2027",
+				title: "TagProvider is only supported on logging parameters",
+				messageFormat: "The [TagProvider] on parameter '{0}' is on a method that generates no log entry, so the provider would never run. Move it to a logging method, or remove it.",
+				defaultSeverity: DiagnosticSeverity.Warning,
+				category: Categories.Logging.Usage,
+				isEnabledByDefault: true
+			),
+			isBlocking: false
+		);
 	}
 }

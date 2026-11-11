@@ -1,8 +1,8 @@
 namespace Purview.Telemetry.SourceGenerator.Records;
 
 /// <summary>
-/// The instrument a metrics method declares: exactly one of the eight <c>System.Diagnostics.Metrics</c> instruments,
-/// so the hierarchy is <c>closed</c> and a <c>switch</c> over it is exhaustive.
+/// The instrument a metrics method declares: exactly one of the seven <c>System.Diagnostics.Metrics</c> instrument
+/// types, so the hierarchy is <c>closed</c> and a <c>switch</c> over it is exhaustive.
 /// </summary>
 /// <remarks>
 /// Each case knows the <c>Meter</c> factory method that creates it, the instrument type it produces and how it

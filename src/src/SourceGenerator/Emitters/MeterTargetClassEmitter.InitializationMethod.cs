@@ -37,12 +37,8 @@ partial class MeterTargetClassEmitter
 		{
 			// Double-init guard: prevents re-initialization when the method path is used
 			// (occurs in Logging+Metrics multi-target where Logging owns the constructor).
-			writer.IfBlock(
-				MeterFieldName + " != null",
-				body =>
-					body.Throw(
-						"new " + TypeLibrary.System.Exception + "(\"The meters have already been initialized.\")"
-					)
+			writer.IfBlock(MeterFieldName + " != null", body =>
+				body.Throw("new " + TypeLibrary.System.Exception + "(\"The meters have already been initialized.\")")
 			);
 
 			writer.NewLine();
@@ -102,6 +98,10 @@ partial class MeterTargetClassEmitter
 		var supportsIMeterFactory = output.Context.Capabilities.SupportsIMeterFactory;
 		const string meterTagsVariableName = "meterTags";
 
+		// An explicit [Meter]/[MeterGeneration] Version wins; otherwise the assembly's own version, resolved once per
+		// compilation on the capabilities rather than read per target here.
+		var meterVersion = target.MeterVersion ?? output.Context.Capabilities.AssemblyVersion;
+
 		var dictType = GetDictionaryType(writer);
 		writer.Assignment((string)dictType, meterTagsVariableName, "new " + (string)dictType + "()").NewLine();
 
@@ -109,6 +109,23 @@ partial class MeterTargetClassEmitter
 
 		if (supportsIMeterFactory)
 		{
+			// Attribute-supplied tags first (key=value from [Meter]/[MeterGeneration]), then the consumer's
+			// partial hook, so a consumer can override any key at runtime.
+			foreach (var tag in target.MeterTags)
+			{
+				var separator = tag.IndexOf('=');
+				if (separator <= 0)
+					continue;
+
+				writer
+					.Write(meterTagsVariableName)
+					.Write('[')
+					.Write(tag.Substring(0, separator).Wrap())
+					.Write("] = ")
+					.Write(tag.Substring(separator + 1).Wrap())
+					.Line(";");
+			}
+
 			writer
 				.Write(MeterFieldName)
 				.Write(" = ")
@@ -120,7 +137,9 @@ partial class MeterTargetClassEmitter
 				.Write(") {")
 				.NewLine();
 			writer.Indent();
-			writer.Line("Version = null,");
+			writer.Line(
+				"Version = " + (meterVersion is null ? PropertyLibrary.System.NullKeyword : meterVersion.Wrap()) + ","
+			);
 			writer.Line($"Tags = {meterTagsVariableName}");
 			writer.Unindent();
 			writer.Write("});").NewLine();
@@ -132,9 +151,13 @@ partial class MeterTargetClassEmitter
 				.Write(" = new ")
 				.Write(TypeLibrary.System.Diagnostics.Metrics.Meter)
 				.Write('(')
-				.Write(target.MeterName!.Wrap())
-				.Line(");")
-				.NewLine();
+				.Write(target.MeterName!.Wrap());
+
+			// Meter(string name, string? version) is the only metadata the constructor carries.
+			if (meterVersion is not null)
+				writer.Write(", ").Write(meterVersion.Wrap());
+
+			writer.Line(");").NewLine();
 		}
 
 		foreach (var method in target.InstrumentationMethods)

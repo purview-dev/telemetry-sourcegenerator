@@ -5,7 +5,7 @@
 	},
 	"msbuild-sdks": {
 		"Purview.BuildSdk": "2.0.0",
-		"Aspire.AppHost.Sdk": "13.6.4"
+		"Aspire.AppHost.Sdk": "13.6.5"
 	},
 	"test": {
 		"runner": "Microsoft.Testing.Platform"

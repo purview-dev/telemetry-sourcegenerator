@@ -1,9 +1,0 @@
-# CSharpier 1.3.0 (the newest release) parses with a Roslyn that predates C# 15, so the two files that use the
-# `closed` modifier fail to parse and are reported as "not formatted due to syntax errors", which fails
-# `just lint`. They are excluded rather than dropped, because `closed` is what makes a switch over the
-# activity-method and instrument hierarchies compiler-checked for exhaustiveness.
-#
-# `dotnet format` (`just format`) still analyses and formats them: it runs on the SDK's Roslyn, which
-# understands C# 15. Remove these entries once CSharpier ships C# 15 support.
-src/src/SourceGenerator/Records/ActivityRecords.cs
-src/src/SourceGenerator/Records/MetricAttributeRecords.cs

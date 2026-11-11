@@ -27,8 +27,13 @@ ALTER TABLE [Orders] ADD CONSTRAINT [DF_Orders_Id]
     DEFAULT NEWSEQUENTIALID() FOR [Id];
 ```
 
-EF Core, for a `Guid` key on SQL Server, configures this by default — `ValueGeneratedOnAdd` maps to
-`NEWSEQUENTIALID()` through the default value-generation strategy.
+EF Core does **not** map `ValueGeneratedOnAdd` to `NEWSEQUENTIALID()` by default. For a `Guid` key on
+SQL Server the provider generates the value client-side with `SequentialGuidValueGenerator` (below).
+Configure a store default explicitly when the database must own the value:
+
+```csharp
+builder.Property(o => o.Id).HasDefaultValueSql("NEWSEQUENTIALID()");
+```
 
 Trade-offs:
 
@@ -52,6 +57,44 @@ builder.Property(o => o.Id)
 
 Use this when the identifier must exist before `SaveChanges`. It keeps most of the index locality
 while letting the application own the value.
+
+### Application-generated, store-ordered strategy
+
+When one context type serves both SQL Server and PostgreSQL, or the identifier must exist before
+`SaveChanges` on both, a single built-in generator is not enough: the two stores order GUIDs
+differently. The answer is a store-specific strategy carried as context-options data — a
+`static abstract` witness whose SQL Server implementation returns `FastGuid.NewSqlServerGuid()`, plus a
+value generator and a model-finalising convention that applies it to every GUID key.
+
+```csharp
+public sealed class SqlServerSequentialGuidProvider : ISequentialGuidProvider
+{
+	public static string Name => "SqlServer";
+
+	public static Guid NewGuid() => FastGuid.NewSqlServerGuid();
+
+	public static Guid NewGuid(DateTime timestampUtc) =>
+		FastGuid.NewSqlServerGuid(UtcTimestamp.EnsureUtc(timestampUtc));
+
+	public static DateTime GetTimestamp(Guid value) => FastGuid.SqlServer.GetTimestamp(value);
+
+	public static Guid MinValueFor(DateTime timestampUtc) =>
+		FastGuid.SqlServer.MinGuidForTimestamp(UtcTimestamp.EnsureUtc(timestampUtc));
+
+	public static Guid MaxValueFor(DateTime timestampUtc) =>
+		FastGuid.SqlServer.MaxGuidForTimestamp(UtcTimestamp.EnsureUtc(timestampUtc));
+}
+```
+
+- The increasing part must sit where SQL Server sorts it. The trailing six bytes dominate
+  `uniqueidentifier`; a byte-ordered UUIDv7 does not.
+- The generator must hand the value through the property's value converter, or a `readonly record
+  struct OrderId` key receives a raw `Guid`.
+- Apply it at convention precedence, so explicit `ValueGeneratedNever()`, a store default and a
+  computed column all win.
+
+The full sample is the Engineering Playbook's *GUID Key Strategy* page. The abstraction is earned by
+the second provider; on one SQL Server provider `NEWSEQUENTIALID()` or EF Core's generator is enough.
 
 ### `Guid.NewGuid()` — random
 
@@ -88,7 +131,7 @@ reaching for a sequential generator.
 | Situation | Use |
 | -- | -- |
 | High insert volume, key may be database-generated | `NEWSEQUENTIALID()` |
-| High insert volume, identifier needed before persisting | EF Core `SequentialGuidValueGenerator` |
+| High insert volume, identifier needed before persisting | EF Core `SequentialGuidValueGenerator`, or a store-ordered `FastGuid` strategy when both providers share a model |
 | Key must be unpredictable (public surface, security boundary) | `Guid.NewGuid()`, with a non-clustered PK |
 | Low or moderate volume | `Guid.NewGuid()` — do not optimise what does not hurt |
 | You want a sortable timestamp in the key and accept the locality cost | `Guid.CreateVersion7()` |

@@ -195,7 +195,7 @@ public sealed partial class ReleaseGateTests
 	{
 		// Arrange
 		using TemporaryDirectory output = new();
-		var path = directoryExists ? output.Path : System.IO.Path.Combine(output.Path, "missing");
+		var path = directoryExists ? output.Path : Path.Combine(output.Path, "missing");
 
 		// Act
 		var result = await RunLeakScanAsync([path], cancellationToken);
@@ -218,10 +218,7 @@ public sealed partial class ReleaseGateTests
 	)
 	{
 		// Arrange
-		var workflows = Directory.GetFiles(
-			System.IO.Path.Combine(RepositoryRoot.Value, ".github", "workflows"),
-			"*.yml"
-		);
+		var workflows = Directory.GetFiles(Path.Combine(RepositoryRoot.Value, ".github", "workflows"), "*.yml");
 
 		// Act
 		List<string> building = [];
@@ -237,7 +234,7 @@ public sealed partial class ReleaseGateTests
 				)
 					continue;
 
-				var name = $"{System.IO.Path.GetFileName(workflow)}:{job}";
+				var name = $"{Path.GetFileName(workflow)}:{job}";
 				building.Add(name);
 				if (!body.Contains("./" + LeakScanScript, StringComparison.Ordinal))
 					unscanned.Add(name);
@@ -262,7 +259,7 @@ public sealed partial class ReleaseGateTests
 	{
 		// Arrange
 		var text = await File.ReadAllTextAsync(
-			System.IO.Path.Combine(RepositoryRoot.Value, ".github", "workflows", "pr.yml"),
+			Path.Combine(RepositoryRoot.Value, ".github", "workflows", "pr.yml"),
 			cancellationToken
 		);
 
@@ -293,7 +290,7 @@ public sealed partial class ReleaseGateTests
 	{
 		// Arrange
 		var text = await File.ReadAllTextAsync(
-			System.IO.Path.Combine(RepositoryRoot.Value, ".github", "workflows", "pr.yml"),
+			Path.Combine(RepositoryRoot.Value, ".github", "workflows", "pr.yml"),
 			cancellationToken
 		);
 
@@ -336,10 +333,7 @@ public sealed partial class ReleaseGateTests
 	)
 	{
 		// Arrange
-		var lines = await File.ReadAllLinesAsync(
-			System.IO.Path.Combine(RepositoryRoot.Value, script),
-			cancellationToken
-		);
+		var lines = await File.ReadAllLinesAsync(Path.Combine(RepositoryRoot.Value, script), cancellationToken);
 
 		// Act
 		var last = lines.Reverse().FirstOrDefault(static line => !string.IsNullOrWhiteSpace(line))?.Trim();
@@ -362,21 +356,67 @@ public sealed partial class ReleaseGateTests
 	)
 	{
 		// Arrange
-		var text = await File.ReadAllTextAsync(
-			System.IO.Path.Combine(RepositoryRoot.Value, "Justfile"),
-			cancellationToken
-		);
+		var text = await File.ReadAllTextAsync(Path.Combine(RepositoryRoot.Value, "Justfile"), cancellationToken);
 
 		// Act
-		var match = Regex.Match(
-			text,
-			$@"^{Regex.Escape(recipe)}\b[^\n]*:\r?\n(?<body>(?:[ \t]+[^\n]*\r?\n?)+)",
-			RegexOptions.Multiline
-		);
+		var match = Recipe(text, recipe);
 
 		// Assert
 		await Assert.That(match.Success).IsTrue().Because($"the Justfile has no '{recipe}' recipe");
 		await Assert.That(match.Groups["body"].Value).Contains($"pwsh -NoProfile -File {script}");
+	}
+
+	/// <summary>
+	/// Every version this package declares is a lower bound, so the floor it picks becomes the floor every
+	/// consumer inherits. A floor is a claim until something builds against it: <c>Directory.Packages.props</c>
+	/// keeps one property per package family plus a single <c>DependencyFloor</c> switch, <c>just test-floor</c>
+	/// proves it locally and the <c>dependency-floor</c> PR job proves it on every change.
+	/// </summary>
+	[Test]
+	public async Task DependencyFloor_GivenEachPackageFamily_IsSwitchedAndProvedByARecipeAndAPrJob(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		var packages = XDocument.Parse(
+			await File.ReadAllTextAsync(
+				Path.Combine(RepositoryRoot.Value, "Directory.Packages.props"),
+				cancellationToken
+			)
+		);
+		var justfile = await File.ReadAllTextAsync(Path.Combine(RepositoryRoot.Value, "Justfile"), cancellationToken);
+		var workflow = await File.ReadAllTextAsync(
+			Path.Combine(RepositoryRoot.Value, ".github", "workflows", "pr.yml"),
+			cancellationToken
+		);
+
+		// Act
+		var families = packages
+			.Descendants()
+			.Where(static element => element.Name.LocalName is "DotnetRuntimeVersion" or "MSExtensionVersion")
+			.ToArray();
+		var ordinary = families.Count(static element =>
+			((string?)element.Attribute("Condition"))?.Contains("!= 'true'", StringComparison.Ordinal) == true
+		);
+		var floor = families.Count(static element =>
+			((string?)element.Attribute("Condition"))?.Contains("== 'true'", StringComparison.Ordinal) == true
+		);
+		var recipe = Recipe(justfile, "test-floor");
+		var job = Jobs(workflow).FirstOrDefault(static candidate => candidate.Name == "dependency-floor");
+
+		// Assert: two package families, each with an ordinary and a floor version, so a family cannot be
+		// bumped halfway and the floor cannot be a second file that drifts.
+		await Assert.That(families.Length).IsEqualTo(4);
+		await Assert.That(ordinary).IsEqualTo(2);
+		await Assert.That(floor).IsEqualTo(2);
+
+		await Assert.That(recipe.Success).IsTrue().Because("the Justfile has no 'test-floor' recipe");
+		await Assert.That(recipe.Groups["body"].Value).Contains("-p:DependencyFloor=true");
+		await Assert
+			.That(job.Name)
+			.IsEqualTo("dependency-floor")
+			.Because("the PR workflow has no 'dependency-floor' job");
+		await Assert.That(job.Body).Contains("-p:DependencyFloor=true");
 	}
 
 	/// <summary>
@@ -389,7 +429,7 @@ public sealed partial class ReleaseGateTests
 	)
 	{
 		// Arrange
-		var consumers = System.IO.Path.Combine(RepositoryRoot.Value, "scripts", "packed-consumers");
+		var consumers = Path.Combine(RepositoryRoot.Value, "scripts", "packed-consumers");
 		var projects = Directory.GetFiles(consumers, "*.csproj", SearchOption.AllDirectories);
 
 		// Act
@@ -397,7 +437,7 @@ public sealed partial class ReleaseGateTests
 		foreach (var project in projects)
 		{
 			var document = XDocument.Parse(await File.ReadAllTextAsync(project, cancellationToken));
-			var name = System.IO.Path.GetRelativePath(consumers, project);
+			var name = Path.GetRelativePath(consumers, project);
 
 			var generator = document
 				.Descendants("PackageReference")
@@ -415,10 +455,8 @@ public sealed partial class ReleaseGateTests
 			foreach (var reference in document.Descendants("ProjectReference"))
 			{
 				var include = (string?)reference.Attribute("Include") ?? string.Empty;
-				var resolved = System.IO.Path.GetFullPath(
-					System.IO.Path.Combine(System.IO.Path.GetDirectoryName(project)!, include)
-				);
-				if (!resolved.StartsWith(consumers + System.IO.Path.DirectorySeparatorChar, StringComparison.Ordinal))
+				var resolved = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(project)!, include));
+				if (!resolved.StartsWith(consumers + Path.DirectorySeparatorChar, StringComparison.Ordinal))
 					problems.Add($"{name} references {include}, outside scripts/packed-consumers");
 			}
 		}
@@ -440,7 +478,7 @@ public sealed partial class ReleaseGateTests
 	{
 		// Arrange
 		var json = await File.ReadAllTextAsync(
-			System.IO.Path.Combine(RepositoryRoot.Value, ".config", "purview-build.json"),
+			Path.Combine(RepositoryRoot.Value, ".config", "purview-build.json"),
 			cancellationToken
 		);
 		using var document = JsonDocument.Parse(
@@ -501,7 +539,7 @@ public sealed partial class ReleaseGateTests
 		// Arrange
 		var document = XDocument.Parse(
 			await File.ReadAllTextAsync(
-				System.IO.Path.Combine(RepositoryRoot.Value, "src", "Directory.Build.props"),
+				Path.Combine(RepositoryRoot.Value, "src", "Directory.Build.props"),
 				cancellationToken
 			)
 		);
@@ -545,8 +583,8 @@ public sealed partial class ReleaseGateTests
 
 	static void Write(string root, OutputFile file)
 	{
-		var path = System.IO.Path.Combine(root, file.RelativePath.Replace('/', System.IO.Path.DirectorySeparatorChar));
-		Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path)!);
+		var path = Path.Combine(root, file.RelativePath.Replace('/', Path.DirectorySeparatorChar));
+		Directory.CreateDirectory(Path.GetDirectoryName(path)!);
 		var bytes = Encoding.UTF8.GetBytes(file.Content);
 		if (!file.Brotli)
 		{
@@ -570,7 +608,7 @@ public sealed partial class ReleaseGateTests
 				"-NoProfile",
 				"-NonInteractive",
 				"-File",
-				System.IO.Path.Combine(RepositoryRoot.Value, LeakScanScript),
+				Path.Combine(RepositoryRoot.Value, LeakScanScript),
 				"-Path",
 				.. paths,
 				.. AllowArguments(allow),
@@ -608,6 +646,21 @@ public sealed partial class ReleaseGateTests
 	[GeneratedRegex(@"^  (?<name>[A-Za-z0-9_-]+):[ \t]*\r?$", RegexOptions.Multiline)]
 	private static partial Regex JobHeader();
 
+	/// <summary>One recipe of the Justfile, matched by name together with its indented body.</summary>
+	static Match Recipe(string justfile, string name)
+	{
+		foreach (Match candidate in RecipeBlock().Matches(justfile))
+		{
+			if (candidate.Groups["name"].Value == name)
+				return candidate;
+		}
+
+		return Match.Empty;
+	}
+
+	[GeneratedRegex(@"^(?<name>[A-Za-z0-9_-]+)[^\n]*:\r?\n(?<body>(?:[ \t]+[^\n]*\r?\n?)+)", RegexOptions.Multiline)]
+	private static partial Regex RecipeBlock();
+
 	static string FindRepositoryRoot()
 	{
 		for (
@@ -617,8 +670,8 @@ public sealed partial class ReleaseGateTests
 		)
 		{
 			if (
-				File.Exists(System.IO.Path.Combine(directory.FullName, "AGENTS.md"))
-				&& File.Exists(System.IO.Path.Combine(directory.FullName, LeakScanScript))
+				File.Exists(Path.Combine(directory.FullName, "AGENTS.md"))
+				&& File.Exists(Path.Combine(directory.FullName, LeakScanScript))
 			)
 				return directory.FullName;
 		}

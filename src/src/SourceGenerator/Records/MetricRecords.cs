@@ -8,7 +8,10 @@ sealed record MeterTarget(
 	TypeReference InterfaceType,
 	string? MeterName,
 	MeterGenerationAttributeData? MeterGeneration,
-	EquatableArray<InstrumentTarget> InstrumentationMethods
+	EquatableArray<InstrumentTarget> InstrumentationMethods,
+	string? MeterVersion = null,
+	EquatableArray<string> MeterTags = default,
+	EquatableArray<TypeParameterTarget> InterfaceTypeParameters = default
 )
 {
 	public string? ClassNamespace => TelemetryGeneration.TelemetryNamesNamespace ?? InterfaceType.Identity.Namespace;
@@ -53,10 +56,13 @@ sealed record InstrumentTarget(
 	EquatableArray<InstrumentParameterTarget> Parameters,
 	EquatableArray<InstrumentParameterTarget> Tags,
 	InstrumentParameterTarget? MeasurementParameter,
-	TargetGeneration TargetGenerationState
+	TargetGeneration TargetGenerationState,
+	EquatableArray<TypeParameterTarget> TypeParameters = default
 )
 {
 	public string TagPopulateMethodName { get; } = $"Populate{MethodName}Tags";
+
+	public bool IsGeneric => !TypeParameters.IsEmpty;
 }
 
 sealed record InstrumentParameterTarget(

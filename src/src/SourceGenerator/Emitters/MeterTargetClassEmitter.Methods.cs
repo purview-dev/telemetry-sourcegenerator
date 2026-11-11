@@ -26,6 +26,7 @@ partial class MeterTargetClassEmitter
 							p.ParameterType
 						)),
 					],
+					GenericTypes = TypeParameterHelpers.ToOptions(methodTarget.TypeParameters),
 					ExpressionBody = "throw new global::System.NotSupportedException()",
 				}
 			)
@@ -163,6 +164,7 @@ partial class MeterTargetClassEmitter
 				{
 					Attributes = [EmitterHelpers.AggressiveInliningAttribute()],
 					Parameters = parameters,
+					GenericTypes = TypeParameterHelpers.ToOptions(methodTarget.TypeParameters),
 				}
 			)
 		)
@@ -232,30 +234,27 @@ partial class MeterTargetClassEmitter
 
 	static void EmitObservableInstrumentBodyTest(CodeWriter writer, InstrumentTarget method)
 	{
-		writer.IfBlock(
-			method.FieldName + " != null",
-			body =>
+		writer.IfBlock(method.FieldName + " != null", body =>
+		{
+			if (method.InstrumentAttribute?.ThrowOnAlreadyInitialized == true)
 			{
-				if (method.InstrumentAttribute?.ThrowOnAlreadyInitialized == true)
-				{
-					writer
-						.Write("throw new ")
-						.Write(TypeLibrary.System.Exception)
-						.Write("(\"")
-						.Write(method.MetricName)
-						.Line(" has already been initialized.\");");
-				}
-				else
-				{
-					writer.Write("return");
-
-					if (method.ReturnsBool)
-						writer.Line(" false;");
-					else
-						writer.Write(";").NewLine();
-				}
+				writer
+					.Write("throw new ")
+					.Write(TypeLibrary.System.Exception)
+					.Write("(\"")
+					.Write(method.MetricName)
+					.Line(" has already been initialized.\");");
 			}
-		);
+			else
+			{
+				writer.Write("return");
+
+				if (method.ReturnsBool)
+					writer.Line(" false;");
+				else
+					writer.Write(";").NewLine();
+			}
+		});
 
 		writer.NewLine();
 	}
@@ -382,15 +381,13 @@ partial class MeterTargetClassEmitter
 		{
 			if (param.SkipOnNullOrEmpty)
 			{
-				writer.IfBlock(
-					param.ParameterName + " != default",
-					body =>
-						body.MethodCallOn(
-							tagVariableName,
-							"Add",
-							param.GeneratedName.Wrap(),
-							param.RenderTagValueExpression()
-						)
+				writer.IfBlock(param.ParameterName + " != default", body =>
+					body.MethodCallOn(
+						tagVariableName,
+						"Add",
+						param.GeneratedName.Wrap(),
+						param.RenderTagValueExpression()
+					)
 				);
 			}
 			else

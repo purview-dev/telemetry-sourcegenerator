@@ -20,8 +20,8 @@ The package ships a single Roslyn analyzer, `TelemetryDiagnosticAnalyzer`, which
 | `TSG1001`<a id="tsg1001"></a> | Error | Inferring generation targets is not supported when using multi-target generation. A method on a multi-target interface has no explicit generation attribute. |
 | `TSG1002`<a id="tsg1002"></a> | Error | Multiple attributes from the same target family are not supported. Only one Activity, Logging, or Metrics attribute is allowed per method. |
 | `TSG1003`<a id="tsg1003"></a> | Error | Duplicate method names are not supported. Two or more methods on the interface share the same name. |
-| `TSG1004`<a id="tsg1004"></a> | Error | Generic interfaces are not supported. |
-| `TSG1005`<a id="tsg1005"></a> | Error | Generic methods are not supported. |
+| `TSG1004`<a id="tsg1004"></a> | Error | Generic interface cannot be generated. A generic interface is generated as a generic class with the same type parameters and constraints; the shapes that cannot be are a **nested** generic interface (the enclosing type's type arguments cannot be repeated on the generated class) and a type parameter carrying the `allows ref struct` anti-constraint (the generated class cannot repeat it). |
+| `TSG1005`<a id="tsg1005"></a> | Error | Generic method cannot be generated. Generic methods and their constraints are mirrored; what cannot be is a type parameter carrying the `allows ref struct` anti-constraint, or a **metric** method whose measurement is one of its own type parameters (the instrument is a field, and a field cannot name a method's type parameter — declare that type parameter on the interface instead). The method is emitted as a throwing stub so the interface stays implemented. |
 | `TSG1006`<a id="tsg1006"></a> | Warning | `ExcludeTargets` references a target not present on this method. |
 | `TSG1007`<a id="tsg1007"></a> | Warning | `ExcludeTargets` results in an empty or invalid parameter set for a target. |
 | `TSG1008`<a id="tsg1008"></a> | Warning | Activity parameter has no Activity target. A parameter of type `Activity` is present on a method with no `[Activity]`/`[Event]`/`[Context]` attribute. |
@@ -42,6 +42,12 @@ The package ships a single Roslyn analyzer, `TelemetryDiagnosticAnalyzer`, which
 | `TSG2007`<a id="tsg2007"></a> | Warning | A scoped log shouldn't have a `LogLevel`; it will be ignored. |
 | `TSG2008`<a id="tsg2008"></a> | Warning | Unbounded enumeration possible. `[ExpandEnumerable]` has a `MaximumValueCount` greater than the recommended default of 5. |
 | `TSG2021`<a id="tsg2021"></a> | Error | Log method must return void or IDisposable. (Returning `Activity` is allowed when the method is also an Activity method.) |
+| `TSG2022`<a id="tsg2022"></a> | Error | `params` parameters are not supported. The generated method re-declares the parameter without the modifier, so the `params` call form would stop compiling. Take an array and mark it `[ExpandEnumerable]` instead. Parity with the .NET 11 `[LoggerMessage]` generator's `SYSLIB1028`. |
+| `TSG2023`<a id="tsg2023"></a> | Error | `ref`, `out`, `in`, `scoped`, and ref struct parameters (such as `Span<T>`) are not supported: the generated state struct cannot capture them. Parity with the .NET 11 `[LoggerMessage]` generator's `SYSLIB1029`. |
+| `TSG2024`<a id="tsg2024"></a> | Error | The `[TagProvider]` type could not be resolved. The parameter is logged without the provider's extra tags. |
+| `TSG2025`<a id="tsg2025"></a> | Error | The `[TagProvider]` method could not be found on the provider type. The parameter is logged without the provider's extra tags. |
+| `TSG2026`<a id="tsg2026"></a> | Error | The `[TagProvider]` method has an invalid signature. It must be a visible static method taking one parameter the annotated parameter can be passed to, and returning `IEnumerable<KeyValuePair<string, object?>>` (or the `string`-valued variant, or a type implementing one). The parameter is logged without the provider's extra tags. |
+| `TSG2027`<a id="tsg2027"></a> | Warning | `[TagProvider]` is on a method that generates no log entry, so the provider would never run. Move it to a logging method, or remove it. |
 
 ## Activities diagnostics (TSG3xxx)
 
@@ -108,6 +114,56 @@ interface IMyTelemetry
 ### TSG1003 — duplicate method names
 
 Two or more methods share the same name, which is used to generate members on the implementation class. Rename the methods.
+
+### TSG1004 — generic interface cannot be generated
+
+A generic interface is generated as a generic class with the same type parameters and constraints:
+
+```csharp
+[Logger]
+public interface IMyTelemetry<T> where T : class
+{
+    void Log(T value);           // ✅ generated as IMyTelemetryCore<T>
+}
+```
+
+Two shapes still cannot be generated, because the generated class has no way to express them:
+
+- a **nested** generic interface — the enclosing type's type arguments cannot be repeated on the generated class;
+- a type parameter carrying the `allows ref struct` anti-constraint — it cannot be repeated on the generated class.
+
+### TSG1005 — generic method cannot be generated
+
+Generic methods are generated with the interface method's type parameters and constraints mirrored onto the
+implementation, and constraints are mirrored for `struct`, `class`, `class?`, `notnull`, `unmanaged`, `new()` and
+type-parameter or type constraints:
+
+```csharp
+[Logger]
+public interface IMyTelemetry
+{
+    void Log<T>(T value) where T : notnull;      // ✅ generated as void Log<T>(T value) where T : notnull
+}
+```
+
+The method is emitted as a throwing stub, so the interface stays implemented, when:
+
+- a type parameter carries the `allows ref struct` anti-constraint; or
+- a metric method uses one of its own type parameters as the instrument measurement. An instrument is a **field**, and
+  a field cannot name a method's type parameter — declare that type parameter on the interface instead, which makes the
+  generated class generic and lets the instrument field use it.
+
+### TSG2024 / TSG2025 / TSG2026 — `[TagProvider]` cannot be used
+
+`[TagProvider(typeof(T), "Method")]` names a static method that contributes extra tags; see
+[Logging](Logging.md#tagprovider-contributed-tags). `TSG2024` reports a provider type that cannot be resolved,
+`TSG2025` a method that does not exist on it, and `TSG2026` a method whose signature the generated `foreach` cannot
+read. In every case the parameter is still logged — only the extra tags are missing.
+
+### TSG2027 — `[TagProvider]` on a method that never logs
+
+The attribute is on a parameter of a method that generates no log entry (for example an `[Activity]`-only method on a
+multi-target interface). Move it to the logging method, or remove it.
 
 ### TSG2008 — unbounded enumeration
 

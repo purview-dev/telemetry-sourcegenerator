@@ -21,8 +21,8 @@ partial class ActivitySourceTargetClassEmitter
 		if (parameters.Count == 0)
 			return;
 
-		var useRecordedExceptionRules =
-			eventAttribute?.UseRecordExceptionRules ?? PropertyLibrary.Activities.UseRecordExceptionRulesDefault;
+		var useRecordedExceptionRules = eventAttribute?.UseRecordExceptionRules
+			?? PropertyLibrary.Activities.UseRecordExceptionRulesDefault;
 
 		void EmitParameter(ActivityBasedParameterTarget param)
 		{

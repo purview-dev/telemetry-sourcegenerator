@@ -9,7 +9,11 @@ namespace Purview.Telemetry.SourceGenerator.Records;
 /// assemblies access to internals.
 /// </remarks>
 /// <param name="SupportsIMeterFactory">
-/// Whether meters are created through an injected <c>IMeterFactory</c> (.NET 8+; never .NET Framework).
+/// Whether meters are created through an injected <c>IMeterFactory</c>. Probed on the compilation, never on the target
+/// framework: <c>IMeterFactory</c> arrives with Microsoft.Extensions.Diagnostics.Abstractions (or the shared framework on
+/// .NET 8+), so a .NET Framework project that references that package has it too, and a modern project that pins an
+/// older line may not. A consumer with the generated factory-taking constructor must register the factory
+/// (<c>services.AddMetrics()</c>).
 /// </param>
 /// <param name="UseActivitySourceFactory">
 /// Whether activity sources are created through an injected <c>System.Diagnostics.ActivitySourceFactory</c>: the
@@ -33,5 +37,7 @@ sealed record TelemetryCapabilities(
 	bool SupportsIMeterFactory,
 	bool UseActivitySourceFactory = false,
 	bool SupportsGauge = false,
-	bool SupportsInstrumentAdvice = false
+	bool SupportsInstrumentAdvice = false,
+	bool SupportsActivityAddException = false,
+	string? AssemblyVersion = null
 ) : IGenerationCapabilities;

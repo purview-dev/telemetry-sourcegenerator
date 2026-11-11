@@ -143,6 +143,24 @@ partial class SharedHelpers
 		return data.Exists ? data : null;
 	}
 
+	public static TagProviderAttributeData? GetTagProviderAttribute(ISymbol symbol, CancellationToken token)
+	{
+		if (
+			!Utilities.TryContainsAttribute(
+				symbol,
+				TypeLibrary.Microsoft.Extensions.Logging.TagProviderAttribute,
+				token,
+				out var attributeData
+			)
+		)
+		{
+			return null;
+		}
+
+		var data = TagProviderAttributeData.FromAttributeData(attributeData!);
+		return data.Exists ? data with { ProviderMethod = NullIfWhitespace(data.ProviderMethod) } : null;
+	}
+
 	public static LoggerGenerationAttributeData? GetLoggerGenerationAttribute(
 		Compilation compilation,
 		CancellationToken token

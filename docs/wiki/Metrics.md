@@ -5,7 +5,14 @@
 
 All metric-related attributes live in the `Purview.Telemetry` namespace. To signal an interface for meter generation, decorate it with the `[Meter]` attribute.
 
-When creating the meter types, the [`IMeterFactory`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics.imeterfactory) is used when available (it is not available on .NET Framework 4.8, where a `new Meter(...)` is created instead).
+When creating the meter types, the [`IMeterFactory`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics.imeterfactory) is used **when the compilation can resolve it**. That is a symbol probe, not a target-framework check: `IMeterFactory` ships in Microsoft.Extensions.Diagnostics.Abstractions, so a .NET Framework 4.8 project that references it gets the injected-factory constructor too, while a modern project pinned to an older line may not and falls back to `new Meter(...)`.
+
+When the generated constructor takes an `IMeterFactory`, the container has to be able to supply one — register it with `services.AddMetrics()`:
+
+```csharp
+services.AddMetrics();                          // registers IMeterFactory
+services.AddInventoryMetrics();                 // the generated registration
+```
 
 ## Meter naming
 

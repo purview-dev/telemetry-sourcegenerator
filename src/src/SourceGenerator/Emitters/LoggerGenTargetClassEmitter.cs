@@ -35,7 +35,8 @@ static partial class LoggerGenTargetClassEmitter
 					target.GenerationType,
 					target.ClassNameToGenerate,
 					target.InterfaceType,
-					TypeDeclarationAccessibility.Internal
+					TypeDeclarationAccessibility.Internal,
+					target.InterfaceTypeParameters
 				)
 			)
 			{

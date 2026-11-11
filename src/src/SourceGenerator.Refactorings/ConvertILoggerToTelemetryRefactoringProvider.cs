@@ -386,8 +386,8 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 			var exType = semanticModel.Compilation.GetTypeByMetadataName(
 				TelemetryAttributeNames.System.Exception.MetadataFullName
 			);
-			var exTypeStr =
-				exType?.ToDisplayString(ParamTypeFormat) ?? TelemetryAttributeNames.System.Exception.MetadataFullName;
+			var exTypeStr = exType?.ToDisplayString(ParamTypeFormat)
+				?? TelemetryAttributeNames.System.Exception.MetadataFullName;
 			parameters.Add(new LogParameterInfo("exception", exTypeStr, exceptionExpression));
 		}
 
@@ -503,9 +503,9 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		// Group calls that represent the same logical log operation (same attribute, template, params).
 		// Identical calls share one interface method; distinct calls that happen to produce the same
 		// base name from the template get a numeric suffix.
-		Dictionary<string, string> signatureToName = new(StringComparer.Ordinal);
-		HashSet<string> usedNames = new(StringComparer.Ordinal);
-		List<(LogCallInfo, string)> result = new(calls.Count);
+		Dictionary<string, string> signatureToName = [with(StringComparer.Ordinal)];
+		HashSet<string> usedNames = [with(StringComparer.Ordinal)];
+		List<(LogCallInfo, string)> result = [with(calls.Count)];
 
 		foreach (var call in calls)
 		{
@@ -582,7 +582,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	internal static string BuildInterfaceMembers(List<(LogCallInfo Call, string MethodName)> callsWithMethods)
 	{
 		StringBuilder sb = new();
-		HashSet<string> emittedSignatures = new(StringComparer.Ordinal);
+		HashSet<string> emittedSignatures = [with(StringComparer.Ordinal)];
 
 		foreach (var (call, methodName) in callsWithMethods)
 		{
@@ -788,8 +788,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		var root = tree.GetCompilationUnitRoot();
 
 		// Try to find the interface inside a namespace or at top-level
-		var interfaceDecl =
-			root.DescendantNodes().OfType<InterfaceDeclarationSyntax>().FirstOrDefault()
+		var interfaceDecl = root.DescendantNodes().OfType<InterfaceDeclarationSyntax>().FirstOrDefault()
 			?? throw new InvalidOperationException("Could not parse generated interface from: " + code);
 
 		// Return as a standalone declaration with appropriate usings attached as leading trivia
@@ -813,9 +812,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		var loggerVariableRemap = BuildLoggerVariableRemap(classDecl, loggerFields);
 
 		// Build a map from invocation → new invocation
-		Dictionary<InvocationExpressionSyntax, InvocationExpressionSyntax> invocationMap = new(
-			SyntaxNodeReferenceComparer<InvocationExpressionSyntax>.Instance
-		);
+		Dictionary<InvocationExpressionSyntax, InvocationExpressionSyntax> invocationMap =
+		[
+			with(SyntaxNodeReferenceComparer<InvocationExpressionSyntax>.Instance),
+		];
 
 		foreach (var (call, methodName) in callsWithMethods)
 		{
@@ -831,9 +831,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		}
 
 		// Build a map from field declarations → new field declarations
-		Dictionary<FieldDeclarationSyntax, FieldDeclarationSyntax> fieldMap = new(
-			SyntaxNodeReferenceComparer<FieldDeclarationSyntax>.Instance
-		);
+		Dictionary<FieldDeclarationSyntax, FieldDeclarationSyntax> fieldMap =
+		[
+			with(SyntaxNodeReferenceComparer<FieldDeclarationSyntax>.Instance),
+		];
 		foreach (var field in loggerFields)
 		{
 			if (field.FieldDeclaration is null)
@@ -844,9 +845,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		}
 
 		// Build a map from property declarations → new property declarations
-		Dictionary<PropertyDeclarationSyntax, PropertyDeclarationSyntax> propertyMap = new(
-			SyntaxNodeReferenceComparer<PropertyDeclarationSyntax>.Instance
-		);
+		Dictionary<PropertyDeclarationSyntax, PropertyDeclarationSyntax> propertyMap =
+		[
+			with(SyntaxNodeReferenceComparer<PropertyDeclarationSyntax>.Instance),
+		];
 		foreach (var field in loggerFields)
 		{
 			if (field.PropertyDeclaration is null)
@@ -891,18 +893,15 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 			var ctors = newClassDecl.Members.OfType<ConstructorDeclarationSyntax>().ToList();
 			if (ctors.Count > 0)
 			{
-				newClassDecl = newClassDecl.ReplaceNodes(
-					ctors,
-					(ctor, _) =>
-					{
-						var filtered = ctor.ParameterList.Parameters.Where(p =>
-							!paramsToRemove.Contains(p.Identifier.Text)
-						);
-						return ctor.WithParameterList(
-							ctor.ParameterList.WithParameters(SyntaxFactory.SeparatedList(filtered))
-						);
-					}
-				);
+				newClassDecl = newClassDecl.ReplaceNodes(ctors, (ctor, _) =>
+				{
+					var filtered = ctor.ParameterList.Parameters.Where(p =>
+						!paramsToRemove.Contains(p.Identifier.Text)
+					);
+					return ctor.WithParameterList(
+						ctor.ParameterList.WithParameters(SyntaxFactory.SeparatedList(filtered))
+					);
+				});
 			}
 		}
 
@@ -960,9 +959,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 		SemanticModel semanticModel
 	)
 	{
-		Dictionary<ParameterSyntax, ParameterSyntax> result = new(
-			SyntaxNodeReferenceComparer<ParameterSyntax>.Instance
-		);
+		Dictionary<ParameterSyntax, ParameterSyntax> result =
+		[
+			with(SyntaxNodeReferenceComparer<ParameterSyntax>.Instance),
+		];
 
 		// Match parameters by the exact types of the identified logger fields.
 		// This is more precise than re-detecting all ILogger variants from scratch.
@@ -1037,7 +1037,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProvider : CodeRefactori
 	)
 	{
 		HashSet<string> loggerFieldNames = new(loggerFields.Select(f => f.FieldName), StringComparer.Ordinal);
-		Dictionary<string, string> remap = new(StringComparer.Ordinal);
+		Dictionary<string, string> remap = [with(StringComparer.Ordinal)];
 
 		if (classDecl.ParameterList is { } primaryCtorParams)
 			AddParamListRemap(primaryCtorParams.Parameters, loggerFieldNames, remap);

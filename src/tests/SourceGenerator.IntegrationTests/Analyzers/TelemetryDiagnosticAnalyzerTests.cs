@@ -11,7 +11,27 @@ public class TelemetryDiagnosticAnalyzerTests
 	: TUnitDiagnosticAnalyzerTestBase<TelemetryDiagnosticAnalyzer, TelemetryAnalyzerTestOptions>
 {
 	[Test]
-	public async Task Analyze_GivenGenericActivityInterface_RaisesGenericInterfaceDiagnostic(
+	public async Task Analyze_GivenNestedGenericActivityInterface_RaisesGenericInterfaceDiagnostic(
+		CancellationToken cancellationToken
+	)
+	{
+		const string code = """
+			public class Outer
+			{
+				[ActivitySource]
+				public interface ITestActivities<T>
+				{
+				}
+			}
+			""";
+
+		var result = await AnalyzeAsync(code, new TelemetryAnalyzerTestOptions(), cancellationToken);
+
+		await Assert.That(result).HasDiagnostic("TSG1004");
+	}
+
+	[Test]
+	public async Task Analyze_GivenGenericActivityInterface_DoesNotRaiseGenericInterfaceDiagnostic(
 		CancellationToken cancellationToken
 	)
 	{
@@ -24,7 +44,7 @@ public class TelemetryDiagnosticAnalyzerTests
 
 		var result = await AnalyzeAsync(code, new TelemetryAnalyzerTestOptions(), cancellationToken);
 
-		await Assert.That(result).HasDiagnostic("TSG1004");
+		await Assert.That(result).DoesNotHaveDiagnostic("TSG1004");
 	}
 
 	[Test]

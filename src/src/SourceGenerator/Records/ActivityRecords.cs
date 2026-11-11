@@ -9,7 +9,8 @@ sealed record ActivitySourceTarget(
 	ActivitySourceGenerationAttributeData? ActivitySourceGenerationAttribute,
 	string? ActivitySourceName,
 	EquatableArray<ActivityMethodTarget> ActivityMethods,
-	ActivitySourceAttributeData ActivityTargetAttributeRecord
+	ActivitySourceAttributeData ActivityTargetAttributeRecord,
+	EquatableArray<TypeParameterTarget> InterfaceTypeParameters = default
 )
 {
 	public string? ClassNamespace => TelemetryGeneration.TelemetryNamesNamespace ?? InterfaceType.Identity.Namespace;
@@ -58,7 +59,7 @@ sealed record ActivitySourceTarget(
 /// <param name="Baggage">The parameters recorded as baggage.</param>
 /// <param name="Tags">The parameters recorded as tags.</param>
 /// <param name="TargetGenerationState">The method's generation state.</param>
-/// <param name="TypeParameters">The method's generic type parameters, when it is generic (and therefore invalid).</param>
+/// <param name="TypeParameters">The method's generic type parameters and their constraints, empty for a non-generic method.</param>
 closed record ActivityMethodTarget(
 	string MethodName,
 	TypeReference ReturnType,
@@ -68,7 +69,7 @@ closed record ActivityMethodTarget(
 	EquatableArray<ActivityBasedParameterTarget> Baggage,
 	EquatableArray<ActivityBasedParameterTarget> Tags,
 	TargetGeneration TargetGenerationState,
-	EquatableArray<string> TypeParameters = default
+	EquatableArray<TypeParameterTarget> TypeParameters = default
 );
 
 /// <summary>A method that starts an activity: <c>[Activity]</c>, or inferred from an <c>Activity</c> return type.</summary>
@@ -82,7 +83,7 @@ sealed record StartActivityMethod(
 	EquatableArray<ActivityBasedParameterTarget> Tags,
 	TargetGeneration TargetGenerationState,
 	ActivityAttributeData? ActivityAttribute,
-	EquatableArray<string> TypeParameters = default
+	EquatableArray<TypeParameterTarget> TypeParameters = default
 )
 	: ActivityMethodTarget(
 		MethodName,
@@ -108,7 +109,7 @@ sealed record ActivityEventMethod(
 	EquatableArray<ActivityBasedParameterTarget> Tags,
 	TargetGeneration TargetGenerationState,
 	EventAttributeData? EventAttribute,
-	EquatableArray<string> TypeParameters = default
+	EquatableArray<TypeParameterTarget> TypeParameters = default
 )
 	: ActivityMethodTarget(
 		MethodName,
@@ -132,7 +133,7 @@ sealed record ActivityContextMethod(
 	EquatableArray<ActivityBasedParameterTarget> Baggage,
 	EquatableArray<ActivityBasedParameterTarget> Tags,
 	TargetGeneration TargetGenerationState,
-	EquatableArray<string> TypeParameters = default
+	EquatableArray<TypeParameterTarget> TypeParameters = default
 )
 	: ActivityMethodTarget(
 		MethodName,

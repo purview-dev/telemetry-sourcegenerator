@@ -57,6 +57,16 @@ static partial class TelemetryRules
 						"TelemetrySchemaUrl"
 					)
 				);
+
+			if (!string.IsNullOrWhiteSpace(target.ActivitySourceGenerationAttribute?.Tags))
+				diagnostics.Add(
+					ReportableDiagnostic.Create(
+						DiagnosticLibrary.Activities.ActivitySourceOptionsRequireFactory.Descriptor,
+						isBlocking: false,
+						interfaceSymbol,
+						"Tags"
+					)
+				);
 		}
 
 		// TSG3001: no activity source specified.
@@ -84,8 +94,10 @@ static partial class TelemetryRules
 				)
 			);
 
-		var generateDiagnosticsForMissingActivity =
-			target.ActivitySourceGenerationAttribute?.GenerateDiagnosticsForMissingActivity ?? true;
+		var generateDiagnosticsForMissingActivity = target
+			.ActivitySourceGenerationAttribute
+			?.GenerateDiagnosticsForMissingActivity
+			?? true;
 
 		foreach (var method in target.ActivityMethods)
 		{
@@ -185,8 +197,7 @@ static partial class TelemetryRules
 		// set as baggage, and a parameter excluded from the Activities target is not applied at all.
 		if (method is ActivityEventMethod activityEventMethod)
 		{
-			var useRecordExceptionRules =
-				activityEventMethod.EventAttribute?.UseRecordExceptionRules
+			var useRecordExceptionRules = activityEventMethod.EventAttribute?.UseRecordExceptionRules
 				?? PropertyLibrary.Activities.UseRecordExceptionRulesDefault;
 
 			var recordsException =

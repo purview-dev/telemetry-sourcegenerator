@@ -381,9 +381,9 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 
 	static List<(ActivitySourceCallInfo Call, string MethodName)> AssignMethodNames(List<ActivitySourceCallInfo> calls)
 	{
-		Dictionary<string, string> signatureToName = new(StringComparer.Ordinal);
-		HashSet<string> usedNames = new(StringComparer.Ordinal);
-		List<(ActivitySourceCallInfo, string)> result = new(calls.Count);
+		Dictionary<string, string> signatureToName = [with(StringComparer.Ordinal)];
+		HashSet<string> usedNames = [with(StringComparer.Ordinal)];
+		List<(ActivitySourceCallInfo, string)> result = [with(calls.Count)];
 
 		foreach (var call in calls)
 		{
@@ -507,7 +507,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 	)
 	{
 		StringBuilder sb = new();
-		HashSet<string> emittedSignatures = new(StringComparer.Ordinal);
+		HashSet<string> emittedSignatures = [with(StringComparer.Ordinal)];
 
 		foreach (var (call, methodName) in callsWithMethods)
 		{
@@ -538,9 +538,10 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 	)
 	{
 		// Build invocation map: StartActivity("name") → interface method call
-		Dictionary<InvocationExpressionSyntax, InvocationExpressionSyntax> invocationMap = new(
-			SyntaxNodeReferenceComparer<InvocationExpressionSyntax>.Instance
-		);
+		Dictionary<InvocationExpressionSyntax, InvocationExpressionSyntax> invocationMap =
+		[
+			with(SyntaxNodeReferenceComparer<InvocationExpressionSyntax>.Instance),
+		];
 
 		foreach (var (call, methodName) in callsWithMethods)
 		{
@@ -549,9 +550,10 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		}
 
 		// Build field map
-		Dictionary<FieldDeclarationSyntax, FieldDeclarationSyntax> fieldMap = new(
-			SyntaxNodeReferenceComparer<FieldDeclarationSyntax>.Instance
-		);
+		Dictionary<FieldDeclarationSyntax, FieldDeclarationSyntax> fieldMap =
+		[
+			with(SyntaxNodeReferenceComparer<FieldDeclarationSyntax>.Instance),
+		];
 		foreach (var field in activitySourceFields)
 		{
 			if (field.FieldDeclaration is null)
@@ -561,9 +563,10 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		}
 
 		// Build property map
-		Dictionary<PropertyDeclarationSyntax, PropertyDeclarationSyntax> propertyMap = new(
-			SyntaxNodeReferenceComparer<PropertyDeclarationSyntax>.Instance
-		);
+		Dictionary<PropertyDeclarationSyntax, PropertyDeclarationSyntax> propertyMap =
+		[
+			with(SyntaxNodeReferenceComparer<PropertyDeclarationSyntax>.Instance),
+		];
 		foreach (var field in activitySourceFields)
 		{
 			if (field.PropertyDeclaration is null)
@@ -628,9 +631,10 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProvider : CodeRe
 		SemanticModel semanticModel
 	)
 	{
-		Dictionary<ParameterSyntax, ParameterSyntax> result = new(
-			SyntaxNodeReferenceComparer<ParameterSyntax>.Instance
-		);
+		Dictionary<ParameterSyntax, ParameterSyntax> result =
+		[
+			with(SyntaxNodeReferenceComparer<ParameterSyntax>.Instance),
+		];
 
 		// Build a set of qualified type names so we can match by name when
 		// the classDecl has already been rewritten (nodes no longer in the

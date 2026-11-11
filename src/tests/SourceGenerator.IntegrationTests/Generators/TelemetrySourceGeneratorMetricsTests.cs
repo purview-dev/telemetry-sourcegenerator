@@ -90,7 +90,7 @@ public interface ITestMetrics
 
 	[Test]
 	[MethodDataSource<TelemetrySourceGeneratorTests>(nameof(TelemetrySourceGeneratorTests.GetGenericTypeDefCount))]
-	public async Task Generate_GivenInterfaceWithGenerics_RaisesDiagnostics(
+	public async Task Generate_GivenInterfaceWithGenerics_GeneratesAGenericClass(
 		int genericTypeCount,
 		CancellationToken cancellationToken
 	)
@@ -118,12 +118,12 @@ public interface ITestMetrics<{{genericTypeDef}}>  {
 		);
 
 		// Assert
-		await Assert.That(generationResult).HasDiagnostic("TSG1004");
+		await Assert.That(generationResult).DoesNotHaveDiagnostic("TSG1004");
 	}
 
 	[Test]
 	[MethodDataSource<TelemetrySourceGeneratorTests>(nameof(TelemetrySourceGeneratorTests.GetGenericTypeDefCount))]
-	public async Task Generate_GivenMethodWithGenerics_RaisesDiagnostics(
+	public async Task Generate_GivenGenericInterfaceWithManyTypeParameters_GeneratesAGenericClass(
 		int genericTypeCount,
 		CancellationToken cancellationToken
 	)
@@ -151,6 +151,6 @@ public interface ITestMetrics<{{genericTypeDef}}>  {
 		);
 
 		// Assert
-		await Assert.That(generationResult).HasDiagnostic("TSG1004");
+		await Assert.That(generationResult).DoesNotHaveDiagnostic("TSG1004");
 	}
 }

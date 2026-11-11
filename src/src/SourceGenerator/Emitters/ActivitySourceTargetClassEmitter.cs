@@ -33,7 +33,8 @@ static partial class ActivitySourceTargetClassEmitter
 					target.GenerationType,
 					target.ClassNameToGenerate,
 					target.InterfaceType,
-					TypeDeclarationAccessibility.Internal
+					TypeDeclarationAccessibility.Internal,
+					target.InterfaceTypeParameters
 				)
 			)
 			{

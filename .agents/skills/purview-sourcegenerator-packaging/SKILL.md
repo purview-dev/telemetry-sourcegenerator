@@ -185,10 +185,12 @@ marker is the preferred configuration.
 | 4.8 | VS 2022 17.8 | C# 12 / .NET 8 |
 | 4.12 | VS 2022 17.12 | C# 13 / .NET 9 |
 | 5.0 | VS 2026 18.0 | C# 14 / .NET 10 |
+| 5.12 | VS 2026 18.x | C# 15 / .NET 11 |
 
-**This framework is built against Roslyn 5.0**, so a host loading it must be Roslyn 5.0 or later
-(.NET 10 SDK / Visual Studio 2026 18.0). The testing packages multi-target `net8.0`–`net10.0`, and
-Roslyn 5.x ships `net8.0`/`net9.0` assets, so those test targets still load the runner.
+**This framework is built against Roslyn 5.9**, so a host loading it must ship Roslyn 5.9 or later
+(.NET 11 SDK / Visual Studio 2026). The .NET 11 SDK ships Roslyn 5.12. The testing packages
+multi-target `netstandard2.0`, `net10.0`, and `net11.0`, and Roslyn 5.9 ships `net10.0`/
+`netstandard2.0` assets, so both test targets load the runner.
 
 ## A generator project to start from
 

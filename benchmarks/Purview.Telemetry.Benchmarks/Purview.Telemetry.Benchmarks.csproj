@@ -1,7 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFrameworks>net48;net10.0</TargetFrameworks>
+		<!--
+			net11.0 is the framework the suite is launched with; each benchmark job names its own runtime
+			explicitly, so the launch framework only decides the BenchmarkDotNet host.
+		-->
+		<TargetFrameworks>net48;net10.0;net11.0</TargetFrameworks>
 		<LangVersion>14.0</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
@@ -49,7 +53,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+		<PackageReference Include="BenchmarkDotNet" Version="0.16.0-preview.2" />
+		<!--
+			BenchmarkDotNet 0.16 pulls Microsoft.Diagnostics.Tracing.TraceEvent 3.2.5, which is built against
+			Microsoft.Bcl.HashCode 6.0.0.0, while the Microsoft.Extensions.* 10.11 packages still resolve 1.1.1
+			(1.0.0.0). On the net48 leg MSBuild unifies them and warns (MSB3277) that it picked a lower version
+			than a reference expects. Declaring 6.0.0 here resolves the whole graph to one assembly; it is the
+			version the higher reference asks for, and it is netstandard2.0, so net48 still binds it.
+		-->
+		<PackageReference Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.15" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.15" />
 		<PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" Version="10.11.0" />

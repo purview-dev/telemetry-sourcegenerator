@@ -215,8 +215,8 @@ var model = LogAttributeData.FromAttributeData(attribute);
   runner, reference the generator project twice — once `OutputItemType="Analyzer"` and once as a normal
   reference.
 - **Multi-target**: build generators against the Roslyn version that supports the test matrix; the
-  framework is built against Roslyn 5.0 (net8.0/net9.0 assets keep a .NET 8–10 matrix loading); keep
-  `System.Collections.Immutable` version pinned to the shared one.
+  framework is built against Roslyn 5.9 (`net10.0`/`netstandard2.0` assets keep a .NET 10–11 matrix
+  loading); keep `System.Collections.Immutable` version pinned to the shared one.
 - **Scope validation**: keep `PurviewSourceGeneratorFrameworkValidateCodeWriterScopes` enabled; it makes
   undisposed `CodeWriter` scopes fail tests.
 - **Prefer `CodeQuery` over string matching** for structural assertions (members, signatures, namespaces).

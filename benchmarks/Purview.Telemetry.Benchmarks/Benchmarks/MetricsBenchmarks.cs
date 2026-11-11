@@ -20,9 +20,9 @@ namespace Purview.Telemetry.Benchmarks.Benchmarks;
 /// </summary>
 [MemoryDiagnoser]
 [HideColumns("Error", "StdDev", "Median", "RatioSD")]
-[SimpleJob(RuntimeMoniker.Net47)]
-[SimpleJob(RuntimeMoniker.Net48)]
 [SimpleJob(RuntimeMoniker.Net10_0)]
+[SimpleJob(RuntimeMoniker.Net11_0)]
+[SimpleJob(RuntimeMoniker.Net48)]
 public class MetricsBenchmarks
 {
 	IMetricsBenchmarkTelemetry _generated = default!;

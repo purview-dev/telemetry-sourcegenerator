@@ -14,6 +14,34 @@ jobs:
     uses: purview-dev/build/.github/workflows/purview-build.yml@main
     secrets: inherit
 
+  # Proves the lower bound this package declares. `Directory.Packages.props` keeps each package family on
+  # one property, and `DependencyFloor=true` drops every family to the oldest version the generator compiles
+  # and passes against. Dependency resolution is a set of lower bounds, so the floor declared here becomes
+  # the floor every consumer inherits; a floor nobody builds against is a guess. The `build` job above is the
+  # ceiling - it resolves the latest servicing patch of the same line.
+  dependency-floor:
+    name: Lowest compatible dependency floor
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Restore, build and test at the declared floor
+        run: >-
+          dotnet test --solution src/Telemetry.SourceGenerator.slnx
+          --configuration Release
+          --timeout 30m
+          --maximum-failed-tests 25
+          --results-directory-layout per-module
+          -p:DependencyFloor=true
+
   samples:
     name: Build and test samples
     runs-on: ubuntu-latest

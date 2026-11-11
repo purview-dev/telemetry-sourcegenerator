@@ -230,7 +230,7 @@ combines" stays a review obligation, because a dependency matrix cannot express 
 
 ## See also
 
-- [Contracts and Data Exchange](https://github.com/purview-dev/engineering-playbook/blob/main/docs/wiki/Contracts-And-Data-Exchange.md)
+- [Contracts and Data Exchange](https://github.com/purview-dev/engineering-playbook/blob/main/docs/wiki/data/Contracts-And-Data-Exchange.md)
   — `Create` and `Hydrate`, and the schema as the source of truth for a wire shape
 - [zodsharp](https://github.com/purview-dev/zodsharp) — authoritative on `[ZodSchema]` and JSON Schema
   export

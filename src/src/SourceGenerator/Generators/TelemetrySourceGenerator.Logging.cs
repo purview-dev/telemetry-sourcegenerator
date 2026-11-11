@@ -29,25 +29,22 @@ partial class TelemetrySourceGenerator
 			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_LoggerOutputs");
 
 		// Register with the source generator.
-		context.RegisterSourceOutput(
-			source: outputContexts,
-			action: static (spc, output) =>
+		context.RegisterSourceOutput(source: outputContexts, action: static (spc, output) =>
+		{
+			if (output.Context.Settings.IsSourceGeneratorDisabled)
 			{
-				if (output.Context.Settings.IsSourceGeneratorDisabled)
-				{
-					output.Context.Debug(
-						$"Logger generation skipped for {output.Target.FullyQualifiedName} because the generator is disabled"
-					);
-					return;
-				}
-
-				output.Context.Debug($"Logger generation target: {output.Target.FullyQualifiedName}");
-
-				if (output.Target.UseMSLoggingTelemetryBasedGeneration)
-					RunSafely(spc, () => LoggerGenTargetClassEmitter.GenerateImplementation(output, spc));
-				else
-					RunSafely(spc, () => LoggerTargetClassEmitter.GenerateImplementation(output, spc));
+				output.Context.Debug(
+					$"Logger generation skipped for {output.Target.FullyQualifiedName} because the generator is disabled"
+				);
+				return;
 			}
-		);
+
+			output.Context.Debug($"Logger generation target: {output.Target.FullyQualifiedName}");
+
+			if (output.Target.UseMSLoggingTelemetryBasedGeneration)
+				RunSafely(spc, () => LoggerGenTargetClassEmitter.GenerateImplementation(output, spc));
+			else
+				RunSafely(spc, () => LoggerTargetClassEmitter.GenerateImplementation(output, spc));
+		});
 	}
 }

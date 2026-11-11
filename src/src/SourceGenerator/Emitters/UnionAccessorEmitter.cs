@@ -18,7 +18,7 @@ static class UnionAccessorEmitter
 	public static void EmitAccessors(CodeWriter writer, IEnumerable<UnionTargetRecord?> unions)
 	{
 		List<UnionTargetRecord> distinct = [];
-		HashSet<string> emitted = new(StringComparer.Ordinal);
+		HashSet<string> emitted = [with(StringComparer.Ordinal)];
 
 		foreach (var union in unions)
 		{
@@ -64,9 +64,8 @@ static class UnionAccessorEmitter
 				// class union. Both mean "no value", which unwraps to null.
 				if (union.IsValueType)
 				{
-					writer.IfBlock(
-						"!value." + UnionHelpers.HasValueMemberName,
-						static body => body.Return(PropertyLibrary.System.NullKeyword)
+					writer.IfBlock("!value." + UnionHelpers.HasValueMemberName, static body =>
+						body.Return(PropertyLibrary.System.NullKeyword)
 					);
 
 					writer
@@ -93,30 +92,27 @@ static class UnionAccessorEmitter
 				return;
 			}
 
-			writer.IfBlock(
-				value + "." + UnionHelpers.HasValueMemberName,
-				body =>
+			writer.IfBlock(value + "." + UnionHelpers.HasValueMemberName, body =>
+			{
+				for (var i = 0; i < union.CaseTypes.Count; i++)
 				{
-					for (var i = 0; i < union.CaseTypes.Count; i++)
-					{
-						var caseVariableName = "caseValue" + i.ToString(CultureInfo.InvariantCulture);
+					var caseVariableName = "caseValue" + i.ToString(CultureInfo.InvariantCulture);
 
-						// The out argument is the case type itself rather than `var`: a union declares one
-						// TryGetValue overload per case, so an inferred type would be ambiguous.
-						body.IfBlock(
-							value
-								+ "."
-								+ UnionHelpers.TryGetValueMemberName
-								+ "(out "
-								+ union.CaseTypes[i].RenderFullNameForNullable(useNullable)
-								+ " "
-								+ caseVariableName
-								+ ")",
-							caseBody => caseBody.Return(caseVariableName)
-						);
-					}
+					// The out argument is the case type itself rather than `var`: a union declares one
+					// TryGetValue overload per case, so an inferred type would be ambiguous.
+					body.IfBlock(
+						value
+							+ "."
+							+ UnionHelpers.TryGetValueMemberName
+							+ "(out "
+							+ union.CaseTypes[i].RenderFullNameForNullable(useNullable)
+							+ " "
+							+ caseVariableName
+							+ ")",
+						caseBody => caseBody.Return(caseVariableName)
+					);
 				}
-			);
+			});
 
 			writer.NewLine().Return(PropertyLibrary.System.NullKeyword);
 		}

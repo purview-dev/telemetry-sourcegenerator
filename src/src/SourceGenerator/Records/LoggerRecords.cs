@@ -9,7 +9,8 @@ sealed record LoggerTarget(
 	LoggerAttributeData LoggerAttribute,
 	int DefaultLevel,
 	EquatableArray<LogMethodTarget> LogMethods,
-	bool UseMSLoggingTelemetryBasedGeneration
+	bool UseMSLoggingTelemetryBasedGeneration,
+	EquatableArray<TypeParameterTarget> InterfaceTypeParameters = default
 )
 {
 	public string? ClassNamespace => TelemetryGeneration.TelemetryNamesNamespace ?? InterfaceType.Identity.Namespace;
@@ -61,12 +62,16 @@ sealed record LogMethodTarget(
 	TargetGeneration TargetGenerationState,
 	bool UseV1Generation,
 	bool HasExplicitLevel = false,
-	bool HasLogPropertiesAndExpandEnumerable = false
+	bool HasLogPropertiesAndExpandEnumerable = false,
+	bool SkipEnabledCheck = false,
+	EquatableArray<TypeParameterTarget> TypeParameters = default
 )
 {
 	public int TotalParameterCount => Parameters.Count;
 
 	public int ParameterCountSansException => ParametersSansException.Count;
+
+	public bool IsGeneric => !TypeParameters.IsEmpty;
 }
 
 sealed record LogParameterTarget(
@@ -83,7 +88,8 @@ sealed record LogParameterTarget(
 	ExpandEnumerableAttributeData? ExpandEnumerableAttribute,
 	GenerationType ExcludedTargets,
 	EquatableArray<MessageTemplateHole> ReferencedHoles = default,
-	UnionTargetRecord? Union = null
+	UnionTargetRecord? Union = null,
+	TagProviderTarget? TagProvider = null
 )
 {
 	public bool UsedInTemplate => !ReferencedHoles.IsEmpty;
@@ -102,6 +108,34 @@ sealed record LogParameterTarget(
 	public bool RequiresObjectState => Union is not null;
 }
 
-readonly record struct LogPropertiesParameterDetails(string PropertyName, bool IsNullable);
+/// <summary>
+/// One property, or one step of a transitive property path, flattened out of a <c>[LogProperties]</c> parameter.
+/// </summary>
+/// <param name="PropertyName">
+/// The tag name beneath the parameter, dot-separated for a transitive path: <c>TemperatureC</c>, or
+/// <c>Location.City</c> for a nested property.
+/// </param>
+/// <param name="IsNullable">Whether the property's value can be null, which decides <c>SkipNullProperties</c>.</param>
+/// <param name="Accessor">
+/// The expression appended to the parameter name to read the value, including the null-conditional operators the
+/// chain needs: <c>?.TemperatureC</c>, or <c>?.Location?.City</c>.
+/// </param>
+readonly record struct LogPropertiesParameterDetails(string PropertyName, bool IsNullable, string? Accessor = null)
+{
+	public string ValueAccessor => Accessor ?? ("." + PropertyName);
+}
+
+/// <summary>
+/// A resolved <c>[TagProvider]</c>: the static method whose returned pairs are added to the log state as extra tags.
+/// </summary>
+/// <param name="ProviderTypeName">
+/// The provider type's fully-qualified name, including the <c>global::</c> prefix the emitters rely on.
+/// </param>
+/// <param name="MethodName">The static provider method's name.</param>
+/// <param name="OmitReferenceName">
+/// Whether the parameter name is left off the contributed tag names, matching the same-named
+/// <c>[TagProvider]</c> property.
+/// </param>
+readonly record struct TagProviderTarget(string ProviderTypeName, string MethodName, bool OmitReferenceName);
 
 readonly record struct LogLevelDetails(TypeIdentity LevelType, int Value, string Name);

@@ -113,26 +113,23 @@ public static class HostApplicationBuilderExtensions
 		string[] versions = ["v1"];
 		foreach (var description in versions)
 		{
-			builder.Services.AddOpenApi(
-				description,
-				options =>
-				{
-					options.ApplyAPIVersionInfo(
-						openApiSection.GetRequiredValue("Document:Title"),
-						openApiSection.GetRequiredValue("Document:Description")
-					);
+			builder.Services.AddOpenApi(description, options =>
+			{
+				options.ApplyAPIVersionInfo(
+					openApiSection.GetRequiredValue("Document:Title"),
+					openApiSection.GetRequiredValue("Document:Description")
+				);
 
-					// Clear out the default servers so we can fallback to
-					// whatever ports have been allocated for the service by Aspire
-					options.AddDocumentTransformer(
-						(document, _, _) =>
-						{
-							document.Servers = [];
-							return Task.CompletedTask;
-						}
-					);
-				}
-			);
+				// Clear out the default servers so we can fallback to
+				// whatever ports have been allocated for the service by Aspire
+				options.AddDocumentTransformer(
+					(document, _, _) =>
+					{
+						document.Servers = [];
+						return Task.CompletedTask;
+					}
+				);
+			});
 		}
 
 		return builder;

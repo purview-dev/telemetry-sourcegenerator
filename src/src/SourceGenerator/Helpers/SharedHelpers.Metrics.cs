@@ -5,6 +5,85 @@ namespace Purview.Telemetry.SourceGenerator.Helpers;
 
 partial class SharedHelpers
 {
+	/// <summary>
+	/// Merges the assembly-level and interface-level <c>Tags</c> settings into the ordered
+	/// <c>key=value</c> list a target carries. Both arrive as a comma-separated string because an attribute
+	/// property cannot be an array (the attribute-data model rejects <c>string[]</c> with <c>ADM0002</c>), so the
+	/// parse lives here once for both <c>MeterOptions.Tags</c> and <c>ActivitySourceOptions.Tags</c>. The
+	/// interface-level entry replaces the assembly-level one for the same key; a malformed entry is skipped.
+	/// </summary>
+	public static EquatableArray<string> MergeTags(string? assemblyTags, string? interfaceTags)
+	{
+		List<(string Key, string Value)> merged = [];
+		AddTagEntries(assemblyTags, merged);
+		AddTagEntries(interfaceTags, merged);
+
+		if (merged.Count == 0)
+			return new EquatableArray<string>([]);
+
+		List<string> rendered = [];
+		foreach (var entry in merged)
+			rendered.Add(entry.Key + "=" + entry.Value);
+
+		return new EquatableArray<string>([.. rendered]);
+	}
+
+	/// <summary>The entries in a <c>Tags</c> string that are not <c>key=value</c>, for diagnostics.</summary>
+	public static EquatableArray<string> GetMalformedTags(string? tags)
+	{
+		if (string.IsNullOrWhiteSpace(tags))
+			return new EquatableArray<string>([]);
+
+		List<string> malformed = [];
+
+		// netstandard2.0 reference assemblies do not annotate IsNullOrWhiteSpace, so the null state is restated.
+		var tagList = tags!;
+
+		foreach (var entry in tagList.Split(','))
+		{
+			var trimmed = entry.Trim();
+			if (trimmed.Length == 0)
+				continue;
+
+			var separator = trimmed.IndexOf('=');
+			if (separator <= 0 || separator == trimmed.Length - 1 || trimmed.Substring(0, separator).Trim().Length == 0)
+				malformed.Add(trimmed);
+		}
+
+		return malformed.Count == 0 ? new EquatableArray<string>([]) : new EquatableArray<string>([.. malformed]);
+	}
+
+	static void AddTagEntries(string? tags, List<(string Key, string Value)> entries)
+	{
+		if (string.IsNullOrWhiteSpace(tags))
+			return;
+
+		// netstandard2.0 reference assemblies do not annotate IsNullOrWhiteSpace, so the null state is restated.
+		var tagList = tags!;
+
+		foreach (var entry in tagList.Split(','))
+		{
+			var trimmed = entry.Trim();
+			if (trimmed.Length == 0)
+				continue;
+
+			var separator = trimmed.IndexOf('=');
+			if (separator <= 0 || separator == trimmed.Length - 1)
+				continue;
+
+			var key = trimmed.Substring(0, separator).Trim();
+			var value = trimmed.Substring(separator + 1).Trim();
+			if (key.Length == 0)
+				continue;
+
+			var existing = entries.FindIndex(candidate => candidate.Key == key);
+			if (existing >= 0)
+				entries[existing] = (key, value);
+			else
+				entries.Add((key, value));
+		}
+	}
+
 	public static MeterGenerationAttributeData? GetMeterGenerationAttribute(
 		Compilation compilation,
 		CancellationToken token

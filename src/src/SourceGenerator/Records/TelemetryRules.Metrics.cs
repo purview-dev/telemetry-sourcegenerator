@@ -51,7 +51,7 @@ static partial class TelemetryRules
 			// TSG4011: histogram bucket boundaries need InstrumentAdvice<T>.
 			if (
 				instrument.InstrumentAttribute
-					is HistogramInstrumentAttributeRecord { HistogramBucketBoundaries: { Count: > 0 } }
+					is HistogramInstrumentAttributeRecord { HistogramBucketBoundaries.Count: > 0 }
 				&& !supportsInstrumentAdvice
 			)
 				diagnostics.Add(

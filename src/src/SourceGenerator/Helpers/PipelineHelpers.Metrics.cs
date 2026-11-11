@@ -24,13 +24,14 @@ partial class PipelineHelpers
 		if (interfaceSymbol is null)
 			return GeneratorResult<MeterTarget?>.Empty;
 
-		if (interfaceSymbol.Arity > 0)
+		if (interfaceSymbol.Arity > 0 && !SharedHelpers.AreInterfaceTypeParametersSupported(interfaceSymbol))
 		{
 			return GeneratorResult<MeterTarget?>.Create(
 				ReportableDiagnostic.Create(
 					DiagnosticLibrary.General.GenericInterfacesNotSupported.Descriptor,
 					isBlocking: true,
-					interfaceSymbol
+					interfaceSymbol,
+					interfaceSymbol.Name
 				)
 			);
 		}
@@ -94,10 +95,16 @@ partial class PipelineHelpers
 				GenerationType: generationType,
 				ClassNameToGenerate: className,
 				ParentClasses: Utilities.GetParentClasses(interfaceDeclaration),
-				InterfaceType: TypeReference.Create(interfaceSymbol),
+				InterfaceType: SharedHelpers.GetInterfaceTypeReference(interfaceSymbol),
 				MeterName: meterName,
 				MeterGeneration: meterGenerationAttribute,
-				InstrumentationMethods: instrumentMethods
+				InstrumentationMethods: instrumentMethods,
+				// The interface-level [Meter] overrides the assembly-level [MeterGeneration], the same precedence
+				// every other setting here uses.
+				MeterVersion: SharedHelpers.NullIfWhitespace(meterAttribute.Version)
+					?? SharedHelpers.NullIfWhitespace(meterGenerationAttribute?.Version),
+				MeterTags: SharedHelpers.MergeTags(meterGenerationAttribute?.Tags, meterAttribute.Tags),
+				InterfaceTypeParameters: TypeParameterHelpers.FromNamedType(interfaceSymbol)
 			),
 			TelemetryRules.GetInterfaceLevelDiagnostics(interfaceSymbol, compilation, token)
 		);

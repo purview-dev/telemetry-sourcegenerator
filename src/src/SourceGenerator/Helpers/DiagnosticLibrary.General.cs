@@ -65,8 +65,8 @@ partial class DiagnosticLibrary
 		public static readonly ReportableDiagnostic GenericInterfacesNotSupported = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG1004",
-				title: "Generic interfaces are not supported",
-				messageFormat: "Remove the generic type(s) from the interface, this type of generation is not supported.",
+				title: "Generic interface cannot be generated",
+				messageFormat: "The generic interface '{0}' cannot be generated: only a top-level generic interface whose type parameters the generated class can mirror is supported. A nested generic interface, or one whose type parameter carries the 'allows ref struct' anti-constraint, is not.",
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Usage,
 				isEnabledByDefault: true
@@ -77,8 +77,8 @@ partial class DiagnosticLibrary
 		public static readonly ReportableDiagnostic GenericMethodsNotSupported = ReportableDiagnostic.Create(
 			new DiagnosticDescriptor(
 				id: "TSG1005",
-				title: "Generic methods are not supported",
-				messageFormat: "Remove the generic type(s) from the method, this type of generation is not supported.",
+				title: "Generic method cannot be generated",
+				messageFormat: "The generic method '{0}' cannot be generated: {1}. Generic methods and constraints are mirrored where C# allows it; the method is emitted as a throwing stub so the interface stays implemented.",
 				defaultSeverity: DiagnosticSeverity.Error,
 				category: Categories.Usage,
 				isEnabledByDefault: true

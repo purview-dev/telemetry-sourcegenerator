@@ -106,14 +106,11 @@ partial class ActivitySourceTargetClassEmitter
 		{
 			writer
 				.NewLine()
-				.IfBlock(
-					activityVariableName + " != null",
-					body =>
-					{
-						EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, output);
-						EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, output);
-					}
-				);
+				.IfBlock(activityVariableName + " != null", body =>
+				{
+					EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, output);
+					EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, output);
+				});
 		}
 
 		context.CancellationToken.ThrowIfCancellationRequested();
@@ -195,9 +192,8 @@ partial class ActivitySourceTargetClassEmitter
 	static void EmitHasListenersTest(CodeWriter writer, ActivityMethodTarget methodTarget)
 	{
 		var returnsVoid = methodTarget.ReturnType.Identity.SpecialType == SpecialType.System_Void;
-		writer.IfBlock(
-			"!" + PropertyLibrary.Activities.ActivitySourceFieldName + ".HasListeners()",
-			body => body.Return(returnsVoid ? null : "null" + (methodTarget.ReturnType.IsNullable ? null : "!"))
+		writer.IfBlock("!" + PropertyLibrary.Activities.ActivitySourceFieldName + ".HasListeners()", body =>
+			body.Return(returnsVoid ? null : "null" + (methodTarget.ReturnType.IsNullable ? null : "!"))
 		);
 
 		writer.NewLine();

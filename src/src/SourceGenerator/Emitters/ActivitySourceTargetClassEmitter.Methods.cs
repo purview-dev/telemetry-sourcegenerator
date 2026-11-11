@@ -67,42 +67,76 @@ partial class ActivitySourceTargetClassEmitter
 			)
 		)
 		{
-			writer.IfBlock("activity == null || exception == null", static body => body.Return());
-
-			writer.NewLine();
-
-			const string tagsListVariableName = "tagsCollection";
-			writer.Assignment(
-				TypeLibrary.System.Diagnostics.ActivityTagsCollection,
-				tagsListVariableName,
-				"new " + TypeLibrary.System.Diagnostics.ActivityTagsCollection + "()"
-			);
-
-			EmitExceptionParam(writer, tagsListVariableName, "escape", "exception");
-
-			const string eventVariableName = "recordExceptionEvent";
-
-			writer
-				.NewLine()
-				.Write(TypeLibrary.System.Diagnostics.ActivityEvent)
-				.Write(' ')
-				.Write(eventVariableName)
-				.Write(" = new ")
-				.Write(TypeLibrary.System.Diagnostics.ActivityEvent)
-				// name:
-				.Write("(name: ")
-				.Write(PropertyLibrary.Activities.Tag_ExceptionEventName.Wrap())
-				// timestamp:
-				.Write(", timestamp: default")
-				// tags:
-				.Write(", tags: ")
-				.Write(tagsListVariableName)
-				.Line(");");
-
-			writer.NewLine().Write("activity.AddEvent(").Write(eventVariableName).Line(");");
+			EmitRecordExceptionBody(writer, output.Context.Capabilities.SupportsActivityAddException);
 		}
 
 		writer.NewLine();
+	}
+
+	/// <summary>
+	/// Writes the body of the generated exception-recording helper.
+	/// </summary>
+	/// <remarks>
+	/// Extracted so both capability states have a test that needs no compilation: when the compilation can resolve
+	/// <c>Activity.AddException</c> the framework builds the <c>"exception"</c> event and writes
+	/// <c>exception.type</c>, <c>exception.message</c> and <c>exception.stacktrace</c> itself, so this method supplies
+	/// only <c>exception.escaped</c> through the <c>TagList</c> overload. Adding the other three here would duplicate
+	/// the framework's tags. Otherwise the event is built by hand, which is what <c>net48</c> and any pinned
+	/// DiagnosticSource older than 9 need.
+	/// </remarks>
+	/// <param name="writer">The writer to emit into.</param>
+	/// <param name="supportsActivityAddException">Whether <c>Activity.AddException</c> is available.</param>
+	internal static void EmitRecordExceptionBody(CodeWriter writer, bool supportsActivityAddException)
+	{
+		writer.IfBlock("activity == null || exception == null", static body => body.Return());
+
+		writer.NewLine();
+
+		if (supportsActivityAddException)
+		{
+			const string tagsVariableName = "exceptionTags";
+
+			writer.Assignment(TypeLibrary.System.Diagnostics.TagList, tagsVariableName, "default");
+
+			writer
+				.MethodCallOn(tagsVariableName, "Add", PropertyLibrary.Activities.Tag_ExceptionEscaped.Wrap(), "escape")
+				.NewLine()
+				.Write("activity.AddException(exception, ")
+				.Write(tagsVariableName)
+				.Line(", default);");
+
+			return;
+		}
+
+		const string tagsListVariableName = "tagsCollection";
+		writer.Assignment(
+			TypeLibrary.System.Diagnostics.ActivityTagsCollection,
+			tagsListVariableName,
+			"new " + TypeLibrary.System.Diagnostics.ActivityTagsCollection + "()"
+		);
+
+		EmitExceptionParam(writer, tagsListVariableName, "escape", "exception");
+
+		const string eventVariableName = "recordExceptionEvent";
+
+		writer
+			.NewLine()
+			.Write(TypeLibrary.System.Diagnostics.ActivityEvent)
+			.Write(' ')
+			.Write(eventVariableName)
+			.Write(" = new ")
+			.Write(TypeLibrary.System.Diagnostics.ActivityEvent)
+			// name:
+			.Write("(name: ")
+			.Write(PropertyLibrary.Activities.Tag_ExceptionEventName.Wrap())
+			// timestamp:
+			.Write(", timestamp: default")
+			// tags:
+			.Write(", tags: ")
+			.Write(tagsListVariableName)
+			.Line(");");
+
+		writer.NewLine().Write("activity.AddEvent(").Write(eventVariableName).Line(");");
 	}
 
 	static void EmitExceptionParam(
@@ -163,7 +197,7 @@ partial class ActivitySourceTargetClassEmitter
 							p.ParameterType
 						)),
 					],
-					GenericTypes = [.. methodTarget.TypeParameters],
+					GenericTypes = TypeParameterHelpers.ToOptions(methodTarget.TypeParameters),
 					ExpressionBody = "throw new global::System.NotSupportedException()",
 				}
 			)
@@ -250,6 +284,7 @@ partial class ActivitySourceTargetClassEmitter
 							p.ParameterType
 						)),
 					],
+					GenericTypes = TypeParameterHelpers.ToOptions(methodTarget.TypeParameters),
 				}
 			)
 		)
@@ -304,6 +339,7 @@ partial class ActivitySourceTargetClassEmitter
 							p.ParameterType
 						)),
 					],
+					GenericTypes = TypeParameterHelpers.ToOptions(methodTarget.TypeParameters),
 				}
 			)
 		)
@@ -386,6 +422,7 @@ partial class ActivitySourceTargetClassEmitter
 							p.ParameterType
 						)),
 					],
+					GenericTypes = TypeParameterHelpers.ToOptions(methodTarget.TypeParameters),
 				}
 			)
 		)

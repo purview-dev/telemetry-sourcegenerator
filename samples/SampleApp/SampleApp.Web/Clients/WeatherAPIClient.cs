@@ -30,8 +30,9 @@ sealed class WeatherAPIClient(HttpClient httpClient, IWeatherAPIClientTelemetry 
 
 			telemetry.RequestSuccess();
 
-			var forecasts =
-				await result.Content.ReadFromJsonAsync<WeatherForecast[]>(cancellationToken: cancellationToken) ?? [];
+			var forecasts = await result.Content.ReadFromJsonAsync<WeatherForecast[]>(
+				cancellationToken: cancellationToken
+			) ?? [];
 
 			if (forecasts.Length == 0)
 				telemetry.NoForecastsRecieved(activity);

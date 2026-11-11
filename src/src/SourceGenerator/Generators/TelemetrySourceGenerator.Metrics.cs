@@ -18,21 +18,18 @@ partial class TelemetrySourceGenerator
 			.Select(static (pair, _) => new MeterOutputContext(pair.Left.Value!, pair.Right))
 			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_MeterOutputs");
 
-		context.RegisterSourceOutput(
-			source: outputContexts,
-			action: static (spc, output) =>
+		context.RegisterSourceOutput(source: outputContexts, action: static (spc, output) =>
+		{
+			if (output.Context.Settings.IsSourceGeneratorDisabled)
 			{
-				if (output.Context.Settings.IsSourceGeneratorDisabled)
-				{
-					output.Context.Debug(
-						$"Meter generation skipped for {output.Target.FullyQualifiedName} because the generator is disabled"
-					);
-					return;
-				}
-
-				output.Context.Debug($"Meter generation target: {output.Target.FullyQualifiedName}");
-				RunSafely(spc, () => MeterTargetClassEmitter.GenerateImplementation(output, spc));
+				output.Context.Debug(
+					$"Meter generation skipped for {output.Target.FullyQualifiedName} because the generator is disabled"
+				);
+				return;
 			}
-		);
+
+			output.Context.Debug($"Meter generation target: {output.Target.FullyQualifiedName}");
+			RunSafely(spc, () => MeterTargetClassEmitter.GenerateImplementation(output, spc));
+		});
 	}
 }

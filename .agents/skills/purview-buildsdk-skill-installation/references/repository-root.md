@@ -44,7 +44,9 @@ an agent directory somewhere that is not the repository.
 
 A property a dependency computes is still empty in the depending target's `Condition`. That is why
 the unresolved-root guard sits on the `EvaluatePurviewSkillState` task rather than on
-`RecommendPurviewSkills` — and equally why the build hook's CI and design-time gating works at all.
+`RecommendPurviewSkills`, and why the explicit-only guard (`PRSKL0009`) is a dependency target with
+its own `Error` rather than a `Condition` on `InstallPurviewSkills`, `UpdatePurviewSkills` or
+`FixPurviewSkills`.
 
 ## The managed port
 

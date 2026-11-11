@@ -54,7 +54,7 @@ public interface ITestActivities
 
 	[Test]
 	[MethodDataSource<TelemetrySourceGeneratorTests>(nameof(TelemetrySourceGeneratorTests.GetGenericTypeDefCount))]
-	public async Task Generate_GivenInterfaceWithGenerics_RaisesDiagnostics(
+	public async Task Generate_GivenInterfaceWithGenerics_GeneratesAGenericClass(
 		int genericTypeCount,
 		CancellationToken cancellationToken
 	)
@@ -82,12 +82,12 @@ public interface ITestActivities<{genericTypeDef}>
 		);
 
 		// Assert
-		await Assert.That(generationResult).HasDiagnostic("TSG1004");
+		await Assert.That(generationResult).DoesNotHaveDiagnostic("TSG1004");
 	}
 
 	[Test]
 	[MethodDataSource<TelemetrySourceGeneratorTests>(nameof(TelemetrySourceGeneratorTests.GetGenericTypeDefCount))]
-	public async Task Generate_GivenMethodWithGenerics_RaisesDiagnostics(
+	public async Task Generate_GivenMethodWithGenerics_GeneratesAGenericMethod(
 		int genericTypeCount,
 		CancellationToken cancellationToken
 	)
@@ -108,13 +108,13 @@ public interface ITestActivities
 ";
 
 		// Act
-		using var generationResult = await GenerateAsync(
-			basicActivity,
-			TelemetrySourceGeneratorTestOptions.NoValidation,
-			cancellationToken: cancellationToken
-		);
+		using var generationResult = await GenerateAsync(basicActivity, cancellationToken: cancellationToken);
 
-		// Assert
-		await Assert.That(generationResult).HasDiagnostic("TSG1005");
+		// Assert: a generic method is generated with the interface's type parameters mirrored, not rejected.
+		await Assert.That(generationResult).DoesNotHaveDiagnostic("TSG1005");
+		await Assert
+			.That(generationResult.GetSource("TestActivitiesCore.Activity.g.cs"))
+			.Contains($"Activity<{genericTypeDef}>")
+			.Because("the generated implementation must declare the same type parameters as the interface method");
 	}
 }

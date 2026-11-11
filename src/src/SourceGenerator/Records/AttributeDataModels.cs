@@ -30,7 +30,12 @@ readonly partial record struct ActivitySourceGenerationAttributeData(
 		bool GenerateDiagnosticsForMissingActivity,
 	[Property(DefaultValue = false)] bool UseActivitySourceFactory,
 	[Property] string? Version,
-	[Property] string? TelemetrySchemaUrl
+	[Property] string? TelemetrySchemaUrl,
+	// ActivitySourceOptions.Tags: a comma-separated list of key=value pairs, because an attribute-data-model
+	// property cannot be an array (ADM0002).
+	[Argument("tags")]
+	[Property]
+		string? Tags
 );
 
 [Generate("Purview.Telemetry.ActivityAttribute")]
@@ -103,7 +108,10 @@ readonly partial record struct LogAttributeData(
 	[Argument("messageTemplate")] [Property] string? MessageTemplate,
 	[Argument("eventId")] [Property(DefaultValue = -1)] int EventId,
 	[Argument("name")] [Property] string? Name,
-	[Property(DefaultValue = 0)] int GenerationMode
+	[Property(DefaultValue = 0)] int GenerationMode,
+	// Parity with [LoggerMessage(SkipEnabledCheck = true)]: skip the IsEnabled guard when the caller has already
+	// checked the level, which saves a virtual call per log entry on a hot path.
+	[Property] bool SkipEnabledCheck
 );
 
 [Generate("Purview.Telemetry.ExpandEnumerableAttribute")]
@@ -190,6 +198,15 @@ readonly partial record struct LogPropertiesAttributeData(
 	[Property] bool Transitive
 );
 
+[Generate("Microsoft.Extensions.Logging.TagProviderAttribute")]
+readonly partial record struct TagProviderAttributeData(
+	// The provider type is carried as a TypeIdentity: a Type-valued attribute argument is not cacheable (ADM0010), and
+	// the TypeIdentity names the type without holding a Roslyn symbol in the pipeline model.
+	[Argument("providerType")] TypeIdentity ProviderType,
+	[Argument("providerMethod")] [Property] string? ProviderMethod,
+	[Property] bool OmitReferenceName
+);
+
 [Generate("Purview.Telemetry.MeterGenerationAttribute")]
 readonly partial record struct MeterGenerationAttributeData(
 	[Argument("meterName")] [Property] string? MeterName,
@@ -197,7 +214,13 @@ readonly partial record struct MeterGenerationAttributeData(
 	[Argument("instrumentPrefix")] [Property] string? InstrumentPrefix,
 	[Property(DefaultValue = ".")] string? InstrumentSeparator,
 	[Argument("lowercaseInstrumentName")] [Property(DefaultValue = true)] bool LowercaseInstrumentName,
-	[Argument("lowercaseTagKeys")] [Property(DefaultValue = true)] bool LowercaseTagKeys
+	[Argument("lowercaseTagKeys")] [Property(DefaultValue = true)] bool LowercaseTagKeys,
+	// MeterOptions metadata. Version goes to MeterOptions.Version; each Tag is "key=value" and goes to
+	// MeterOptions.Tags. Scope stays unreachable: it takes an object instance that an attribute cannot carry.
+	[Argument("version")]
+	[Property]
+		string? Version,
+	[Argument("tags")] [Property] string? Tags
 );
 
 [Generate("Purview.Telemetry.MeterAttribute")]
@@ -206,7 +229,9 @@ readonly partial record struct MeterAttributeData(
 	[Argument("instrumentPrefix")] [Property] string? InstrumentPrefix,
 	[Property(DefaultValue = true)] bool IncludeAssemblyInstrumentPrefix,
 	[Property(DefaultValue = true)] bool LowercaseInstrumentName,
-	[Property(DefaultValue = true)] bool LowercaseTagKeys
+	[Property(DefaultValue = true)] bool LowercaseTagKeys,
+	[Argument("version")] [Property] string? Version,
+	[Argument("tags")] [Property] string? Tags
 );
 
 [Generate("Purview.Telemetry.CounterAttribute")]

@@ -37,8 +37,8 @@ carry the message, so a reworded message is recorded in the CHANGELOG instead.
 | `TSG1001` | Error | A method on a multi-target interface has no explicit generation attribute — inference is not supported there. |
 | `TSG1002` | Error | Two attributes from the same target family on one method. Only one Activity, Logging or Metrics attribute per method. |
 | `TSG1003` | Error | Two methods on the interface share a name. |
-| `TSG1004` | Error | Generic interfaces are not supported. |
-| `TSG1005` | Error | Generic methods are not supported. |
+| `TSG1004` | Error | A generic interface cannot be generated: only a top-level generic interface whose type parameters the generated class can mirror is supported. A nested generic interface, or a type parameter carrying the `allows ref struct` anti-constraint, is not. |
+| `TSG1005` | Error | A generic method cannot be generated: a type parameter carrying `allows ref struct`, or a **metric** measurement that is one of the method's own type parameters (the instrument is a field, and a field cannot name a method's type parameter). The method is emitted as a throwing stub. |
 | `TSG1006` | Warning | `ExcludeTargets` names a target not present on the method. |
 | `TSG1007` | Warning | `ExcludeTargets` leaves a target with an empty or invalid parameter set. |
 | `TSG1008` | Warning | An `Activity`-typed parameter on a method with no `[Activity]`/`[Event]`/`[Context]`. |
@@ -59,6 +59,12 @@ carry the message, so a reworded message is recorded in the CHANGELOG instead.
 | `TSG2007` | Warning | A scoped log declares a `LogLevel`; it is ignored. |
 | `TSG2008` | Warning | `[ExpandEnumerable]` has a `MaximumValueCount` above the recommended default of 5. |
 | `TSG2021` | Error | A log method returns something other than `void` or `IDisposable`. (`Activity` is allowed when the method is also an Activity method.) |
+| `TSG2022` | Error | A logging parameter is declared `params`. Take an array and mark it `[ExpandEnumerable]` instead. Parity with `SYSLIB1028`. |
+| `TSG2023` | Error | A logging parameter is `ref`/`out`/`in`/`scoped`, or a ref struct such as `Span<T>`; the generated state struct cannot capture it. Parity with `SYSLIB1029`. |
+| `TSG2024` | Error | A `[TagProvider]` names a type that cannot be resolved. The parameter is still logged, without the provider's extra tags. |
+| `TSG2025` | Error | A `[TagProvider]` names a method that does not exist on the provider type. The parameter is still logged, without the extra tags. |
+| `TSG2026` | Error | A `[TagProvider]` method has an unusable signature: it must be a visible static method taking one parameter the annotated parameter can be passed to, and returning `IEnumerable<KeyValuePair<string, object?>>` (or the `string` variant, or a type implementing one). The .NET 11 `ITagCollector` collector shape is deliberately not accepted. |
+| `TSG2027` | Warning | `[TagProvider]` is on a parameter of a method that produces no log entry, so the provider would never run. |
 
 ## Activities — `TSG3xxx`
 
@@ -85,6 +91,7 @@ carry the message, so a reworded message is recorded in the CHANGELOG instead.
 | `TSG3021` | Info | An `[Event]` records an exception under the OpenTelemetry rules but is not named `"exception"`. |
 | `TSG3022` | Warning | An Activity method returns non-nullable `Activity`. |
 | `TSG3023` | Warning | `UseActivitySourceFactory` is set but `System.Diagnostics.ActivitySourceFactory` (.NET 11, or DiagnosticSource 11+) cannot be resolved; a static `ActivitySource` is generated instead. Target `net11.0` or remove the option. |
+| `TSG3024` | Warning | `Version` or `TelemetrySchemaUrl` is set on `[assembly: ActivitySourceGeneration(...)]` without `UseActivitySourceFactory`. A static `ActivitySource` has nowhere to put them, so they are ignored; add the factory or remove them. |
 
 ## Metrics — `TSG4xxx`
 
@@ -100,6 +107,9 @@ carry the message, so a reworded message is recorded in the CHANGELOG instead.
 | `TSG4007` | Error | An observable metric returns `bool`. |
 | `TSG4008` | Error | An `AutoCounter` does not return `void`. |
 | `TSG4009` | Warning | The instrument name matches the instrument type name. Name what is measured, not the instrument. |
+| `TSG4010` | Warning | `[Gauge]` needs `System.Diagnostics.Metrics.Gauge<T>` (.NET 9, or System.Diagnostics.DiagnosticSource 9+). The compilation cannot resolve it, so no instrument is generated and the method throws `NotSupportedException`. |
+| `TSG4011` | Warning | `HistogramBucketBoundaries` needs `System.Diagnostics.Metrics.InstrumentAdvice<T>` (.NET 9, or System.Diagnostics.DiagnosticSource 9+). The histogram is generated without the boundaries. |
+| `TSG4012` | Warning | `HistogramBucketBoundaries` does not parse as a comma-separated list of ascending, positive numbers (for example `"0.005, 0.01, 0.1, 1"`). No boundaries are generated. |
 
 ## The ones people actually hit
 
@@ -157,6 +167,40 @@ measured the cost.
 
 `[AutoCounter]` — equivalently `[Counter(AutoIncrement = true)]` — must declare no measurement
 parameter. The measurement is fixed at 1.
+
+### `TSG1004` — generic interface cannot be generated
+
+A plain generic interface works: the generated class is generic over the same type parameters, with the same
+constraints, and the DI extension registers the open generic (`typeof(IFoo<>)`). What does not work is a **nested**
+generic interface (the enclosing type's type arguments cannot be repeated on the class) or a type parameter with the
+`allows ref struct` anti-constraint (the class cannot repeat it). Move the interface out of its enclosing type, or
+drop the anti-constraint.
+
+### `TSG1005` — generic method cannot be generated
+
+Generic methods work, including constraint mirroring (`struct`, `class`, `class?`, `notnull`, `unmanaged`, `new()`,
+type-parameter and type constraints) and multiple type parameters. Two shapes are still refused, and the method is
+emitted as a throwing stub so the interface stays implemented:
+
+- a type parameter with the `allows ref struct` anti-constraint, which cannot be repeated on the generated
+  declaration;
+- a **metric** method whose measurement is one of its own type parameters. An instrument is a field, and a field cannot
+  name a method's type parameter — declare that type parameter on the interface instead, which makes the class generic
+  and lets the instrument field use it.
+
+### `TSG2024` / `TSG2025` / `TSG2026` — `[TagProvider]` cannot be used
+
+`[TagProvider(typeof(T), "M")]` needs a visible static method `M` on `T` that takes one parameter the annotated
+parameter can be passed to, and returns `IEnumerable<KeyValuePair<string, object?>>` (the `string`-valued variant, an
+array, or a `List<...>` of either also work). `2024` is the type, `2025` the method, `2026` the signature. In every
+case the parameter is still logged — only the contributed tags are missing. The .NET 11 collector shape
+(`static void M(ITagCollector, T)`) is reported as `TSG2026`: implementing `ITagCollector` in generated code would drag
+`Microsoft.Extensions.Compliance.Classification` into the consumer's build.
+
+### `TSG2027` — `[TagProvider]` where nothing logs
+
+The attribute sits on a parameter of a method that produces no log entry — commonly an `[Activity]`-only method on a
+multi-target interface. Move it to the logging method.
 
 ### `TSG1011` — unsupported target framework
 

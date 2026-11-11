@@ -9,6 +9,7 @@ license: MIT
 metadata:
   author: Purview-Dev
   version: "2.0"
+  repository: purview-dev/engineering-playbook
 ---
 
 # Purview architecture testing
@@ -83,7 +84,7 @@ debugging the package.
 
 Then add a test that the documentation matches the policy, so the table in the wiki is falsifiable
 too. Full worked example:
-[Project Responsibilities](https://github.com/purview-dev/engineering-playbook/blob/main/docs/wiki/Project-Responsibilities.md).
+[Project Responsibilities](https://github.com/purview-dev/engineering-playbook/blob/main/docs/wiki/foundations/Project-Responsibilities.md).
 
 ## 3. Read project files, and assemblies
 
@@ -180,4 +181,4 @@ project classified so every dependency rule still applies to it. Prefer a waiver
 
 - `purview-architecture` — what the projects are for, and how they are named
 - `purview-buildsdk-architecture-tests` — the package's own skill, authoritative on its API
-- [Architecture as Tests](https://github.com/purview-dev/engineering-playbook/blob/main/docs/wiki/Architecture-As-Tests.md)
+- [Architecture as Tests](https://github.com/purview-dev/engineering-playbook/blob/main/docs/wiki/foundations/Architecture-As-Tests.md)

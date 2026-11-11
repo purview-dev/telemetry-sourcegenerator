@@ -67,6 +67,32 @@ public class UnsupportedTargetFrameworkTests
 	}
 
 	[Test]
+	[Arguments("NET;NET8_0;NET8_0_OR_GREATER;NETCOREAPP")]
+	[Arguments("NET;NET8_0;NET8_0_OR_GREATER;NET9_0;NET9_0_OR_GREATER;NETCOREAPP")]
+	public async Task Analyze_GivenDroppedNet8OrNet9Compilation_RaisesTSG1011(
+		string preprocessorSymbols,
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange: the exact symbol set the SDK defines for net8.0 and net9.0, including the
+		// NET<version>_OR_GREATER chain that a later version defines as well. .NET 8 and .NET 9 are no
+		// longer supported, so the compilation must be reported rather than silently generate nothing.
+		var compilation = CreateCompilation(preprocessorSymbols.Split(';'));
+
+		// Act
+		var diagnostics = await AnalyzeAsync(compilation, cancellationToken);
+
+		// Assert
+		var messages = diagnostics
+			.Where(static diagnostic => diagnostic.Id == "TSG1011")
+			.Select(static diagnostic => diagnostic.GetMessage(CultureInfo.InvariantCulture))
+			.ToArray();
+
+		await Assert.That(messages.Length).IsEqualTo(1);
+		await Assert.That(messages[0]).IsEqualTo(ExpectedMessage);
+	}
+
+	[Test]
 	[Arguments("NET;NET10_0;NET10_0_OR_GREATER;NETCOREAPP")]
 	[Arguments("NETFRAMEWORK;NET48;NET48_OR_GREATER")]
 	public async Task Analyze_GivenSupportedTargetFramework_DoesNotRaiseTSG1011(
