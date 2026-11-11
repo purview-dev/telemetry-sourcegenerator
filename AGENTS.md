@@ -212,6 +212,12 @@ table of gates is in [`docs/wiki/Release-Flow.md`](docs/wiki/Release-Flow.md#rel
   1.4.0 parses C# 15, so the two files that declare a `closed` hierarchy are formatted like any other and the
   `.csharpierignore` those entries lived in is gone. Do not reintroduce an ignore file to work around the parser;
   a file it cannot read is a version bump, not an exclusion.
+- **Local tools**: `.config/dotnet-tools.json` holds `csharpier` and `purview.build`, and nothing RID-specific. A
+  `DotNetCliTool Version="2"` package (one with `RuntimeIdentifierPackages`, laid out under `tools/any/any`) breaks a
+  cold `dotnet tool restore` on a hosted runner when it sits beside another tool: NuGet validates the wrong package's
+  commands and names the other entry. `dotnet-inspect` did exactly that - removed in `7427652`, re-added by accident in
+  `2f1c731`, which took the `pack-validation` job down again - so it is rejected by name in `ToolManifestTests`.
+  Nothing here runs it; do not add it or any tool of that shape back.
 - **Solutions**: `.slnx` solution files are used.
 - **Source generator**: targets `netstandard2.0` for broad compiler-host compatibility and uses
   `Purview.SourceGeneratorFramework` (CodeWriter-based emission, incremental pipeline, value-equatable
