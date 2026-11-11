@@ -130,7 +130,7 @@ samples/
     └── SampleApp.Net48.slnx
 
 benchmarks/
-└── Purview.Telemetry.Benchmarks/           # BenchmarkDotNet project (net48/net10.0)
+└── Purview.Telemetry.Benchmarks/           # BenchmarkDotNet project (net48/net10.0/net11.0)
 
 .build/                                     # TS scripts (build-pack.ts, update-version.ts)
 .agents/skills/                             # Installed + developer skills, committed (see "Installed skills")
