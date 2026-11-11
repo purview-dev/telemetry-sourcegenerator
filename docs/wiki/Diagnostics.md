@@ -20,13 +20,13 @@ The package ships a single Roslyn analyzer, `TelemetryDiagnosticAnalyzer`, which
 | `TSG1001`<a id="tsg1001"></a> | Error | Inferring generation targets is not supported when using multi-target generation. A method on a multi-target interface has no explicit generation attribute. |
 | `TSG1002`<a id="tsg1002"></a> | Error | Multiple attributes from the same target family are not supported. Only one Activity, Logging, or Metrics attribute is allowed per method. |
 | `TSG1003`<a id="tsg1003"></a> | Error | Duplicate method names are not supported. Two or more methods on the interface share the same name. |
-| `TSG1004`<a id="tsg1004"></a> | Error | Generic interfaces are not supported. |
-| `TSG1005`<a id="tsg1005"></a> | Error | Generic methods are not supported. |
+| `TSG1004`<a id="tsg1004"></a> | Error | Generic interface cannot be generated. A generic interface is generated as a generic class with the same type parameters and constraints; the shapes that cannot be are a **nested** generic interface (the enclosing type's type arguments cannot be repeated on the generated class) and a type parameter carrying the `allows ref struct` anti-constraint (the generated class cannot repeat it). |
+| `TSG1005`<a id="tsg1005"></a> | Error | Generic method cannot be generated. Generic methods and their constraints are mirrored; what cannot be is a type parameter carrying the `allows ref struct` anti-constraint, or a **metric** method whose measurement is one of its own type parameters (the instrument is a field, and a field cannot name a method's type parameter — declare that type parameter on the interface instead). The method is emitted as a throwing stub so the interface stays implemented. |
 | `TSG1006`<a id="tsg1006"></a> | Warning | `ExcludeTargets` references a target not present on this method. |
 | `TSG1007`<a id="tsg1007"></a> | Warning | `ExcludeTargets` results in an empty or invalid parameter set for a target. |
 | `TSG1008`<a id="tsg1008"></a> | Warning | Activity parameter has no Activity target. A parameter of type `Activity` is present on a method with no `[Activity]`/`[Event]`/`[Context]` attribute. |
 | `TSG1010`<a id="tsg1010"></a> | Error | Method target not registered on interface. A method carries an attribute for a target family that is not registered on the interface. |
-| `TSG1011`<a id="tsg1011"></a> | Error | Unsupported target framework. The compilation targets neither .NET 8+ nor .NET Framework 4.8+ (for example `netstandard2.0`), so no telemetry is generated for it. There is no opt-out. Target `net8.0` or later, or `net48` or later; a multi-targeted library references the package only from its supported targets (a `Condition` on the `PackageReference`), with the telemetry interfaces under the same condition. See [Platform Support](Platform-Support.md). |
+| `TSG1011`<a id="tsg1011"></a> | Error | Unsupported target framework. The compilation targets neither .NET 10+ nor .NET Framework 4.8+ (for example `netstandard2.0`, `net8.0` or `net9.0`), so no telemetry is generated for it. There is no opt-out. Target `net10.0` or later, or `net48` or later; a multi-targeted library references the package only from its supported targets (a `Condition` on the `PackageReference`), with the telemetry interfaces under the same condition. See [Platform Support](Platform-Support.md). |
 
 ## Logging diagnostics (TSG2xxx)
 
@@ -42,6 +42,12 @@ The package ships a single Roslyn analyzer, `TelemetryDiagnosticAnalyzer`, which
 | `TSG2007`<a id="tsg2007"></a> | Warning | A scoped log shouldn't have a `LogLevel`; it will be ignored. |
 | `TSG2008`<a id="tsg2008"></a> | Warning | Unbounded enumeration possible. `[ExpandEnumerable]` has a `MaximumValueCount` greater than the recommended default of 5. |
 | `TSG2021`<a id="tsg2021"></a> | Error | Log method must return void or IDisposable. (Returning `Activity` is allowed when the method is also an Activity method.) |
+| `TSG2022`<a id="tsg2022"></a> | Error | `params` parameters are not supported. The generated method re-declares the parameter without the modifier, so the `params` call form would stop compiling. Take an array and mark it `[ExpandEnumerable]` instead. Parity with the .NET 11 `[LoggerMessage]` generator's `SYSLIB1028`. |
+| `TSG2023`<a id="tsg2023"></a> | Error | `ref`, `out`, `in`, `scoped`, and ref struct parameters (such as `Span<T>`) are not supported: the generated state struct cannot capture them. Parity with the .NET 11 `[LoggerMessage]` generator's `SYSLIB1029`. |
+| `TSG2024`<a id="tsg2024"></a> | Error | The `[TagProvider]` type could not be resolved. The parameter is logged without the provider's extra tags. |
+| `TSG2025`<a id="tsg2025"></a> | Error | The `[TagProvider]` method could not be found on the provider type. The parameter is logged without the provider's extra tags. |
+| `TSG2026`<a id="tsg2026"></a> | Error | The `[TagProvider]` method has an invalid signature. It must be a visible static method taking one parameter the annotated parameter can be passed to, and returning `IEnumerable<KeyValuePair<string, object?>>` (or the `string`-valued variant, or a type implementing one). The parameter is logged without the provider's extra tags. |
+| `TSG2027`<a id="tsg2027"></a> | Warning | `[TagProvider]` is on a method that generates no log entry, so the provider would never run. Move it to a logging method, or remove it. |
 
 ## Activities diagnostics (TSG3xxx)
 
@@ -68,6 +74,7 @@ The package ships a single Roslyn analyzer, `TelemetryDiagnosticAnalyzer`, which
 | `TSG3021`<a id="tsg3021"></a> | Info | Exception event does not use OpenTelemetry standard name. An `[Event]` method records an exception under the OpenTelemetry exception rules but the event name is not the standard `"exception"` (suggest `[Event(Name = "exception")]`). Not raised when `UseRecordExceptionRules` is disabled, for `[Baggage]` exceptions, or when the exception parameter is excluded from the Activities target. |
 | `TSG3022`<a id="tsg3022"></a> | Warning | Activity return type should be nullable. An Activity method returns non-nullable `Activity`; use `Activity?` because the Activity can be null when no listeners are active. |
 | `TSG3023`<a id="tsg3023"></a> | Warning | ActivitySourceFactory is not available. `UseActivitySourceFactory` is set but `System.Diagnostics.ActivitySourceFactory` (.NET 11, or System.Diagnostics.DiagnosticSource 11+) cannot be resolved; a static `ActivitySource` is generated instead. |
+| `TSG3024`<a id="tsg3024"></a> | Warning | ActivitySourceOptions require UseActivitySourceFactory. `Version` or `TelemetrySchemaUrl` is set but the assembly kept the static `ActivitySource`, which has nowhere to pass them. |
 
 ## Metrics diagnostics (TSG4xxx)
 
@@ -83,6 +90,9 @@ The package ships a single Roslyn analyzer, `TelemetryDiagnosticAnalyzer`, which
 | `TSG4007`<a id="tsg4007"></a> | Error | Observable metrics cannot return bool. |
 | `TSG4008`<a id="tsg4008"></a> | Error | AutoCounter must return void. |
 | `TSG4009`<a id="tsg4009"></a> | Warning | Instrument name matches the instrument type name. Use a name that describes what is measured. |
+| `TSG4010`<a id="tsg4010"></a> | Warning | Gauge is not available. `[Gauge]` needs `System.Diagnostics.Metrics.Gauge<T>` (.NET 9, or System.Diagnostics.DiagnosticSource 9+); the instrument is not generated and the method throws `NotSupportedException`. |
+| `TSG4011`<a id="tsg4011"></a> | Warning | HistogramBucketBoundaries is not available. It needs `InstrumentAdvice<T>` (.NET 9, or System.Diagnostics.DiagnosticSource 9+); the histogram is generated without bucket boundaries. |
+| `TSG4012`<a id="tsg4012"></a> | Warning | HistogramBucketBoundaries is not a list of numbers. It must be a comma-separated list of ascending, positive numbers, for example `"0.005, 0.01, 0.1, 1"`. |
 
 ## Common resolutions
 
@@ -104,6 +114,56 @@ interface IMyTelemetry
 ### TSG1003 — duplicate method names
 
 Two or more methods share the same name, which is used to generate members on the implementation class. Rename the methods.
+
+### TSG1004 — generic interface cannot be generated
+
+A generic interface is generated as a generic class with the same type parameters and constraints:
+
+```csharp
+[Logger]
+public interface IMyTelemetry<T> where T : class
+{
+    void Log(T value);           // ✅ generated as IMyTelemetryCore<T>
+}
+```
+
+Two shapes still cannot be generated, because the generated class has no way to express them:
+
+- a **nested** generic interface — the enclosing type's type arguments cannot be repeated on the generated class;
+- a type parameter carrying the `allows ref struct` anti-constraint — it cannot be repeated on the generated class.
+
+### TSG1005 — generic method cannot be generated
+
+Generic methods are generated with the interface method's type parameters and constraints mirrored onto the
+implementation, and constraints are mirrored for `struct`, `class`, `class?`, `notnull`, `unmanaged`, `new()` and
+type-parameter or type constraints:
+
+```csharp
+[Logger]
+public interface IMyTelemetry
+{
+    void Log<T>(T value) where T : notnull;      // ✅ generated as void Log<T>(T value) where T : notnull
+}
+```
+
+The method is emitted as a throwing stub, so the interface stays implemented, when:
+
+- a type parameter carries the `allows ref struct` anti-constraint; or
+- a metric method uses one of its own type parameters as the instrument measurement. An instrument is a **field**, and
+  a field cannot name a method's type parameter — declare that type parameter on the interface instead, which makes the
+  generated class generic and lets the instrument field use it.
+
+### TSG2024 / TSG2025 / TSG2026 — `[TagProvider]` cannot be used
+
+`[TagProvider(typeof(T), "Method")]` names a static method that contributes extra tags; see
+[Logging](Logging.md#tagprovider-contributed-tags). `TSG2024` reports a provider type that cannot be resolved,
+`TSG2025` a method that does not exist on it, and `TSG2026` a method whose signature the generated `foreach` cannot
+read. In every case the parameter is still logged — only the extra tags are missing.
+
+### TSG2027 — `[TagProvider]` on a method that never logs
+
+The attribute is on a parameter of a method that generates no log entry (for example an `[Activity]`-only method on a
+multi-target interface). Move it to the logging method, or remove it.
 
 ### TSG2008 — unbounded enumeration
 
@@ -142,6 +202,14 @@ Return `Activity?` so callers can handle the `null` case when no listeners are a
 `System.Diagnostics.ActivitySourceFactory`, but the compilation cannot resolve that type, so a static `ActivitySource`
 is generated instead. Target `net11.0`, or reference System.Diagnostics.DiagnosticSource 11 or later; or remove the
 option. See [Creating sources with ActivitySourceFactory](Activities.md#creating-sources-with-activitysourcefactory-net-11).
+
+### TSG3024 — ActivitySourceOptions require UseActivitySourceFactory
+
+`Version` or `TelemetrySchemaUrl` on `[assembly: ActivitySourceGeneration(...)]` is only consumed by
+`System.Diagnostics.ActivitySourceOptions`, which a factory-created source passes to
+`ActivitySourceFactory.Create`. A static `ActivitySource` has nowhere to put them, so they are ignored. Set
+`UseActivitySourceFactory = true`, or remove the option. See
+[Creating sources with ActivitySourceFactory](Activities.md#creating-sources-with-activitysourcefactory-net-11).
 
 ### TSG4002 — auto-increment counter with a measurement
 

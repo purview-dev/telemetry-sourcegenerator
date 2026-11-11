@@ -37,6 +37,10 @@ static partial class TelemetryRules
 			DiagnosticLibrary.Logging.ScopedMethodShouldNotHaveLevel.Descriptor,
 			DiagnosticLibrary.Logging.UnboundedIEnumerableMaxCount.Descriptor,
 			DiagnosticLibrary.Logging.LogMustReturnVoidOrAsync.Descriptor,
+			DiagnosticLibrary.Logging.TagProviderTypeNotFound.Descriptor,
+			DiagnosticLibrary.Logging.TagProviderMethodNotFound.Descriptor,
+			DiagnosticLibrary.Logging.TagProviderMethodInvalidSignature.Descriptor,
+			DiagnosticLibrary.Logging.TagProviderNotOnLoggingMethod.Descriptor,
 			DiagnosticLibrary.Activities.BaggageParameterShouldBeString.Descriptor,
 			DiagnosticLibrary.Activities.NoActivitySourceSpecified.Descriptor,
 			DiagnosticLibrary.Activities.InvalidReturnType.Descriptor,
@@ -58,6 +62,7 @@ static partial class TelemetryRules
 			DiagnosticLibrary.Activities.ExceptionEventNotStandardName.Descriptor,
 			DiagnosticLibrary.Activities.ActivityReturnTypeShouldBeNullable.Descriptor,
 			DiagnosticLibrary.Activities.ActivitySourceFactoryNotAvailable.Descriptor,
+			DiagnosticLibrary.Activities.ActivitySourceOptionsRequireFactory.Descriptor,
 			DiagnosticLibrary.Metrics.NoInstrumentDefined.Descriptor,
 			DiagnosticLibrary.Metrics.DoesNotReturnVoid.Descriptor,
 			DiagnosticLibrary.Metrics.AutoIncrementCountAndMeasurementParam.Descriptor,
@@ -68,6 +73,9 @@ static partial class TelemetryRules
 			DiagnosticLibrary.Metrics.ObservableCannotReturnBool.Descriptor,
 			DiagnosticLibrary.Metrics.AutoCounterMustReturnVoid.Descriptor,
 			DiagnosticLibrary.Metrics.InstrumentNameMatchesType.Descriptor,
+			DiagnosticLibrary.Metrics.GaugeNotAvailable.Descriptor,
+			DiagnosticLibrary.Metrics.InstrumentAdviceNotAvailable.Descriptor,
+			DiagnosticLibrary.Metrics.InvalidHistogramBucketBoundaries.Descriptor,
 		];
 
 	static IMethodSymbol? FindMethod(INamedTypeSymbol interfaceSymbol, string methodName) =>
@@ -84,7 +92,7 @@ static partial class TelemetryRules
 		?? Location.None;
 
 	/// <summary>
-	/// Determines whether the target framework of the compilation is supported (net8.0+/net48+).
+	/// Determines whether the target framework of the compilation is supported (net10.0+/net48+).
 	/// A compilation with no target-framework symbols is treated as supported.
 	/// </summary>
 	public static bool IsUnsupportedTargetFramework(Compilation compilation)
@@ -94,7 +102,7 @@ static partial class TelemetryRules
 			if (tree.Options is CSharpParseOptions options)
 			{
 				var symbols = options.PreprocessorSymbolNames;
-				return !symbols.Contains("NET8_0_OR_GREATER")
+				return !symbols.Contains("NET10_0_OR_GREATER")
 					&& !symbols.Contains("NET48_OR_GREATER")
 					&& symbols.Any(static s => s.StartsWith("NET", StringComparison.Ordinal));
 			}
@@ -126,14 +134,16 @@ static partial class TelemetryRules
 				)
 			);
 
-		// TSG1004: generic interface - nothing further is meaningful.
-		if (interfaceSymbol.Arity > 0)
+		// TSG1004: a generic interface whose type parameters cannot be mirrored, or a nested one. A plain generic
+		// interface is generated as a generic class with the same type parameters and constraints.
+		if (interfaceSymbol.Arity > 0 && !SharedHelpers.AreInterfaceTypeParametersSupported(interfaceSymbol))
 		{
 			diagnostics.Add(
 				ReportableDiagnostic.Create(
 					DiagnosticLibrary.General.GenericInterfacesNotSupported.Descriptor,
 					isBlocking: true,
-					interfaceSymbol
+					interfaceSymbol,
+					interfaceSymbol.Name
 				)
 			);
 			return diagnostics.ToImmutable();
@@ -175,7 +185,7 @@ static partial class TelemetryRules
 		}
 
 		// Gather methods grouped by name (for TSG1003 and per-method checks).
-		Dictionary<string, List<IMethodSymbol>> methodsByName = new(StringComparer.Ordinal);
+		Dictionary<string, List<IMethodSymbol>> methodsByName = [with(StringComparer.Ordinal)];
 		foreach (var method in PipelineHelpers.GetInstanceMethods(interfaceSymbol))
 		{
 			if (!methodsByName.TryGetValue(method.Name, out var list))
@@ -231,17 +241,38 @@ static partial class TelemetryRules
 		if (TypeHelpers.HasAttribute(method, TypeLibrary.Purview.Telemetry.ExcludeAttribute))
 			return;
 
-		// TSG1005: generic method.
+		// TSG1005: a generic method the generator cannot implement. Generic methods are supported; what is not is a
+		// constraint the generated declaration cannot repeat (`allows ref struct`) or a measurement whose type
+		// parameter is declared by the method rather than the interface.
 		if (method.Arity > 0)
 		{
-			diagnostics.Add(
-				ReportableDiagnostic.Create(
-					DiagnosticLibrary.General.GenericMethodsNotSupported.Descriptor,
-					isBlocking: false,
-					method
-				)
-			);
-			return;
+			var typeParameters = method.TypeParameters;
+			if (!TypeParameterHelpers.AreSupported(typeParameters))
+			{
+				diagnostics.Add(
+					ReportableDiagnostic.Create(
+						DiagnosticLibrary.General.GenericMethodsNotSupported.Descriptor,
+						isBlocking: false,
+						method,
+						method.Name,
+						"the 'allows ref struct' anti-constraint cannot be repeated on the generated declaration"
+					)
+				);
+			}
+			else if (
+				generationType.HasFlag(GenerationType.Metrics) && UsesMethodTypeParameterAsMeasurement(method, token)
+			)
+			{
+				diagnostics.Add(
+					ReportableDiagnostic.Create(
+						DiagnosticLibrary.General.GenericMethodsNotSupported.Descriptor,
+						isBlocking: false,
+						method,
+						method.Name,
+						"a type parameter declared by the method cannot be the instrument measurement, because the instrument is a field; declare the type parameter on the interface instead"
+					)
+				);
+			}
 		}
 
 		var targetState = Utilities.IsValidGenerationTarget(method, generationType, generationType);
@@ -282,8 +313,7 @@ static partial class TelemetryRules
 		)
 		{
 			var parameterSymbol = FindParameter(method, activityParameterName);
-			var activityParameterLocation =
-				parameterSymbol?.Locations.FirstOrDefault(static l => l.IsInSource)
+			var activityParameterLocation = parameterSymbol?.Locations.FirstOrDefault(static l => l.IsInSource)
 				?? method.Locations.FirstOrDefault(static l => l.IsInSource)
 				?? Location.None;
 
@@ -299,6 +329,115 @@ static partial class TelemetryRules
 
 		// TSG1006/TSG1007: [ExcludeTargets] validation against the method's target families.
 		ApplyExcludeTargetsRules(method, targetState.MethodTargets, diagnostics, token);
+
+		// TSG2027: [TagProvider] on a method that never produces a log entry.
+		ApplyTagProviderTargetRules(method, generationType, targetState, diagnostics, token);
+	}
+
+	/// <summary>
+	/// Whether a metric method's measurement parameter is one of the method's own type parameters, which cannot be
+	/// carried by the generated instrument field.
+	/// </summary>
+	static bool UsesMethodTypeParameterAsMeasurement(IMethodSymbol method, CancellationToken token)
+	{
+		foreach (var parameter in method.Parameters)
+		{
+			token.ThrowIfCancellationRequested();
+
+			var resolved = parameter.Type;
+
+			if (resolved is ITypeParameterSymbol directTypeParameter)
+			{
+				if (
+					method.TypeParameters.Contains(directTypeParameter, SymbolEqualityComparer.Default)
+					&& directTypeParameter.HasValueTypeConstraint
+				)
+				{
+					return true;
+				}
+
+				continue;
+			}
+
+			if (resolved is INamedTypeSymbol { Arity: 1 } func && new TypeIdentity(typeof(Func<>)).Matches(func))
+			{
+				resolved = func.TypeArguments[0];
+
+				if (
+					resolved is INamedTypeSymbol { Arity: 1 } measurement
+					&& TypeLibrary.System.Diagnostics.Metrics.Measurement.Equals(measurement.ConstructedFrom)
+				)
+				{
+					resolved = measurement.TypeArguments[0];
+				}
+				else if (
+					resolved is INamedTypeSymbol { Arity: 1 } enumerable
+					&& TypeLibrary.System.Collections.Generic.IEnumerable.Equals(enumerable.ConstructedFrom)
+					&& enumerable.TypeArguments[0] is INamedTypeSymbol { Arity: 1 } nested
+					&& TypeLibrary.System.Diagnostics.Metrics.Measurement.Equals(nested.ConstructedFrom)
+				)
+				{
+					resolved = nested.TypeArguments[0];
+				}
+			}
+
+			if (
+				resolved is ITypeParameterSymbol typeParameter
+				&& typeParameter.HasValueTypeConstraint
+				&& method.TypeParameters.Contains(typeParameter, SymbolEqualityComparer.Default)
+			)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	static void ApplyTagProviderTargetRules(
+		IMethodSymbol method,
+		GenerationType interfaceGenerationType,
+		TargetGeneration targetState,
+		ImmutableArray<ReportableDiagnostic>.Builder diagnostics,
+		CancellationToken token
+	)
+	{
+		if (!interfaceGenerationType.HasFlag(GenerationType.Logging))
+		{
+			ReportTagProvidersOnNonLoggingMethod(method, diagnostics, token);
+			return;
+		}
+
+		// A method with no explicit attributes is inferred for every registered target, so it does log.
+		if (targetState.MethodTargets == GenerationType.None)
+			return;
+
+		if (!targetState.MethodTargets.HasFlag(GenerationType.Logging))
+			ReportTagProvidersOnNonLoggingMethod(method, diagnostics, token);
+	}
+
+	static void ReportTagProvidersOnNonLoggingMethod(
+		IMethodSymbol method,
+		ImmutableArray<ReportableDiagnostic>.Builder diagnostics,
+		CancellationToken token
+	)
+	{
+		foreach (var parameter in method.Parameters)
+		{
+			token.ThrowIfCancellationRequested();
+
+			if (SharedHelpers.GetTagProviderAttribute(parameter, token) is null)
+				continue;
+
+			diagnostics.Add(
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.Logging.TagProviderNotOnLoggingMethod.Descriptor,
+					isBlocking: false,
+					parameter,
+					parameter.Name
+				)
+			);
+		}
 	}
 
 	static void ApplyExcludeTargetsRules(
@@ -401,19 +540,20 @@ static partial class TelemetryRules
 				)
 			);
 
-		if (interfaceSymbol.Arity > 0)
+		if (interfaceSymbol.Arity > 0 && !SharedHelpers.AreInterfaceTypeParametersSupported(interfaceSymbol))
 		{
 			diagnostics.Add(
 				ReportableDiagnostic.Create(
 					DiagnosticLibrary.General.GenericInterfacesNotSupported.Descriptor,
 					isBlocking: true,
-					interfaceSymbol
+					interfaceSymbol,
+					interfaceSymbol.Name
 				)
 			);
 			return diagnostics.ToImmutable();
 		}
 
-		Dictionary<string, List<IMethodSymbol>> methodsByName = new(StringComparer.Ordinal);
+		Dictionary<string, List<IMethodSymbol>> methodsByName = [with(StringComparer.Ordinal)];
 		foreach (var method in PipelineHelpers.GetInstanceMethods(interfaceSymbol))
 		{
 			if (!methodsByName.TryGetValue(method.Name, out var list))

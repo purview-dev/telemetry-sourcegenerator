@@ -33,11 +33,16 @@ static partial class ActivitySourceTargetClassEmitter
 					target.GenerationType,
 					target.ClassNameToGenerate,
 					target.InterfaceType,
-					TypeDeclarationAccessibility.Internal
+					TypeDeclarationAccessibility.Internal,
+					target.InterfaceTypeParameters
 				)
 			)
 			{
 				EmitFields(output, writer, context);
+				UnionAccessorEmitter.EmitAccessors(
+					writer,
+					target.ActivityMethods.SelectMany(static m => m.Parameters).Select(static p => p.Union)
+				);
 				EmitMethods(output, writer, context);
 			}
 

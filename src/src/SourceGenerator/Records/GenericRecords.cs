@@ -14,6 +14,22 @@ enum GenerationType
 	All = Activities | Logging | Metrics,
 }
 
+/// <summary>
+/// One generic type parameter a generated method (or class) must re-declare, with the constraint expressions written
+/// after <c>where T :</c>.
+/// </summary>
+/// <remarks>
+/// The constraints are already-rendered C# expressions (<c>struct</c>, <c>class?</c>, <c>notnull</c>, <c>unmanaged</c>,
+/// <c>new()</c>, or a fully-qualified constraint type) rather than symbols, so the value stays equatable and usable in
+/// the incremental pipeline.
+/// </remarks>
+/// <param name="Name">The type parameter's name.</param>
+/// <param name="Constraints">The ordered constraint expressions, empty when the parameter is unconstrained.</param>
+readonly record struct TypeParameterTarget(string Name, EquatableArray<string> Constraints)
+{
+	public bool HasConstraints => !Constraints.IsEmpty;
+}
+
 readonly record struct TargetGeneration(
 	bool IsValid,
 	bool RaiseInferenceNotSupportedWithMultiTargeting,

@@ -1,6 +1,6 @@
 ---
 name: purview-buildsdk-project-detection
-description: Explain why Purview.BuildSdk classified a project as test, shared, shared-testing, CLI, web, worker, Aspire host, container, Roslyn component, Blazor WebAssembly client, Razor class library, Blazor host or BFF, and why it added a package, a project reference, a namespace or an analyzer automatically. Use when SDK behaviour looks surprising, when a test project gets no runner or no InternalsVisibleTo, or when reasoning about RootNamespace, AssemblyName and TargetProjectName.
+description: Explain why Purview.BuildSdk classified a project as test, shared, shared-testing, ServerShared, client-side, CLI, web, worker, Aspire host, container, Roslyn component, Blazor WebAssembly client, Razor class library, Blazor host or BFF, and why it added a package, a project reference, a namespace or an analyzer automatically. Use when SDK behaviour looks surprising, when a test project gets no runner or no InternalsVisibleTo, or when reasoning about RootNamespace, AssemblyName and TargetProjectName.
 license: MIT
 metadata:
   package: Purview.BuildSdk
@@ -25,7 +25,8 @@ dotnet msbuild <project> -getProperty:PurviewLogicalProjectName -getProperty:Roo
 
 The values worth inspecting first: `MSBuildProjectName`, `NamespacePrefix`,
 `PurviewLogicalProjectName`, `RootNamespace`, `TestingType`, `TargetProjectName`, `SdkProjectName`,
-`IsTestProject`, `IsSharedProject`, `IsSharedTestingProject`, `IsContainerProject`, `IsCLIProject`,
+`IsTestProject`, `IsSharedProject`, `IsServerSharedProject`, `IsClientSideProject`,
+`IsSharedTestingProject`, `IsContainerProject`, `IsCLIProject`,
 `IsWebSdkProject`, `IsAspireHostProject`, `IsBlazorWebAssemblyProject`, `IsRazorClassLibraryProject`,
 `IsBlazorHostProject`, `IsBffProject`.
 
@@ -52,11 +53,16 @@ a non-test project grants access to `{AssemblyName}.{TestType}Tests` for each na
 suffix outside it still builds, runs and gets a category — it just cannot see `internal` members.
 The 53 names are in [references/test-types.md](references/test-types.md).
 
-### Shared and shared-testing projects
+### Shared, shared-testing and ServerShared projects
 
-Recognised by **exact name**, never by substring. The two lists are in
+Recognised by **exact name**, never by substring. The three lists are in
 [references/detection.md](references/detection.md). Derived: `IsSharedProject`,
-`IsSharedTestingProject`.
+`IsSharedTestingProject`, `IsServerSharedProject`.
+
+`ServerShared` is separate from `Shared` for a reason: a `Shared` project is referenced by almost
+everything, including code that ends up in a browser, so server-only helpers get their own name and
+are referenced automatically only by a project that cannot be downloaded. `IsClientSideProject` is the
+classification that decides it.
 
 ### SDK and content based
 

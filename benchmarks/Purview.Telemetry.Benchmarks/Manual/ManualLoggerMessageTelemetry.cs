@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Purview.Telemetry.Benchmarks.Telemetry;
 
 namespace Purview.Telemetry.Benchmarks.Manual;
 
@@ -9,7 +10,15 @@ namespace Purview.Telemetry.Benchmarks.Manual;
 /// This baseline demonstrates the ceiling performance of the pattern and verifies
 /// that the source generator adds no measurable overhead over a hand-written equivalent.
 /// </summary>
-public sealed class ManualLoggerMessageTelemetry
+/// <remarks>
+/// Implements <see cref="ILoggerOnlyTelemetry"/> so the benchmark can hold both the generated and the
+/// hand-written implementation as the interface: a generated class is resolved from DI as its interface, and a
+/// call that crosses an interface boundary cannot be inlined into the caller. The interface is the v2 one
+/// because it declares the same four methods; the body here is the classic <c>LoggerMessage.Define</c> pattern,
+/// which is what it is meant to represent. Holding this baseline as its concrete type instead would let the JIT
+/// inline every body and would attribute the difference to the generator.
+/// </remarks>
+public sealed class ManualLoggerMessageTelemetry : ILoggerOnlyTelemetry
 {
 	static readonly Action<ILogger, string, int, Exception?> _operationStartedAction = LoggerMessage.Define<
 		string,

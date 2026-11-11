@@ -100,9 +100,14 @@ silently gets no runner, no coverage, no `InternalsVisibleTo` and no category.
 
 ## 5. Agent skills are a separate, explicit step
 
-The SDK does not install agent skills, and nothing it does during a build writes to an agent
-directory. It reads which skills each referenced package ships and recommends the command that
-installs them; the skills CLI does the installing. See `purview-buildsdk-skill-installation`.
+Nothing the SDK does during a restore or a build touches agent skills. Installing, updating and
+cleaning them up are separate targets a person runs by name — `InstallPurviewSkills`,
+`UpdatePurviewSkills`, `CheckPurviewSkills`, `FixPurviewSkills` — and the ones that change the
+repository refuse to run inside a build (`PRSKL0009`). Do not hook them into one. The skills CLI does
+the installing, through `bun x` by default; with `PurviewSkillsAgents` unset it auto-detects agents.
+
+If the repository uses `just`, add recipes for them — see `purview-buildsdk-skills-justfile`. For what each
+target does and the `PRSKL*` diagnostics, see `purview-buildsdk-skill-installation`.
 
 ## Constraints
 

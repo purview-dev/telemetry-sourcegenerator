@@ -14,6 +14,36 @@ jobs:
     uses: purview-dev/build/.github/workflows/purview-build.yml@main
     secrets: inherit
 
+  # Proves the lower bound this package declares. `Directory.Packages.props` keeps each package family on
+  # one property, and `DependencyFloor=true` drops every family to the oldest version the generator compiles
+  # and passes against. Dependency resolution is a set of lower bounds, so the floor declared here becomes
+  # the floor every consumer inherits; a floor nobody builds against is a guess. The `build` job above is the
+  # ceiling - it resolves the latest servicing patch of the same line.
+  dependency-floor:
+    name: Lowest compatible dependency floor
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      # Installs the SDK global.json pins (11.0.100). `actions/setup-dotnet` directly, with its
+      # `global-json-file` input, falls back to the LTS channel when it cannot install the pin,
+      # reports success, and leaves the first dotnet command to fail with "A compatible .NET SDK was
+      # not found". The shared action is the one implementation of this resolution.
+      - uses: purview-dev/build/actions/dotnet-sdk@main
+
+      - name: Restore, build and test at the declared floor
+        run: >-
+          dotnet test --solution src/Telemetry.SourceGenerator.slnx
+          --configuration Release
+          --timeout 30m
+          --maximum-failed-tests 25
+          --results-directory-layout per-module
+          -p:DependencyFloor=true
+
   samples:
     name: Build and test samples
     runs-on: ubuntu-latest
@@ -25,11 +55,7 @@ jobs:
           fetch-tags: true
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          # global.json is the source of truth: the repo targets net11.0, and a floating
-          # 10.0.x here leaves the SDK pinned by global.json uninstalled.
-          global-json-file: global.json
+        uses: purview-dev/build/actions/dotnet-sdk@main
 
       - name: Build SampleApp
         run: dotnet build samples/SampleApp/SampleApp.slnx --configuration Release
@@ -67,9 +93,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - uses: actions/setup-dotnet@v6
-        with:
-          global-json-file: global.json
+      - uses: purview-dev/build/actions/dotnet-sdk@main
 
       # Restore before pack: a pwsh step that left `dotnet tool restore`'s non-zero exit code to the shell's
       # trailing `exit $LASTEXITCODE` is what made this gate report a green run as a failure. Reaching a step at
@@ -102,9 +126,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - uses: actions/setup-dotnet@v6
-        with:
-          global-json-file: global.json
+      - uses: purview-dev/build/actions/dotnet-sdk@main
 
       # First, before any toolchain is installed: the generator is built against the
       # Purview.SourceGeneratorFramework version Directory.Packages.props pins, with the
@@ -114,9 +136,47 @@ jobs:
         shell: pwsh
         run: ./scripts/test-packed-consumers.ps1 -PreflightOnly
 
-      # Native AOT links with clang and needs the zlib headers; the hosted image may not carry both.
+      # Native AOT links with clang and needs the zlib headers. Only the last of these needs the network:
+      #   - `clang` is on PATH; or a versioned `clang-18` is installed and only the unversioned name is
+      #     missing, which the hosted image does - link it instead of installing anything;
+      #   - `/usr/include/zlib.h` is present, as it usually is;
+      #   - a package really is missing - install it with short timeouts and no retries.
+      #
+      # Never let apt retry: the runner's mirror (azure.archive.ubuntu.com, via apt-mirrors.txt)
+      # intermittently fails to resolve, and every attempt hangs for minutes per repository. Three
+      # attempts took this job to 24 minutes and still failed. Failing in seconds is the better outcome,
+      # and the probe means the usual case never reaches apt at all.
       - name: Install the Native AOT prerequisites
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang zlib1g-dev
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+
+          if ! command -v clang >/dev/null 2>&1; then
+            versioned="$(ls /usr/bin/clang-[0-9]* 2>/dev/null | sort -V | tail -1 || true)"
+            if [ -n "$versioned" ]; then
+              echo "no unversioned clang on PATH; using $versioned"
+              sudo ln -sf "$versioned" /usr/local/bin/clang
+            fi
+          fi
+
+          missing=""
+          command -v clang >/dev/null 2>&1 || missing="$missing clang"
+          [ -f /usr/include/zlib.h ] || missing="$missing zlib1g-dev"
+
+          if [ -z "$missing" ]; then
+            echo "clang and the zlib headers are present."
+            exit 0
+          fi
+
+          echo "installing$missing"
+          if ! sudo timeout 120 apt-get install -y --no-install-recommends $missing \
+              -o Acquire::Retries=0 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15; then
+            echo "install failed from the cached lists; refreshing them once"
+            sudo timeout 90 apt-get update \
+              -o Acquire::Retries=0 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 || true
+            sudo timeout 120 apt-get install -y --no-install-recommends $missing \
+              -o Acquire::Retries=0 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15
+          fi
 
       # RunAOTCompilation needs the Emscripten toolchain and the Mono AOT cross compiler.
       # -WasmAot Require below makes a missing workload an error instead of a skipped step.

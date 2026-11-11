@@ -234,7 +234,7 @@ Guidelines:
 - The `Microsoft.CodeAnalysis.*` version used to compile the analyser/generator sets the minimum compiler-host requirement.
 - The consumer's `TargetFramework` does not determine analyser compatibility.
 - Choose the oldest Roslyn version that contains the APIs you need.
-- Common baselines: Roslyn 4.8 for VS 17.8 / .NET 8, 4.12 for VS 17.12 / .NET 9, 5.0 for VS 2026 18.0 / .NET 10.
+- Common baselines: Roslyn 4.8 for VS 17.8 / .NET 8, 4.12 for VS 17.12 / .NET 9, 5.0 for VS 2026 18.0 / .NET 10, 5.12 for .NET 11.
 - Ship one `netstandard2.0` analyser/generator binary unless you have a deliberate multi-version strategy.
 - Do not mistake multi-targeting for automatic analyser asset selection.
 - Use `PrivateAssets="all"` for Roslyn development dependencies.

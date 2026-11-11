@@ -126,6 +126,7 @@ partial class LoggerGenTargetClassEmitter
 							p.ParameterType
 						)),
 					],
+					GenericTypes = TypeParameterHelpers.ToOptions(methodTarget.TypeParameters),
 				}
 			)
 		)
@@ -137,7 +138,7 @@ partial class LoggerGenTargetClassEmitter
 			// exception and output it as the exception parameter in
 			// the Log method.
 
-			List<string> existingParamNames = new(methodTarget.Parameters.Count);
+			List<string> existingParamNames = [with(methodTarget.Parameters.Count)];
 			foreach (var param in methodTarget.Parameters)
 			{
 				existingParamNames.Add(param.Name);
@@ -153,11 +154,13 @@ partial class LoggerGenTargetClassEmitter
 				// First check if the the Log Level is enabled.
 				// if (!_logger.IsEnabled(LogLevel.Information)))
 				// { return; };
-				// ...but only if it's not been scoped.
-				writer.IfBlock(
-					"!" + PropertyLibrary.Logging.LoggerFieldName + ".IsEnabled(" + methodTarget.MSLevel + ")",
-					static body => body.Return()
-				);
+				// ...but only if it's not been scoped, and not when the method opted out with
+				// [Log(SkipEnabledCheck = true)] because the caller already checked the level.
+				if (!methodTarget.SkipEnabledCheck)
+					writer.IfBlock(
+						"!" + PropertyLibrary.Logging.LoggerFieldName + ".IsEnabled(" + methodTarget.MSLevel + ")",
+						static body => body.Return()
+					);
 
 				writer.NewLine();
 			}
@@ -207,7 +210,7 @@ partial class LoggerGenTargetClassEmitter
 			{
 				context.CancellationToken.ThrowIfCancellationRequested();
 
-				writer.Write(scopeNonExceptionParams[i].Name);
+				writer.Write(scopeNonExceptionParams[i].RenderValueExpression());
 				if (i < scopeNonExceptionParams.Count - 1)
 					writer.Write(", ");
 			}
@@ -391,7 +394,7 @@ partial class LoggerGenTargetClassEmitter
 
 		for (var i = 0; i < nonExceptionParams.Count; i++)
 		{
-			writer.Write(nonExceptionParams[i].Name);
+			writer.Write(nonExceptionParams[i].RenderValueExpression());
 			if (i < nonExceptionParams.Count - 1)
 				writer.Write(", ");
 		}
@@ -481,7 +484,14 @@ partial class LoggerGenTargetClassEmitter
 
 			var isEnumerable = parameter.IsArray || parameter.IsIEnumerable;
 			// Need to match the name against the value.
-			OutputState(writer, stateVarName, parameter.Name.Wrap(), parameter.Name, ++idx, isEnumerable: isEnumerable);
+			OutputState(
+				writer,
+				stateVarName,
+				parameter.Name.Wrap(),
+				parameter.RenderValueExpression(),
+				++idx,
+				isEnumerable: isEnumerable
+			);
 
 			if (isEnumerable)
 			{
@@ -503,6 +513,12 @@ partial class LoggerGenTargetClassEmitter
 					parameter,
 					existingParamNames
 				);
+			}
+
+			if (parameter.TagProvider is { } tagProvider)
+			{
+				postSetProperties ??= [];
+				postSetProperties.Add(OutputTagProvider(stateVarName, parameter, tagProvider, existingParamNames));
 			}
 		}
 
@@ -537,7 +553,7 @@ partial class LoggerGenTargetClassEmitter
 			{
 				context.CancellationToken.ThrowIfCancellationRequested();
 
-				var logPropertyValue = $"{parameter.Name}?.{logProperty.PropertyName}";
+				var logPropertyValue = parameter.Name + logProperty.ValueAccessor;
 				var logPropertyName = logProperty.PropertyName;
 				if (!parameter.LogPropertiesAttribute!.Value.OmitReferenceName)
 				{
@@ -551,9 +567,8 @@ partial class LoggerGenTargetClassEmitter
 					var tmpVarName = FindUniqueName("tmp", existingParamNames);
 					logPropertiesWriter.Write("{");
 					logPropertiesWriter.Write("var ").Write(tmpVarName).Write(" = ").Write(logPropertyValue).Line(";");
-					logPropertiesWriter.IfBlock(
-						tmpVarName + " != null",
-						body => OutputState(body, stateVarName, logPropertyName.Wrap(), tmpVarName, null)
+					logPropertiesWriter.IfBlock(tmpVarName + " != null", body =>
+						OutputState(body, stateVarName, logPropertyName.Wrap(), tmpVarName, null)
 					);
 					logPropertiesWriter.Write("}");
 				}
@@ -633,48 +648,84 @@ partial class LoggerGenTargetClassEmitter
 		CodeWriter snippet = new(GenerationSettings.Create<TelemetrySourceGenerator>(), throwOnUnclosedScopes: false);
 		var iteratorVarName = FindUniqueName("tmp_i", existingParamNames);
 		var iteratorItemVarName = FindUniqueName("item", existingParamNames);
-		snippet.IfBlock(
-			parameter.Name + " != null",
-			body =>
+		snippet.IfBlock(parameter.Name + " != null", body =>
+		{
+			body.Write("var ").Write(iteratorVarName).Line(" = 0;");
+
+			var maxCount = parameter.ExpandEnumerableAttribute!.Value.MaximumValueCount;
+
+			if (maxCount < 1)
+				maxCount = 1;
+
+			if (maxCount > PropertyLibrary.Logging.UnboundedIEnumerableMaxCountBeforeDiagnostic)
 			{
-				body.Write("var ").Write(iteratorVarName).Line(" = 0;");
-
-				var maxCount = parameter.ExpandEnumerableAttribute!.Value.MaximumValueCount;
-
-				if (maxCount < 1)
-					maxCount = 1;
-
-				if (maxCount > PropertyLibrary.Logging.UnboundedIEnumerableMaxCountBeforeDiagnostic)
-				{
-					output.Context.Diagnostic(
-						$"Identified {parameter.Name} that has a large unbounded ienumerable max."
-					);
-				}
-
-				body.Foreach(
-					"var " + iteratorItemVarName + " in " + parameter.Name,
-					loopBody =>
-					{
-						loopBody.IfBlock(
-							iteratorVarName + " == " + maxCount.ToString(CultureInfo.InvariantCulture),
-							static breakBody => breakBody.Line("break;")
-						);
-
-						loopBody.NewLine();
-
-						OutputState(
-							loopBody,
-							stateVarName,
-							$"$\"{parameter.Name}[{{{iteratorVarName}}}]\"",
-							iteratorItemVarName,
-							null
-						);
-
-						loopBody.Write(iteratorVarName).Line("++;");
-					}
-				);
+				output.Context.Diagnostic($"Identified {parameter.Name} that has a large unbounded ienumerable max.");
 			}
-		);
+
+			body.Foreach("var " + iteratorItemVarName + " in " + parameter.Name, loopBody =>
+			{
+				loopBody.IfBlock(
+					iteratorVarName + " == " + maxCount.ToString(CultureInfo.InvariantCulture),
+					static breakBody => breakBody.Line("break;")
+				);
+
+				loopBody.NewLine();
+
+				OutputState(
+					loopBody,
+					stateVarName,
+					$"$\"{parameter.Name}[{{{iteratorVarName}}}]\"",
+					iteratorItemVarName,
+					null
+				);
+
+				loopBody.Write(iteratorVarName).Line("++;");
+			});
+		});
+
+		return snippet.ToString().TrimEnd('\n');
+	}
+
+	/// <summary>
+	/// Emits the <c>[TagProvider]</c> call for one parameter: the provider's pairs are added to the log state as extra
+	/// tags once the fixed-size state entries are written, because the number of pairs is only known at run time.
+	/// </summary>
+	static string OutputTagProvider(
+		string stateVarName,
+		LogParameterTarget parameter,
+		TagProviderTarget tagProvider,
+		List<string> existingParamNames
+	)
+	{
+		CodeWriter snippet = new(GenerationSettings.Create<TelemetrySourceGenerator>(), throwOnUnclosedScopes: false);
+		var tagVariableName = FindUniqueName("tag", existingParamNames);
+
+		void EmitPairs(CodeWriter target)
+		{
+			target.Foreach(
+				$"var {tagVariableName} in {tagProvider.ProviderTypeName}.{tagProvider.MethodName}({parameter.RenderValueExpression()})",
+				loopBody =>
+				{
+					// LoggerMessageState.AddTag takes (string, object?), so a string-valued pair boxes; nothing to do.
+					loopBody
+						.Write(stateVarName)
+						.Write(".AddTag(")
+						.Write(
+							tagProvider.OmitReferenceName
+								? tagVariableName + ".Key"
+								: $"\"{parameter.Name}.\" + {tagVariableName}.Key"
+						)
+						.Write(", ")
+						.Write(tagVariableName)
+						.Line(".Value);");
+				}
+			);
+		}
+
+		if (parameter.ParameterType.IsNullable)
+			snippet.IfBlock(parameter.Name + " != null", EmitPairs);
+		else
+			EmitPairs(snippet);
 
 		return snippet.ToString().TrimEnd('\n');
 	}
@@ -759,11 +810,19 @@ partial class LoggerGenTargetClassEmitter
 
 	static bool IsSimpleLogMethod(LogMethodTarget methodTarget)
 	{
+		// A nested state struct cannot re-declare the method's type parameters, so a generic method always uses the
+		// thread-local state bag instead of the typed struct.
+		if (methodTarget.IsGeneric)
+			return false;
+
 		foreach (var param in methodTarget.Parameters)
 		{
 			if (param.LogPropertiesAttribute != null)
 				return false;
 			if (param.ExpandEnumerableAttribute != null)
+				return false;
+			// A tag provider contributes a run-time number of tags, which a fixed-size typed state struct cannot hold.
+			if (param.TagProvider != null)
 				return false;
 		}
 
@@ -890,7 +949,12 @@ partial class LoggerGenTargetClassEmitter
 					context.CancellationToken.ThrowIfCancellationRequested();
 
 					writer.Field(
-						new FieldDeclarationOptions($"_{param.UpperCasedName}", param.ParameterType)
+						new FieldDeclarationOptions(
+							$"_{param.UpperCasedName}",
+							param.RequiresObjectState
+								? TypeLibrary.System.Object.AsTypeReference().Nullable(writer)
+								: param.ParameterType
+						)
 						{
 							Accessibility = TypeDeclarationAccessibility.Public,
 							IsReadOnly = true,
@@ -905,7 +969,12 @@ partial class LoggerGenTargetClassEmitter
 					{
 						Parameters =
 						[
-							.. nonExceptionParams.Select(p => new ParameterDeclarationOptions(p.Name, p.ParameterType)),
+							.. nonExceptionParams.Select(p => new ParameterDeclarationOptions(
+								p.Name,
+								p.RequiresObjectState
+									? TypeLibrary.System.Object.AsTypeReference().Nullable(writer)
+									: p.ParameterType
+							)),
 						],
 					},
 					ctor =>
@@ -1167,7 +1236,12 @@ partial class LoggerGenTargetClassEmitter
 					context.CancellationToken.ThrowIfCancellationRequested();
 
 					writer.Field(
-						new FieldDeclarationOptions($"_{param.UpperCasedName}", param.ParameterType)
+						new FieldDeclarationOptions(
+							$"_{param.UpperCasedName}",
+							param.RequiresObjectState
+								? TypeLibrary.System.Object.AsTypeReference().Nullable(writer)
+								: param.ParameterType
+						)
 						{
 							Accessibility = TypeDeclarationAccessibility.Public,
 							IsReadOnly = true,
@@ -1182,7 +1256,12 @@ partial class LoggerGenTargetClassEmitter
 					{
 						Parameters =
 						[
-							.. nonExceptionParams.Select(p => new ParameterDeclarationOptions(p.Name, p.ParameterType)),
+							.. nonExceptionParams.Select(p => new ParameterDeclarationOptions(
+								p.Name,
+								p.RequiresObjectState
+									? TypeLibrary.System.Object.AsTypeReference().Nullable(writer)
+									: p.ParameterType
+							)),
 						],
 					},
 					ctor =>
@@ -1218,19 +1297,17 @@ partial class LoggerGenTargetClassEmitter
 						IsOverride = true,
 					},
 					body =>
-						body.HashDefines(
-							"NET",
-							hashWriter =>
-								hashWriter
-									.Write(
-										"return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"
-									)
-									.Write(interpolatedMessage.Wrap())
-									.Line(");")
-									.HashElse()
-									.Write("return global::System.FormattableString.Invariant($")
-									.Write(interpolatedMessage.Wrap())
-									.Line(");")
+						body.HashDefines("NET", hashWriter =>
+							hashWriter
+								.Write(
+									"return string.Create(global::System.Globalization.CultureInfo.InvariantCulture, $"
+								)
+								.Write(interpolatedMessage.Wrap())
+								.Line(");")
+								.HashElse()
+								.Write("return global::System.FormattableString.Invariant($")
+								.Write(interpolatedMessage.Wrap())
+								.Line(");")
 						)
 				);
 
@@ -1342,6 +1419,7 @@ partial class LoggerGenTargetClassEmitter
 							p.ParameterType
 						)),
 					],
+					GenericTypes = TypeParameterHelpers.ToOptions(methodTarget.TypeParameters),
 				}
 			)
 		)

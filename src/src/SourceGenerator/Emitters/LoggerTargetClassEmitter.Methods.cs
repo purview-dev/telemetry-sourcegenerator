@@ -24,6 +24,7 @@ partial class LoggerTargetClassEmitter
 							p.ParameterType
 						)),
 					],
+					GenericTypes = TypeParameterHelpers.ToOptions(methodTarget.TypeParameters),
 					ExpressionBody = "throw new global::System.NotSupportedException()",
 				}
 			)
@@ -128,6 +129,7 @@ partial class LoggerTargetClassEmitter
 							p.ParameterType
 						)),
 					],
+					GenericTypes = TypeParameterHelpers.ToOptions(methodTarget.TypeParameters),
 				}
 			)
 		)
@@ -142,10 +144,13 @@ partial class LoggerTargetClassEmitter
 			}
 			else
 			{
-				writer.IfBlock(
-					"!" + PropertyLibrary.Logging.LoggerFieldName + ".IsEnabled(" + methodTarget.MSLevel + ")",
-					static body => body.Return()
-				);
+				// [Log(SkipEnabledCheck = true)]: the caller has already checked the level, so the per-call virtual
+				// IsEnabled dispatch is redundant. Same contract as [LoggerMessage(SkipEnabledCheck = true)].
+				if (!methodTarget.SkipEnabledCheck)
+					writer.IfBlock(
+						"!" + PropertyLibrary.Logging.LoggerFieldName + ".IsEnabled(" + methodTarget.MSLevel + ")",
+						static body => body.Return()
+					);
 
 				writer
 					.NewLine()
@@ -156,7 +161,7 @@ partial class LoggerTargetClassEmitter
 
 			foreach (var parameter in methodTarget.ParametersSansException)
 			{
-				writer.Write(", ").Write(parameter.Name);
+				writer.Write(", ").Write(parameter.RenderValueExpression());
 			}
 
 			if (methodTarget.ExceptionParameter != null)
@@ -207,6 +212,7 @@ partial class LoggerTargetClassEmitter
 							p.ParameterType
 						)),
 					],
+					GenericTypes = TypeParameterHelpers.ToOptions(methodTarget.TypeParameters),
 				}
 			)
 		)

@@ -33,11 +33,17 @@ static partial class LoggerTargetClassEmitter
 					target.GenerationType,
 					target.ClassNameToGenerate,
 					target.InterfaceType,
-					TypeDeclarationAccessibility.Internal
+					TypeDeclarationAccessibility.Internal,
+					target.InterfaceTypeParameters
 				)
 			)
 			{
 				EmitFields(output, writer, context);
+
+				UnionAccessorEmitter.EmitAccessors(
+					writer,
+					target.LogMethods.SelectMany(static m => m.Parameters).Select(static p => p.Union)
+				);
 
 				ConstructorEmitter.EmitCtor(
 					GenerationType.Logging,

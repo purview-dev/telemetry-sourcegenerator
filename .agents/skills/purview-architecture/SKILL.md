@@ -10,6 +10,7 @@ license: MIT
 metadata:
   author: Purview-Dev
   version: "1.0"
+  repository: purview-dev/engineering-playbook
 ---
 
 # Purview architecture
@@ -173,4 +174,4 @@ small telemetry — it does not get none. See `purview-telemetry`.
 - `purview-telemetry` — instrumentation at every scale
 - `purview-persistence` — storage and GUID-key guidance, only when persistence is real
 - [Engineering Principles](https://github.com/purview-dev/engineering-playbook/blob/main/docs/wiki/Engineering-Principles.md)
-- [Adopting This At Your Scale](https://github.com/purview-dev/engineering-playbook/blob/main/docs/wiki/Adopting-This-At-Your-Scale.md)
+- [Adopting This At Your Scale](https://github.com/purview-dev/engineering-playbook/blob/main/docs/wiki/governance/Adopting-This-At-Your-Scale.md)

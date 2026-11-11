@@ -5,6 +5,20 @@
 `Shared`, `SharedFramework`, `SharedInfrastructure`, `SharedInfra`, `SharedUtilities`,
 `SharedUtils`, `SharedLibrary`, `SharedLib`, `SharedHelpers`
 
+## ServerShared project names (exact)
+
+`ServerShared`, `ServerSharedFramework`, `ServerSharedInfrastructure`, `ServerSharedInfra`,
+`ServerSharedUtilities`, `ServerSharedUtils`, `ServerSharedLibrary`, `ServerSharedLib`,
+`ServerSharedHelpers`
+
+A `ServerShared` project is referenced automatically by every non-client-side project, and never by a
+WebAssembly client, a `PurviewBrowserSafe` library, a Razor class library, a project named with a
+client-side segment (`*.Client`, `*.ClientShared`, `*.Browser`, `*.Wasm`, `*.WebAssembly`,
+`*.Components`, or exactly `Components`/`ClientShared`), or a `Shared`/`SharedTesting` project.
+`IsClientSideProject` overrides the classification. `PRSHR0001` reports a client-side reference and
+`PRSHR0002` a `Shared` reference; `PurviewBrowserSafe="true"` on the reference records an accepted
+decision.
+
 ## Shared testing project names (exact)
 
 `SharedTestingFramework`, `SharedTestingInfrastructure`, `SharedTestingInfra`,
@@ -64,7 +78,8 @@ dual-role component that wants normal library symbol packaging.
 | Container | `InvariantGlobalization`, `PublishAot`, Linux Docker defaults, container tooling packages |
 | Web SDK | `Microsoft.AspNetCore.OpenApi.Generated` added to `InterceptorsNamespaces`, unless marked as a separate web-project mode |
 | Aspire host | `OutputType=Exe` |
-| Blazor WebAssembly client | not packable, no container defaults, no automatic `Shared` reference, the browser-safe reference check - see [blazor.md](blazor.md) |
+| Blazor WebAssembly client | not packable, no container defaults, no automatic `Shared`/`ServerShared` reference, the browser-safe reference check - see [blazor.md](blazor.md) |
+| ServerShared project | referenced automatically by every non-client-side project; never by a WebAssembly client, browser-safe library, Razor class library, client-side name, or `Shared`/`SharedTesting` project |
 | Blazor host | an automatic reference to its `<Name>.Client` - see [blazor.md](blazor.md) |
 | BFF | no packages, no OpenAPI interceptor unless it exposes an API, `PDS0008`/`PDS0009` - see [blazor.md](blazor.md) |
 | `PurviewBrowserSafe` library | `IsAotCompatible`, `SupportedPlatform browser`, trim/AOT/`CA1416` as errors - see [blazor.md](blazor.md) |

@@ -5,7 +5,14 @@
 
 All metric-related attributes live in the `Purview.Telemetry` namespace. To signal an interface for meter generation, decorate it with the `[Meter]` attribute.
 
-When creating the meter types, the [`IMeterFactory`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics.imeterfactory) is used when available (it is not available on .NET Framework 4.8, where a `new Meter(...)` is created instead).
+When creating the meter types, the [`IMeterFactory`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics.imeterfactory) is used **when the compilation can resolve it**. That is a symbol probe, not a target-framework check: `IMeterFactory` ships in Microsoft.Extensions.Diagnostics.Abstractions, so a .NET Framework 4.8 project that references it gets the injected-factory constructor too, while a modern project pinned to an older line may not and falls back to `new Meter(...)`.
+
+When the generated constructor takes an `IMeterFactory`, the container has to be able to supply one — register it with `services.AddMetrics()`:
+
+```csharp
+services.AddMetrics();                          // registers IMeterFactory
+services.AddInventoryMetrics();                 // the generated registration
+```
 
 ## Meter naming
 
@@ -69,6 +76,8 @@ Each instrument is determined by its corresponding attribute:
 
 - `[AutoCounter]` and `[Counter]` generate the [`Counter<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics.counter-1) instrument.
 - `[Histogram]` generates the [`Histogram<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics.histogram-1) instrument.
+- `[Gauge]` generates the [`Gauge<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics.gauge-1) instrument (.NET 9, or System.Diagnostics.DiagnosticSource 9+). Unlike an
+  `[ObservableGauge]`, it records a value at the moment it is called and never accumulates one.
 - `[UpDownCounter]` generates the [`UpDownCounter<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics.updowncounter-1) instrument.
 - `[ObservableCounter]` generates the [`ObservableCounter<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics.observablecounter-1) instrument.
 - `[ObservableGauge]` generates the [`ObservableGauge<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics.observablegauge-1) instrument.
@@ -187,6 +196,32 @@ When `AutoIncrement` is `true` and `[InstrumentMeasurement]` is used, the `TSG40
 ### `[Histogram]` and `[UpDownCounter]`
 
 Create a `Histogram<T>` or `UpDownCounter<T>`. Both share the `Name`, `Unit`, and `Description` properties described above.
+
+`[Histogram]` also takes bucket boundaries, which are passed to
+[`InstrumentAdvice<T>.HistogramBucketBoundaries`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.metrics.instrumentadvice-1)
+(.NET 9, or System.Diagnostics.DiagnosticSource 9+):
+
+```csharp
+[Histogram("request-duration", Unit = "s", HistogramBucketBoundaries = "0.005, 0.01, 0.05, 0.1, 0.5, 1")]
+void RequestDuration(double seconds);
+```
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `HistogramBucketBoundaries` | `string?` | A comma-separated list of ascending, positive numbers. An unparsable value reports `TSG4012` and generates no boundaries; a compilation without `InstrumentAdvice<T>` reports `TSG4011`. |
+
+### `[Gauge]`
+
+Creates a `Gauge<T>` (.NET 9, or System.Diagnostics.DiagnosticSource 9+), which records a value rather than accumulating
+one. It takes the same `Name`, `Unit` and `Description` properties as the other instrument attributes.
+
+```csharp
+[Gauge("queue-depth", Unit = "items")]
+void QueueDepth(int depth);
+```
+
+A compilation that cannot resolve `Gauge<T>` reports `TSG4010` and the generated method throws `NotSupportedException`
+instead of silently doing nothing.
 
 ### Observable attributes
 

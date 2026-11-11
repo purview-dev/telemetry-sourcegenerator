@@ -43,6 +43,49 @@ builder.Property(o => o.Id).ValueGeneratedNever();
 
 Without that, EF Core may treat the key as store-generated and skip your value.
 
+### Application-generated, store-ordered strategy
+
+When one context type serves both PostgreSQL and SQL Server, or the identifier must exist before
+`SaveChanges` on both, use a store-specific strategy carried as context-options data. The PostgreSQL
+implementation returns `FastGuid.NewPostgreSqlGuid()`; a model-finalising convention applies it to
+every GUID key and leaves explicitly keyed derived identifiers alone.
+
+```csharp
+public sealed class PostgreSqlSequentialGuidProvider : ISequentialGuidProvider
+{
+	public static string Name => "PostgreSql";
+
+	public static Guid NewGuid() => FastGuid.NewPostgreSqlGuid();
+
+	public static Guid NewGuid(DateTime timestampUtc) =>
+		FastGuid.NewPostgreSqlGuid(UtcTimestamp.EnsureUtc(timestampUtc));
+
+	public static DateTime GetTimestamp(Guid value) => FastGuid.PostgreSql.GetTimestamp(value);
+
+	public static Guid MinValueFor(DateTime timestampUtc) =>
+		FastGuid.PostgreSql.MinGuidForTimestamp(UtcTimestamp.EnsureUtc(timestampUtc));
+
+	public static Guid MaxValueFor(DateTime timestampUtc) =>
+		FastGuid.PostgreSql.MaxGuidForTimestamp(UtcTimestamp.EnsureUtc(timestampUtc));
+}
+```
+
+- PostgreSQL compares `uuid` in plain big-endian byte order, so both `FastGuid.NewPostgreSqlGuid()`
+  and `Guid.CreateVersion7()` are genuinely sequential here. `FastGuid` is also correct for SQL Server,
+  which is the point of the strategy abstraction.
+- Set `ValueGeneratedNever()` through the convention; never let EF fetch a store-generated value that
+  does not exist.
+
+#### RFC caveat
+
+`FastGuid.NewPostgreSqlGuid()` values are **not** RFC 9562 UUIDs. They are ordinary GUIDs with a
+PostgreSQL-ordered layout, so PostgreSQL's `uuid_extract_timestamp()` will not read them even though
+they are valid `uuid` values. Use the provider's `GetTimestamp` (above) instead. If another system
+needs a standard timestamp, generate `Guid.CreateVersion7()` there and accept that the layout differs.
+
+The full sample is the Engineering Playbook's *GUID Key Strategy* page. The abstraction is earned by
+the second provider, not by anticipation.
+
 ### Database-generated UUIDv7 — PostgreSQL 18+
 
 PostgreSQL 18 added a native `uuidv7()` function. Earlier versions do not have it; on 13–17 you have
@@ -87,6 +130,7 @@ Random and unpredictable. Fine at low to moderate write volume, which covers mos
 | .NET 8 or earlier, high write volume | A reviewed UUIDv7 implementation, or accept v4 after measuring |
 | Rows inserted outside the application, PostgreSQL 18+ | `uuidv7()` as a column default |
 | Rows inserted outside the application, PostgreSQL 13–17 | `gen_random_uuid()` |
+| One model serving PostgreSQL and SQL Server | A store-specific `FastGuid` strategy carried as context-options data — never one byte-ordered generator for both |
 | Key must be unpredictable | `Guid.NewGuid()` or `gen_random_uuid()` — v7 leaks creation time |
 | Low or moderate volume | v4 — the locality difference will not be your bottleneck |
 

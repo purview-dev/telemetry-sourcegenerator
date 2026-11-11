@@ -37,19 +37,16 @@ static class InstrumentMethodModelBuilder
 			if (TypeHelpers.HasAttribute(method, TypeLibrary.Purview.Telemetry.ExcludeAttribute))
 				continue;
 
-			if (method.Arity > 0)
-				continue;
-
 			var instrumentAttribute = SharedHelpers.GetInstrumentAttribute(method, token);
-			var validAutoCounter =
-				instrumentAttribute?.InstrumentType is InstrumentTypes.Counter && instrumentAttribute.IsAutoIncrement;
+			var validAutoCounter = instrumentAttribute is CounterInstrumentAttributeRecord { AutoIncrement: true };
 
 			var parameters = GetInstrumentParameters(
 				method,
 				lowercaseTagKeys,
 				validAutoCounter,
 				namingConvention,
-				token
+				token,
+				out var measurementTypeSymbol
 			);
 			var measurementParameters = parameters
 				.Where(m => m.ParamDestination == InstrumentParameterDestination.Measurement)
@@ -82,6 +79,21 @@ static class InstrumentMethodModelBuilder
 
 			var instrumentMeasurementType = measurementParameter?.InstrumentType ?? TypeLibrary.System.Int32;
 
+			// TSG1005: a constraint the generator cannot re-declare. A generic *measurement* is only usable when its
+			// type parameter is declared by the interface, because the instrument is a field: a method-level type
+			// parameter cannot appear in a field's type.
+			var typeParameters = TypeParameterHelpers.FromMethod(method);
+			if (
+				!TypeParameterHelpers.AreSupported(method.TypeParameters)
+				|| (
+					measurementTypeSymbol is ITypeParameterSymbol measurementTypeParameter
+					&& method.TypeParameters.Contains(measurementTypeParameter, SymbolEqualityComparer.Default)
+				)
+			)
+			{
+				targetGenerationState = targetGenerationState with { IsValid = false };
+			}
+
 			methodTargets.Add(
 				new(
 					MethodName: method.Name,
@@ -96,13 +108,14 @@ static class InstrumentMethodModelBuilder
 					Parameters: parameters,
 					Tags: tagParameters,
 					MeasurementParameter: measurementParameter,
-					TargetGenerationState: targetGenerationState
+					TargetGenerationState: targetGenerationState,
+					TypeParameters: typeParameters
 				)
 			);
 		}
 
 		// Post-pass: mark duplicate method names as invalid (emitter generates throw stubs; TSG1003 raised by analyzer)
-		HashSet<string> seenNames = new(StringComparer.Ordinal);
+		HashSet<string> seenNames = [with(StringComparer.Ordinal)];
 		for (var i = 0; i < methodTargets.Count; i++)
 		{
 			var t = methodTargets[i];
@@ -164,16 +177,19 @@ static class InstrumentMethodModelBuilder
 		bool lowercaseTagKeys,
 		bool isAutoCounter,
 		int namingConvention,
-		CancellationToken token
+		CancellationToken token,
+		out ITypeSymbol? measurementTypeSymbol
 	)
 	{
+		measurementTypeSymbol = null;
+
 		List<InstrumentParameterTarget> parameterTargets = [];
 		foreach (var parameter in method.Parameters)
 		{
 			token.ThrowIfCancellationRequested();
 
 			// Skip Activity-related parameters - they are not valid for metrics
-			var paramType = TypeReference.Create(parameter.Type);
+			var paramType = SharedHelpers.ToTypeReference(parameter.Type);
 			if (
 				paramType.Identity.Equals(TypeLibrary.System.Diagnostics.Activity)
 				|| paramType.Identity.Equals(TypeLibrary.System.Diagnostics.ActivityContext)
@@ -197,7 +213,10 @@ static class InstrumentMethodModelBuilder
 				(isFuncType, isIEnumerableType, isMeasurementType, isValidInstrumentType, instrumentType) =
 					TryResolveMeasurementType(parameter.Type, isAutoCounter);
 				if (instrumentType != null)
+				{
 					destination = InstrumentParameterDestination.Measurement;
+					measurementTypeSymbol ??= ResolvedMeasurementType(parameter.Type, isAutoCounter);
+				}
 			}
 
 			if (destination == InstrumentParameterDestination.Unknown)
@@ -217,7 +236,7 @@ static class InstrumentMethodModelBuilder
 			parameterTargets.Add(
 				new(
 					ParameterName: parameterName,
-					ParameterType: TypeReference.Create(parameter.Type),
+					ParameterType: SharedHelpers.ToTypeReference(parameter.Type),
 					IsFunc: isFuncType,
 					IsIEnumerable: isIEnumerableType,
 					IsMeasurement: isMeasurementType,
@@ -226,7 +245,8 @@ static class InstrumentMethodModelBuilder
 					GeneratedName: generatedName,
 					ParamDestination: destination,
 					SkipOnNullOrEmpty: PipelineHelpers.GetSkipOnNullOrEmptyValue(tagAttribute),
-					ExcludedTargets: excludeTargets?.ExcludedTargets ?? GenerationType.None
+					ExcludedTargets: excludeTargets?.ExcludedTargets ?? GenerationType.None,
+					Union: UnionHelpers.GetUnionTarget(parameter.Type, token)
 				)
 			);
 		}
@@ -269,6 +289,16 @@ static class InstrumentMethodModelBuilder
 		TypeReference? InstrumentType
 	) TryResolveMeasurementType(ITypeSymbol parameterType, bool isAutoCounter)
 	{
+		// A type-parameter measurement: the instrument types all declare `where T : struct`, so only a
+		// value-type-constrained parameter can be measured. Whether the parameter is declared by the method or the
+		// interface decides whether the instrument field can name it; the caller checks that.
+		if (parameterType is ITypeParameterSymbol typeParameter)
+		{
+			return typeParameter.HasValueTypeConstraint && !isAutoCounter
+				? (false, false, false, true, SharedHelpers.ToTypeReference(parameterType))
+				: (false, false, false, false, null);
+		}
+
 		if (parameterType is not INamedTypeSymbol namedParameterType)
 			return (false, false, false, false, null);
 
@@ -276,7 +306,7 @@ static class InstrumentMethodModelBuilder
 		if (!isFunc)
 		{
 			// For non-observable instruments.
-			var isValid = SharedHelpers.IsValidMeasurementValueType(namedParameterType);
+			var isValid = IsUsableMeasurementType(namedParameterType);
 			if (isValid && !isAutoCounter)
 			{
 				var typeRef = TypeReference.Create(namedParameterType);
@@ -288,6 +318,13 @@ static class InstrumentMethodModelBuilder
 
 		// For observable instruments: Func<...>.
 		var funcArg = namedParameterType.TypeArguments[0];
+
+		if (funcArg is ITypeParameterSymbol genericMeasurement)
+		{
+			return genericMeasurement.HasValueTypeConstraint
+				? (true, false, false, true, SharedHelpers.ToTypeReference(genericMeasurement))
+				: (true, false, false, false, null);
+		}
 
 		if (
 			funcArg is INamedTypeSymbol enumerableType
@@ -303,10 +340,10 @@ static class InstrumentMethodModelBuilder
 			{
 				// Func<IEnumerable<Measurement<T>>>
 				var valueType = measurementContainer.TypeArguments[0];
-				var isValid = SharedHelpers.IsValidMeasurementValueType(valueType);
+				var isValid = IsUsableMeasurementType(valueType);
 				if (isValid)
 				{
-					var typeRef = TypeReference.Create(valueType);
+					var typeRef = SharedHelpers.ToTypeReference(valueType);
 					return (true, true, true, true, typeRef);
 				}
 
@@ -322,10 +359,10 @@ static class InstrumentMethodModelBuilder
 		)
 		{
 			// Func<Measurement<T>>
-			var isValid = SharedHelpers.IsValidMeasurementValueType(funcMeasurementType.TypeArguments[0]);
+			var isValid = IsUsableMeasurementType(funcMeasurementType.TypeArguments[0]);
 			if (isValid)
 			{
-				var typeRef = TypeReference.Create(funcMeasurementType.TypeArguments[0]);
+				var typeRef = SharedHelpers.ToTypeReference(funcMeasurementType.TypeArguments[0]);
 				return (true, false, true, true, typeRef);
 			}
 
@@ -333,14 +370,53 @@ static class InstrumentMethodModelBuilder
 		}
 
 		// Func<T> directly.
-		var isValidDirect = SharedHelpers.IsValidMeasurementValueType(funcArg);
+		var isValidDirect = IsUsableMeasurementType(funcArg);
 		if (isValidDirect)
 		{
-			var directRef = TypeReference.Create(funcArg);
+			var directRef = SharedHelpers.ToTypeReference(funcArg);
 			return (true, false, false, true, directRef);
 		}
 
 		return (true, false, false, false, null);
+	}
+
+	/// <summary>
+	/// Whether the type can be an instrument measurement: one of the numeric types the metrics API accepts, or a
+	/// type parameter the instrument's own <c>where T : struct</c> constraint accepts.
+	/// </summary>
+	static bool IsUsableMeasurementType(ITypeSymbol type) =>
+		type is ITypeParameterSymbol { HasValueTypeConstraint: true }
+		|| (type is INamedTypeSymbol named && SharedHelpers.IsValidMeasurementValueType(named));
+
+	/// <summary>
+	/// The symbol whose type is the instrument's measurement, unwrapping <c>Func&lt;T&gt;</c>,
+	/// <c>Func&lt;Measurement&lt;T&gt;&gt;</c> and <c>Func&lt;IEnumerable&lt;Measurement&lt;T&gt;&gt;&gt;</c>.
+	/// </summary>
+	static ITypeSymbol? ResolvedMeasurementType(ITypeSymbol parameterType, bool isAutoCounter)
+	{
+		_ = isAutoCounter;
+
+		if (parameterType is not INamedTypeSymbol named || !new TypeIdentity(typeof(Func<>)).Matches(named))
+			return parameterType;
+
+		var funcArg = named.TypeArguments[0];
+
+		if (funcArg is INamedTypeSymbol { Arity: 1 } measurement)
+		{
+			if (TypeLibrary.System.Diagnostics.Metrics.Measurement.Equals(measurement.ConstructedFrom))
+				return measurement.TypeArguments[0];
+
+			if (
+				TypeLibrary.System.Collections.Generic.IEnumerable.Equals(measurement.ConstructedFrom)
+				&& measurement.TypeArguments[0] is INamedTypeSymbol { Arity: 1 } inner
+				&& TypeLibrary.System.Diagnostics.Metrics.Measurement.Equals(inner.ConstructedFrom)
+			)
+			{
+				return inner.TypeArguments[0];
+			}
+		}
+
+		return funcArg;
 	}
 
 	static string? GeneratePrefix(
@@ -353,8 +429,8 @@ static class InstrumentMethodModelBuilder
 		token.ThrowIfCancellationRequested();
 
 		string? prefix = null;
-		var separator =
-			meterGenerationAttribute?.InstrumentSeparator ?? PropertyLibrary.Metrics.InstrumentSeparatorDefault;
+		var separator = meterGenerationAttribute?.InstrumentSeparator
+			?? PropertyLibrary.Metrics.InstrumentSeparatorDefault;
 
 		if (
 			meterAttribute.IncludeAssemblyInstrumentPrefix

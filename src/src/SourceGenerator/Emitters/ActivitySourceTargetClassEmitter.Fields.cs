@@ -96,9 +96,8 @@ partial class ActivitySourceTargetClassEmitter
 			)
 		)
 		{
-			writer.IfBlock(
-				factoryParameter + " == null",
-				body => body.Throw($"new global::System.ArgumentNullException(nameof({factoryParameter}))")
+			writer.IfBlock(factoryParameter + " == null", body =>
+				body.Throw($"new global::System.ArgumentNullException(nameof({factoryParameter}))")
 			);
 
 			writer.NewLine();
@@ -111,7 +110,61 @@ partial class ActivitySourceTargetClassEmitter
 				.Write(TypeLibrary.System.Diagnostics.ActivitySourceOptions)
 				.Write("(")
 				.Write(activitySourceName.Wrap())
-				.Line("));");
+				.Write(')');
+
+			// .NET 11's ActivitySourceOptions carries the source's version, telemetry schema URL and tags. They are
+			// emitted only when set, so a source whose assembly set none keeps the single-argument constructor.
+			// The version falls back to the assembly version, resolved once per compilation on the capabilities.
+			var version = output.Target.ActivitySourceGenerationAttribute?.Version
+				?? output.Context.Capabilities.AssemblyVersion;
+			var telemetrySchemaUrl = output.Target.ActivitySourceGenerationAttribute?.TelemetrySchemaUrl;
+			var tags = SharedHelpers.MergeTags(output.Target.ActivitySourceGenerationAttribute?.Tags, null);
+
+			if (!string.IsNullOrWhiteSpace(version) || !string.IsNullOrWhiteSpace(telemetrySchemaUrl) || !tags.IsEmpty)
+			{
+				writer
+					.Write(' ')
+					.Line("{")
+					.Indented(body =>
+					{
+						if (!string.IsNullOrWhiteSpace(version))
+							body.Write("Version = ").Line(version!.Wrap() + ",");
+
+						if (!string.IsNullOrWhiteSpace(telemetrySchemaUrl))
+							body.Write("TelemetrySchemaUrl = ").Line(telemetrySchemaUrl!.Wrap() + ",");
+
+						if (!tags.IsEmpty)
+						{
+							body.Write(
+								"Tags = new global::System.Collections.Generic.KeyValuePair<string, object?>[] {"
+							);
+							var first = true;
+							foreach (var tag in tags)
+							{
+								var separator = tag.IndexOf('=');
+								if (separator <= 0)
+									continue;
+
+								if (!first)
+									body.Write(", ");
+
+								first = false;
+								body.Write("new(")
+									.Write(tag.Substring(0, separator).Wrap())
+									.Write(", ")
+									.Write(tag.Substring(separator + 1).Wrap())
+									.Write(')');
+							}
+
+							body.Line(" },");
+						}
+					})
+					.Line("});");
+			}
+			else
+			{
+				writer.Line(");");
+			}
 		}
 	}
 }

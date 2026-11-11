@@ -17,7 +17,7 @@ Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system
 **Consumer runtime targets:**
 
 - .NET Framework 4.8
-- .NET 8 or higher, including .NET 11
+- .NET 10 or higher, including .NET 11 (.NET 8 and .NET 9 are no longer supported)
 
 **Hosting models:** console, ASP.NET Core, .NET Aspire, Native AOT, Blazor WebAssembly (trimmed and AOT-compiled)
 and Blazor Server. The generated code uses no reflection and adds no trim or AOT warnings, and no compiler-host
@@ -35,8 +35,16 @@ assembly reaches your application's output. See
   `services.AddTracing()`. The generated classes then create their sources from the injected .NET 11 factory instead
   of a static `ActivitySource`. When the type isn't available, `TSG3023` reports it and the static source is kept.
 - **C# 15 static interface members** are ignored rather than implemented.
+- **C# 15 union types** are unwrapped to their case value for tags, baggage, log values and metric tags.
+  A union that declares the non-boxing `TryGetValue`/`HasValue` pattern is read without boxing the union
+  struct. **Purview.Unions `[GenerateUnion]` types** work too: the case list is read from the surface that is
+  in source — the attribute's `typeof` list, partial static factories, a nested `IUnionMembers` provider, then
+  the constructors — so no reference to that package is taken and no other generator's output is needed. See
+  [Union types](https://purview.dev/docs/telemetry-sourcegenerator/tags-and-baggage/#union-types).
 - **Validated on .NET 11**: the tests run on `net11.0`, and Native AOT, Blazor WebAssembly and Blazor Server
   consumers of the package are built on every release.
+- **.NET 8 and .NET 9 are no longer supported**: target `net10.0`+ or `net48`+. `TSG1011` reports a
+  compilation that targets either dropped framework.
 
 ## Installation
 
@@ -195,47 +203,47 @@ The [.NET Aspire Sample](https://github.com/purview-dev/telemetry-sourcegenerato
 
 ## Performance
 
-Benchmarked on 13th Gen Intel Core i9-13900KF, .NET SDK 10.0.401. See the [Performance](https://purview.dev/docs/telemetry-sourcegenerator/performance/) page for full cross-runtime results.
+Benchmarked on 13th Gen Intel Core i9-13900KF, .NET SDK 11.0.100. See the [Performance](https://purview.dev/docs/telemetry-sourcegenerator/performance/) page for the full cross-runtime results (.NET 10, .NET 11 and .NET Framework 4.8). Ratios below compare generated against the hand-written implementation of the same scenario.
 
 ### Activities (.NET 10.0)
 
 | Scenario | HasListener | Manual | Generated | Ratio |
 | --- | --- | --- | --- | --- |
-| start + complete | False | 0.53 ns | 0.58 ns | 1.11x |
-| start + complete | True | 220 ns / 1008 B | 217 ns / 1008 B | 0.98x |
-| start + fail | True | 208 ns / 920 B | 203 ns / 920 B | 0.92x |
+| start + complete | False | 1.50 ns | 1.51 ns | 1.01x |
+| start + complete | True | 218 ns / 1008 B | 213 ns / 1008 B | 0.98x |
+| start + fail | True | 192 ns / 920 B | 191 ns / 920 B | 0.99x |
 
-Generated activities match hand-written code with identical allocations.
+Generated activities match hand-written code with identical allocations. With a listener active, ~99% of the measured time is the framework creating the `Activity`, not generated code.
 
 ### Logging (.NET 10.0)
 
 | Scenario | HasLogging | LoggerMessage.Define | Generated v1 | Generated v2 |
 | --- | --- | --- | --- | --- |
-| single Info call | True | 6.12 ns | 4.43 ns (0.72x) | 3.80 ns (0.62x) |
-| full lifecycle (4 calls) | True | 18.88 ns | 19.58 ns (1.04x) | 15.01 ns (0.80x) |
+| single Info call | True | 5.36 ns | 5.36 ns (1.00x) | 4.39 ns (0.82x) |
+| full lifecycle (4 calls) | True | 20.21 ns | 19.60 ns (0.97x) | 17.96 ns (0.89x) |
 
-Both v1 and v2 allocate **0 bytes** per call on all runtimes. Generated methods are emitted with `[MethodImpl(AggressiveInlining)]`; generated v1 and v2 both beat the manual `LoggerMessage.Define` baseline for single calls on .NET 10.0.
+Both v1 and v2 allocate **0 bytes** per call on all runtimes. Generated methods are emitted with `[MethodImpl(AggressiveInlining)]`; v2 (state-based) is the fastest implementation on .NET 10.0, .NET 11.0 and .NET Framework 4.8, and v1 — which reproduces the hand-written `LoggerMessage.Define` delegate — is at parity with the hand-written baseline (0.97-1.00x here, 0.99-1.03x across all runtimes). The one place v2 is measurably more expensive is the disabled level on .NET Framework 4.8 (8.19 ns against 2.82 ns), before any log state is built.
 
 ### Multi-Target (.NET 10.0, Activity + Logging + Metrics)
 
 | Scenario | HasListener | Single-target | Multi-target generated | Multi-target manual |
 |---|---|---|---|---|
-| start + complete | True | 216 ns / 1008 B | 230 ns / 1032 B (1.07x) | 260 ns / 1032 B (1.20x) |
+| start + complete | True | 204 ns / 1008 B | 213 ns / 1032 B (1.04x) | 237 ns / 1032 B (1.16x) |
 
-Adding full Activity+Logging+Metrics multi-target generation costs ~7% over Activity-only on .NET 10.0, and the generated multi-target code is faster than the hand-written equivalent.
+Adding full Activity+Logging+Metrics multi-target generation costs ~4% over Activity-only on .NET 10.0, and the generated multi-target code is faster than the hand-written equivalent. The 24 B difference is the log and metric state, which the hand-written version allocates identically.
 
 ### Metrics (.NET 10.0)
 
 | Scenario | Generated | Notes |
 | --- | --- | --- |
-| auto-counter (0 tags) | 0.40 ns | - |
-| auto-counter (1 tag) | 0.35 ns | - |
-| up-down counter | 0.37 ns | - |
-| histogram (0 tags) | 0.42 ns | - |
-| histogram (1 tag) | 0.34 ns | - |
-| 4+ tags (TagList) | 5-8 ns | Stack-allocated `TagList` |
+| auto-counter (0 tags) | 1.31 ns | - |
+| auto-counter (1 tag) | 1.30 ns | - |
+| up-down counter | 1.30 ns | - |
+| histogram (0 tags) | 1.29 ns | - |
+| histogram (1 tag) | 1.29 ns | - |
+| 4+ tags (TagList) | 4.9-7.1 ns | Stack-allocated `TagList` |
 
-All instruments are **0 allocations** on all runtimes.
+All instruments are **0 allocations** on all runtimes, generated and hand-written alike. On .NET 10.0 the generated rows sit within 2% of the hand-written equivalents (1.29-1.31 ns against 1.28-1.34 ns), with both consumed through the same interface, so the ~1.3 ns is the instrument update itself rather than generator overhead.
 
 ## v4 Breaking Changes
 

@@ -15,7 +15,26 @@
 		     TSG2008: the sample intentionally demonstrates a large ExpandEnumerable limit;
 		     source-generator diagnostics are not suppressible with #pragma, so it's NoWarn'd. -->
 		<NoWarn>$(NoWarn);CA1031;CA1724;CA2007;CA2201;TSG2008;</NoWarn>
+		<!--
+			An Aspire AppHost cannot cross-target: the outer cross-targeting pass imports
+			Microsoft.NET.Sdk.BeforeCommonCrossTargeting.targets instead of BeforeCommon.targets, so
+			Microsoft.NET.RuntimeIdentifierInference.targets - the only declaration of the
+			Microsoft.NET.Build.Tasks.PickBestRid task the AppHost SDK runs during restore - is never
+			imported and restore fails with MSB4036. Pin the sample to net10.0, the framework the support
+			matrix documents, so nothing in this tree cross-targets.
+		-->
+		<TargetFramework>net10.0</TargetFramework>
 	</PropertyGroup>
 
 	<Import Sdk="Purview.BuildSdk" Project="Sdk.props" />
+
+	<PropertyGroup>
+		<!--
+			Purview.BuildSdk resolves its curated 'Current' target set (net10.0;net11.0) into TargetFrameworks
+			whenever that property is empty at the import above: it detects a project's own TargetFramework
+			declaration from the project file, never from this file. Clear it afterwards so restore and build
+			agree on one framework instead of restore resolving assets for two.
+		-->
+		<TargetFrameworks></TargetFrameworks>
+	</PropertyGroup>
 </Project>

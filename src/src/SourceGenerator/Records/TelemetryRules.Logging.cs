@@ -26,8 +26,9 @@ static partial class TelemetryRules
 		var loggerAttribute = SharedHelpers.GetLoggerAttribute(interfaceSymbol, token);
 		var loggerGenerationAttribute = SharedHelpers.GetLoggerGenerationAttribute(compilation.Assembly, token);
 
-		var interfaceGenerationMode =
-			loggerAttribute?.GenerationModeOrNull ?? loggerGenerationAttribute?.GenerationModeOrNull ?? 0;
+		var interfaceGenerationMode = loggerAttribute?.GenerationModeOrNull
+			?? loggerGenerationAttribute?.GenerationModeOrNull
+			?? 0;
 
 		var methods = PipelineHelpers
 			.GetInstanceMethods(interfaceSymbol)
@@ -44,7 +45,7 @@ static partial class TelemetryRules
 					continue;
 			}
 
-			ApplyLoggerMethodRules(method, interfaceGenerationMode, diagnostics, token);
+			ApplyLoggerMethodRules(method, compilation, interfaceGenerationMode, diagnostics, token);
 		}
 
 		return diagnostics.ToImmutable();
@@ -52,6 +53,7 @@ static partial class TelemetryRules
 
 	static void ApplyLoggerMethodRules(
 		IMethodSymbol method,
+		Compilation compilation,
 		int interfaceGenerationMode,
 		ImmutableArray<ReportableDiagnostic>.Builder diagnostics,
 		CancellationToken token
@@ -140,7 +142,7 @@ static partial class TelemetryRules
 		foreach (var parameter in method.Parameters)
 		{
 			token.ThrowIfCancellationRequested();
-			ApplyParameterRules(parameter, diagnostics, token);
+			ApplyParameterRules(parameter, compilation, diagnostics, token);
 		}
 
 		// Message-template rules (only when an explicit template is supplied).
@@ -150,12 +152,42 @@ static partial class TelemetryRules
 
 	static void ApplyParameterRules(
 		IParameterSymbol parameter,
+		Compilation compilation,
 		ImmutableArray<ReportableDiagnostic>.Builder diagnostics,
 		CancellationToken token
 	)
 	{
 		var logPropertiesAttribute = SharedHelpers.GetLogPropertiesAttribute(parameter, token);
 		var expandEnumerableAttribute = SharedHelpers.GetExpandEnumerableAttribute(parameter, token);
+		var tagProviderAttribute = SharedHelpers.GetTagProviderAttribute(parameter, token);
+
+		ApplyTagProviderRules(parameter, tagProviderAttribute, compilation, diagnostics, token);
+
+		// TSG2022 / TSG2023: parity with the .NET 11 [LoggerMessage] generator (SYSLIB1028/SYSLIB1029). These shapes
+		// cannot be represented in the generated state: the parameter list is re-declared without modifiers, a
+		// `params` array would stop accepting the params form, and a by-ref or ref-struct value cannot be captured by
+		// LoggerMessage.Define or a typed state struct. Rejecting them says so up front instead of emitting code
+		// that fails to compile or silently changes the call syntax.
+		if (parameter.IsParams)
+		{
+			diagnostics.Add(
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.Logging.ParamsParameterNotSupported.Descriptor,
+					isBlocking: false,
+					parameter
+				)
+			);
+		}
+		else if (parameter.RefKind != RefKind.None || parameter.Type.IsRefLikeType)
+		{
+			diagnostics.Add(
+				ReportableDiagnostic.Create(
+					DiagnosticLibrary.Logging.ByRefParameterNotSupported.Descriptor,
+					isBlocking: false,
+					parameter
+				)
+			);
+		}
 
 		// TSG2006: LogProperties + ExpandEnumerable on the same parameter.
 		if (logPropertiesAttribute != null && expandEnumerableAttribute != null)
@@ -184,6 +216,54 @@ static partial class TelemetryRules
 				)
 			);
 		}
+	}
+
+	static void ApplyTagProviderRules(
+		IParameterSymbol parameter,
+		TagProviderAttributeData? tagProviderAttribute,
+		Compilation compilation,
+		ImmutableArray<ReportableDiagnostic>.Builder diagnostics,
+		CancellationToken token
+	)
+	{
+		if (tagProviderAttribute is not { } attribute)
+			return;
+
+		var resolution = TagProviderResolver.Resolve(parameter, attribute, compilation, token);
+		var providerTypeName = attribute.ProviderType.Name;
+		var methodName = attribute.ProviderMethod ?? string.Empty;
+
+		// A successful resolution needs nothing reported; the generator emits the provider's tags.
+		var diagnostic = resolution.Status switch
+		{
+			TagProviderStatus.TypeNotFound => ReportableDiagnostic.Create(
+				DiagnosticLibrary.Logging.TagProviderTypeNotFound.Descriptor,
+				isBlocking: false,
+				parameter,
+				parameter.Name,
+				providerTypeName
+			),
+			TagProviderStatus.MethodNotFound => ReportableDiagnostic.Create(
+				DiagnosticLibrary.Logging.TagProviderMethodNotFound.Descriptor,
+				isBlocking: false,
+				parameter,
+				parameter.Name,
+				methodName,
+				providerTypeName
+			),
+			TagProviderStatus.InvalidSignature => ReportableDiagnostic.Create(
+				DiagnosticLibrary.Logging.TagProviderMethodInvalidSignature.Descriptor,
+				isBlocking: false,
+				parameter,
+				methodName,
+				providerTypeName,
+				parameter.Type.Name
+			),
+			_ => null,
+		};
+
+		if (diagnostic is { } reportable)
+			diagnostics.Add(reportable);
 	}
 
 	static void ApplyMessageTemplateRules(

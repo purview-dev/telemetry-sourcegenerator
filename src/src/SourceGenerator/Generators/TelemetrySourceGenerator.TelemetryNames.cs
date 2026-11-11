@@ -56,9 +56,8 @@ partial class TelemetrySourceGenerator
 			)
 			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_TelemetryNamesAttributeOutput");
 
-		context.RegisterSourceOutput(
-			source: attributeOutput,
-			action: static (spc, output) => GenerateTelemetryNamesAttribute(output, spc)
+		context.RegisterSourceOutput(source: attributeOutput, action: static (spc, output) =>
+			GenerateTelemetryNamesAttribute(output, spc)
 		);
 
 		// The names referenced assemblies recorded, projected to strings before they reach a cached node.
@@ -77,9 +76,8 @@ partial class TelemetrySourceGenerator
 			)
 			.WithTrackingName($"{nameof(TelemetrySourceGenerator)}_TelemetryNamesOutput");
 
-		context.RegisterSourceOutput(
-			source: classOutput,
-			action: static (spc, output) => GenerateTelemetryNames(output, spc)
+		context.RegisterSourceOutput(source: classOutput, action: static (spc, output) =>
+			GenerateTelemetryNames(output, spc)
 		);
 	}
 
@@ -226,8 +224,8 @@ partial class TelemetrySourceGenerator
 	{
 		token.ThrowIfCancellationRequested();
 
-		SortedSet<string> activitySourceNames = new(StringComparer.Ordinal);
-		SortedSet<string> meterNames = new(StringComparer.Ordinal);
+		SortedSet<string> activitySourceNames = [with(StringComparer.Ordinal)];
+		SortedSet<string> meterNames = [with(StringComparer.Ordinal)];
 
 		ReferencedTelemetryNames.Collect(compilation, activitySourceNames, meterNames, token);
 
@@ -266,15 +264,8 @@ partial class TelemetrySourceGenerator
 		// Use custom class name if provided, otherwise default to "TelemetryNames"
 		var className = string.IsNullOrWhiteSpace(output.Names.ClassName) ? "TelemetryNames" : output.Names.ClassName!;
 
-		RunSafely(
-			spc,
-			() =>
-				TelemetryNamesEmitter.GenerateClass(
-					output,
-					className,
-					output.Names.Namespace ?? output.AssemblyName,
-					spc
-				)
+		RunSafely(spc, () =>
+			TelemetryNamesEmitter.GenerateClass(output, className, output.Names.Namespace ?? output.AssemblyName, spc)
 		);
 	}
 }

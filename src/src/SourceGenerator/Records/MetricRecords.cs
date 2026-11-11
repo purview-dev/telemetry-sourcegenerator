@@ -8,7 +8,10 @@ sealed record MeterTarget(
 	TypeReference InterfaceType,
 	string? MeterName,
 	MeterGenerationAttributeData? MeterGeneration,
-	EquatableArray<InstrumentTarget> InstrumentationMethods
+	EquatableArray<InstrumentTarget> InstrumentationMethods,
+	string? MeterVersion = null,
+	EquatableArray<string> MeterTags = default,
+	EquatableArray<TypeParameterTarget> InterfaceTypeParameters = default
 )
 {
 	public string? ClassNamespace => TelemetryGeneration.TelemetryNamesNamespace ?? InterfaceType.Identity.Namespace;
@@ -53,10 +56,13 @@ sealed record InstrumentTarget(
 	EquatableArray<InstrumentParameterTarget> Parameters,
 	EquatableArray<InstrumentParameterTarget> Tags,
 	InstrumentParameterTarget? MeasurementParameter,
-	TargetGeneration TargetGenerationState
+	TargetGeneration TargetGenerationState,
+	EquatableArray<TypeParameterTarget> TypeParameters = default
 )
 {
 	public string TagPopulateMethodName { get; } = $"Populate{MethodName}Tags";
+
+	public bool IsGeneric => !TypeParameters.IsEmpty;
 }
 
 sealed record InstrumentParameterTarget(
@@ -70,19 +76,17 @@ sealed record InstrumentParameterTarget(
 	string GeneratedName,
 	InstrumentParameterDestination ParamDestination,
 	bool SkipOnNullOrEmpty,
-	GenerationType ExcludedTargets
-);
-
-enum InstrumentTypes
+	GenerationType ExcludedTargets,
+	UnionTargetRecord? Union = null
+)
 {
-	Counter,
-	UpDownCounter,
-	Histogram,
-
-	ObservableCounter,
-	ObservableGauge,
-	ObservableUpDownCounter,
-}
+	/// <summary>
+	/// The expression that yields the tag value recorded for this parameter: the parameter itself, or the
+	/// union's case value when the parameter is a union type.
+	/// </summary>
+	public string RenderTagValueExpression() =>
+		Union is null ? ParameterName : Union.RenderValueExpression(ParameterName);
+};
 
 enum InstrumentParameterDestination
 {

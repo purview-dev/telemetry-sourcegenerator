@@ -12,8 +12,11 @@ This approach allows for:
 
 ## Supported frameworks
 
-- .NET 8 or higher, including .NET 11
+- .NET 10 or higher, including .NET 11
 - .NET Framework 4.8 or higher
+
+.NET 8 and .NET 9 are no longer supported. A project that targets either reports
+[`TSG1011`](Diagnostics.md#tsg1011).
 
 **Build toolchain requirement:** Visual Studio 2026 (18.x) or the .NET 10 SDK or later (Roslyn 5.9.0+).
 

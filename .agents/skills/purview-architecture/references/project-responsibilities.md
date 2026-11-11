@@ -3,7 +3,7 @@
 The catalogue in brief. The authoritative definition is
 [`.config/architecture-policy.json`](https://github.com/purview-dev/engineering-playbook/blob/main/.config/architecture-policy.json),
 and the full page — with diagrams — is
-[Project Responsibilities](https://github.com/purview-dev/engineering-playbook/blob/main/docs/wiki/Project-Responsibilities.md).
+[Project Responsibilities](https://github.com/purview-dev/engineering-playbook/blob/main/docs/wiki/foundations/Project-Responsibilities.md).
 Do not restate either here or in another skill; link to them.
 
 ## The catalogue

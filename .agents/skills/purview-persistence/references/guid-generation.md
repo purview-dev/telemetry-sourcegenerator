@@ -62,13 +62,21 @@ Never use `NEWSEQUENTIALID()` output as a secret.
 
 | Provider | Needs value before insert | Locality matters | Recommendation |
 | -- | -- | -- | -- |
-| SQL Server | No | Yes | `NEWSEQUENTIALID()` (EF Core's default for `Guid` keys) |
-| SQL Server | Yes | Yes | EF Core `SequentialGuidValueGenerator` |
+| SQL Server | No | Yes | `NEWSEQUENTIALID()` as a store default, or EF Core's client-side `SequentialGuidValueGenerator` |
+| SQL Server | Yes | Yes | EF Core `SequentialGuidValueGenerator`, or a store-ordered `FastGuid` strategy when both providers share a model |
 | SQL Server | Either | No | `Guid.NewGuid()` |
 | PostgreSQL | Yes | Yes | `Guid.CreateVersion7()` with `ValueGeneratedNever()` |
 | PostgreSQL | No | Yes | `uuidv7()` on 18+, otherwise generate v7 in the application |
 | PostgreSQL | Either | No | `Guid.NewGuid()` or `gen_random_uuid()` |
+| SQL Server **and** PostgreSQL, one context type | Either | Yes | A store-specific strategy carried as context-options data. One strategy per provider; see below. |
 | Any | Either | Either, but must be unpredictable | Random v4 |
+
+The two-provider row is the one that needs code: an `ISequentialGuidProvider` witness, an options
+extension and a model-finalising convention. Copy them from the Engineering Playbook's *GUID Key
+Strategy* page. Never expect one byte-ordered generator to order for both stores.
+
+A value whose identity is known before storage does not belong in this table. Derive it with UUIDv5 and
+key it `ValueGeneratedNever()`; see `well-known-identifiers.md`.
 
 ## Prefer built-in capability
 
@@ -77,17 +85,19 @@ In order of preference:
 1. A framework capability — `Guid.CreateVersion7()`, EF Core's value generators.
 2. A database capability — `NEWSEQUENTIALID()`, `uuidv7()`, `gen_random_uuid()`.
 3. A reviewed, tested implementation of a published standard, when neither of the above is available
-   on your target versions.
+   on your target versions — `FastGuid` is the one the sample uses for store-ordered values.
 4. A bespoke generator — only against a measured requirement the first three cannot meet.
 
 A hand-written sequential GUID generator is easy to get subtly wrong — endianness, clock regression,
 counter rollover within a millisecond, and thread safety are all live hazards, and the failure mode
 is duplicate or badly-ordered keys found in production.
 
-## There is no Purview GUID package
+## No NuGet package provides this
 
-No Purview library provides GUID generation today. Do not reference one and do not invent one.
+No NuGet package provides the strategy/convention pattern. It is repository-local: copy the strategy
+witness, options extension, value generator and model-finalising convention from the Engineering
+Playbook's *GUID Key Strategy* page. Do not depend on a package that claims to own it, and do not
+create one without a measured requirement the built-in options cannot meet.
 
-If a concrete need emerges that the built-in options cannot meet — established by measurement, not by
-anticipation — that is the point at which creating one is worth discussing. Until then this guidance
-is the deliverable, and this page is where a recommendation for such a package would be documented.
+The abstraction is earned by a second provider, or by an identifier needed before `SaveChanges` on
+both — not by anticipation. Until then a built-in capability is the answer.

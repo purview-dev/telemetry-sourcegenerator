@@ -26,6 +26,7 @@ partial class MeterTargetClassEmitter
 							p.ParameterType
 						)),
 					],
+					GenericTypes = TypeParameterHelpers.ToOptions(methodTarget.TypeParameters),
 					ExpressionBody = "throw new global::System.NotSupportedException()",
 				}
 			)
@@ -68,6 +69,13 @@ partial class MeterTargetClassEmitter
 				output.Context.Debug(
 					$"Activity parameter '{methodTarget.TargetGenerationState.ActivityParameterWithoutTarget}' on {methodTarget.MethodName} has no Activity target."
 				);
+			}
+
+			if (!IsInstrumentAvailable(methodTarget, output.Context))
+			{
+				// Gauge<T> is unavailable: TSG4010 reports it, and the method still has to satisfy the interface.
+				EmitThrowStub(writer, methodTarget);
+				continue;
 			}
 
 			EmitMethod(output, methodTarget, writer, context);
@@ -156,6 +164,7 @@ partial class MeterTargetClassEmitter
 				{
 					Attributes = [EmitterHelpers.AggressiveInliningAttribute()],
 					Parameters = parameters,
+					GenericTypes = TypeParameterHelpers.ToOptions(methodTarget.TypeParameters),
 				}
 			)
 		)
@@ -225,30 +234,27 @@ partial class MeterTargetClassEmitter
 
 	static void EmitObservableInstrumentBodyTest(CodeWriter writer, InstrumentTarget method)
 	{
-		writer.IfBlock(
-			method.FieldName + " != null",
-			body =>
+		writer.IfBlock(method.FieldName + " != null", body =>
+		{
+			if (method.InstrumentAttribute?.ThrowOnAlreadyInitialized == true)
 			{
-				if (method.InstrumentAttribute?.ThrowOnAlreadyInitialized == true)
-				{
-					writer
-						.Write("throw new ")
-						.Write(TypeLibrary.System.Exception)
-						.Write("(\"")
-						.Write(method.MetricName)
-						.Line(" has already been initialized.\");");
-				}
-				else
-				{
-					writer.Write("return");
-
-					if (method.ReturnsBool)
-						writer.Line(" false;");
-					else
-						writer.Write(";").NewLine();
-				}
+				writer
+					.Write("throw new ")
+					.Write(TypeLibrary.System.Exception)
+					.Write("(\"")
+					.Write(method.MetricName)
+					.Line(" has already been initialized.\");");
 			}
-		);
+			else
+			{
+				writer.Write("return");
+
+				if (method.ReturnsBool)
+					writer.Line(" false;");
+				else
+					writer.Write(";").NewLine();
+			}
+		});
 
 		writer.NewLine();
 	}
@@ -261,9 +267,7 @@ partial class MeterTargetClassEmitter
 		writer
 			.Write(method.FieldName)
 			.Write(" = ")
-			.Write(MeterFieldName)
-			.Write(".Create")
-			.Write(method.InstrumentAttribute!.InstrumentType.ToString())
+			.Write(MeterFieldName + "." + method.InstrumentAttribute!.CreationMethodName)
 			.Write('<')
 			.Write(method.InstrumentMeasurementType)
 			.Write(">(")
@@ -295,8 +299,7 @@ partial class MeterTargetClassEmitter
 		bool emitNullable = true
 	)
 	{
-		var instrumentMeasureMethodName =
-			methodTarget.InstrumentAttribute!.InstrumentType == InstrumentTypes.Histogram ? "Record" : "Add";
+		var instrumentMeasureMethodName = methodTarget.InstrumentAttribute!.UsesRecordMethod ? "Record" : "Add";
 
 		var tagCount = methodTarget.Tags.Count;
 		var hasConditionalTags = methodTarget.Tags.Any(t => t.SkipOnNullOrEmpty);
@@ -328,7 +331,7 @@ partial class MeterTargetClassEmitter
 					.Write(kvpType)
 					.Write(tag.GeneratedName.Wrap())
 					.Write(", ")
-					.Write(tag.ParameterName)
+					.Write(tag.RenderTagValueExpression())
 					.Write(')');
 			}
 
@@ -378,14 +381,23 @@ partial class MeterTargetClassEmitter
 		{
 			if (param.SkipOnNullOrEmpty)
 			{
-				writer.IfBlock(
-					param.ParameterName + " != default",
-					body => body.MethodCallOn(tagVariableName, "Add", param.GeneratedName.Wrap(), param.ParameterName)
+				writer.IfBlock(param.ParameterName + " != default", body =>
+					body.MethodCallOn(
+						tagVariableName,
+						"Add",
+						param.GeneratedName.Wrap(),
+						param.RenderTagValueExpression()
+					)
 				);
 			}
 			else
 			{
-				writer.MethodCallOn(tagVariableName, "Add", param.GeneratedName.Wrap(), param.ParameterName);
+				writer.MethodCallOn(
+					tagVariableName,
+					"Add",
+					param.GeneratedName.Wrap(),
+					param.RenderTagValueExpression()
+				);
 			}
 		}
 

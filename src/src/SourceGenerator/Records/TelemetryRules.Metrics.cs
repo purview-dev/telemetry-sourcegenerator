@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Purview.Telemetry.SourceGenerator.Helpers;
 using Purview.Telemetry.SourceGenerator.Records;
 
 namespace Purview.Telemetry.SourceGenerator;
@@ -13,10 +14,17 @@ static partial class TelemetryRules
 	public static ImmutableArray<ReportableDiagnostic> GetMeterDiagnostics(
 		MeterTarget target,
 		INamedTypeSymbol interfaceSymbol,
+		Compilation compilation,
 		CancellationToken token
 	)
 	{
 		var diagnostics = ImmutableArray.CreateBuilder<ReportableDiagnostic>();
+
+		var supportsGauge = SharedHelpers.IsTypeAvailable(compilation, TypeLibrary.System.Diagnostics.Metrics.Gauge);
+		var supportsInstrumentAdvice = SharedHelpers.IsTypeAvailable(
+			compilation,
+			TypeLibrary.System.Diagnostics.Metrics.InstrumentAdvice
+		);
 
 		foreach (var instrument in target.InstrumentationMethods)
 		{
@@ -28,6 +36,46 @@ static partial class TelemetryRules
 			var methodSymbol = FindMethod(interfaceSymbol, instrument.MethodName);
 			if (methodSymbol is null)
 				continue;
+
+			// TSG4010: a gauge needs System.Diagnostics.Metrics.Gauge<T>, which an older analyzer-only
+			// System.Diagnostics.DiagnosticSource does not carry.
+			if (instrument.InstrumentAttribute is GaugeInstrumentAttributeRecord && !supportsGauge)
+				diagnostics.Add(
+					ReportableDiagnostic.Create(
+						DiagnosticLibrary.Metrics.GaugeNotAvailable.Descriptor,
+						isBlocking: false,
+						methodSymbol
+					)
+				);
+
+			// TSG4011: histogram bucket boundaries need InstrumentAdvice<T>.
+			if (
+				instrument.InstrumentAttribute
+					is HistogramInstrumentAttributeRecord { HistogramBucketBoundaries.Count: > 0 }
+				&& !supportsInstrumentAdvice
+			)
+				diagnostics.Add(
+					ReportableDiagnostic.Create(
+						DiagnosticLibrary.Metrics.InstrumentAdviceNotAvailable.Descriptor,
+						isBlocking: false,
+						methodSymbol
+					)
+				);
+
+			// TSG4012: the boundaries were supplied but could not be parsed.
+			if (
+				instrument.InstrumentAttribute is HistogramInstrumentAttributeRecord
+				{
+					InvalidHistogramBucketBoundaries: true,
+				}
+			)
+				diagnostics.Add(
+					ReportableDiagnostic.Create(
+						DiagnosticLibrary.Metrics.InvalidHistogramBucketBoundaries.Descriptor,
+						isBlocking: false,
+						methodSymbol
+					)
+				);
 
 			ApplyInstrumentRules(instrument, methodSymbol, diagnostics);
 		}
@@ -147,7 +195,7 @@ static partial class TelemetryRules
 		}
 
 		// TSG4009: instrument name matches the instrument type name.
-		var instrumentTypeName = GetInstrumentTypeName(instrument.InstrumentAttribute.InstrumentType);
+		var instrumentTypeName = instrument.InstrumentAttribute.TypeName;
 		if (
 			!string.IsNullOrWhiteSpace(instrument.MetricName)
 			&& string.Equals(instrument.MetricName, instrumentTypeName, StringComparison.OrdinalIgnoreCase)
@@ -161,16 +209,4 @@ static partial class TelemetryRules
 				)
 			);
 	}
-
-	static string GetInstrumentTypeName(InstrumentTypes type) =>
-		type switch
-		{
-			InstrumentTypes.Counter => "Counter",
-			InstrumentTypes.UpDownCounter => "UpDownCounter",
-			InstrumentTypes.Histogram => "Histogram",
-			InstrumentTypes.ObservableCounter => "ObservableCounter",
-			InstrumentTypes.ObservableGauge => "ObservableGauge",
-			InstrumentTypes.ObservableUpDownCounter => "ObservableUpDownCounter",
-			_ => type.ToString(),
-		};
 }

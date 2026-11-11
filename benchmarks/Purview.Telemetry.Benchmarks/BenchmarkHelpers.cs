@@ -48,13 +48,9 @@ static class BenchmarkHelpers
 		var logger = CreateEnabledLogger<IMultiTargetTelemetry>();
 		var meterFactory = new SimpleMeterFactory();
 
-#if NETFRAMEWORK
-		// IMeterFactory is a .NET 8+ host concept, so on .NET Framework the generator emits a
-		// constructor without it and creates the Meter itself.
-		var generated = new MultiTargetTelemetryCore(logger);
-#else
+		// IMeterFactory is probed on the compilation, not the target framework, so every leg -
+		// including .NET Framework - gets the injected-factory constructor.
 		var generated = new MultiTargetTelemetryCore(logger, meterFactory);
-#endif
 		var manual = new ManualMultiTargetTelemetry(logger, meterFactory);
 
 		return (generated, manual);
@@ -65,33 +61,25 @@ static class BenchmarkHelpers
 	/// </summary>
 	public static (IMetricsFewTagsTelemetry FewTags, IMetricsManyTagsTelemetry ManyTags) CreateMetricsTelemetry()
 	{
-#if NETFRAMEWORK
-		var fewTags = new MetricsFewTagsTelemetryCore();
-		var manyTags = new MetricsManyTagsTelemetryCore();
-#else
 		var meterFactory = new SimpleMeterFactory();
 		var fewTags = new MetricsFewTagsTelemetryCore(meterFactory);
 		var manyTags = new MetricsManyTagsTelemetryCore(meterFactory);
-#endif
 		return (fewTags, manyTags);
 	}
 
 	/// <summary>
 	/// Creates the source-generator-produced <see cref="IMetricsBenchmarkTelemetry"/> implementation
 	/// alongside the hand-written <see cref="ManualMetricsTelemetry"/>, both backed by the same
-	/// <see cref="SimpleMeterFactory"/> for a fair comparison.
+	/// <see cref="SimpleMeterFactory"/> for a fair comparison and both returned as the interface, so the two
+	/// sides are consumed through the same call shape.
 	/// </summary>
 	public static (
 		IMetricsBenchmarkTelemetry Generated,
-		ManualMetricsTelemetry Manual
+		IMetricsBenchmarkTelemetry Manual
 	) CreateMetricsBenchmarkTelemetry()
 	{
 		var meterFactory = new SimpleMeterFactory();
-#if NETFRAMEWORK
-		var generated = new MetricsBenchmarkTelemetryCore();
-#else
 		var generated = new MetricsBenchmarkTelemetryCore(meterFactory);
-#endif
 		var manual = new ManualMetricsTelemetry(meterFactory);
 		return (generated, manual);
 	}
@@ -100,6 +88,8 @@ static class BenchmarkHelpers
 	/// Creates the v2 (state-based ThreadLocalState) and v1 (LoggerMessage.Define) generated logger
 	/// implementations alongside the hand-written <see cref="ManualLoggerMessageTelemetry"/> baseline,
 	/// all backed by either an always-enabled no-op logger or <see cref="NullLogger{T}"/> (always disabled).
+	/// The hand-written baseline is returned as an interface so both sides are consumed through the same call
+	/// shape; see <see cref="ManualLoggerMessageTelemetry"/>.
 	/// </summary>
 	/// <param name="loggingEnabled">
 	/// When <c>true</c>, a no-op logger with <see cref="ILogger.IsEnabled"/> always returning
@@ -114,7 +104,7 @@ static class BenchmarkHelpers
 	public static (
 		ILoggerOnlyTelemetry GeneratedV2,
 		ILoggerV1OnlyTelemetry GeneratedV1,
-		ManualLoggerMessageTelemetry Manual
+		ILoggerOnlyTelemetry Manual
 	) CreateLoggerTelemetry(bool loggingEnabled)
 	{
 		ILogger<ILoggerOnlyTelemetry> loggerV2 = loggingEnabled
@@ -151,13 +141,8 @@ static class BenchmarkHelpers
 		var loggerManual = CreateEnabledLogger<ManualMultiTargetTelemetry>();
 		var meterFactory = new SimpleMeterFactory();
 
-#if NETFRAMEWORK
-		var generatedV2 = new MultiTargetTelemetryCore(loggerV2);
-		var generatedV1 = new MultiTargetV1TelemetryCore(loggerV1);
-#else
 		var generatedV2 = new MultiTargetTelemetryCore(loggerV2, meterFactory);
 		var generatedV1 = new MultiTargetV1TelemetryCore(loggerV1, meterFactory);
-#endif
 		var manual = new ManualMultiTargetTelemetry(loggerManual, meterFactory);
 
 		return (generatedV2, generatedV1, manual);

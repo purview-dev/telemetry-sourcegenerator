@@ -23,7 +23,7 @@ You may also need runtime dependencies depending on which telemetry types you us
 
 - `System.Diagnostics.DiagnosticSource` for Activities
 - `Microsoft.Extensions.Logging.Abstractions` for `ILogger`
-- `System.Diagnostics.Metrics` for metrics (built into .NET 8+)
+- `System.Diagnostics.Metrics` for metrics (built into .NET 10+)
 
 See [Installation](Installation.md) for the full dependency matrix.
 

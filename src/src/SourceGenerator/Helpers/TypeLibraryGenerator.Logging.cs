@@ -22,4 +22,13 @@ partial class TypeLibraryGenerator
 
 	[TypeRef(LoggingNamespace)]
 	static readonly TypeIdentity LogPropertyIgnoreAttribute = default;
+
+	/// <summary>
+	/// <c>Microsoft.Extensions.Logging.TagProviderAttribute</c>, shipped by Microsoft.Extensions.Telemetry.Abstractions.
+	/// The generator reads that type rather than declaring a Purview duplicate: a second
+	/// <c>Purview.Telemetry.TagProviderAttribute</c> would make every <c>[TagProvider]</c> ambiguous in a consumer that
+	/// imports both namespaces for <c>ILogger</c> and <c>[Logger]</c> (CS0104).
+	/// </summary>
+	[TypeRef(LoggingNamespace)]
+	static readonly TypeIdentity TagProviderAttribute = default;
 }

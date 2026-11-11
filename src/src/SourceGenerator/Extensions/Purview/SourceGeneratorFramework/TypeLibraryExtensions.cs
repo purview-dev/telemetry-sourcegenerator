@@ -15,8 +15,6 @@ static class TypeLibraryExtensions
 		TypeLibrary.Purview.Telemetry.CriticalAttribute
 	);
 
-	static readonly ImmutableDictionary<InstrumentTypes, TypeIdentity> InstrumentTypeMap = Create();
-
 	static readonly ImmutableDictionary<TypeIdentity, LogLevelDetails> LogLevelMap = new Dictionary<
 		TypeIdentity,
 		LogLevelDetails
@@ -36,23 +34,10 @@ static class TypeLibraryExtensions
 		},
 	}.ToImmutableDictionary();
 
-	static ImmutableDictionary<InstrumentTypes, TypeIdentity> Create() =>
-		new Dictionary<InstrumentTypes, TypeIdentity>
-		{
-			{ InstrumentTypes.Counter, TypeLibrary.System.Diagnostics.Metrics.Counter },
-			{ InstrumentTypes.UpDownCounter, TypeLibrary.System.Diagnostics.Metrics.UpDownCounter },
-			{ InstrumentTypes.Histogram, TypeLibrary.System.Diagnostics.Metrics.Histogram },
-			{ InstrumentTypes.ObservableCounter, TypeLibrary.System.Diagnostics.Metrics.ObservableCounter },
-			{ InstrumentTypes.ObservableGauge, TypeLibrary.System.Diagnostics.Metrics.ObservableGauge },
-			{ InstrumentTypes.ObservableUpDownCounter, TypeLibrary.System.Diagnostics.Metrics.ObservableUpDownCounter },
-		}.ToImmutableDictionary();
-
 	extension(TypeLibrary.Purview.Telemetry)
 	{
 		public static ImmutableArray<TypeIdentity> LogAttributeTargets => LogAttributeTargets;
 
 		public static ImmutableDictionary<TypeIdentity, LogLevelDetails> LogLevelMap => LogLevelMap;
-
-		public static ImmutableDictionary<InstrumentTypes, TypeIdentity> InstrumentTypeMap => InstrumentTypeMap;
 	}
 }

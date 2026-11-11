@@ -1,4 +1,5 @@
 using System.Diagnostics.Metrics;
+using Purview.Telemetry.Benchmarks.Telemetry;
 
 namespace Purview.Telemetry.Benchmarks.Manual;
 
@@ -8,7 +9,14 @@ namespace Purview.Telemetry.Benchmarks.Manual;
 /// <see cref="Histogram{T}"/>) with the same instrument types, names, and tag patterns that the
 /// source generator produces, enabling a fair generated-vs-manual comparison.
 /// </summary>
-public sealed class ManualMetricsTelemetry : IDisposable
+/// <remarks>
+/// Implements <see cref="IMetricsBenchmarkTelemetry"/> so the benchmark can hold both the generated and the
+/// hand-written implementation as the interface and compare like with like: a generated class is resolved from
+/// DI as its interface, and a call that crosses an interface boundary cannot be inlined into the caller. Holding
+/// this baseline as its concrete type instead would let the JIT inline every one-line body and would attribute
+/// the difference to the generator.
+/// </remarks>
+public sealed class ManualMetricsTelemetry : IMetricsBenchmarkTelemetry, IDisposable
 {
 	readonly Meter _meter;
 

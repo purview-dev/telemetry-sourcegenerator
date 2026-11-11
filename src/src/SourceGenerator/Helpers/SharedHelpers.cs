@@ -23,11 +23,110 @@ static partial class SharedHelpers
 		return generationType;
 	}
 
+	/// <summary>
+	/// Projects a type symbol into a <c>TypeReference</c>, including an open generic type parameter.
+	/// </summary>
+	/// <remarks>
+	/// A type parameter cannot use the framework's <c>TypeReference.ForTypeParameter</c> here: the writer's
+	/// parameter validation requires a named identity, so a type-parameter reference is rejected as a parameter type.
+	/// A namespace-less identity renders as the bare parameter name and satisfies that check.
+	/// </remarks>
+	public static TypeReference ToTypeReference(ITypeSymbol type) =>
+		type is ITypeParameterSymbol typeParameter
+			? new TypeReference(new TypeIdentity(typeParameter.Name, null))
+			: TypeReference.Create(type);
+
+	/// <summary>
+	/// Builds the type reference for the interface a generated class implements, including a generic interface's own
+	/// type parameters.
+	/// </summary>
+	/// <remarks>
+	/// The framework's <c>TypeReference.Create(ITypeSymbol)</c> cannot name an open type parameter, so a generic
+	/// interface declaration is rebuilt from its name, namespace and type-parameter names. A nested generic interface
+	/// is reported as unsupported rather than half-built here.
+	/// </remarks>
+	public static TypeReference GetInterfaceTypeReference(INamedTypeSymbol interfaceSymbol)
+	{
+		if (interfaceSymbol.Arity == 0)
+			return TypeReference.Create(interfaceSymbol);
+
+		TypeIdentity identity = new(
+			interfaceSymbol.Name,
+			interfaceSymbol.ContainingNamespace.IsGlobalNamespace
+				? null
+				: interfaceSymbol.ContainingNamespace.ToDisplayString(),
+			interfaceSymbol.Arity
+		);
+
+		TypeReference[] typeArguments = [.. interfaceSymbol.TypeParameters.Select(ToTypeReference)];
+
+		return new TypeReference(identity.MakeGeneric(typeArguments));
+	}
+
+	/// <summary>
+	/// Whether every type parameter of an interface can be mirrored by the generated class. Only the
+	/// <c>allows ref struct</c> anti-constraint is out of reach, because it cannot be repeated on the generated
+	/// declaration.
+	/// </summary>
+	public static bool AreInterfaceTypeParametersSupported(INamedTypeSymbol interfaceSymbol) =>
+		TypeParameterHelpers.AreSupported(interfaceSymbol.TypeParameters) && interfaceSymbol.ContainingType is null;
+
 	public static bool ShouldEmit(GenerationType requestingType, GenerationType generationType)
 	{
 		// For multi-targeting: emit if the interface has the requesting target type
 		// This allows ActivitySource+Logger+Meter interfaces to generate all three targets
 		return generationType.HasFlag(requestingType);
+	}
+
+	/// <summary>
+	/// Whether the compilation can resolve a type. Gate every emitted API on this rather than on the target
+	/// framework: an analyzer-only package reference never brings a type to the consumer, and the
+	/// System.Diagnostics.DiagnosticSource package carries .NET 9/10/11 types all the way down to
+	/// <c>net462</c> and <c>netstandard2.0</c>.
+	/// </summary>
+	public static bool IsTypeAvailable(Compilation compilation, TypeIdentity identity) =>
+		compilation.GetTypeByMetadataName(identity.MetadataFullName) is not null;
+
+	/// <summary>
+	/// Whether the compilation can resolve <c>System.Diagnostics.Metrics.IMeterFactory</c>. It arrives with
+	/// Microsoft.Extensions.Diagnostics.Abstractions (or the shared framework on .NET 8+), so a project can target a
+	/// modern framework and still not have it — the symbol probe, not the target framework, decides whether the
+	/// generated constructor may take one.
+	/// </summary>
+	public static bool IsMeterFactoryAvailable(Compilation compilation) =>
+		IsTypeAvailable(compilation, TypeLibrary.System.Diagnostics.Metrics.IMeterFactory);
+
+	/// <summary>
+	/// Whether the compilation can resolve <c>Activity.AddException</c> (.NET 9, or System.Diagnostics.DiagnosticSource
+	/// 9+ on any target). When it can, the generated exception event is produced by the framework, which names and
+	/// tags the event the way the runtime's own diagnostics do.
+	/// </summary>
+	public static bool IsActivityAddExceptionAvailable(Compilation compilation) =>
+		compilation
+			.GetTypeByMetadataName(TypeLibrary.System.Diagnostics.Activity.MetadataFullName)
+			?.GetMembers("AddException")
+			.Length > 0;
+
+	/// <summary>
+	/// The assembly's version, used as the default meter and activity-source version when an attribute does not set
+	/// one. Read from the assembly identity, so <c>[assembly: AssemblyVersion]</c> and the SDK's own version
+	/// generation both feed it. Resolved once per compilation (see <c>TelemetryCapabilities</c>) rather than per
+	/// target, because the pipeline builds one capabilities value for the whole project.
+	/// </summary>
+	public static string? GetAssemblyVersion(Compilation compilation)
+	{
+		var version = compilation.Assembly.Identity.Version;
+
+		// 0.0.0.0 is what the compiler supplies for a project that declares no version. Carrying it into
+		// MeterOptions.Version or ActivitySourceOptions.Version would report a meaningless version to every
+		// exporter, so an undeclared version stays absent and the emitted options keep their single-argument form.
+		if (version == default)
+			return null;
+
+		if (version is { Major: 0, Minor: 0, Build: <= 0, Revision: <= 0 })
+			return null;
+
+		return version.ToString();
 	}
 
 	/// <summary>

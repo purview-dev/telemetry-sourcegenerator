@@ -21,9 +21,10 @@ code to generated telemetry interfaces) in a companion assembly.
 
 ## Prerequisites
 
-- The .NET 11 SDK pinned in `global.json` (currently an RC, `rollForward: latestMajor`), plus the .NET 8, 9 and
-  10 runtimes for the test legs. Projects target `net10.0` by default; the source generator is a Roslyn component
+- The .NET 11 SDK pinned in `global.json` (`11.0.100`, `rollForward: latestMajor`), plus the .NET 10 and 11
+  runtimes for the test legs. Projects target `net10.0` by default; the source generator is a Roslyn component
   targeting `netstandard2.0`. Consumers need Visual Studio 2026 / the .NET 10 SDK or later (Roslyn 5.9.0+).
+  **.NET 8 and .NET 9 are not supported** — consumer compilations that target them report `TSG1011`.
 - [Bun](https://bun.sh) for the `package.json`/`.build/*.ts` scripts
 - The `Purview.BuildSdk` MSBuild SDK (pinned in `global.json` under `msbuild-sdks`)
 - `csharpier` dotnet tool (pinned in `.config/dotnet-tools.json`) for linting/formatting
@@ -38,6 +39,7 @@ All `just` recipes read the repository's [`Justfile`](Justfile). Configuration d
 | --- | --- |
 | `just build` | Builds `src/Telemetry.SourceGenerator.slnx` (Debug). |
 | `just test` | Runs the test solution (Debug) with a tree-node filter. |
+| `just test-floor` | Runs the test solution against the declared dependency floor (`-p:DependencyFloor=true`). |
 | `just build-s` | Builds `samples/SampleApp/SampleApp.slnx`. |
 | `just test-s` | Runs the sample test solution. |
 | `just build-mp` | Builds `samples/SampleApp.MultiProject/SampleApp.MultiProject.slnx`. |
@@ -88,12 +90,13 @@ These mirror the GitHub CI/CD workflows and are the supported way to run a full 
 
 | Command | Purpose |
 | --- | --- |
-| `just benchmark` | Runs the full benchmark project on `net10.0` (Debug config). |
-| `just benchmark-quick` | Single-runtime `net10.0` run with a short BenchmarkDotNet job. |
+| `just benchmark` | Runs the full suite — .NET 10, .NET 11 and .NET Framework 4.8 — in one Release invocation. |
+| `just benchmark-quick` | Single-runtime `net11.0` run with a short BenchmarkDotNet job and its own artifacts folder. |
 | `just benchmark-docs` | Runs benchmarks, then prints a checklist of docs to update. |
 
-> BenchmarkDotNet numbers are only meaningful from **Release** builds. When measuring performance,
-> run the benchmark project directly with `--configuration Release` (see `benchmarks/README.md`).
+> The recipes pin **Release**, because BenchmarkDotNet numbers from a Debug build are not meaningful. Every
+> benchmark job names its runtime explicitly, so one report in `BenchmarkDotNet.Artifacts/results/` carries all
+> three runtimes and the launch framework only selects the BenchmarkDotNet host.
 
 ### Timeouts and cancellations
 
@@ -127,10 +130,10 @@ samples/
     └── SampleApp.Net48.slnx
 
 benchmarks/
-└── Purview.Telemetry.Benchmarks/           # BenchmarkDotNet project (net48/net8.0/net9.0/net10.0)
+└── Purview.Telemetry.Benchmarks/           # BenchmarkDotNet project (net48/net10.0/net11.0)
 
 .build/                                     # TS scripts (build-pack.ts, update-version.ts)
-.agents/skills/                             # Installed skills from other repos, committed (see "Installed skills")
+.agents/skills/                             # Installed + developer skills, committed (see "Installed skills")
 skills-lock.json                            # The skills CLI lockfile for .agents/skills/, committed
 skills/                                     # Authored skills shipped by this package (see "Authoring skills")
 .config/                                    # dotnet-tools.json, lefthook.yml
@@ -160,6 +163,9 @@ Treat work as incomplete until every gate relevant to it passes. Before a releas
 - `just scrub`, then `just pipeline-local-release --PublishLocalNuGet:LocalFeedPath=p:/_sync-projects/.local-nuget/`
   — restore, build with no new warnings, lint, tests, pack and pack validation (`RequiredContent` and
   `ForbiddenContent`).
+- `just test-floor` — the lowest compatible dependency leg. Every version this package declares is a lower
+  bound, so the floor becomes every consumer's floor; this proves it builds and passes rather than assuming it.
+  The `dependency-floor` PR job runs the same leg, and `ReleaseGateTests` fails when either wiring is removed.
 - `just smoke-packed-consumers` — packs the generator to an isolated feed and cache and proves the
   `.nupkg` itself works: a Native AOT console (published with `-warnaserror`, then run, asserting the
   emitted activities, metrics and log entries, log-level gating and multi-target methods), a Blazor
@@ -185,7 +191,7 @@ table of gates is in [`docs/wiki/Release-Flow.md`](docs/wiki/Release-Flow.md#rel
 
 ### Test project details
 
-- Integration tests target `net8.0;net9.0;net10.0;net11.0`, plus `net48` on Windows only. The `net11.0` leg is the
+- Integration tests target `net10.0;net11.0`, plus `net48` on Windows only. The `net11.0` leg is the
   only one whose references carry `System.Diagnostics.ActivitySourceFactory`, so the `UseActivitySourceFactory`
   tests (`[RequiresActivitySourceFactory]`) run there and the fallback tests (`[RequiresNoActivitySourceFactory]`,
   `TSG3023`) run on the earlier legs.
@@ -202,14 +208,50 @@ table of gates is in [`docs/wiki/Release-Flow.md`](docs/wiki/Release-Flow.md#rel
 
 - **Conventional commits**: enforced by commitlint (`.config/lefthook.yml`). Types: `build`, `chore`,
   `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`, `test`.
-- **Formatting**: C# is formatted with csharpier; check with `just lint`.
+- **Formatting**: C# is formatted with csharpier; check with `just lint` and fix with `just lint-fix`. CSharpier
+  1.4.0 parses C# 15, so the two files that declare a `closed` hierarchy are formatted like any other and the
+  `.csharpierignore` those entries lived in is gone. Do not reintroduce an ignore file to work around the parser;
+  a file it cannot read is a version bump, not an exclusion.
+- **Local tools**: `.config/dotnet-tools.json` holds `csharpier` and `purview.build`, and nothing RID-specific. A
+  `DotNetCliTool Version="2"` package (one with `RuntimeIdentifierPackages`, laid out under `tools/any/any`) breaks a
+  cold `dotnet tool restore` on a hosted runner when it sits beside another tool: NuGet validates the wrong package's
+  commands and names the other entry. `dotnet-inspect` did exactly that - removed in `7427652`, re-added by accident in
+  `2f1c731`, which took the `pack-validation` job down again - so it is rejected by name in `ToolManifestTests`.
+  Nothing here runs it; do not add it or any tool of that shape back.
 - **Solutions**: `.slnx` solution files are used.
 - **Source generator**: targets `netstandard2.0` for broad compiler-host compatibility and uses
   `Purview.SourceGeneratorFramework` (CodeWriter-based emission, incremental pipeline, value-equatable
   models).
+- **Union parameters**: a parameter whose type carries `[System.Runtime.CompilerServices.Union]` is
+  recorded as its case value, never as the union struct. `Helpers/UnionHelpers.cs` detects it
+  (case types from the nested `IUnionMembers` provider when there is one, otherwise from the union's
+  single-parameter constructors, and whether it declares the non-boxing `HasValue`/`TryGetValue` pattern);
+  `Emitters/UnionAccessorEmitter.cs` emits one private accessor per union type into each generated class;
+  every target renders the value through `UnionTargetRecord.RenderValueExpression()` rather than the
+  parameter name. Detection is by symbol, never by target framework. Whether a union is a *declared*
+  `union` or hand-written decides only whether the accessor reads `TryGetValue` or `Value`.
 - **SDK**: projects import `Purview.BuildSdk` via `Directory.Build.props`/`.targets`. The repo
   sets `ExcludePurviewTelemetry=true` (it does not consume the telemetry package it generates) and
   `NamespacePrefix=Purview.Telemetry` under `src/`. See `.agents/skills/purview-buildsdk-*` for SDK behavior.
+- **.NET 11 opt-ins are SDK settings, not repo settings.** `Purview.BuildSdk` 2.0.0 applies them to any
+  `net11.0`+ project from `Sdk/Targets/Modern.targets`: Runtime Async V2 (`PurviewRuntimeAsync=true`) and the
+  C# 15 updated memory-safety rules (`MemorySafetyRules=2`), with `AllowUnsafeBlocks` left off. Do not add
+  `Features` or `MemorySafetyRules` to a project file; set `PurviewRuntimeAsync=false` / `MemorySafetyRules=0`
+  to opt one project out. `.NET 10` and `netstandard2.0` legs are deliberately untouched.
+  `docs/wiki/Platform-Support.md` records every .NET 11 feature that was evaluated and why it is or is not used.
+- **Dependency versions are lower bounds.** `Directory.Packages.props` keeps one property per package family —
+  `DotnetRuntimeVersion` for the runtime-tracked `10.0.<patch>` line, `MSExtensionVersion` for
+  dotnet/extensions' `10.<minor>.0` — and pins the lowest supported framework line (`net10.0`), never the
+  `11.x` line; the `.NET 11` packages are used only by the `net11.0` packed consumers. `-p:DependencyFloor=true`
+  drops both families to the oldest version that compiles and passes, which `just test-floor` and the
+  `dependency-floor` PR job prove. Audit runs over the whole graph (`NuGetAuditMode=all`).
+- **C# 15 `closed` hierarchies**: the two tagged unions are closed. `Records/ActivityRecords.cs` declares
+  `closed record ActivityMethodTarget` with `StartActivityMethod` / `ActivityEventMethod` / `ActivityContextMethod`,
+  and `Records/MetricAttributeRecords.cs` declares `closed record InstrumentAttributeRecord` with one case per
+  instrument. Emitters switch over them, which the compiler checks for exhaustiveness. `closed` needs
+  `IsClosedTypeAttribute` and `CompilerFeatureRequiredAttribute`, which `Compatibility/ClosedTypeAttribute.cs`
+  declares internally for `netstandard2.0`; `IDE0010` does not model `closed` yet, so a switch over one carries
+  `#pragma warning disable IDE0010`.
 - **Analyzer release tracking**: the `TSG` rules are tracked in
   `src/src/SourceGenerator/AnalyzerReleases.{Shipped,Unshipped}.md` (wired as `AdditionalFiles`, so
   the Roslyn RS2000-series checks run under `EnforceExtendedAnalyzerRules=true`). Add new rules to
@@ -237,7 +279,17 @@ entry) are both in source, so a clone has them without running anything.
 | `purview-buildsdk-*` (8 skills) | `purview-dev/build-sdk` | build/SDK configuration, project layout and detection, testing, skill installation and skill tests |
 | `purview-architecture`, `purview-architecture-testing`, `purview-engineering-principles`, `purview-persistence`, `purview-telemetry`, `purview-testing-conventions` | `purview-dev/engineering-playbook` | solution shape, architecture tests, engineering conventions, persistence, telemetry and testing conventions |
 
-This repository's own skills in `skills/` are authored for **consumers** of its packages, not for use while working on this repository. They are never installed into this repository's `.agents/skills/`, which holds only skills installed from other repositories; `InstalledSkillTests` enforces this.
+This repository's own skills in `skills/` are authored for **consumers** of its packages, not for use while working on this repository. They are never installed into this repository's `.agents/skills/`; `InstalledSkillTests` enforces this.
+
+`.agents/skills/` also holds the **developer skills**: skills written here for people working on the
+generator, which are not consumer guidance and are never published. They are committed in place (the
+skills CLI neither writes them nor records them in the lockfile), and `InstalledSkillTests` allows a
+folder there only when it is declared in that class's `DeveloperSkills` list, which also asserts the
+skill cannot drift into `skills/`.
+
+| Developer skill | Answers |
+| --- | --- |
+| `.agents/skills/purview-telemetry-benchmarks/` | running the BenchmarkDotNet suite for .NET 10 / .NET 11 / .NET Framework 4.8, reading a report, refreshing `docs/wiki/Performance.md` and `README.md`, writing the analysis, adding a family |
 
 Skills are installed into the universal `.agents/skills/` location **only**. Never install copies
 into `.claude/` or any other per-agent folder. Pass `-a universal`, which writes `.agents/skills/`
@@ -254,12 +306,14 @@ npx -y skills@1 experimental_install
 ```
 
 Commit the changed `.agents/skills/**` and `skills-lock.json` together, in their own `chore` commit.
-Do not edit anything under `.agents/skills/` by hand — the CLI is its only writer, and a hand edit
-no longer matches the lockfile's hash. This repository's *own* skills are never installed here; they
-live in `skills/` (below). `Purview.BuildSdk`'s `InstallPurviewSkills` target delegates to the same
-CLI; `src/Directory.Build.props` sets `PurviewSkillsAgents=universal` so it is restricted the same
-way rather than defaulting to every agent (`*`). None of the restored packages ship skills, so
-`ListPurviewSkills` has nothing to recommend and the set above is chosen by hand.
+Do not edit an *installed* skill under `.agents/skills/` by hand — the CLI is its only writer, and a
+hand edit no longer matches the lockfile's hash. The developer skills above are the exception: nothing
+installs them, so they are edited in place like any other source file. This repository's *own* consumer
+skills are never installed here; they live in `skills/` (below). `Purview.BuildSdk`'s
+`InstallPurviewSkills` target delegates to the same CLI; `src/Directory.Build.props` sets
+`PurviewSkillsAgents=universal` so it is restricted the same way rather than defaulting to every agent
+(`*`). None of the restored packages ship skills, so `ListPurviewSkills` has nothing to recommend and
+the set above is chosen by hand.
 
 Claude Code is the exception: it reads skills from `.claude/skills/`, not `.agents/skills/`. Give it
 **links**, never copies, so there is still one installed copy and the lockfile stays its record.
@@ -284,8 +338,9 @@ To remove a link, delete the link itself (`[System.IO.Directory]::Delete($link)`
 `Remove-Item -Recurse`, which can follow a junction into `.agents/skills/`.
 
 `src/tests/Repository.UnitTests/InstalledSkillTests.cs` keeps this honest: every `skills-lock.json`
-entry has its `.agents/skills/<name>/SKILL.md`, every installed folder is in the lockfile, and every
-entry in `.claude/skills/`, when the folder exists, is a link to the same skill in `.agents/skills/`.
+entry has its `.agents/skills/<name>/SKILL.md`, every installed folder is in the lockfile or is one of
+the `DeveloperSkills` above, and every entry in `.claude/skills/`, when the folder exists, is a link to
+the same skill in `.agents/skills/`.
 
 ## Authoring skills
 
@@ -331,9 +386,22 @@ prose instead, and keep deep detail in the skill's own `references/`.
 > `README.md`. Never copy stale results or estimate values — every performance table must come from a
 > current run.
 
-- Run with `just benchmark` or directly:
-  `dotnet run --project ./benchmarks/Purview.Telemetry.Benchmarks/Purview.Telemetry.Benchmarks.csproj --configuration Release --framework net10.0`
+The full workflow — running the suite, reading a report, refreshing `docs/wiki/Performance.md` and
+`README.md`, writing the analysis and adding a family — is the developer skill
+`.agents/skills/purview-telemetry-benchmarks/`. Load it before touching a performance number; the
+points below are the constraints it depends on.
+
+- Run with `just benchmark`, or directly:
+  `dotnet run --project ./benchmarks/Purview.Telemetry.Benchmarks/Purview.Telemetry.Benchmarks.csproj --configuration Release --framework net11.0`
 - Results land in `BenchmarkDotNet.Artifacts/results/` as `*-report-github.md`, `*.csv`, `*.html`.
+  The folder is gitignored, so nothing links to it as a published artifact.
+- **Every job names its runtime explicitly** (`RuntimeMoniker.Net10_0`, `Net11_0`, `Net48`), so one invocation
+  measures all three and one report carries all three. `RuntimeMoniker.Net11_0` exists only from BenchmarkDotNet
+  **0.16.0-preview.2** — 0.15.8's `RuntimeMoniker` stops at `Net10_0` — which is why the benchmark project pins a
+  prerelease. A host-runtime `[SimpleJob]` is not a substitute: it carries no Runtime characteristic and fails
+  BenchmarkDotNet's `GetSupportedBenchmarks` validation instead of measuring anything.
+- `RuntimeMoniker.Net47` is deliberately absent: its generated host project fails to restore on every run, which
+  only ever produced `NA` rows. .NET Framework 4.8 is the supported .NET Framework target.
 - `just benchmark-docs` runs the suite and prints the docs-update checklist.
 - Observable instruments (`ObservableCounter`/`ObservableGauge`/`ObservableUpDownCounter`) are not
   benchmarked: they are registered once via a callback with no per-operation hot path.

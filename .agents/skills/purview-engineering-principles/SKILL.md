@@ -4,8 +4,9 @@ description: >-
   Use when setting up, reviewing or rationalising a .NET repository against the Purview engineering
   conventions - convention over configuration, derived identity, architecture as tests, warnings as
   errors, proving consumer-facing claims, documentation ownership, test data builders, agent
-  legibility, and tiering verification by risk. Each rule names the failure it prevents and whether a
-  build or a reviewer enforces it.
+  legibility, tiering verification by risk, the version policy for applications and for published
+  components, and the conditional persistence rules. Each rule names the failure it prevents and
+  whether a build or a reviewer enforces it.
 metadata:
   product: Purview engineering playbook
   repository: purview-dev/engineering-playbook
@@ -13,7 +14,7 @@ metadata:
 
 # Purview engineering principles
 
-Ten rules, each with the failure it prevents and the mechanism that makes it true. The distinction
+Eleven rules, each with the failure it prevents and the mechanism that makes it true. The distinction
 that matters throughout: **a convention a build can check is checked by the build; a convention only
 a reviewer can check is labelled a review obligation and never described as enforced.** A rule that
 claims enforcement it does not have is worse than no rule, because people stop looking.
@@ -100,8 +101,9 @@ repository's own tests already are the consumer.
 
 ## 7. Documentation is a build artefact of the repository
 
-The wiki lives in the repository it describes, in `docs/wiki`, and the repository owns its
-`mkdocs.yml`, its navigation and its `edit_uri`.
+The wiki lives in the repository it describes, in `docs/wiki`, as plain Markdown. The repository owns no
+site configuration at all: `_Sidebar.md` is the navigation, `Home.md` is the hub, and the site that
+publishes them lives in one place outside the repository.
 
 Documentation that lives elsewhere is updated elsewhere. A page with no owner and no review path is
 wrong within one release.
@@ -154,6 +156,23 @@ hand-written attribute.
 *At your scale:* one tier is fine until the slow tests exist. Then split by project name, not by
 attribute.
 
+## 11. A version is a range, not a number
+
+An application takes the latest version its runtime supports. A published component declares the
+**lowest** version that compiles, passes its tests and satisfies the contract it documents, on each
+target framework it claims — because dependency resolution is a set of lower bounds, so the floor a
+component declares becomes the floor every consumer inherits.
+
+A page states no release number. It shows a badge generated from the registry, or links to the
+registry, so a version cannot be wrong within a release.
+
+*Enforced by:* a lowest-compatible CI leg that restores against the declared floor, and an
+API-compatibility check per target framework. Nothing enforces the floor of a package that has no
+consumer yet — that tier arrives with the first release.
+
+*At your scale:* with one application there is nothing to earn yet; take the latest and let
+`dotnet list package --outdated` report the rest. The golden rule starts at the first published package.
+
 ## Applying these in review
 
 Three questions catch most of it:
@@ -164,8 +183,16 @@ Three questions catch most of it:
 3. **Could an agent — or a new joiner — find this without being told?** If not, it goes in
    `AGENTS.md` or the wiki.
 
+## The conditional persistence rules
+
+Three further rules apply only when a repository actually stores data: a value known before storage is
+derived with UUIDv5, every other GUID key uses one strategy per store, and EF Core is the persistence
+boundary. They are not part of the eleven because a stateless CLI or a pure library must not inherit them.
+`purview-persistence` owns them and stays silent when persistence is not real.
+
 ## Related skills
 
 `purview-architecture` for project-shape decisions, `purview-architecture-testing` for turning a
 boundary into a failing build, `purview-telemetry` and `purview-persistence` for the per-concern
-guidance.
+guidance, and `purview-component-compatibility` for deciding and verifying a published component's
+lowest compatible dependency versions.

@@ -1,11 +1,11 @@
 {
 	"sdk": {
-		"version": "11.0.100-rc.3.26522.148",
-		"rollForward": "latestMajor",
-		"allowPrerelease": true
+		"version": "11.0.100",
+		"rollForward": "latestMajor"
 	},
 	"msbuild-sdks": {
-		"Purview.BuildSdk": "1.3.0"
+		"Purview.BuildSdk": "2.0.0",
+		"Aspire.AppHost.Sdk": "13.6.5"
 	},
 	"test": {
 		"runner": "Microsoft.Testing.Platform"

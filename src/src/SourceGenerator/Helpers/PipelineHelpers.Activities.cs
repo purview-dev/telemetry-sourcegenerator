@@ -25,13 +25,14 @@ partial class PipelineHelpers
 		if (interfaceSymbol is null)
 			return GeneratorResult<ActivitySourceTarget?>.Empty;
 
-		if (interfaceSymbol.Arity > 0)
+		if (interfaceSymbol.Arity > 0 && !SharedHelpers.AreInterfaceTypeParametersSupported(interfaceSymbol))
 		{
 			return GeneratorResult<ActivitySourceTarget?>.Create(
 				ReportableDiagnostic.Create(
 					DiagnosticLibrary.General.GenericInterfacesNotSupported.Descriptor,
 					isBlocking: true,
-					interfaceSymbol
+					interfaceSymbol,
+					interfaceSymbol.Name
 				)
 			);
 		}
@@ -85,17 +86,18 @@ partial class PipelineHelpers
 				GenerationType: generationType,
 				ClassNameToGenerate: className,
 				ParentClasses: Utilities.GetParentClasses(interfaceDeclaration),
-				InterfaceType: TypeReference.Create(interfaceSymbol),
+				InterfaceType: SharedHelpers.GetInterfaceTypeReference(interfaceSymbol),
 				ActivitySourceGenerationAttribute: activitySourceGenerationAttribute,
 				ActivitySourceName: activitySourceName,
 				ActivityMethods: activityMethods,
-				ActivityTargetAttributeRecord: activitySourceAttribute
+				ActivityTargetAttributeRecord: activitySourceAttribute,
+				InterfaceTypeParameters: TypeParameterHelpers.FromNamedType(interfaceSymbol)
 			),
 			TelemetryRules.GetInterfaceLevelDiagnostics(interfaceSymbol, compilation, token)
 		);
 	}
 
-	static ImmutableArray<ActivityBasedGenerationTarget> BuildActivityMethods(
+	static ImmutableArray<ActivityMethodTarget> BuildActivityMethods(
 		GenerationType generationType,
 		ActivitySourceAttributeData activitySourceAttribute,
 		ActivitySourceGenerationAttributeData? activitySourceGenerationAttribute,
@@ -112,37 +114,16 @@ partial class PipelineHelpers
 		var prefix = GeneratePrefix(activitySourceGenerationAttribute, activitySourceAttribute, token);
 		var defaultToTags = activitySourceGenerationAttribute?.DefaultToTags ?? activitySourceAttribute.DefaultToTags;
 
-		var lowercaseBaggageAndTagKeys = activitySourceAttribute.LowercaseBaggageAndTagKeys;
+		// The assembly-level value is the default and the interface-level value overrides it, which is the same
+		// precedence DefaultToTags uses. Before this, the assembly-level property was declared and modelled but
+		// never read, so setting it changed nothing.
+		var lowercaseBaggageAndTagKeys = activitySourceGenerationAttribute?.LowercaseBaggageAndTagKeys
+			?? activitySourceAttribute.LowercaseBaggageAndTagKeys;
 
-		List<ActivityBasedGenerationTarget> methodTargets = [];
+		List<ActivityMethodTarget> methodTargets = [];
 		foreach (var method in GetAllInterfaceMethods(interfaceSymbol, token))
 		{
 			token.ThrowIfCancellationRequested();
-
-			if (method.Arity > 0)
-			{
-				methodTargets.Add(
-					new(
-						MethodName: method.Name,
-						ReturnType: TypeReference.Create(method.ReturnType),
-						ActivityOrEventName: method.Name,
-						HasActivityParameter: false,
-						ActivityAttribute: null,
-						EventAttribute: null,
-						MethodType: ActivityMethodType.Activity,
-						Parameters: ImmutableArray<ActivityBasedParameterTarget>.Empty,
-						Baggage: ImmutableArray<ActivityBasedParameterTarget>.Empty,
-						Tags: ImmutableArray<ActivityBasedParameterTarget>.Empty,
-						TargetGenerationState: new TargetGeneration(
-							IsValid: false,
-							RaiseInferenceNotSupportedWithMultiTargeting: false,
-							RaiseMultiGenerationTargetsNotSupported: false
-						),
-						TypeParameters: ImmutableArray.CreateRange(method.TypeParameters, tp => tp.Name)
-					)
-				);
-				continue;
-			}
 
 			if (TypeHelpers.HasAttribute(method, TypeLibrary.Purview.Telemetry.ExcludeAttribute))
 				continue;
@@ -182,23 +163,60 @@ partial class PipelineHelpers
 				GenerationType.Activities
 			);
 
-			methodTargets.Add(
-				new(
+			var returnType = TypeReference.Create(method.ReturnType);
+			var hasActivityParameter = parameters.Any(m =>
+				m.ParameterType.Identity.Equals(TypeLibrary.System.Diagnostics.Activity)
+			);
+
+			// The payload decides the case, so an activity attribute and an event attribute can never both be set,
+			// and a method that has neither is a context method rather than an activity with a null attribute.
+			var typeParameters = TypeParameterHelpers.FromMethod(method);
+
+			// TSG1005: a type parameter whose constraint the generator cannot re-declare stops this method; the
+			// emitter writes a throw stub so the interface stays implemented.
+			if (!TypeParameterHelpers.AreSupported(method.TypeParameters))
+				targetGenerationState = targetGenerationState with { IsValid = false };
+
+			ActivityMethodTarget methodTarget =
+				methodType == ActivityMethodType.Activity
+					? new StartActivityMethod(
+						MethodName: method.Name,
+						ReturnType: returnType,
+						ActivityOrEventName: activityOrEventName!,
+						HasActivityParameter: hasActivityParameter,
+						Parameters: parameters,
+						Baggage: baggageParameters,
+						Tags: tagParameters,
+						TargetGenerationState: targetGenerationState,
+						ActivityAttribute: activityAttribute,
+						TypeParameters: typeParameters
+					)
+				: methodType == ActivityMethodType.Event
+					? new ActivityEventMethod(
+						MethodName: method.Name,
+						ReturnType: returnType,
+						ActivityOrEventName: activityOrEventName!,
+						HasActivityParameter: hasActivityParameter,
+						Parameters: parameters,
+						Baggage: baggageParameters,
+						Tags: tagParameters,
+						TargetGenerationState: targetGenerationState,
+						EventAttribute: eventAttribute,
+						TypeParameters: typeParameters
+					)
+				: new ActivityContextMethod(
 					MethodName: method.Name,
-					ReturnType: TypeReference.Create(method.ReturnType),
+					ReturnType: returnType,
 					ActivityOrEventName: activityOrEventName!,
-					HasActivityParameter: parameters.Any(m =>
-						m.ParameterType.Identity.Equals(TypeLibrary.System.Diagnostics.Activity)
-					),
-					ActivityAttribute: activityAttribute,
-					EventAttribute: eventAttribute,
-					MethodType: methodType,
+					HasActivityParameter: hasActivityParameter,
 					Parameters: parameters,
 					Baggage: baggageParameters,
 					Tags: tagParameters,
-					TargetGenerationState: targetGenerationState
-				)
-			);
+					TargetGenerationState: targetGenerationState,
+					TypeParameters: typeParameters
+				);
+
+			methodTargets.Add(methodTarget);
 		}
 
 		return [.. methodTargets];
@@ -218,7 +236,7 @@ partial class PipelineHelpers
 		{
 			token.ThrowIfCancellationRequested();
 
-			var parameterType = TypeReference.Create(parameter.Type);
+			var parameterType = SharedHelpers.ToTypeReference(parameter.Type);
 			var (destination, attribute) = GetParameterDestination(parameter, parameterType, defaultToTags, token);
 
 			TagOrBaggageAttributeRecord? tagOrBaggageAttribute = null;
@@ -244,12 +262,24 @@ partial class PipelineHelpers
 					ParamDestination: destination,
 					SkipOnNullOrEmpty: GetSkipOnNullOrEmptyValue(tagOrBaggageAttribute),
 					IsException: parameter.Type.IsExceptionType(),
-					ExcludedTargets: excludeTargets?.ExcludedTargets ?? GenerationType.None
+					ExcludedTargets: excludeTargets?.ExcludedTargets ?? GenerationType.None,
+					Union: UnionHelpers.GetUnionTarget(parameter.Type, token)
 				)
 			);
 		}
 
 		return [.. parameterTargets];
+	}
+
+	/// <summary>
+	/// How a method participates in an activity interface. This is a construction-time decision: the closed
+	/// <see cref="ActivityMethodTarget"/> hierarchy carries it in the type, so nothing downstream switches on it.
+	/// </summary>
+	enum ActivityMethodType
+	{
+		Activity,
+		Event,
+		Context,
 	}
 
 	static (ActivityMethodType, bool) GetMethodType(

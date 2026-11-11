@@ -1,14 +1,15 @@
 ---
 name: purview-persistence
 description: >-
-  Use when a .NET project actually persists data and you are choosing a storage approach, deciding
-  whether to abstract EF Core, or selecting a GUID primary-key strategy. Gives provider-specific
-  guidance — SQL Server and PostgreSQL differ and must not be treated alike — and stays silent for
-  projects that do not persist anything.
+  Use when a .NET project actually persists data and you are choosing a storage approach, integrating
+  or abstracting EF Core, deriving a well-known identifier, or selecting a GUID primary-key strategy.
+  Gives provider-specific guidance — SQL Server and PostgreSQL differ and must not be treated alike —
+  and stays silent for projects that do not persist anything.
 license: MIT
 metadata:
   author: Purview-Dev
-  version: "1.0"
+  version: "1.2"
+  repository: purview-dev/engineering-playbook
 ---
 
 # Purview persistence
@@ -40,7 +41,39 @@ development and integration tests — including `MsSql`, `PostgreSql`, `MySql`, 
 `RabbitMq`, `Azurite` and an Azure Key Vault emulator. Prefer a real container over an in-memory
 provider: the in-memory provider does not enforce the constraints that break you in production.
 
-## 3. GUID keys — only if GUIDs are keys
+## 3. EF Core integration
+
+When EF Core is the store, keep the integration in four places:
+
+- **`DbContext` is the boundary.** Use it directly; do not add `IRepository<T>` or a unit-of-work wrapper
+  for testability. `Purview.Containers` gives you a real database in tests.
+- **Choose the provider where the context is registered.** Carry the choice as context-options data, not
+  a `Database.ProviderName` branch at model-build time.
+- **Map value objects once.** Configure converters and comparers in the model, not per property. A
+  value-object key needs a converter-aware value generator.
+- **Keep design time and runtime in step.** Both paths make the same provider, strategy and
+  `ReplaceService` choices, or the migration snapshot describes a different model.
+
+Migrations are code, reviewed and applied by a deliberate step; the API does not migrate at startup in
+production. The full rule, composition sample and checks are in `references/ef-core-integration.md`.
+
+## 4. Identifiers — derived or generated
+
+Two decisions live here, and they are independent. Ask them in this order.
+
+### The deterministic-identifier gate
+
+Derive an identifier only when its **value must be known before storage** — a system tenant, a seeded
+reference row, an installation's service principal, or an ingested object whose provider key is stable
+and never recycled. Then derive it with UUIDv5 over an installation-scoped namespace and configure
+`ValueGeneratedNever()`, so the sequential convention below leaves it alone. A project with random keys
+and no seeding has no use for UUIDv5. An outbox row that merely needs an id before `SaveChanges` takes
+the generated strategy below, not a derived one.
+
+The full rule, catalogue, naming rules, migration caveat and tests are in
+`references/well-known-identifiers.md`.
+
+### The generated-key decision
 
 Resolve these before recommending anything; most are answered by the repository:
 
@@ -72,11 +105,14 @@ Use the framework or database capability when it is sufficient — `Guid.CreateV
 generator is a maintenance obligation and a correctness risk; introduce one only against a measured
 requirement.
 
-**There is no Purview GUID generation package.** Do not reference one, and do not create one without
-first establishing a concrete, measured need that the built-in options cannot meet. If such a
-capability is added later, this skill is where the guidance for recommending it belongs.
+**No NuGet package provides this pattern.** A reviewed generator such as `FastGuid` supplies a
+store-ordered implementation, but the strategy witness, options extension, value generator with
+value-converter support, and model-finalising convention are repository-local: copy them, do not depend
+on a package that claims to own the wiring. Introduce it only for a measured requirement: a second
+provider, or an identifier needed before `SaveChanges`. Until the second provider exists, a built-in
+capability is the answer.
 
-## 4. Value objects as keys
+## 5. Value objects as keys
 
 `Purview.ValueObjects` gives strongly-typed identifiers that stop an `OrderId` being passed where a
 `CustomerId` belongs. They need an EF Core value converter; configure it once in the model rather
@@ -85,7 +121,7 @@ than per property.
 This is about type safety at the boundary, not about the generation strategy — the two decisions are
 independent.
 
-## 5. Migrations and schema
+## 6. Migrations and schema
 
 - Migrations are code: reviewed, tested against a real container, and applied by a deliberate step —
   not by the application at startup in production.
@@ -96,7 +132,14 @@ independent.
 ## Checks before you answer
 
 - Have you confirmed persistence is actually required?
+- If the project uses EF Core, are you recommending the `DbContext` directly rather than a repository
+  wrapper added for testability?
+- Does the design-time path make the same provider and strategy choices as the runtime path?
+- Does every generated value have one owner — application, store or derivation — and no second writer?
+- If you are deriving an identifier, is its value genuinely known before storage, and is it keyed
+  `ValueGeneratedNever()`?
 - If you are recommending a GUID strategy, do you know the provider *and* its version?
+- If you are proposing the strategy/convention, is there a second provider or a pre-save identifier?
 - Are you proposing an abstraction you can justify by something other than testability?
 - Have you preferred a built-in capability over a custom generator?
 

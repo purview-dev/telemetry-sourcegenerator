@@ -8,7 +8,7 @@ partial class ActivitySourceTargetClassEmitter
 {
 	static void EmitEventMethodBody(
 		ActivityOutputContext output,
-		ActivityBasedGenerationTarget methodTarget,
+		ActivityEventMethod methodTarget,
 		CodeWriter writer,
 		SourceProductionContext context
 	)
@@ -33,8 +33,8 @@ partial class ActivitySourceTargetClassEmitter
 			return;
 		}
 
-		var activityVariableName =
-			activityParam?.ParameterName ?? (TypeLibrary.System.Diagnostics.Activity + ".Current");
+		var activityVariableName = activityParam?.ParameterName
+			?? (TypeLibrary.System.Diagnostics.Activity + ".Current");
 		if (parentContextOrId != null)
 		{
 			output.Context.Diagnostic("Parent context/ Id not allowed on event method, only activities.");
@@ -58,53 +58,43 @@ partial class ActivitySourceTargetClassEmitter
 
 		EmitHasListenersTest(writer, methodTarget);
 
-		writer.IfBlock(
-			activityVariableName + " != null",
-			body =>
+		writer.IfBlock(activityVariableName + " != null", body =>
+		{
+			var exceptionParam = methodTarget.Parameters.FirstOrDefault(m => m.IsException)
+				?? methodTarget.Tags.FirstOrDefault(m => m.IsException);
+			var tagsParameterName = EmitEventTags(writer, methodTarget, activityVariableName, tagsParam, escapeParam);
+
+			var eventVariableName = "activityEvent" + methodTarget.MethodName;
+
+			writer
+				.NewLine()
+				.Write(TypeLibrary.System.Diagnostics.ActivityEvent)
+				.Write(' ')
+				.Write(eventVariableName)
+				.Write(" = new ")
+				// Use explicit type for C# 7.3 compatibility (target-typed new() requires C# 9+)
+				.Write(TypeLibrary.System.Diagnostics.ActivityEvent)
+				.Write("(name: ")
+				.Write(methodTarget.ActivityOrEventName.Wrap())
+				// timestamp:
+				.Write(", timestamp: ")
+				.Write(timestampParam?.ParameterName ?? "default")
+				// tags:
+				.Write(", tags: ")
+				.Write(tagsParameterName)
+				.Line(");");
+
+			writer.NewLine().Write(activityVariableName).Write(".AddEvent(").Write(eventVariableName).Line(");");
+
+			if (methodTarget.Baggage.Count > 0)
 			{
-				var exceptionParam =
-					methodTarget.Parameters.FirstOrDefault(m => m.IsException)
-					?? methodTarget.Tags.FirstOrDefault(m => m.IsException);
-				var tagsParameterName = EmitEventTags(
-					writer,
-					methodTarget,
-					activityVariableName,
-					tagsParam,
-					escapeParam
-				);
+				writer.NewLine();
 
-				var eventVariableName = "activityEvent" + methodTarget.MethodName;
-
-				writer
-					.NewLine()
-					.Write(TypeLibrary.System.Diagnostics.ActivityEvent)
-					.Write(' ')
-					.Write(eventVariableName)
-					.Write(" = new ")
-					// Use explicit type for C# 7.3 compatibility (target-typed new() requires C# 9+)
-					.Write(TypeLibrary.System.Diagnostics.ActivityEvent)
-					.Write("(name: ")
-					.Write(methodTarget.ActivityOrEventName.Wrap())
-					// timestamp:
-					.Write(", timestamp: ")
-					.Write(timestampParam?.ParameterName ?? "default")
-					// tags:
-					.Write(", tags: ")
-					.Write(tagsParameterName)
-					.Line(");");
-
-				writer.NewLine().Write(activityVariableName).Write(".AddEvent(").Write(eventVariableName).Line(");");
-
-				if (methodTarget.Baggage.Count > 0)
-				{
-					writer.NewLine();
-
-					EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, output);
-				}
-
-				EmitSetStatus(writer, methodTarget, activityVariableName, statusDescriptionParam, exceptionParam);
+				EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, output);
 			}
-		);
+
+			EmitSetStatus(writer, methodTarget, activityVariableName, statusDescriptionParam, exceptionParam);
+		});
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 
@@ -116,7 +106,7 @@ partial class ActivitySourceTargetClassEmitter
 
 	static string EmitEventTags(
 		CodeWriter writer,
-		ActivityBasedGenerationTarget methodTarget,
+		ActivityEventMethod methodTarget,
 		string activityVariableName,
 		ActivityBasedParameterTarget? tagsParam,
 		ActivityBasedParameterTarget? escapeParam
@@ -140,8 +130,7 @@ partial class ActivitySourceTargetClassEmitter
 
 		writer.Line(");");
 
-		var useRecordedExceptionRules =
-			methodTarget.EventAttribute?.UseRecordExceptionRules
+		var useRecordedExceptionRules = methodTarget.EventAttribute?.UseRecordExceptionRules
 			?? PropertyLibrary.Activities.UseRecordExceptionRulesDefault;
 
 		var escapeValue = escapeParam?.ParameterName ?? "true";
@@ -153,11 +142,9 @@ partial class ActivitySourceTargetClassEmitter
 				{
 					if (methodTarget.ActivityOrEventName == PropertyLibrary.Activities.Tag_ExceptionEventName)
 					{
-						writer.IfBlock(
-							tagParam.ParameterName + " != null",
-							body =>
-								// We want the details inside of the current event.
-								EmitExceptionParam(writer, tagsListVariableName, escapeValue, tagParam.ParameterName)
+						writer.IfBlock(tagParam.ParameterName + " != null", body =>
+							// We want the details inside of the current event.
+							EmitExceptionParam(writer, tagsListVariableName, escapeValue, tagParam.ParameterName)
 						);
 					}
 					else
@@ -213,7 +200,7 @@ partial class ActivitySourceTargetClassEmitter
 
 	static void EmitSetStatus(
 		CodeWriter writer,
-		ActivityBasedGenerationTarget methodTarget,
+		ActivityEventMethod methodTarget,
 		string activityVariableName,
 		ActivityBasedParameterTarget? statusDescriptionParam,
 		ActivityBasedParameterTarget? exceptionParam

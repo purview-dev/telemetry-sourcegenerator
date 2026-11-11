@@ -1,6 +1,6 @@
 ---
 name: purview-buildsdk-repository-review
-description: Review a repository that uses Purview.BuildSdk for naming, placement and test-structure alignment, and report what the SDK can and cannot do automatically as a result. Use when asked to audit, rationalise or health-check a repo against the SDK's conventions, when onboarding an existing codebase onto Purview.BuildSdk, or when deciding whether a layout quirk is worth changing.
+description: Review a repository that uses Purview.BuildSdk for naming, placement, test-structure and agent-skill-management alignment, and report what the SDK can and cannot do automatically as a result. Use when asked to audit, rationalise or health-check a repo against the SDK's conventions, when onboarding an existing codebase onto Purview.BuildSdk, or when deciding whether a layout quirk is worth changing.
 license: MIT
 metadata:
   package: Purview.BuildSdk
@@ -89,7 +89,24 @@ go stale:
   is not any more.
 - A package the SDK already adds, restated in a project file, is maintenance cost with no effect.
 
-## 6. Explain consequences, not just mismatches
+## 6. Check how agent skills are managed
+
+Only relevant when the repository has a `skills-lock.json`, an agent skills directory, or a package
+reference that ships skills:
+
+- **Anything that runs `InstallPurviewSkills`, `UpdatePurviewSkills` or `FixPurviewSkills`
+  implicitly** — an `AfterTargets`/`BeforeTargets` hook, a `*DependsOn` property, a git hook, a
+  `just` recipe dependency — is structural debt: the SDK fails it with `PRSKL0009`, and skill changes
+  should only happen when somebody asks.
+- **Hand-written skill scripts** (`update-agent-skills.ts`, `ensure-universal-skills.ts`,
+  `package.json` `skills:*` entries) are an incremental opportunity: the SDK targets replace them, and
+  pin package skills to their package's commit where the scripts install latest. See
+  `purview-buildsdk-skills-justfile`.
+- **Drift**: run `dotnet msbuild <project> -t:RecommendPurviewSkills` and quote any `PRSKL0010`/`PRSKL0011`.
+- **Layout**: if `PurviewSkillsAgents` is set, run `-t:CheckPurviewSkills` and quote any `PRSKL0015`.
+  If it is not set, every agent directory is legitimate — that is acceptable variance, not a finding.
+
+## 7. Explain consequences, not just mismatches
 
 For each finding, name the specific automatic behaviour that is lost: `RootNamespace`,
 `AssemblyName`, `PackageId`, `TargetProjectName`, the automatic target-project reference, the

@@ -30,13 +30,14 @@ partial class PipelineHelpers
 		if (iLoggerTypeSymbol is null)
 			return GeneratorResult<LoggerTarget?>.Empty;
 
-		if (interfaceSymbol.Arity > 0)
+		if (interfaceSymbol.Arity > 0 && !SharedHelpers.AreInterfaceTypeParametersSupported(interfaceSymbol))
 		{
 			return GeneratorResult<LoggerTarget?>.Create(
 				ReportableDiagnostic.Create(
 					DiagnosticLibrary.General.GenericInterfacesNotSupported.Descriptor,
 					isBlocking: true,
-					interfaceSymbol
+					interfaceSymbol,
+					interfaceSymbol.Name
 				)
 			);
 		}
@@ -54,8 +55,9 @@ partial class PipelineHelpers
 
 		// Resolve the effective generation mode using priority:
 		// interface GenerationMode > assembly GenerationMode > Auto (per-method decision)
-		var interfaceGenerationMode =
-			loggerAttribute.GenerationModeOrNull ?? loggerGenerationAttribute?.GenerationModeOrNull ?? 0; // Auto
+		var interfaceGenerationMode = loggerAttribute.GenerationModeOrNull
+			?? loggerGenerationAttribute?.GenerationModeOrNull
+			?? 0; // Auto
 
 		var generationType = SharedHelpers.GetGenerationTypes(interfaceSymbol, token);
 		if (
@@ -78,17 +80,24 @@ partial class PipelineHelpers
 			token
 		);
 
+		// A [TagProvider] produces its tags at run time, which the LoggerMessage.Define-based emitter cannot carry.
+		// Rather than dropping them an interface that forced V1 is generated with the state-based emitter.
+		var requiresStateGeneration = logMethods.Any(static method =>
+			method.Parameters.Any(static parameter => parameter.TagProvider != null)
+		);
+
 		return GeneratorResult<LoggerTarget?>.Create(
 			new(
 				TelemetryGeneration: telemetryGeneration,
 				GenerationType: generationType,
 				ClassNameToGenerate: className,
 				ParentClasses: Utilities.GetParentClasses(interfaceDeclaration),
-				InterfaceType: TypeReference.Create(interfaceSymbol),
+				InterfaceType: SharedHelpers.GetInterfaceTypeReference(interfaceSymbol),
 				LoggerAttribute: loggerAttribute,
 				DefaultLevel: defaultLogLevel,
 				LogMethods: logMethods,
-				UseMSLoggingTelemetryBasedGeneration: interfaceGenerationMode != 1 // false only when V1 forced
+				UseMSLoggingTelemetryBasedGeneration: interfaceGenerationMode != 1 || requiresStateGeneration,
+				InterfaceTypeParameters: TypeParameterHelpers.FromNamedType(interfaceSymbol)
 			),
 			TelemetryRules.GetInterfaceLevelDiagnostics(interfaceSymbol, compilation, token)
 		);

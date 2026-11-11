@@ -62,9 +62,14 @@ partial class MeterTargetClassEmitter
 				continue;
 			}
 
-			var type = TypeLibrary
-				.Purview.Telemetry.InstrumentTypeMap[method.InstrumentAttribute.InstrumentType]
-				.MakeGeneric(method.InstrumentMeasurementType);
+			if (!IsInstrumentAvailable(method, output.Context))
+			{
+				// The instrument type is unavailable (a gauge without Gauge<T>): TSG4010 reports it and the
+				// method is emitted as a throw stub, so there is no field to declare.
+				continue;
+			}
+
+			var type = method.InstrumentAttribute.InstrumentType.MakeGeneric(method.InstrumentMeasurementType);
 
 			// Observable instruments are registered via callback, not assigned in the constructor,
 			// so they cannot be readonly.

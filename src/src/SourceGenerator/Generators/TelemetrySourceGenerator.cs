@@ -88,15 +88,25 @@ public sealed partial class TelemetrySourceGenerator : IIncrementalGenerator
 	{
 		token.ThrowIfCancellationRequested();
 
-		// C# 8+ feature detection: controls nullable annotations and null-forgiving operators.
-		// IMeterFactory is .NET 8+ only — never available on .NET Framework 4.8.
-		var parseOptions = compilation.SyntaxTrees.FirstOrDefault()?.Options as CSharpParseOptions;
+		// Capabilities are probed on the compilation, never on the target framework: the
+		// System.Diagnostics.DiagnosticSource and Microsoft.Extensions.Diagnostics.Abstractions packages bring these
+		// types to net462 and netstandard2.0 consumers, and a net10.0 consumer that pins an older line may not have
+		// them either. IMeterFactory in particular is not ".NET 8+" in practice — it is whatever the referenced
+		// package provides, so a symbol probe is the only correct gate.
 		return new(
 			//SupportsNullableAnnotations: parseOptions is null
 			//|| parseOptions.LanguageVersion >= LanguageVersion.CSharp8,
-			SupportsIMeterFactory: parseOptions is null
-				|| !parseOptions.PreprocessorSymbolNames.Contains("NET48_OR_GREATER"),
-			UseActivitySourceFactory: SharedHelpers.UseActivitySourceFactory(compilation, token)
+			SupportsIMeterFactory: SharedHelpers.IsMeterFactoryAvailable(compilation),
+			UseActivitySourceFactory: SharedHelpers.UseActivitySourceFactory(compilation, token),
+			SupportsGauge: SharedHelpers.IsTypeAvailable(compilation, TypeLibrary.System.Diagnostics.Metrics.Gauge),
+			SupportsInstrumentAdvice: SharedHelpers.IsTypeAvailable(
+				compilation,
+				TypeLibrary.System.Diagnostics.Metrics.InstrumentAdvice
+			),
+			SupportsActivityAddException: SharedHelpers.IsActivityAddExceptionAvailable(compilation),
+			// Resolved once per compilation and carried on the capabilities, so every meter and activity source in
+			// the project reuses one value instead of reading the assembly identity per target.
+			AssemblyVersion: SharedHelpers.GetAssemblyVersion(compilation)
 		);
 	}
 }

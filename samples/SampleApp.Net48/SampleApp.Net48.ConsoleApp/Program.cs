@@ -43,6 +43,11 @@ namespace SampleApp.Net48.ConsoleApp
 
 			services.AddLogging(logging => logging.AddConsole().SetMinimumLevel(LogLevel.Trace));
 
+			// Registers IMeterFactory. The generator probes the compilation for that type rather than the target
+			// framework, so a net48 project that can see it gets the injected-factory constructor - and DI then has
+			// to be able to supply one. Microsoft.Extensions.Diagnostics ships net462/netstandard2.0 assets for it.
+			services.AddMetrics();
+
 			services.AddScoped<IWeatherService, WeatherService>();
 			services.AddWeatherServiceTelemetry();
 

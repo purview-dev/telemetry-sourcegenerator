@@ -1,6 +1,5 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
-using Purview.Telemetry.Benchmarks.Manual;
 using Purview.Telemetry.Benchmarks.Telemetry;
 
 namespace Purview.Telemetry.Benchmarks.Benchmarks;
@@ -24,16 +23,17 @@ namespace Purview.Telemetry.Benchmarks.Benchmarks;
 /// </summary>
 [MemoryDiagnoser]
 [HideColumns("Error", "StdDev", "Median", "RatioSD")]
-[SimpleJob(RuntimeMoniker.Net47)]
-[SimpleJob(RuntimeMoniker.Net48)]
-[SimpleJob(RuntimeMoniker.Net80)]
-[SimpleJob(RuntimeMoniker.Net90)]
 [SimpleJob(RuntimeMoniker.Net10_0)]
+[SimpleJob(RuntimeMoniker.Net11_0)]
+[SimpleJob(RuntimeMoniker.Net48)]
 public class LoggerBenchmarks
 {
 	ILoggerOnlyTelemetry _generatedV2 = default!;
 	ILoggerV1OnlyTelemetry _generatedV1 = default!;
-	ManualLoggerMessageTelemetry _manual = default!;
+
+	// Held as the interface, not as ManualLoggerMessageTelemetry: both implementations are then consumed through
+	// the same call shape, so a difference is generated code rather than an inlined concrete call on one side.
+	ILoggerOnlyTelemetry _manual = default!;
 
 	/// <summary>
 	/// When <c>true</c>, an always-enabled no-op logger is used so the full logging code path

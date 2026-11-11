@@ -110,10 +110,30 @@ restore *args:
     dotnet restore {{ solution_file }} {{ args }}
 
 # Runs tests for the solution with the specified configuration (default: Release)
+#
+# Uses the .NET 11 Microsoft.Testing.Platform run-level switches. They apply to the whole run across every
+# test application (net48, net10.0, net11.0 and Repository.UnitTests):
+#   --timeout                             caps total execution time, so a hung test application cannot stall CI
+#   --maximum-failed-tests                stops at the first N failures instead of burning the whole run
+#   --results-directory-layout per-module gives every project/TFM its own <project>/<tfm>_<rid> folder, so the
+#                                         four legs can no longer overwrite one another's report files
+# These are not VSTest switches: VSTest mode rejects them.
 [group('Build and Test')]
 test filter="/*/*/*/*/" *args:
     echo "Running tests for {{ BLUE }}{{ test_solution }}{{ NORMAL }} with {{ YELLOW }}{{ build_configuration }}{{ NORMAL }}..."
-    dotnet test --solution "{{ test_solution }}" --configuration "{{ build_configuration }}" --treenode-filter={{ filter }} {{ args }}
+    dotnet test --solution "{{ test_solution }}" --configuration "{{ build_configuration }}" --treenode-filter={{ filter }} --timeout 30m --maximum-failed-tests 25 --results-directory-layout per-module {{ args }}
+
+# Runs the test solution against every declared dependency floor (`DependencyFloor=true`), proving the
+# lowest common .NET 10 versions this package declares still compile and pass. The ordinary `test`
+# recipe resolves the latest servicing patch of the same line, which is what a consumer actually gets.
+#
+# `Directory.Packages.props` holds one property per package family, so the floor is a switch rather than
+# a second file, and this is the leg that proves it. `ReleaseGateTests` keeps the recipe and the PR job
+# wired up, so a declared floor cannot drift away from the version that was tested.
+[group('Build and Test')]
+test-floor filter="/*/*/*/*/" *args:
+    echo "Running tests against the dependency floor for {{ test_solution }}..."
+    dotnet test --solution "{{ test_solution }}" --configuration "{{ build_configuration }}" --treenode-filter={{ filter }} --timeout 30m --maximum-failed-tests 25 --results-directory-layout per-module -p:DependencyFloor=true {{ args }}
 
 # Scan build or publish output for compiler-host assemblies (the generator, the refactorings,
 # Purview.SourceGeneratorFramework, Roslyn) that must never reach an application.
@@ -254,14 +274,18 @@ scrub:
 # Benchmarking
 # -----------------------------------------------------------------------------
 
-# Runs the full benchmark suite
-
+# Runs the full benchmark suite: .NET 10, .NET 11 and .NET Framework 4.8 in one invocation.
+#
+# Release is fixed rather than taken from `build_configuration`: BenchmarkDotNet numbers from a Debug build
+# are not meaningful. Every job names its runtime explicitly (`RuntimeMoniker.Net10_0`, `Net11_0`, `Net48`),
+# so one report carries all three runtimes and the launch framework only selects the BenchmarkDotNet host.
+# `Net11_0` needs BenchmarkDotNet 0.16.0-preview.2 or later; there is no stable release with it yet.
 [group('Benchmarking')]
 benchmark:
-    echo "Running benchmarks for {{ BLUE }}{{ benchmark_solution }}{{ NORMAL }} with {{ YELLOW }}{{ build_configuration }}{{ NORMAL }}..."
-    dotnet run --project "{{ benchmark_solution }}" --configuration "{{ build_configuration }}" --framework net10.0
+    echo "Running benchmarks for {{ BLUE }}{{ benchmark_solution }}{{ NORMAL }} with {{ YELLOW }}Release{{ NORMAL }}..."
+    dotnet run --project "{{ benchmark_solution }}" --configuration Release --framework net11.0 -- --artifacts BenchmarkDotNet.Artifacts
 
-# Runs a quick single-runtime (.NET 10.0) benchmark with reduced iterations
+# Runs a quick single-runtime (.NET 11) benchmark with reduced iterations
 # for development validation.
 #
 # Uses BenchmarkDotNet's short job:
@@ -269,12 +293,12 @@ benchmark:
 #   - 3 warmups
 #   - 3 iterations
 #
-# Use `just benchmark` for the full multi-runtime suite.
-
+# Its own artifacts folder keeps it from overwriting the full suite's report.
+# Use `just benchmark` for the full three-runtime suite.
 [group('Benchmarking')]
 benchmark-quick:
-    echo "Running quick benchmarks (net10.0, short job) for {{ BLUE }}{{ benchmark_solution }}{{ NORMAL }} with {{ YELLOW }}{{ build_configuration }}{{ NORMAL }}..."
-    dotnet run --project "{{ benchmark_solution }}" --configuration "{{ build_configuration }}" --framework net10.0 -- --job short --runtimes net10.0
+    echo "Running quick benchmarks (net11.0, short job) for {{ BLUE }}{{ benchmark_solution }}{{ NORMAL }} with {{ YELLOW }}Release{{ NORMAL }}..."
+    dotnet run --project "{{ benchmark_solution }}" --configuration Release --framework net11.0 -- --job short --runtimes net11.0 --artifacts BenchmarkDotNet.Artifacts/quick
 
 # Runs benchmarks and reminds you to update performance documentation
 
@@ -284,12 +308,12 @@ benchmark-docs: benchmark
     echo "{{ GREEN }}Benchmarks complete.{{ NORMAL }} Results are in {{ BLUE }}BenchmarkDotNet.Artifacts/results/{{ NORMAL }}."
     echo ""
     echo "{{ YELLOW }}Next steps - update performance documentation:{{ NORMAL }}"
-    echo "  1. Open {{ BLUE }}README.md{{ NORMAL }} and update the {{ YELLOW }}## Performance{{ NORMAL }} section:"
+    echo "  1. Update the {{ YELLOW }}## Performance{{ NORMAL }} section of {{ BLUE }}README.md{{ NORMAL }}:"
     echo "     - Activities:   use {{ BLUE }}*ActivityBenchmarks*-report-github.md{{ NORMAL }}"
     echo "     - Logging:      use {{ BLUE }}*LoggerBenchmarks*-report-github.md{{ NORMAL }}"
     echo "     - Multi-target: use {{ BLUE }}*MultiTarget*-report-github.md{{ NORMAL }}"
     echo "     - Metrics:      use {{ BLUE }}*MetricsBenchmarks*-report-github.md{{ NORMAL }}"
-    echo "  2. Regenerate {{ BLUE }}PERFORMANCE.md{{ NORMAL }} from all six *-report-github.md files."
-    echo "  3. Update the environment header (machine / SDK / runtime versions)."
+    echo "  2. Regenerate {{ BLUE }}docs/wiki/Performance.md{{ NORMAL }} from all six *-report-github.md files, one section per family with a row per runtime."
+    echo "  3. Update the environment header (machine / SDK / runtime versions) in both files."
     echo ""
-    echo "  See {{ BLUE }}.github/copilot-instructions.md{{ NORMAL }} - Benchmarking for full instructions."
+    echo "  See {{ BLUE }}AGENTS.md{{ NORMAL }} - Benchmarking and performance documentation for the full rules."

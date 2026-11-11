@@ -12,6 +12,10 @@ via a simple console application.
   `#nullable enable` directive. No extra configuration is needed.
 - **Full telemetry stack on net48** — ActivitySource, ILogger, and System.Diagnostics.Metrics all
   work via NuGet packages (`System.Diagnostics.DiagnosticSource`, `Microsoft.Extensions.*`).
+- **Injected `IMeterFactory` on .NET Framework** — the generator probes the *compilation* for
+  `System.Diagnostics.Metrics.IMeterFactory`, not the target framework. Referencing
+  `Microsoft.Extensions.Diagnostics` (which ships `net462` assets) gives `net48` the same
+  factory-taking constructor as a modern target, so the sample registers one with `services.AddMetrics()`.
 
 ## Running the sample
 
@@ -78,4 +82,5 @@ SampleApp.Net48/
 |---|---|
 | `System.Diagnostics.DiagnosticSource` | ActivitySource, ActivityListener, Meter, MeterListener |
 | `Microsoft.Extensions.DependencyInjection` | Service registration (`AddWeatherServiceTelemetry()`) |
+| `Microsoft.Extensions.Diagnostics` | `services.AddMetrics()`, which registers the `IMeterFactory` the generated meter takes |
 | `Microsoft.Extensions.Logging.Console` | Console log output |

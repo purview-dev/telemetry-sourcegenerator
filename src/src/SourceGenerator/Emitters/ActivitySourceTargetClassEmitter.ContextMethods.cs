@@ -7,7 +7,7 @@ partial class ActivitySourceTargetClassEmitter
 {
 	static void EmitContextMethodBody(
 		ActivityOutputContext output,
-		ActivityBasedGenerationTarget methodTarget,
+		ActivityMethodTarget methodTarget,
 		CodeWriter writer,
 		SourceProductionContext context
 	)
@@ -32,8 +32,8 @@ partial class ActivitySourceTargetClassEmitter
 			return;
 		}
 
-		var activityVariableName =
-			activityParam?.ParameterName ?? TypeLibrary.System.Diagnostics.Activity.StaticMember("Current");
+		var activityVariableName = activityParam?.ParameterName
+			?? TypeLibrary.System.Diagnostics.Activity.StaticMember("Current");
 
 		if (tagsParam != null)
 		{
@@ -51,14 +51,11 @@ partial class ActivitySourceTargetClassEmitter
 
 		EmitHasListenersTest(writer, methodTarget);
 
-		writer.IfBlock(
-			activityVariableName + " != null",
-			body =>
-			{
-				EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, output);
-				EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, output);
-			}
-		);
+		writer.IfBlock(activityVariableName + " != null", body =>
+		{
+			EmitTagsOrBaggageParameters(writer, activityVariableName, true, methodTarget, false, output);
+			EmitTagsOrBaggageParameters(writer, activityVariableName, false, methodTarget, false, output);
+		});
 
 		context.CancellationToken.ThrowIfCancellationRequested();
 

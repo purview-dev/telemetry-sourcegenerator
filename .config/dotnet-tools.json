@@ -3,14 +3,14 @@
   "isRoot": true,
   "tools": {
     "csharpier": {
-      "version": "1.3.0",
+      "version": "1.4.0",
       "commands": [
         "csharpier"
       ],
       "rollForward": false
     },
     "purview.build": {
-      "version": "0.8.0",
+      "version": "0.9.0",
       "commands": [
         "purview-build"
       ],

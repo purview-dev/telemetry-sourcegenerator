@@ -1,16 +1,46 @@
 <Project>
-	<PropertyGroup>
+	<PropertyGroup Label="Dependency versions">
 		<RoslynVersion>5.9.0</RoslynVersion>
-		<TUnitVersion>1.76.0</TUnitVersion>
-		<PurviewSGFVersion>1.3.0</PurviewSGFVersion>
-		<DotnetRuntimeVersion>10.0.14</DotnetRuntimeVersion>
-		<MSExtensionVersion>10.11.0</MSExtensionVersion>
+		<TUnitVersion>1.83.0</TUnitVersion>
+		<PurviewSGFVersion>2.0.0</PurviewSGFVersion>
 		<OpenTelemetryVersion>1.20.1</OpenTelemetryVersion>
+		<!--
+			The lowest framework line this repository supports is net10.0, so every Microsoft.Extensions.*,
+			System.Diagnostics.DiagnosticSource and ASP.NET Core package stays on the .NET 10 line, never the
+			.NET 11 one. A library that references these packages hands its references on to consumers;
+			pinning the 11.x line would raise their floor to .NET 11 for no benefit. The .NET 11 packages are
+			used only where the consumer itself targets net11.0 (see the "Packed consumers" group below).
+
+			Two families move independently, so each is one property and cannot be bumped halfway:
+			  * DotnetRuntimeVersion  - versioned 10.0.<patch> with the runtime; the patch is the latest
+			                            net10.0 servicing release.
+			  * MSExtensionVersion    - dotnet/extensions, versioned 10.<minor>.0.
+
+			DependencyFloor is the switch that proves the lower bound instead of assuming it: the ordinary
+			restore takes the latest patch of the supported line, and `-p:DependencyFloor=true` drops both
+			families to the oldest version this generator's code and tests compile and pass against
+			(`just test-floor`). A floor nobody builds against is a guess.
+		-->
+		<DependencyFloor Condition="'$(DependencyFloor)' == ''">false</DependencyFloor>
+		<DotnetRuntimeVersion Condition="'$(DependencyFloor)' != 'true'">10.0.15</DotnetRuntimeVersion>
+		<DotnetRuntimeVersion Condition="'$(DependencyFloor)' == 'true'">10.0.0</DotnetRuntimeVersion>
+		<MSExtensionVersion Condition="'$(DependencyFloor)' != 'true'">10.11.0</MSExtensionVersion>
+		<MSExtensionVersion Condition="'$(DependencyFloor)' == 'true'">10.0.0</MSExtensionVersion>
+	</PropertyGroup>
+	<PropertyGroup Label="Restore policy">
+		<!--
+			Audit the whole graph, not only the packages declared here: this repository ships a compiler-host
+			assembly, so a vulnerable transitive dependency is one it hands to every consumer's build. The
+			.NET 11 SDK defaults this to `direct`. The SDK already turns on transitive pinning
+			(CentralPackageTransitivePinningEnabled=true), so a transitive uplift is visible here as a
+			deliberate override rather than only in the resolved graph.
+		-->
+		<NuGetAuditMode>all</NuGetAuditMode>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageVersion Include="Purview.SourceGeneratorFramework" Version="$(PurviewSGFVersion)" />
 		<PackageVersion Include="Purview.SourceGeneratorFramework.Testing.TUnit" Version="$(PurviewSGFVersion)" />
-		<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.403" />
+		<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="11.0.100" />
 		<PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" />
 		<PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="$(RoslynVersion)" />
 		<PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
@@ -26,7 +56,7 @@
 		<PackageVersion Include="TUnit" Version="$(TUnitVersion)" />
 		<PackageVersion Include="TUnit.Mocks" Version="$(TUnitVersion)" />
 		<PackageVersion Include="Bogus" Version="35.6.5" />
-		<PackageVersion Include="Purview.Skills.Testing" Version="1.2.0" />
+		<PackageVersion Include="Purview.Skills.Testing" Version="2.0.0" />
 		<PackageVersion Include="CliWrap" Version="3.10.5" />
 	</ItemGroup>
 	<ItemGroup Label="Samples">
@@ -60,7 +90,7 @@
 		the same version.
 	-->
 	<ItemGroup Label="Packed consumers">
-		<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="11.0.0-rc.3.26522.148" />
-		<PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="11.0.0-rc.3.26522.148" />
+		<PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="11.0.0" />
+		<PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="11.0.0" />
 	</ItemGroup>
 </Project>

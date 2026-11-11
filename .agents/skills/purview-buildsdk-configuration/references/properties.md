@@ -21,7 +21,7 @@ consuming project supplies nothing.
 
 | Property | Default | Behaviour |
 | -- | -- | -- |
-| `TargetFramework` | `net10.0` | Applied when neither `TargetFramework` nor `TargetFrameworks` is set. A project that explicitly declares `IsRoslynComponent=true` defaults to `netstandard2.0` |
+| `TargetFramework` | `net10.0;net11.0` | Applied when neither `TargetFramework` nor `TargetFrameworks` is set. A project that explicitly declares `IsRoslynComponent=true` defaults to `netstandard2.0` |
 | `IsRoslynComponent` | *(unset)* | When explicitly `true`: a single `netstandard2.0` target, `LangVersion=latest`, `Nullable=enable`, `TreatWarningsAsErrors=true`, `Deterministic=true`, extended analyzer rules, SourceLink with `EmbedUntrackedSources=true`, no dependency file, telemetry exclusion, and `PrivateAssets=all` on `Microsoft.CodeAnalysis.*` references |
 | `IsRoslynComponentOnly` | `true` for Roslyn components | Analyzer-only package: `IncludeBuildOutput=false`, `IncludeSymbols=false`, portable PDB packed beside the analyzer under `analyzers/dotnet/cs/`. Set `false` for a dual-role component using normal library symbol packaging |
 | `DisableRoslynCompilerDefaultsValidation` | `false` | Opts out of `ValidateRoslynComponentCompilerSettings`, which fails the pack of a packable Roslyn component missing `LangVersion`, `Nullable`, `TreatWarningsAsErrors` or `EnforceExtendedAnalyzerRules` |
@@ -35,6 +35,19 @@ consuming project supplies nothing.
 | `PurviewTestContextNoWarn` | `CA1002;CA1012;CA1034;CA1047;CA1050;CA1051;CA1062;CA1064;CA1515;CA1707` | The production API-surface rules exempted in test and shared-testing projects. Test projects keep the strict style contract (`IDE0040`, field naming, formatting, `IDE1006`) but are context aware: public test classes, `Method_Scenario_Expectation` names, exposed fields and unvalidated helper parameters are allowed. Set before the SDK import |
 | `DisablePurviewTestContextRuleSet` | `false` | Makes test and shared-testing projects enforce the production API-surface rules too |
 | `PurviewPolicyExemptNoWarn` | *(derived)* | The SDK-injected `NoWarn` entries `ValidatePurviewStylePolicy` accepts |
+
+## .NET 11 features and ServerShared
+
+| Property | Default | Behaviour |
+| -- | -- | -- |
+| `MemorySafetyRules` | `2` | C# 15 memory-safety tier on `net11.0`+ targets: `0` off, `1` preview pointer syntax (sets `LangVersion=preview` when none was chosen), `2` `updated-memory-safety-rules`. Unknown values fail with `PRCFG0001`. Never touches `AllowUnsafeBlocks` |
+| `PurviewRuntimeAsync` | `true` | `runtime-async=on` on `net11.0`+ targets. `UseRuntimeAsync=false` also opts out |
+| `PurviewMultiThreadedBuild` | `true` | Bootstraps a managed `Directory.Build.rsp` with `-mt`/`-nr:false`; `false` writes `-mt:false` |
+| `BootstrapMultiThreadedBuildRspToRepoRoot` | `true` | Whether that bootstrapped response file is written at all |
+| `IsClientSideProject` | *(computed)* | `true` for a WebAssembly client, `PurviewBrowserSafe` library, Razor class library, or `*.Client`/`*.Browser`/`*.Wasm`/`*.WebAssembly`/`*.Components` name. Explicit value wins |
+| `PurviewAutoServerSharedReference` | `true` | Adds `../ServerShared*/ServerShared*.csproj` to a non-client-side project |
+| `PurviewServerSharedReferenceCheckAsError` | `false` | Makes `PRSHR0001`/`PRSHR0002` errors |
+| `DisablePurviewServerSharedReferenceCheck` | `false` | Turns `PRSHR0001`/`PRSHR0002` off |
 
 ## Testing
 
@@ -119,6 +132,9 @@ reference was judged browser-safe when it cannot say so itself.
 | `RepositoryEditorConfigFilePath` | *(derived)* | Overrides the destination `.editorconfig` |
 | `BootstrapGlobalJsonToRepoRoot` | `true` | |
 | `RepositoryGlobalJsonFilePath` | *(derived)* | Overrides the destination `global.json` |
+| `BootstrapMultiThreadedBuildRspToRepoRoot` | `true` | Creates a managed `Directory.Build.rsp` enabling `-mt` |
+| `RepositoryDirectoryBuildRspFilePath` | *(derived)* | Overrides the destination `Directory.Build.rsp` |
+| `PurviewMultiThreadedBuild` | `true` | `false` rewrites a managed rsp to `-mt:false` |
 | `PurviewBuildSdkVersionForGlobalJson` | restored package version, else the version it was packed as | |
 | `PurviewRepoBootstrapCopyRetries` | `3` | |
 | `PurviewRepoBootstrapCopyRetryDelayMilliseconds` | `500` | |
@@ -136,7 +152,7 @@ nothing else was left for the mirror to deliver.
 Covered in full by `purview-buildsdk-skill-installation`: `PurviewSkillsRunner`,
 `PurviewSkillsRunnerCandidates`, `PurviewSkillsCommand`, `PurviewSkillsPackage`,
 `PurviewSkillsAgents`, `PurviewSkillsSource`, `PurviewSkillsInstallRoot`, `PurviewSkillsRepoRoot`,
-`EnablePurviewSkillRecommendations`, `PurviewSkillRecommendationsInCI`.
+`PurviewSkillsDryRun`, and the `PurviewSkillsAgentDirectory` item group.
 
 ## Compiler-visible properties
 
@@ -148,7 +164,11 @@ Exported to analyzers and generators as `build_property.<PropertyName>`:
 - `ExcludePurviewTelemetry`, `ExcludeMSTelemetryExtension`
 - `EnableAssemblyNameGeneration`, `DisableAutoInternalsVisibleTo`, `DisableGenerateAssemblyInfoClass`,
   `DisableGenerateAssemblyIdentifierClass`, `AssemblyIdentifierClassName`
-- `IsCSharpProject`, `IsTestProject`, `IsSharedTestingProject`, `IsSharedProject`
+- `IsCSharpProject`, `IsTestProject`, `IsSharedTestingProject`, `IsSharedProject`,
+  `IsServerSharedProject`, `IsClientSideProject`
+- `PurviewAutoServerSharedReference`, `DisablePurviewServerSharedReferenceCheck`,
+  `PurviewServerSharedReferenceCheckAsError`
+- `MemorySafetyRules`, `PurviewRuntimeAsync`, `PurviewMultiThreadedBuild`
 - `TestingType`, `TargetProjectName`
 - `IsContainerProject`, `IsSdkProject`, `SdkProjectName`, `IsWebProject`, `IsWebSdkProject`,
   `IsWorkerSdkProject`, `IsAspireHostProject`, `IsCLIProject`
@@ -163,6 +183,6 @@ Exported to analyzers and generators as `build_property.<PropertyName>`:
 - `PurviewSuppressCopyRetryWarnings`
 - `PurviewSkillsSourceFolder`,
   `PurviewSkillsAgents`, `PurviewSkillsInstallRoot`, `PurviewRepositoryRootMarkers`,
-  `PurviewSkillsRunner`
+  `PurviewSkillsRunner`, `PurviewSkillsDryRun`
 - `PurviewBuildSdkVersionForGlobalJson`, `CurrentYear`, `AutoGeneratedAssemblyInfoFile`,
   `AutoGeneratedAssemblyIdentifierFile`
