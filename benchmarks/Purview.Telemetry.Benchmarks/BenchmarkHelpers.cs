@@ -70,11 +70,12 @@ static class BenchmarkHelpers
 	/// <summary>
 	/// Creates the source-generator-produced <see cref="IMetricsBenchmarkTelemetry"/> implementation
 	/// alongside the hand-written <see cref="ManualMetricsTelemetry"/>, both backed by the same
-	/// <see cref="SimpleMeterFactory"/> for a fair comparison.
+	/// <see cref="SimpleMeterFactory"/> for a fair comparison and both returned as the interface, so the two
+	/// sides are consumed through the same call shape.
 	/// </summary>
 	public static (
 		IMetricsBenchmarkTelemetry Generated,
-		ManualMetricsTelemetry Manual
+		IMetricsBenchmarkTelemetry Manual
 	) CreateMetricsBenchmarkTelemetry()
 	{
 		var meterFactory = new SimpleMeterFactory();
@@ -87,6 +88,8 @@ static class BenchmarkHelpers
 	/// Creates the v2 (state-based ThreadLocalState) and v1 (LoggerMessage.Define) generated logger
 	/// implementations alongside the hand-written <see cref="ManualLoggerMessageTelemetry"/> baseline,
 	/// all backed by either an always-enabled no-op logger or <see cref="NullLogger{T}"/> (always disabled).
+	/// The hand-written baseline is returned as an interface so both sides are consumed through the same call
+	/// shape; see <see cref="ManualLoggerMessageTelemetry"/>.
 	/// </summary>
 	/// <param name="loggingEnabled">
 	/// When <c>true</c>, a no-op logger with <see cref="ILogger.IsEnabled"/> always returning
@@ -101,7 +104,7 @@ static class BenchmarkHelpers
 	public static (
 		ILoggerOnlyTelemetry GeneratedV2,
 		ILoggerV1OnlyTelemetry GeneratedV1,
-		ManualLoggerMessageTelemetry Manual
+		ILoggerOnlyTelemetry Manual
 	) CreateLoggerTelemetry(bool loggingEnabled)
 	{
 		ILogger<ILoggerOnlyTelemetry> loggerV2 = loggingEnabled

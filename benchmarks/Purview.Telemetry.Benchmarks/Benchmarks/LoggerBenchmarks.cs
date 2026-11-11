@@ -1,6 +1,5 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
-using Purview.Telemetry.Benchmarks.Manual;
 using Purview.Telemetry.Benchmarks.Telemetry;
 
 namespace Purview.Telemetry.Benchmarks.Benchmarks;
@@ -31,7 +30,10 @@ public class LoggerBenchmarks
 {
 	ILoggerOnlyTelemetry _generatedV2 = default!;
 	ILoggerV1OnlyTelemetry _generatedV1 = default!;
-	ManualLoggerMessageTelemetry _manual = default!;
+
+	// Held as the interface, not as ManualLoggerMessageTelemetry: both implementations are then consumed through
+	// the same call shape, so a difference is generated code rather than an inlined concrete call on one side.
+	ILoggerOnlyTelemetry _manual = default!;
 
 	/// <summary>
 	/// When <c>true</c>, an always-enabled no-op logger is used so the full logging code path

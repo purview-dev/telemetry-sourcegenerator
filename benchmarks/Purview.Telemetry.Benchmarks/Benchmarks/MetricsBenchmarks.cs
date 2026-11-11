@@ -1,6 +1,5 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
-using Purview.Telemetry.Benchmarks.Manual;
 using Purview.Telemetry.Benchmarks.Telemetry;
 
 namespace Purview.Telemetry.Benchmarks.Benchmarks;
@@ -26,7 +25,10 @@ namespace Purview.Telemetry.Benchmarks.Benchmarks;
 public class MetricsBenchmarks
 {
 	IMetricsBenchmarkTelemetry _generated = default!;
-	ManualMetricsTelemetry _manual = default!;
+
+	// Held as the interface, not as ManualMetricsTelemetry: both implementations are then consumed through the
+	// same call shape, so a difference is generated code rather than an inlined concrete call on one side.
+	IMetricsBenchmarkTelemetry _manual = default!;
 
 	[GlobalSetup]
 	public void Setup()
@@ -37,7 +39,10 @@ public class MetricsBenchmarks
 	[GlobalCleanup]
 	public void Cleanup()
 	{
-		_manual.Dispose();
+		// The interface does not expose disposal, so the meter the hand-written baseline owns is released through
+		// the concrete type it still is.
+		if (_manual is IDisposable disposable)
+			disposable.Dispose();
 	}
 
 	// --- AutoCounter: 0 tags ---

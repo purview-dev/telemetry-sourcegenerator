@@ -203,6 +203,9 @@ Rules of thumb:
   the same; state the comparison basis if you do.
 - Every ratio you quote must exist in the report. If you want to say "~7%", the rows must say
   `1.07`.
+- A generated-vs-manual gap that is *flat* across scenarios the method does different amounts of work in — the
+  same mean for a 0-tag counter and a 6-tag histogram, say — is a harness shape problem before it is a
+  generator problem. Check how each side is held (interface or concrete) before writing an overhead claim.
 - Keep the consumer's frame: absolute nanoseconds for the hot path, allocations per call, and whether
   the generated code is on par with "what you would write by hand".
 
@@ -229,6 +232,12 @@ the `HasListener = false` row as the production cost, and describing a family th
    - A `<summary>` that says what question the benchmark answers and why the pair is fair. This is where
      the mechanism the analysis will cite is recorded.
    - `[GlobalSetup]` / `[GlobalCleanup]` dispose meters, loggers and listeners.
+   - **Both sides of a comparison must be consumed through the same shape.** Hold the generated *and* the
+     hand-written implementation as the same interface (that is why `ManualMetricsTelemetry` and
+     `ManualLoggerMessageTelemetry` implement the benchmark interfaces). At nanosecond scale a concrete call is
+     inlined into the benchmark loop and an interface call is not, so a generated-through-interface vs
+     hand-written-through-concrete pair measures dispatch and reports it as generator overhead — a flat per-call
+     delta that ignores the work the method does.
 5. Register it: `benchmarks/README.md` (family table + project tree), `docs/wiki/Performance.md` (new
    section with one row per runtime), and `README.md` only if it is a consumer hot path.
 6. Validate as described below, then run the full suite - a new family cannot be documented from a
@@ -269,6 +278,9 @@ characteristic and fails BenchmarkDotNet's `GetSupportedBenchmarks` validation i
 
 - `just build` is green while `benchmarks/` does not compile - the project is not in the solution.
 - `--filter "*MultiTarget*"` matches two classes; the report then covers only part of what the docs claim.
+- A comparison whose generated side is held as an interface and whose hand-written side is held as its concrete
+  type reports interface dispatch as generated overhead. `MetricsBenchmarks` and `LoggerBenchmarks` implement the
+  interface on the manual baseline to avoid it; a new family must do the same.
 - `net48` silently disappears on a non-Windows machine, and with it the `netstandard2.0` comparison.
 - A missing .NET 10 or .NET 11 runtime turns a leg into `NA` rows rather than a failure.
 - `BenchmarkDotNet.Artifacts/` is gitignored, so a "raw results" link to it on GitHub is a dead link.

@@ -119,6 +119,10 @@ Compares three logging implementations with a parameterised `HasLogging` flag:
 - `HasLogging = true` — an always-enabled no-op logger is used; the full code path (including `IsEnabled` check and message formatting) is exercised.
 - `HasLogging = false` — `NullLogger` is used; the `IsEnabled` guard short-circuits immediately.
 
+All three are held as an interface in the benchmark — `ManualLoggerMessageTelemetry` implements `ILoggerOnlyTelemetry`
+for that reason — so one side is not inlined into the measurement loop while the other is. Consuming the generated
+class through its interface is also what a DI-resolved consumer gets.
+
 ### `LoggerMultiTargetBenchmarks`
 
 Compares the overhead of including logging in multi-target telemetry with a parameterised `HasListener` flag (logging is always enabled):
@@ -162,6 +166,10 @@ benchmark with the manual implementation as the baseline:
 | Up-down counter | `AdjustActiveConnections(1)` | `UpDownCounter<int>.Add(1)` |
 | Histogram, 0 tags | `RecordDuration(42.0)` | `Histogram<double>.Record(42.0)` |
 | Histogram, 1 tag | `RecordDurationByEndpoint(42.0, "/api/data")` | `Histogram<double>.Record(42.0, KeyValuePair("endpoint", "/api/data"))` |
+
+Both implementations are held as `IMetricsBenchmarkTelemetry` — `ManualMetricsTelemetry` implements the interface for
+that reason — so neither side is inlined into the measurement loop and a difference is generated code rather than call
+shape.
 
 Observable instruments are absent for the reason given above: a callback registered once has no per-operation hot path.
 
