@@ -29,9 +29,11 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - uses: actions/setup-dotnet@v6
-        with:
-          global-json-file: global.json
+      # Installs the SDK global.json pins (11.0.100). `actions/setup-dotnet` directly, with its
+      # `global-json-file` input, falls back to the LTS channel when it cannot install the pin,
+      # reports success, and leaves the first dotnet command to fail with "A compatible .NET SDK was
+      # not found". The shared action is the one implementation of this resolution.
+      - uses: purview-dev/build/actions/dotnet-sdk@main
 
       - name: Restore, build and test at the declared floor
         run: >-
@@ -53,11 +55,7 @@ jobs:
           fetch-tags: true
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          # global.json is the source of truth: the repo targets net11.0, and a floating
-          # 10.0.x here leaves the SDK pinned by global.json uninstalled.
-          global-json-file: global.json
+        uses: purview-dev/build/actions/dotnet-sdk@main
 
       - name: Build SampleApp
         run: dotnet build samples/SampleApp/SampleApp.slnx --configuration Release
@@ -95,9 +93,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - uses: actions/setup-dotnet@v6
-        with:
-          global-json-file: global.json
+      - uses: purview-dev/build/actions/dotnet-sdk@main
 
       # Restore before pack: a pwsh step that left `dotnet tool restore`'s non-zero exit code to the shell's
       # trailing `exit $LASTEXITCODE` is what made this gate report a green run as a failure. Reaching a step at
@@ -130,9 +126,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - uses: actions/setup-dotnet@v6
-        with:
-          global-json-file: global.json
+      - uses: purview-dev/build/actions/dotnet-sdk@main
 
       # First, before any toolchain is installed: the generator is built against the
       # Purview.SourceGeneratorFramework version Directory.Packages.props pins, with the
