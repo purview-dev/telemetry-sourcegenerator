@@ -137,8 +137,37 @@ jobs:
         run: ./scripts/test-packed-consumers.ps1 -PreflightOnly
 
       # Native AOT links with clang and needs the zlib headers; the hosted image may not carry both.
+      #
+      # The install is best-effort in the two ways that have actually failed: the image often already
+      # has both (then no network is touched at all), and `azure.archive.ubuntu.com` - the mirror the
+      # runner's apt-mirrors.txt points at - intermittently fails to resolve, which killed this job
+      # twice in one afternoon with "Temporary failure resolving 'azure.archive.ubuntu.com'" while
+      # every other job stayed green. Retries cover the second; the probe covers the first.
       - name: Install the Native AOT prerequisites
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang zlib1g-dev
+        run: |
+          set -euo pipefail
+
+          missing=""
+          for package in clang zlib1g-dev; do
+            dpkg -s "$package" >/dev/null 2>&1 || missing="$missing $package"
+          done
+
+          if [ -z "$missing" ]; then
+            echo "clang and zlib1g-dev are already installed on this image."
+            exit 0
+          fi
+
+          for attempt in 1 2 3; do
+            sudo apt-get update -o Acquire::Retries=3 || true
+            if sudo apt-get install -y --no-install-recommends $missing; then
+              exit 0
+            fi
+            echo "apt-get could not install$missing (attempt $attempt of 3); retrying in $((attempt * 20))s"
+            sleep $((attempt * 20))
+          done
+
+          echo "could not install$missing after 3 attempts" >&2
+          exit 1
 
       # RunAOTCompilation needs the Emscripten toolchain and the Mono AOT cross compiler.
       # -WasmAot Require below makes a missing workload an error instead of a skipped step.
