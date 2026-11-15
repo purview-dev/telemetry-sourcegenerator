@@ -39,10 +39,7 @@ static partial class ActivitySourceTargetClassEmitter
 			)
 			{
 				EmitFields(output, writer, context);
-				UnionAccessorEmitter.EmitAccessors(
-					writer,
-					target.ActivityMethods.SelectMany(static m => m.Parameters).Select(static p => p.Union)
-				);
+				UnionAccessorEmitter.EmitAccessors(writer, target.UnionAccessors);
 				EmitMethods(output, writer, context);
 			}
 

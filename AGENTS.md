@@ -226,10 +226,15 @@ table of gates is in [`docs/wiki/Release-Flow.md`](docs/wiki/Release-Flow.md#rel
   recorded as its case value, never as the union struct. `Helpers/UnionHelpers.cs` detects it
   (case types from the nested `IUnionMembers` provider when there is one, otherwise from the union's
   single-parameter constructors, and whether it declares the non-boxing `HasValue`/`TryGetValue` pattern);
-  `Emitters/UnionAccessorEmitter.cs` emits one private accessor per union type into each generated class;
-  every target renders the value through `UnionTargetRecord.RenderValueExpression()` rather than the
-  parameter name. Detection is by symbol, never by target framework. Whether a union is a *declared*
-  `union` or hand-written decides only whether the accessor reads `TryGetValue` or `Value`.
+  `Emitters/UnionAccessorEmitter.cs` emits one private accessor per union type into the generated class, and
+  `Helpers/UnionAccessorPlanner.cs` decides that only the canonical target declares it — the class is one
+  `partial` across the target files, so a second declaration is `CS0111` for the consumer. The owning target's
+  list is the interface's unions when the interface registers more than one target, and its own parameters'
+  unions when it registers one, so a single-target interface's output is unchanged. Every target renders the
+  value through `UnionTargetRecord.RenderValueExpression()` rather than the parameter name — including an
+  `[Event]` tag, which is collected into an `ActivityTagsCollection` rather than set through `SetTag`.
+  Detection is by symbol, never by target framework. Whether a union is a *declared* `union` or hand-written
+  decides only whether the accessor reads `TryGetValue` or `Value`.
 - **SDK**: projects import `Purview.BuildSdk` via `Directory.Build.props`/`.targets`. The repo
   sets `ExcludePurviewTelemetry=true` (it does not consume the telemetry package it generates) and
   `NamespacePrefix=Purview.Telemetry` under `src/`. See `.agents/skills/purview-buildsdk-*` for SDK behavior.

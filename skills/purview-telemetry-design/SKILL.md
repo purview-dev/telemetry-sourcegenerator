@@ -99,6 +99,11 @@ the union's own `TryGetValue` overloads when it declares them (a `bool HasValue`
 per case), so the union struct is never boxed to read it. A union that holds no value records `null`. Works on every
 supported target, `net48` included: detection is by symbol, not by framework.
 
+One interface generates one `partial` class across its target files, so the accessor is declared **once**: by the target
+that owns shared members (Activities, else Logging, else Metrics), for every union the interface declares. The other
+files call it. A `[ExcludeTargets(Targets.Activities)]` parameter does not move it — the log or metric call site still
+unwraps the value.
+
 ```csharp
 public union OrderOutcome(OrderPlaced, OrderRejected);
 

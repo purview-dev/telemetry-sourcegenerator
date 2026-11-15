@@ -104,7 +104,14 @@ partial class PipelineHelpers
 				MeterVersion: SharedHelpers.NullIfWhitespace(meterAttribute.Version)
 					?? SharedHelpers.NullIfWhitespace(meterGenerationAttribute?.Version),
 				MeterTags: SharedHelpers.MergeTags(meterGenerationAttribute?.Tags, meterAttribute.Tags),
-				InterfaceTypeParameters: TypeParameterHelpers.FromNamedType(interfaceSymbol)
+				InterfaceTypeParameters: TypeParameterHelpers.FromNamedType(interfaceSymbol),
+				UnionAccessors: UnionAccessorPlanner.Plan(
+					interfaceSymbol,
+					generationType,
+					GenerationType.Metrics,
+					instrumentMethods.SelectMany(static method => method.Parameters).Select(static p => p.Union),
+					token
+				)
 			),
 			TelemetryRules.GetInterfaceLevelDiagnostics(interfaceSymbol, compilation, token)
 		);

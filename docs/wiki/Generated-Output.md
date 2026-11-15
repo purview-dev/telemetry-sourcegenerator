@@ -31,6 +31,12 @@ interface IEntityStoreTelemetry
 generates one partial `EntityStoreTelemetryCore` class split across Activity, Logging, and Metric files, plus a DI extension class and an assembly-level `[GeneratedTelemetryNames]` attribute recording the generated names.
 
 > [!NOTE]
+> Because the class is `partial` across those files, a member that belongs to the class rather than to one target is
+> declared by exactly one of them: the class attributes and the DI extension by the canonical target (Activities, else
+> Logging, else Metrics), the constructor by Logging or Metrics, and a union accessor (`UnwrapUnion_<Type>`) by the
+> canonical target, once per union type. See [Shared members](Multi-Targeting.md#shared-members-and-which-file-declares-them).
+
+> [!NOTE]
 > To inspect the generated output in your own project, enable `EmitCompilerGeneratedFiles` and look under `obj/<Configuration>/<tfm>/generated/Purview.Telemetry.SourceGenerator/Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator/`.
 
 ## Activities (`EntityStoreTelemetryCore.Activity.g.cs`)

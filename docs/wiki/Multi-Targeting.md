@@ -248,6 +248,23 @@ Activity? ApiCall(
 );
 ```
 
+## Shared members and which file declares them
+
+One interface generates one `partial` class spread across a file per target (`*.Activity.g.cs`, `*.Logging.g.cs`,
+`*.Metric.g.cs`). A member that belongs to the class rather than to one target is therefore declared by exactly one of
+them, so the consumer never sees a duplicate definition (`CS0111`):
+
+| Member | Declared by |
+| --- | --- |
+| Class attributes, dependency-injection extension | the canonical target: Activities, else Logging, else Metrics |
+| Constructor | Logging, else Metrics (Activities never owns it) |
+| Union accessor (`UnwrapUnion_<Type>`) | the canonical target, once per union type on the interface |
+
+The union accessor is the same rule with one addition: the list is the *interface's* unions, not the owning target's own
+parameters, because a union consumed by a `[Warning]` log entry is still owned by the Activities file on an interface that
+also registers `[ActivitySource]`, and a target never sees the parameters of a method that targets only another family.
+`[ExcludeTargets]` on the parameter does not move it: the other family's call site still unwraps the value.
+
 ## Benefits
 
 1. **Less code** — one method definition generates multiple telemetry types

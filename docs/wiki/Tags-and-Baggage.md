@@ -123,7 +123,9 @@ Marks a `string` parameter as the status description for an Event that sets an e
 
 A parameter whose type is a union is recorded as its **case value**, never as the union struct. The generator emits
 one private, aggressively inlined accessor per union type and calls it wherever the parameter's value is recorded, so a
-union behaves like the value it holds:
+union behaves like the value it holds. The accessor is declared once per generated class, in the file of the target that
+owns shared members (Activities, else Logging, else Metrics), and every other target's file calls it — see
+[Shared members](Multi-Targeting.md#shared-members-and-which-file-declares-them).
 
 ```csharp
 public record class Ordered(string OrderId);

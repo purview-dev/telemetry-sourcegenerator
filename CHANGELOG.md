@@ -119,6 +119,18 @@ and, for breaking changes, by [Breaking Changes](docs/wiki/Breaking-Changes.md).
 
 ### Fixed
 
+- **A union-typed parameter on an interface that registers more than one target no longer produces `CS0111`.** Each
+  target emitted the `UnwrapUnion_<Type>` accessor into its own hint file, and Activity, Logging and Metric are one
+  `partial` class, so an interface such as `[ActivitySource][Logger]` with a union on a method that both records an
+  event and logs declared the same helper twice — and every call site then failed with `CS0121`, "the call is
+  ambiguous". The accessor is a shared member like the dependency-injection extension and the constructor, so it now
+  follows the same ownership rule: the canonical target (Activities, else Logging, else Metrics) declares it once per
+  union type and the other files call it. With more than one target the list is the *interface's* unions rather than the
+  owning target's own parameters, because a target never sees a method that belongs to another family only, and a
+  parameter excluded from Activities is still unwrapped by the log or metric call site. A single-target interface's
+  output is unchanged, so no consumer needs to change its interfaces, add `[ExcludeTargets]`, or suppress `CS0111`.
+  `[Event]` tags now unwrap a union to its case value as well: they are collected into an `ActivityTagsCollection`
+  rather than set through `SetTag`, and that was the one call site still recording the union struct itself.
 - **Purview.Unions `[GenerateUnion]` unions used as telemetry parameters are unwrapped to their case value.** Union
   recognition only looked for `[System.Runtime.CompilerServices.Union]`, which the unions generator emits into
   *generated* output — output Roslyn never shows another generator — so a `[GenerateUnion]` parameter was recorded as the
