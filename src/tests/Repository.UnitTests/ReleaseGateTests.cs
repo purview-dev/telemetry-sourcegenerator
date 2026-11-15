@@ -63,18 +63,21 @@ public sealed partial class ReleaseGateTests
 				new(
 					"a deps.json library entry",
 					"PackedApp.deps.json",
+					/*lang=json,strict*/
 					"""{"libraries":{"Purview.SourceGeneratorFramework/1.2.2":{"type":"package"}}}"""
 				),
-			() =>
+			static () =>
 				new(
 					"a runtimeconfig.json reference",
 					"PackedApp.runtimeconfig.json",
+					/*lang=json,strict*/
 					"""{"runtimeOptions":{"configProperties":{"Microsoft.CodeAnalysis.Leak":true}}}"""
 				),
 			() =>
 				new(
 					"a blazor.boot.json asset",
 					"wwwroot/_framework/blazor.boot.json",
+					/*lang=json,strict*/
 					"""{"resources":{"assembly":{"Purview.Telemetry.SourceGenerator.wasm":"sha256-x"}}}"""
 				),
 			() =>
@@ -565,10 +568,18 @@ public sealed partial class ReleaseGateTests
 			new(
 				"clean deps.json",
 				"PackedApp.deps.json",
+				/*lang=json,strict*/
 				"""{"libraries":{"Microsoft.Extensions.Logging/10.0.13":{"type":"package"},"Microsoft.Extensions.Telemetry.Abstractions/10.11.0":{"type":"package"}}}"""
 			)
 		);
-		Write(output.Path, new("clean runtimeconfig", "PackedApp.runtimeconfig.json", """{"runtimeOptions":{}}"""));
+		Write(
+			output.Path,
+			new(
+				"clean runtimeconfig",
+				"PackedApp.runtimeconfig.json", /*lang=json,strict*/
+				"""{"runtimeOptions":{}}"""
+			)
+		);
 		Write(
 			output.Path,
 			new(
