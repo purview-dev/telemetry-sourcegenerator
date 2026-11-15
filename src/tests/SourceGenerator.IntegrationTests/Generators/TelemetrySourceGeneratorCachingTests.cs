@@ -128,8 +128,9 @@ public class TelemetrySourceGeneratorCachingTests : IncrementalSourceGeneratorTe
 	/// <c>ForAttributeWithMetadataName</c> tracking names (<c>TelemetrySourceGenerator_*</c>); the
 	/// remaining stages come from the framework's <c>GenerationContextValueProvider</c>
 	/// (<c>GetGenerationContext_*</c>). The generator passes a <see langword="null"/> disable-property
-	/// name, so no <c>GetMSBuildPropertyValue_*</c> stages exist and a property-only invalidation test
-	/// is not applicable.
+	/// name, so no <c>GetMSBuildPropertyValue_*</c> stages exist; a global option is still observed
+	/// through the generation context, which <see cref="Generate_AnalyzerConfigOptionChange_RerunsTheGenerationContext"/>
+	/// proves.
 	/// </summary>
 	static bool IsFrameworkStage(string trackingName) =>
 		trackingName.StartsWith("TelemetrySourceGenerator_", StringComparison.Ordinal)
@@ -173,8 +174,10 @@ public class TelemetrySourceGeneratorCachingTests : IncrementalSourceGeneratorTe
 	[Test]
 	public async Task Generate_UnchangedCompilation_OutputCached(CancellationToken cancellationToken)
 	{
+		// Act
 		var result = await GenerateIncrementalAsync([ActivityInterface, LoggerInterface], Options, cancellationToken);
 
+		// Assert
 		await Assert
 			.That(GetFrameworkReasons(result.Runs[0]).All(static reason => reason == IncrementalStepRunReason.New))
 			.IsTrue()
@@ -193,11 +196,13 @@ public class TelemetrySourceGeneratorCachingTests : IncrementalSourceGeneratorTe
 	[Test]
 	public async Task Generate_UnchangedCompilation_OutputIsStable(CancellationToken cancellationToken)
 	{
+		// Act
 		var result = await GenerateIncrementalAsync([ActivityInterface, LoggerInterface], Options, cancellationToken);
 
 		var first = GetGeneratedSources(result.Runs[0].RunResult);
 		var second = GetGeneratedSources(result.Runs[1].RunResult);
 
+		// Assert
 		await Assert.That(second.Count).IsEqualTo(first.Count);
 		foreach (var source in first)
 			await Assert.That(second[source.Key]).IsEqualTo(source.Value);
@@ -206,14 +211,17 @@ public class TelemetrySourceGeneratorCachingTests : IncrementalSourceGeneratorTe
 	[Test]
 	public async Task Generate_UnrelatedChange_OutputStaysCached(CancellationToken cancellationToken)
 	{
+		// Arrange
 		var inputs = new[]
 		{
 			new IncrementalRunInput([ActivityInterface, LoggerInterface], []),
 			new IncrementalRunInput([ActivityInterface, LoggerInterface, UnrelatedType], []),
 		};
+		// Act
 		var result = await GenerateIncrementalAsync(inputs, Options, cancellationToken);
 
 		var reasons = GetFrameworkReasons(result.Runs[1]);
+		// Assert
 		await Assert.That(reasons).IsNotEmpty();
 		await Assert
 			.That(
@@ -228,16 +236,19 @@ public class TelemetrySourceGeneratorCachingTests : IncrementalSourceGeneratorTe
 	[Test]
 	public async Task Generate_UnrelatedChange_AllOutputUnchanged(CancellationToken cancellationToken)
 	{
+		// Arrange
 		var inputs = new[]
 		{
 			new IncrementalRunInput([ActivityInterface, LoggerInterface], []),
 			new IncrementalRunInput([ActivityInterface, LoggerInterface, UnrelatedType], []),
 		};
+		// Act
 		var result = await GenerateIncrementalAsync(inputs, Options, cancellationToken);
 
 		var first = GetGeneratedSources(result.Runs[0].RunResult);
 		var second = GetGeneratedSources(result.Runs[1].RunResult);
 
+		// Assert
 		await Assert.That(second.Count).IsEqualTo(first.Count);
 		foreach (var source in first)
 			await Assert.That(second[source.Key]).IsEqualTo(source.Value);
@@ -246,11 +257,14 @@ public class TelemetrySourceGeneratorCachingTests : IncrementalSourceGeneratorTe
 	[Test]
 	public async Task Generate_ActivityEdit_OutputReRuns(CancellationToken cancellationToken)
 	{
+		// Arrange
 		var edited = ActivityInterface.ReplaceOrdinal("Activity([Tag]", "Activity2([Tag]");
 		var inputs = new[] { new IncrementalRunInput([ActivityInterface], []), new IncrementalRunInput([edited], []) };
+		// Act
 		var result = await GenerateIncrementalAsync(inputs, Options, cancellationToken);
 
 		var reasons = GetStageReasons(result.Runs[1], "TelemetrySourceGenerator_Activities");
+		// Assert
 		await Assert
 			.That(reasons.Any(static reason => reason == IncrementalStepRunReason.Modified))
 			.IsTrue()
@@ -260,15 +274,18 @@ public class TelemetrySourceGeneratorCachingTests : IncrementalSourceGeneratorTe
 	[Test]
 	public async Task Generate_LoggerEdit_OnlyLoggerOutputChanges(CancellationToken cancellationToken)
 	{
+		// Arrange
 		var editedLogger = LoggerInterface.ReplaceOrdinal("void Log(", "void Log2(");
 		var inputs = new[]
 		{
 			new IncrementalRunInput([ActivityInterface, LoggerInterface], []),
 			new IncrementalRunInput([ActivityInterface, editedLogger], []),
 		};
+		// Act
 		var result = await GenerateIncrementalAsync(inputs, Options, cancellationToken);
 
 		var loggerReasons = GetStageReasons(result.Runs[1], "TelemetrySourceGenerator_Logging");
+		// Assert
 		await Assert
 			.That(loggerReasons.Any(static reason => reason == IncrementalStepRunReason.Modified))
 			.IsTrue()
@@ -311,6 +328,111 @@ public class TelemetrySourceGeneratorCachingTests : IncrementalSourceGeneratorTe
 	}
 
 	/// <summary>
+	/// Deleting an interface must delete its generated source. A pipeline that keys its outputs off a
+	/// <c>Collect()</c>ed aggregate can keep emitting the removed target, and nothing else in the suite
+	/// would notice: the remaining output is still correct.
+	/// </summary>
+	[Test]
+	public async Task Generate_InterfaceDeleted_ItsOutputIsRemoved(CancellationToken cancellationToken)
+	{
+		// Arrange
+		var inputs = new[]
+		{
+			new IncrementalRunInput([ActivityInterface, LoggerInterface], []),
+			new IncrementalRunInput([LoggerInterface], []),
+		};
+		// Act
+		var result = await GenerateIncrementalAsync(inputs, Options, cancellationToken);
+
+		var first = GetGeneratedSources(result.Runs[0].RunResult);
+		var second = GetGeneratedSources(result.Runs[1].RunResult);
+
+		// Assert
+		await Assert
+			.That(first.Keys.Any(static key => key.EndsWith(".Activity.g.cs", StringComparison.Ordinal)))
+			.IsTrue()
+			.Because("the first run generates the activity target");
+		await Assert
+			.That(second.Keys.Any(static key => key.EndsWith(".Activity.g.cs", StringComparison.Ordinal)))
+			.IsFalse()
+			.Because("deleting the interface must remove its generated source rather than leave it behind");
+		await Assert
+			.That(second.Keys.Any(static key => key.EndsWith(".Logging.g.cs", StringComparison.Ordinal)))
+			.IsTrue()
+			.Because("the interface that was not deleted must still generate");
+	}
+
+	/// <summary>
+	/// A rename is the delete and the add in one edit. The hint name is derived from the interface, so the
+	/// old one must go and a new one must appear — a stale hint name is a duplicate-type error the
+	/// consumer sees, not a caching detail. Asserted on the sets rather than on the naming convention, so
+	/// the test does not repeat the class-name rules the emitters own.
+	/// </summary>
+	[Test]
+	public async Task Generate_InterfaceRenamed_ReplacesItsOutput(CancellationToken cancellationToken)
+	{
+		// Arrange
+		var renamed = ActivityInterface.ReplaceOrdinal("ITestActivities", "IRenamedActivities");
+		var inputs = new[] { new IncrementalRunInput([ActivityInterface], []), new IncrementalRunInput([renamed], []) };
+		// Act
+		var result = await GenerateIncrementalAsync(inputs, Options, cancellationToken);
+
+		var first = GetGeneratedSources(result.Runs[0].RunResult).Keys.ToArray();
+		var second = GetGeneratedSources(result.Runs[1].RunResult).Keys.ToArray();
+
+		// Assert
+		await Assert
+			.That(first.Any(static key => key.EndsWith(".Activity.g.cs", StringComparison.Ordinal)))
+			.IsTrue()
+			.Because("the first run generates the activity target");
+		await Assert
+			.That(second.Any(static key => key.EndsWith(".Activity.g.cs", StringComparison.Ordinal)))
+			.IsTrue()
+			.Because("the renamed interface must still generate its activity target");
+		await Assert
+			.That(first.Except(second, StringComparer.Ordinal).Any())
+			.IsTrue()
+			.Because("the hint name of the old interface must not survive the rename");
+		await Assert
+			.That(second.Except(first, StringComparer.Ordinal).Any())
+			.IsTrue()
+			.Because("the renamed interface must generate under a new hint name");
+	}
+
+	/// <summary>
+	/// A global option (an MSBuild property read through the analyzer-config provider) must be observed on
+	/// every run, not captured once when the pipeline was built. The generation context resolves
+	/// <c>LangVersion</c> from it, so changing the property has to re-run that stage rather than resolve it
+	/// from a cached value.
+	/// </summary>
+	[Test]
+	public async Task Generate_AnalyzerConfigOptionChange_RerunsTheGenerationContext(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange
+		var inputs = new[]
+		{
+			new IncrementalRunInput([ActivityInterface], []),
+			new IncrementalRunInput([ActivityInterface], [("build_property.LangVersion", "12.0")]),
+		};
+		// Act
+		var result = await GenerateIncrementalAsync(inputs, Options, cancellationToken);
+
+		var reasons = GetStageReasons(result.Runs[1], "GetGenerationContext_TelemetryCapabilities");
+		// Assert
+		await Assert.That(reasons).IsNotEmpty().Because("the generation context stage must run");
+		await Assert
+			.That(
+				reasons.Any(static reason =>
+					reason is IncrementalStepRunReason.Modified or IncrementalStepRunReason.New
+				)
+			)
+			.IsTrue()
+			.Because("a changed global option must re-resolve the generation context, not leave it cached");
+	}
+
+	/// <summary>
 	/// The union accessor plan is computed from the interface rather than from the owning target's own method records.
 	/// That must stay a value-equatable model: a second run over unchanged sources re-runs nothing.
 	/// </summary>
@@ -319,12 +441,14 @@ public class TelemetrySourceGeneratorCachingTests : IncrementalSourceGeneratorTe
 		CancellationToken cancellationToken
 	)
 	{
+		// Act
 		var result = await GenerateIncrementalAsync(
 			[UnionSource, MultiTargetUnionInterface],
 			Options,
 			cancellationToken
 		);
 
+		// Assert
 		await Assert
 			.That(GetFrameworkReasons(result.Runs[0]).All(static reason => reason == IncrementalStepRunReason.New))
 			.IsTrue()
@@ -349,14 +473,17 @@ public class TelemetrySourceGeneratorCachingTests : IncrementalSourceGeneratorTe
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		var inputs = new[]
 		{
 			new IncrementalRunInput([UnionSource, MultiTargetUnionInterface], []),
 			new IncrementalRunInput([UnionSource, MultiTargetUnionInterface, UnrelatedType], []),
 		};
+		// Act
 		var result = await GenerateIncrementalAsync(inputs, Options, cancellationToken);
 
 		var reasons = GetFrameworkReasons(result.Runs[1]);
+		// Assert
 		await Assert.That(reasons).IsNotEmpty();
 		await Assert
 			.That(

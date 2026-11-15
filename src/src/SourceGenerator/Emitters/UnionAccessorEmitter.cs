@@ -61,8 +61,11 @@ static class UnionAccessorEmitter
 
 					writer
 						.NewLine()
-						.Write(union.UnderlyingUnionType.RenderFullNameForNullable(useNullable))
-						.Write(" unionValue = value.GetValueOrDefault();")
+						.Assignment(
+							union.UnderlyingUnionType.RenderFullNameForNullable(useNullable),
+							"unionValue",
+							"value.GetValueOrDefault()"
+						)
 						.NewLine();
 
 					value = "unionValue";
