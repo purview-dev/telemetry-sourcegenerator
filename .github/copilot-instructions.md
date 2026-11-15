@@ -7,7 +7,7 @@ root. Read it first and treat it as the source of truth for:
 - Project structure and layout
 - Build and validation workflow
 - Conventions (conventional commits, csharpier, `.slnx`, SDK behaviour)
-- Installed source-generator, testing and SDK skills (`.agents/skills/`, committed)
+- Installed source-generator, testing and SDK skills (`.agents/skills/`, gitignored; restored with `just skills-install` from the committed `skills-lock.json`)
 - Benchmarking and performance documentation rules
 - Release process
 

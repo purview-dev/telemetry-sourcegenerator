@@ -134,7 +134,7 @@ benchmarks/
 └── Purview.Telemetry.Benchmarks/           # BenchmarkDotNet project (net48/net10.0/net11.0)
 
 .build/                                     # TS scripts (build-pack.ts, update-version.ts) and just/ modules
-.agents/skills/                             # Installed + developer skills, committed (see "Installed skills")
+.agents/skills/                             # Installed skills (gitignored; see "Installed skills")
 skills-lock.json                            # The skills CLI lockfile for .agents/skills/, committed
 skills/                                     # Authored skills shipped by this package (see "Authoring skills")
 .config/                                    # dotnet-tools.json, lefthook.yml
@@ -272,9 +272,11 @@ table of gates is in [`docs/wiki/contributing/Release-Flow.md`](docs/wiki/contri
 
 Specialist source-generator and SDK guidance — `CodeWriter` emission, incremental pipeline design,
 test runners and `CodeQuery`, `Purview.BuildSdk` configuration — is published by the repositories
-that own it, and installed here by the skills CLI. The installed skills are **committed**:
-`.agents/skills/**` and the CLI's `skills-lock.json` (source, skill path and content hash of every
-entry) are both in source, so a clone has them without running anything.
+that own it, and installed here by the skills CLI. Only the CLI's `skills-lock.json` (source, skill
+path and content hash of every entry) is committed: `.agents/skills/` is a local install, gitignored so
+a skill this repository installs but does not publish can never be found through
+`skills add purview-dev/telemetry-sourcegenerator`. A fresh clone restores the set with
+`just skills-install`.
 
 | Skill | Source | Load before |
 | --- | --- | --- |
@@ -290,15 +292,14 @@ entry) are both in source, so a clone has them without running anything.
 
 This repository's own skills in `skills/` are authored for **consumers** of its packages, not for use while working on this repository. They are never installed into this repository's `.agents/skills/`; `InstalledSkillTests` enforces this.
 
-`.agents/skills/` also holds the **developer skills**: skills written here for people working on the
-generator, which are not consumer guidance and are never published. They are committed in place (the
-skills CLI neither writes them nor records them in the lockfile), and `InstalledSkillTests` allows a
-folder there only when it is declared in that class's `DeveloperSkills` list, which also asserts the
-skill cannot drift into `skills/`.
+`skills/` also holds the **developer skills**: skills written here for people working on the
+generator, which are not consumer guidance. They are authored like any other skill — the skills CLI
+neither installs them nor records them in the lockfile — and `InstalledSkillTests` declares them in
+`DeveloperSkills`, which asserts each one ships from `skills/` and reaches no lockfile.
 
 | Developer skill | Answers |
 | --- | --- |
-| `.agents/skills/purview-telemetry-benchmarks/` | running the BenchmarkDotNet suite for .NET 10 / .NET 11 / .NET Framework 4.8, reading a report, refreshing `docs/wiki/reference/Performance.md` and `README.md`, writing the analysis, adding a family |
+| `skills/purview-telemetry-benchmarks/` | running the BenchmarkDotNet suite for .NET 10 / .NET 11 / .NET Framework 4.8, reading a report, refreshing `docs/wiki/reference/Performance.md` and `README.md`, writing the analysis, adding a family |
 
 Skills are installed into the universal `.agents/skills/` location **only**. Never install copies
 into `.claude/` or any other per-agent folder. Pass `-a universal`, which writes `.agents/skills/`
