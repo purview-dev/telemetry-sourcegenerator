@@ -4,7 +4,7 @@
 		"rollForward": "latestMajor"
 	},
 	"msbuild-sdks": {
-		"Purview.BuildSdk": "2.0.0",
+		"Purview.BuildSdk": "2.1.0",
 		"Aspire.AppHost.Sdk": "13.6.5"
 	},
 	"test": {
