@@ -14,6 +14,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 	[Test]
 	public async Task ComputeRefactorings_GivenClassWithoutMetrics_ReturnsNoActions(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -25,8 +26,10 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(actions).IsEmpty();
 	}
 
@@ -35,6 +38,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -48,8 +52,10 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(actions).IsEmpty();
 	}
 
@@ -60,6 +66,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 	[Test]
 	public async Task ComputeRefactorings_GivenClassWithCounter_ReturnsAction(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -81,8 +88,10 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(actions).IsNotEmpty();
 		await Assert.That(actions[0].Title).IsEqualTo("Convert Metrics to IWeatherServiceMetrics");
 	}
@@ -96,6 +105,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -117,8 +127,10 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Meter]");
 		await Assert.That(result).Contains("IRequestServiceMetrics");
@@ -131,6 +143,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -152,8 +165,10 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Meter]");
 		await Assert.That(result).Contains("IBatchServiceMetrics");
@@ -166,6 +181,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -187,8 +203,10 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Histogram]");
 		await Assert.That(result).Contains("ITimingServiceMetrics");
@@ -200,6 +218,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -219,8 +238,10 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[UpDownCounter]");
 		await Assert.That(result).Contains("IQueueServiceMetrics");
@@ -231,6 +252,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -252,8 +274,10 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("IOrderServiceMetrics _orderCounter");
 		await Assert.That(result).DoesNotContain("Counter<int> _orderCounter");

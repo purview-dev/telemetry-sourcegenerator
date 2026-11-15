@@ -16,6 +16,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderSnapshotTes
 	[Test]
 	public async Task Verify_AllThreeTelemetryTypes(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System;
 			using System.Diagnostics;
@@ -51,6 +52,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderSnapshotTes
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
@@ -61,6 +63,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderSnapshotTes
 	[Test]
 	public async Task Verify_LoggerOnly(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -79,12 +82,14 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderSnapshotTes
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_ActivitySourceOnly(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -101,12 +106,14 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderSnapshotTes
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_MetricsOnly(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -132,6 +139,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderSnapshotTes
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
@@ -142,6 +150,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderSnapshotTes
 	[Test]
 	public async Task Verify_LoggerAndMetrics(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System;
 			using System.Diagnostics.Metrics;
@@ -177,12 +186,14 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderSnapshotTes
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_LoggerAndActivitySource(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System;
 			using System.Diagnostics;
@@ -210,12 +221,14 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderSnapshotTes
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_ActivitySourceAndMetrics(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 			using System.Diagnostics.Metrics;
@@ -249,6 +262,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderSnapshotTes
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
@@ -259,6 +273,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderSnapshotTes
 	[Test]
 	public async Task Verify_ComplexService_PrimaryConstructor(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System;
 			using System.Diagnostics;
@@ -301,6 +316,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderSnapshotTes
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
@@ -311,6 +327,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderSnapshotTes
 	[Test]
 	public async Task Verify_DocumentScope_TwoClassesInSameFile(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 			using System.Diagnostics.Metrics;
@@ -357,6 +374,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderSnapshotTes
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(
 			code,
 			Provider,

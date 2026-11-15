@@ -29,7 +29,7 @@ partial class TelemetrySourceGeneratorLoggingGen2Tests
 	[Test]
 	public async Task Generate_GivenTagProvider_EmitsProviderCallIntoLogState(CancellationToken cancellationToken)
 	{
-		// Arrange / Act
+		// Act
 		using var generationResult = await GenerateAsync(TagProviderLoggerSource, cancellationToken: cancellationToken);
 
 		// Assert

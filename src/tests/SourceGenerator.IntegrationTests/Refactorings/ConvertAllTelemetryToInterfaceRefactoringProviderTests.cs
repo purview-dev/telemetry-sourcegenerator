@@ -13,6 +13,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			namespace Testing;
 
@@ -22,8 +23,10 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 			}
 			""";
 
+		// Act
 		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(actions).IsEmpty();
 	}
 
@@ -34,6 +37,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 	[Test]
 	public async Task ComputeRefactorings_GivenClassWithILogger_ReturnsAction(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -52,8 +56,10 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 			}
 			""";
 
+		// Act
 		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(actions).IsNotEmpty();
 		await Assert.That(actions[0].Title).IsEqualTo("Convert all telemetry to IWeatherServiceTelemetry");
 	}
@@ -63,6 +69,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -79,8 +86,10 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 			}
 			""";
 
+		// Act
 		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(actions).IsNotEmpty();
 		await Assert.That(actions[0].Title).IsEqualTo("Convert all telemetry to IWeatherServiceTelemetry");
 	}
@@ -88,6 +97,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 	[Test]
 	public async Task ComputeRefactorings_GivenClassWithMetrics_ReturnsAction(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -107,8 +117,10 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 			}
 			""";
 
+		// Act
 		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(actions).IsNotEmpty();
 		await Assert.That(actions[0].Title).IsEqualTo("Convert all telemetry to IWeatherServiceTelemetry");
 	}
@@ -122,6 +134,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 			using System.Diagnostics.Metrics;
@@ -150,8 +163,10 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[ActivitySource]");
 		await Assert.That(result).Contains("[Logger]");
@@ -165,6 +180,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -183,8 +199,10 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("IReportServiceTelemetry");
@@ -197,6 +215,7 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -213,8 +232,10 @@ public sealed class ConvertAllTelemetryToInterfaceRefactoringProviderTests : Cod
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[ActivitySource]");
 		await Assert.That(result).Contains("ITracingServiceTelemetry");
