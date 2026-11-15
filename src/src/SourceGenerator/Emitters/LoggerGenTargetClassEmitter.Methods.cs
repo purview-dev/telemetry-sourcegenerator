@@ -700,12 +700,10 @@ partial class LoggerGenTargetClassEmitter
 		CodeWriter snippet = new(GenerationSettings.Create<TelemetrySourceGenerator>(), throwOnUnclosedScopes: false);
 		var tagVariableName = FindUniqueName("tag", existingParamNames);
 
-		void EmitPairs(CodeWriter target)
-		{
+		void EmitPairs(CodeWriter target) =>
 			target.Foreach(
 				$"var {tagVariableName} in {tagProvider.ProviderTypeName}.{tagProvider.MethodName}({parameter.RenderValueExpression()})",
 				loopBody =>
-				{
 					// LoggerMessageState.AddTag takes (string, object?), so a string-valued pair boxes; nothing to do.
 					loopBody
 						.Write(stateVarName)
@@ -717,10 +715,8 @@ partial class LoggerGenTargetClassEmitter
 						)
 						.Write(", ")
 						.Write(tagVariableName)
-						.Line(".Value);");
-				}
+						.Line(".Value);")
 			);
-		}
 
 		if (parameter.ParameterType.IsNullable)
 			snippet.IfBlock(parameter.Name + " != null", EmitPairs);

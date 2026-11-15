@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Purview.SourceGeneratorFramework;
 using Purview.Telemetry.SourceGenerator.Records;
 
 namespace Purview.Telemetry.SourceGenerator.Helpers;
@@ -32,11 +31,11 @@ static class TypeParameterHelpers
 		if (typeParameters.IsDefaultOrEmpty)
 			return default;
 
-		List<TypeParameterTarget> targets = new(typeParameters.Length);
+		List<TypeParameterTarget> targets = [with(typeParameters.Length)];
 		foreach (var typeParameter in typeParameters)
 			targets.Add(From(typeParameter));
 
-		return new(targets.ToImmutableArray());
+		return new([.. targets]);
 	}
 
 	static TypeParameterTarget From(ITypeParameterSymbol typeParameter)

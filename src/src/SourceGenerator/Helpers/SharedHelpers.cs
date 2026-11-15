@@ -126,6 +126,7 @@ static partial class SharedHelpers
 		if (version is { Major: 0, Minor: 0, Build: <= 0, Revision: <= 0 })
 			return null;
 
+		// The assembly identity's version is a System.Version, which has no concept of a pre-release tag.
 		return version.ToString();
 	}
 

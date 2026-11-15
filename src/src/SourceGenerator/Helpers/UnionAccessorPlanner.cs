@@ -48,6 +48,7 @@ static class UnionAccessorPlanner
 		if (generationType == target)
 			return Distinct(ownUnions);
 
+		// The target is not the canonical owner, so it does not emit any accessors.
 		return Distinct(Collect(interfaceSymbol, token));
 	}
 
