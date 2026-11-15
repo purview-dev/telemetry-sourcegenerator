@@ -10,28 +10,19 @@ namespace Purview.Telemetry.SourceGenerator.Emitters;
 /// <remarks>
 /// One accessor is emitted per distinct union type in the class, so the read logic exists once no matter how
 /// many methods and targets use the union, and the emitted method is small enough for the JIT to inline into
-/// every call site. Nothing here reflects over the union: every case is a compile-time <c>TryGetValue</c>
+/// every call site. The class is one <c>partial</c> type across the target files, so the list is not derived here:
+/// <see cref="UnionAccessorPlanner"/> decides which target owns the declarations and hands only that target a
+/// non-empty list. Nothing here reflects over the union: every case is a compile-time <c>TryGetValue</c>
 /// overload or the union's own <c>Value</c> property, so the generated code stays trim- and AOT-safe.
 /// </remarks>
 static class UnionAccessorEmitter
 {
-	public static void EmitAccessors(CodeWriter writer, IEnumerable<UnionTargetRecord?> unions)
+	public static void EmitAccessors(CodeWriter writer, EquatableArray<UnionTargetRecord> unions)
 	{
-		List<UnionTargetRecord> distinct = [];
-		HashSet<string> emitted = [with(StringComparer.Ordinal)];
-
-		foreach (var union in unions)
-		{
-			if (union is null || !emitted.Add(union.AccessorName))
-				continue;
-
-			distinct.Add(union);
-		}
-
-		if (distinct.Count == 0)
+		if (unions.IsEmpty)
 			return;
 
-		foreach (var union in distinct)
+		foreach (var union in unions)
 			EmitAccessor(writer, union);
 	}
 
@@ -70,8 +61,11 @@ static class UnionAccessorEmitter
 
 					writer
 						.NewLine()
-						.Write(union.UnderlyingUnionType.RenderFullNameForNullable(useNullable))
-						.Write(" unionValue = value.GetValueOrDefault();")
+						.Assignment(
+							union.UnderlyingUnionType.RenderFullNameForNullable(useNullable),
+							"unionValue",
+							"value.GetValueOrDefault()"
+						)
 						.NewLine();
 
 					value = "unionValue";

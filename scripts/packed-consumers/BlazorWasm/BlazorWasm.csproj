@@ -25,7 +25,7 @@
 
 	<ItemGroup>
 		<Compile
-			Include="../Shared/IOrderTelemetry.cs;../Shared/OrderWorkflow.cs"
+			Include="../Shared/IOrderTelemetry.cs;../Shared/OrderWorkflow.cs;../Shared/OrderRejection.cs"
 			Link="Shared/%(Filename)%(Extension)"
 		/>
 		<ProjectReference Include="../Library/Library.csproj" />

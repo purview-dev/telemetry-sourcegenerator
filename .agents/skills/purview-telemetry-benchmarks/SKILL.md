@@ -2,7 +2,7 @@
 name: purview-telemetry-benchmarks
 description: >-
   Maintainer workflow for this repository's BenchmarkDotNet suite - running the .NET 10, .NET 11 and
-  .NET Framework 4.8 jobs, reading a -report-github.md, refreshing docs/wiki/Performance.md and
+  .NET Framework 4.8 jobs, reading a -report-github.md, refreshing docs/wiki/reference/Performance.md and
   README.md from a fresh run, writing the analysis consumers read, and adding a benchmark family.
   Use when asked to run, update, interpret, or extend the benchmark results. This is a developer
   skill for this repository; it is never published to consumers.
@@ -52,7 +52,7 @@ Load this skill before you quote, edit, or add a performance number.
 
 The first six measure code a consumer runs. `GeneratorModelBenchmarks` measures the generator's own
 data model and is contributor-facing: it backs the recorded decision in
-`docs/wiki/Platform-Support.md` to keep the `closed record` hierarchies. Do not promote it into the
+`docs/wiki/reference/Platform-Support.md` to keep the `closed record` hierarchies. Do not promote it into the
 README's consumer performance section.
 
 Exact table shapes, section headings and column headers for each family live in
@@ -144,7 +144,7 @@ Column semantics:
 
 Do these in order, from the same run. Nothing below is optional because "it looked the same".
 
-1. **`docs/wiki/Performance.md`** - the full cross-runtime page.
+1. **`docs/wiki/reference/Performance.md`** - the full cross-runtime page.
    - `## Environment`: replace the fenced block with the fresh report header (BenchmarkDotNet, OS, CPU,
      SDK, and one line per measured runtime).
    - One section per family, in the existing order, each with a row per runtime and per parameter
@@ -167,7 +167,7 @@ Do these in order, from the same run. Nothing below is optional because "it look
 3. **`benchmarks/README.md`** - only when the suite itself changed: the family table, the "runtimes and
    jobs" table, the per-family detail sections and the project-structure tree all list the classes and
    the monikers.
-4. **`docs/wiki/Platform-Support.md`** - when `GeneratorModelBenchmarks` numbers back (or contradict)
+4. **`docs/wiki/reference/Platform-Support.md`** - when `GeneratorModelBenchmarks` numbers back (or contradict)
    the recorded decision to keep the `closed record` models, update that row's reasoning. It currently
    says the tables predate the benchmark; once they do not, say so.
 5. **`AGENTS.md`** - the "Benchmarking and performance documentation" section carries the commands, the
@@ -238,7 +238,7 @@ the `HasListener = false` row as the production cost, and describing a family th
      inlined into the benchmark loop and an interface call is not, so a generated-through-interface vs
      hand-written-through-concrete pair measures dispatch and reports it as generator overhead — a flat per-call
      delta that ignores the work the method does.
-5. Register it: `benchmarks/README.md` (family table + project tree), `docs/wiki/Performance.md` (new
+5. Register it: `benchmarks/README.md` (family table + project tree), `docs/wiki/reference/Performance.md` (new
    section with one row per runtime), and `README.md` only if it is a consumer hot path.
 6. Validate as described below, then run the full suite - a new family cannot be documented from a
    filtered run that never executed it on all three legs.
@@ -254,13 +254,13 @@ characteristic and fails BenchmarkDotNet's `GetSupportedBenchmarks` validation i
 - It exists to answer one question: is the per-method allocation and virtual dispatch of the record
   hierarchy measurable against a pass that also parses symbols, builds templates and writes source? A
   delta of tens of nanoseconds per method against a generation pass is not a throughput story.
-- Report it in `docs/wiki/Performance.md` only, with a row per runtime and per `MethodCount`. A
+- Report it in `docs/wiki/reference/Performance.md` only, with a row per runtime and per `MethodCount`. A
   `.NET Framework` result that is *slower* for the struct union is a real outcome, not a mistake - it is
   part of why the records stayed.
 
 ## Validate before committing
 
-- `just lint` - CSharpier, no writes. `just lint-fix` to apply. Any C# you touched in `benchmarks/` is
+- `just lint-check` - CSharpier, no writes. `just lint-fix` to apply. Any C# you touched in `benchmarks/` is
   formatted by the same check.
 - `dotnet build ./benchmarks/Purview.Telemetry.Benchmarks/Purview.Telemetry.Benchmarks.csproj --configuration Release`
   - a compile check of a new or edited family that costs seconds instead of a benchmark run. Note that

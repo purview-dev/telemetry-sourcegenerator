@@ -180,7 +180,7 @@ partial class ActivitySourceTargetClassEmitter
 						.Write(".Add(")
 						.Write(tagParam.GeneratedName.Wrap())
 						.Write(", ")
-						.Write(tagParam.ParameterName)
+						.Write(tagParam.RenderValueExpression())
 						.Line(");");
 				}
 			}

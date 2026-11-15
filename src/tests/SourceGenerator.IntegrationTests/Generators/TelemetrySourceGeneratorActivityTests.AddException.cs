@@ -25,7 +25,7 @@ partial class TelemetrySourceGeneratorActivityTests
 		CancellationToken cancellationToken
 	)
 	{
-		// Arrange / Act
+		// Act
 		using var generationResult = await GenerateAsync(ActivitySourceWithEvent, cancellationToken: cancellationToken);
 
 		// Assert
@@ -49,7 +49,7 @@ partial class TelemetrySourceGeneratorActivityTests
 		CancellationToken cancellationToken
 	)
 	{
-		// Arrange / Act
+		// Act
 		using var generationResult = await GenerateAsync(ActivitySourceWithEvent, cancellationToken: cancellationToken);
 
 		// Assert: AddException writes exception.type/message/stacktrace itself. Emitting them too would either

@@ -1,0 +1,272 @@
+# Tags, Baggage, and Parameter Attributes
+
+The parameter-level attributes that control whether a value becomes a tag, a baggage entry, or a log property.
+
+> [!IMPORTANT]
+> All attributes are now in the unified `Purview.Telemetry` namespace.
+
+Parameters on telemetry methods can be decorated to control how they are emitted. This page covers the parameter-level attributes.
+
+## `[Tag]`
+
+Used within [Activity](Activities.md) and [Metrics](Metrics.md) generation to add a parameter as a tag. Tag names follow the configured `NamingConvention`:
+
+- **OpenTelemetry** (default): `snake_case` for compound words (e.g. `"entity_id"`)
+- **Legacy**: lowercased, smashed (e.g. `"entityid"`)
+
+| Property | Type | Default | Description |
+| --- | --- | --- | --- |
+| `Name` | `string?` | `null` | Explicitly sets the tag name. When `null`, the parameter name is used (transformed according to the naming convention). |
+| `SkipOnNullOrEmpty` | `bool` | `false` | When `true`, the tag is not added if the parameter value is `null` or default. |
+
+### Examples
+
+```csharp
+using Purview.Telemetry;
+
+[ActivitySource("OrderService")]
+interface IOrderTelemetry
+{
+    [Activity]
+    Activity? ProcessingOrder(
+        // Auto-named tag (becomes "order_id" in OpenTelemetry mode)
+        [Tag]int orderId,
+
+        // Explicitly named tag (explicit names are not transformed)
+        [Tag(Name = "customer.name")]string customerName,
+
+        // Skip if null
+        [Tag(SkipOnNullOrEmpty = true)]string? notes
+    );
+}
+```
+
+**OpenTelemetry convention (default):**
+
+```csharp
+[Tag]int orderId       // Generated: "order_id"
+[Tag]string userName   // Generated: "user_name"
+[Tag(Name = "my.custom.tag")]int value  // Generated: "my.custom.tag" (not transformed)
+```
+
+**Legacy convention:**
+
+```csharp
+[Tag]int orderId       // Generated: "orderid"
+[Tag]string userName   // Generated: "username"
+```
+
+To change the convention, see [Naming conventions](../Generation.md#naming-conventions).
+
+### Best practices
+
+1. **Use explicit names for cross-service tags** to prevent breakage if parameter names change:
+
+   ```csharp
+   [Tag(Name = "trace.id")]string traceId
+   ```
+
+2. **Use `SkipOnNullOrEmpty` for optional tags** to avoid cluttering telemetry with null values:
+
+   ```csharp
+   [Tag(SkipOnNullOrEmpty = true)]string? optionalContext
+   ```
+
+3. **Follow OpenTelemetry semantic conventions** for standard names such as `http.method`, `http.status_code`, `service.name`.
+
+## `[Baggage]`
+
+Marks a parameter as baggage on an Activity or ActivityEvent. Baggage propagates across service boundaries, unlike tags.
+
+| Property | Type | Default | Description |
+| --- | --- | --- | --- |
+| `Name` | `string?` | `null` | Explicitly sets the baggage name. When `null`, the parameter name is used. |
+| `SkipOnNullOrEmpty` | `bool` | `false` | When `true`, the parameter is skipped when `null` or default. |
+
+> [!NOTE]
+> `[Baggage]` parameters should be `string`; `TSG3000` warns if a non-string is used (`ToString()` is called).
+
+## `[ExcludeTargets]`
+
+Excludes a parameter from specific telemetry targets. See [Multi-Targeting](Multi-Targeting.md) for the `Targets` enum values (`None`, `Activities`, `Logging`, `Metrics`, `All`).
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `ExcludedTargets` | `Targets` | The targets to exclude the parameter from. Available on construction. |
+
+```csharp
+[ExcludeTargets(Targets.Metrics)]
+string verboseMessage;  // excluded from metrics only
+```
+
+The parameter stays part of the generated method signature, but it is not applied to the excluded target: for the Activities target that means it is not set as a tag, not added as baggage, and not used as a reserved parameter such as `tags`, `parentContext`, `startTime`, or `[Escape]`. Excluding it from Activities also stops the Activities-specific diagnostics (`TSG3000`, `TSG3003`–`TSG3011`, `TSG3016`, `TSG3017`, `TSG3021`) for that parameter.
+
+## `[ExpandEnumerable]`
+
+Applied to an array or `IEnumerable` parameter on a log method, it logs the individual elements. See [Logging Generation v2](Logging-Generation-v2.md#expandenumerable).
+
+| Property | Type | Default | Description |
+| --- | --- | --- | --- |
+| `MaximumValueCount` | `int` | `5` | The maximum number of elements to output from the enumeration/array. |
+
+## `[InstrumentMeasurement]`
+
+Marks the parameter used as the instrument measurement value on a metrics method. See [Metrics](Metrics.md#the-measurement-value).
+
+## `[Escape]`
+
+Marks a `bool` parameter as the escape value for an exception event on an Event method. See [Activities](Activities.md#escape).
+
+## `[StatusDescription]`
+
+Marks a `string` parameter as the status description for an Event that sets an error status code. See [Activities](Activities.md#statusdescription).
+
+## Union types
+
+A parameter whose type is a union is recorded as its **case value**, never as the union struct. The generator emits
+one private, aggressively inlined accessor per union type and calls it wherever the parameter's value is recorded, so a
+union behaves like the value it holds. The accessor is declared once per generated class, in the file of the target that
+owns shared members (Activities, else Logging, else Metrics), and every other target's file calls it — see
+[Shared members](Multi-Targeting.md#shared-members-and-which-file-declares-them).
+
+```csharp
+public record class Ordered(string OrderId);
+public record class Rejected(string Reason);
+
+public union OrderStatus(Ordered, Rejected);
+
+[ActivitySource("OrderService")]
+interface IOrderTelemetry
+{
+    [Activity]
+    void Submit([Tag] OrderStatus status);
+}
+```
+
+Generated:
+
+```csharp
+static object? UnwrapUnion_OrderStatus(OrderStatus value) => value.Value;
+
+// ...
+activity.SetTag("status", UnwrapUnion_OrderStatus(status));
+```
+
+Three kinds of union are recognised, each by metadata name and namespace — the generator references no union package:
+
+- a **C# 15 `union` declaration**;
+- a **hand-written type carrying `[System.Runtime.CompilerServices.Union]`**;
+- a **[Purview.Unions `[GenerateUnion]`](#purviewunions-generateunion-types)** target.
+
+### Non-boxing access pattern
+
+A union declared with the `union` keyword always stores `object?`, so reading it boxes nothing new — the
+case is already boxed. A hand-written union can do better by declaring the **non-boxing access pattern**:
+a `bool HasValue` property plus a `TryGetValue(out T)`, `bool`-returning overload per case type. When it
+does, the generated accessor calls those instead of `Value`, so the union struct itself is never boxed:
+
+```csharp
+[System.Runtime.CompilerServices.Union]
+public struct OrderStatus
+{
+    public bool HasValue { get; }
+    public bool TryGetValue(out Ordered value);
+    public bool TryGetValue(out Rejected value);
+    public object? Value { get; }
+}
+```
+
+```csharp
+static object? UnwrapUnion_OrderStatus(OrderStatus value)
+{
+    if (value.HasValue)
+    {
+        if (value.TryGetValue(out global::Ordered caseValue0)) return caseValue0;
+        if (value.TryGetValue(out global::Rejected caseValue1)) return caseValue1;
+    }
+
+    return null;
+}
+```
+
+A union with no value (a default struct, or a `TryGetValue` that matches nothing) records `null`, so a
+`[Tag]`/`[Baggage]` union parameter behaves like a `null` value and `SkipOnNullOrEmpty` applies to it.
+Baggage converts the case value with `?.ToString()`, as it does for any non-`string` parameter.
+
+### Purview.Unions `[GenerateUnion]` types
+
+A union generated by [Purview.Unions](https://github.com/purview-dev/unions) declares nothing but
+`[Purview.Unions.GenerateUnion]` in its own source: the `[Union]` attribute, the constructors, `HasValue` and one
+`TryGetValue(out T)` per case are all emitted into *generated* output. Roslyn never shows one generator another
+generator's output, so the telemetry generator cannot see any of those members — and it still unwraps the parameter to
+its case value, because it reads the case list from the surfaces that **are** in source.
+
+The case list is taken from the first non-empty of, in the union generator's own order:
+
+| Order | Source |
+| --- | --- |
+| 1 | the `[GenerateUnion(typeof(...))]` `typeof` list |
+| 2 | the union's partial static factory signatures — `static partial OrderStatus Make(Ordered value);` |
+| 3 | a nested `IUnionMembers` provider's static single-parameter `Create` methods |
+| 4 | the union's source-visible public single-parameter constructors |
+
+Cases are normalised exactly as that generator exposes them: a nullable value type becomes its underlying type
+(`int?` → `int`), a nullable reference annotation is stripped, and constructed generic types and arrays are kept. A
+duplicate case is emitted once.
+
+```csharp
+[Purview.Unions.GenerateUnion(typeof(Ordered), typeof(Rejected))]
+public partial struct OrderStatus { }
+```
+
+```csharp
+static object? UnwrapUnion_Testing_OrderStatus(OrderStatus value)
+{
+    if (value.HasValue)
+    {
+        if (value.TryGetValue(out global::Ordered caseValue0)) return caseValue0;
+        if (value.TryGetValue(out global::Rejected caseValue1)) return caseValue1;
+    }
+
+    return null;
+}
+```
+
+The accessor always uses the non-boxing pattern for a `[GenerateUnion]` target, because that generator emits
+`HasValue` and one `TryGetValue(out T)` per case for every surface. The members are invisible to this generator but
+present in the final compilation, so the emitted accessor compiles. For a hand-written `[Union]` type the pattern is
+still *detected*, because some declare it and some do not; a `union` declaration has no `TryGetValue` and uses `Value`.
+
+If no case list is visible in source — `[GenerateUnion]` with no `typeof` list, no factory signatures, no provider and
+no constructors — the parameter is **not** treated as a union: no accessor is emitted and the value is recorded as
+ordinary. Purview.Unions reports `UNI0003` for that union itself, so the error is reported once, by the generator that
+owns it.
+
+> [!NOTE]
+> This reads the *source-visible* case list, so a telemetry build never depends on another generator having run. When
+> another generator also needs the case list, surface 3 — a nested `IUnionMembers` provider in your own source — remains
+> the portable route, because both generators can read it.
+
+> [!NOTE]
+> An end-to-end test running Purview.Unions and this generator in one compilation is a follow-up: Purview.Unions is not
+> yet on a CI-safe package feed, so the generator cannot take a reference to it. The tests in this repository use a
+> stand-in `Purview.Unions.GenerateUnionAttribute` declared in the test source.
+
+### Where unions are supported
+
+| Target | Behaviour |
+| --- | --- |
+| Activities tags and baggage | The case value is recorded; baggage converts it to a `string`. |
+| Metrics tags | The case value is recorded. A union is never a measurement value: instruments require a numeric type. |
+| Logging v1 and v2 | The log state carries `object?` and the case value is logged, so `{Status}` renders the case, not the union struct. |
+
+Unions are detected by symbol, not target framework: the same union works on `net48` and `net11.0` as long
+as the consumer's compiler can see the type. Declaring one with the `union` keyword needs C# 15.
+
+## See also
+
+- [Activities](Activities.md) — tags/baggage in Activity generation
+- [Metrics](Metrics.md) — tags in metrics generation
+- [Multi-Targeting](Multi-Targeting.md) — excluding parameters per target
+- [Generation](../Generation.md) — naming conventions
+- [Breaking Changes](../reference/Breaking-Changes.md#opentelemetry-aligned-naming) — v3 to v4 naming changes

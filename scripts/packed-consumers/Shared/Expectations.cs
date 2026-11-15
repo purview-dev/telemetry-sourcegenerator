@@ -69,6 +69,27 @@ public static class Expectations
 					$"exception event tag order_id is '{Get(exception[0].Tags, "order_id")}'"
 				);
 			}
+
+			// A union parameter is recorded as its case value, never as the union struct, and a parameter excluded from
+			// Activities is not applied to the event even though the same method logs it.
+			var rejected = activity.Events.Where(e => e.Name == "order.rejected").ToArray();
+			Check(rejected.Length == 1, $"expected one order.rejected event, got {rejected.Length}");
+			if (rejected.Length == 1)
+			{
+				var rejection = Get(rejected[0].Tags, "rejection");
+				Check(
+					rejection?.Contains("card declined", StringComparison.Ordinal) == true,
+					$"order.rejected tag rejection is the union's case value only when it reads '{rejection}'"
+				);
+				Check(
+					!rejection!.Contains("OrderRejection", StringComparison.Ordinal),
+					$"order.rejected tag rejection is the union struct itself: '{rejection}'"
+				);
+				Check(
+					Get(rejected[0].Tags, "rejection_id") is null,
+					"order.rejected recorded rejection_id although it is excluded from Activities"
+				);
+			}
 		}
 
 		var reserve = capture.Activities.Where(a => a.Source == InventoryName && a.Name == "stock.reserve").ToArray();
@@ -181,6 +202,25 @@ public static class Expectations
 				failed[0].Exception is InvalidOperationException,
 				"the OrderFailed log entry does not carry the exception"
 			);
+
+		var rejectedLogs = logs.Where(l => l.EventName?.Contains("OrderRejected", StringComparison.Ordinal) == true)
+			.ToArray();
+		Check(
+			rejectedLogs.Length == 1 && rejectedLogs[0].Level == LogLevel.Warning,
+			$"expected one Warning OrderRejected log entry, got {Describe(rejectedLogs)}"
+		);
+		if (rejectedLogs.Length == 1)
+		{
+			var rejection = Get(rejectedLogs[0].State, "Rejection");
+			Check(
+				rejection?.Contains("card declined", StringComparison.Ordinal) == true,
+				$"the OrderRejected state Rejection is '{rejection}', not the union's case value"
+			);
+			Check(
+				Get(rejectedLogs[0].State, "RejectionId") == orderId,
+				$"the OrderRejected state RejectionId is '{Get(rejectedLogs[0].State, "RejectionId")}'"
+			);
+		}
 
 		return failures;
 	}

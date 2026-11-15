@@ -38,7 +38,7 @@ readonly record struct TagProviderResolution(TagProviderStatus Status, TagProvid
 /// <c>ITagCollector</c> in generated code would pull <c>Microsoft.Extensions.Compliance.Classification</c> into every
 /// consumer's build. Only the pair-returning shape the generated state can consume is supported; a collector-shaped
 /// method is reported as <see cref="TagProviderStatus.InvalidSignature"/> and recorded in
-/// <c>docs/wiki/Platform-Support.md</c>.
+/// <c>docs/wiki/reference/Platform-Support.md</c>.
 /// </remarks>
 static class TagProviderResolver
 {

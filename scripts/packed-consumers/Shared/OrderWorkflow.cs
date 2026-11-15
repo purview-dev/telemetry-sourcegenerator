@@ -27,6 +27,8 @@ public sealed class OrderWorkflow(IOrderTelemetry telemetry, StockReserver stock
 			{
 				telemetry.OrderFailed(activity, exception, orderId);
 			}
+
+			telemetry.OrderRejected(activity, orderId, new OrderRejection(new CardDeclined("card declined")));
 		}
 		telemetry.OrdersInFlight(-1);
 	}

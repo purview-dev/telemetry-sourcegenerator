@@ -59,10 +59,7 @@ static partial class MeterTargetClassEmitter
 
 				EmitFields(output, writer, context, readonlyFields: metricsOwnsConstructor);
 
-				UnionAccessorEmitter.EmitAccessors(
-					writer,
-					target.InstrumentationMethods.SelectMany(static m => m.Parameters).Select(static p => p.Union)
-				);
+				UnionAccessorEmitter.EmitAccessors(writer, target.UnionAccessors);
 
 				if (metricsOwnsConstructor)
 					EmitInlineConstructor(output, writer, context);

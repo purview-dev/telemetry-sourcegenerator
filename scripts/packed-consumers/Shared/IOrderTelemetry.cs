@@ -52,4 +52,21 @@ public interface IOrderTelemetry
 	[Event("exception")]
 	[Error]
 	void OrderFailed(Activity? activity, Exception exception, [Tag] string orderId);
+
+	/// <summary>
+	/// Multi-target: adds an ActivityEvent and logs at Warning, each carrying a union-typed parameter as its case value.
+	/// </summary>
+	/// <remarks>
+	/// This is the shape that regressed in 6.0.0: a union consumed by two target families was declared in both
+	/// generated partial files (<c>CS0111</c>). Every warning is an error here, so the gate fails on it. The
+	/// <c>rejectionId</c> parameter is excluded from Activities as well, so the accessor has to be owned by a target
+	/// that the excluded-from family does not itself use.
+	/// </remarks>
+	[Event("order.rejected")]
+	[Warning]
+	void OrderRejected(
+		Activity? activity,
+		[ExcludeTargets(Targets.Activities)] string rejectionId,
+		OrderRejection rejection
+	);
 }

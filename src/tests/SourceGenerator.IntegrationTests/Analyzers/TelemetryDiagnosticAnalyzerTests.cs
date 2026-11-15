@@ -15,6 +15,7 @@ public class TelemetryDiagnosticAnalyzerTests
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			public class Outer
 			{
@@ -25,8 +26,10 @@ public class TelemetryDiagnosticAnalyzerTests
 			}
 			""";
 
+		// Act
 		var result = await AnalyzeAsync(code, new TelemetryAnalyzerTestOptions(), cancellationToken);
 
+		// Assert
 		await Assert.That(result).HasDiagnostic("TSG1004");
 	}
 
@@ -35,6 +38,7 @@ public class TelemetryDiagnosticAnalyzerTests
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			[ActivitySource]
 			public interface ITestActivities<T>
@@ -42,8 +46,10 @@ public class TelemetryDiagnosticAnalyzerTests
 			}
 			""";
 
+		// Act
 		var result = await AnalyzeAsync(code, new TelemetryAnalyzerTestOptions(), cancellationToken);
 
+		// Assert
 		await Assert.That(result).DoesNotHaveDiagnostic("TSG1004");
 	}
 
@@ -52,6 +58,7 @@ public class TelemetryDiagnosticAnalyzerTests
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 
 			[ActivitySource]
@@ -66,8 +73,10 @@ public class TelemetryDiagnosticAnalyzerTests
 
 			""";
 
+		// Act
 		var result = await AnalyzeAsync(code, new TelemetryAnalyzerTestOptions(), cancellationToken);
 
+		// Assert
 		await Assert.That(result).HasDiagnostic("TSG1003");
 	}
 
@@ -76,6 +85,7 @@ public class TelemetryDiagnosticAnalyzerTests
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 
 			[Logger]
@@ -87,8 +97,10 @@ public class TelemetryDiagnosticAnalyzerTests
 
 			""";
 
+		// Act
 		var result = await AnalyzeAsync(code, new TelemetryAnalyzerTestOptions(), cancellationToken);
 
+		// Assert
 		await Assert.That(result).HasDiagnostic("TSG2021");
 	}
 
@@ -98,6 +110,7 @@ public class TelemetryDiagnosticAnalyzerTests
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 
 			[Meter("testing-meter")]
@@ -109,14 +122,17 @@ public class TelemetryDiagnosticAnalyzerTests
 
 			""";
 
+		// Act
 		var result = await AnalyzeAsync(code, new TelemetryAnalyzerTestOptions(), cancellationToken);
 
+		// Assert
 		await Assert.That(result).HasDiagnostic("TSG4001");
 	}
 
 	[Test]
 	public async Task Analyze_GivenValidActivityInterface_RaisesNoDiagnostics(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 
 			[ActivitySource]
@@ -128,8 +144,10 @@ public class TelemetryDiagnosticAnalyzerTests
 
 			""";
 
+		// Act
 		var result = await AnalyzeAsync(code, new TelemetryAnalyzerTestOptions(), cancellationToken);
 
+		// Assert
 		await Assert.That(result).HasNoDiagnostics();
 	}
 }

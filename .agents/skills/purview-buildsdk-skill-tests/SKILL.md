@@ -16,7 +16,6 @@ For installing skills a package ships, use `purview-buildsdk-skill-installation`
 **At the repository root, in `skills/<name>/SKILL.md`.** Always.
 
 The skills CLI only discovers skills at a root `skills/` folder, and it reaches a repository by
-The skills CLI only discovers skills at a root `skills/` folder, and it reaches a repository by
 cloning it, so nothing else is visible to it. Nothing is packed into a NuGet package — a package
 carries .NET artifacts, and skills are delivered by the CLI from git.
 
@@ -108,8 +107,8 @@ Overrides: `RepositoryRoot` (default: the SDK's repository-root marker walk),
 `SkillsFolderName` (default `skills`), and `SkipRule(string)`.
 
 The evaluator takes a `SkillCatalogue`, so a rule can be exercised against a fixture folder rather
-than a real repository — the same three-layer shape this repository uses throughout: a reader, an
-evaluator over an in-memory model, and a thin test base class.
+than a real repository: a reader (`SkillManifestReader`/`SkillCatalogue`), an evaluator over the
+in-memory model (`SkillPolicyEvaluator`), and a thin test base class (`PurviewSkillTests`).
 
 ### At pack time — `ValidatePurviewSkills`
 

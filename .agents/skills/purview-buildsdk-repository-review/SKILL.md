@@ -36,13 +36,14 @@ Inspect, in this order, before forming any opinion:
 
 - `Directory.Build.props` and `Directory.Build.targets` — where the SDK is imported, and what is set
   before the import
+- `global.json` (the pinned SDK version) and repo `package.json` (the product version)
 - the solution entry point, for what is actually in the build
 - `Directory.Packages.props`, for Central Package Management
 - the project layout on disk
 
 ## 2. Check the structural signals
 
-- Source projects under `src/`, test projects under `tests/`.
+- Source projects under `src/src/`, test projects under `src/tests/`, the solution in `src/`.
 - `.csproj` filename equals its containing directory name — unless
   `DisableProjectFileNamingConventionCheck=true`, which is itself a finding worth surfacing.
 - Short project names, with `NamespacePrefix` carrying the repository identity.
@@ -53,6 +54,12 @@ Inspect, in this order, before forming any opinion:
   suffix outside it still runs, it just cannot see `internal` members.
 - Shared and shared-testing projects use the **exact** recognised names. A near miss gets none of
   the behaviour.
+- Target frameworks: a project should inherit the SDK's default set (`net10.0;net11.0`) or select a
+  curated `PurviewTargetFrameworkSet` (`Current`, `Latest`, `Supported`, `Broad`, `All`), not hard-code
+  a TFM list. A hard-coded list is an incremental opportunity. A TFM set in `Directory.Build.targets`
+  is structural debt: it is evaluated after the .NET SDK decides whether to multi-target, so it does
+  not take effect. A `Condition`-guarded `PurviewTargetFrameworkSet` is not seen at all
+  (`PurviewConditionedProjectDeclaration`).
 
 ## 3. Verify with MSBuild, do not infer from folder names
 
@@ -91,18 +98,19 @@ go stale:
 
 ## 6. Check how agent skills are managed
 
-Only relevant when the repository has a `skills-lock.json`, an agent skills directory, or a package
-reference that ships skills:
+Only relevant when the repository has a `skills-lock.json` or an agent skills directory:
 
 - **Anything that runs `InstallPurviewSkills`, `UpdatePurviewSkills` or `FixPurviewSkills`
   implicitly** — an `AfterTargets`/`BeforeTargets` hook, a `*DependsOn` property, a git hook, a
-  `just` recipe dependency — is structural debt: the SDK fails it with `PRSKL0009`, and skill changes
-  should only happen when somebody asks.
+  `just` recipe dependency — is structural debt: skill changes should only happen when somebody asks.
+  The SDK fails the build-time cases with `PRSKL0009` (inside a build, a restore or a design-time
+  build); a git hook or a recipe dependency that runs the target on its own is **not** caught, so
+  look for those by reading the hook configuration and the `Justfile`.
 - **Hand-written skill scripts** (`update-agent-skills.ts`, `ensure-universal-skills.ts`,
-  `package.json` `skills:*` entries) are an incremental opportunity: the SDK targets replace them, and
-  pin package skills to their package's commit where the scripts install latest. See
-  `purview-buildsdk-skills-justfile`.
-- **Drift**: run `dotnet msbuild <project> -t:RecommendPurviewSkills` and quote any `PRSKL0010`/`PRSKL0011`.
+  `package.json` `skills:*` entries) are an incremental opportunity: the SDK targets wrap the same
+  standard CLI, from the repository root, once per solution. See `purview-buildsdk-justfile`.
+- **A fresh clone**: a committed `skills-lock.json` with no agent skills directory beside it means the
+  skills were never restored — `-t:InstallPurviewSkills` (`skills experimental_install`) restores them.
 - **Layout**: if `PurviewSkillsAgents` is set, run `-t:CheckPurviewSkills` and quote any `PRSKL0015`.
   If it is not set, every agent directory is legitimate — that is acceptable variance, not a finding.
 

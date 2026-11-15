@@ -19,6 +19,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : 
 	[Test]
 	public async Task Verify_Counter_AutoIncrement_LiteralOne(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -41,12 +42,14 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_Counter_WithVariable_NotAutoIncrement(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -69,12 +72,14 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_Counter_WithKeyValuePairTags(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Collections.Generic;
 			using System.Diagnostics.Metrics;
@@ -100,12 +105,14 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_Counter_WithTagList(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -135,6 +142,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
@@ -145,6 +153,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : 
 	[Test]
 	public async Task Verify_Histogram_BasicRecord(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -167,12 +176,14 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_Histogram_WithTag(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Collections.Generic;
 			using System.Diagnostics.Metrics;
@@ -196,6 +207,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
@@ -206,6 +218,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : 
 	[Test]
 	public async Task Verify_UpDownCounter_Add(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -226,6 +239,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
@@ -236,6 +250,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : 
 	[Test]
 	public async Task Verify_Mixed_Counter_And_Histogram(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -261,12 +276,14 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_Mixed_AllThreeInstrumentTypes(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -303,6 +320,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
@@ -313,6 +331,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : 
 	[Test]
 	public async Task Verify_PrimaryConstructor_WithMeterFactory(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -328,12 +347,14 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_Counter_IntMeasurementType(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -356,6 +377,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
@@ -366,6 +388,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : 
 	[Test]
 	public async Task Verify_DocumentScope_TwoClassesInSameFile(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics.Metrics;
 
@@ -404,6 +427,7 @@ public sealed class ConvertMetricsToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(
 			code,
 			Provider,

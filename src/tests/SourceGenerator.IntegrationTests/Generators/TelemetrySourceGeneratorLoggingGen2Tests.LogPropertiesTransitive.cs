@@ -40,7 +40,7 @@ partial class TelemetrySourceGeneratorLoggingGen2Tests
 	[Test]
 	public async Task Generate_GivenTransitiveLogProperty_FlattensNestedObject(CancellationToken cancellationToken)
 	{
-		// Arrange / Act
+		// Act
 		using var generationResult = await GenerateAsync(TransitiveLoggerSource, cancellationToken: cancellationToken);
 
 		// Assert
@@ -64,7 +64,7 @@ partial class TelemetrySourceGeneratorLoggingGen2Tests
 		CancellationToken cancellationToken
 	)
 	{
-		// Arrange / Act
+		// Act
 		using var generationResult = await GenerateAsync(TransitiveLoggerSource, cancellationToken: cancellationToken);
 
 		// Assert: `weather?.Coordinates?.Lat` does not compile - a non-nullable struct cannot take a `?`.

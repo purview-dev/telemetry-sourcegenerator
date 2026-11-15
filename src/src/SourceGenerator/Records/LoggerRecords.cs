@@ -10,7 +10,8 @@ sealed record LoggerTarget(
 	int DefaultLevel,
 	EquatableArray<LogMethodTarget> LogMethods,
 	bool UseMSLoggingTelemetryBasedGeneration,
-	EquatableArray<TypeParameterTarget> InterfaceTypeParameters = default
+	EquatableArray<TypeParameterTarget> InterfaceTypeParameters = default,
+	EquatableArray<UnionTargetRecord> UnionAccessors = default
 )
 {
 	public string? ClassNamespace => TelemetryGeneration.TelemetryNamesNamespace ?? InterfaceType.Identity.Namespace;

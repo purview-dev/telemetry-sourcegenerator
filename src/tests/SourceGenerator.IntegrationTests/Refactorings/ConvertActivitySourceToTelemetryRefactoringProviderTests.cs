@@ -13,6 +13,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests : C
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -24,8 +25,10 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests : C
 			}
 			""";
 
+		// Act
 		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(actions).IsEmpty();
 	}
 
@@ -34,6 +37,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests : C
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -47,8 +51,10 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests : C
 			}
 			""";
 
+		// Act
 		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(actions).IsEmpty();
 	}
 
@@ -61,6 +67,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests : C
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -77,8 +84,10 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests : C
 			}
 			""";
 
+		// Act
 		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(actions).IsNotEmpty();
 		await Assert.That(actions[0].Title).IsEqualTo("Convert ActivitySource to IWeatherServiceTracing");
 	}
@@ -92,6 +101,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests : C
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -108,8 +118,10 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests : C
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[ActivitySource]");
 		await Assert.That(result).Contains("IWeatherServiceTracing");
@@ -123,6 +135,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests : C
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -139,8 +152,10 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests : C
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[ActivitySource]");
 		await Assert.That(result).Contains("IPaymentServiceTracing");
@@ -152,6 +167,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests : C
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -168,8 +184,10 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests : C
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("IOrderServiceTracing _activitySource");
 		await Assert.That(result).DoesNotContain("ActivitySource _activitySource");
@@ -180,6 +198,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests : C
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -196,8 +215,10 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderTests : C
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, Provider, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("_activitySource.ShipOrder(");
 		await Assert.That(result).DoesNotContain(".StartActivity(");

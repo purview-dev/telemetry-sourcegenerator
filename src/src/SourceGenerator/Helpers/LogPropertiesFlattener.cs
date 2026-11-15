@@ -19,7 +19,7 @@ namespace Purview.Telemetry.SourceGenerator.Helpers;
 /// <c>MaxTypeTraversalDepth</c>.
 /// </para>
 /// <para>
-/// Two deliberate divergences, both documented on <c>docs/wiki/Logging.md</c>: a type already on the visited chain
+/// Two deliberate divergences, both documented on <c>docs/wiki/telemetry/Logging.md</c>: a type already on the visited chain
 /// stops only that branch instead of abandoning the whole parameter, and a <c>Nullable&lt;T&gt;</c> property is
 /// flattened no further because the extra <c>.Value</c> hop the accessor would need does not fit the generated
 /// null-conditional chain.
@@ -38,8 +38,9 @@ static class LogPropertiesFlattener
 	/// Known value-like types that are rendered with their own <c>ToString</c> rather than expanded. Expanding a
 	/// <c>DateTime</c> into <c>Year</c>/<c>Month</c>/... would replace a useful value with noise.
 	/// </summary>
-	static readonly HashSet<string> StringifiableTypes = new(StringComparer.Ordinal)
-	{
+	static readonly HashSet<string> StringifiableTypes =
+	[
+		with(StringComparer.Ordinal),
 		"System.DateOnly",
 		"System.DateTime",
 		"System.DateTimeOffset",
@@ -48,7 +49,7 @@ static class LogPropertiesFlattener
 		"System.TimeSpan",
 		"System.Uri",
 		"System.Version",
-	};
+	];
 
 	public static EquatableArray<LogPropertiesParameterDetails> Flatten(
 		ITypeSymbol parameterType,
@@ -59,7 +60,7 @@ static class LogPropertiesFlattener
 		var flattenedType = UnwrapNullable(parameterType);
 
 		List<LogPropertiesParameterDetails> properties = [];
-		HashSet<ITypeSymbol> chain = new(SymbolEqualityComparer.Default) { flattenedType };
+		HashSet<ITypeSymbol> chain = [with(SymbolEqualityComparer.Default), flattenedType];
 
 		FlattenType(
 			flattenedType,
@@ -89,7 +90,7 @@ static class LogPropertiesFlattener
 	)
 	{
 		// A property declared on a base type that a derived type hides is logged once, as the derived member.
-		HashSet<string> seenPropertyNames = new(StringComparer.Ordinal);
+		HashSet<string> seenPropertyNames = [with(StringComparer.Ordinal)];
 
 		var current = type as INamedTypeSymbol;
 		while (current is not null && current.SpecialType != SpecialType.System_Object)
@@ -204,6 +205,8 @@ static class LogPropertiesFlattener
 		if (named.AllInterfaces.Any(static i => i.SpecialType == SpecialType.System_Collections_IEnumerable))
 			return false;
 
+		// A delegate is one tag: expanding Action<T> into Method/Target is not what a reader wants, and the .NET
+		// generator does not expand delegates either.
 		return true;
 	}
 }

@@ -10,12 +10,14 @@ Releases are driven by GitHub Actions using the reusable
 [`purview-dev/build`](https://github.com/purview-dev/build) pipelines. No release steps are
 performed manually.
 
-```text
-Feature branch
-  → PR to main          (pr.yml runs purview-build.yml: restore + build + lint + tests)
-  → merge to main       (release.yml runs purview-release.yml: build, test, pack, publish)
-  → GitHub Release      (NuGet package + changelog, created by the pipeline)
+<!-- purview:likec4 file="wiki/diagrams/release-flow.c4" view="releaseFlow" title="Release flow" -->
+```mermaid
+flowchart LR
+  branch[Feature branch] --> pr[PR to main] --> merge[Merge to main] --> release[GitHub Release]
 ```
+
+[LikeC4 model](wiki/diagrams/release-flow.c4)
+<!-- /purview:likec4 -->
 
 ### Workflow components
 
@@ -74,7 +76,8 @@ Merging to `main` triggers `release.yml`, which runs the reusable `purview-relea
 - It is applied to `Version` / `PackageVersion` by `Purview.BuildSdk` via package.json
   version detection (`UsePackageJsonVersion`, default `true`).
 - `just version` prints the current version.
-- After bumping `package.json`, run `just update-version` to sync the version into docs/samples.
+- `just bump major|minor|patch` bumps `package.json`, then syncs the version into docs/samples itself
+  (through the `_after-bump` hook, which runs `just update-version`).
 
 ### Analyzer release tracking
 
@@ -108,20 +111,19 @@ Before a release, validate locally on a clean tree. Each step must pass.
    and `RunAOTCompilation`) and Blazor Server consumers of the `.nupkg`, each leak-scanned for
    compiler-host assemblies.
 4. `just build-s && just test-s` — sample solution build and tests.
-5. `just lint` — CSharpier reports no change.
+5. `just lint-check` — CSharpier reports no change.
 
 After changing `PackValidation`, also run `just verify-pack-rules` (pass `-PackagesFolder <feed>` after
 `just pipeline-local-release`, which moves the package out of `artifacts/`).
 
 What each gate proves, and where CI runs it, is in the wiki's
-[Release Flow — Release gates](wiki/Release-Flow.md#release-gates).
+[Release Flow — Release gates](wiki/contributing/Release-Flow.md#release-gates).
 
 ## Releasing
 
-1. Bump the version in `package.json`.
-2. Run `just update-version` to sync docs/samples.
-3. Push a PR with the version bump; merge to `main`.
-4. `release.yml` publishes the release automatically.
+1. `just bump major|minor|patch` — bumps `package.json` and syncs docs/samples.
+2. Push a PR with the version bump; merge to `main`.
+3. `release.yml` publishes the release automatically.
 
 > The legacy `scripts/setup-release.*` files describe a changeset-based (`@changesets/cli`) flow that
 > is **not** used by this repository. They are retained for reference only; the actual release

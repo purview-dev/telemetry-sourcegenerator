@@ -97,7 +97,14 @@ partial class PipelineHelpers
 				DefaultLevel: defaultLogLevel,
 				LogMethods: logMethods,
 				UseMSLoggingTelemetryBasedGeneration: interfaceGenerationMode != 1 || requiresStateGeneration,
-				InterfaceTypeParameters: TypeParameterHelpers.FromNamedType(interfaceSymbol)
+				InterfaceTypeParameters: TypeParameterHelpers.FromNamedType(interfaceSymbol),
+				UnionAccessors: UnionAccessorPlanner.Plan(
+					interfaceSymbol,
+					generationType,
+					GenerationType.Logging,
+					logMethods.SelectMany(static method => method.Parameters).Select(static p => p.Union),
+					token
+				)
 			),
 			TelemetryRules.GetInterfaceLevelDiagnostics(interfaceSymbol, compilation, token)
 		);

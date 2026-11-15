@@ -87,6 +87,9 @@ static class UnionHelpers
 		if (caseTypes.Count == 0)
 			return null;
 
+		// The unions generator emits a single TryGetValue(out T) per case type, so the accessor can read each case through
+		// TryGetValue and the compiler never boxes the union struct. A [GenerateUnion] target whose case list is not
+		// visible in source is not treated as a union at all, so the accessor reads it through object and boxes it.
 		return new(
 			UnionType: TypeReference.Create(parameterType),
 			UnderlyingUnionType: TypeReference.Create(unionType),
@@ -349,6 +352,7 @@ static class UnionHelpers
 			return unionType.TypeParameters.Contains(typeParameter, SymbolEqualityComparer.Default) ? caseType : null;
 		}
 
+		// A nullable reference annotation is a compile-time-only hint, so the accessor reads the case type without it.
 		return caseType.NullableAnnotation == NullableAnnotation.Annotated
 			? caseType.WithNullableAnnotation(NullableAnnotation.NotAnnotated)
 			: caseType;

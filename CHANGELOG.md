@@ -5,7 +5,7 @@ All notable changes to `Purview.Telemetry.SourceGenerator`.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions come from the
 `version` field in `package.json`, which is the single source of truth. This file starts at
 5.0.7; earlier releases are described by their [GitHub releases](https://github.com/purview-dev/telemetry-sourcegenerator/releases)
-and, for breaking changes, by [Breaking Changes](docs/wiki/Breaking-Changes.md).
+and, for breaking changes, by [Breaking Changes](docs/wiki/reference/Breaking-Changes.md).
 
 ## [Unreleased]
 
@@ -44,7 +44,7 @@ and, for breaking changes, by [Breaking Changes](docs/wiki/Breaking-Changes.md).
 - **`GeneratorModelBenchmarks`.** Compares the generator's `closed record` tagged models against a value-based
   `[Union]` struct on every benchmark runtime leg. It backs the recorded decision to keep the `closed` records: the
   measurable win is a fraction of a generation pass, and on .NET Framework the struct union is slower. See
-  [Platform Support](docs/wiki/Platform-Support.md#considered-and-rejected).
+  [Platform Support](docs/wiki/reference/Platform-Support.md#considered-and-rejected).
 - **`[Meter]` / `[MeterGeneration]` `Version` and `Tags`.** `MeterOptions.Version` and `MeterOptions.Tags` were
   previously reachable only through a `partial` hook the generator declared and never implemented, and `Version` was
   hard-coded `null`. Both are now attribute settings (comma-separated `key=value` tags, interface-level overriding
@@ -71,7 +71,7 @@ and, for breaking changes, by [Breaking Changes](docs/wiki/Breaking-Changes.md).
   accessor per union type. When the union declares the non-boxing access pattern (`bool HasValue` plus a
   `bool TryGetValue(out T)` overload per case) the accessor calls those, so the union struct is never boxed
   to read it; otherwise it reads `Value`. A union that holds no value records `null`.
-  See [Union types](docs/wiki/Tags-and-Baggage.md#union-types).
+  See [Union types](docs/wiki/telemetry/Tags-and-Baggage.md#union-types).
 - **A lowest-compatible dependency floor, proved by a build.** `Directory.Packages.props` now keeps one property per
   package family (`DotnetRuntimeVersion` for the runtime-tracked `10.0.<patch>` line, `MSExtensionVersion` for
   dotnet/extensions' `10.<minor>.0`) plus a `DependencyFloor` switch. `-p:DependencyFloor=true` drops both families to
@@ -90,7 +90,7 @@ and, for breaking changes, by [Breaking Changes](docs/wiki/Breaking-Changes.md).
   `Unable to resolve service for type 'System.Diagnostics.Metrics.IMeterFactory'` on first resolution. The benchmark now
   passes a factory on every leg, and the sample registers one with `services.AddMetrics()` (plus
   `[assembly: MeterGeneration("sample-weather-app-net48")]` so its documented meter name is the one reported).
-  `docs/wiki/Metrics.md` and the [support matrix](docs/wiki/Platform-Support.md#support-matrix) said "not available on
+  `docs/wiki/telemetry/Metrics.md` and the [support matrix](docs/wiki/reference/Platform-Support.md#support-matrix) said "not available on
   .NET Framework 4.8"; they now describe the probe instead of a framework.
 - **The generator's two tagged unions are C# 15 `closed` hierarchies.** An activity method is exactly one of
   `StartActivityMethod`, `ActivityEventMethod` or `ActivityContextMethod`, and an instrument is exactly one of the eight
@@ -111,7 +111,7 @@ and, for breaking changes, by [Breaking Changes](docs/wiki/Breaking-Changes.md).
   compiler-host assembly, so a transitive dependency is one it hands to every consumer's build.
 - **`.NET 11` opt-ins are the ones `Purview.BuildSdk` 2.0.0 already applies**, not new project properties: Runtime Async
   V2 (`PurviewRuntimeAsync`) and the C# 15 updated memory-safety rules (`MemorySafetyRules=2`) for every `net11.0`
-  project. `docs/wiki/Platform-Support.md` records each .NET 11 feature that was evaluated and why it is or is not used.
+  project. `docs/wiki/reference/Platform-Support.md` records each .NET 11 feature that was evaluated and why it is or is not used.
 - **`EventId` on `[Log]` and the level-specific attributes is `int`, not `int?`.** A nullable property
   cannot be set as a named attribute argument, so `[Info(EventId = 42)]` failed with CS0655 and only
   the constructor overloads worked. Omitting it, or passing a negative value, still uses the id derived
@@ -119,6 +119,18 @@ and, for breaking changes, by [Breaking Changes](docs/wiki/Breaking-Changes.md).
 
 ### Fixed
 
+- **A union-typed parameter on an interface that registers more than one target no longer produces `CS0111`.** Each
+  target emitted the `UnwrapUnion_<Type>` accessor into its own hint file, and Activity, Logging and Metric are one
+  `partial` class, so an interface such as `[ActivitySource][Logger]` with a union on a method that both records an
+  event and logs declared the same helper twice — and every call site then failed with `CS0121`, "the call is
+  ambiguous". The accessor is a shared member like the dependency-injection extension and the constructor, so it now
+  follows the same ownership rule: the canonical target (Activities, else Logging, else Metrics) declares it once per
+  union type and the other files call it. With more than one target the list is the *interface's* unions rather than the
+  owning target's own parameters, because a target never sees a method that belongs to another family only, and a
+  parameter excluded from Activities is still unwrapped by the log or metric call site. A single-target interface's
+  output is unchanged, so no consumer needs to change its interfaces, add `[ExcludeTargets]`, or suppress `CS0111`.
+  `[Event]` tags now unwrap a union to its case value as well: they are collected into an `ActivityTagsCollection`
+  rather than set through `SetTag`, and that was the one call site still recording the union struct itself.
 - **Purview.Unions `[GenerateUnion]` unions used as telemetry parameters are unwrapped to their case value.** Union
   recognition only looked for `[System.Runtime.CompilerServices.Union]`, which the unions generator emits into
   *generated* output — output Roslyn never shows another generator — so a `[GenerateUnion]` parameter was recorded as the
@@ -194,7 +206,7 @@ exception is the opt-in `MeterNameGenerationType.OpenTelemetry` naming, which wa
   Register the factory with `services.AddTracing()`. The option is gated on the compilation resolving
   the type (.NET 11, or System.Diagnostics.DiagnosticSource 11+). When the type is unavailable,
   the static source is kept and the new warning **`TSG3023`** reports it.
-- [Platform Support and .NET 11](docs/wiki/Platform-Support.md): the target-framework and hosting
+- [Platform Support and .NET 11](docs/wiki/reference/Platform-Support.md): the target-framework and hosting
   matrix, the trim/AOT guarantees, the .NET 11 features and what is not supported yet.
 - The integration tests run on a `net11.0` leg.
 - The packed-consumer gate exercises `UseActivitySourceFactory` under Native AOT, Blazor

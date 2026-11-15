@@ -3,7 +3,7 @@
 The exact shapes the two performance documents use today. Preserve them: a consumer reads the same
 table layout release after release, and a diff should show changed numbers, not a reshaped page.
 
-## `docs/wiki/Performance.md`
+## `docs/wiki/reference/Performance.md`
 
 Order of sections:
 

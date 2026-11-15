@@ -91,7 +91,14 @@ partial class PipelineHelpers
 				ActivitySourceName: activitySourceName,
 				ActivityMethods: activityMethods,
 				ActivityTargetAttributeRecord: activitySourceAttribute,
-				InterfaceTypeParameters: TypeParameterHelpers.FromNamedType(interfaceSymbol)
+				InterfaceTypeParameters: TypeParameterHelpers.FromNamedType(interfaceSymbol),
+				UnionAccessors: UnionAccessorPlanner.Plan(
+					interfaceSymbol,
+					generationType,
+					GenerationType.Activities,
+					activityMethods.SelectMany(static method => method.Parameters).Select(static p => p.Union),
+					token
+				)
 			),
 			TelemetryRules.GetInterfaceLevelDiagnostics(interfaceSymbol, compilation, token)
 		);

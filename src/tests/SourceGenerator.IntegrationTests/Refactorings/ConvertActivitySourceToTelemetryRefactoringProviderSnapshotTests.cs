@@ -16,6 +16,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotT
 	[Test]
 	public async Task Verify_SingleStartActivity_LiteralName(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -32,12 +33,14 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotT
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_SingleStartActivity_NoName(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -54,12 +57,14 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotT
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_SingleStartActivity_WithActivityKind(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -76,12 +81,14 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotT
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_MultipleActivities_DifferentKinds(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -108,6 +115,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotT
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
@@ -118,6 +126,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotT
 	[Test]
 	public async Task Verify_PrimaryConstructor_ActivitySource(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -132,12 +141,14 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotT
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_InstanceField_ExpressionBodyCtor(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -156,6 +167,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotT
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
@@ -166,6 +178,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotT
 	[Test]
 	public async Task Verify_ActivityName_FromLiteral_CamelCase(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -182,12 +195,14 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotT
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_ActivityName_FromLiteral_WithSeparator(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -204,6 +219,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotT
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
@@ -214,6 +230,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotT
 	[Test]
 	public async Task Verify_SameActivityName_TwoMethods(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -235,12 +252,14 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotT
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_StaticFieldInit_FullNewExpression(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -257,6 +276,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotT
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
@@ -267,6 +287,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotT
 	[Test]
 	public async Task Verify_DocumentScope_TwoClassesInSameFile(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System.Diagnostics;
 
@@ -293,6 +314,7 @@ public sealed class ConvertActivitySourceToTelemetryRefactoringProviderSnapshotT
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(
 			code,
 			Provider,

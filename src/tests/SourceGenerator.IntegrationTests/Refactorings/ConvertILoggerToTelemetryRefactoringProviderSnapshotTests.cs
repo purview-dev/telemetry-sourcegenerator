@@ -16,6 +16,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 	[Test]
 	public async Task Verify_SingleLogInformation_NoParams(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -34,12 +35,14 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_SingleLogInformation_WithParams(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -58,12 +61,14 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_AllSixLogLevels(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -87,12 +92,14 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_LogError_WithException(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System;
 			using Microsoft.Extensions.Logging;
@@ -116,12 +123,14 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_LogError_WithException_NoParams(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System;
 			using Microsoft.Extensions.Logging;
@@ -145,6 +154,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
@@ -155,6 +165,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 	[Test]
 	public async Task Verify_GenericILogger_T(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -176,12 +187,14 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_NonGenericILogger(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -200,12 +213,14 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_PropertyInjection(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -222,6 +237,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
@@ -232,6 +248,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 	[Test]
 	public async Task Verify_PrimaryConstructorInjection(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -246,12 +263,14 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_ExpressionBodyConstructor(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -270,6 +289,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
@@ -280,6 +300,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 	[Test]
 	public async Task Verify_DuplicateMessageTemplate_Disambiguates(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -299,12 +320,14 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
 	[Test]
 	public async Task Verify_MultipleCallSites_SameMessage(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -328,6 +351,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
@@ -338,6 +362,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 	[Test]
 	public async Task Verify_LogWithExplicitLogLevel_DoesNotRefactor(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -358,13 +383,16 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 
 		// A variable LogLevel cannot be mapped to a specific generated attribute, so no
 		// refactoring should be offered.
+		// Act
 		var actions = await GetRefactoringActionsAsync(code, Provider, cancellationToken: cancellationToken);
+		// Assert
 		await Assert.That(actions).IsEmpty();
 	}
 
 	[Test]
 	public async Task Verify_MixedLogLevels_MultipleParams(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using System;
 			using Microsoft.Extensions.Logging;
@@ -391,6 +419,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(code, Provider, cancellationToken);
 	}
 
@@ -401,6 +430,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 	[Test]
 	public async Task Verify_DocumentScope_TwoClassesInSameFile(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -431,6 +461,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderSnapshotTests : 
 			}
 			""";
 
+		// Act
 		await VerifyRefactoringAsync(
 			code,
 			Provider,

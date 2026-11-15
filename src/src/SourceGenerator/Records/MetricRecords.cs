@@ -11,7 +11,8 @@ sealed record MeterTarget(
 	EquatableArray<InstrumentTarget> InstrumentationMethods,
 	string? MeterVersion = null,
 	EquatableArray<string> MeterTags = default,
-	EquatableArray<TypeParameterTarget> InterfaceTypeParameters = default
+	EquatableArray<TypeParameterTarget> InterfaceTypeParameters = default,
+	EquatableArray<UnionTargetRecord> UnionAccessors = default
 )
 {
 	public string? ClassNamespace => TelemetryGeneration.TelemetryNamesNamespace ?? InterfaceType.Identity.Namespace;

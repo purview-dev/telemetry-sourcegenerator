@@ -71,6 +71,10 @@ Opt out with `PurviewSourceGeneratorFrameworkAnalyzerValidation=false` (`PRSGD00
 
 ## CodeWriter rules
 
+The rules that recommend a structured API are **warnings**, not IDE-only suggestions: `PSGFR16`,
+`PSGFR18`–`PSGFR23`, and `PSGFR34`. A build that treats warnings as errors therefore fails until the
+call is rewritten or explicitly suppressed.
+
 | Rule | Summary |
 | --- | --- |
 | `PSGFR16` | Prefer the nullable-context `Nullable()`/`MakeNullable()` overload, so annotations honour the target compilation. |
@@ -138,6 +142,9 @@ Most rules above have a fix in `Purview.SourceGeneratorFramework.CodeFixers`:
 | `PreferNullableContextOverloadCodeFixProvider` (project-wide Fix All) | `PSGFR16` |
 | `PipelineModelReferenceEqualityCollectionCodeFixProvider` | `PSGFR15` |
 | `PreferStructuredCodeWriterIfBlockCodeFixProvider` | `PSGFR23` |
+| `PreferStructuredCodeWriterStatementCodeFixProvider` (single-line statements) | `PSGFR19` |
+| `PreferMinimalCodeWriterOverloadCodeFixProvider` | `PSGFR20` |
+| `PreferPragmaDisableCodeFixProvider` (`disable` only) | `PSGFR22` |
 | `CodeWriterToStringCodeFixProvider` | `PSGFR29` |
 | `PreferInlineCodeForFrameworkCrefCodeFixProvider` | `PSGFR40` |
 | `MakeComponentSurfaceNonPublicCodeFixProvider` | `PSGFR41` |

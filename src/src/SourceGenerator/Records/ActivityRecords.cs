@@ -10,7 +10,8 @@ sealed record ActivitySourceTarget(
 	string? ActivitySourceName,
 	EquatableArray<ActivityMethodTarget> ActivityMethods,
 	ActivitySourceAttributeData ActivityTargetAttributeRecord,
-	EquatableArray<TypeParameterTarget> InterfaceTypeParameters = default
+	EquatableArray<TypeParameterTarget> InterfaceTypeParameters = default,
+	EquatableArray<UnionTargetRecord> UnionAccessors = default
 )
 {
 	public string? ClassNamespace => TelemetryGeneration.TelemetryNamesNamespace ?? InterfaceType.Identity.Namespace;

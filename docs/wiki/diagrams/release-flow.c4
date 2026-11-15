@@ -1,0 +1,40 @@
+specification {
+  element stage {
+    style {
+      shape rectangle
+    }
+  }
+  element delivery {
+    style {
+      shape rectangle
+      color secondary
+    }
+  }
+}
+
+model {
+  branch = stage 'Feature branch' {
+    description 'A change on its own branch'
+  }
+  pr = stage 'PR to main' {
+    description 'pr.yml runs purview-build.yml: restore, build, lint, tests'
+  }
+  merge = stage 'Merge to main' {
+    description 'release.yml runs purview-release.yml: build, test, pack, publish'
+  }
+  release = delivery 'GitHub Release' {
+    description 'The NuGet package and the changelog, created by the pipeline'
+  }
+
+  branch -> pr
+  pr -> merge
+  merge -> release
+}
+
+views {
+  view releaseFlow {
+    title 'Release flow'
+    include *
+    autoLayout LeftRight
+  }
+}

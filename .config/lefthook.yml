@@ -1,9 +1,9 @@
 pre-commit:
   jobs:
     - name: csharpier format check
-      run: dotnet csharpier check .
+      run: just lint-fix
 
 commit-msg:
   jobs:
     - name: conventional commits
-      run: bunx --bun commitlint --edit {1}
+      run: bun x --bun commitlint --edit {1}

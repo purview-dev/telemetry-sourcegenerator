@@ -126,6 +126,7 @@ static partial class SharedHelpers
 		if (version is { Major: 0, Minor: 0, Build: <= 0, Revision: <= 0 })
 			return null;
 
+		// The assembly identity's version is a System.Version, which has no concept of a pre-release tag.
 		return version.ToString();
 	}
 
@@ -164,7 +165,16 @@ static partial class SharedHelpers
 		&& GetCanonicalTargetType(generationType, includeActivities: true) == requestingType;
 
 	/// <summary>
-	/// Determines if class-level attributes should be emitted for this requesting type.
+	/// Determines if the union accessors should be emitted for this requesting type.
+	/// Only one target should emit them to avoid duplicate definitions across the generated
+	/// partial classes (CS0111).
+	/// </summary>
+	public static bool ShouldEmitUnionAccessors(GenerationType requestingType, GenerationType generationType) =>
+		requestingType != GenerationType.None
+		&& GetCanonicalTargetType(generationType, includeActivities: true) == requestingType;
+
+	/// <summary>
+	/// Determines if the class-level attributes should be emitted for this requesting type.
 	/// Only one target should emit class attributes to avoid duplicate attributes on partial classes.
 	/// </summary>
 	public static bool ShouldEmitClassAttributes(GenerationType requestingType, GenerationType generationType) =>

@@ -24,8 +24,10 @@ public sealed class SkillTests : PurviewSkillTests
 	[Test]
 	public async Task SkillsFolder_ResolvesToThisRepository()
 	{
+		// Act
 		var catalogue = Evaluator.Catalogue;
 
+		// Assert
 		await Assert
 			.That(catalogue.FolderExists)
 			.IsTrue()
@@ -45,11 +47,13 @@ public sealed class SkillTests : PurviewSkillTests
 		// Skills install into one flat directory per agent, shared with every skill a developer has
 		// installed from anywhere. An unprefixed name collides with somebody else's, and the loser is
 		// whichever installed second.
+		// Act
 		var unprefixed = Evaluator
 			.Catalogue.Skills.Select(skill => skill.FolderName)
 			.Where(name => !name.StartsWith("purview-telemetry", StringComparison.Ordinal))
 			.ToArray();
 
+		// Assert
 		await Assert
 			.That(unprefixed)
 			.IsEmpty()

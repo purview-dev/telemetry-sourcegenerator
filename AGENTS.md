@@ -53,7 +53,7 @@ All `just` recipes read the repository's [`Justfile`](Justfile). Configuration d
 | Command | Purpose |
 | --- | --- |
 | `just format` | Runs `dotnet format` over `./src/`. |
-| `just lint` | Runs `dotnet csharpier check .` (no writes). |
+| `just lint-check` | Runs `dotnet csharpier check .` (no writes). |
 | `just lint-fix` | Runs `dotnet csharpier format .` (writes). |
 
 `csharpier check` also runs in the pre-commit hook (`.config/lefthook.yml`) alongside a commitlint
@@ -64,6 +64,7 @@ conventional-commits check.
 | Command | Purpose |
 | --- | --- |
 | `just version` | Prints the current version from `package.json`. |
+| `just bump major\|minor\|patch` | Bumps that part of the version in `package.json`, then runs `update-version` through `_after-bump`. |
 | `just update-version` | Runs `.build/update-version.ts` to sync the version into docs/samples. |
 | `just pack` | Updates the version then packs the NuGet package into `artifacts/`. |
 
@@ -132,7 +133,7 @@ samples/
 benchmarks/
 └── Purview.Telemetry.Benchmarks/           # BenchmarkDotNet project (net48/net10.0/net11.0)
 
-.build/                                     # TS scripts (build-pack.ts, update-version.ts)
+.build/                                     # TS scripts (build-pack.ts, update-version.ts) and just/ modules
 .agents/skills/                             # Installed + developer skills, committed (see "Installed skills")
 skills-lock.json                            # The skills CLI lockfile for .agents/skills/, committed
 skills/                                     # Authored skills shipped by this package (see "Authoring skills")
@@ -141,7 +142,10 @@ skills/                                     # Authored skills shipped by this pa
 scripts/                                    # release-gate scripts (see "Quality gates"), legacy setup-release.*
 └── packed-consumers/                       # Native AOT, Blazor WebAssembly and Blazor Server consumers of the .nupkg
 docs/release-process.md                     # Release process documentation
-docs/wiki/                                  # User documentation (Platform-Support.md: TFM/hosting matrix, .NET 11)
+docs/wiki/                                  # User documentation (purview.dev docs), one topic folder per area
+├── guide/ telemetry/ reference/            #   migration/ contributing/ - _Sidebar.md is the navigation
+├── diagrams/                               #   LikeC4 models (.c4), each paired with a Mermaid fence in the page
+└── _redirects.yml                          #   old URL -> new URL for every moved page
 ```
 
 ## Build and validation workflow
@@ -151,7 +155,7 @@ After making changes to the source generator:
 1. `just build` — build the main solution.
 2. `just test` — run the integration tests.
 3. `just build-s && just test-s` — build and test the sample application end to end.
-4. `just lint` / `just format` — ensure C# formatting compliance before committing.
+4. `just lint-check` / `just format` — ensure C# formatting compliance before committing.
 
 The sample projects enable `EmitCompilerGeneratedFiles`, so generated telemetry can be inspected in
 `obj/*/generated/` to sanity-check generator output.
@@ -177,7 +181,7 @@ Treat work as incomplete until every gate relevant to it passes. Before a releas
 - `just verify-pack-rules` after any change to `PackValidation` in `.config/purview-build.json` (it is also the last
   step of `just pipeline-pack-validate`, so packing locally proves the rules without a second command).
 - `just build-s && just test-s` — the samples, which reference the generator as an analyzer project.
-- `just lint` — CSharpier reports no change (`just lint-fix` to apply it).
+- `just lint-check` — CSharpier reports no change (`just lint-fix` to apply it).
 
 Compiler-host assemblies (`Purview.SourceGeneratorFramework*`, `Microsoft.CodeAnalysis*`, and this
 repository's `Purview.Telemetry.SourceGenerator*` generator and refactorings) must never reach an
@@ -187,7 +191,7 @@ any CI job that builds the samples or publishes an application must run it on wh
 tests keep the leak scan honest against crafted leaks, keep the `packed-consumers` job, the Justfile
 recipes and every `ForbiddenContent` rule wired up, and require the consumers in
 `scripts/packed-consumers/` to reference the generator as a package, never as a project. The full
-table of gates is in [`docs/wiki/Release-Flow.md`](docs/wiki/Release-Flow.md#release-gates).
+table of gates is in [`docs/wiki/contributing/Release-Flow.md`](docs/wiki/contributing/Release-Flow.md#release-gates).
 
 ### Test project details
 
@@ -198,7 +202,7 @@ table of gates is in [`docs/wiki/Release-Flow.md`](docs/wiki/Release-Flow.md#rel
 - Gate new emitted APIs on the compilation (`Compilation.GetTypeByMetadataName`, surfaced through
   `TelemetryCapabilities`), not on the target framework: the System.Diagnostics.DiagnosticSource package brings .NET 11
   types to `net462`/`netstandard2.0`. The supported matrix and the list of .NET 11 features that are not generated
-  yet live in [`docs/wiki/Platform-Support.md`](docs/wiki/Platform-Support.md); update it with any such change.
+  yet live in [`docs/wiki/reference/Platform-Support.md`](docs/wiki/reference/Platform-Support.md); update it with any such change.
 - Tests use `Purview.SourceGeneratorFramework.Testing.TUnit` (TUnit + the framework's `CodeQuery`
   syntax-lookup API and assertion extensions). There is no Verify/snapshot library; refactoring tests
   use the framework's `CodeRefactoringTestBase` snapshot approach.
@@ -208,7 +212,7 @@ table of gates is in [`docs/wiki/Release-Flow.md`](docs/wiki/Release-Flow.md#rel
 
 - **Conventional commits**: enforced by commitlint (`.config/lefthook.yml`). Types: `build`, `chore`,
   `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`, `test`.
-- **Formatting**: C# is formatted with csharpier; check with `just lint` and fix with `just lint-fix`. CSharpier
+- **Formatting**: C# is formatted with csharpier; check with `just lint-check` and fix with `just lint-fix`. CSharpier
   1.4.0 parses C# 15, so the two files that declare a `closed` hierarchy are formatted like any other and the
   `.csharpierignore` those entries lived in is gone. Do not reintroduce an ignore file to work around the parser;
   a file it cannot read is a version bump, not an exclusion.
@@ -226,10 +230,15 @@ table of gates is in [`docs/wiki/Release-Flow.md`](docs/wiki/Release-Flow.md#rel
   recorded as its case value, never as the union struct. `Helpers/UnionHelpers.cs` detects it
   (case types from the nested `IUnionMembers` provider when there is one, otherwise from the union's
   single-parameter constructors, and whether it declares the non-boxing `HasValue`/`TryGetValue` pattern);
-  `Emitters/UnionAccessorEmitter.cs` emits one private accessor per union type into each generated class;
-  every target renders the value through `UnionTargetRecord.RenderValueExpression()` rather than the
-  parameter name. Detection is by symbol, never by target framework. Whether a union is a *declared*
-  `union` or hand-written decides only whether the accessor reads `TryGetValue` or `Value`.
+  `Emitters/UnionAccessorEmitter.cs` emits one private accessor per union type into the generated class, and
+  `Helpers/UnionAccessorPlanner.cs` decides that only the canonical target declares it — the class is one
+  `partial` across the target files, so a second declaration is `CS0111` for the consumer. The owning target's
+  list is the interface's unions when the interface registers more than one target, and its own parameters'
+  unions when it registers one, so a single-target interface's output is unchanged. Every target renders the
+  value through `UnionTargetRecord.RenderValueExpression()` rather than the parameter name — including an
+  `[Event]` tag, which is collected into an `ActivityTagsCollection` rather than set through `SetTag`.
+  Detection is by symbol, never by target framework. Whether a union is a *declared* `union` or hand-written
+  decides only whether the accessor reads `TryGetValue` or `Value`.
 - **SDK**: projects import `Purview.BuildSdk` via `Directory.Build.props`/`.targets`. The repo
   sets `ExcludePurviewTelemetry=true` (it does not consume the telemetry package it generates) and
   `NamespacePrefix=Purview.Telemetry` under `src/`. See `.agents/skills/purview-buildsdk-*` for SDK behavior.
@@ -238,7 +247,7 @@ table of gates is in [`docs/wiki/Release-Flow.md`](docs/wiki/Release-Flow.md#rel
   C# 15 updated memory-safety rules (`MemorySafetyRules=2`), with `AllowUnsafeBlocks` left off. Do not add
   `Features` or `MemorySafetyRules` to a project file; set `PurviewRuntimeAsync=false` / `MemorySafetyRules=0`
   to opt one project out. `.NET 10` and `netstandard2.0` legs are deliberately untouched.
-  `docs/wiki/Platform-Support.md` records every .NET 11 feature that was evaluated and why it is or is not used.
+  `docs/wiki/reference/Platform-Support.md` records every .NET 11 feature that was evaluated and why it is or is not used.
 - **Dependency versions are lower bounds.** `Directory.Packages.props` keeps one property per package family —
   `DotnetRuntimeVersion` for the runtime-tracked `10.0.<patch>` line, `MSExtensionVersion` for
   dotnet/extensions' `10.<minor>.0` — and pins the lowest supported framework line (`net10.0`), never the
@@ -289,7 +298,7 @@ skill cannot drift into `skills/`.
 
 | Developer skill | Answers |
 | --- | --- |
-| `.agents/skills/purview-telemetry-benchmarks/` | running the BenchmarkDotNet suite for .NET 10 / .NET 11 / .NET Framework 4.8, reading a report, refreshing `docs/wiki/Performance.md` and `README.md`, writing the analysis, adding a family |
+| `.agents/skills/purview-telemetry-benchmarks/` | running the BenchmarkDotNet suite for .NET 10 / .NET 11 / .NET Framework 4.8, reading a report, refreshing `docs/wiki/reference/Performance.md` and `README.md`, writing the analysis, adding a family |
 
 Skills are installed into the universal `.agents/skills/` location **only**. Never install copies
 into `.claude/` or any other per-agent folder. Pass `-a universal`, which writes `.agents/skills/`
@@ -386,7 +395,7 @@ prose instead, and keep deep detail in the skill's own `references/`.
 > `README.md`. Never copy stale results or estimate values — every performance table must come from a
 > current run.
 
-The full workflow — running the suite, reading a report, refreshing `docs/wiki/Performance.md` and
+The full workflow — running the suite, reading a report, refreshing `docs/wiki/reference/Performance.md` and
 `README.md`, writing the analysis and adding a family — is the developer skill
 `.agents/skills/purview-telemetry-benchmarks/`. Load it before touching a performance number; the
 points below are the constraints it depends on.
@@ -415,5 +424,6 @@ See [`docs/release-process.md`](docs/release-process.md) for the full flow. In s
 2. Merging to `main` triggers `release.yml`, which runs the reusable
    `purview-dev/build/.github/workflows/purview-release.yml` pipeline (build, test, pack, publish,
    GitHub release).
-3. The version is read from `package.json`. Bump it and run `just update-version` to sync docs/samples,
-   then use `just pipeline-local-release` to validate locally or `just pipeline-release` to publish.
+3. The version is read from `package.json`. Bump it with `just bump major|minor|patch`, which runs
+   `update-version` for you to sync docs/samples, then use `just pipeline-local-release` to validate
+   locally or `just pipeline-release` to publish.

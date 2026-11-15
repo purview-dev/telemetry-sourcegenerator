@@ -51,7 +51,7 @@ public class RegexValidationTests
 
 	static async Task MatchAsync(string template, TestMessageTemplateHole[] holes)
 	{
-		// Arrange/ Act
+		// Act
 		var matches = PropertyLibrary.MessageTemplateMatcher.Matches(template);
 
 		// Assert

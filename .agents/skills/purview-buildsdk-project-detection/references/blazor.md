@@ -12,9 +12,30 @@ prevents. Nothing here changes a project that is not a WebAssembly client, a Bla
 | `IsContainerProject=false`, so no `PublishAot`, `InvariantGlobalization` or Docker defaults | `PublishAot` on a client is a publish that fails, and the Blazor SDK owns globalisation | `DisablePurviewBlazorWebAssemblyDefaults=true` before the SDK import |
 | no automatic `../Shared*/Shared*.csproj` reference | a server-side library joining the browser download because of a folder name | `DisablePurviewBlazorWebAssemblyDefaults=true` before the SDK import |
 | the browser-safe reference check (`PRBLZ0001`) | a library joining the download without anyone deciding it was safe there | `DisablePurviewBrowserSafeReferenceCheck=true` |
+| the managed `Directory.Build.rsp` written as `-mt:false`, naming the client | the WebAssembly SDK's `ReadWasmProps` failing under `-mt` with `MSB4060`, an error that points nowhere near the response file | `PurviewMultiThreadedBuild=true` (which then fails with `PRBLZ0002`) |
+| `PRBLZ0002` when a `net11.0`+ client is built under `-mt` anyway | the same failure, reported before `PrepareForBuild` and naming where `-mt` came from | none: the build would fail anyway |
 
 Globalisation, trimming mode and the Blazor runtime settings are deliberately left alone: the Blazor
 SDK owns them, and a second default would compete with it.
+
+### The multithreaded build (`PRBLZ0002`)
+
+A `net11.0` client cannot build under MSBuild's `-mt`, because the WebAssembly SDK's `ReadWasmProps`
+task comes from a custom task factory that cannot run in the out-of-process task host. The
+`Directory.Build.rsp` the SDK manages is per repository, so with `PurviewMultiThreadedBuild` unset:
+
+- a client writes `-mt:false` and a `# -mt:false: the Blazor WebAssembly client '<path>' ...` line;
+- every other project leaves that file alone while `<path>` exists, and writes `-mt` again once it
+  does not;
+- a `PurviewMultiThreadedBuild` the user set always wins, and a file without the marker line is never
+  rewritten.
+
+A client built under `-mt` anyway (the command line, a response file the user owns,
+`PurviewMultiThreadedBuild=true`, or the first build after upgrading from 2.0.x) stops with `PRBLZ0002`.
+The message says whether `-mt` came from the command line or which `Directory.Build.rsp`, and gives the
+fix: `<PurviewMultiThreadedBuild>false</PurviewMultiThreadedBuild>`, or `-mt:false`. After an upgrade,
+the managed file has already been rewritten, so building again is the fix. A `net10.0` client builds
+under `-mt` and is not checked.
 
 ### The automatic packages
 
@@ -70,12 +91,14 @@ Applies to class libraries only, and only what the project has not set:
 - `<SupportedPlatform Include="browser" />`, so `CA1416` reports an API the browser does not support;
 - `WarningsAsErrors` for every trim (`IL2001`-`IL2128`), single-file (`IL3000`-`IL3005`) and AOT
   (`IL3050`-`IL3059`) diagnostic and `CA1416`, listed in `PurviewBrowserSafeWarningCodes`.
-  `TreatWarningsAsErrors` is not touched.
+  `TreatWarningsAsErrors` is not touched (it is `true` for every project by default), so these stay
+  errors in a project that turns it off.
 
 `CA1416` is `suggestion` in the shipped `.editorconfig`. The compiler's `/warnaserror+:CA1416`
 outranks an `.editorconfig` severity, so the error still fires without the repository's setting
 changing. The consequence of `PurviewBrowserSafeWarningsAsErrors=false` is that the trim and AOT
-diagnostics stay warnings while `CA1416` falls back to the repository's configured severity.
+diagnostics follow `TreatWarningsAsErrors` (`true` by default) while `CA1416` falls back to the
+repository's configured severity.
 
 What it cannot catch: file and network I/O. `File` works against the browser's in-memory file system
 and `HttpClient` works through `fetch`, so neither is annotated as unsupported, and no analyzer reports

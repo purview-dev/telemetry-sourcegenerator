@@ -1,6 +1,6 @@
 ---
 name: purview-buildsdk-project-detection
-description: Explain why Purview.BuildSdk classified a project as test, shared, shared-testing, ServerShared, client-side, CLI, web, worker, Aspire host, container, Roslyn component, Blazor WebAssembly client, Razor class library, Blazor host or BFF, and why it added a package, a project reference, a namespace or an analyzer automatically. Use when SDK behaviour looks surprising, when a test project gets no runner or no InternalsVisibleTo, or when reasoning about RootNamespace, AssemblyName and TargetProjectName.
+description: Explain why Purview.BuildSdk classified a project as test, shared, shared-testing, ServerShared, client-side, CLI, web, worker, Aspire host, container, Roslyn component, Blazor WebAssembly client, Razor class library, Blazor host or BFF, or why it picked the target framework(s) it did, and why it added a package, a project reference, a namespace or an analyzer automatically. Use when SDK behaviour looks surprising, when a test project gets no runner or no InternalsVisibleTo, or when reasoning about RootNamespace, AssemblyName and TargetProjectName.
 license: MIT
 metadata:
   package: Purview.BuildSdk
@@ -93,13 +93,28 @@ dotnet msbuild <host> -t:ResolvePurviewBlazorHostProject -getProperty:IsBlazorHo
 What each Blazor and BFF classification applies - and the browser-safe library check - is in
 [references/blazor.md](references/blazor.md).
 
+### Target frameworks
+
+A project that declares neither `TargetFramework` nor `TargetFrameworks` gets the SDK's default set,
+`net10.0;net11.0` (`Current`). A `PurviewTargetFrameworkSet` (`Current`, `Latest`, `Supported`, `Broad`,
+`All`) resolves the same way; an unknown name fails with `PurviewInvalidTargetFrameworkSet`. A Roslyn
+component keeps `netstandard2.0` and ignores the sets (`PurviewTargetFrameworkSetIgnored`).
+
+An explicit `TargetFramework` or `TargetFrameworks` always wins, wherever it is set: one the SDK cannot
+see in the project XML (a `Condition`, an imported file, a `Directory.Build.props` value) is reconciled
+after the project body, before the .NET SDK decides whether to multi-target. `PurviewTargetFrameworkSet`
+is still read from the **project XML**, so a `Condition` on it is not seen and is reported as
+`PurviewConditionedProjectDeclaration`. See `purview-buildsdk-configuration` for how to set them.
+
 ## Namespace and identity
 
 1. `PurviewLogicalProjectName` is `NamespacePrefix` plus the project name, de-duplicated when the
    project name already starts with the prefix's tail.
 2. `RootNamespace` defaults to `PurviewLogicalProjectName`.
-3. Known suffixes are stripped from `RootNamespace` — shared and shared-testing names, and segments
-   such as `Core`, `EF`, `Shared`, `ClientShared`, `ServiceDefaults`.
+3. Known suffixes are stripped from `RootNamespace` in two passes: while `Sdk.props` evaluates, the
+   shared, server-shared and shared-testing names plus `Core`, `EF`, `Shared`, `ClientShared` and
+   `ServiceDefaults`; then, during the build, the wider `NamespaceRemoveSuffix` list (`Infrastructure`,
+   `Abstractions`, `Contracts`, …). A `RootNamespace` declared in the project file is left as written.
 4. Test suffixes are stripped too, so `Acme.Api.UnitTests` maps back to `Acme.Api`.
 5. `AssemblyName` and `PackageId` default to the fully evaluated `RootNamespace` — except where
    stripping removed a segment, where they use the full `PurviewLogicalProjectName` so the artifact
@@ -110,7 +125,8 @@ What each Blazor and BFF classification applies - and the browser-safe library c
 
 ## Automatic packages and references
 
-- **Non-test C# projects**: SourceLink (unless `DisableSourceLink`), the Purview telemetry packages
+- **Non-test C# projects**: a SourceLink provider package (`SourceLinkPackageName`, default
+  `Microsoft.SourceLink.GitHub`; `DisableSourceLink=true` opts out), the Purview telemetry packages
   (unless `ExcludePurviewTelemetry`), `GenerateDocumentationFile=true`, and `InternalsVisibleTo`
   generation (unless `DisableAutoInternalsVisibleTo`).
 - **Test and shared-testing projects**: test-friendly `NoWarn` defaults, not packable or
@@ -127,7 +143,10 @@ Project-reference probing is layout-driven and covered by `purview-buildsdk-proj
 ## The shipped analyzers
 
 The SDK adds `Purview.BuildSdk.Analyzers` as an `<Analyzer>` item to every C# project, so its rules
-surface in command-line builds and in Visual Studio. The code-fix assembly ships beside it.
+surface in command-line builds and in Visual Studio. The code-fix assembly ships beside it. The rules
+read the SDK's compiler-visible properties (`build_property.*`) rather than re-deriving project state —
+`PDS0008`/`PDS0009`, for example, are gated on `build_property.IsBffProject`. The exported set is in
+`purview-buildsdk-configuration`.
 
 | Rule | What it enforces |
 | -- | -- |
@@ -137,10 +156,10 @@ surface in command-line builds and in Visual Studio. The code-fix assembly ships
 | `PDS0008` | A BFF's authentication cookie is not set `HttpOnly = false` |
 | `PDS0009` | A BFF's authentication cookie is not set `SameSite = None` |
 
-`PDS0004` follows .NET naming guidance: well-known framework spellings (`Sql`, `Guid`, `Uuid`,
-`Url`, `Dns`, `Tcp`, `Http`, `Xml`, `Db`, …) are exempt — `Db` among them, so `DbContext`,
-`DbConnection` and `DbSet` are never flagged. A small set is still uppercased: `Api`, `Ai`, `Ui`,
-`Io`, `Os`, `Cpu`, `Gpu`, `Cli`, `Gui`, `Ram`, `Ssh`. Members mandated by a contract — interface
+`PDS0004` follows .NET naming guidance: well-known framework spellings (`Sql`, `Uuid`, `Url`, `Dns`,
+`Tcp`, `Http`, `Xml`, `Db`, …) are exempt — `Db` among them, so `DbContext`, `DbConnection` and `DbSet`
+are never flagged. A small set is still uppercased: `Api`, `Ai`, `Ui`, `Io`, `Os`, `Cpu`, `Gpu`, `Cli`,
+`Gui`, `Ram`, `Ssh`, `Dsl`. Members mandated by a contract — interface
 implementations and base-class overrides — are never renamed.
 
 Customise through `dotnet_analyzer_configuration.pds0004.allowed_words` (exempt segments),
@@ -155,9 +174,11 @@ diagnostics under `Extensions/`, so no `#pragma` suppressions are needed there.
 Two Visual Studio refactorings ship with them, both described in
 [references/detection.md](references/detection.md).
 
-## When changing a detection rule
+## When a classification is wrong
 
-1. Keep the `.csproj` filename equal to its directory name.
-2. Update `README.md` and the shipped skills in the same change — a rule true in code and false in
-   prose is this repository's recurring failure.
-3. Add or update the integration test in `src/tests/BuildSdk.IntegrationTests/` that pins it.
+1. Confirm the computed value with `dotnet msbuild <project> -getProperty:<Flag>` before changing
+   anything.
+2. Prefer fixing the name or placement so the convention applies; keep the `.csproj` filename equal
+   to its directory name.
+3. Otherwise set the flag explicitly before the SDK import (`IsBffProject` and `IsClientSideProject`
+   can also be set in the project), and say why in a comment.

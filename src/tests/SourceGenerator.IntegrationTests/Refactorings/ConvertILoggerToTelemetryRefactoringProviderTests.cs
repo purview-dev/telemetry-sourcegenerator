@@ -9,6 +9,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 	[Test]
 	public async Task ComputeRefactorings_GivenClassWithoutILogger_ReturnsNoActions(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -20,8 +21,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(actions).IsEmpty();
 	}
 
@@ -30,6 +33,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -48,8 +52,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(actions).IsEmpty();
 	}
 
@@ -62,6 +68,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -83,8 +90,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(actions).IsNotEmpty();
 		await Assert.That(actions[0].Title).IsEqualTo("Convert ILogger to IWeatherServiceLogs");
 	}
@@ -94,6 +103,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -115,8 +125,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("IWeatherServiceLogs");
@@ -130,6 +142,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -153,8 +166,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Trace(\"Trace {OrderId}\")]");
 		await Assert.That(result).Contains("[Debug(\"Debug {OrderId}\")]");
@@ -169,6 +184,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System;
 			using Microsoft.Extensions.Logging;
@@ -192,8 +208,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Error(\"Payment failed for {PaymentId}\")]");
 		await Assert.That(result).Contains("System.Exception");
@@ -206,6 +224,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -225,8 +244,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		// "User {UserId} logged in"       → UserLoggedIn
 		// "User {UserId} logged in from {Ip}" → UserLoggedInFrom
@@ -239,6 +260,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -257,8 +279,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		// ILogger<ReportService> should be replaced with IReportServiceLogs
 		await Assert.That(result).Contains("IReportServiceLogs _logger");
@@ -272,6 +296,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -290,8 +315,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("void HealthCheckStarted()");
 	}
@@ -301,6 +328,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -319,8 +347,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("ISimpleServiceLogs");
@@ -333,6 +363,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -351,8 +382,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		// The invocation should now be _logger.Saving(key, value) — no template string
 		await Assert.That(result).Contains("_logger.Saving(key, value)");
@@ -361,6 +394,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 	[Test]
 	public async Task ApplyRefactoring_GivenGenericLogMethod_MapsToCorrectAttribute(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -379,8 +413,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Warning(\"Audit: {Action}\")]");
 		await Assert.That(result).Contains("void Audit(string action)");
@@ -389,6 +425,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 	[Test]
 	public async Task ApplyRefactoring_GivenNamespace_IncludesNamespaceInInterface(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -407,8 +444,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("INotificationServiceLogs");
@@ -419,6 +458,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -437,8 +477,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("query");
 		await Assert.That(result).Contains("page");
@@ -452,6 +494,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 	[Test]
 	public async Task ApplyRefactoring_GivenLogCallWithEventId_SkipsEventIdArgument(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -470,8 +513,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		// new EventId(1, "OrderProcessed") is not a literal int, so EventId is not embedded in attribute;
 		// the message template IS embedded.
@@ -485,6 +530,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System;
 			using Microsoft.Extensions.Logging;
@@ -508,8 +554,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Error(\"Shipping failed for {TrackingId}\")]");
 		await Assert.That(result).Contains("exception");
@@ -524,6 +572,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 	[Test]
 	public async Task ApplyRefactoring_GivenLogLevelInformation_MapsToInfoAttribute(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -542,8 +591,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Info(\"Refreshing cache for {Key}\")]");
 		await Assert.That(result).Contains("void RefreshingCacheFor(string key)");
@@ -552,6 +603,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 	[Test]
 	public async Task ApplyRefactoring_GivenLogLevelNone_EmitsFallbackLogAttribute(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -570,8 +622,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Log(");
 		await Assert.That(result).Contains("LogLevel.None");
@@ -586,6 +640,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -604,8 +659,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("void UserLoggedIn(object user)");
 		// The template is preserved verbatim in the attribute (including the {@…} prefix),
@@ -619,6 +676,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -637,8 +695,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("void ProductCreated(object product)");
 		// The template is preserved verbatim in the attribute (including the {$…} prefix),
@@ -652,6 +712,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -670,8 +731,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("void MetricValue(double value)");
 	}
@@ -681,6 +744,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -699,8 +763,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("void ItemCount(int count)");
 	}
@@ -710,6 +776,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -728,8 +795,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("label");
 		await Assert.That(result).Contains("arg1");
@@ -745,6 +814,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -761,8 +831,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("IGlobalServiceLogs");
@@ -778,6 +850,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -804,8 +877,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(actions).IsNotEmpty();
 	}
 
@@ -814,6 +889,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -832,8 +908,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("IFilterServiceLogs logger");
 		// non-logger param must be untouched
@@ -849,6 +927,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -863,8 +942,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(actions).IsNotEmpty();
 		await Assert.That(actions[0].Title).IsEqualTo("Convert ILogger to IWeatherServiceLogs");
 	}
@@ -874,6 +955,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -888,8 +970,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("IWeatherServiceLogs");
@@ -905,6 +989,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -919,8 +1004,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("ISimpleServiceLogs");
@@ -934,6 +1021,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -949,8 +1037,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("IServicesLogs");
@@ -971,6 +1061,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -985,8 +1076,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("IOrderServiceLogs logger");
 		// Non-logger param must be untouched
@@ -1002,6 +1095,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -1018,8 +1112,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(actions).IsNotEmpty();
 		await Assert.That(actions[0].Title).IsEqualTo("Convert ILogger to IWeatherServiceLogs");
 	}
@@ -1027,6 +1123,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 	[Test]
 	public async Task ApplyRefactoring_GivenILoggerProperty_ReplacesPropertyType(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -1043,8 +1140,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("IReportServiceLogs");
@@ -1058,6 +1157,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -1074,8 +1174,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("IAuditServiceLogs Logger");
 		await Assert.That(result).DoesNotContain("ILogger<AuditService>");
@@ -1090,6 +1192,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -1104,8 +1207,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var actions = await GetRefactoringActionsAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(actions).IsNotEmpty();
 		await Assert.That(actions[0].Title).IsEqualTo("Convert ILogger to IWeatherServiceLogs");
 	}
@@ -1113,6 +1218,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 	[Test]
 	public async Task ApplyRefactoring_GivenILoggerMethodParam_ReplacesParamType(CancellationToken cancellationToken)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -1127,8 +1233,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Logger]");
 		await Assert.That(result).Contains("IDataServiceLogs");
@@ -1145,6 +1253,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -1164,8 +1273,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Info(\"Starting {Task}\")]");
 		await Assert.That(result).Contains("[Error(\"Failed {Task}\")]");
@@ -1183,6 +1294,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -1201,8 +1313,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		// The message template must appear verbatim in the attribute argument.
 		await Assert.That(result).Contains("[Info(\"Processing order {OrderId} for customer\")]");
@@ -1213,6 +1327,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		// When the message template is stored in a variable, not a string literal, the refactoring
 		// cannot statically determine the template value.  The attribute should be emitted without
 		// any template argument — the source generator will auto-generate a name from parameters.
@@ -1236,9 +1351,11 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
 		// Refactoring should still trigger because there are log calls.
+		// Assert
 		await Assert.That(result).IsNotNull();
 		// The attribute must NOT contain a template string argument.
 		await Assert.That(result).Contains("[Info]");
@@ -1249,6 +1366,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -1272,8 +1390,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Trace(\"Trace: {Name}\")]");
 		await Assert.That(result).Contains("[Debug(\"Debug: {Name}\")]");
@@ -1288,6 +1408,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -1306,8 +1427,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		// Unmapped level → [Log(LogLevel.None, "Diag: {Info}")]
 		await Assert.That(result).Contains("[Log(");
@@ -1320,6 +1443,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -1338,8 +1462,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		// Backslash in the original template must be escaped in the attribute string argument.
 		await Assert.That(result).Contains("[Info(");
@@ -1355,6 +1481,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -1373,8 +1500,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		// Literal int EventId 42 must appear in the attribute before the template.
 		await Assert.That(result).Contains("[Info(42, \"Creating invoice {InvoiceId}\")]");
@@ -1386,6 +1515,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -1404,8 +1534,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		// new EventId(…) is not a plain literal, so no EventId in the attribute; template IS embedded.
 		await Assert.That(result).Contains("[Info(\"Shipping {TrackingId}\")]");
@@ -1417,6 +1549,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using System;
 			using Microsoft.Extensions.Logging;
@@ -1440,8 +1573,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		await Assert.That(result).Contains("[Error(7, \"Payment failed for {PaymentId}\")]");
 		await Assert.That(result).Contains("System.Exception exception");
@@ -1453,6 +1588,7 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 		CancellationToken cancellationToken
 	)
 	{
+		// Arrange
 		const string code = """
 			using Microsoft.Extensions.Logging;
 
@@ -1471,8 +1607,10 @@ public sealed class ConvertILoggerToTelemetryRefactoringProviderTests : CodeRefa
 			}
 			""";
 
+		// Act
 		var result = await ApplyRefactoringAsync(code, cancellationToken: cancellationToken);
 
+		// Assert
 		await Assert.That(result).IsNotNull();
 		// [Log] with both EventId and LogLevel must use LogAttribute(int eventId, LogLevel level, …)
 		// so eventId (99) must appear before the LogLevel argument.
