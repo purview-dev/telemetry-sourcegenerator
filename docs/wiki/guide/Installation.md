@@ -13,7 +13,7 @@ This page covers supported frameworks, installation methods, per-feature depende
 
 - Visual Studio 2026 (18.x) or the .NET 10 SDK or later (Roslyn 5.9.0+)
 
-The generator itself is a Roslyn component targeting `netstandard2.0`, so it works in any supported compiler host. See [Platform Support and .NET 11](Platform-Support.md) for the hosting models (Native AOT, Blazor WebAssembly, Blazor Server, Aspire) and the trim/AOT guarantees.
+The generator itself is a Roslyn component targeting `netstandard2.0`, so it works in any supported compiler host. See [Platform Support and .NET 11](../reference/Platform-Support.md) for the hosting models (Native AOT, Blazor WebAssembly, Blazor Server, Aspire) and the trim/AOT guarantees.
 
 ## Install the package
 
@@ -48,7 +48,7 @@ Install-Package Purview.Telemetry.SourceGenerator
 | Logging | `Microsoft.Extensions.Logging.Abstractions` | Required for `[Logger]` interfaces; `TSG2003` is raised if `ILogger` cannot be resolved. Part of the shared framework on .NET 11, so no reference is needed there (an explicit one reports `NU1510`) |
 | Logging (v2) | `Microsoft.Extensions.Telemetry.Abstractions` | Required for state-based v2 generation (`LoggerMessageHelper`, `[LogProperties]`) |
 | Metrics | `System.Diagnostics.Metrics` | Included in the SDK for .NET 10+ |
-| Activities from `ActivitySourceFactory` (opt-in) | `Microsoft.Extensions.Diagnostics` 11 (`services.AddTracing()`) | Only with `UseActivitySourceFactory`; see [Activities](Activities.md#creating-sources-with-activitysourcefactory-net-11) |
+| Activities from `ActivitySourceFactory` (opt-in) | `Microsoft.Extensions.Diagnostics` 11 (`services.AddTracing()`) | Only with `UseActivitySourceFactory`; see [Activities](../telemetry/Activities.md#creating-sources-with-activitysourcefactory-net-11) |
 
 ## Verifying the install
 
@@ -100,7 +100,7 @@ Define this constant to disable logging generation entirely. This is useful when
 ### Unsupported target frameworks
 
 A compilation that targets neither `net10.0`+ nor `net48`+ (for example `netstandard2.0`, `net8.0` or
-`net9.0`) reports [`TSG1011`](Diagnostics.md#tsg1011) and generates nothing. No define suppresses it. A
+`net9.0`) reports [`TSG1011`](../reference/Diagnostics.md#tsg1011) and generates nothing. No define suppresses it. A
 library that keeps such a target references the package only from its supported targets, and puts its
 telemetry interfaces under the same condition:
 
@@ -171,6 +171,6 @@ See the [sample application](Sample-Application.md) for a complete Aspire setup 
 
 ## Next steps
 
-- [Getting Started](Getting-Started.md) — write your first telemetry interface
-- [Generation Options](Generation.md) — control class names, DI, and naming
-- [Diagnostics](Diagnostics.md) — analyzer warnings and errors
+- [Getting Started](../Getting-Started.md) — write your first telemetry interface
+- [Generation Options](../Generation.md) — control class names, DI, and naming
+- [Diagnostics](../reference/Diagnostics.md) — analyzer warnings and errors

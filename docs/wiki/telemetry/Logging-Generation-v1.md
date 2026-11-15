@@ -1,7 +1,9 @@
 # Logging Generation v1
 
+The original `LoggerMessage.Define`-based logging mode: what it emits, its limits, and when it is still generated.
+
 > [!IMPORTANT]
-> All attributes are now in the unified `Purview.Telemetry` namespace. See [Breaking Changes](Breaking-Changes.md#namespace-consolidation) for migration details.
+> All attributes are now in the unified `Purview.Telemetry` namespace. See [Breaking Changes](../reference/Breaking-Changes.md#namespace-consolidation) for migration details.
 
 Generation v1 is the previous style of log generation, built on [`LoggerMessage.Define`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.loggermessagedefine) from the [high-performance logging](https://learn.microsoft.com/en-us/dotnet/core/extensions/high-performance-logging) libraries.
 
@@ -83,4 +85,4 @@ If no level is specified on the method and an `Exception` parameter is present, 
 
 - [Logging Generation v2](Logging-Generation-v2.md) — the state-based mode with `[ExpandEnumerable]`/`[LogProperties]`
 - [Logging](Logging.md) — choosing between v1 and v2
-- [Diagnostics](Diagnostics.md) — the `TSG2xxx` Logging rules
+- [Diagnostics](../reference/Diagnostics.md) — the `TSG2xxx` Logging rules

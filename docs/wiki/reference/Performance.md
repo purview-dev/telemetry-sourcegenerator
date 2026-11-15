@@ -22,7 +22,7 @@ is **gitignored**: the artifacts stay on the machine that produced them, and the
 
 ## Environment
 
-```
+```text
 BenchmarkDotNet v0.16.0-preview.2, Windows 11 (10.0.26300.9974)
 13th Gen Intel Core i9-13900KF 3.00GHz, 1 CPU, 32 logical and 24 physical cores
 Memory: 63.77 GB Total, 39.06 GB Available

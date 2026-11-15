@@ -1,7 +1,9 @@
 # Metrics
 
+The metric attributes and instruments: counters, histograms, gauges, observable instruments, and meter naming.
+
 > [!IMPORTANT]
-> All attributes are now in the unified `Purview.Telemetry` namespace. See [Breaking Changes](Breaking-Changes.md#namespace-consolidation) for migration details.
+> All attributes are now in the unified `Purview.Telemetry` namespace. See [Breaking Changes](../reference/Breaking-Changes.md#namespace-consolidation) for migration details.
 
 All metric-related attributes live in the `Purview.Telemetry` namespace. To signal an interface for meter generation, decorate it with the `[Meter]` attribute.
 
@@ -235,4 +237,4 @@ instead of silently doing nothing.
 
 - [Tags, Baggage, and Parameter Attributes](Tags-and-Baggage.md) — tagging parameters
 - [Multi-Targeting](Multi-Targeting.md) — combining Metrics with Activities and Logging
-- [Diagnostics](Diagnostics.md) — the `TSG4xxx` Metrics rules
+- [Diagnostics](../reference/Diagnostics.md) — the `TSG4xxx` Metrics rules

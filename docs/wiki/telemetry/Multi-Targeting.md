@@ -288,4 +288,4 @@ also registers `[ActivitySource]`, and a target never sees the parameters of a m
 - [Logging](Logging.md) — logging generation details
 - [Metrics](Metrics.md) — metrics generation details
 - [Tags, Baggage, and Parameter Attributes](Tags-and-Baggage.md) — `[Tag]`, `[Baggage]`, `[ExcludeTargets]`
-- [Diagnostics](Diagnostics.md) — error codes and resolutions
+- [Diagnostics](../reference/Diagnostics.md) — error codes and resolutions

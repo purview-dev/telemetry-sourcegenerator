@@ -22,7 +22,7 @@ Generates [`ActivitySource`](https://learn.microsoft.com/en-us/dotnet/api/system
 **Hosting models:** console, ASP.NET Core, .NET Aspire, Native AOT, Blazor WebAssembly (trimmed and AOT-compiled)
 and Blazor Server. The generated code uses no reflection and adds no trim or AOT warnings, and no compiler-host
 assembly reaches your application's output. See
-[Platform Support](https://purview.dev/docs/telemetry-sourcegenerator/platform-support/) for the full matrix.
+[Platform Support](https://purview.dev/docs/telemetry-sourcegenerator/reference/platform-support/) for the full matrix.
 
 **Build toolchain requirement:**
 
@@ -40,7 +40,7 @@ assembly reaches your application's output. See
   struct. **Purview.Unions `[GenerateUnion]` types** work too: the case list is read from the surface that is
   in source — the attribute's `typeof` list, partial static factories, a nested `IUnionMembers` provider, then
   the constructors — so no reference to that package is taken and no other generator's output is needed. See
-  [Union types](https://purview.dev/docs/telemetry-sourcegenerator/tags-and-baggage/#union-types).
+  [Union types](https://purview.dev/docs/telemetry-sourcegenerator/telemetry/tags-and-baggage/#union-types).
 - **Validated on .NET 11**: the tests run on `net11.0`, and Native AOT, Blazor WebAssembly and Blazor Server
   consumers of the package are built on every release.
 - **.NET 8 and .NET 9 are no longer supported**: target `net10.0`+ or `net48`+. `TSG1011` reports a
@@ -172,16 +172,16 @@ public class EntityService(IEntityStoreTelemetry telemetry, IEntityRepository re
 | `[ObservableCounter]`, `[ObservableGauge]`, `[ObservableUpDownCounter]` | Method | Observable instruments |
 
 > [!TIP]
-> For single-target interfaces (only Activities, only Logging, or only Metrics), the generator automatically infers the necessary attributes. See the [Multi-Targeting guide](https://purview.dev/docs/telemetry-sourcegenerator/multi-targeting/) for details.
+> For single-target interfaces (only Activities, only Logging, or only Metrics), the generator automatically infers the necessary attributes. See the [Multi-Targeting guide](https://purview.dev/docs/telemetry-sourcegenerator/telemetry/multi-targeting/) for details.
 
 ## Documentation
 
 - [Homepage](https://purview.dev/projects/telemetry-sourcegenerator/)
 - [Documentation](https://purview.dev/docs/telemetry-sourcegenerator/)
-- [Generated Output Examples](https://purview.dev/docs/telemetry-sourcegenerator/generated-output/)
-- [Multi-Targeting Guide](https://purview.dev/docs/telemetry-sourcegenerator/multi-targeting/)
-- [Logging Configuration](https://purview.dev/docs/telemetry-sourcegenerator/logging/)
-- [Platform Support and .NET 11](https://purview.dev/docs/telemetry-sourcegenerator/platform-support/)
+- [Generated Output Examples](https://purview.dev/docs/telemetry-sourcegenerator/reference/generated-output/)
+- [Multi-Targeting Guide](https://purview.dev/docs/telemetry-sourcegenerator/telemetry/multi-targeting/)
+- [Logging Configuration](https://purview.dev/docs/telemetry-sourcegenerator/telemetry/logging/)
+- [Platform Support and .NET 11](https://purview.dev/docs/telemetry-sourcegenerator/reference/platform-support/)
 
 ## Agent Skills
 
@@ -203,7 +203,7 @@ The [.NET Aspire Sample](https://github.com/purview-dev/telemetry-sourcegenerato
 
 ## Performance
 
-Benchmarked on 13th Gen Intel Core i9-13900KF, .NET SDK 11.0.100. See the [Performance](https://purview.dev/docs/telemetry-sourcegenerator/performance/) page for the full cross-runtime results (.NET 10, .NET 11 and .NET Framework 4.8). Ratios below compare generated against the hand-written implementation of the same scenario.
+Benchmarked on 13th Gen Intel Core i9-13900KF, .NET SDK 11.0.100. See the [Performance](https://purview.dev/docs/telemetry-sourcegenerator/reference/performance/) page for the full cross-runtime results (.NET 10, .NET 11 and .NET Framework 4.8). Ratios below compare generated against the hand-written implementation of the same scenario.
 
 ### Activities (.NET 10.0)
 
@@ -329,7 +329,7 @@ with `MeterNameGenerationType.OpenTelemetry`, which also lowercases a meter name
 // The interface above now generates "my_app.products.product.record_count".
 ```
 
-See [Metrics](https://purview.dev/docs/telemetry-sourcegenerator/metrics/#meter-naming) for the full rules.
+See [Metrics](https://purview.dev/docs/telemetry-sourcegenerator/telemetry/metrics/#meter-naming) for the full rules.
 
 #### Reverting to v3 Naming (Legacy Mode)
 
@@ -364,7 +364,7 @@ public enum NamingConvention
 
 ## Contributing
 
-Contributions are welcome! See the [Contributing guide](https://purview.dev/docs/telemetry-sourcegenerator/contributing/) for development setup and testing instructions.
+Contributions are welcome! See the [Contributing guide](https://purview.dev/docs/telemetry-sourcegenerator/contributing/contributing/) for development setup and testing instructions.
 
 See [docs/release-process.md](docs/release-process.md) for the release flow, and [`AGENTS.md`](AGENTS.md)
 for the build, validation, and convention rules. Bump the version in `package.json` and run

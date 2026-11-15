@@ -1,7 +1,9 @@
 # Logging Generation v2
 
+The state-based logging mode: its generated shape, `MessageTemplate`s, array expansion, and when it is chosen over v1.
+
 > [!IMPORTANT]
-> All attributes are now in the unified `Purview.Telemetry` namespace. See [Breaking Changes](Breaking-Changes.md#namespace-consolidation) for migration details.
+> All attributes are now in the unified `Purview.Telemetry` namespace. See [Breaking Changes](../reference/Breaking-Changes.md#namespace-consolidation) for migration details.
 
 Generation v2 is the state-based logging mode. Its output closely resembles the built-in [`[LoggerMessage]`](https://learn.microsoft.com/en-us/dotnet/core/extensions/logger-message-generator) generator, but with additional features: dynamically generated `MessageTemplate`s and the ability to expand array/`IEnumerable` parameters.
 
@@ -86,4 +88,4 @@ The companion `LogPropertyIgnoreAttribute` marks a property to be skipped during
 
 - [Logging Generation v1](Logging-Generation-v1.md) — the `LoggerMessage.Define` mode and its limits
 - [Logging](Logging.md) — choosing between v1 and v2
-- [Diagnostics](Diagnostics.md) — the `TSG2xxx` Logging rules
+- [Diagnostics](../reference/Diagnostics.md) — the `TSG2xxx` Logging rules

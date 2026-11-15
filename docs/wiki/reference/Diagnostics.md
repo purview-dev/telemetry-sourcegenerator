@@ -156,7 +156,7 @@ The method is emitted as a throwing stub, so the interface stays implemented, wh
 ### TSG2024 / TSG2025 / TSG2026 — `[TagProvider]` cannot be used
 
 `[TagProvider(typeof(T), "Method")]` names a static method that contributes extra tags; see
-[Logging](Logging.md#tagprovider-contributed-tags). `TSG2024` reports a provider type that cannot be resolved,
+[Logging](../telemetry/Logging.md#tagprovider-contributed-tags). `TSG2024` reports a provider type that cannot be resolved,
 `TSG2025` a method that does not exist on it, and `TSG2026` a method whose signature the generated `foreach` cannot
 read. In every case the parameter is still logged — only the extra tags are missing.
 
@@ -201,7 +201,7 @@ Return `Activity?` so callers can handle the `null` case when no listeners are a
 `[assembly: ActivitySourceGeneration(..., UseActivitySourceFactory = true)]` asks for sources created by
 `System.Diagnostics.ActivitySourceFactory`, but the compilation cannot resolve that type, so a static `ActivitySource`
 is generated instead. Target `net11.0`, or reference System.Diagnostics.DiagnosticSource 11 or later; or remove the
-option. See [Creating sources with ActivitySourceFactory](Activities.md#creating-sources-with-activitysourcefactory-net-11).
+option. See [Creating sources with ActivitySourceFactory](../telemetry/Activities.md#creating-sources-with-activitysourcefactory-net-11).
 
 ### TSG3024 — ActivitySourceOptions require UseActivitySourceFactory
 
@@ -209,7 +209,7 @@ option. See [Creating sources with ActivitySourceFactory](Activities.md#creating
 `System.Diagnostics.ActivitySourceOptions`, which a factory-created source passes to
 `ActivitySourceFactory.Create`. A static `ActivitySource` has nowhere to put them, so they are ignored. Set
 `UseActivitySourceFactory = true`, or remove the option. See
-[Creating sources with ActivitySourceFactory](Activities.md#creating-sources-with-activitysourcefactory-net-11).
+[Creating sources with ActivitySourceFactory](../telemetry/Activities.md#creating-sources-with-activitysourcefactory-net-11).
 
 ### TSG4002 — auto-increment counter with a measurement
 
@@ -217,6 +217,6 @@ option. See [Creating sources with ActivitySourceFactory](Activities.md#creating
 
 ## See also
 
-- [Getting Started](Getting-Started.md)
-- [Activities](Activities.md), [Logging](Logging.md), [Metrics](Metrics.md)
-- [Multi-Targeting](Multi-Targeting.md)
+- [Getting Started](../Getting-Started.md)
+- [Activities](../telemetry/Activities.md), [Logging](../telemetry/Logging.md), [Metrics](../telemetry/Metrics.md)
+- [Multi-Targeting](../telemetry/Multi-Targeting.md)

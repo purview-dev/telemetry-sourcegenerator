@@ -2,12 +2,14 @@
 
 Releases are driven by GitHub Actions using the reusable [`purview-dev/build`](https://github.com/purview-dev/build) pipelines. No release steps are performed manually.
 
-```text
-Feature branch
-  → PR to main      (pr.yml runs purview-build.yml: restore + build + lint + tests)
-  → merge to main   (release.yml runs purview-release.yml: build, test, pack, publish)
-  → GitHub Release  (NuGet package + changelog, created by the pipeline)
+<!-- purview:likec4 file="../diagrams/release-flow.c4" view="releaseFlow" title="Release flow" -->
+```mermaid
+flowchart LR
+  branch[Feature branch] --> pr[PR to main] --> merge[Merge to main] --> release[GitHub Release]
 ```
+
+[LikeC4 model](../diagrams/release-flow.c4)
+<!-- /purview:likec4 -->
 
 ## Workflow components
 
@@ -30,7 +32,8 @@ Feature branch
 - The version lives in `package.json`. **Current Version:** `*` (run `just version` to print it)
 - It is applied to `Version`/`PackageVersion` by `Purview.BuildSdk` via package.json version detection.
 - `just version` prints the current version.
-- After bumping `package.json`, run `just update-version` to sync the version into docs/samples.
+- `just bump major|minor|patch` bumps `package.json`, then syncs the version into docs/samples itself
+  (through the `_after-bump` hook, which runs `just update-version`).
 
 ## Building the package locally
 
@@ -48,7 +51,7 @@ check fails rather than passing.
 
 | Gate | What it proves | Local | CI |
 | --- | --- | --- | --- |
-| Build, lint and tests | The solution builds warning-free, CSharpier reports no change, and every test project passes. | `just build`, `just lint`, `just test` | `pr.yml` `build` |
+| Build, lint and tests | The solution builds warning-free, CSharpier reports no change, and every test project passes. | `just build`, `just lint-check`, `just test` | `pr.yml` `build` |
 | Pack and pack validation | The package packs; `purview-build.json` `PackValidation` finds exactly the declared content (`RequiredContent`, `RequireExplicitContent`) and none of the `ForbiddenContent`. | `just pipeline-pack-validate` (which also runs the rule proof) | `pr.yml` `build` |
 | Forbidden-content rule proof | Every `ForbiddenContent` rule rejects a package: a matching file is injected into scratch copies of the package and the real `purview-build` validation must fail, per package and per rule. | `just verify-pack-rules` (and the end of `just pipeline-pack-validate`) | `pr.yml` `pack-validation`, in parallel with the consumer gate |
 | Dependency floor | Every declared dependency version is a lower bound, so the floor this package declares becomes the floor every consumer inherits. `-p:DependencyFloor=true` drops each package family to the oldest version the generator's code and tests compile and pass against, while the ordinary leg resolves the latest servicing patch of the same line. The two together prove the bottom and the top. | `just test-floor` | `pr.yml` `dependency-floor` |
@@ -87,7 +90,7 @@ just pipeline-local-release --PublishLocalNuGet:LocalFeedPath=p:/_sync-projects/
                                               # restore, build, lint, tests, pack, pack validation, local publish
 just smoke-packed-consumers                   # Native AOT, Blazor WebAssembly (trimmed and AOT) and Blazor Server
 just build-s && just test-s                   # sample solution build and tests
-just lint                                     # CSharpier reports no change
+just lint-check                               # CSharpier reports no change
 ```
 
 `just verify-pack-rules` re-proves the forbidden-content rules against the package in `artifacts/` (after
@@ -96,10 +99,9 @@ just lint                                     # CSharpier reports no change
 
 ## Releasing
 
-1. Bump the version in `package.json`.
-2. Run `just update-version` to sync docs/samples.
-3. Push a PR with the version bump; merge to `main`.
-4. `release.yml` publishes the release automatically.
+1. `just bump major|minor|patch` — bumps `package.json` and syncs docs/samples.
+2. Push a PR with the version bump; merge to `main`.
+3. `release.yml` publishes the release automatically.
 
 > The legacy `scripts/setup-release.*` files describe a changeset-based (`@changesets/cli`) flow that is **not** used by this repository. They are retained for reference only; the actual release automation lives in `.github/workflows/pr.yml` and `.github/workflows/release.yml`.
 

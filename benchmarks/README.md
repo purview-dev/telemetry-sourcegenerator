@@ -103,7 +103,7 @@ changes.
 
 This family is **contributor-facing**: it answers whether the record hierarchy's per-method allocation and virtual
 dispatch can move generator throughput, and it backs the recorded decision in
-[Platform Support](../docs/wiki/Platform-Support.md#considered-and-rejected) to keep the `closed` records. It is not
+[Platform Support](../docs/wiki/reference/Platform-Support.md#considered-and-rejected) to keep the `closed` records. It is not
 a consumer hot path and is not part of the README's consumer performance tables.
 
 ### `LoggerBenchmarks`

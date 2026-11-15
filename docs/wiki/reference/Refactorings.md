@@ -109,5 +109,5 @@ If a refactoring does not cover a call pattern, convert it manually:
 
 ## See also
 
-- [Migration from ILogger](Migration-From-ILogger.md)
-- [Migration from Activities](Migration-From-Activities.md)
+- [Migration from ILogger](../migration/Migration-From-ILogger.md)
+- [Migration from Activities](../migration/Migration-From-Activities.md)

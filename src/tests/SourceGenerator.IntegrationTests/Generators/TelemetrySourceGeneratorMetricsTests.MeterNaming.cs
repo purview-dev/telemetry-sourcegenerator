@@ -371,7 +371,7 @@ interface ITestMetrics
 	}
 
 	/// <summary>
-	/// The interface every naming example in README.md, docs/wiki/Metrics.md and docs/wiki/FAQ.md uses, so the
+	/// The interface every naming example in README.md, docs/wiki/telemetry/Metrics.md and docs/wiki/reference/FAQ.md uses, so the
 	/// documented names are pinned by the generator itself.
 	/// </summary>
 	const string DocumentedProductTelemetry = """

@@ -3,7 +3,7 @@
 All activity-related attributes live in the `Purview.Telemetry` namespace. To signal an interface for Activity generation, decorate it with the `[ActivitySource]` attribute.
 
 > [!IMPORTANT]
-> All attributes are now in the unified `Purview.Telemetry` namespace. See [Breaking Changes](Breaking-Changes.md#namespace-consolidation) for migration details.
+> All attributes are now in the unified `Purview.Telemetry` namespace. See [Breaking Changes](../reference/Breaking-Changes.md#namespace-consolidation) for migration details.
 
 ## ActivitySource naming
 
@@ -40,7 +40,7 @@ builder.Services.AddOrderTelemetry();
 - The option is opt-in because it changes the generated constructor. Without it, nothing changes when you move to .NET 11.
 - It is gated on the compilation, not the target framework: it needs `System.Diagnostics.ActivitySourceFactory`, which
   ships in .NET 11 and in the System.Diagnostics.DiagnosticSource 11 package (net462, netstandard2.0, net10.0). When the
-  type cannot be resolved the generator keeps the static source and reports [`TSG3023`](Diagnostics.md#tsg3023).
+  type cannot be resolved the generator keeps the static source and reports [`TSG3023`](../reference/Diagnostics.md#tsg3023).
 - Listeners registered with `ActivitySource.AddActivityListener` (OpenTelemetry's included) still see factory-created sources.
 
 ### Version and telemetry schema URL
@@ -65,7 +65,7 @@ _activitySource = activitySourceFactory.Create(new global::System.Diagnostics.Ac
 ```
 
 Both are only consumed by the factory: a static `ActivitySource` has nowhere to put them, so setting either without
-`UseActivitySourceFactory` reports [`TSG3024`](Diagnostics.md#tsg3024). `ActivitySourceOptions.Tags` is not expressible
+`UseActivitySourceFactory` reports [`TSG3024`](../reference/Diagnostics.md#tsg3024). `ActivitySourceOptions.Tags` is not expressible
 from an attribute; add tags through `AddTracing` configuration instead.
 
 ## Activity, Event, or Context
@@ -229,4 +229,4 @@ Defines a method that creates an `ActivityEvent`.
 
 - [Tags, Baggage, and Parameter Attributes](Tags-and-Baggage.md) — parameter-level attributes
 - [Multi-Targeting](Multi-Targeting.md) — combining Activities with Logging and Metrics
-- [Diagnostics](Diagnostics.md) — the `TSG3xxx` Activity rules
+- [Diagnostics](../reference/Diagnostics.md) — the `TSG3xxx` Activity rules

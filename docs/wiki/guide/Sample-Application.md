@@ -15,7 +15,7 @@ The [.NET Aspire sample](https://github.com/purview-dev/telemetry-sourcegenerato
 
 The sample targets `net10.0` and enables `EmitCompilerGeneratedFiles`, so generated output can be inspected under:
 
-```
+```text
 obj/<Configuration>/net10.0/generated/Purview.Telemetry.SourceGenerator/Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator/
 ```
 
@@ -162,7 +162,7 @@ public static readonly string[] ActivitySourceNames = new string[] { "SampleApp.
 
 `SampleApp.Web` references `SampleApp.Shared` for the DTOs only, so it aggregates the same names without emitting from them — the aggregate follows the reference graph, not usage, and registering a source that stays quiet costs nothing.
 
-See [Generation](Generation.md#telemetry-names).
+See [Generation](../Generation.md#telemetry-names).
 
 ## Multi-project sample
 
@@ -189,6 +189,6 @@ With `dotnet run --project samples/SampleApp/SampleApp.AppHost`, the Aspire Dash
 
 ## See also
 
-- [Getting Started](Getting-Started.md)
-- [Multi-Targeting](Multi-Targeting.md)
-- [Generated Output](Generated-Output.md) — real generated code from this sample
+- [Getting Started](../Getting-Started.md)
+- [Multi-Targeting](../telemetry/Multi-Targeting.md)
+- [Generated Output](../reference/Generated-Output.md) — real generated code from this sample

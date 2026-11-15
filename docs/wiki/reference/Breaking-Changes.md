@@ -146,7 +146,7 @@ If a project uses `TelemetryNames.MeterNames` / `TelemetryNames.ActivitySourceNa
 [assembly: TelemetryGeneration(GenerateTelemetryNamesClass = true)]
 ```
 
-The class it generates now also includes the names recorded by referenced assemblies, so a host project no longer needs one `TelemetryNames` reference per library. Set `AggregateReferencedTelemetryNames = false` for the previous assembly-only behaviour. See [Generation](Generation.md#telemetry-names).
+The class it generates now also includes the names recorded by referenced assemblies, so a host project no longer needs one `TelemetryNames` reference per library. Set `AggregateReferencedTelemetryNames = false` for the previous assembly-only behaviour. See [Generation](../Generation.md#telemetry-names).
 
 ## v4 to v5
 
@@ -171,7 +171,7 @@ interface ICacheServiceTelemetry { }
 
 ### `MeterGenerationAttribute` additions
 
-v5 adds `MeterName` and `MeterNameGenerationType` to `[MeterGeneration]`, controlling the default meter name and whether instrument names are prefixed with the meter name. See [Metrics](Metrics.md#metergeneration).
+v5 adds `MeterName` and `MeterNameGenerationType` to `[MeterGeneration]`, controlling the default meter name and whether instrument names are prefixed with the meter name. See [Metrics](../telemetry/Metrics.md#metergeneration).
 
 ### Activity return type should be nullable
 

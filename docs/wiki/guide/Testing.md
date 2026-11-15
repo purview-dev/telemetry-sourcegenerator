@@ -63,4 +63,4 @@ For full multi-target scenarios, the [sample application](Sample-Application.md)
 
 ## Integration tests in this repository
 
-The repository's own test suite lives in `src/tests/SourceGenerator.IntegrationTests` and uses `Purview.SourceGeneratorFramework.Testing.TUnit` (TUnit with the framework's `CodeQuery` syntax-lookup API and assertion extensions). See [Contributing](Contributing.md) for running them.
+The repository's own test suite lives in `src/tests/SourceGenerator.IntegrationTests` and uses `Purview.SourceGeneratorFramework.Testing.TUnit` (TUnit with the framework's `CodeQuery` syntax-lookup API and assertion extensions). See [Contributing](../contributing/Contributing.md) for running them.

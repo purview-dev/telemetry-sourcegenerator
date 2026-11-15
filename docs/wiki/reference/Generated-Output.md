@@ -1,6 +1,6 @@
 # Generated Output
 
-This page shows real generated output from the [sample application](Sample-Application.md), produced by `5.0.0`. The interface:
+This page shows real generated output from the [sample application](../guide/Sample-Application.md), produced by `5.0.0`. The interface:
 
 ```csharp
 [ActivitySource]
@@ -34,7 +34,7 @@ generates one partial `EntityStoreTelemetryCore` class split across Activity, Lo
 > Because the class is `partial` across those files, a member that belongs to the class rather than to one target is
 > declared by exactly one of them: the class attributes and the DI extension by the canonical target (Activities, else
 > Logging, else Metrics), the constructor by Logging or Metrics, and a union accessor (`UnwrapUnion_<Type>`) by the
-> canonical target, once per union type. See [Shared members](Multi-Targeting.md#shared-members-and-which-file-declares-them).
+> canonical target, once per union type. See [Shared members](../telemetry/Multi-Targeting.md#shared-members-and-which-file-declares-them).
 
 > [!NOTE]
 > To inspect the generated output in your own project, enable `EmitCompilerGeneratedFiles` and look under `obj/<Configuration>/<tfm>/generated/Purview.Telemetry.SourceGenerator/Purview.Telemetry.SourceGenerator.TelemetrySourceGenerator/`.
@@ -171,7 +171,7 @@ internal sealed partial class EntityStoreTelemetryCore : IEntityStoreTelemetry
 }
 ```
 
-These methods fit the v1 limits (≤ 6 non-exception parameters, no `[ExpandEnumerable]`/`[LogProperties]`), so `LoggerGenerationMode.Auto` selected v1 `LoggerMessage.Define` generation with an `IsEnabled` fast-path. See [Logging](Logging.md).
+These methods fit the v1 limits (≤ 6 non-exception parameters, no `[ExpandEnumerable]`/`[LogProperties]`), so `LoggerGenerationMode.Auto` selected v1 `LoggerMessage.Define` generation with an `IsEnabled` fast-path. See [Logging](../telemetry/Logging.md).
 
 ## Metrics (`EntityStoreTelemetryCore.Metric.g.cs`)
 
@@ -267,10 +267,10 @@ namespace SampleApp.APIService
 }
 ```
 
-`SampleApp.Shared` comes from the referenced project of the same name, whose `IWeatherForecastTelemetry` declares an ActivitySource and a Meter: the class aggregates this assembly's names with the names recorded by everything it references. See [Generation](Generation.md#telemetry-names).
+`SampleApp.Shared` comes from the referenced project of the same name, whose `IWeatherForecastTelemetry` declares an ActivitySource and a Meter: the class aggregates this assembly's names with the names recorded by everything it references. See [Generation](../Generation.md#telemetry-names).
 
 ## See also
 
-- [Sample Application](Sample-Application.md) — the full source
-- [Generation](Generation.md) — controlling class names, DI, and names
+- [Sample Application](../guide/Sample-Application.md) — the full source
+- [Generation](../Generation.md) — controlling class names, DI, and names
 - [Diagnostics](Diagnostics.md) — analyzer rules

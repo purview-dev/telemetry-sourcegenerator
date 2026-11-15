@@ -16,7 +16,7 @@ git clone https://github.com/purview-dev/telemetry-sourcegenerator
 cd telemetry-sourcegenerator
 ```
 
-All `just` recipes read the [`Justfile`](https://github.com/purview-dev/telemetry-sourcegenerator/blob/main/Justfile); configuration defaults to **Debug**.
+All `just` recipes read the [`Justfile`](https://github.com/purview-dev/telemetry-sourcegenerator/blob/main/Justfile); configuration defaults to **Debug**. The shared recipes are the modules under `.build/just/` (copied from the `purview-buildsdk-justfile` skill and not edited here); the `Justfile` holds the repository's own recipes and overrides.
 
 ## Common commands
 
@@ -26,7 +26,7 @@ All `just` recipes read the [`Justfile`](https://github.com/purview-dev/telemetr
 | `just test` | Runs the integration tests (Debug) with a tree-node filter. |
 | `just build-s` | Builds `samples/SampleApp/SampleApp.slnx`. |
 | `just test-s` | Runs the sample test solution. |
-| `just lint` | Runs `dotnet csharpier check .` (no writes). |
+| `just lint-check` | Runs `dotnet csharpier check .` (no writes). |
 | `just lint-fix` | Runs `dotnet csharpier format .` (writes). |
 | `just clean` | Cleans the main solution. |
 | `just restore` | Restores packages for the main solution. |
@@ -39,7 +39,7 @@ After making changes to the source generator:
 1. `just build` — build the main solution.
 2. `just test` — run the integration tests.
 3. `just build-s && just test-s` — build and test the sample application end to end.
-4. `just lint` / `just format` — ensure C# formatting compliance before committing.
+4. `just lint-check` / `just format` — ensure C# formatting compliance before committing.
 
 > [!NOTE]
 > Build and test commands can take a long time (tens of minutes) in slow environments. Give them a generous timeout and never cancel them part-way.
@@ -53,7 +53,7 @@ When generator behaviour changes, add or update tests in `src/tests/SourceGenera
 ## Conventions
 
 - **Conventional commits** — enforced by commitlint (`.config/lefthook.yml`). Types: `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`, `test`.
-- **Formatting** — C# is formatted with csharpier; check with `just lint`.
+- **Formatting** — C# is formatted with csharpier; check with `just lint-check`.
 - **Solutions** — `.slnx` solution files are used.
 - **Source generator** — targets `netstandard2.0` and uses `Purview.SourceGeneratorFramework` (CodeWriter-based emission, incremental pipeline, value-equatable models).
 
@@ -75,9 +75,9 @@ Before doing specialist work, load the relevant skill from `.agents/skills/` —
 
 ## Release process
 
-See [`docs/release-process.md`](../release-process.md) for the full flow. In short: push a feature branch and open a PR to `main` (`pr.yml` runs build + lint + tests); merging to `main` triggers the reusable release pipeline (build, test, pack, publish, GitHub release). The version lives in `package.json`; after bumping it, run `just update-version` to sync docs/samples, then `just pipeline-local-release` to validate locally.
+See [`docs/release-process.md`](../../release-process.md) for the full flow. In short: push a feature branch and open a PR to `main` (`pr.yml` runs build + lint + tests); merging to `main` triggers the reusable release pipeline (build, test, pack, publish, GitHub release). The version lives in `package.json`; `just bump major|minor|patch` bumps it and syncs docs/samples, then `just pipeline-local-release` validates locally.
 
 ## Next steps
 
 - [Release Flow](Release-Flow.md) — how releases are produced
-- [Testing](Testing.md) — mocking generated telemetry interfaces
+- [Testing](../guide/Testing.md) — mocking generated telemetry interfaces

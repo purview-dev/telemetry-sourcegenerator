@@ -16,59 +16,59 @@ This approach allows for:
 - .NET Framework 4.8 or higher
 
 .NET 8 and .NET 9 are no longer supported. A project that targets either reports
-[`TSG1011`](Diagnostics.md#tsg1011).
+[`TSG1011`](reference/Diagnostics.md#tsg1011).
 
 **Build toolchain requirement:** Visual Studio 2026 (18.x) or the .NET 10 SDK or later (Roslyn 5.9.0+).
 
 Native AOT, trimmed and AOT-compiled Blazor WebAssembly, and Blazor Server are supported. See
-[Platform Support and .NET 11](Platform-Support.md) for the full matrix, the trim/AOT guarantees and what's new for .NET 11.
+[Platform Support and .NET 11](reference/Platform-Support.md) for the full matrix, the trim/AOT guarantees and what's new for .NET 11.
 
 ## Documentation
 
 ### Getting started
 
 - [Getting Started](Getting-Started.md) — install, first interface, and common patterns
-- [Installation](Installation.md) — supported frameworks, per-feature dependencies, and build configuration
-- [Platform Support and .NET 11](Platform-Support.md) — support matrix, trim/AOT guarantees, .NET 11 features
-- [Sample Application](Sample-Application.md) — full .NET Aspire demo application
+- [Installation](guide/Installation.md) — supported frameworks, per-feature dependencies, and build configuration
+- [Platform Support and .NET 11](reference/Platform-Support.md) — support matrix, trim/AOT guarantees, .NET 11 features
+- [Sample Application](guide/Sample-Application.md) — full .NET Aspire demo application
 
 ### Core features
 
-- [Activities](Activities.md) — distributed tracing generation with `ActivitySource`
-- [Logging](Logging.md) — structured logging generation with `ILogger`
-  - [Generation v2](Logging-Generation-v2.md) — state-based logging with `Microsoft.Extensions.Telemetry.Abstractions`
-  - [Generation v1](Logging-Generation-v1.md) — legacy `LoggerMessage.Define` high-performance mode
-- [Metrics](Metrics.md) — metrics generation (Counters, Histograms, Observables)
-- [Multi-Targeting](Multi-Targeting.md) — combine Activities + Logging + Metrics in one interface
+- [Activities](telemetry/Activities.md) — distributed tracing generation with `ActivitySource`
+- [Logging](telemetry/Logging.md) — structured logging generation with `ILogger`
+  - [Generation v2](telemetry/Logging-Generation-v2.md) — state-based logging with `Microsoft.Extensions.Telemetry.Abstractions`
+  - [Generation v1](telemetry/Logging-Generation-v1.md) — legacy `LoggerMessage.Define` high-performance mode
+- [Metrics](telemetry/Metrics.md) — metrics generation (Counters, Histograms, Observables)
+- [Multi-Targeting](telemetry/Multi-Targeting.md) — combine Activities + Logging + Metrics in one interface
 
 ### Configuration and reference
 
 - [Generation Options](Generation.md) — control class names, DI, and code generation
-- [Tags, Baggage, and Parameter Attributes](Tags-and-Baggage.md) — adding tags/baggage/properties to telemetry
-- [Generated Output](Generated-Output.md) — examples of generated code
-- [Diagnostics](Diagnostics.md) — analyzer warnings and errors
-- [FAQ](FAQ.md) — frequently asked questions and troubleshooting
-- [Breaking Changes](Breaking-Changes.md) — migration guide for v3 → v4 → v5
-- [Performance](Performance.md) — cross-runtime benchmark results
+- [Tags, Baggage, and Parameter Attributes](telemetry/Tags-and-Baggage.md) — adding tags/baggage/properties to telemetry
+- [Generated Output](reference/Generated-Output.md) — examples of generated code
+- [Diagnostics](reference/Diagnostics.md) — analyzer warnings and errors
+- [FAQ](reference/FAQ.md) — frequently asked questions and troubleshooting
+- [Breaking Changes](reference/Breaking-Changes.md) — migration guide for v3 → v4 → v5
+- [Performance](reference/Performance.md) — cross-runtime benchmark results
 
 ### Migrating
 
-- [Refactorings](Refactorings.md) — the shipped IDE code refactorings
-- [Migration from ILogger](Migration-From-ILogger.md)
-- [Migration from Activities](Migration-From-Activities.md)
+- [Refactorings](reference/Refactorings.md) — the shipped IDE code refactorings
+- [Migration from ILogger](migration/Migration-From-ILogger.md)
+- [Migration from Activities](migration/Migration-From-Activities.md)
 
 ### Contributing
 
-- [Testing](Testing.md) — mocking generated telemetry interfaces
-- [Contributing](Contributing.md) — development setup, build commands, and conventions
-- [Release Flow](Release-Flow.md) — how releases are produced
+- [Testing](guide/Testing.md) — mocking generated telemetry interfaces
+- [Contributing](contributing/Contributing.md) — development setup, build commands, and conventions
+- [Release Flow](contributing/Release-Flow.md) — how releases are produced
 
 ## Basic examples
 
-Each generation target ([Activities](Activities.md), [Logging](Logging.md), and [Metrics](Metrics.md)) documents what can be inferred and what must be explicit. By default each interface used as a source for generation includes an extension method for registering it with an `IServiceCollection`; more details can be found in [Generation](Generation.md).
+Each generation target ([Activities](telemetry/Activities.md), [Logging](telemetry/Logging.md), and [Metrics](telemetry/Metrics.md)) documents what can be inferred and what must be explicit. By default each interface used as a source for generation includes an extension method for registering it with an `IServiceCollection`; more details can be found in [Generation](Generation.md).
 
 > [!TIP]
-> You can mix-and-match generation targets within a single interface; this is called [multi-targeting](Multi-Targeting.md). When you do, inference is disabled and every method must declare its targets explicitly.
+> You can mix-and-match generation targets within a single interface; this is called [multi-targeting](telemetry/Multi-Targeting.md). When you do, inference is disabled and every method must declare its targets explicitly.
 
 > [!NOTE]
 > In .NET, Activities, Events, and Metrics capture additional properties at creation, recording, or observation time as **tags**. OpenTelemetry calls these **attributes**. Because this source generator makes extensive use of marker attributes to control code generation, these docs use *tags* for the properties and *attributes* for the .NET [`Attribute`](https://learn.microsoft.com/en-us/dotnet/api/system.attribute) type.
@@ -105,7 +105,7 @@ interface IActivityTelemetry
 }
 ```
 
-More information can be found in [Activities](Activities.md).
+More information can be found in [Activities](telemetry/Activities.md).
 
 ### Logging
 
@@ -131,7 +131,7 @@ interface ILoggingTelemetry
 }
 ```
 
-More information can be found in [Logging](Logging.md), including the two generation modes and how to disable logging generation when the `Microsoft.Extensions.Logging` types are unavailable.
+More information can be found in [Logging](telemetry/Logging.md), including the two generation modes and how to disable logging generation when the `Microsoft.Extensions.Logging` types are unavailable.
 
 ### Metrics
 
@@ -181,7 +181,7 @@ interface IMeterTelemetry
 }
 ```
 
-More information can be found in [Metrics](Metrics.md).
+More information can be found in [Metrics](telemetry/Metrics.md).
 
 ## Multi-targeting
 
@@ -223,4 +223,4 @@ interface IServiceTelemetry
 }
 ```
 
-More information can be found in [Multi-Targeting](Multi-Targeting.md).
+More information can be found in [Multi-Targeting](telemetry/Multi-Targeting.md).

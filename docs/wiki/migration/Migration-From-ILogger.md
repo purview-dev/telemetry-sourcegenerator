@@ -1,6 +1,6 @@
 # Migration from ILogger
 
-This guide covers converting hand-written `ILogger` usage to generated telemetry interfaces. For the fastest path, use the [IDE refactorings](Refactorings.md) — this page documents the manual fallback.
+This guide covers converting hand-written `ILogger` usage to generated telemetry interfaces. For the fastest path, use the [IDE refactorings](../reference/Refactorings.md) — this page documents the manual fallback.
 
 ## Before
 
@@ -103,22 +103,22 @@ logger.OrderFailed(orderId, ex);
 
 ## Structured data
 
-For collections, use `[ExpandEnumerable]`; for objects, use `[LogProperties]` — see [Logging Generation v2](Logging-Generation-v2.md).
+For collections, use `[ExpandEnumerable]`; for objects, use `[LogProperties]` — see [Logging Generation v2](../telemetry/Logging-Generation-v2.md).
 
 ## Naming
 
-v4+ converts parameter names to snake_case by default (OpenTelemetry convention). To revert to v3 naming, apply `[assembly: TelemetryGeneration(NamingConvention = NamingConvention.Legacy)]`. See [Naming conventions](Generation.md#naming-conventions).
+v4+ converts parameter names to snake_case by default (OpenTelemetry convention). To revert to v3 naming, apply `[assembly: TelemetryGeneration(NamingConvention = NamingConvention.Legacy)]`. See [Naming conventions](../Generation.md#naming-conventions).
 
 ## Checklist
 
 1. Add the `Purview.Telemetry.SourceGenerator` package and `Microsoft.Extensions.Logging.Abstractions`.
-2. Create the `[Logger]` interface (or run the [ILogger refactoring](Refactorings.md#convert-ilogger-to-iclassnamelogs)).
+2. Create the `[Logger]` interface (or run the [ILogger refactoring](../reference/Refactorings.md#convert-ilogger-to-iclassnamelogs)).
 3. Replace `ILogger` members and calls with the interface.
 4. Register with `services.Add{InterfaceNameWithoutI}()`.
-5. Rebuild and review the [Diagnostics](Diagnostics.md).
+5. Rebuild and review the [Diagnostics](../reference/Diagnostics.md).
 
 ## Next steps
 
-- [Refactorings](Refactorings.md) — the shipped IDE conversions
-- [Logging](Logging.md) — v1/v2 generation modes
-- [Multi-Targeting](Multi-Targeting.md) — combine with Activities and Metrics
+- [Refactorings](../reference/Refactorings.md) — the shipped IDE conversions
+- [Logging](../telemetry/Logging.md) — v1/v2 generation modes
+- [Multi-Targeting](../telemetry/Multi-Targeting.md) — combine with Activities and Metrics

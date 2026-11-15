@@ -25,7 +25,7 @@ You may also need runtime dependencies depending on which telemetry types you us
 - `Microsoft.Extensions.Logging.Abstractions` for `ILogger`
 - `System.Diagnostics.Metrics` for metrics (built into .NET 10+)
 
-See [Installation](Installation.md) for the full dependency matrix.
+See [Installation](guide/Installation.md) for the full dependency matrix.
 
 ## Define a telemetry interface
 
@@ -217,14 +217,14 @@ Generated files appear under `obj/Debug|Release/<tfm>/generated/Purview.Telemetr
 3. **One namespace** — use the single `using Purview.Telemetry;` import.
 4. **OpenTelemetry naming** — v5 defaults to OpenTelemetry conventions (snake_case tags, hierarchical metrics). See [Naming conventions](Generation.md#naming-conventions).
 5. **DI registration** — use the generated `Add{InterfaceName}()` extension methods.
-6. **Testing** — telemetry interfaces are easy to mock in unit tests. See [Testing](Testing.md).
+6. **Testing** — telemetry interfaces are easy to mock in unit tests. See [Testing](guide/Testing.md).
 
 ## Next steps
 
-- [Activities](Activities.md) — deep dive into distributed tracing with Activities, Events, and Context
-- [Logging](Logging.md) — structured logging and the v1/v2 generation modes
-- [Metrics](Metrics.md) — counters, histograms, and observable instruments
-- [Multi-Targeting](Multi-Targeting.md) — combine multiple telemetry types in one interface
+- [Activities](telemetry/Activities.md) — deep dive into distributed tracing with Activities, Events, and Context
+- [Logging](telemetry/Logging.md) — structured logging and the v1/v2 generation modes
+- [Metrics](telemetry/Metrics.md) — counters, histograms, and observable instruments
+- [Multi-Targeting](telemetry/Multi-Targeting.md) — combine multiple telemetry types in one interface
 - [Generation Options](Generation.md) — control code generation, DI, and naming
-- [Generated Output](Generated-Output.md) — see what code is actually generated
-- [Migration](Refactorings.md) — convert existing `ILogger`/`ActivitySource`/metrics code using the IDE refactorings
+- [Generated Output](reference/Generated-Output.md) — see what code is actually generated
+- [Migration](reference/Refactorings.md) — convert existing `ILogger`/`ActivitySource`/metrics code using the IDE refactorings

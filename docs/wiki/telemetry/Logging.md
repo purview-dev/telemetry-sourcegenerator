@@ -157,7 +157,7 @@ interface IWeatherTelemetry
 - **Divergence:** the .NET 11 collector shape (`static void GetTags(ITagCollector collector, T value)`) is not accepted
   and is reported as `TSG2026`. Implementing `ITagCollector` in generated code would pull
   `Microsoft.Extensions.Compliance.Classification` into every consumer's build, so only the pair-returning shape is
-  supported. This is recorded in [Platform Support](Platform-Support.md).
+  supported. This is recorded in [Platform Support](../reference/Platform-Support.md).
 - A `[TagProvider]` parameter makes the method state-based (v2), even if `V1` was requested, because
   `LoggerMessage.Define` has no tag bag to add the pairs to.
 
@@ -165,5 +165,5 @@ interface IWeatherTelemetry
 
 - [Generation v1](Logging-Generation-v1.md) — `LoggerMessage.Define` mode and its limits
 - [Generation v2](Logging-Generation-v2.md) — state-based mode, `[ExpandEnumerable]`, `[LogProperties]`
-- [Breaking Changes](Breaking-Changes.md#namespace-consolidation) — namespace migration
-- [Diagnostics](Diagnostics.md) — the `TSG2xxx` Logging rules
+- [Breaking Changes](../reference/Breaking-Changes.md#namespace-consolidation) — namespace migration
+- [Diagnostics](../reference/Diagnostics.md) — the `TSG2xxx` Logging rules

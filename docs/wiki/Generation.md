@@ -55,7 +55,7 @@ public enum NamingConvention
 | --- | --- | --- |
 | ActivitySource name | Assembly name lowercased: `"myapp"` | Assembly name preserved: `"MyApp"` |
 | Tag / baggage keys | Lowercased, smashed: `"entityid"` | snake_case: `"entity_id"` |
-| Metric instrument names | Lowercased, smashed: `"product.recordcount"` | Interface prefix + snake_case: `"product.record_count"` (see [Instrument naming](Metrics.md#instrument-naming)) |
+| Metric instrument names | Lowercased, smashed: `"product.recordcount"` | Interface prefix + snake_case: `"product.record_count"` (see [Instrument naming](telemetry/Metrics.md#instrument-naming)) |
 | Metric tag keys | Lowercased, smashed: `"requestcount"` | snake_case: `"request_count"` |
 
 ```csharp
@@ -128,7 +128,7 @@ The names are deduplicated and ordered, and the aggregate covers the whole refer
 The host project does not need telemetry of its own. An API or console project that defines no `[ActivitySource]` or `[Meter]` interface still gets the class from the assembly-level attribute alone, containing the names its references recorded. If neither the project nor its references generated any names, nothing is emitted.
 
 > [!NOTE]
-> The reference direction still applies: an Aspire-style `ServiceDefaults` project is referenced *by* the projects that own the telemetry, so it cannot aggregate them. Generate the class in the host project and pass the arrays into `ServiceDefaults`, as the [sample application](Sample-Application.md) does.
+> The reference direction still applies: an Aspire-style `ServiceDefaults` project is referenced *by* the projects that own the telemetry, so it cannot aggregate them. Generate the class in the host project and pass the arrays into `ServiceDefaults`, as the [sample application](guide/Sample-Application.md) does.
 
 Control the two outputs with `GenerateTelemetryNamesAttribute` (default `true`) and `GenerateTelemetryNamesClass` (default `false`), plus `TelemetryNamesClassName`, `TelemetryNamesNamespace`, and `AggregateReferencedTelemetryNames` for the class.
 
@@ -156,10 +156,10 @@ interface IOrderServiceTelemetry
 | `[LoggerGeneration]` | Assembly-level default log level, default `LogPrefixType`, and default logging generation mode. |
 | `[MeterGeneration]` | Default meter name, meter-name generation type, instrument prefix/separator, and casing defaults. |
 
-See [Activities](Activities.md), [Logging](Logging.md), and [Metrics](Metrics.md) for the full property tables.
+See [Activities](telemetry/Activities.md), [Logging](telemetry/Logging.md), and [Metrics](telemetry/Metrics.md) for the full property tables.
 
 ## Next steps
 
-- [Activities](Activities.md), [Logging](Logging.md), [Metrics](Metrics.md) — per-target attribute reference
-- [Tags, Baggage, and Parameter Attributes](Tags-and-Baggage.md) — parameter-level attributes
-- [Diagnostics](Diagnostics.md) — analyzer rules
+- [Activities](telemetry/Activities.md), [Logging](telemetry/Logging.md), [Metrics](telemetry/Metrics.md) — per-target attribute reference
+- [Tags, Baggage, and Parameter Attributes](telemetry/Tags-and-Baggage.md) — parameter-level attributes
+- [Diagnostics](reference/Diagnostics.md) — analyzer rules

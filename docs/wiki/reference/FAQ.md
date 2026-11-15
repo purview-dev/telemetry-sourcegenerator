@@ -43,7 +43,7 @@ Add the NuGet package to your `.csproj`:
 </PackageReference>
 ```
 
-See [Getting Started](Getting-Started.md) for more details.
+See [Getting Started](../Getting-Started.md) for more details.
 
 ### Why do I need `PrivateAssets` and `IncludeAssets`?
 
@@ -77,7 +77,7 @@ Generated files appear in `obj/Debug|Release/<tfm>/generated/Purview.Telemetry.S
 - **Logging** — events, state changes, debugging with structured data, error details
 - **Metrics** — counting occurrences, distributions, gauges for dashboards
 
-**Pro tip:** use [Multi-Targeting](Multi-Targeting.md) to combine all three.
+**Pro tip:** use [Multi-Targeting](../telemetry/Multi-Targeting.md) to combine all three.
 
 ### Why does my Activity method return `Activity?` instead of `Activity`?
 
@@ -108,7 +108,7 @@ Use baggage sparingly as it increases overhead; use tags for most properties.
 
 ### What's the difference between Generation v1 and v2?
 
-See [Logging](Logging.md) for the full comparison. In brief:
+See [Logging](../telemetry/Logging.md) for the full comparison. In brief:
 
 - **Generation v2** — state-based output resembling the built-in `[LoggerMessage]` generator; supports dynamic message templates, `[ExpandEnumerable]`, and `[LogProperties]`; requires `Microsoft.Extensions.Telemetry.Abstractions`.
 - **Generation v1** — `LoggerMessage.Define` high-performance mode; limited to 6 non-exception parameters plus one `Exception`; no `[ExpandEnumerable]`/`[LogProperties]`.
@@ -207,7 +207,7 @@ interface IProductTelemetry
 //                                                                 ^^^^^^^^^^^^ instrument name
 ```
 
-See [Instrument naming](Metrics.md#instrument-naming) for the full rules.
+See [Instrument naming](../telemetry/Metrics.md#instrument-naming) for the full rules.
 
 ## Registering names
 
@@ -231,13 +231,13 @@ Libraries need no configuration at all, however many of them there are and howev
 
 ### Why can't my `ServiceDefaults` project generate the names itself?
 
-Because of the reference direction: an Aspire-style `ServiceDefaults` is referenced *by* the projects that own the telemetry, so their assemblies are not in its reference graph. Generate the class in each host (executable) project and pass the arrays into `ServiceDefaults`, as the [sample application](Sample-Application.md#registering-names-with-aspire) does.
+Because of the reference direction: an Aspire-style `ServiceDefaults` is referenced *by* the projects that own the telemetry, so their assemblies are not in its reference graph. Generate the class in each host (executable) project and pass the arrays into `ServiceDefaults`, as the [sample application](../guide/Sample-Application.md#registering-names-with-aspire) does.
 
 ## Multi-targeting
 
 ### Can I generate Activities, Logging, AND Metrics from one interface?
 
-Yes — this is called [Multi-Targeting](Multi-Targeting.md):
+Yes — this is called [Multi-Targeting](../telemetry/Multi-Targeting.md):
 
 ```csharp
 [ActivitySource("MyApp")]
@@ -361,7 +361,7 @@ Yes. Generated implementation and DI classes are internal by default, so they do
 
 ### How do I test code that uses telemetry interfaces?
 
-Just mock the interface — see [Testing](Testing.md):
+Just mock the interface — see [Testing](../guide/Testing.md):
 
 ```csharp
 var mockTelemetry = Substitute.For<IOrderTelemetry>();
@@ -372,6 +372,6 @@ var service = new OrderService(mockTelemetry);
 
 - **Documentation** — [purview.dev](https://purview.dev/docs/telemetry-sourcegenerator/)
 - **Issues** — [GitHub Issues](https://github.com/purview-dev/telemetry-sourcegenerator/issues)
-- **Sample** — [Sample Application](Sample-Application.md)
+- **Sample** — [Sample Application](../guide/Sample-Application.md)
 
 When reporting a bug, include the package version, .NET version, a minimal repro, expected vs actual behaviour, and any `TSG` diagnostics.

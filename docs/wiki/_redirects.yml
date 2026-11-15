@@ -1,0 +1,33 @@
+# previous: current
+#
+# Every page below moved into a topic folder, so its URL gained a segment:
+# /docs/telemetry-sourcegenerator/<page>/ -> /docs/telemetry-sourcegenerator/<folder>/<page>/.
+# The site writes a noindex redirect at the old address, and only once the release
+# that carries the move is published on the live channel. Never delete a released
+# pair; point a page that moves again at its final address.
+redirects:
+  installation: guide/installation
+  sample-application: guide/sample-application
+  testing: guide/testing
+
+  activities: telemetry/activities
+  logging: telemetry/logging
+  logging-generation-v1: telemetry/logging-generation-v1
+  logging-generation-v2: telemetry/logging-generation-v2
+  metrics: telemetry/metrics
+  multi-targeting: telemetry/multi-targeting
+  tags-and-baggage: telemetry/tags-and-baggage
+
+  diagnostics: reference/diagnostics
+  generated-output: reference/generated-output
+  refactorings: reference/refactorings
+  breaking-changes: reference/breaking-changes
+  platform-support: reference/platform-support
+  performance: reference/performance
+  faq: reference/faq
+
+  migration-from-ilogger: migration/migration-from-ilogger
+  migration-from-activities: migration/migration-from-activities
+
+  contributing: contributing/contributing
+  release-flow: contributing/release-flow

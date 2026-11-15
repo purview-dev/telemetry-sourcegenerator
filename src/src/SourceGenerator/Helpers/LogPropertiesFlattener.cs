@@ -19,7 +19,7 @@ namespace Purview.Telemetry.SourceGenerator.Helpers;
 /// <c>MaxTypeTraversalDepth</c>.
 /// </para>
 /// <para>
-/// Two deliberate divergences, both documented on <c>docs/wiki/Logging.md</c>: a type already on the visited chain
+/// Two deliberate divergences, both documented on <c>docs/wiki/telemetry/Logging.md</c>: a type already on the visited chain
 /// stops only that branch instead of abandoning the whole parameter, and a <c>Nullable&lt;T&gt;</c> property is
 /// flattened no further because the extra <c>.Value</c> hop the accessor would need does not fit the generated
 /// null-conditional chain.
@@ -204,6 +204,8 @@ static class LogPropertiesFlattener
 		if (named.AllInterfaces.Any(static i => i.SpecialType == SpecialType.System_Collections_IEnumerable))
 			return false;
 
+		// A delegate is one tag: expanding Action<T> into Method/Target is not what a reader wants, and the .NET
+		// generator does not expand delegates either.
 		return true;
 	}
 }

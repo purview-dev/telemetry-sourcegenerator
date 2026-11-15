@@ -1,5 +1,7 @@
 # Tags, Baggage, and Parameter Attributes
 
+The parameter-level attributes that control whether a value becomes a tag, a baggage entry, or a log property.
+
 > [!IMPORTANT]
 > All attributes are now in the unified `Purview.Telemetry` namespace.
 
@@ -54,7 +56,7 @@ interface IOrderTelemetry
 [Tag]string userName   // Generated: "username"
 ```
 
-To change the convention, see [Naming conventions](Generation.md#naming-conventions).
+To change the convention, see [Naming conventions](../Generation.md#naming-conventions).
 
 ### Best practices
 
@@ -266,5 +268,5 @@ as the consumer's compiler can see the type. Declaring one with the `union` keyw
 - [Activities](Activities.md) — tags/baggage in Activity generation
 - [Metrics](Metrics.md) — tags in metrics generation
 - [Multi-Targeting](Multi-Targeting.md) — excluding parameters per target
-- [Generation](Generation.md) — naming conventions
-- [Breaking Changes](Breaking-Changes.md#opentelemetry-aligned-naming) — v3 to v4 naming changes
+- [Generation](../Generation.md) — naming conventions
+- [Breaking Changes](../reference/Breaking-Changes.md#opentelemetry-aligned-naming) — v3 to v4 naming changes
