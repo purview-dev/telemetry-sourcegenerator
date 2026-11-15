@@ -38,8 +38,9 @@ static class LogPropertiesFlattener
 	/// Known value-like types that are rendered with their own <c>ToString</c> rather than expanded. Expanding a
 	/// <c>DateTime</c> into <c>Year</c>/<c>Month</c>/... would replace a useful value with noise.
 	/// </summary>
-	static readonly HashSet<string> StringifiableTypes = new(StringComparer.Ordinal)
-	{
+	static readonly HashSet<string> StringifiableTypes =
+	[
+		with(StringComparer.Ordinal),
 		"System.DateOnly",
 		"System.DateTime",
 		"System.DateTimeOffset",
@@ -48,7 +49,7 @@ static class LogPropertiesFlattener
 		"System.TimeSpan",
 		"System.Uri",
 		"System.Version",
-	};
+	];
 
 	public static EquatableArray<LogPropertiesParameterDetails> Flatten(
 		ITypeSymbol parameterType,
@@ -59,7 +60,7 @@ static class LogPropertiesFlattener
 		var flattenedType = UnwrapNullable(parameterType);
 
 		List<LogPropertiesParameterDetails> properties = [];
-		HashSet<ITypeSymbol> chain = new(SymbolEqualityComparer.Default) { flattenedType };
+		HashSet<ITypeSymbol> chain = [with(SymbolEqualityComparer.Default), flattenedType];
 
 		FlattenType(
 			flattenedType,
@@ -89,7 +90,7 @@ static class LogPropertiesFlattener
 	)
 	{
 		// A property declared on a base type that a derived type hides is logged once, as the derived member.
-		HashSet<string> seenPropertyNames = new(StringComparer.Ordinal);
+		HashSet<string> seenPropertyNames = [with(StringComparer.Ordinal)];
 
 		var current = type as INamedTypeSymbol;
 		while (current is not null && current.SpecialType != SpecialType.System_Object)

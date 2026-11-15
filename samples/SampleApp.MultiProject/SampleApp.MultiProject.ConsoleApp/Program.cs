@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using SampleApp.MultiProject.Observability;
 using SampleApp.MultiProject.Ordering;
 
-(string OrderId, decimal Total)[] Orders = [("ord-1001", 49.99m), ("ord-1002", 12.50m), ("ord-1003", 149.00m)];
+(string OrderId, decimal Total)[] orders = [("ord-1001", 49.99m), ("ord-1002", 12.50m), ("ord-1003", 149.00m)];
 
 // TelemetryNames is generated for this project only, and already contains the names from
 // every assembly in the reference graph. ServiceDefaults-style projects cannot build this
@@ -27,12 +27,12 @@ using var provider = services.BuildServiceProvider();
 var orderBook = provider.GetRequiredService<OrderBook>();
 var telemetry = provider.GetRequiredService<IBatchTelemetry>();
 
-Console.WriteLine($"Placing {Orders.Length} orders:");
+Console.WriteLine($"Placing {orders.Length} orders:");
 Console.WriteLine();
 
-using (telemetry.RunningBatch(Orders.Length))
+using (telemetry.RunningBatch(orders.Length))
 {
-	foreach (var (orderId, total) in Orders)
+	foreach (var (orderId, total) in orders)
 	{
 		Console.WriteLine($"  {orderId} ({total:C})");
 		orderBook.PlaceOrder(orderId, total);
