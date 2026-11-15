@@ -1,12 +1,14 @@
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace Purview.Telemetry.Repository;
 
 /// <summary>
 /// Guards the skills installed from other repositories. They are installed by the skills CLI into the
-/// universal <c>.agents/skills/</c> folder only, and that folder and the CLI's <c>skills-lock.json</c>
-/// are committed, so the two must agree and no per-agent copy or instruction file may appear beside them.
-/// Claude Code only reads <c>.claude/skills/</c>, so that gitignored folder may hold links into
+/// universal <c>.agents/skills/</c> folder only, which is a local install: gitignored, reproducible from
+/// the committed <c>skills-lock.json</c>, and never tracked - so a skill this repository installs but does
+/// not publish cannot be found through <c>skills add purview-dev/telemetry-sourcegenerator</c>. Claude
+/// Code only reads <c>.claude/skills/</c>, so that gitignored folder may hold links into
 /// <c>.agents/skills/</c>, never copies.
 /// </summary>
 /// <remarks>
@@ -15,10 +17,9 @@ namespace Purview.Telemetry.Repository;
 /// so their content is not checked here, only that the installed set is the recorded set.
 /// </para>
 /// <para>
-/// <see cref="DeveloperSkills"/> are the exception: skills written here for people working on the
-/// generator. They are not consumer guidance and are never published, so they cannot live in
-/// <c>skills/</c> (which the skills CLI ships) or in the lockfile (which the CLI writes). They live in
-/// <c>.agents/skills/</c> because that is the one folder every agent reads.
+/// <see cref="DeveloperSkills"/> are the exception in one respect only: they are written here, for people
+/// working on the generator, rather than installed from elsewhere. They are still authored skills, so they
+/// live in <c>skills/</c> with the rest, and no CLI records them in <c>skills-lock.json</c>.
 /// </para>
 /// </remarks>
 public sealed class InstalledSkillTests
@@ -26,9 +27,9 @@ public sealed class InstalledSkillTests
 	static readonly Lazy<string> RepositoryRoot = new(FindRepositoryRoot);
 
 	/// <summary>
-	/// Skills committed here for this repository's own developers. Each is authored in place, is not in
-	/// <c>skills-lock.json</c> (no CLI wrote it) and must never appear in <c>skills/</c>, because anything
-	/// there is published to consumers.
+	/// Skills authored here for this repository's own developers rather than installed from elsewhere. They
+	/// live in <c>skills/</c> like any other authored skill, and no CLI records them in
+	/// <c>skills-lock.json</c>.
 	/// </summary>
 	static readonly string[] DeveloperSkills = ["purview-telemetry-benchmarks"];
 
@@ -37,6 +38,13 @@ public sealed class InstalledSkillTests
 	{
 		// Arrange
 		var recorded = await ReadLockfileSkillsAsync(cancellationToken);
+		if (!Directory.Exists(AgentsSkillsFolder()))
+		{
+			// A fresh clone has no local install - it is gitignored and restored with `just skills-install` -
+			// so the committed record is what has to be there.
+			await Assert.That(recorded).IsNotEmpty().Because("skills-lock.json records no installed skills");
+			return;
+		}
 
 		// Act
 		var missing = recorded
@@ -59,13 +67,18 @@ public sealed class InstalledSkillTests
 	{
 		// Arrange
 		var recorded = await ReadLockfileSkillsAsync(cancellationToken);
+		if (!Directory.Exists(AgentsSkillsFolder()))
+		{
+			// No local install to check against the record; the record itself is checked above.
+			return;
+		}
 
-		// Act
+		// Act - the folder holds what the CLI installed and nothing else: the authored skills, including
+		// the developer ones, live in skills/.
 		var unrecorded = Directory
 			.GetDirectories(AgentsSkillsFolder())
 			.Select(static path => Path.GetFileName(path))
 			.Where(name => !recorded.Contains(name, StringComparer.Ordinal))
-			.Where(name => !DeveloperSkills.Contains(name, StringComparer.Ordinal))
 			.ToArray();
 
 		// Assert
@@ -74,36 +87,35 @@ public sealed class InstalledSkillTests
 			.IsEmpty()
 			.Because(
 				"every folder in .agents/skills/ must be written by the skills CLI, which records it in "
-					+ "skills-lock.json, or declared in InstalledSkillTests.DeveloperSkills as a "
-					+ $"developer skill of this repository: {string.Join(", ", unrecorded)}"
+					+ $"skills-lock.json: {string.Join(", ", unrecorded)}"
 			);
 	}
 
 	[Test]
-	public async Task DeveloperSkills_GivenEachOne_IsPresentAndNeverPublished(CancellationToken cancellationToken)
+	public async Task DeveloperSkills_GivenEachOne_IsAuthoredUnderSkills(CancellationToken cancellationToken)
 	{
 		// Arrange
 		cancellationToken.ThrowIfCancellationRequested();
 
-		// Act: a developer skill has to be loadable by an agent, and it must not also be a consumer skill.
-		var notLoadable = DeveloperSkills
-			.Where(static name => !File.Exists(Path.Combine(AgentsSkillsFolder(), name, "SKILL.md")))
+		// Act - a developer skill is an authored skill, so it ships from skills/ like the rest. No CLI
+		// installed it, which is why skills-lock.json does not record it.
+		var notAuthored = DeveloperSkills
+			.Where(static name => !File.Exists(Path.Combine(RepositoryRoot.Value, "skills", name, "SKILL.md")))
 			.ToArray();
-		var published = DeveloperSkills
-			.Where(static name => Directory.Exists(Path.Combine(RepositoryRoot.Value, "skills", name)))
-			.ToArray();
+		var recorded = await ReadLockfileSkillsAsync(cancellationToken);
+		var recordedAnyway = DeveloperSkills.Where(name => recorded.Contains(name, StringComparer.Ordinal)).ToArray();
 
 		// Assert
 		await Assert
-			.That(notLoadable)
+			.That(notAuthored)
 			.IsEmpty()
-			.Because($"a developer skill must ship its SKILL.md in .agents/skills/: {string.Join(", ", notLoadable)}");
+			.Because($"a developer skill must ship its SKILL.md in skills/: {string.Join(", ", notAuthored)}");
 		await Assert
-			.That(published)
+			.That(recordedAnyway)
 			.IsEmpty()
 			.Because(
-				"a developer skill is for this repository only, so it must never sit in skills/, which the "
-					+ $"skills CLI publishes to consumers: {string.Join(", ", published)}"
+				"a developer skill is written here rather than installed, so no CLI records it in "
+					+ $"skills-lock.json: {string.Join(", ", recordedAnyway)}"
 			);
 	}
 
@@ -181,6 +193,67 @@ public sealed class InstalledSkillTests
 				"this repository is not agent-specific: AGENTS.md is its one instruction file, so a CLAUDE.md "
 					+ $"must not be added: {string.Join(", ", present)}"
 			);
+	}
+
+	[Test]
+	public async Task AgentsSkills_GivenEverythingTheCLIWrites_IsIgnoredAndNeverTracked(
+		CancellationToken cancellationToken
+	)
+	{
+		// Arrange - the folder is a local install, so nothing under it may be tracked, and the rules that
+		// keep it (and every per-agent folder) out of this repository must be in place. This is what stops
+		// a skill the repository installs but does not publish being found by `skills add
+		// purview-dev/telemetry-sourcegenerator`.
+		var tracked = await TrackedFilesUnderAgentsSkillsAsync(cancellationToken);
+		var ignores = await AgentsSkillsIgnoreRulesAsync(cancellationToken);
+
+		// Assert
+		await Assert
+			.That(tracked)
+			.IsEmpty()
+			.Because(
+				"nothing under .agents/skills/ may be tracked: it is a local install, reproducible from "
+					+ $"skills-lock.json with `just skills-install`: {string.Join(", ", tracked)}"
+			);
+		await Assert
+			.That(ignores.Agents)
+			.IsTrue()
+			.Because(".gitignore must keep .agents/skills/ out of this repository");
+		await Assert.That(ignores.Claude).IsTrue().Because(".gitignore must keep .claude/ out of this repository");
+	}
+
+	/// <summary>What git tracks under <c>.agents/skills/</c>, asked of the repository itself.</summary>
+	static async Task<string[]> TrackedFilesUnderAgentsSkillsAsync(CancellationToken cancellationToken)
+	{
+		using Process process = new()
+		{
+			StartInfo = new ProcessStartInfo("git", "ls-files .agents/skills")
+			{
+				WorkingDirectory = RepositoryRoot.Value,
+				RedirectStandardOutput = true,
+				RedirectStandardError = true,
+			},
+		};
+		process.Start();
+		var output = await process.StandardOutput.ReadToEndAsync(cancellationToken);
+		await process.WaitForExitAsync(cancellationToken);
+		return
+		[
+			.. output
+				.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+				.Order(StringComparer.Ordinal),
+		];
+	}
+
+	/// <summary>The ignore rules for the two agent folders, as <c>.gitignore</c> spells them.</summary>
+	static async Task<(bool Agents, bool Claude)> AgentsSkillsIgnoreRulesAsync(CancellationToken cancellationToken)
+	{
+		var lines = await File.ReadAllLinesAsync(Path.Combine(RepositoryRoot.Value, ".gitignore"), cancellationToken);
+		var rules = lines.Select(static line => line.Trim()).ToHashSet(StringComparer.Ordinal);
+		return (
+			rules.Overlaps([".agents/skills/", ".agents/skills", "/.agents/skills/", ".agents/"]),
+			rules.Overlaps([".claude/", ".claude", "/.claude/", "/.claude"])
+		);
 	}
 
 	static string AgentsSkillsFolder() => Path.Combine(RepositoryRoot.Value, ".agents", "skills");
