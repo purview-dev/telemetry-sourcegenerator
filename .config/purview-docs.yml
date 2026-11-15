@@ -1,0 +1,91 @@
+# The purview.dev catalogue record for this project (ADR 0013 in purview-dev/purview-dev).
+# The site reads this file from the default branch of this repository, so the record
+# changes in the same pull request as the thing it describes.
+#
+# `$schema` is an editor hint and nothing more: the enforcing validation is the site's
+# loader, which `just check-projects` runs there.
+$schema: https://raw.githubusercontent.com/purview-dev/purview-dev/main/src/src/lib/manifest/schema.ts
+
+id: telemetry-sourcegenerator
+name: Telemetry SourceGenerator
+shortDescription: Interface-based telemetry for .NET with zero boilerplate.
+description: >-
+  A source generator that turns simple interface methods into
+  OpenTelemetry-aligned Activities, structured ILogger logging, and Metrics.
+  Define telemetry once on an interface; the generator emits the
+  implementation, DI registration helpers, and multi-target generation —
+  no runtime reflection, no boilerplate.
+origin: >-
+  Repeating the same logging, activity, and metric wiring across services made telemetry a
+  strong candidate for one interface-driven, compile-time implementation.
+useWhen: >-
+  You want strongly typed OpenTelemetry-aligned telemetry from interfaces, with generated
+  implementations and dependency-injection registration.
+avoidWhen: >-
+  Your telemetry is highly dynamic, cannot be described at compile time, or is already handled
+  consistently by another instrumentation layer.
+repository: purview-dev/telemetry-sourcegenerator
+category: observability
+status: stable
+featured: true
+order: 10
+docs:
+  source: github-path
+  path: docs/wiki
+  rootPage: Getting-Started.md
+  exclude:
+    - _Sidebar.md
+    - Home.md
+    - index.md
+targetFrameworks:
+  - net8.0
+  - net9.0
+  - net10.0
+packages:
+  - id: Purview.Telemetry.SourceGenerator
+    description: Core package with the Roslyn source generator and attribute library.
+    primary: true
+    targetFrameworks:
+      - netstandard2.0
+useCases:
+  - audience: developer
+    title: Tracing, logging, and metrics from a single interface
+    scenario: >-
+      You want OpenTelemetry activities, structured logs, and metrics around an order service, but
+      you do not want to hand-write the ActivitySource, ILogger, and Meter wiring in every class.
+    code: |
+      [ActivitySource]
+      [Logger]
+      [Meter]
+      public interface IOrderServiceTelemetry
+      {
+          [Activity]
+          [Info]
+          [AutoCounter]
+          Activity? PlacingOrder(int orderId, [Baggage] string region);
+      }
+    language: csharp
+    outcome: >-
+      The generator emits the implementation and an AddOrderServiceTelemetry() DI extension; you
+      register it once and inject the interface wherever telemetry is needed.
+    evidence: >-
+      One interface replaces the ActivitySource, ILogger, and Meter boilerplate you would otherwise
+      repeat in every service.
+  - audience: architect
+    title: Standardise telemetry names across services
+    scenario: >-
+      You want consistent OpenTelemetry meter and activity-source names across many services instead
+      of ad-hoc string literals scattered through the codebase.
+    code: |
+      builder.AddServiceDefaults(
+          TelemetryNames.MeterNames,
+          TelemetryNames.ActivitySourceNames);
+    language: csharp
+    outcome: >-
+      A generated TelemetryNames static class holds the names, so registration happens once at
+      startup rather than in every service.
+    evidence: >-
+      Naming conventions are generated, so snake_case tags and hierarchical metrics stay consistent
+      without a review checklist.
+    docsPage: generation
+discussions: false
