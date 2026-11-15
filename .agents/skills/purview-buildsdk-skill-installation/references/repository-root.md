@@ -43,8 +43,8 @@ an agent directory somewhere that is not the repository.
 ## A target's Condition is evaluated before its DependsOnTargets
 
 A property a dependency computes is still empty in the depending target's `Condition`. That is why
-the unresolved-root guard sits on the `EvaluatePurviewSkillState` task rather than on
-`RecommendPurviewSkills`, and why the explicit-only guard (`PRSKL0009`) is a dependency target with
+the unresolved-root check (`PRSKL0003`) is an `Error` inside a dependency target rather than a
+`Condition` on the public target, and why the explicit-only guard (`PRSKL0009`) is a dependency target with
 its own `Error` rather than a `Condition` on `InstallPurviewSkills`, `UpdatePurviewSkills` or
 `FixPurviewSkills`.
 
@@ -52,6 +52,7 @@ its own `Error` rather than a `Condition` on `InstallPurviewSkills`, `UpdatePurv
 
 `Purview.Skills.Testing` ships `SkillRepositoryRoot`, a managed port of the same walk with the same
 default markers, so a test that validates a repository's skills resolves the same root the build
-installs them into. The two are kept in step by `SkillRepositoryRootTests`, including an assertion
-on the default marker list itself — both are defaults nobody sets, so nothing else would notice them
-drifting apart.
+installs them into. In the Purview.BuildSdk repository the two are kept in step twice over:
+`SkillRepositoryRootParityTests` runs the real MSBuild target and the managed port over the same
+folders and compares the root and the matched marker, and `SkillRepositoryRootTests` pins the default
+marker list itself — both are defaults nobody sets, so nothing else would notice them drifting apart.

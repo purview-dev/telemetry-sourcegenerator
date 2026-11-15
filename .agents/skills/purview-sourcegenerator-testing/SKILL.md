@@ -89,7 +89,7 @@ result.Generated().GetMethod("Format").HasParameters(TypeReference.Create<string
 When a test expects a nullable annotation, prefer the test-only `query.MakeNullable(type)` extension (on a
 `CodeQuery`, accepting a `TypeReference` or `TypeIdentity`). It resolves the annotation against the query's
 compilation and, unlike `TypeReference.Nullable()`/`TypeIdentity.MakeNullable()`, does not trigger the
-`PSGFR16` context-overload suggestion (tests have no generation context to pass).
+`PSGFR16` context-overload warning (tests have no generation context to pass).
 
 Member chaining from a type declaration (`MemberQueryExtensions`):
 

@@ -276,7 +276,10 @@ A generator project should normally include:
 
 ### Types and members
 
-- Types: `Class`, `Struct`, `RecordClass`, `RecordStruct`, `Interface`, `Enum`, `Delegate`
+- Types: `Class`, `Struct`, `RecordClass`, `RecordStruct`, `Union`, `Interface`, `Enum`, `Delegate`
+- A C# 15 union declares its case types through `TypeDeclarationOptions.UnionCaseTypes` (for example
+  `writer.Union("Pet", [cat, dog])`); a closed hierarchy sets `IsClosed` on a class or record class
+  to emit `closed`, which replaces the default `sealed`.
 - Members: `Method`, `MethodScope`, `Property`, `Field`, `Constructor`
 - Attributes: `AttributeDeclarationOptions`, `AttributeArgumentOptions`
 - Type syntax: `TypeReference` (nullable/generic/array/pointer-safe composition)

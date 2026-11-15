@@ -77,3 +77,5 @@ stale skill looks broken — it just gives confidently wrong advice.
   behaviour; those are greppable when the code changes.
 - Where a number or a list is authoritative somewhere else — a default, an enumeration — say where
   it comes from, so a reader can check it.
+- To bring skills, agent instructions, READMEs and docs back in line with the code after a change,
+  use `purview-buildsdk-docs-sync`.
